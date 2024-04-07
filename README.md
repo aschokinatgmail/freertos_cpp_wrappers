@@ -1,1 +1,3 @@
-# freertos_cpp_wrappers
+# C++ Wrappers for FreeRTOS
+
+Lightweight collection of FreeRTOS API wrappers compliant to modern C++ standards
