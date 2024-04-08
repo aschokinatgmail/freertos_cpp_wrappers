@@ -30,26 +30,26 @@ using namespace std::chrono_literals;
 
 #if configSUPPORT_STATIC_ALLOCATION
 template <size_t StackSize> class static_task_allocator {
-  StackType_t m_stackBuffer[StackSize];
+  StackType_t m_stackBuffer[StackSize / sizeof(StackType_t)];
   StaticTask_t m_taskBuffer;
 
 public:
   TaskHandle_t create(TaskFunction_t taskFunction, const char *name,
                       UBaseType_t priority, void *context) {
-    return xTaskCreateStatic(taskFunction, name, StackSize, context, priority,
+    return xTaskCreateStatic(taskFunction, name,
+                             StackSize / sizeof(StackType_t), context, priority,
                              m_stackBuffer, &m_taskBuffer);
   }
 };
 #endif
-
 #if configSUPPORT_DYNAMIC_ALLOCATION
 template <size_t StackSize> class dynamic_task_allocator {
 public:
   TaskHandle_t create(TaskFunction_t taskFunction, const char *name,
                       UBaseType_t priority, void *context) {
     TaskHandle_t hTask = nullptr;
-    auto rc =
-        xTaskCreate(taskFunction, name, StackSize, context, priority, &hTask);
+    auto rc = xTaskCreate(taskFunction, name, StackSize / sizeof(StackType_t),
+                          context, priority, &hTask);
     return pdPASS == rc ? hTask : nullptr;
   }
 };
@@ -61,22 +61,31 @@ template <typename TaskAllocator> class task {
   TaskAllocator m_allocator;
   TaskHandle_t m_hTask;
   task_routine_t m_taskRoutine;
+  uint8_t m_start_suspended : 1;
 
   static void task_exec(void *context) {
     auto pThis = static_cast<task *>(context);
     assert(nullptr != pThis);
+#if INCLUDE_vTaskSuspend
+    if (pThis->m_start_suspended) {
+      pThis->suspend();
+    }
+#endif
     pThis->m_taskRoutine();
   }
 
 public:
-  task(const char *name, UBaseType_t priority, task_routine_t &&task_routine)
-      : m_allocator{}, m_hTask{nullptr}, m_taskRoutine{task_routine} {
+  task(const char *name, UBaseType_t priority, task_routine_t &&task_routine,
+       bool start_suspended = true)
+      : m_allocator{}, m_hTask{nullptr}, m_taskRoutine{task_routine},
+        m_start_suspended{start_suspended} {
     m_hTask = m_allocator.create(task_exec, name, priority, this);
   }
   task(const std::string &name, UBaseType_t priority,
-       task_routine_t &&task_routine)
+       task_routine_t &&task_routine, bool start_suspended = true)
       : task{name.c_str(), priority,
-             std::forward<std::function<void()>>(task_routine)} {}
+             std::forward<std::function<void()>>(task_routine),
+             start_suspended} {}
   task(const task &) = delete;
   task(task &&other) noexcept
       : m_allocator{std::move(other.m_allocator)}, m_hTask{other.m_hTask},
@@ -111,6 +120,7 @@ public:
   void resume(void) { vTaskResume(m_hTask); }
   BaseType_t resume_isr(void) { return xTaskResumeFromISR(m_hTask); }
 #endif
+  void terminate(void) { vTaskDelete(m_hTask); }
 #if INCLUDE_xTaskAbortDelay
   BaseType_t abort_delay(void) { return xTaskAbortDelay(m_hTask); }
 #endif
@@ -245,37 +255,52 @@ public:
   periodic_task(const char *name, UBaseType_t priority,
                 task_routine_t &&on_start, task_routine_t &&on_stop,
                 task_routine_t &&periodic_routine,
-                const std::chrono::duration<Rep, Period> &period)
+                const std::chrono::duration<Rep, Period> &period,
+                bool start_suspended = true)
       : m_period{std::chrono::duration_cast<std::chrono::milliseconds>(period)},
         m_on_start{on_start}, m_on_stop{on_stop},
         m_periodic_routine{periodic_routine},
-        m_task{name, priority, [this]() { run(); }} {}
+        m_task{name, priority, [this]() { run(); }, start_suspended} {}
   template <typename Rep, typename Period>
   periodic_task(const std::string &name, UBaseType_t priority,
                 task_routine_t &&on_start, task_routine_t &&on_stop,
                 task_routine_t &&periodic_routine,
-                const std::chrono::duration<Rep, Period> &period)
+                const std::chrono::duration<Rep, Period> &period,
+                bool start_suspended = true)
       : periodic_task{name.c_str(),
                       priority,
                       std::forward<std::function<void()>>(on_start),
                       std::forward<std::function<void()>>(on_stop),
                       std::forward<std::function<void()>>(periodic_routine),
-                      period} {}
+                      period,
+                      start_suspended} {}
   periodic_task(const char *name, UBaseType_t priority,
                 task_routine_t &&on_start, task_routine_t &&on_stop,
-                task_routine_t &&periodic_routine)
-      : periodic_task{name,    priority,         on_start,
-                      on_stop, periodic_routine, std::chrono::milliseconds{0}} {
-  }
+                task_routine_t &&periodic_routine, bool start_suspended = true)
+      : periodic_task{name,
+                      priority,
+                      std::forward<task_routine_t>(on_start),
+                      std::forward<task_routine_t>(on_stop),
+                      std::forward<task_routine_t>(periodic_routine),
+                      std::chrono::milliseconds{0},
+                      start_suspended} {}
   periodic_task(const std::string &name, UBaseType_t priority,
                 task_routine_t &&on_start, task_routine_t &&on_stop,
-                task_routine_t &&periodic_routine)
-      : periodic_task{name.c_str(), priority,
+                task_routine_t &&periodic_routine, bool start_suspended = true)
+      : periodic_task{name.c_str(),
+                      priority,
                       std::forward<std::function<void()>>(on_start),
                       std::forward<std::function<void()>>(on_stop),
-                      std::forward<std::function<void()>>(periodic_routine)} {}
+                      std::forward<std::function<void()>>(periodic_routine),
+                      start_suspended} {}
   periodic_task(const periodic_task &) = delete;
-  periodic_task(periodic_task &&) = delete;
+  periodic_task(periodic_task &&other) {
+    m_period = other.m_period;
+    m_on_start = std::move(other.m_on_start);
+    m_on_stop = std::move(other.m_on_stop);
+    m_periodic_routine = std::move(other.m_periodic_routine);
+    m_task = std::move(other.m_task);
+  }
   ~periodic_task(void) {
 #if INCLUDE_xTaskAbortDelay
     m_task.abort_delay();
@@ -283,7 +308,16 @@ public:
   }
 
   periodic_task &operator=(const periodic_task &) = delete;
-  periodic_task &operator=(periodic_task &&) = delete;
+  periodic_task &operator=(periodic_task &&other) {
+    if (this != &other) {
+      m_period = other.m_period;
+      m_on_start = std::move(other.m_on_start);
+      m_on_stop = std::move(other.m_on_stop);
+      m_periodic_routine = std::move(other.m_periodic_routine);
+      m_task = std::move(other.m_task);
+    }
+    return *this;
+  }
 
   TaskHandle_t handle(void) const { return m_task.handle(); }
 #if INCLUDE_vTaskSuspend
@@ -302,6 +336,7 @@ public:
       return false;
     }
   }
+  void terminate(void) { m_task.terminate(); }
 #if INCLUDE_xTaskAbortDelay
   BaseType_t abort_delay(void) { return m_task.abort_delay(); }
 #endif
@@ -402,7 +437,7 @@ public:
 
 // TODO: add less than ms delays
 
-void delay(TickType_t ticks) { vTaskDelay(ticks); }
+void delay(TickType_t ticks);
 
 template <typename Rep, typename Period>
 void delay(std::chrono::duration<Rep, Period> duration) {
@@ -415,9 +450,7 @@ void sleep_for(std::chrono::duration<Rep, Period> duration) {
   delay(duration);
 }
 
-void delay_until(TickType_t &previousWakeTime, TickType_t period) {
-  vTaskDelayUntil(&previousWakeTime, period);
-}
+void delay_until(TickType_t &previousWakeTime, TickType_t period);
 
 template <typename Rep, typename Period>
 void delay_until(TickType_t &previousWakeTime,
@@ -427,19 +460,8 @@ void delay_until(TickType_t &previousWakeTime,
       std::chrono::duration_cast<std::chrono::milliseconds>(period).count());
 }
 
-void delay_until(const std::chrono::system_clock::time_point &wakeTime) {
-  auto now = std::chrono::system_clock::now();
-  if (wakeTime > now) {
-    delay(wakeTime - now);
-  }
-}
-
-void delay_until(const std::chrono::steady_clock::time_point &wakeTime) {
-  auto now = std::chrono::steady_clock::now();
-  if (wakeTime > now) {
-    delay(wakeTime - now);
-  }
-}
+void delay_until(const std::chrono::system_clock::time_point &wakeTime);
+void delay_until(const std::chrono::steady_clock::time_point &wakeTime);
 
 // task utilities:
 
@@ -464,30 +486,26 @@ public:
 };
 #endif
 #if INCLUDE_xTaskGetCurrentTaskHandle
-TaskHandle_t current_task_handle(void) { return xTaskGetCurrentTaskHandle(); }
+TaskHandle_t current_task_handle(void);
 #endif
 #if INCLUDE_xTaskGetIdleTaskHandle
-TaskHandle_t idle_task_handle(void) { return xTaskGetIdleTaskHandle(); }
+TaskHandle_t idle_task_handle(void);
 #endif
 
-TickType_t tick_count(void) { return xTaskGetTickCount(); }
-TickType_t tick_count_isr(void) { return xTaskGetTickCountFromISR(); }
+TickType_t tick_count(void);
+TickType_t tick_count_isr(void);
 
-std::chrono::milliseconds time_since_scheduler_started(void) {
-  return std::chrono::milliseconds{tick_count() * portTICK_PERIOD_MS};
-}
-std::chrono::milliseconds time_since_scheduler_started_isr(void) {
-  return std::chrono::milliseconds{tick_count_isr() * portTICK_PERIOD_MS};
-}
+std::chrono::milliseconds time_since_scheduler_started(void);
+std::chrono::milliseconds time_since_scheduler_started_isr(void);
 
 #if INCLUDE_xTaskGetSchedulerState || configUSE_TIMERS
-BaseType_t get_scheduler_state(void) { return xTaskGetSchedulerState(); }
+BaseType_t get_scheduler_state(void);
 #endif
-UBaseType_t task_count(void) { return uxTaskGetNumberOfTasks(); }
+UBaseType_t task_count(void);
 
 // RTOS Kernel Control:
 
-void yield(void) { taskYIELD(); }
+void yield(void);
 
 class critical_section {
 public:
