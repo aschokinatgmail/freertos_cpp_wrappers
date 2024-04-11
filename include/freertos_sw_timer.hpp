@@ -21,6 +21,8 @@
 
 namespace freertos {
 
+#if configUSE_TIMERS
+
 using std::optional;
 
 #if configSUPPORT_STATIC_ALLOCATION
@@ -48,7 +50,7 @@ public:
 };
 #endif
 
-using timer_callback_t = std::function<void(TimerHandle_t)>;
+using timer_callback_t = std::function<void()>;
 
 template <typename SwTimerAllocator> class timer {
   SwTimerAllocator m_allocator;
@@ -58,7 +60,7 @@ template <typename SwTimerAllocator> class timer {
   static void callback_wrapper(TimerHandle_t t) {
     auto *const self = static_cast<timer *>(pvTimerGetTimerID(t));
     configASSERT(self);
-    self->m_callback(t);
+    self->m_callback();
   }
 
 public:
@@ -72,14 +74,16 @@ public:
   template <typename Rep, typename Period>
   explicit timer(const char *name,
                  const std::chrono::duration<Rep, Period> &period,
-                 UBaseType_t auto_reload, timer_callback_t callback)
+                 UBaseType_t auto_reload, timer_callback_t &&callback)
       : timer{name,
               static_cast<TickType_t>(
                   std::chrono::duration_cast<std::chrono::milliseconds>(period)
                       .count()),
               auto_reload, std::forward<timer_callback_t>(callback)} {}
   timer(const timer &) = delete;
-  timer(timer &&src) : m_allocator{src.m_allocator}, m_timer{src.m_timer} {
+  timer(timer &&src)
+      : m_allocator{src.m_allocator}, m_timer{src.m_timer},
+        m_callback{src.m_callback} {
     src.m_timer = nullptr;
   }
   ~timer(void) {
@@ -167,6 +171,9 @@ public:
     return std::chrono::milliseconds{remaining_ticks()};
   }
   BaseType_t running(void) const { return xTimerIsTimerActive(m_timer); }
+  const char *name(void) const { return pcTimerGetName(m_timer); }
 };
+
+#endif
 
 } // namespace freertos

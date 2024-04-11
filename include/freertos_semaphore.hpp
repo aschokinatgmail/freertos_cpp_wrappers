@@ -168,15 +168,17 @@ public:
 template <typename SemaphoreAllocator> class mutex {
   SemaphoreAllocator m_allocator;
   SemaphoreHandle_t m_semaphore;
+  uint8_t m_locked : 1;
 
 public:
-  mutex() : m_allocator{}, m_semaphore{nullptr} {
+  mutex() : m_allocator{}, m_semaphore{nullptr}, m_locked{false} {
     m_semaphore = m_allocator.create_mutex();
     configASSERT(m_semaphore);
   }
   mutex(const mutex &) = delete;
   mutex(mutex &&src)
-      : m_allocator{src.m_allocator}, m_semaphore{src.m_semaphore} {
+      : m_allocator{src.m_allocator}, m_semaphore{src.m_semaphore},
+        m_locked{src.m_locked} {
     src.m_semaphore = nullptr;
   }
   ~mutex(void) {
@@ -185,37 +187,57 @@ public:
     }
   }
 
-  void unlock() { xSemaphoreGive(m_semaphore); }
+  void unlock() {
+    xSemaphoreGive(m_semaphore);
+    m_locked = false;
+  }
   void unlock_isr(BaseType_t &high_priority_task_woken) {
     xSemaphoreGiveFromISR(m_semaphore, &high_priority_task_woken);
+    m_locked = false;
   }
   BaseType_t lock(const TickType_t ticks_to_wait = portMAX_DELAY) {
-    return xSemaphoreTake(m_semaphore, ticks_to_wait);
+    auto rc = xSemaphoreTake(m_semaphore, ticks_to_wait);
+    if (rc) {
+      m_locked = true;
+    }
+    return rc;
   }
   BaseType_t lock_isr(BaseType_t &high_priority_task_woken) {
-    return xSemaphoreTakeFromISR(m_semaphore, &high_priority_task_woken);
+    auto rc = xSemaphoreTakeFromISR(m_semaphore, &high_priority_task_woken);
+    if (rc) {
+      m_locked = true;
+    }
+    return rc;
   }
   template <typename Rep, typename Period>
   BaseType_t lock(const std::chrono::duration<Rep, Period> &timeout) {
     return lock(
         std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count());
   }
-  BaseType_t try_lock() { return xSemaphoreTake(m_semaphore, 0); }
-  BaseType_t locked(void) const { return uxSemaphoreGetCount(m_semaphore); }
+  BaseType_t try_lock() {
+    auto rc = xSemaphoreTake(m_semaphore, 0);
+    if (rc) {
+      m_locked = true;
+    }
+    return rc;
+  }
+  BaseType_t locked(void) const { return m_locked; }
 };
 
 template <typename SemaphoreAllocator> class recursive_mutex {
   SemaphoreAllocator m_allocator;
   SemaphoreHandle_t m_semaphore;
+  uint8_t m_locked : 1;
 
 public:
-  recursive_mutex() : m_allocator{}, m_semaphore{nullptr} {
+  recursive_mutex() : m_allocator{}, m_semaphore{nullptr}, m_locked{false} {
     m_semaphore = m_allocator.create_recursive_mutex();
     configASSERT(m_semaphore);
   }
   recursive_mutex(const recursive_mutex &) = delete;
   recursive_mutex(recursive_mutex &&src)
-      : m_allocator{src.m_allocator}, m_semaphore{src.m_semaphore} {
+      : m_allocator{src.m_allocator}, m_semaphore{src.m_semaphore},
+        m_locked{src.m_locked} {
     src.m_semaphore = nullptr;
   }
   ~recursive_mutex(void) {
@@ -224,23 +246,41 @@ public:
     }
   }
 
-  void unlock() { xSemaphoreGive(m_semaphore); }
+  void unlock() {
+    xSemaphoreGive(m_semaphore);
+    m_locked = false;
+  }
   void unlock_isr(BaseType_t &high_priority_task_woken) {
     xSemaphoreGiveFromISR(m_semaphore, &high_priority_task_woken);
+    m_locked = false;
   }
   BaseType_t lock(const TickType_t ticks_to_wait = portMAX_DELAY) {
-    return xSemaphoreTake(m_semaphore, ticks_to_wait);
+    auto rc = xSemaphoreTake(m_semaphore, ticks_to_wait);
+    if (rc) {
+      m_locked = true;
+    }
+    return rc;
   }
   BaseType_t lock_isr(BaseType_t &high_priority_task_woken) {
-    return xSemaphoreTakeFromISR(m_semaphore, &high_priority_task_woken);
+    auto rc = xSemaphoreTakeFromISR(m_semaphore, &high_priority_task_woken);
+    if (rc) {
+      m_locked = true;
+    }
+    return rc;
   }
   template <typename Rep, typename Period>
   BaseType_t lock(const std::chrono::duration<Rep, Period> &timeout) {
     return lock(
         std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count());
   }
-  BaseType_t try_lock() { return xSemaphoreTake(m_semaphore, 0); }
-  BaseType_t locked(void) const { return uxSemaphoreGetCount(m_semaphore); }
+  BaseType_t try_lock() {
+    auto rc = xSemaphoreTake(m_semaphore, 0);
+    if (rc) {
+      m_locked = true;
+    }
+    return rc;
+  }
+  BaseType_t locked(void) const { return m_locked; }
 };
 
 template <typename Mutex> class lock_guard {
