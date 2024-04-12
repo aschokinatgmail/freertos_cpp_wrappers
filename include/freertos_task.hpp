@@ -34,6 +34,13 @@ template <size_t StackSize> class static_task_allocator {
   StaticTask_t m_taskBuffer;
 
 public:
+  static_task_allocator() = default;
+  static_task_allocator(const static_task_allocator &) = delete;
+  static_task_allocator(static_task_allocator &&) = delete;
+
+  static_task_allocator &operator=(const static_task_allocator &) = delete;
+  static_task_allocator &operator=(static_task_allocator &&) = delete;
+
   TaskHandle_t create(TaskFunction_t taskFunction, const char *name,
                       UBaseType_t priority, void *context) {
     return xTaskCreateStatic(taskFunction, name,

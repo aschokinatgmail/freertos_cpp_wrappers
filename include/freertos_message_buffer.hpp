@@ -27,6 +27,15 @@ template <size_t MessageBufferSize> class static_message_buffer_allocator {
 
 public:
   static_message_buffer_allocator() = default;
+  static_message_buffer_allocator(const static_message_buffer_allocator &) =
+      delete;
+  static_message_buffer_allocator(static_message_buffer_allocator &&) = delete;
+
+  static_message_buffer_allocator &
+  operator=(const static_message_buffer_allocator &) = delete;
+  static_message_buffer_allocator &
+  operator=(static_message_buffer_allocator &&) = delete;
+
   MessageBufferHandle_t create() {
     return xMessageBufferCreateStatic(MessageBufferSize, m_storage,
                                       &m_message_buffer_placeholder);

@@ -24,7 +24,6 @@ namespace freertos {
 #if configUSE_TIMERS
 
 using std::function;
-using std::optional;
 
 #if configSUPPORT_STATIC_ALLOCATION
 class static_sw_timer_allocator {

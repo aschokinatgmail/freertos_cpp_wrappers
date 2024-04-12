@@ -23,6 +23,13 @@ class static_event_group_allocator {
 
 public:
   static_event_group_allocator() = default;
+  static_event_group_allocator(const static_event_group_allocator &) = delete;
+  static_event_group_allocator(static_event_group_allocator &&) = delete;
+
+  static_event_group_allocator &
+  operator=(const static_event_group_allocator &) = delete;
+  static_event_group_allocator &
+  operator=(static_event_group_allocator &&) = delete;
   EventGroupHandle_t create() {
     return xEventGroupCreateStatic(&m_event_group_placeholder);
   }

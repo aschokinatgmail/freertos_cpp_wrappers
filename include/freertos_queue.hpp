@@ -27,6 +27,12 @@ template <size_t QueueLength, typename T> class static_queue_allocator {
 
 public:
   static_queue_allocator() = default;
+  static_queue_allocator(const static_queue_allocator &) = delete;
+  static_queue_allocator(static_queue_allocator &&) = delete;
+
+  static_queue_allocator &operator=(const static_queue_allocator &) = delete;
+  static_queue_allocator &operator=(static_queue_allocator &&) = delete;
+
   QueueHandle_t create() {
     return xQueueCreateStatic(QueueLength, sizeof(T), m_storage,
                               &m_queue_placeholder);

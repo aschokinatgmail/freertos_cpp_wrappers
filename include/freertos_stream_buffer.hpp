@@ -25,6 +25,15 @@ template <size_t StreamBufferSize> class static_stream_buffer_allocator {
 
 public:
   static_stream_buffer_allocator() = default;
+  static_stream_buffer_allocator(const static_stream_buffer_allocator &) =
+      delete;
+  static_stream_buffer_allocator(static_stream_buffer_allocator &&) = delete;
+
+  static_stream_buffer_allocator &
+  operator=(const static_stream_buffer_allocator &) = delete;
+  static_stream_buffer_allocator &
+  operator=(static_stream_buffer_allocator &&) = delete;
+
   StreamBufferHandle_t create(size_t trigger_level_bytes = 1) {
     return xStreamBufferCreateStatic(StreamBufferSize, trigger_level_bytes,
                                      m_storage, &m_stream_buffer_placeholder);
