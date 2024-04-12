@@ -1,13 +1,34 @@
-/**
- * @file freertos_semaphore.hpp
- * @author Andrey V. Shchekin <aschokin@gmail.com>
- * @brief FreeRTOS semaphore wrapper
- * @version 0.1
- * @date 2024-04-07
- *
- * @copyright Copyright (c) 2024 Andrey V. Shchekin
- *
- */
+/**********************************************************************************
+@file freertos_semaphore.hpp
+@author Andrey V. Shchekin <aschokin@gmail.com>
+@brief FreeRTOS semaphore wrapper
+@version 0.1
+@date 2024-04-07
+
+The MIT License (MIT)
+
+FreeRTOS C++ Wrappers Library
+https://github.com/aschokinatgmail/freertos_cpp_wrappers/
+
+Copyright(c) 2024 Andrey V. Shchekin <aschokin@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the “Software”), to deal
+in the Software without restriction, including without limitation the rights to
+ use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+***********************************************************************************/
 
 #pragma once
 
@@ -335,6 +356,7 @@ public:
   bool locked(void) const { return m_mutex.locked(); }
 };
 
+#if configSUPPORT_STATIC_ALLOCATION
 namespace sa {
 using binary_semaphore =
     freertos::binary_semaphore<freertos::static_semaphore_allocator>;
@@ -344,7 +366,8 @@ using mutex = freertos::mutex<freertos::static_semaphore_allocator>;
 using recursive_mutex =
     freertos::recursive_mutex<freertos::static_semaphore_allocator>;
 } // namespace sa
-
+#endif
+#if configSUPPORT_DYNAMIC_ALLOCATION
 namespace da {
 using binary_semaphore =
     freertos::binary_semaphore<freertos::dynamic_semaphore_allocator>;
@@ -354,5 +377,6 @@ using mutex = freertos::mutex<freertos::dynamic_semaphore_allocator>;
 using recursive_mutex =
     freertos::recursive_mutex<freertos::dynamic_semaphore_allocator>;
 } // namespace da
+#endif
 
 } // namespace freertos

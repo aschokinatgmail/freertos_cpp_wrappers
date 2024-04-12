@@ -18,11 +18,8 @@
 #include <FreeRTOS.h>
 #include <chrono>
 #include <message_buffer.h>
-#include <optional>
 
 namespace freertos {
-
-using std::optional;
 
 #if configSUPPORT_STATIC_ALLOCATION
 template <size_t MessageBufferSize> class static_message_buffer_allocator {
@@ -122,5 +119,22 @@ public:
   BaseType_t empty(void) { return xMessageBufferIsEmpty(m_message_buffer); }
   BaseType_t full(void) { return xMessageBufferIsFull(m_message_buffer); }
 };
+
+#if configSUPPORT_STATIC_ALLOCATION
+namespace sa {
+template <size_t MessageBufferSize>
+using message_buffer = freertos::message_buffer<
+    MessageBufferSize,
+    freertos::static_message_buffer_allocator<MessageBufferSize>>;
+} // namespace sa
+#endif
+#if configSUPPORT_DYNAMIC_ALLOCATION
+namespace da {
+template <size_t MessageBufferSize>
+using message_buffer = freertos::message_buffer<
+    MessageBufferSize,
+    freertos::dynamic_message_buffer_allocator<MessageBufferSize>>;
+} // namespace da
+#endif
 
 } // namespace freertos
