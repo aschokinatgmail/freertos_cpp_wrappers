@@ -13,6 +13,7 @@
 
 #include <FreeRTOS.h>
 #include <chrono>
+#include <cstdbool>
 #include <functional>
 #include <optional>
 #include <task.h>
@@ -23,6 +24,7 @@ namespace freertos {
 
 #if configUSE_TIMERS
 
+using std::function;
 using std::optional;
 
 #if configSUPPORT_STATIC_ALLOCATION
@@ -31,6 +33,13 @@ class static_sw_timer_allocator {
 
 public:
   static_sw_timer_allocator() = default;
+  static_sw_timer_allocator(const static_sw_timer_allocator &) = delete;
+  static_sw_timer_allocator(static_sw_timer_allocator &&) = delete;
+
+  static_sw_timer_allocator &
+  operator=(const static_sw_timer_allocator &) = delete;
+  static_sw_timer_allocator &operator=(static_sw_timer_allocator &&) = delete;
+
   TimerHandle_t create(const char *name, const TickType_t period_ticks,
                        UBaseType_t auto_reload, void *const timer_id,
                        TimerCallbackFunction_t callback) {
@@ -50,23 +59,30 @@ public:
 };
 #endif
 
-using timer_callback_t = std::function<void()>;
+using timer_callback_t = function<void()>;
+using timer_callback_opt_t = optional<timer_callback_t>;
 
 template <typename SwTimerAllocator> class timer {
-  SwTimerAllocator m_allocator;
+  SwTimerAllocator &&m_allocator;
   TimerHandle_t m_timer;
-  timer_callback_t m_callback;
+  timer_callback_opt_t m_callback;
+  uint8_t m_started : 1;
 
   static void callback_wrapper(TimerHandle_t t) {
     auto *const self = static_cast<timer *>(pvTimerGetTimerID(t));
     configASSERT(self);
-    self->m_callback();
+    auto &callback = self->m_callback;
+    if (callback) {
+      (*callback)();
+    }
   }
 
 public:
   explicit timer(const char *name, const TickType_t period_ticks,
-                 UBaseType_t auto_reload, timer_callback_t &&callback)
-      : m_allocator{}, m_timer{nullptr}, m_callback{callback} {
+                 UBaseType_t auto_reload, timer_callback_t &&callback,
+                 SwTimerAllocator &&allocator)
+      : m_allocator{std::move(allocator)}, m_timer{nullptr},
+        m_callback{callback}, m_started{false} {
     m_timer = m_allocator.create(name, period_ticks, auto_reload, this,
                                  callback_wrapper);
     configASSERT(m_timer);
@@ -74,18 +90,25 @@ public:
   template <typename Rep, typename Period>
   explicit timer(const char *name,
                  const std::chrono::duration<Rep, Period> &period,
-                 UBaseType_t auto_reload, timer_callback_t &&callback)
+                 UBaseType_t auto_reload, timer_callback_t &&callback,
+                 SwTimerAllocator &&allocator)
       : timer{name,
               static_cast<TickType_t>(
                   std::chrono::duration_cast<std::chrono::milliseconds>(period)
                       .count()),
-              auto_reload, std::forward<timer_callback_t>(callback)} {}
+              auto_reload, std::move(callback), std::move(allocator)} {}
   timer(const timer &) = delete;
+#if 0
   timer(timer &&src)
-      : m_allocator{src.m_allocator}, m_timer{src.m_timer},
-        m_callback{src.m_callback} {
+      : m_allocator{std::move(src.m_allocator)},
+        m_timer{std::move(src.m_timer)}, m_callback{std::move(src.m_callback)},
+        m_started{src.m_started} {
     src.m_timer = nullptr;
+    vTimerSetTimerID(m_timer, this);
   }
+#else
+  timer(timer &&src) = delete;
+#endif
   ~timer(void) {
     if (m_timer) {
       xTimerDelete(m_timer, portMAX_DELAY);
@@ -93,20 +116,40 @@ public:
   }
 
   timer &operator=(const timer &) = delete;
+#if 0
   timer &operator=(timer &&src) {
     if (this != &src) {
+      if (m_started) {
+        stop();
+      }
       if (m_timer) {
         xTimerDelete(m_timer, portMAX_DELAY);
       }
-      m_allocator = src.m_allocator;
-      m_timer = src.m_timer;
+      auto started = src.m_started;
+      if (started) {
+        src.stop();
+      }
+      m_allocator = std::move(src.m_allocator);
+      m_timer = std::move(src.m_timer);
+      m_callback = std::move(src.m_callback);
       src.m_timer = nullptr;
+      vTimerSetTimerID(m_timer, this);
+      if (started) {
+        start();
+      }
     }
     return *this;
   }
+#else
+  timer &operator=(timer &&src) = delete;
+#endif
 
   BaseType_t start(const TickType_t ticks_to_wait = portMAX_DELAY) {
-    return xTimerStart(m_timer, ticks_to_wait);
+    auto rc = xTimerStart(m_timer, ticks_to_wait);
+    if (rc) {
+      m_started = true;
+    }
+    return rc;
   }
   template <typename Rep, typename Period>
   BaseType_t start(const std::chrono::duration<Rep, Period> &timeout) {
@@ -114,10 +157,18 @@ public:
         std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count());
   }
   BaseType_t start_isr(BaseType_t &high_priority_task_woken) {
-    return xTimerStartFromISR(m_timer, &high_priority_task_woken);
+    auto rc = xTimerStartFromISR(m_timer, &high_priority_task_woken);
+    if (rc) {
+      m_started = true;
+    }
+    return rc;
   }
   BaseType_t stop(const TickType_t ticks_to_wait = portMAX_DELAY) {
-    return xTimerStop(m_timer, ticks_to_wait);
+    auto rc = xTimerStop(m_timer, ticks_to_wait);
+    if (rc) {
+      m_started = false;
+    }
+    return rc;
   }
   template <typename Rep, typename Period>
   BaseType_t stop(const std::chrono::duration<Rep, Period> &timeout) {
@@ -125,7 +176,11 @@ public:
         std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count());
   }
   BaseType_t stop_isr(BaseType_t &high_priority_task_woken) {
-    return xTimerStopFromISR(m_timer, &high_priority_task_woken);
+    auto rc = xTimerStopFromISR(m_timer, &high_priority_task_woken);
+    if (rc) {
+      m_started = false;
+    }
+    return rc;
   }
   BaseType_t reset(const TickType_t ticks_to_wait = portMAX_DELAY) {
     return xTimerReset(m_timer, ticks_to_wait);
@@ -145,7 +200,7 @@ public:
   template <typename Rep, typename Period>
   BaseType_t period(const std::chrono::duration<Rep, Period> &new_period,
                     const std::chrono::duration<Rep, Period> &timeout) {
-    return change_period(
+    return period(
         std::chrono::duration_cast<std::chrono::milliseconds>(new_period)
             .count(),
         std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count());
