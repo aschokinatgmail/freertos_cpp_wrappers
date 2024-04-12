@@ -1,0 +1,219 @@
+\doxysection{freertos\+\_\+queue.\+hpp}
+\hypertarget{freertos__queue_8hpp_source}{}\label{freertos__queue_8hpp_source}\index{include/freertos\_queue.hpp@{include/freertos\_queue.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/**********************************************************************************}}
+\DoxyCodeLine{00002\ \textcolor{comment}{@file\ freertos\_queue.hpp}}
+\DoxyCodeLine{00003\ \textcolor{comment}{@author\ Andrey\ V.\ Shchekin\ <aschokin@gmail.com>}}
+\DoxyCodeLine{00004\ \textcolor{comment}{@brief\ FreeRTOS\ queue\ wrapper}}
+\DoxyCodeLine{00005\ \textcolor{comment}{@version\ 0.1}}
+\DoxyCodeLine{00006\ \textcolor{comment}{@date\ 2024-\/04-\/07}}
+\DoxyCodeLine{00007\ \textcolor{comment}{}}
+\DoxyCodeLine{00008\ \textcolor{comment}{The\ MIT\ License\ (MIT)}}
+\DoxyCodeLine{00009\ \textcolor{comment}{}}
+\DoxyCodeLine{00010\ \textcolor{comment}{FreeRTOS\ C++\ Wrappers\ Library}}
+\DoxyCodeLine{00011\ \textcolor{comment}{https://github.com/aschokinatgmail/freertos\_cpp\_wrappers/}}
+\DoxyCodeLine{00012\ \textcolor{comment}{}}
+\DoxyCodeLine{00013\ \textcolor{comment}{Copyright(c)\ 2024\ Andrey\ V.\ Shchekin\ <aschokin@gmail.com>}}
+\DoxyCodeLine{00014\ \textcolor{comment}{}}
+\DoxyCodeLine{00015\ \textcolor{comment}{Permission\ is\ hereby\ granted,\ free\ of\ charge,\ to\ any\ person\ obtaining\ a\ copy}}
+\DoxyCodeLine{00016\ \textcolor{comment}{of\ this\ software\ and\ associated\ documentation\ files\ (the\ “Software”),\ to\ deal}}
+\DoxyCodeLine{00017\ \textcolor{comment}{in\ the\ Software\ without\ restriction,\ including\ without\ limitation\ the\ rights\ to}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ use,\ copy,\ modify,\ merge,\ publish,\ distribute,\ sublicense,\ and/or\ sell\ copies}}
+\DoxyCodeLine{00019\ \textcolor{comment}{of\ the\ Software,\ and\ to\ permit\ persons\ to\ whom\ the\ Software\ is\ furnished\ to\ do}}
+\DoxyCodeLine{00020\ \textcolor{comment}{so,\ subject\ to\ the\ following\ conditions:}}
+\DoxyCodeLine{00021\ \textcolor{comment}{}}
+\DoxyCodeLine{00022\ \textcolor{comment}{The\ above\ copyright\ notice\ and\ this\ permission\ notice\ shall\ be\ included\ in\ all}}
+\DoxyCodeLine{00023\ \textcolor{comment}{copies\ or\ substantial\ portions\ of\ the\ Software.}}
+\DoxyCodeLine{00024\ \textcolor{comment}{}}
+\DoxyCodeLine{00025\ \textcolor{comment}{THE\ SOFTWARE\ IS\ PROVIDED\ “AS\ IS”,\ WITHOUT\ WARRANTY\ OF\ ANY\ KIND,\ EXPRESS\ OR}}
+\DoxyCodeLine{00026\ \textcolor{comment}{IMPLIED,\ INCLUDING\ BUT\ NOT\ LIMITED\ TO\ THE\ WARRANTIES\ OF\ MERCHANTABILITY,\ FITNESS}}
+\DoxyCodeLine{00027\ \textcolor{comment}{FOR\ A\ PARTICULAR\ PURPOSE\ AND\ NONINFRINGEMENT.\ IN\ NO\ EVENT\ SHALL\ THE\ AUTHORS\ OR}}
+\DoxyCodeLine{00028\ \textcolor{comment}{COPYRIGHT\ HOLDERS\ BE\ LIABLE\ FOR\ ANY\ CLAIM,\ DAMAGES\ OR\ OTHER\ LIABILITY,\ WHETHER}}
+\DoxyCodeLine{00029\ \textcolor{comment}{IN\ AN\ ACTION\ OF\ CONTRACT,\ TORT\ OR\ OTHERWISE,\ ARISING\ FROM,\ OUT\ OF\ OR\ IN}}
+\DoxyCodeLine{00030\ \textcolor{comment}{CONNECTION\ WITH\ THE\ SOFTWARE\ OR\ THE\ USE\ OR\ OTHER\ DEALINGS\ IN\ THE\ SOFTWARE.}}
+\DoxyCodeLine{00031\ \textcolor{comment}{***********************************************************************************/}}
+\DoxyCodeLine{00032\ }
+\DoxyCodeLine{00033\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00034\ }
+\DoxyCodeLine{00035\ \textcolor{preprocessor}{\#ifndef\ \_\_cplusplus}}
+\DoxyCodeLine{00036\ \textcolor{preprocessor}{\#error\ "{}This\ header\ is\ for\ C++\ only"{}}}
+\DoxyCodeLine{00037\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00038\ }
+\DoxyCodeLine{00039\ \textcolor{preprocessor}{\#include\ <FreeRTOS.h>}}
+\DoxyCodeLine{00040\ \textcolor{preprocessor}{\#include\ <chrono>}}
+\DoxyCodeLine{00041\ \textcolor{preprocessor}{\#include\ <optional>}}
+\DoxyCodeLine{00042\ \textcolor{preprocessor}{\#include\ <queue.h>}}
+\DoxyCodeLine{00043\ }
+\DoxyCodeLine{00044\ \textcolor{keyword}{namespace\ }freertos\ \{}
+\DoxyCodeLine{00045\ }
+\DoxyCodeLine{00046\ \textcolor{keyword}{using\ }std::optional;}
+\DoxyCodeLine{00047\ }
+\DoxyCodeLine{00048\ \textcolor{preprocessor}{\#if\ configSUPPORT\_STATIC\_ALLOCATION}}
+\DoxyCodeLine{00053\ \textcolor{keyword}{template}\ <\textcolor{keywordtype}{size\_t}\ QueueLength,\ \textcolor{keyword}{typename}\ T>\ \textcolor{keyword}{class\ }static\_queue\_allocator\ \{}
+\DoxyCodeLine{00054\ \ \ StaticQueue\_t\ m\_queue\_placeholder;}
+\DoxyCodeLine{00055\ \ \ uint8\_t\ m\_storage[QueueLength\ *\ \textcolor{keyword}{sizeof}(T)];}
+\DoxyCodeLine{00056\ }
+\DoxyCodeLine{00057\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00058\ \ \ static\_queue\_allocator()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00059\ \ \ static\_queue\_allocator(\textcolor{keyword}{const}\ static\_queue\_allocator\ \&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00060\ \ \ static\_queue\_allocator(static\_queue\_allocator\ \&\&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00061\ }
+\DoxyCodeLine{00062\ \ \ static\_queue\_allocator\ \&operator=(\textcolor{keyword}{const}\ static\_queue\_allocator\ \&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00063\ \ \ static\_queue\_allocator\ \&operator=(static\_queue\_allocator\ \&\&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00064\ }
+\DoxyCodeLine{00065\ \ \ QueueHandle\_t\ create()\ \{}
+\DoxyCodeLine{00066\ \ \ \ \ \textcolor{keywordflow}{return}\ xQueueCreateStatic(QueueLength,\ \textcolor{keyword}{sizeof}(T),\ m\_storage,}
+\DoxyCodeLine{00067\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \&m\_queue\_placeholder);}
+\DoxyCodeLine{00068\ \ \ \}}
+\DoxyCodeLine{00069\ \};}
+\DoxyCodeLine{00070\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00071\ \textcolor{preprocessor}{\#if\ configSUPPORT\_DYNAMIC\_ALLOCATION}}
+\DoxyCodeLine{00076\ \textcolor{keyword}{template}\ <\textcolor{keywordtype}{size\_t}\ QueueLength,\ \textcolor{keyword}{typename}\ T>\ \textcolor{keyword}{class\ }dynamic\_queue\_allocator\ \{}
+\DoxyCodeLine{00077\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00078\ \ \ QueueHandle\_t\ create()\ \{\ \textcolor{keywordflow}{return}\ xQueueCreate(QueueLength,\ \textcolor{keyword}{sizeof}(T));\ \}}
+\DoxyCodeLine{00079\ \};}
+\DoxyCodeLine{00080\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00081\ }
+\DoxyCodeLine{00089\ \textcolor{keyword}{template}\ <\textcolor{keywordtype}{size\_t}\ QueueLength,\ \textcolor{keyword}{typename}\ T,\ \textcolor{keyword}{typename}\ QueueAllocator>\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classfreertos_1_1queue}{queue}}\ \{}
+\DoxyCodeLine{00090\ \ \ QueueAllocator\ m\_allocator;}
+\DoxyCodeLine{00091\ \ \ QueueHandle\_t\ m\_queue;}
+\DoxyCodeLine{00092\ }
+\DoxyCodeLine{00093\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00100\ \ \ \textcolor{keyword}{explicit}\ \mbox{\hyperlink{classfreertos_1_1queue_ad7a7ba3e594156a7a9dab385290a0aeb}{queue}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ *registred\_name\ =\ \textcolor{keyword}{nullptr})}
+\DoxyCodeLine{00101\ \ \ \ \ \ \ :\ m\_allocator\{\},\ m\_queue\{nullptr\}\ \{}
+\DoxyCodeLine{00102\ \ \ \ \ m\_queue\ =\ m\_allocator.create();}
+\DoxyCodeLine{00103\ \ \ \ \ configASSERT(m\_queue);}
+\DoxyCodeLine{00104\ \ \ \ \ \textcolor{keywordflow}{if}\ (registred\_name\ !=\ \textcolor{keyword}{nullptr})\ \{}
+\DoxyCodeLine{00105\ \ \ \ \ \ \ vQueueAddToRegistry(m\_queue,\ registred\_name);}
+\DoxyCodeLine{00106\ \ \ \ \ \}}
+\DoxyCodeLine{00107\ \ \ \}}
+\DoxyCodeLine{00108\ \ \ \mbox{\hyperlink{classfreertos_1_1queue_ad7a7ba3e594156a7a9dab385290a0aeb}{queue}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1queue}{queue}}\ \&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00109\ \ \ \mbox{\hyperlink{classfreertos_1_1queue_ad7a7ba3e594156a7a9dab385290a0aeb}{queue}}(\mbox{\hyperlink{classfreertos_1_1queue}{queue}}\ \&\&src)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00110\ \ \ \mbox{\hyperlink{classfreertos_1_1queue}{\string~queue}}(\textcolor{keywordtype}{void})\ \{}
+\DoxyCodeLine{00111\ \ \ \ \ \textcolor{keywordflow}{if}\ (m\_queue)\ \{}
+\DoxyCodeLine{00112\ \ \ \ \ \ \ \textcolor{keyword}{auto}\ n\ =\ pcQueueGetName(m\_queue);}
+\DoxyCodeLine{00113\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (n)\ \{}
+\DoxyCodeLine{00114\ \ \ \ \ \ \ \ \ vQueueUnregisterQueue(m\_queue);}
+\DoxyCodeLine{00115\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00116\ \ \ \ \ \ \ vQueueDelete(m\_queue);}
+\DoxyCodeLine{00117\ \ \ \ \ \}}
+\DoxyCodeLine{00118\ \ \ \}}
+\DoxyCodeLine{00119\ }
+\DoxyCodeLine{00120\ \ \ \mbox{\hyperlink{classfreertos_1_1queue_ad7a7ba3e594156a7a9dab385290a0aeb}{queue}}\ \&operator=(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1queue_ad7a7ba3e594156a7a9dab385290a0aeb}{queue}}\ \&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00121\ \ \ \mbox{\hyperlink{classfreertos_1_1queue_ad7a7ba3e594156a7a9dab385290a0aeb}{queue}}\ \&operator=(\mbox{\hyperlink{classfreertos_1_1queue_ad7a7ba3e594156a7a9dab385290a0aeb}{queue}}\ \&\&src)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00122\ }
+\DoxyCodeLine{00133\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1queue_a603f78c5925a6faa1866371acddcb321}{send}}(\textcolor{keyword}{const}\ T\ \&item,\ TickType\_t\ ticks\_to\_wait)\ \{}
+\DoxyCodeLine{00134\ \ \ \ \ \textcolor{keywordflow}{return}\ xQueueSend(m\_queue,\ \&item,\ ticks\_to\_wait);}
+\DoxyCodeLine{00135\ \ \ \}}
+\DoxyCodeLine{00145\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Rep,\ \textcolor{keyword}{typename}\ Period>}
+\DoxyCodeLine{00146\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1queue_a7d6f58c72807450314b49380520cbfaa}{send}}(\textcolor{keyword}{const}\ T\ \&item,}
+\DoxyCodeLine{00147\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::chrono::duration<Rep,\ Period>\ \&timeout)\ \{}
+\DoxyCodeLine{00148\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classfreertos_1_1queue_a603f78c5925a6faa1866371acddcb321}{send}}(item,\ pdMS\_TO\_TICKS(timeout.count()));}
+\DoxyCodeLine{00149\ \ \ \}}
+\DoxyCodeLine{00160\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1queue_a34d5c5b86b9fc81a728f7dfea968d7b5}{send\_isr}}(\textcolor{keyword}{const}\ T\ \&item,\ BaseType\_t\ \&higher\_priority\_task\_woken)\ \{}
+\DoxyCodeLine{00161\ \ \ \ \ \textcolor{keywordflow}{return}\ xQueueSendFromISR(m\_queue,\ \&item,\ \&higher\_priority\_task\_woken);}
+\DoxyCodeLine{00162\ \ \ \}}
+\DoxyCodeLine{00173\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1queue_a5082a40a1e47a8155925cac7e5ef94e1}{send\_back}}(\textcolor{keyword}{const}\ T\ \&item,\ TickType\_t\ ticks\_to\_wait)\ \{}
+\DoxyCodeLine{00174\ \ \ \ \ \textcolor{keywordflow}{return}\ xQueueSendToBack(m\_queue,\ \&item,\ ticks\_to\_wait);}
+\DoxyCodeLine{00175\ \ \ \}}
+\DoxyCodeLine{00185\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Rep,\ \textcolor{keyword}{typename}\ Period>}
+\DoxyCodeLine{00186\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1queue_a3e075075339dec5dbeec7ec7590f2327}{send\_back}}(\textcolor{keyword}{const}\ T\ \&item,}
+\DoxyCodeLine{00187\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::chrono::duration<Rep,\ Period>\ \&timeout)\ \{}
+\DoxyCodeLine{00188\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classfreertos_1_1queue_a5082a40a1e47a8155925cac7e5ef94e1}{send\_back}}(item,\ pdMS\_TO\_TICKS(timeout.count()));}
+\DoxyCodeLine{00189\ \ \ \}}
+\DoxyCodeLine{00200\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1queue_aa3e1c604aedbc9bbcc89c5660c463381}{send\_back\_isr}}(\textcolor{keyword}{const}\ T\ \&item,}
+\DoxyCodeLine{00201\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ BaseType\_t\ \&higher\_priority\_task\_woken)\ \{}
+\DoxyCodeLine{00202\ \ \ \ \ \textcolor{keywordflow}{return}\ xQueueSendToBackFromISR(m\_queue,\ \&item,\ \&higher\_priority\_task\_woken);}
+\DoxyCodeLine{00203\ \ \ \}}
+\DoxyCodeLine{00214\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1queue_adcf986f60288a5b738cfc8b3c694f5ac}{send\_front}}(\textcolor{keyword}{const}\ T\ \&item,\ TickType\_t\ ticks\_to\_wait)\ \{}
+\DoxyCodeLine{00215\ \ \ \ \ \textcolor{keywordflow}{return}\ xQueueSendToFront(m\_queue,\ \&item,\ ticks\_to\_wait);}
+\DoxyCodeLine{00216\ \ \ \}}
+\DoxyCodeLine{00226\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Rep,\ \textcolor{keyword}{typename}\ Period>}
+\DoxyCodeLine{00227\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1queue_a63063ed3b52b9cc303494a7644523579}{send\_front}}(\textcolor{keyword}{const}\ T\ \&item,}
+\DoxyCodeLine{00228\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::chrono::duration<Rep,\ Period>\ \&timeout)\ \{}
+\DoxyCodeLine{00229\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classfreertos_1_1queue_adcf986f60288a5b738cfc8b3c694f5ac}{send\_front}}(item,\ pdMS\_TO\_TICKS(timeout.count()));}
+\DoxyCodeLine{00230\ \ \ \}}
+\DoxyCodeLine{00241\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1queue_a6dcd49a8e8d379e9da4494fa6e06d1bb}{send\_front\_isr}}(\textcolor{keyword}{const}\ T\ \&item,}
+\DoxyCodeLine{00242\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ BaseType\_t\ \&higher\_priority\_task\_woken)\ \{}
+\DoxyCodeLine{00243\ \ \ \ \ \textcolor{keywordflow}{return}\ xQueueSendToFrontFromISR(m\_queue,\ \&item,}
+\DoxyCodeLine{00244\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \&higher\_priority\_task\_woken);}
+\DoxyCodeLine{00245\ \ \ \}}
+\DoxyCodeLine{00256\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1queue_a25fa1fd799780bcfb82731bf2a16e5fc}{receive}}(T\ \&item,\ TickType\_t\ ticks\_to\_wait)\ \{}
+\DoxyCodeLine{00257\ \ \ \ \ \textcolor{keywordflow}{return}\ xQueueReceive(m\_queue,\ \&item,\ ticks\_to\_wait);}
+\DoxyCodeLine{00258\ \ \ \}}
+\DoxyCodeLine{00267\ \ \ optional<T>\ \mbox{\hyperlink{classfreertos_1_1queue_ae09c48130ce1bdf0ab6128cd98f279b5}{receive}}(TickType\_t\ ticks\_to\_wait)\ \{}
+\DoxyCodeLine{00268\ \ \ \ \ T\ item;}
+\DoxyCodeLine{00269\ \ \ \ \ \textcolor{keywordflow}{if}\ (xQueueReceive(m\_queue,\ \&item,\ ticks\_to\_wait)\ ==\ pdPASS)\ \{}
+\DoxyCodeLine{00270\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ item;}
+\DoxyCodeLine{00271\ \ \ \ \ \}}
+\DoxyCodeLine{00272\ \ \ \ \ \textcolor{keywordflow}{return}\ \{\};}
+\DoxyCodeLine{00273\ \ \ \}}
+\DoxyCodeLine{00283\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Rep,\ \textcolor{keyword}{typename}\ Period>}
+\DoxyCodeLine{00284\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1queue_a43e013e00fdd839d3784ccf37a971226}{receive}}(T\ \&item,}
+\DoxyCodeLine{00285\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::chrono::duration<Rep,\ Period>\ \&timeout)\ \{}
+\DoxyCodeLine{00286\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classfreertos_1_1queue_a25fa1fd799780bcfb82731bf2a16e5fc}{receive}}(item,\ pdMS\_TO\_TICKS(timeout.count()));}
+\DoxyCodeLine{00287\ \ \ \}}
+\DoxyCodeLine{00296\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Rep,\ \textcolor{keyword}{typename}\ Period>}
+\DoxyCodeLine{00297\ \ \ optional<T>\ \mbox{\hyperlink{classfreertos_1_1queue_a5e307df30c7df09bd4687b7dce1471a6}{receive}}(\textcolor{keyword}{const}\ std::chrono::duration<Rep,\ Period>\ \&timeout)\ \{}
+\DoxyCodeLine{00298\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classfreertos_1_1queue_a25fa1fd799780bcfb82731bf2a16e5fc}{receive}}(pdMS\_TO\_TICKS(timeout.count()));}
+\DoxyCodeLine{00299\ \ \ \}}
+\DoxyCodeLine{00310\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1queue_aea41fe95f95e1f21d0c9e3842e88f9a3}{receive\_isr}}(T\ \&item,\ BaseType\_t\ \&higher\_priority\_task\_woken)\ \{}
+\DoxyCodeLine{00311\ \ \ \ \ \textcolor{keywordflow}{return}\ xQueueReceiveFromISR(m\_queue,\ \&item,\ \&higher\_priority\_task\_woken);}
+\DoxyCodeLine{00312\ \ \ \}}
+\DoxyCodeLine{00322\ \ \ optional<T>\ \mbox{\hyperlink{classfreertos_1_1queue_a6bf5700ab4fcbbc2626380e5e8489a3b}{receive\_isr}}(BaseType\_t\ \&higher\_priority\_task\_woken)\ \{}
+\DoxyCodeLine{00323\ \ \ \ \ T\ item;}
+\DoxyCodeLine{00324\ \ \ \ \ \textcolor{keywordflow}{if}\ (xQueueReceiveFromISR(m\_queue,\ \&item,\ \&higher\_priority\_task\_woken)\ ==}
+\DoxyCodeLine{00325\ \ \ \ \ \ \ \ \ pdPASS)\ \{}
+\DoxyCodeLine{00326\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ item;}
+\DoxyCodeLine{00327\ \ \ \ \ \}}
+\DoxyCodeLine{00328\ \ \ \ \ \textcolor{keywordflow}{return}\ \{\};}
+\DoxyCodeLine{00329\ \ \ \}}
+\DoxyCodeLine{00336\ \ \ UBaseType\_t\ \mbox{\hyperlink{classfreertos_1_1queue_a2d10f4c8f8cb5d98743a226f0e771a71}{messages\_waiting}}(\textcolor{keywordtype}{void})\ \{\ \textcolor{keywordflow}{return}\ uxQueueMessagesWaiting(m\_queue);\ \}}
+\DoxyCodeLine{00343\ \ \ UBaseType\_t\ \mbox{\hyperlink{classfreertos_1_1queue_a48b35445cee13cb70394faf6f2bf2870}{messages\_waiting\_isr}}(\textcolor{keywordtype}{void})\ \{}
+\DoxyCodeLine{00344\ \ \ \ \ \textcolor{keywordflow}{return}\ uxQueueMessagesWaitingFromISR(m\_queue);}
+\DoxyCodeLine{00345\ \ \ \}}
+\DoxyCodeLine{00352\ \ \ UBaseType\_t\ \mbox{\hyperlink{classfreertos_1_1queue_a83b3b6efefc86c9629f3b71e645e8dbf}{spaces\_available}}(\textcolor{keywordtype}{void})\ \{\ \textcolor{keywordflow}{return}\ uxQueueSpacesAvailable(m\_queue);\ \}}
+\DoxyCodeLine{00359\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1queue_ac61937b8d0cef8e3e738fb4658148afe}{reset}}(\textcolor{keywordtype}{void})\ \{\ \textcolor{keywordflow}{return}\ xQueueReset(m\_queue);\ \}}
+\DoxyCodeLine{00368\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1queue_aa2d26c4eabbdaabc20969afb7f3b3241}{overwrite}}(\textcolor{keyword}{const}\ T\ \&item)\ \{}
+\DoxyCodeLine{00369\ \ \ \ \ \textcolor{keywordflow}{return}\ xQueueOverwrite(m\_queue,\ \&item);}
+\DoxyCodeLine{00370\ \ \ \}}
+\DoxyCodeLine{00381\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1queue_a36dd34162ebadafe270cf41f8ed07434}{overwrite\_isr}}(\textcolor{keyword}{const}\ T\ \&item,}
+\DoxyCodeLine{00382\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ BaseType\_t\ \&higher\_priority\_task\_woken)\ \{}
+\DoxyCodeLine{00383\ \ \ \ \ \textcolor{keywordflow}{return}\ xQueueOverwriteFromISR(m\_queue,\ \&item,\ \&higher\_priority\_task\_woken);}
+\DoxyCodeLine{00384\ \ \ \}}
+\DoxyCodeLine{00395\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1queue_ac3230471095b57846845bb17e2cb68c6}{peek}}(T\ \&item,\ TickType\_t\ ticks\_to\_wait)\ \{}
+\DoxyCodeLine{00396\ \ \ \ \ \textcolor{keywordflow}{return}\ xQueuePeek(m\_queue,\ \&item,\ ticks\_to\_wait);}
+\DoxyCodeLine{00397\ \ \ \}}
+\DoxyCodeLine{00407\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Rep,\ \textcolor{keyword}{typename}\ Period>}
+\DoxyCodeLine{00408\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1queue_a06c009b6a9a9f5aae6e3529a94fca4cc}{peek}}(T\ \&item,\ \textcolor{keyword}{const}\ std::chrono::duration<Rep,\ Period>\ \&timeout)\ \{}
+\DoxyCodeLine{00409\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classfreertos_1_1queue_ac3230471095b57846845bb17e2cb68c6}{peek}}(item,\ pdMS\_TO\_TICKS(timeout.count()));}
+\DoxyCodeLine{00410\ \ \ \}}
+\DoxyCodeLine{00422\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1queue_ab7797f3ca193976aabde257eb9dd6672}{peek\_isr}}(T\ \&item,\ BaseType\_t\ \&higher\_priority\_task\_woken)\ \{}
+\DoxyCodeLine{00423\ \ \ \ \ \textcolor{keywordflow}{return}\ xQueuePeekFromISR(m\_queue,\ \&item,\ \&higher\_priority\_task\_woken);}
+\DoxyCodeLine{00424\ \ \ \}}
+\DoxyCodeLine{00431\ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ *\mbox{\hyperlink{classfreertos_1_1queue_a78bb3c04a8e21b31b50bd499ceaef983}{name}}(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ pcQueueGetName(m\_queue);\ \}}
+\DoxyCodeLine{00438\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1queue_a12164212be7d0ce39a2b91525c6ac1d5}{full\_isr}}(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ xQueueIsQueueFullFromISR(m\_queue);\ \}}
+\DoxyCodeLine{00445\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1queue_a35d97dd4e37365dcd19ebe0cc6e994af}{empty\_isr}}(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00446\ \ \ \ \ \textcolor{keywordflow}{return}\ xQueueIsQueueEmptyFromISR(m\_queue);}
+\DoxyCodeLine{00447\ \ \ \}}
+\DoxyCodeLine{00448\ \};}
+\DoxyCodeLine{00449\ }
+\DoxyCodeLine{00450\ \textcolor{preprocessor}{\#if\ configSUPPORT\_STATIC\_ALLOCATION}}
+\DoxyCodeLine{00455\ \textcolor{keyword}{namespace\ }sa\ \{}
+\DoxyCodeLine{00460\ \textcolor{keyword}{template}\ <\textcolor{keywordtype}{size\_t}\ QueueLength,\ \textcolor{keyword}{typename}\ T>}
+\DoxyCodeLine{00461\ \textcolor{keyword}{using\ }queue\ =}
+\DoxyCodeLine{00462\ \ \ \ \ \mbox{\hyperlink{classfreertos_1_1queue}{freertos::queue<QueueLength,\ T,\ static\_queue\_allocator<QueueLength,\ T>}}>;}
+\DoxyCodeLine{00463\ \}\ \textcolor{comment}{//\ namespace\ sa}}
+\DoxyCodeLine{00464\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00465\ \textcolor{preprocessor}{\#if\ configSUPPORT\_DYNAMIC\_ALLOCATION}}
+\DoxyCodeLine{00470\ \textcolor{keyword}{namespace\ }da\ \{}
+\DoxyCodeLine{00475\ \textcolor{keyword}{template}\ <\textcolor{keywordtype}{size\_t}\ QueueLength,\ \textcolor{keyword}{typename}\ T>}
+\DoxyCodeLine{00476\ \textcolor{keyword}{using\ }queue\ =}
+\DoxyCodeLine{00477\ \ \ \ \ \mbox{\hyperlink{classfreertos_1_1queue}{freertos::queue<QueueLength,\ T,\ dynamic\_queue\_allocator<QueueLength,\ T>}}>;}
+\DoxyCodeLine{00478\ \}\ \textcolor{comment}{//\ namespace\ da}}
+\DoxyCodeLine{00479\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00480\ }
+\DoxyCodeLine{00481\ \}\ \textcolor{comment}{//\ namespace\ freertos}}
+
+\end{DoxyCode}

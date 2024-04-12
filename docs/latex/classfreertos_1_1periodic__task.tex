@@ -1,0 +1,235 @@
+\doxysection{freertos\+::periodic\+\_\+task\texorpdfstring{$<$}{<} Task\+Allocator \texorpdfstring{$>$}{>} Class Template Reference}
+\hypertarget{classfreertos_1_1periodic__task}{}\label{classfreertos_1_1periodic__task}\index{freertos::periodic\_task$<$ TaskAllocator $>$@{freertos::periodic\_task$<$ TaskAllocator $>$}}
+
+
+A wrapper for the Free\+RTOS periodic task.  
+
+
+
+
+{\ttfamily \#include $<$freertos\+\_\+task.\+hpp$>$}
+
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+{\footnotesize template$<$typename Rep , typename Period $>$ }\\\mbox{\hyperlink{classfreertos_1_1periodic__task_a991b36acf5e9c45cd4ef782e60243490}{periodic\+\_\+task}} (const char \texorpdfstring{$\ast$}{*}\mbox{\hyperlink{classfreertos_1_1periodic__task_a2b5806f904a18a13474efae6b00b74ab}{name}}, UBase\+Type\+\_\+t priority, task\+\_\+routine\+\_\+t \&\&on\+\_\+start, task\+\_\+routine\+\_\+t \&\&on\+\_\+stop, task\+\_\+routine\+\_\+t \&\&periodic\+\_\+routine, const std\+::chrono\+::duration$<$ Rep, Period $>$ \&period, bool start\+\_\+suspended=true)
+\begin{DoxyCompactList}\small\item\em Construct a new periodic task object. \end{DoxyCompactList}\item 
+{\footnotesize template$<$typename Rep , typename Period $>$ }\\\mbox{\hyperlink{classfreertos_1_1periodic__task_ae70905fca339425deac4f20a904f1fc3}{periodic\+\_\+task}} (const std\+::string \&\mbox{\hyperlink{classfreertos_1_1periodic__task_a2b5806f904a18a13474efae6b00b74ab}{name}}, UBase\+Type\+\_\+t priority, task\+\_\+routine\+\_\+t \&\&on\+\_\+start, task\+\_\+routine\+\_\+t \&\&on\+\_\+stop, task\+\_\+routine\+\_\+t \&\&periodic\+\_\+routine, const std\+::chrono\+::duration$<$ Rep, Period $>$ \&period, bool start\+\_\+suspended=true)
+\begin{DoxyCompactList}\small\item\em Construct a new periodic task object. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{classfreertos_1_1periodic__task_a7499e655e45e533799806cda59cd3ff3}{periodic\+\_\+task}} (const char \texorpdfstring{$\ast$}{*}\mbox{\hyperlink{classfreertos_1_1periodic__task_a2b5806f904a18a13474efae6b00b74ab}{name}}, UBase\+Type\+\_\+t priority, task\+\_\+routine\+\_\+t \&\&on\+\_\+start, task\+\_\+routine\+\_\+t \&\&on\+\_\+stop, task\+\_\+routine\+\_\+t \&\&periodic\+\_\+routine, bool start\+\_\+suspended=true)
+\begin{DoxyCompactList}\small\item\em Construct a new periodic task object. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{classfreertos_1_1periodic__task_a6bf73b66eed4feb14a604f94051709e2}{periodic\+\_\+task}} (const std\+::string \&\mbox{\hyperlink{classfreertos_1_1periodic__task_a2b5806f904a18a13474efae6b00b74ab}{name}}, UBase\+Type\+\_\+t priority, task\+\_\+routine\+\_\+t \&\&on\+\_\+start, task\+\_\+routine\+\_\+t \&\&on\+\_\+stop, task\+\_\+routine\+\_\+t \&\&periodic\+\_\+routine, bool start\+\_\+suspended=true)
+\begin{DoxyCompactList}\small\item\em Construct a new periodic task object. \end{DoxyCompactList}\item 
+\Hypertarget{classfreertos_1_1periodic__task_a3bd369abe16aee6bae15626f8afec1d3}\label{classfreertos_1_1periodic__task_a3bd369abe16aee6bae15626f8afec1d3} 
+{\bfseries periodic\+\_\+task} (const \mbox{\hyperlink{classfreertos_1_1periodic__task}{periodic\+\_\+task}} \&)=delete
+\item 
+\Hypertarget{classfreertos_1_1periodic__task_a4971d3674bea0a99c06bcb76bd569072}\label{classfreertos_1_1periodic__task_a4971d3674bea0a99c06bcb76bd569072} 
+{\bfseries periodic\+\_\+task} (\mbox{\hyperlink{classfreertos_1_1periodic__task}{periodic\+\_\+task}} \&\&other)=delete
+\item 
+\Hypertarget{classfreertos_1_1periodic__task_a4b1c8813efc6cb4d7bef04927c807c25}\label{classfreertos_1_1periodic__task_a4b1c8813efc6cb4d7bef04927c807c25} 
+{\bfseries \texorpdfstring{$\sim$}{\string~}periodic\+\_\+task} (void)
+\begin{DoxyCompactList}\small\item\em Destruct the periodic task object and delete the task instance if it was created. \end{DoxyCompactList}\item 
+\Hypertarget{classfreertos_1_1periodic__task_a9ba9d4a029cab5f103f0820d161db4a4}\label{classfreertos_1_1periodic__task_a9ba9d4a029cab5f103f0820d161db4a4} 
+\mbox{\hyperlink{classfreertos_1_1periodic__task}{periodic\+\_\+task}} \& {\bfseries operator=} (const \mbox{\hyperlink{classfreertos_1_1periodic__task}{periodic\+\_\+task}} \&)=delete
+\item 
+\Hypertarget{classfreertos_1_1periodic__task_a569bab89ac4e0f5947bf008332a38c78}\label{classfreertos_1_1periodic__task_a569bab89ac4e0f5947bf008332a38c78} 
+\mbox{\hyperlink{classfreertos_1_1periodic__task}{periodic\+\_\+task}} \& {\bfseries operator=} (\mbox{\hyperlink{classfreertos_1_1periodic__task}{periodic\+\_\+task}} \&\&other)=delete
+\item 
+Task\+Handle\+\_\+t \mbox{\hyperlink{classfreertos_1_1periodic__task_afa781adc0b809367c572305be78b0725}{handle}} (void) const
+\begin{DoxyCompactList}\small\item\em Return the handle of the task. \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{classfreertos_1_1periodic__task_a12c13f558eabec29a997e8330811eb37}{is\+\_\+running}} (void) const
+\begin{DoxyCompactList}\small\item\em Check if the task is running. \end{DoxyCompactList}\item 
+\Hypertarget{classfreertos_1_1periodic__task_a304ec5187ac8b02a7b9fba55ed1c5462}\label{classfreertos_1_1periodic__task_a304ec5187ac8b02a7b9fba55ed1c5462} 
+void {\bfseries terminate} (void)
+\begin{DoxyCompactList}\small\item\em Terminate the task. \end{DoxyCompactList}\item 
+const char \texorpdfstring{$\ast$}{*} \mbox{\hyperlink{classfreertos_1_1periodic__task_a2b5806f904a18a13474efae6b00b74ab}{name}} (void) const
+\begin{DoxyCompactList}\small\item\em Get the name of the task. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\subsubsection*{template$<$typename Task\+Allocator$>$\newline
+class freertos\+::periodic\+\_\+task$<$ Task\+Allocator $>$}
+A wrapper for the Free\+RTOS periodic task. 
+
+
+\begin{DoxyTemplParams}{Template Parameters}
+{\em Task\+Allocator} & type of the task allocator \\
+\hline
+\end{DoxyTemplParams}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\Hypertarget{classfreertos_1_1periodic__task_a991b36acf5e9c45cd4ef782e60243490}\label{classfreertos_1_1periodic__task_a991b36acf5e9c45cd4ef782e60243490} 
+\index{freertos::periodic\_task$<$ TaskAllocator $>$@{freertos::periodic\_task$<$ TaskAllocator $>$}!periodic\_task@{periodic\_task}}
+\index{periodic\_task@{periodic\_task}!freertos::periodic\_task$<$ TaskAllocator $>$@{freertos::periodic\_task$<$ TaskAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{periodic\_task()}{periodic\_task()}\hspace{0.1cm}{\footnotesize\ttfamily [1/4]}}
+{\footnotesize\ttfamily template$<$typename Task\+Allocator $>$ \\
+template$<$typename Rep , typename Period $>$ \\
+\mbox{\hyperlink{classfreertos_1_1periodic__task}{freertos\+::periodic\+\_\+task}}$<$ Task\+Allocator $>$\+::periodic\+\_\+task (\begin{DoxyParamCaption}\item[{const char \texorpdfstring{$\ast$}{*}}]{name,  }\item[{UBase\+Type\+\_\+t}]{priority,  }\item[{task\+\_\+routine\+\_\+t \&\&}]{on\+\_\+start,  }\item[{task\+\_\+routine\+\_\+t \&\&}]{on\+\_\+stop,  }\item[{task\+\_\+routine\+\_\+t \&\&}]{periodic\+\_\+routine,  }\item[{const std\+::chrono\+::duration$<$ Rep, Period $>$ \&}]{period,  }\item[{bool}]{start\+\_\+suspended = {\ttfamily true} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Construct a new periodic task object. 
+
+
+\begin{DoxyTemplParams}{Template Parameters}
+{\em Rep} & duration representation \\
+\hline
+{\em Period} & duration period \\
+\hline
+\end{DoxyTemplParams}
+
+\begin{DoxyParams}{Parameters}
+{\em name} & name of the task \\
+\hline
+{\em priority} & priority of the task \\
+\hline
+{\em on\+\_\+start} & task routine function to be called on start \\
+\hline
+{\em on\+\_\+stop} & task routine function to be called on stop \\
+\hline
+{\em periodic\+\_\+routine} & periodic task routine function \\
+\hline
+{\em period} & period of the periodic task \\
+\hline
+{\em start\+\_\+suspended} & start the task in the suspended state \\
+\hline
+\end{DoxyParams}
+\Hypertarget{classfreertos_1_1periodic__task_ae70905fca339425deac4f20a904f1fc3}\label{classfreertos_1_1periodic__task_ae70905fca339425deac4f20a904f1fc3} 
+\index{freertos::periodic\_task$<$ TaskAllocator $>$@{freertos::periodic\_task$<$ TaskAllocator $>$}!periodic\_task@{periodic\_task}}
+\index{periodic\_task@{periodic\_task}!freertos::periodic\_task$<$ TaskAllocator $>$@{freertos::periodic\_task$<$ TaskAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{periodic\_task()}{periodic\_task()}\hspace{0.1cm}{\footnotesize\ttfamily [2/4]}}
+{\footnotesize\ttfamily template$<$typename Task\+Allocator $>$ \\
+template$<$typename Rep , typename Period $>$ \\
+\mbox{\hyperlink{classfreertos_1_1periodic__task}{freertos\+::periodic\+\_\+task}}$<$ Task\+Allocator $>$\+::periodic\+\_\+task (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{name,  }\item[{UBase\+Type\+\_\+t}]{priority,  }\item[{task\+\_\+routine\+\_\+t \&\&}]{on\+\_\+start,  }\item[{task\+\_\+routine\+\_\+t \&\&}]{on\+\_\+stop,  }\item[{task\+\_\+routine\+\_\+t \&\&}]{periodic\+\_\+routine,  }\item[{const std\+::chrono\+::duration$<$ Rep, Period $>$ \&}]{period,  }\item[{bool}]{start\+\_\+suspended = {\ttfamily true} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Construct a new periodic task object. 
+
+
+\begin{DoxyTemplParams}{Template Parameters}
+{\em Rep} & duration representation \\
+\hline
+{\em Period} & duration period \\
+\hline
+\end{DoxyTemplParams}
+
+\begin{DoxyParams}{Parameters}
+{\em name} & name of the task \\
+\hline
+{\em priority} & priority of the task \\
+\hline
+{\em on\+\_\+start} & task routine function to be called on start \\
+\hline
+{\em on\+\_\+stop} & task routine function to be called on stop \\
+\hline
+{\em periodic\+\_\+routine} & periodic task routine function \\
+\hline
+{\em period} & period of the periodic task \\
+\hline
+{\em start\+\_\+suspended} & start the task in the suspended state \\
+\hline
+\end{DoxyParams}
+\Hypertarget{classfreertos_1_1periodic__task_a7499e655e45e533799806cda59cd3ff3}\label{classfreertos_1_1periodic__task_a7499e655e45e533799806cda59cd3ff3} 
+\index{freertos::periodic\_task$<$ TaskAllocator $>$@{freertos::periodic\_task$<$ TaskAllocator $>$}!periodic\_task@{periodic\_task}}
+\index{periodic\_task@{periodic\_task}!freertos::periodic\_task$<$ TaskAllocator $>$@{freertos::periodic\_task$<$ TaskAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{periodic\_task()}{periodic\_task()}\hspace{0.1cm}{\footnotesize\ttfamily [3/4]}}
+{\footnotesize\ttfamily template$<$typename Task\+Allocator $>$ \\
+\mbox{\hyperlink{classfreertos_1_1periodic__task}{freertos\+::periodic\+\_\+task}}$<$ Task\+Allocator $>$\+::periodic\+\_\+task (\begin{DoxyParamCaption}\item[{const char \texorpdfstring{$\ast$}{*}}]{name,  }\item[{UBase\+Type\+\_\+t}]{priority,  }\item[{task\+\_\+routine\+\_\+t \&\&}]{on\+\_\+start,  }\item[{task\+\_\+routine\+\_\+t \&\&}]{on\+\_\+stop,  }\item[{task\+\_\+routine\+\_\+t \&\&}]{periodic\+\_\+routine,  }\item[{bool}]{start\+\_\+suspended = {\ttfamily true} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Construct a new periodic task object. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em name} & name of the task \\
+\hline
+{\em priority} & priority of the task \\
+\hline
+{\em on\+\_\+start} & task routine function to be called on start \\
+\hline
+{\em on\+\_\+stop} & task routine function to be called on stop \\
+\hline
+{\em periodic\+\_\+routine} & periodic task routine function \\
+\hline
+{\em start\+\_\+suspended} & start the task in the suspended state \\
+\hline
+\end{DoxyParams}
+\Hypertarget{classfreertos_1_1periodic__task_a6bf73b66eed4feb14a604f94051709e2}\label{classfreertos_1_1periodic__task_a6bf73b66eed4feb14a604f94051709e2} 
+\index{freertos::periodic\_task$<$ TaskAllocator $>$@{freertos::periodic\_task$<$ TaskAllocator $>$}!periodic\_task@{periodic\_task}}
+\index{periodic\_task@{periodic\_task}!freertos::periodic\_task$<$ TaskAllocator $>$@{freertos::periodic\_task$<$ TaskAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{periodic\_task()}{periodic\_task()}\hspace{0.1cm}{\footnotesize\ttfamily [4/4]}}
+{\footnotesize\ttfamily template$<$typename Task\+Allocator $>$ \\
+\mbox{\hyperlink{classfreertos_1_1periodic__task}{freertos\+::periodic\+\_\+task}}$<$ Task\+Allocator $>$\+::periodic\+\_\+task (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{name,  }\item[{UBase\+Type\+\_\+t}]{priority,  }\item[{task\+\_\+routine\+\_\+t \&\&}]{on\+\_\+start,  }\item[{task\+\_\+routine\+\_\+t \&\&}]{on\+\_\+stop,  }\item[{task\+\_\+routine\+\_\+t \&\&}]{periodic\+\_\+routine,  }\item[{bool}]{start\+\_\+suspended = {\ttfamily true} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Construct a new periodic task object. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em name} & name of the task \\
+\hline
+{\em priority} & priority of the task \\
+\hline
+{\em on\+\_\+start} & task routine function to be called on start \\
+\hline
+{\em on\+\_\+stop} & task routine function to be called on stop \\
+\hline
+{\em periodic\+\_\+routine} & periodic task routine function \\
+\hline
+{\em start\+\_\+suspended} & start the task in the suspended state \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classfreertos_1_1periodic__task_afa781adc0b809367c572305be78b0725}\label{classfreertos_1_1periodic__task_afa781adc0b809367c572305be78b0725} 
+\index{freertos::periodic\_task$<$ TaskAllocator $>$@{freertos::periodic\_task$<$ TaskAllocator $>$}!handle@{handle}}
+\index{handle@{handle}!freertos::periodic\_task$<$ TaskAllocator $>$@{freertos::periodic\_task$<$ TaskAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{handle()}{handle()}}
+{\footnotesize\ttfamily template$<$typename Task\+Allocator $>$ \\
+Task\+Handle\+\_\+t \mbox{\hyperlink{classfreertos_1_1periodic__task}{freertos\+::periodic\+\_\+task}}$<$ Task\+Allocator $>$\+::handle (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Return the handle of the task. 
+
+\begin{DoxyReturn}{Returns}
+Task\+Handle\+\_\+t task handle 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1periodic__task_a12c13f558eabec29a997e8330811eb37}\label{classfreertos_1_1periodic__task_a12c13f558eabec29a997e8330811eb37} 
+\index{freertos::periodic\_task$<$ TaskAllocator $>$@{freertos::periodic\_task$<$ TaskAllocator $>$}!is\_running@{is\_running}}
+\index{is\_running@{is\_running}!freertos::periodic\_task$<$ TaskAllocator $>$@{freertos::periodic\_task$<$ TaskAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{is\_running()}{is\_running()}}
+{\footnotesize\ttfamily template$<$typename Task\+Allocator $>$ \\
+bool \mbox{\hyperlink{classfreertos_1_1periodic__task}{freertos\+::periodic\+\_\+task}}$<$ Task\+Allocator $>$\+::is\+\_\+running (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Check if the task is running. 
+
+\begin{DoxyReturn}{Returns}
+bool true if the task is running, false otherwise 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1periodic__task_a2b5806f904a18a13474efae6b00b74ab}\label{classfreertos_1_1periodic__task_a2b5806f904a18a13474efae6b00b74ab} 
+\index{freertos::periodic\_task$<$ TaskAllocator $>$@{freertos::periodic\_task$<$ TaskAllocator $>$}!name@{name}}
+\index{name@{name}!freertos::periodic\_task$<$ TaskAllocator $>$@{freertos::periodic\_task$<$ TaskAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{name()}{name()}}
+{\footnotesize\ttfamily template$<$typename Task\+Allocator $>$ \\
+const char \texorpdfstring{$\ast$}{*} \mbox{\hyperlink{classfreertos_1_1periodic__task}{freertos\+::periodic\+\_\+task}}$<$ Task\+Allocator $>$\+::name (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Get the name of the task. 
+
+\begin{DoxyReturn}{Returns}
+const char\texorpdfstring{$\ast$}{*} task name 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+include/freertos\+\_\+task.\+hpp\end{DoxyCompactItemize}

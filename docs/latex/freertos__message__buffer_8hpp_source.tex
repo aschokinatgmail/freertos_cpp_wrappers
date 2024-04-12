@@ -1,0 +1,154 @@
+\doxysection{freertos\+\_\+message\+\_\+buffer.\+hpp}
+\hypertarget{freertos__message__buffer_8hpp_source}{}\label{freertos__message__buffer_8hpp_source}\index{include/freertos\_message\_buffer.hpp@{include/freertos\_message\_buffer.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/**********************************************************************************}}
+\DoxyCodeLine{00002\ \textcolor{comment}{@file\ freertos\_message\_buffer.hpp}}
+\DoxyCodeLine{00003\ \textcolor{comment}{@author\ Andrey\ V.\ Shchekin\ <aschokin@gmail.com>}}
+\DoxyCodeLine{00004\ \textcolor{comment}{@brief\ FreeRTOS\ message\ buffer\ wrapper}}
+\DoxyCodeLine{00005\ \textcolor{comment}{@version\ 0.1}}
+\DoxyCodeLine{00006\ \textcolor{comment}{@date\ 2024-\/04-\/07}}
+\DoxyCodeLine{00007\ \textcolor{comment}{}}
+\DoxyCodeLine{00008\ \textcolor{comment}{The\ MIT\ License\ (MIT)}}
+\DoxyCodeLine{00009\ \textcolor{comment}{}}
+\DoxyCodeLine{00010\ \textcolor{comment}{FreeRTOS\ C++\ Wrappers\ Library}}
+\DoxyCodeLine{00011\ \textcolor{comment}{https://github.com/aschokinatgmail/freertos\_cpp\_wrappers/}}
+\DoxyCodeLine{00012\ \textcolor{comment}{}}
+\DoxyCodeLine{00013\ \textcolor{comment}{Copyright(c)\ 2024\ Andrey\ V.\ Shchekin\ <aschokin@gmail.com>}}
+\DoxyCodeLine{00014\ \textcolor{comment}{}}
+\DoxyCodeLine{00015\ \textcolor{comment}{Permission\ is\ hereby\ granted,\ free\ of\ charge,\ to\ any\ person\ obtaining\ a\ copy}}
+\DoxyCodeLine{00016\ \textcolor{comment}{of\ this\ software\ and\ associated\ documentation\ files\ (the\ “Software”),\ to\ deal}}
+\DoxyCodeLine{00017\ \textcolor{comment}{in\ the\ Software\ without\ restriction,\ including\ without\ limitation\ the\ rights\ to}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ use,\ copy,\ modify,\ merge,\ publish,\ distribute,\ sublicense,\ and/or\ sell\ copies}}
+\DoxyCodeLine{00019\ \textcolor{comment}{of\ the\ Software,\ and\ to\ permit\ persons\ to\ whom\ the\ Software\ is\ furnished\ to\ do}}
+\DoxyCodeLine{00020\ \textcolor{comment}{so,\ subject\ to\ the\ following\ conditions:}}
+\DoxyCodeLine{00021\ \textcolor{comment}{}}
+\DoxyCodeLine{00022\ \textcolor{comment}{The\ above\ copyright\ notice\ and\ this\ permission\ notice\ shall\ be\ included\ in\ all}}
+\DoxyCodeLine{00023\ \textcolor{comment}{copies\ or\ substantial\ portions\ of\ the\ Software.}}
+\DoxyCodeLine{00024\ \textcolor{comment}{}}
+\DoxyCodeLine{00025\ \textcolor{comment}{THE\ SOFTWARE\ IS\ PROVIDED\ “AS\ IS”,\ WITHOUT\ WARRANTY\ OF\ ANY\ KIND,\ EXPRESS\ OR}}
+\DoxyCodeLine{00026\ \textcolor{comment}{IMPLIED,\ INCLUDING\ BUT\ NOT\ LIMITED\ TO\ THE\ WARRANTIES\ OF\ MERCHANTABILITY,\ FITNESS}}
+\DoxyCodeLine{00027\ \textcolor{comment}{FOR\ A\ PARTICULAR\ PURPOSE\ AND\ NONINFRINGEMENT.\ IN\ NO\ EVENT\ SHALL\ THE\ AUTHORS\ OR}}
+\DoxyCodeLine{00028\ \textcolor{comment}{COPYRIGHT\ HOLDERS\ BE\ LIABLE\ FOR\ ANY\ CLAIM,\ DAMAGES\ OR\ OTHER\ LIABILITY,\ WHETHER}}
+\DoxyCodeLine{00029\ \textcolor{comment}{IN\ AN\ ACTION\ OF\ CONTRACT,\ TORT\ OR\ OTHERWISE,\ ARISING\ FROM,\ OUT\ OF\ OR\ IN}}
+\DoxyCodeLine{00030\ \textcolor{comment}{CONNECTION\ WITH\ THE\ SOFTWARE\ OR\ THE\ USE\ OR\ OTHER\ DEALINGS\ IN\ THE\ SOFTWARE.}}
+\DoxyCodeLine{00031\ \textcolor{comment}{***********************************************************************************/}}
+\DoxyCodeLine{00032\ }
+\DoxyCodeLine{00033\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00034\ }
+\DoxyCodeLine{00035\ \textcolor{preprocessor}{\#ifndef\ \_\_cplusplus}}
+\DoxyCodeLine{00036\ \textcolor{preprocessor}{\#error\ "{}This\ header\ is\ for\ C++\ only"{}}}
+\DoxyCodeLine{00037\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00038\ }
+\DoxyCodeLine{00039\ \textcolor{preprocessor}{\#include\ <FreeRTOS.h>}}
+\DoxyCodeLine{00040\ \textcolor{preprocessor}{\#include\ <chrono>}}
+\DoxyCodeLine{00041\ \textcolor{preprocessor}{\#include\ <message\_buffer.h>}}
+\DoxyCodeLine{00042\ }
+\DoxyCodeLine{00043\ \textcolor{keyword}{namespace\ }freertos\ \{}
+\DoxyCodeLine{00044\ }
+\DoxyCodeLine{00045\ \textcolor{preprocessor}{\#if\ configSUPPORT\_STATIC\_ALLOCATION}}
+\DoxyCodeLine{00051\ \textcolor{keyword}{template}\ <\textcolor{keywordtype}{size\_t}\ MessageBufferSize>\ \textcolor{keyword}{class\ }static\_message\_buffer\_allocator\ \{}
+\DoxyCodeLine{00052\ \ \ StaticMessageBuffer\_t\ m\_message\_buffer\_placeholder;}
+\DoxyCodeLine{00053\ \ \ uint8\_t\ m\_storage[MessageBufferSize];}
+\DoxyCodeLine{00054\ }
+\DoxyCodeLine{00055\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00056\ \ \ static\_message\_buffer\_allocator()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00057\ \ \ static\_message\_buffer\_allocator(\textcolor{keyword}{const}\ static\_message\_buffer\_allocator\ \&)\ =}
+\DoxyCodeLine{00058\ \ \ \ \ \ \ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00059\ \ \ static\_message\_buffer\_allocator(static\_message\_buffer\_allocator\ \&\&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00060\ }
+\DoxyCodeLine{00061\ \ \ static\_message\_buffer\_allocator\ \&}
+\DoxyCodeLine{00062\ \ \ operator=(\textcolor{keyword}{const}\ static\_message\_buffer\_allocator\ \&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00063\ \ \ static\_message\_buffer\_allocator\ \&}
+\DoxyCodeLine{00064\ \ \ operator=(static\_message\_buffer\_allocator\ \&\&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00065\ }
+\DoxyCodeLine{00066\ \ \ MessageBufferHandle\_t\ create()\ \{}
+\DoxyCodeLine{00067\ \ \ \ \ \textcolor{keywordflow}{return}\ xMessageBufferCreateStatic(MessageBufferSize,\ m\_storage,}
+\DoxyCodeLine{00068\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \&m\_message\_buffer\_placeholder);}
+\DoxyCodeLine{00069\ \ \ \}}
+\DoxyCodeLine{00070\ \};}
+\DoxyCodeLine{00071\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00072\ \textcolor{preprocessor}{\#if\ configSUPPORT\_DYNAMIC\_ALLOCATION}}
+\DoxyCodeLine{00078\ \textcolor{keyword}{template}\ <\textcolor{keywordtype}{size\_t}\ MessageBufferSize>\ \textcolor{keyword}{class\ }dynamic\_message\_buffer\_allocator\ \{}
+\DoxyCodeLine{00079\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00080\ \ \ MessageBufferHandle\_t\ create()\ \{}
+\DoxyCodeLine{00081\ \ \ \ \ \textcolor{keywordflow}{return}\ xMessageBufferCreate(MessageBufferSize);}
+\DoxyCodeLine{00082\ \ \ \}}
+\DoxyCodeLine{00083\ \};}
+\DoxyCodeLine{00084\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00085\ }
+\DoxyCodeLine{00092\ \textcolor{keyword}{template}\ <\textcolor{keywordtype}{size\_t}\ MessageBufferSize,\ \textcolor{keyword}{typename}\ MessageBufferAllocator>}
+\DoxyCodeLine{00093\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classfreertos_1_1message__buffer}{message\_buffer}}\ \{}
+\DoxyCodeLine{00094\ \ \ MessageBufferAllocator\ m\_allocator;}
+\DoxyCodeLine{00095\ \ \ MessageBufferHandle\_t\ m\_message\_buffer;}
+\DoxyCodeLine{00096\ }
+\DoxyCodeLine{00097\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00102\ \ \ \textcolor{keyword}{explicit}\ \mbox{\hyperlink{classfreertos_1_1message__buffer_a83b811597a637b1fa86b3d42dc92b001}{message\_buffer}}()\ :\ m\_allocator\{\},\ m\_message\_buffer\{nullptr\}\ \{}
+\DoxyCodeLine{00103\ \ \ \ \ m\_message\_buffer\ =\ m\_allocator.create();}
+\DoxyCodeLine{00104\ \ \ \ \ configASSERT(m\_message\_buffer);}
+\DoxyCodeLine{00105\ \ \ \}}
+\DoxyCodeLine{00106\ \ \ \mbox{\hyperlink{classfreertos_1_1message__buffer_a83b811597a637b1fa86b3d42dc92b001}{message\_buffer}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1message__buffer}{message\_buffer}}\ \&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00107\ \ \ \mbox{\hyperlink{classfreertos_1_1message__buffer_a83b811597a637b1fa86b3d42dc92b001}{message\_buffer}}(\mbox{\hyperlink{classfreertos_1_1message__buffer}{message\_buffer}}\ \&\&src)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00113\ \ \ \mbox{\hyperlink{classfreertos_1_1message__buffer_a753bcad0484e4f15f4d3fe826d572065}{\string~message\_buffer}}(\textcolor{keywordtype}{void})\ \{}
+\DoxyCodeLine{00114\ \ \ \ \ \textcolor{keywordflow}{if}\ (m\_message\_buffer)\ \{}
+\DoxyCodeLine{00115\ \ \ \ \ \ \ vMessageBufferDelete(m\_message\_buffer);}
+\DoxyCodeLine{00116\ \ \ \ \ \}}
+\DoxyCodeLine{00117\ \ \ \}}
+\DoxyCodeLine{00118\ }
+\DoxyCodeLine{00119\ \ \ \mbox{\hyperlink{classfreertos_1_1message__buffer}{message\_buffer}}\ \&operator=(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1message__buffer}{message\_buffer}}\ \&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00120\ \ \ \mbox{\hyperlink{classfreertos_1_1message__buffer}{message\_buffer}}\ \&operator=(\mbox{\hyperlink{classfreertos_1_1message__buffer}{message\_buffer}}\ \&\&src)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00121\ }
+\DoxyCodeLine{00132\ \ \ \textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{classfreertos_1_1message__buffer_a530cca3bbcb0645b81ddb26450e57556}{send}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{void}\ *pvTxData,\ \textcolor{keywordtype}{size\_t}\ xDataLengthBytes,}
+\DoxyCodeLine{00133\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ TickType\_t\ xTicksToWait)\ \{}
+\DoxyCodeLine{00134\ \ \ \ \ \textcolor{keywordflow}{return}\ xMessageBufferSend(m\_message\_buffer,\ pvTxData,\ xDataLengthBytes,}
+\DoxyCodeLine{00135\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ xTicksToWait);}
+\DoxyCodeLine{00136\ \ \ \}}
+\DoxyCodeLine{00146\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Rep,\ \textcolor{keyword}{typename}\ Period>}
+\DoxyCodeLine{00147\ \ \ \textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{classfreertos_1_1message__buffer_abde882826aa3acc53d81635871cecc4f}{send}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{void}\ *pvTxData,\ \textcolor{keywordtype}{size\_t}\ xDataLengthBytes,}
+\DoxyCodeLine{00148\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::chrono::duration<Rep,\ Period>\ \&xTicksToWait)\ \{}
+\DoxyCodeLine{00149\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classfreertos_1_1message__buffer_a530cca3bbcb0645b81ddb26450e57556}{send}}(}
+\DoxyCodeLine{00150\ \ \ \ \ \ \ \ \ pvTxData,\ xDataLengthBytes,}
+\DoxyCodeLine{00151\ \ \ \ \ \ \ \ \ std::chrono::duration\_cast<std::chrono::milliseconds>(xTicksToWait)}
+\DoxyCodeLine{00152\ \ \ \ \ \ \ \ \ \ \ \ \ .count());}
+\DoxyCodeLine{00153\ \ \ \}}
+\DoxyCodeLine{00164\ \ \ \textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{classfreertos_1_1message__buffer_ab37be0d840cb8b59bd43c9d4800d0f6f}{receive}}(\textcolor{keywordtype}{void}\ *pvRxData,\ \textcolor{keywordtype}{size\_t}\ xBufferLengthBytes,}
+\DoxyCodeLine{00165\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ TickType\_t\ xTicksToWait)\ \{}
+\DoxyCodeLine{00166\ \ \ \ \ \textcolor{keywordflow}{return}\ xMessageBufferReceive(m\_message\_buffer,\ pvRxData,\ xBufferLengthBytes,}
+\DoxyCodeLine{00167\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ xTicksToWait);}
+\DoxyCodeLine{00168\ \ \ \}}
+\DoxyCodeLine{00179\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Rep,\ \textcolor{keyword}{typename}\ Period>}
+\DoxyCodeLine{00180\ \ \ \textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{classfreertos_1_1message__buffer_aa187c1676a9eb6ee7ea528096184dd73}{receive}}(\textcolor{keywordtype}{void}\ *pvRxData,\ \textcolor{keywordtype}{size\_t}\ xBufferLengthBytes,}
+\DoxyCodeLine{00181\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::chrono::duration<Rep,\ Period>\ \&timeout)\ \{}
+\DoxyCodeLine{00182\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classfreertos_1_1message__buffer_ab37be0d840cb8b59bd43c9d4800d0f6f}{receive}}(}
+\DoxyCodeLine{00183\ \ \ \ \ \ \ \ \ pvRxData,\ xBufferLengthBytes,}
+\DoxyCodeLine{00184\ \ \ \ \ \ \ \ \ std::chrono::duration\_cast<std::chrono::milliseconds>(xTicksToWait)}
+\DoxyCodeLine{00185\ \ \ \ \ \ \ \ \ \ \ \ \ .count());}
+\DoxyCodeLine{00186\ \ \ \}}
+\DoxyCodeLine{00193\ \ \ \textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{classfreertos_1_1message__buffer_a14adfabd008e28ac2a834327e1e27462}{available}}(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00194\ \ \ \ \ \textcolor{keywordflow}{return}\ xMessageBufferSpaceAvailable(m\_message\_buffer);}
+\DoxyCodeLine{00195\ \ \ \}}
+\DoxyCodeLine{00202\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1message__buffer_a37815de9675ed135cb4837b09bf53ec3}{reset}}(\textcolor{keywordtype}{void})\ \{\ \textcolor{keywordflow}{return}\ xMessageBufferReset(m\_message\_buffer);\ \}}
+\DoxyCodeLine{00209\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1message__buffer_a8de814101422041ae0048dcef2bdc9a4}{empty}}(\textcolor{keywordtype}{void})\ \{\ \textcolor{keywordflow}{return}\ xMessageBufferIsEmpty(m\_message\_buffer);\ \}}
+\DoxyCodeLine{00216\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1message__buffer_ab0dc8268ac5a4081c3541e89c749a846}{full}}(\textcolor{keywordtype}{void})\ \{\ \textcolor{keywordflow}{return}\ xMessageBufferIsFull(m\_message\_buffer);\ \}}
+\DoxyCodeLine{00217\ \};}
+\DoxyCodeLine{00218\ }
+\DoxyCodeLine{00219\ \textcolor{preprocessor}{\#if\ configSUPPORT\_STATIC\_ALLOCATION}}
+\DoxyCodeLine{00225\ \textcolor{keyword}{namespace\ }sa\ \{}
+\DoxyCodeLine{00231\ \textcolor{keyword}{template}\ <\textcolor{keywordtype}{size\_t}\ MessageBufferSize>}
+\DoxyCodeLine{00232\ \textcolor{keyword}{using\ }message\_buffer\ =\ \mbox{\hyperlink{classfreertos_1_1message__buffer}{freertos::message\_buffer}}<}
+\DoxyCodeLine{00233\ \ \ \ \ MessageBufferSize,}
+\DoxyCodeLine{00234\ \ \ \ \ freertos::static\_message\_buffer\_allocator<MessageBufferSize>>;}
+\DoxyCodeLine{00235\ \}\ \textcolor{comment}{//\ namespace\ sa}}
+\DoxyCodeLine{00236\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00237\ \textcolor{preprocessor}{\#if\ configSUPPORT\_DYNAMIC\_ALLOCATION}}
+\DoxyCodeLine{00243\ \textcolor{keyword}{namespace\ }da\ \{}
+\DoxyCodeLine{00249\ \textcolor{keyword}{template}\ <\textcolor{keywordtype}{size\_t}\ MessageBufferSize>}
+\DoxyCodeLine{00250\ \textcolor{keyword}{using\ }message\_buffer\ =\ \mbox{\hyperlink{classfreertos_1_1message__buffer}{freertos::message\_buffer}}<}
+\DoxyCodeLine{00251\ \ \ \ \ MessageBufferSize,}
+\DoxyCodeLine{00252\ \ \ \ \ freertos::dynamic\_message\_buffer\_allocator<MessageBufferSize>>;}
+\DoxyCodeLine{00253\ \}\ \textcolor{comment}{//\ namespace\ da}}
+\DoxyCodeLine{00254\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00255\ }
+\DoxyCodeLine{00256\ \}\ \textcolor{comment}{//\ namespace\ freertos}}
+
+\end{DoxyCode}

@@ -1,0 +1,74 @@
+\doxysection{freertos\+::lock\+\_\+guard\texorpdfstring{$<$}{<} Mutex \texorpdfstring{$>$}{>} Class Template Reference}
+\hypertarget{classfreertos_1_1lock__guard}{}\label{classfreertos_1_1lock__guard}\index{freertos::lock\_guard$<$ Mutex $>$@{freertos::lock\_guard$<$ Mutex $>$}}
+
+
+Lock guard for the mutex. The mutex is locked in the constructor and unlocked in the destructor (RAII).  
+
+
+
+
+{\ttfamily \#include $<$freertos\+\_\+semaphore.\+hpp$>$}
+
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classfreertos_1_1lock__guard_a8276ed46c1507dc9c8c27a5bd56c4d9e}{lock\+\_\+guard}} (Mutex \&\mbox{\hyperlink{classfreertos_1_1mutex}{mutex}})
+\begin{DoxyCompactList}\small\item\em Construct a new lock guard object. \end{DoxyCompactList}\item 
+\Hypertarget{classfreertos_1_1lock__guard_af46d4af2d983d17c333f0265c941cad4}\label{classfreertos_1_1lock__guard_af46d4af2d983d17c333f0265c941cad4} 
+{\bfseries \texorpdfstring{$\sim$}{\string~}lock\+\_\+guard} (void)
+\begin{DoxyCompactList}\small\item\em Destruct the lock guard object and unlock the mutex. \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{classfreertos_1_1lock__guard_aab62d6459ed0be2ee1211fe2b3c0b4d1}{locked}} (void) const
+\begin{DoxyCompactList}\small\item\em Checks if the mutex is locked. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\subsubsection*{template$<$typename Mutex$>$\newline
+class freertos\+::lock\+\_\+guard$<$ Mutex $>$}
+Lock guard for the mutex. The mutex is locked in the constructor and unlocked in the destructor (RAII). 
+
+
+\begin{DoxyTemplParams}{Template Parameters}
+{\em Mutex} & type of the mutex to guard. \\
+\hline
+\end{DoxyTemplParams}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\Hypertarget{classfreertos_1_1lock__guard_a8276ed46c1507dc9c8c27a5bd56c4d9e}\label{classfreertos_1_1lock__guard_a8276ed46c1507dc9c8c27a5bd56c4d9e} 
+\index{freertos::lock\_guard$<$ Mutex $>$@{freertos::lock\_guard$<$ Mutex $>$}!lock\_guard@{lock\_guard}}
+\index{lock\_guard@{lock\_guard}!freertos::lock\_guard$<$ Mutex $>$@{freertos::lock\_guard$<$ Mutex $>$}}
+\doxysubsubsection{\texorpdfstring{lock\_guard()}{lock\_guard()}}
+{\footnotesize\ttfamily template$<$typename Mutex $>$ \\
+\mbox{\hyperlink{classfreertos_1_1lock__guard}{freertos\+::lock\+\_\+guard}}$<$ Mutex $>$\+::lock\+\_\+guard (\begin{DoxyParamCaption}\item[{Mutex \&}]{mutex }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [explicit]}}
+
+
+
+Construct a new lock guard object. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em mutex} & mutex to guard \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classfreertos_1_1lock__guard_aab62d6459ed0be2ee1211fe2b3c0b4d1}\label{classfreertos_1_1lock__guard_aab62d6459ed0be2ee1211fe2b3c0b4d1} 
+\index{freertos::lock\_guard$<$ Mutex $>$@{freertos::lock\_guard$<$ Mutex $>$}!locked@{locked}}
+\index{locked@{locked}!freertos::lock\_guard$<$ Mutex $>$@{freertos::lock\_guard$<$ Mutex $>$}}
+\doxysubsubsection{\texorpdfstring{locked()}{locked()}}
+{\footnotesize\ttfamily template$<$typename Mutex $>$ \\
+bool \mbox{\hyperlink{classfreertos_1_1lock__guard}{freertos\+::lock\+\_\+guard}}$<$ Mutex $>$\+::locked (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Checks if the mutex is locked. 
+
+\begin{DoxyReturn}{Returns}
+true if the mutex is locked, otherwise false. 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+include/freertos\+\_\+semaphore.\+hpp\end{DoxyCompactItemize}

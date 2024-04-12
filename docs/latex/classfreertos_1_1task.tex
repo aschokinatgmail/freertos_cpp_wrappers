@@ -1,0 +1,135 @@
+\doxysection{freertos\+::task\texorpdfstring{$<$}{<} Task\+Allocator \texorpdfstring{$>$}{>} Class Template Reference}
+\hypertarget{classfreertos_1_1task}{}\label{classfreertos_1_1task}\index{freertos::task$<$ TaskAllocator $>$@{freertos::task$<$ TaskAllocator $>$}}
+
+
+A wrapper for the Free\+RTOS task.  
+
+
+
+
+{\ttfamily \#include $<$freertos\+\_\+task.\+hpp$>$}
+
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classfreertos_1_1task_a9aedf7e84825ed565badb437a07d4e83}{task}} (const char \texorpdfstring{$\ast$}{*}\mbox{\hyperlink{classfreertos_1_1task_a3e6cd37028ea09cbfbade59fd0cbe7b2}{name}}, UBase\+Type\+\_\+t priority, task\+\_\+routine\+\_\+t \&\&task\+\_\+routine, bool start\+\_\+suspended=true)
+\begin{DoxyCompactList}\small\item\em Construct a new task object. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{classfreertos_1_1task_a0a9030ab811702f3cfe1012ef1e99ebc}{task}} (const std\+::string \&\mbox{\hyperlink{classfreertos_1_1task_a3e6cd37028ea09cbfbade59fd0cbe7b2}{name}}, UBase\+Type\+\_\+t priority, task\+\_\+routine\+\_\+t \&\&task\+\_\+routine, bool start\+\_\+suspended=true)
+\begin{DoxyCompactList}\small\item\em Construct a new task object. \end{DoxyCompactList}\item 
+\Hypertarget{classfreertos_1_1task_a91c406b3a633b5565149682837c6fdd2}\label{classfreertos_1_1task_a91c406b3a633b5565149682837c6fdd2} 
+{\bfseries task} (const \mbox{\hyperlink{classfreertos_1_1task}{task}} \&)=delete
+\item 
+\Hypertarget{classfreertos_1_1task_ae0419e8bbb5de84db376472fed3b4538}\label{classfreertos_1_1task_ae0419e8bbb5de84db376472fed3b4538} 
+{\bfseries task} (\mbox{\hyperlink{classfreertos_1_1task}{task}} \&\&other)=delete
+\item 
+\Hypertarget{classfreertos_1_1task_aa945ed853fdba9f5b9d7e18f859871ac}\label{classfreertos_1_1task_aa945ed853fdba9f5b9d7e18f859871ac} 
+{\bfseries \texorpdfstring{$\sim$}{\string~}task} (void)
+\begin{DoxyCompactList}\small\item\em Destruct the task object and delete the task instance if it was created. \end{DoxyCompactList}\item 
+\Hypertarget{classfreertos_1_1task_a33a7c969b96af3f3d045f06c9fcd7320}\label{classfreertos_1_1task_a33a7c969b96af3f3d045f06c9fcd7320} 
+\mbox{\hyperlink{classfreertos_1_1task}{task}} \& {\bfseries operator=} (const \mbox{\hyperlink{classfreertos_1_1task}{task}} \&)=delete
+\item 
+\Hypertarget{classfreertos_1_1task_a99d94542eef85080218393a3fa6a779c}\label{classfreertos_1_1task_a99d94542eef85080218393a3fa6a779c} 
+\mbox{\hyperlink{classfreertos_1_1task}{task}} \& {\bfseries operator=} (\mbox{\hyperlink{classfreertos_1_1task}{task}} \&\&other)=delete
+\item 
+Task\+Handle\+\_\+t \mbox{\hyperlink{classfreertos_1_1task_a8dcf1f87c6ff7f6fd22028b816975cf0}{handle}} (void) const
+\begin{DoxyCompactList}\small\item\em Return the handle of the task. \end{DoxyCompactList}\item 
+\Hypertarget{classfreertos_1_1task_a507100d53fbe90a1ae00c05e443f2f81}\label{classfreertos_1_1task_a507100d53fbe90a1ae00c05e443f2f81} 
+void {\bfseries terminate} (void)
+\begin{DoxyCompactList}\small\item\em Terminates the task. \end{DoxyCompactList}\item 
+const char \texorpdfstring{$\ast$}{*} \mbox{\hyperlink{classfreertos_1_1task_a3e6cd37028ea09cbfbade59fd0cbe7b2}{name}} (void) const
+\begin{DoxyCompactList}\small\item\em Get the name of the task. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\subsubsection*{template$<$typename Task\+Allocator$>$\newline
+class freertos\+::task$<$ Task\+Allocator $>$}
+A wrapper for the Free\+RTOS task. 
+
+
+\begin{DoxyTemplParams}{Template Parameters}
+{\em Task\+Allocator} & type of the task allocator \\
+\hline
+\end{DoxyTemplParams}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\Hypertarget{classfreertos_1_1task_a9aedf7e84825ed565badb437a07d4e83}\label{classfreertos_1_1task_a9aedf7e84825ed565badb437a07d4e83} 
+\index{freertos::task$<$ TaskAllocator $>$@{freertos::task$<$ TaskAllocator $>$}!task@{task}}
+\index{task@{task}!freertos::task$<$ TaskAllocator $>$@{freertos::task$<$ TaskAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{task()}{task()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily template$<$typename Task\+Allocator $>$ \\
+\mbox{\hyperlink{classfreertos_1_1task}{freertos\+::task}}$<$ Task\+Allocator $>$\+::task (\begin{DoxyParamCaption}\item[{const char \texorpdfstring{$\ast$}{*}}]{name,  }\item[{UBase\+Type\+\_\+t}]{priority,  }\item[{task\+\_\+routine\+\_\+t \&\&}]{task\+\_\+routine,  }\item[{bool}]{start\+\_\+suspended = {\ttfamily true} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Construct a new task object. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em name} & name of the task \\
+\hline
+{\em priority} & priority of the task \\
+\hline
+{\em task\+\_\+routine} & task routine function \\
+\hline
+{\em start\+\_\+suspended} & start the task in the suspended state \\
+\hline
+\end{DoxyParams}
+\Hypertarget{classfreertos_1_1task_a0a9030ab811702f3cfe1012ef1e99ebc}\label{classfreertos_1_1task_a0a9030ab811702f3cfe1012ef1e99ebc} 
+\index{freertos::task$<$ TaskAllocator $>$@{freertos::task$<$ TaskAllocator $>$}!task@{task}}
+\index{task@{task}!freertos::task$<$ TaskAllocator $>$@{freertos::task$<$ TaskAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{task()}{task()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily template$<$typename Task\+Allocator $>$ \\
+\mbox{\hyperlink{classfreertos_1_1task}{freertos\+::task}}$<$ Task\+Allocator $>$\+::task (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{name,  }\item[{UBase\+Type\+\_\+t}]{priority,  }\item[{task\+\_\+routine\+\_\+t \&\&}]{task\+\_\+routine,  }\item[{bool}]{start\+\_\+suspended = {\ttfamily true} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Construct a new task object. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em name} & name of the task \\
+\hline
+{\em priority} & priority of the task \\
+\hline
+{\em task\+\_\+routine} & task routine function \\
+\hline
+{\em start\+\_\+suspended} & start the task in the suspended state \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classfreertos_1_1task_a8dcf1f87c6ff7f6fd22028b816975cf0}\label{classfreertos_1_1task_a8dcf1f87c6ff7f6fd22028b816975cf0} 
+\index{freertos::task$<$ TaskAllocator $>$@{freertos::task$<$ TaskAllocator $>$}!handle@{handle}}
+\index{handle@{handle}!freertos::task$<$ TaskAllocator $>$@{freertos::task$<$ TaskAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{handle()}{handle()}}
+{\footnotesize\ttfamily template$<$typename Task\+Allocator $>$ \\
+Task\+Handle\+\_\+t \mbox{\hyperlink{classfreertos_1_1task}{freertos\+::task}}$<$ Task\+Allocator $>$\+::handle (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Return the handle of the task. 
+
+\begin{DoxyReturn}{Returns}
+Task\+Handle\+\_\+t task handle 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1task_a3e6cd37028ea09cbfbade59fd0cbe7b2}\label{classfreertos_1_1task_a3e6cd37028ea09cbfbade59fd0cbe7b2} 
+\index{freertos::task$<$ TaskAllocator $>$@{freertos::task$<$ TaskAllocator $>$}!name@{name}}
+\index{name@{name}!freertos::task$<$ TaskAllocator $>$@{freertos::task$<$ TaskAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{name()}{name()}}
+{\footnotesize\ttfamily template$<$typename Task\+Allocator $>$ \\
+const char \texorpdfstring{$\ast$}{*} \mbox{\hyperlink{classfreertos_1_1task}{freertos\+::task}}$<$ Task\+Allocator $>$\+::name (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Get the name of the task. 
+
+\begin{DoxyReturn}{Returns}
+const char\texorpdfstring{$\ast$}{*} task name 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+include/freertos\+\_\+task.\+hpp\end{DoxyCompactItemize}

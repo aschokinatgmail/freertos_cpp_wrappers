@@ -1,0 +1,220 @@
+\doxysection{freertos\+::message\+\_\+buffer\texorpdfstring{$<$}{<} Message\+Buffer\+Size, Message\+Buffer\+Allocator \texorpdfstring{$>$}{>} Class Template Reference}
+\hypertarget{classfreertos_1_1message__buffer}{}\label{classfreertos_1_1message__buffer}\index{freertos::message\_buffer$<$ MessageBufferSize, MessageBufferAllocator $>$@{freertos::message\_buffer$<$ MessageBufferSize, MessageBufferAllocator $>$}}
+
+
+A wrapper for the Free\+RTOS message buffer.  
+
+
+
+
+{\ttfamily \#include $<$freertos\+\_\+message\+\_\+buffer.\+hpp$>$}
+
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{classfreertos_1_1message__buffer_a83b811597a637b1fa86b3d42dc92b001}\label{classfreertos_1_1message__buffer_a83b811597a637b1fa86b3d42dc92b001} 
+{\bfseries message\+\_\+buffer} ()
+\begin{DoxyCompactList}\small\item\em Construct a new message buffer object. \end{DoxyCompactList}\item 
+\Hypertarget{classfreertos_1_1message__buffer_ad3d7a18114acdad951509720d519252d}\label{classfreertos_1_1message__buffer_ad3d7a18114acdad951509720d519252d} 
+{\bfseries message\+\_\+buffer} (const \mbox{\hyperlink{classfreertos_1_1message__buffer}{message\+\_\+buffer}} \&)=delete
+\item 
+\Hypertarget{classfreertos_1_1message__buffer_af2d1910764787b046ce559b359baaf3d}\label{classfreertos_1_1message__buffer_af2d1910764787b046ce559b359baaf3d} 
+{\bfseries message\+\_\+buffer} (\mbox{\hyperlink{classfreertos_1_1message__buffer}{message\+\_\+buffer}} \&\&src)=delete
+\item 
+\Hypertarget{classfreertos_1_1message__buffer_a753bcad0484e4f15f4d3fe826d572065}\label{classfreertos_1_1message__buffer_a753bcad0484e4f15f4d3fe826d572065} 
+{\bfseries \texorpdfstring{$\sim$}{\string~}message\+\_\+buffer} (void)
+\begin{DoxyCompactList}\small\item\em Destruct the message buffer object and delete the message buffer kernel object instance if it was created. \end{DoxyCompactList}\item 
+\Hypertarget{classfreertos_1_1message__buffer_aa7ed06871a86407842970c8a6351f3d5}\label{classfreertos_1_1message__buffer_aa7ed06871a86407842970c8a6351f3d5} 
+\mbox{\hyperlink{classfreertos_1_1message__buffer}{message\+\_\+buffer}} \& {\bfseries operator=} (const \mbox{\hyperlink{classfreertos_1_1message__buffer}{message\+\_\+buffer}} \&)=delete
+\item 
+\Hypertarget{classfreertos_1_1message__buffer_a279fd9f2d79a06fd10a24d4f0cb1284c}\label{classfreertos_1_1message__buffer_a279fd9f2d79a06fd10a24d4f0cb1284c} 
+\mbox{\hyperlink{classfreertos_1_1message__buffer}{message\+\_\+buffer}} \& {\bfseries operator=} (\mbox{\hyperlink{classfreertos_1_1message__buffer}{message\+\_\+buffer}} \&\&src)=delete
+\item 
+size\+\_\+t \mbox{\hyperlink{classfreertos_1_1message__buffer_a530cca3bbcb0645b81ddb26450e57556}{send}} (const void \texorpdfstring{$\ast$}{*}pv\+Tx\+Data, size\+\_\+t x\+Data\+Length\+Bytes, Tick\+Type\+\_\+t x\+Ticks\+To\+Wait)
+\begin{DoxyCompactList}\small\item\em Method sends a discret message to the message buffer. \href{https://www.freertos.org/xMessageBufferSend.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Message\+Buffer\+Send.\+html}}. \end{DoxyCompactList}\item 
+{\footnotesize template$<$typename Rep , typename Period $>$ }\\size\+\_\+t \mbox{\hyperlink{classfreertos_1_1message__buffer_abde882826aa3acc53d81635871cecc4f}{send}} (const void \texorpdfstring{$\ast$}{*}pv\+Tx\+Data, size\+\_\+t x\+Data\+Length\+Bytes, const std\+::chrono\+::duration$<$ Rep, Period $>$ \&x\+Ticks\+To\+Wait)
+\begin{DoxyCompactList}\small\item\em Method sends a discret message to the message buffer. \href{https://www.freertos.org/xMessageBufferSend.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Message\+Buffer\+Send.\+html}}. \end{DoxyCompactList}\item 
+size\+\_\+t \mbox{\hyperlink{classfreertos_1_1message__buffer_ab37be0d840cb8b59bd43c9d4800d0f6f}{receive}} (void \texorpdfstring{$\ast$}{*}pv\+Rx\+Data, size\+\_\+t x\+Buffer\+Length\+Bytes, Tick\+Type\+\_\+t x\+Ticks\+To\+Wait)
+\begin{DoxyCompactList}\small\item\em Method receives a discret message from the message buffer. \href{https://www.freertos.org/xMessageBufferReceive.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Message\+Buffer\+Receive.\+html}}. \end{DoxyCompactList}\item 
+{\footnotesize template$<$typename Rep , typename Period $>$ }\\size\+\_\+t \mbox{\hyperlink{classfreertos_1_1message__buffer_aa187c1676a9eb6ee7ea528096184dd73}{receive}} (void \texorpdfstring{$\ast$}{*}pv\+Rx\+Data, size\+\_\+t x\+Buffer\+Length\+Bytes, const std\+::chrono\+::duration$<$ Rep, Period $>$ \&timeout)
+\begin{DoxyCompactList}\small\item\em Method receives a discret message from the message buffer. \href{https://www.freertos.org/xMessageBufferReceive.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Message\+Buffer\+Receive.\+html}}. \end{DoxyCompactList}\item 
+size\+\_\+t \mbox{\hyperlink{classfreertos_1_1message__buffer_a14adfabd008e28ac2a834327e1e27462}{available}} (void) const
+\begin{DoxyCompactList}\small\item\em Method returning the number of bytes available in the buffer. \href{https://www.freertos.org/xMessageBufferSpaceAvailable.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Message\+Buffer\+Space\+Available.\+html}}. \end{DoxyCompactList}\item 
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1message__buffer_a37815de9675ed135cb4837b09bf53ec3}{reset}} (void)
+\begin{DoxyCompactList}\small\item\em Method resetting the message buffer to the cleared state. \href{https://www.freertos.org/xMessageBufferReset.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Message\+Buffer\+Reset.\+html}}. \end{DoxyCompactList}\item 
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1message__buffer_a8de814101422041ae0048dcef2bdc9a4}{empty}} (void)
+\begin{DoxyCompactList}\small\item\em Method checking if the message buffer is empty. \href{https://www.freertos.org/xMessageBufferIsEmpty.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Message\+Buffer\+Is\+Empty.\+html}}. \end{DoxyCompactList}\item 
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1message__buffer_ab0dc8268ac5a4081c3541e89c749a846}{full}} (void)
+\begin{DoxyCompactList}\small\item\em Method checking if the message buffer is full. \href{https://www.freertos.org/xMessageBufferIsFull.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Message\+Buffer\+Is\+Full.\+html}}. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\subsubsection*{template$<$size\+\_\+t Message\+Buffer\+Size, typename Message\+Buffer\+Allocator$>$\newline
+class freertos\+::message\+\_\+buffer$<$ Message\+Buffer\+Size, Message\+Buffer\+Allocator $>$}
+A wrapper for the Free\+RTOS message buffer. 
+
+
+\begin{DoxyTemplParams}{Template Parameters}
+{\em Message\+Buffer\+Size} & size of the message buffer \\
+\hline
+{\em Message\+Buffer\+Allocator} & type of the message buffer allocator \\
+\hline
+\end{DoxyTemplParams}
+
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classfreertos_1_1message__buffer_a14adfabd008e28ac2a834327e1e27462}\label{classfreertos_1_1message__buffer_a14adfabd008e28ac2a834327e1e27462} 
+\index{freertos::message\_buffer$<$ MessageBufferSize, MessageBufferAllocator $>$@{freertos::message\_buffer$<$ MessageBufferSize, MessageBufferAllocator $>$}!available@{available}}
+\index{available@{available}!freertos::message\_buffer$<$ MessageBufferSize, MessageBufferAllocator $>$@{freertos::message\_buffer$<$ MessageBufferSize, MessageBufferAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{available()}{available()}}
+{\footnotesize\ttfamily template$<$size\+\_\+t Message\+Buffer\+Size, typename Message\+Buffer\+Allocator $>$ \\
+size\+\_\+t \mbox{\hyperlink{classfreertos_1_1message__buffer}{freertos\+::message\+\_\+buffer}}$<$ Message\+Buffer\+Size, Message\+Buffer\+Allocator $>$\+::available (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Method returning the number of bytes available in the buffer. \href{https://www.freertos.org/xMessageBufferSpaceAvailable.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Message\+Buffer\+Space\+Available.\+html}}. 
+
+\begin{DoxyReturn}{Returns}
+size\+\_\+t the number of bytes available in the buffer 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1message__buffer_a8de814101422041ae0048dcef2bdc9a4}\label{classfreertos_1_1message__buffer_a8de814101422041ae0048dcef2bdc9a4} 
+\index{freertos::message\_buffer$<$ MessageBufferSize, MessageBufferAllocator $>$@{freertos::message\_buffer$<$ MessageBufferSize, MessageBufferAllocator $>$}!empty@{empty}}
+\index{empty@{empty}!freertos::message\_buffer$<$ MessageBufferSize, MessageBufferAllocator $>$@{freertos::message\_buffer$<$ MessageBufferSize, MessageBufferAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{empty()}{empty()}}
+{\footnotesize\ttfamily template$<$size\+\_\+t Message\+Buffer\+Size, typename Message\+Buffer\+Allocator $>$ \\
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1message__buffer}{freertos\+::message\+\_\+buffer}}$<$ Message\+Buffer\+Size, Message\+Buffer\+Allocator $>$\+::empty (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Method checking if the message buffer is empty. \href{https://www.freertos.org/xMessageBufferIsEmpty.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Message\+Buffer\+Is\+Empty.\+html}}. 
+
+\begin{DoxyReturn}{Returns}
+Base\+Type\+\_\+t pd\+TRUE if the message buffer is empty, pd\+FALSE otherwise 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1message__buffer_ab0dc8268ac5a4081c3541e89c749a846}\label{classfreertos_1_1message__buffer_ab0dc8268ac5a4081c3541e89c749a846} 
+\index{freertos::message\_buffer$<$ MessageBufferSize, MessageBufferAllocator $>$@{freertos::message\_buffer$<$ MessageBufferSize, MessageBufferAllocator $>$}!full@{full}}
+\index{full@{full}!freertos::message\_buffer$<$ MessageBufferSize, MessageBufferAllocator $>$@{freertos::message\_buffer$<$ MessageBufferSize, MessageBufferAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{full()}{full()}}
+{\footnotesize\ttfamily template$<$size\+\_\+t Message\+Buffer\+Size, typename Message\+Buffer\+Allocator $>$ \\
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1message__buffer}{freertos\+::message\+\_\+buffer}}$<$ Message\+Buffer\+Size, Message\+Buffer\+Allocator $>$\+::full (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Method checking if the message buffer is full. \href{https://www.freertos.org/xMessageBufferIsFull.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Message\+Buffer\+Is\+Full.\+html}}. 
+
+\begin{DoxyReturn}{Returns}
+Base\+Type\+\_\+t pd\+TRUE if the message buffer is full, pd\+FALSE otherwise 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1message__buffer_aa187c1676a9eb6ee7ea528096184dd73}\label{classfreertos_1_1message__buffer_aa187c1676a9eb6ee7ea528096184dd73} 
+\index{freertos::message\_buffer$<$ MessageBufferSize, MessageBufferAllocator $>$@{freertos::message\_buffer$<$ MessageBufferSize, MessageBufferAllocator $>$}!receive@{receive}}
+\index{receive@{receive}!freertos::message\_buffer$<$ MessageBufferSize, MessageBufferAllocator $>$@{freertos::message\_buffer$<$ MessageBufferSize, MessageBufferAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{receive()}{receive()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily template$<$size\+\_\+t Message\+Buffer\+Size, typename Message\+Buffer\+Allocator $>$ \\
+template$<$typename Rep , typename Period $>$ \\
+size\+\_\+t \mbox{\hyperlink{classfreertos_1_1message__buffer}{freertos\+::message\+\_\+buffer}}$<$ Message\+Buffer\+Size, Message\+Buffer\+Allocator $>$\+::receive (\begin{DoxyParamCaption}\item[{void \texorpdfstring{$\ast$}{*}}]{pv\+Rx\+Data,  }\item[{size\+\_\+t}]{x\+Buffer\+Length\+Bytes,  }\item[{const std\+::chrono\+::duration$<$ Rep, Period $>$ \&}]{timeout }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Method receives a discret message from the message buffer. \href{https://www.freertos.org/xMessageBufferReceive.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Message\+Buffer\+Receive.\+html}}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em pv\+Rx\+Data} & pointer to the message data \\
+\hline
+{\em x\+Buffer\+Length\+Bytes} & length of the message data buffer \\
+\hline
+{\em timeout} & timeout to wait for the message buffer to become available \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+size\+\_\+t number of bytes received 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1message__buffer_ab37be0d840cb8b59bd43c9d4800d0f6f}\label{classfreertos_1_1message__buffer_ab37be0d840cb8b59bd43c9d4800d0f6f} 
+\index{freertos::message\_buffer$<$ MessageBufferSize, MessageBufferAllocator $>$@{freertos::message\_buffer$<$ MessageBufferSize, MessageBufferAllocator $>$}!receive@{receive}}
+\index{receive@{receive}!freertos::message\_buffer$<$ MessageBufferSize, MessageBufferAllocator $>$@{freertos::message\_buffer$<$ MessageBufferSize, MessageBufferAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{receive()}{receive()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily template$<$size\+\_\+t Message\+Buffer\+Size, typename Message\+Buffer\+Allocator $>$ \\
+size\+\_\+t \mbox{\hyperlink{classfreertos_1_1message__buffer}{freertos\+::message\+\_\+buffer}}$<$ Message\+Buffer\+Size, Message\+Buffer\+Allocator $>$\+::receive (\begin{DoxyParamCaption}\item[{void \texorpdfstring{$\ast$}{*}}]{pv\+Rx\+Data,  }\item[{size\+\_\+t}]{x\+Buffer\+Length\+Bytes,  }\item[{Tick\+Type\+\_\+t}]{x\+Ticks\+To\+Wait }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Method receives a discret message from the message buffer. \href{https://www.freertos.org/xMessageBufferReceive.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Message\+Buffer\+Receive.\+html}}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em pv\+Rx\+Data} & pointer to the message data \\
+\hline
+{\em x\+Buffer\+Length\+Bytes} & length of the message data buffer \\
+\hline
+{\em x\+Ticks\+To\+Wait} & timeout in ticks to wait for the message buffer to become available \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+size\+\_\+t number of bytes received 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1message__buffer_a37815de9675ed135cb4837b09bf53ec3}\label{classfreertos_1_1message__buffer_a37815de9675ed135cb4837b09bf53ec3} 
+\index{freertos::message\_buffer$<$ MessageBufferSize, MessageBufferAllocator $>$@{freertos::message\_buffer$<$ MessageBufferSize, MessageBufferAllocator $>$}!reset@{reset}}
+\index{reset@{reset}!freertos::message\_buffer$<$ MessageBufferSize, MessageBufferAllocator $>$@{freertos::message\_buffer$<$ MessageBufferSize, MessageBufferAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{reset()}{reset()}}
+{\footnotesize\ttfamily template$<$size\+\_\+t Message\+Buffer\+Size, typename Message\+Buffer\+Allocator $>$ \\
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1message__buffer}{freertos\+::message\+\_\+buffer}}$<$ Message\+Buffer\+Size, Message\+Buffer\+Allocator $>$\+::reset (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Method resetting the message buffer to the cleared state. \href{https://www.freertos.org/xMessageBufferReset.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Message\+Buffer\+Reset.\+html}}. 
+
+\begin{DoxyReturn}{Returns}
+Base\+Type\+\_\+t pd\+Pass if the message buffer was reset, pd\+FAIL otherwise 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1message__buffer_abde882826aa3acc53d81635871cecc4f}\label{classfreertos_1_1message__buffer_abde882826aa3acc53d81635871cecc4f} 
+\index{freertos::message\_buffer$<$ MessageBufferSize, MessageBufferAllocator $>$@{freertos::message\_buffer$<$ MessageBufferSize, MessageBufferAllocator $>$}!send@{send}}
+\index{send@{send}!freertos::message\_buffer$<$ MessageBufferSize, MessageBufferAllocator $>$@{freertos::message\_buffer$<$ MessageBufferSize, MessageBufferAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{send()}{send()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily template$<$size\+\_\+t Message\+Buffer\+Size, typename Message\+Buffer\+Allocator $>$ \\
+template$<$typename Rep , typename Period $>$ \\
+size\+\_\+t \mbox{\hyperlink{classfreertos_1_1message__buffer}{freertos\+::message\+\_\+buffer}}$<$ Message\+Buffer\+Size, Message\+Buffer\+Allocator $>$\+::send (\begin{DoxyParamCaption}\item[{const void \texorpdfstring{$\ast$}{*}}]{pv\+Tx\+Data,  }\item[{size\+\_\+t}]{x\+Data\+Length\+Bytes,  }\item[{const std\+::chrono\+::duration$<$ Rep, Period $>$ \&}]{x\+Ticks\+To\+Wait }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Method sends a discret message to the message buffer. \href{https://www.freertos.org/xMessageBufferSend.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Message\+Buffer\+Send.\+html}}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em pv\+Tx\+Data} & pointer to the message data \\
+\hline
+{\em x\+Data\+Length\+Bytes} & length of the message data \\
+\hline
+{\em x\+Ticks\+To\+Wait} & timeout in ticks to wait for the message buffer to \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+size\+\_\+t number of bytes sent 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1message__buffer_a530cca3bbcb0645b81ddb26450e57556}\label{classfreertos_1_1message__buffer_a530cca3bbcb0645b81ddb26450e57556} 
+\index{freertos::message\_buffer$<$ MessageBufferSize, MessageBufferAllocator $>$@{freertos::message\_buffer$<$ MessageBufferSize, MessageBufferAllocator $>$}!send@{send}}
+\index{send@{send}!freertos::message\_buffer$<$ MessageBufferSize, MessageBufferAllocator $>$@{freertos::message\_buffer$<$ MessageBufferSize, MessageBufferAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{send()}{send()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily template$<$size\+\_\+t Message\+Buffer\+Size, typename Message\+Buffer\+Allocator $>$ \\
+size\+\_\+t \mbox{\hyperlink{classfreertos_1_1message__buffer}{freertos\+::message\+\_\+buffer}}$<$ Message\+Buffer\+Size, Message\+Buffer\+Allocator $>$\+::send (\begin{DoxyParamCaption}\item[{const void \texorpdfstring{$\ast$}{*}}]{pv\+Tx\+Data,  }\item[{size\+\_\+t}]{x\+Data\+Length\+Bytes,  }\item[{Tick\+Type\+\_\+t}]{x\+Ticks\+To\+Wait }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Method sends a discret message to the message buffer. \href{https://www.freertos.org/xMessageBufferSend.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Message\+Buffer\+Send.\+html}}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em pv\+Tx\+Data} & pointer to the message data \\
+\hline
+{\em x\+Data\+Length\+Bytes} & length of the message data \\
+\hline
+{\em x\+Ticks\+To\+Wait} & timeout in ticks to wait for the message buffer to become available \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+size\+\_\+t number of bytes sent 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+include/freertos\+\_\+message\+\_\+buffer.\+hpp\end{DoxyCompactItemize}
