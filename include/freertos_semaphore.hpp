@@ -285,6 +285,8 @@ template <typename Mutex> class lock_guard {
 public:
   explicit lock_guard(Mutex &mutex) : m_mutex{mutex} { m_mutex.lock(); }
   ~lock_guard(void) { m_mutex.unlock(); }
+
+  bool locked(void) const { return m_mutex.locked(); }
 };
 
 template <typename Mutex> class try_lock_guard {
@@ -311,6 +313,7 @@ public:
   BaseType_t high_priority_task_woken(void) const {
     return m_high_priority_task_woken;
   }
+  bool locked(void) const { return m_mutex.locked(); }
 };
 
 template <typename Mutex> class timeout_lock_guard {
@@ -331,5 +334,25 @@ public:
 
   bool locked(void) const { return m_mutex.locked(); }
 };
+
+namespace sa {
+using binary_semaphore =
+    freertos::binary_semaphore<freertos::static_semaphore_allocator>;
+using counting_semaphore =
+    freertos::counting_semaphore<freertos::static_semaphore_allocator>;
+using mutex = freertos::mutex<freertos::static_semaphore_allocator>;
+using recursive_mutex =
+    freertos::recursive_mutex<freertos::static_semaphore_allocator>;
+} // namespace sa
+
+namespace da {
+using binary_semaphore =
+    freertos::binary_semaphore<freertos::dynamic_semaphore_allocator>;
+using counting_semaphore =
+    freertos::counting_semaphore<freertos::dynamic_semaphore_allocator>;
+using mutex = freertos::mutex<freertos::dynamic_semaphore_allocator>;
+using recursive_mutex =
+    freertos::recursive_mutex<freertos::dynamic_semaphore_allocator>;
+} // namespace da
 
 } // namespace freertos
