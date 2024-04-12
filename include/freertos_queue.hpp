@@ -11,6 +11,10 @@
 
 #pragma once
 
+#ifndef __cplusplus
+#error "This header is for C++ only"
+#endif
+
 #include <FreeRTOS.h>
 #include <chrono>
 #include <optional>
