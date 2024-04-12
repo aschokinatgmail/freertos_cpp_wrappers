@@ -25,6 +25,13 @@ class static_semaphore_allocator {
 
 public:
   static_semaphore_allocator() = default;
+  static_semaphore_allocator(const static_semaphore_allocator &) = delete;
+  static_semaphore_allocator(static_semaphore_allocator &&) = delete;
+
+  static_semaphore_allocator &
+  operator=(const static_semaphore_allocator &) = delete;
+  static_semaphore_allocator &operator=(static_semaphore_allocator &&) = delete;
+
   SemaphoreHandle_t create_binary() {
     return xSemaphoreCreateBinaryStatic(&m_semaphore_placeholder);
   }
@@ -64,15 +71,15 @@ public:
     configASSERT(m_semaphore);
   }
   binary_semaphore(const binary_semaphore &) = delete;
-  binary_semaphore(binary_semaphore &&src)
-      : m_allocator{src.m_allocator}, m_semaphore{src.m_semaphore} {
-    src.m_semaphore = nullptr;
-  }
+  binary_semaphore(binary_semaphore &&src) = delete;
   ~binary_semaphore(void) {
     if (m_semaphore) {
       vSemaphoreDelete(m_semaphore);
     }
   }
+
+  binary_semaphore &operator=(const binary_semaphore &) = delete;
+  binary_semaphore &operator=(binary_semaphore &&src) = delete;
 
   void give() { xSemaphoreGive(m_semaphore); }
   void give_isr(BaseType_t &high_priority_task_woken) {
@@ -102,10 +109,7 @@ public:
     configASSERT(m_semaphore);
   }
   counting_semaphore(const counting_semaphore &) = delete;
-  counting_semaphore(counting_semaphore &&src)
-      : m_allocator{src.m_allocator}, m_semaphore{src.m_semaphore} {
-    src.m_semaphore = nullptr;
-  }
+  counting_semaphore(counting_semaphore &&src) = delete;
   ~counting_semaphore(void) {
     if (m_semaphore) {
       vSemaphoreDelete(m_semaphore);
@@ -113,17 +117,7 @@ public:
   }
 
   counting_semaphore &operator=(const counting_semaphore &) = delete;
-  counting_semaphore &operator=(counting_semaphore &&src) {
-    if (this != &src) {
-      if (m_semaphore) {
-        vSemaphoreDelete(m_semaphore);
-      }
-      m_allocator = src.m_allocator;
-      m_semaphore = src.m_semaphore;
-      src.m_semaphore = nullptr;
-    }
-    return *this;
-  }
+  counting_semaphore &operator=(counting_semaphore &&src) = delete;
 
   void give() { xSemaphoreGive(m_semaphore); }
   void give_isr(BaseType_t &high_priority_task_woken) {
@@ -176,16 +170,15 @@ public:
     configASSERT(m_semaphore);
   }
   mutex(const mutex &) = delete;
-  mutex(mutex &&src)
-      : m_allocator{src.m_allocator}, m_semaphore{src.m_semaphore},
-        m_locked{src.m_locked} {
-    src.m_semaphore = nullptr;
-  }
+  mutex(mutex &&src) = delete;
   ~mutex(void) {
     if (m_semaphore) {
       vSemaphoreDelete(m_semaphore);
     }
   }
+
+  mutex &operator=(const mutex &) = delete;
+  mutex &operator=(mutex &&src) = delete;
 
   void unlock() {
     xSemaphoreGive(m_semaphore);
@@ -235,16 +228,15 @@ public:
     configASSERT(m_semaphore);
   }
   recursive_mutex(const recursive_mutex &) = delete;
-  recursive_mutex(recursive_mutex &&src)
-      : m_allocator{src.m_allocator}, m_semaphore{src.m_semaphore},
-        m_locked{src.m_locked} {
-    src.m_semaphore = nullptr;
-  }
+  recursive_mutex(recursive_mutex &&src) = delete;
   ~recursive_mutex(void) {
     if (m_semaphore) {
       vSemaphoreDelete(m_semaphore);
     }
   }
+
+  recursive_mutex &operator=(const recursive_mutex &) = delete;
+  recursive_mutex &operator=(recursive_mutex &&src) = delete;
 
   void unlock() {
     xSemaphoreGive(m_semaphore);

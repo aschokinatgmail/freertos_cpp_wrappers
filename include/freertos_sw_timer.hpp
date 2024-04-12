@@ -15,7 +15,6 @@
 #include <chrono>
 #include <cstdbool>
 #include <functional>
-#include <optional>
 #include <task.h>
 #include <time.h>
 #include <timers.h>
@@ -60,29 +59,23 @@ public:
 #endif
 
 using timer_callback_t = function<void()>;
-using timer_callback_opt_t = optional<timer_callback_t>;
 
 template <typename SwTimerAllocator> class timer {
-  SwTimerAllocator &&m_allocator;
+  SwTimerAllocator m_allocator;
   TimerHandle_t m_timer;
-  timer_callback_opt_t m_callback;
+  timer_callback_t m_callback;
   uint8_t m_started : 1;
 
   static void callback_wrapper(TimerHandle_t t) {
     auto *const self = static_cast<timer *>(pvTimerGetTimerID(t));
     configASSERT(self);
-    auto &callback = self->m_callback;
-    if (callback) {
-      (*callback)();
-    }
+    self->m_callback();
   }
 
 public:
   explicit timer(const char *name, const TickType_t period_ticks,
-                 UBaseType_t auto_reload, timer_callback_t &&callback,
-                 SwTimerAllocator &&allocator)
-      : m_allocator{std::move(allocator)}, m_timer{nullptr},
-        m_callback{callback}, m_started{false} {
+                 UBaseType_t auto_reload, timer_callback_t &&callback)
+      : m_timer{nullptr}, m_callback{callback}, m_started{false} {
     m_timer = m_allocator.create(name, period_ticks, auto_reload, this,
                                  callback_wrapper);
     configASSERT(m_timer);
@@ -90,25 +83,14 @@ public:
   template <typename Rep, typename Period>
   explicit timer(const char *name,
                  const std::chrono::duration<Rep, Period> &period,
-                 UBaseType_t auto_reload, timer_callback_t &&callback,
-                 SwTimerAllocator &&allocator)
+                 UBaseType_t auto_reload, timer_callback_t &&callback)
       : timer{name,
               static_cast<TickType_t>(
                   std::chrono::duration_cast<std::chrono::milliseconds>(period)
                       .count()),
-              auto_reload, std::move(callback), std::move(allocator)} {}
+              auto_reload, std::move(callback)} {}
   timer(const timer &) = delete;
-#if 0
-  timer(timer &&src)
-      : m_allocator{std::move(src.m_allocator)},
-        m_timer{std::move(src.m_timer)}, m_callback{std::move(src.m_callback)},
-        m_started{src.m_started} {
-    src.m_timer = nullptr;
-    vTimerSetTimerID(m_timer, this);
-  }
-#else
   timer(timer &&src) = delete;
-#endif
   ~timer(void) {
     if (m_timer) {
       xTimerDelete(m_timer, portMAX_DELAY);
@@ -116,33 +98,7 @@ public:
   }
 
   timer &operator=(const timer &) = delete;
-#if 0
-  timer &operator=(timer &&src) {
-    if (this != &src) {
-      if (m_started) {
-        stop();
-      }
-      if (m_timer) {
-        xTimerDelete(m_timer, portMAX_DELAY);
-      }
-      auto started = src.m_started;
-      if (started) {
-        src.stop();
-      }
-      m_allocator = std::move(src.m_allocator);
-      m_timer = std::move(src.m_timer);
-      m_callback = std::move(src.m_callback);
-      src.m_timer = nullptr;
-      vTimerSetTimerID(m_timer, this);
-      if (started) {
-        start();
-      }
-    }
-    return *this;
-  }
-#else
   timer &operator=(timer &&src) = delete;
-#endif
 
   BaseType_t start(const TickType_t ticks_to_wait = portMAX_DELAY) {
     auto rc = xTimerStart(m_timer, ticks_to_wait);
