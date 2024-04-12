@@ -43,6 +43,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 namespace freertos {
 
 #if configSUPPORT_STATIC_ALLOCATION
+/**
+ * @brief An allocator for the event group that uses a static memory allocation.
+ *
+ */
 class static_event_group_allocator {
   StaticEventGroup_t m_event_group_placeholder;
 
@@ -61,22 +65,39 @@ public:
 };
 #endif
 #if configSUPPORT_DYNAMIC_ALLOCATION
+/**
+ * @brief An allocator for the event group that uses a dynamic memory
+ * allocation.
+ *
+ */
 class dynamic_event_group_allocator {
 public:
   EventGroupHandle_t create() { return xEventGroupCreate(); }
 };
 #endif
 
+/**
+ * @brief A wrapper for the FreeRTOS event group.
+ *
+ * @tparam EventGroupAllocator type of the event group allocator
+ */
 template <typename EventGroupAllocator> class event_group {
   EventGroupAllocator m_allocator;
   EventGroupHandle_t m_event_group;
 
 public:
+  /**
+   * @brief Construct a new event group object
+   *
+   */
   event_group(void) : m_event_group(m_allocator.create()) {}
   event_group(const event_group &) = delete;
-  event_group(event_group &&other) : m_event_group(other.m_event_group) {
-    other.m_event_group = nullptr;
-  }
+  event_group(event_group &&other) = delete;
+  /**
+   * @brief Destruct the event group object and delete the event group instance
+   * if it was created.
+   *
+   */
   ~event_group(void) {
     if (m_event_group) {
       vEventGroupDelete(m_event_group);
@@ -84,22 +105,33 @@ public:
   }
 
   event_group &operator=(const event_group &) = delete;
-  event_group &operator=(event_group &&other) {
-    if (this != &other) {
-      if (m_event_group) {
-        vEventGroupDelete(m_event_group);
-      }
-      m_event_group = other.m_event_group;
-      other.m_event_group = nullptr;
-    }
-    return *this;
-  }
+  event_group &operator=(event_group &&other) = delete;
 
+  /**
+   * @brief Method to get the handle of the event group.
+   * @ref https://www.freertos.org/xEventGroupGetHandle.html
+   *
+   * @return EventGroupHandle_t event group handle
+   */
   EventGroupHandle_t handle(void) const { return m_event_group; }
 
+  /**
+   * @brief Method to set bits in the event group.
+   * @ref https://www.freertos.org/xEventGroupSetBits.html
+   *
+   * @param bits_to_set bits to set
+   * @return EventBits_t bits set
+   */
   EventBits_t set_bits(const EventBits_t bits_to_set) {
     return xEventGroupSetBits(m_event_group, bits_to_set);
   }
+  /**
+   * @brief Method to set bits in the event group from an ISR.
+   * @ref https://www.freertos.org/xEventGroupSetBitsFromISR.html
+   *
+   * @param bits_to_set bits to set
+   * @return EventBits_t bits set
+   */
   EventBits_t set_bits_isr(const EventBits_t bits_to_set) {
     BaseType_t higher_priority_task_woken = pdFALSE;
     const EventBits_t bits_set = xEventGroupSetBitsFromISR(
@@ -107,9 +139,26 @@ public:
     portYIELD_FROM_ISR(higher_priority_task_woken);
     return bits_set;
   }
+  /**
+   * @brief Method to clear bits in the event group.
+   * @ref https://www.freertos.org/xEventGroupClearBits.html
+   *
+   * @param bits_to_clear bits to clear
+   * @return EventBits_t bits cleared
+   */
   EventBits_t clear_bits(const EventBits_t bits_to_clear) {
     return xEventGroupClearBits(m_event_group, bits_to_clear);
   }
+  /**
+   * @brief Method waiting for the bits or group of bits to be set.
+   * @ref https://www.freertos.org/xEventGroupWaitBits.html
+   *
+   * @param bits_to_wait_for bits to wait for
+   * @param clear_on_exit clear bits on exit
+   * @param wait_for_all_bits wait for all bits
+   * @param ticks_to_wait timeout in ticks to wait for the bits
+   * @return EventBits_t value of the event group after the call returns
+   */
   EventBits_t wait_bits(const EventBits_t bits_to_wait_for,
                         const BaseType_t clear_on_exit,
                         const BaseType_t wait_for_all_bits,
@@ -117,6 +166,17 @@ public:
     return xEventGroupWaitBits(m_event_group, bits_to_wait_for, clear_on_exit,
                                wait_for_all_bits, ticks_to_wait);
   }
+  /**
+   * @brief Method waiting for the bits or group of bits to be set compliant to
+   * the C++ std::chrono library.
+   * @ref https://www.freertos.org/xEventGroupWaitBits.html
+   *
+   * @param bits_to_wait_for bits to wait for
+   * @param clear_on_exit clear bits on exit
+   * @param wait_for_all_bits wait for all bits
+   * @param timeout timeout to wait for the bits
+   * @return EventBits_t value of the event group after the call returns
+   */
   template <typename Rep, typename Period>
   EventBits_t wait_bits(const EventBits_t bits_to_wait_for,
                         const BaseType_t clear_on_exit,
@@ -128,10 +188,31 @@ public:
             std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
                 .count()));
   }
+  /**
+   * @brief Method to get the bits of the event group.
+   * @ref https://www.freertos.org/xEventGroupGetBits.html
+   *
+   * @return EventBits_t Current value of the event group bits
+   */
   EventBits_t get_bits(void) const { return xEventGroupGetBits(m_event_group); }
+  /**
+   * @brief Method to get the bits of the event group from an ISR.
+   * @ref https://www.freertos.org/xEventGroupGetBitsFromISR.html
+   *
+   * @return EventBits_t Current value of the event group bits
+   */
   EventBits_t get_bits_isr(void) const {
     return xEventGroupGetBitsFromISR(m_event_group);
   }
+  /**
+   * @brief Method to synchronize the event group.
+   * @ref https://www.freertos.org/xEventGroupSync.html
+   *
+   * @param bits_to_set bits to set
+   * @param bits_to_wait_for bits to wait for
+   * @param ticks_to_wait timeout in ticks to wait for the bits
+   * @return EventBits_t value of the event group after the call returns
+   */
   EventBits_t sync(const EventBits_t bits_to_set,
                    const EventBits_t bits_to_wait_for,
                    const TickType_t ticks_to_wait) {
@@ -151,13 +232,29 @@ public:
 };
 
 #if configSUPPORT_STATIC_ALLOCATION
+/**
+ * @brief Namespace for aliases of RTOS kernel objects that use a static memory
+ *
+ */
 namespace sa {
+/**
+ * @brief Alias for the event group that uses a static memory allocation.
+ *
+ */
 using event_group =
     freertos::event_group<freertos::static_event_group_allocator>;
 } // namespace sa
 #endif
 #if configSUPPORT_DYNAMIC_ALLOCATION
+/**
+ * @brief Namespace for aliases of RTOS kernel objects that use a dynamic memory
+ *
+ */
 namespace da {
+/**
+ * @brief Alias for the event group that uses a dynamic memory allocation.
+ *
+ */
 using event_group =
     freertos::event_group<freertos::dynamic_event_group_allocator>;
 } // namespace da

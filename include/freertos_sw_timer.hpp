@@ -51,6 +51,11 @@ namespace freertos {
 using std::function;
 
 #if configSUPPORT_STATIC_ALLOCATION
+/**
+ * @brief An allocator for the software timer that uses a static memory
+ * allocation.
+ *
+ */
 class static_sw_timer_allocator {
   StaticTimer_t m_timer_placeholder;
 
@@ -72,6 +77,11 @@ public:
 };
 #endif
 #if configSUPPORT_DYNAMIC_ALLOCATION
+/**
+ * @brief An allocator for the software timer that uses a dynamic memory
+ * allocation.
+ *
+ */
 class dynamic_sw_timer_allocator {
 public:
   TimerHandle_t create(const char *name, const TickType_t period_ticks,
@@ -82,8 +92,17 @@ public:
 };
 #endif
 
+/**
+ * @brief Timer callback routine type definition based on std::function.
+ *
+ */
 using timer_callback_t = function<void()>;
 
+/**
+ * @brief A wrapper for the FreeRTOS software timer.
+ *
+ * @tparam SwTimerAllocator type of the software timer allocator
+ */
 template <typename SwTimerAllocator> class timer {
   SwTimerAllocator m_allocator;
   TimerHandle_t m_timer;
@@ -97,6 +116,14 @@ template <typename SwTimerAllocator> class timer {
   }
 
 public:
+  /**
+   * @brief Construct a new timer object
+   *
+   * @param name name of the timer
+   * @param period_ticks period of the timer in ticks
+   * @param auto_reload auto-reload flag
+   * @param callback callback routine
+   */
   explicit timer(const char *name, const TickType_t period_ticks,
                  UBaseType_t auto_reload, timer_callback_t &&callback)
       : m_timer{nullptr}, m_callback{callback}, m_started{false} {
@@ -104,6 +131,16 @@ public:
                                  callback_wrapper);
     configASSERT(m_timer);
   }
+  /**
+   * @brief Construct a new timer object
+   *
+   * @tparam Rep duration representation type
+   * @tparam Period duration period type
+   * @param name name of the timer
+   * @param period period of the timer
+   * @param auto_reload auto-reload flag
+   * @param callback callback routine
+   */
   template <typename Rep, typename Period>
   explicit timer(const char *name,
                  const std::chrono::duration<Rep, Period> &period,
@@ -115,6 +152,11 @@ public:
               auto_reload, std::move(callback)} {}
   timer(const timer &) = delete;
   timer(timer &&src) = delete;
+  /**
+   * @brief Destruct the timer object and delete the software timer kernel
+   * object instance if it was created.
+   *
+   */
   ~timer(void) {
     if (m_timer) {
       xTimerDelete(m_timer, portMAX_DELAY);
@@ -124,6 +166,13 @@ public:
   timer &operator=(const timer &) = delete;
   timer &operator=(timer &&src) = delete;
 
+  /**
+   * @brief Method to start the timer.
+   * @ref https://www.freertos.org/xTimerStart.html
+   *
+   * @param ticks_to_wait timeout in ticks to wait for the timer to start
+   * @return BaseType_t pdPASS if the timer was started successfully else pdFAIL
+   */
   BaseType_t start(const TickType_t ticks_to_wait = portMAX_DELAY) {
     auto rc = xTimerStart(m_timer, ticks_to_wait);
     if (rc) {
@@ -131,11 +180,28 @@ public:
     }
     return rc;
   }
+  /**
+   * @brief Method to start the timer.
+   * @ref https://www.freertos.org/xTimerStart.html
+   *
+   * @tparam Rep duration representation type
+   * @tparam Period duration period type
+   * @param timeout timeout to wait for the timer to start
+   * @return BaseType_t pdPASS if the timer was started successfully else pdFAIL
+   */
   template <typename Rep, typename Period>
   BaseType_t start(const std::chrono::duration<Rep, Period> &timeout) {
     return start(
         std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count());
   }
+  /**
+   * @brief Method to start the timer from an ISR.
+   * @ref https://www.freertos.org/xTimerStartFromISR.html
+   *
+   * @param high_priority_task_woken flag to indicate if a high priority task
+   * was woken
+   * @return BaseType_t pdPASS if the timer was started successfully else pdFAIL
+   */
   BaseType_t start_isr(BaseType_t &high_priority_task_woken) {
     auto rc = xTimerStartFromISR(m_timer, &high_priority_task_woken);
     if (rc) {
@@ -143,6 +209,13 @@ public:
     }
     return rc;
   }
+  /**
+   * @brief Method to stop the timer.
+   * @ref https://www.freertos.org/xTimerStop.html
+   *
+   * @param ticks_to_wait timeout in ticks to wait for the timer to stop
+   * @return BaseType_t pdPASS if the timer was stopped successfully else pdFAIL
+   */
   BaseType_t stop(const TickType_t ticks_to_wait = portMAX_DELAY) {
     auto rc = xTimerStop(m_timer, ticks_to_wait);
     if (rc) {
@@ -150,11 +223,28 @@ public:
     }
     return rc;
   }
+  /**
+   * @brief Method to stop the timer.
+   * @ref https://www.freertos.org/xTimerStop.html
+   *
+   * @tparam Rep duration representation type
+   * @tparam Period duration period type
+   * @param timeout timeout to wait for the timer to stop
+   * @return BaseType_t pdPASS if the timer was stopped successfully else pdFAIL
+   */
   template <typename Rep, typename Period>
   BaseType_t stop(const std::chrono::duration<Rep, Period> &timeout) {
     return stop(
         std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count());
   }
+  /**
+   * @brief Method to stop the timer from an ISR.
+   * @ref https://www.freertos.org/xTimerStopFromISR.html
+   *
+   * @param high_priority_task_woken flag to indicate if a high priority task
+   * was woken
+   * @return BaseType_t pdPASS if the timer was stopped successfully else pdFAIL
+   */
   BaseType_t stop_isr(BaseType_t &high_priority_task_woken) {
     auto rc = xTimerStopFromISR(m_timer, &high_priority_task_woken);
     if (rc) {
@@ -162,21 +252,66 @@ public:
     }
     return rc;
   }
+  /**
+   * @brief Method to reset the timer.
+   * @ref https://www.freertos.org/xTimerReset.html
+   *
+   * @param ticks_to_wait timeout in ticks to wait for the timer to reset
+   * @return BaseType_t pdPASS if the timer was reset successfully else pdFAIL
+   */
   BaseType_t reset(const TickType_t ticks_to_wait = portMAX_DELAY) {
     return xTimerReset(m_timer, ticks_to_wait);
   }
+  /**
+   * @brief Method to reset the timer.
+   * @ref https://www.freertos.org/xTimerReset.html
+   *
+   * @tparam Rep duration representation type
+   * @tparam Period duration period type
+   * @param timeout timeout to wait for the timer to reset
+   * @return BaseType_t pdPASS if the timer was reset successfully else pdFAIL
+   */
   template <typename Rep, typename Period>
   BaseType_t reset(const std::chrono::duration<Rep, Period> &timeout) {
     return reset(
         std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count());
   }
+  /**
+   * @brief Method to reset the timer from an ISR.
+   * @ref https://www.freertos.org/xTimerResetFromISR.html
+   *
+   * @param high_priority_task_woken flag to indicate if a high priority task
+   * was woken
+   * @return BaseType_t pdPASS if the timer was reset successfully else pdFAIL
+   */
   BaseType_t reset_isr(BaseType_t &high_priority_task_woken) {
     return xTimerResetFromISR(m_timer, &high_priority_task_woken);
   }
+  /**
+   * @brief Method to change the period of the timer.
+   * @ref https://www.freertos.org/xTimerChangePeriod.html
+   *
+   * @param new_period_ticks new period of the timer in ticks
+   * @param ticks_to_wait timeout in ticks to wait for the timer to change the
+   * period
+   * @return BaseType_t pdPASS if the timer period was changed successfully else
+   * pdFAIL
+   */
   BaseType_t period(const TickType_t new_period_ticks,
                     const TickType_t ticks_to_wait = portMAX_DELAY) {
     return xTimerChangePeriod(m_timer, new_period_ticks, ticks_to_wait);
   }
+  /**
+   * @brief Method to change the period of the timer.
+   * @ref https://www.freertos.org/xTimerChangePeriod.html
+   *
+   * @tparam Rep duration representation type
+   * @tparam Period duration period type
+   * @param new_period new period of the timer
+   * @param timeout timeout to wait for the timer to change the period
+   * @return BaseType_t pdPASS if the timer period was changed successfully else
+   * pdFAIL
+   */
   template <typename Rep, typename Period>
   BaseType_t period(const std::chrono::duration<Rep, Period> &new_period,
                     const std::chrono::duration<Rep, Period> &timeout) {
@@ -185,37 +320,111 @@ public:
             .count(),
         std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count());
   }
+  /**
+   * @brief Method to change the period of the timer from an ISR.
+   * @ref https://www.freertos.org/xTimerChangePeriodFromISR.html
+   *
+   * @param new_period_ticks new period of the timer in ticks
+   * @param high_priority_task_woken flag to indicate if a high priority task
+   * was woken
+   * @return BaseType_t pdPASS if the timer period was changed successfully else
+   * pdFAIL
+   */
   BaseType_t period_isr(const TickType_t new_period_ticks,
                         BaseType_t &high_priority_task_woken) {
     return xTimerChangePeriodFromISR(m_timer, new_period_ticks,
                                      &high_priority_task_woken);
   }
+  /**
+   * @brief Method to change the period of the timer from an ISR.
+   * @ref https://www.freertos.org/xTimerChangePeriodFromISR.html
+   *
+   * @tparam Rep duration representation type
+   * @tparam Period duration period type
+   * @param new_period new period of the timer
+   * @param high_priority_task_woken flag to indicate if a high priority task
+   * was woken
+   * @return BaseType_t pdPASS if the timer period was changed successfully else
+   * pdFAIL
+   */
   BaseType_t period_ticks(void) const { return xTimerGetPeriod(m_timer); }
   std::chrono::milliseconds period(void) const {
     return std::chrono::milliseconds{period_ticks()};
   }
+  /**
+   * @brief Method to change the timer reload mode flag.
+   * @ref https://www.freertos.org/FreeeRTOS-timers-vTimerSetReloadMode.html
+   *
+   * @param auto_reload pdTRUE to enable auto-reload mode, pdFALSE to disable
+   * @return timer& reference to the timer object
+   */
   timer &reload_mode(UBaseType_t auto_reload) {
     vTimerSetReloadMode(m_timer, auto_reload);
     return *this;
   }
+  /**
+   * @brief Method to get the timer reload mode flag.
+   * @ref https://www.freertos.org/xTimerGetReloadMode.html
+   *
+   * @return UBaseType_t pdTRUE if auto-reload mode is enabled, pdFALSE
+   * otherwise
+   */
   UBaseType_t reload_mode(void) const { return uxTimerGetReloadMode(m_timer); }
+  /**
+   * @brief Method to get number of remaining ticks before the timer expires.
+   *
+   * @return BaseType_t number of remaining ticks before the timer expires.
+   */
   BaseType_t remaining_ticks(void) const {
     return xTimerGetExpiryTime(m_timer) - xTaskGetTickCount();
   }
+  /**
+   * @brief Method to get the remaining time before the timer expires.
+   *
+   * @return std::chrono::milliseconds remaining time before the timer expires
+   * in milliseconds.
+   */
   std::chrono::milliseconds remaining_time(void) const {
     return std::chrono::milliseconds{remaining_ticks()};
   }
+  /**
+   * @brief Method to check if the timer is running.
+   * @ref https://www.freertos.org/xTimerIsTimerActive.html
+   *
+   * @return BaseType_t pdTRUE if the timer is running, pdFALSE otherwise
+   */
   BaseType_t running(void) const { return xTimerIsTimerActive(m_timer); }
+  /**
+   * @brief Method to get the name of the timer.
+   *
+   * @return const char* name of the timer
+   */
   const char *name(void) const { return pcTimerGetName(m_timer); }
 };
 
 #if configSUPPORT_STATIC_ALLOCATION
+/**
+ * @brief Namespace for the kernel objects static memory allocation.
+ *
+ */
 namespace sa {
+/**
+ * @brief Alias for the software timer that uses a static memory allocation.
+ *
+ */
 using timer = freertos::timer<freertos::static_sw_timer_allocator>;
 } // namespace sa
 #endif
 #if configSUPPORT_DYNAMIC_ALLOCATION
+/**
+ * @brief Namespace for the kernel objects dynamic memory allocation.
+ *
+ */
 namespace da {
+/**
+ * @brief Alias for the software timer that uses a dynamic memory allocation.
+ *
+ */
 using timer = freertos::timer<freertos::dynamic_sw_timer_allocator>;
 } // namespace da
 #endif
