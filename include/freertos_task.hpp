@@ -105,7 +105,9 @@ template <typename TaskAllocator> class task {
   TaskAllocator m_allocator;
   TaskHandle_t m_hTask;
   task_routine_t m_taskRoutine;
+#if INCLUDE_vTaskSuspend
   uint8_t m_start_suspended : 1;
+#endif
 
   static void task_exec(void *context) {
     auto pThis = static_cast<task *>(context);
@@ -119,6 +121,7 @@ template <typename TaskAllocator> class task {
   }
 
 public:
+#if INCLUDE_vTaskSuspend
   /**
    * @brief Construct a new task object
    *
@@ -146,6 +149,30 @@ public:
       : task{name.c_str(), priority,
              std::forward<std::function<void()>>(task_routine),
              start_suspended} {}
+#else
+  /**
+   * @brief Construct a new task object
+   *
+   * @param name  name of the task
+   * @param priority  priority of the task
+   * @param task_routine  task routine function
+   */
+  task(const char *name, UBaseType_t priority, task_routine_t &&task_routine)
+      : m_allocator{}, m_hTask{nullptr}, m_taskRoutine{task_routine} {
+    m_hTask = m_allocator.create(task_exec, name, priority, this);
+  }
+  /**
+   * @brief Construct a new task object
+   *
+   * @param name  name of the task
+   * @param priority  priority of the task
+   * @param task_routine  task routine function
+   */
+  task(const std::string &name, UBaseType_t priority,
+       task_routine_t &&task_routine)
+      : task{name.c_str(), priority,
+             std::forward<std::function<void()>>(task_routine)} {}
+#endif
   task(const task &) = delete;
   task(task &&other) = delete;
   /**
