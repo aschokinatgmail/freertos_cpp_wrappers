@@ -181,8 +181,7 @@ public:
                  const std::chrono::duration<Rep, Period> &timeout) {
     return receive(
         pvRxData, xBufferLengthBytes,
-        std::chrono::duration_cast<std::chrono::milliseconds>(xTicksToWait)
-            .count());
+        std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count());
   }
   /**
    * @brief Method returning the number of bytes available in the buffer.
