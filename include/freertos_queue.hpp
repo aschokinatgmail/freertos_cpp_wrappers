@@ -161,6 +161,18 @@ public:
     return xQueueSendFromISR(m_queue, &item, &higher_priority_task_woken);
   }
   /**
+   * @brief Posts an item to the back of a queue from an ISR.
+   * @ref https://www.freertos.org/a00119.html
+   *
+   * @param item  An item to be posted on the queue.
+   * @return BaseType_t  pdPASS if the item was successfully posted, otherwise
+   * errQUEUE_FULL.
+   */
+  BaseType_t send_isr(const T &item) {
+    BaseType_t higher_priority_task_woken = pdFALSE;
+    return xQueueSendFromISR(m_queue, &item, &higher_priority_task_woken);
+  }
+  /**
    * @brief Posts an item to the back of a queue.
    * @ref https://www.freertos.org/xQueueSendToBack.html
    *
