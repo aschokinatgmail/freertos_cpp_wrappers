@@ -210,6 +210,16 @@ public:
     return rc;
   }
   /**
+   * @brief Method to start the timer from an ISR.
+   * @ref https://www.freertos.org/xTimerStartFromISR.html
+   *
+   * @return BaseType_t pdPASS if the timer was started successfully else pdFAIL
+   */
+  BaseType_t start_isr(void) {
+    BaseType_t high_priority_task_woken = pdFALSE;
+    return start_isr(high_priority_task_woken);
+  }
+  /**
    * @brief Method to stop the timer.
    * @ref https://www.freertos.org/xTimerStop.html
    *
@@ -253,6 +263,16 @@ public:
     return rc;
   }
   /**
+   * @brief Method to stop the timer from an ISR.
+   * @ref https://www.freertos.org/xTimerStopFromISR.html
+   *
+   * @return BaseType_t pdPASS if the timer was stopped successfully else pdFAIL
+   */
+  BaseType_t stop_isr(void) {
+    BaseType_t high_priority_task_woken = pdFALSE;
+    return stop_isr(high_priority_task_woken);
+  }
+  /**
    * @brief Method to reset the timer.
    * @ref https://www.freertos.org/xTimerReset.html
    *
@@ -286,6 +306,16 @@ public:
    */
   BaseType_t reset_isr(BaseType_t &high_priority_task_woken) {
     return xTimerResetFromISR(m_timer, &high_priority_task_woken);
+  }
+  /**
+   * @brief Method to reset the timer from an ISR.
+   * @ref https://www.freertos.org/xTimerResetFromISR.html
+   *
+   * @return BaseType_t pdPASS if the timer was reset successfully else pdFAIL
+   */
+  BaseType_t reset_isr(void) {
+    BaseType_t high_priority_task_woken = pdFALSE;
+    return reset_isr(high_priority_task_woken);
   }
   /**
    * @brief Method to change the period of the timer.
@@ -347,7 +377,59 @@ public:
    * @return BaseType_t pdPASS if the timer period was changed successfully else
    * pdFAIL
    */
-  BaseType_t period_ticks(void) const { return xTimerGetPeriod(m_timer); }
+  template <typename Rep, typename Period>
+  BaseType_t period_isr(const std::chrono::duration<Rep, Period> &new_period,
+                        BaseType_t &high_priority_task_woken) {
+    return period_isr(
+        std::chrono::duration_cast<std::chrono::milliseconds>(new_period)
+            .count(),
+        high_priority_task_woken);
+  }
+  /**
+   * @brief Method to change the period of the timer from an ISR.
+   * @ref https://www.freertos.org/xTimerChangePeriodFromISR.html
+   *
+   * @param new_period_ticks new period of the timer in ticks
+   * @return BaseType_t pdPASS if the timer period was changed successfully else
+   * pdFAIL
+   */
+  BaseType_t period_isr(const TickType_t new_period_ticks) {
+    BaseType_t high_priority_task_woken = pdFALSE;
+    return period_isr(new_period_ticks, high_priority_task_woken);
+  }
+  /**
+   * @brief Method to change the period of the timer from an ISR.
+   * @ref https://www.freertos.org/xTimerChangePeriodFromISR.html
+   *
+   * @tparam Rep duration representation type
+   * @tparam Period duration period type
+   * @param new_period new period of the timer
+   * @return BaseType_t pdPASS if the timer period was changed successfully else
+   * pdFAIL
+   */
+  template <typename Rep, typename Period>
+  BaseType_t period_isr(const std::chrono::duration<Rep, Period> &new_period) {
+    return period_isr(
+        std::chrono::duration_cast<std::chrono::milliseconds>(new_period)
+            .count());
+  }
+  /**
+   * @brief Method to change the period of the timer from an ISR.
+   * @ref https://www.freertos.org/xTimerChangePeriodFromISR.html
+   *
+   * @tparam Rep duration representation type
+   * @tparam Period duration period type
+   * @param new_period new period of the timer
+   * @param high_priority_task_woken flag to indicate if a high priority task
+   * was woken
+   * @return TickType_t timer period in ticks
+   */
+  TickType_t period_ticks(void) const { return xTimerGetPeriod(m_timer); }
+  /**
+   * @brief Method to get the period of the timer.
+   *
+   * @return std::chrono::milliseconds period of the timer in milliseconds
+   */
   std::chrono::milliseconds period(void) const {
     return std::chrono::milliseconds{period_ticks()};
   }
@@ -373,9 +455,9 @@ public:
   /**
    * @brief Method to get number of remaining ticks before the timer expires.
    *
-   * @return BaseType_t number of remaining ticks before the timer expires.
+   * @return TickType_t number of remaining ticks before the timer expires.
    */
-  BaseType_t remaining_ticks(void) const {
+  TickType_t remaining_ticks(void) const {
     return xTimerGetExpiryTime(m_timer) - xTaskGetTickCount();
   }
   /**

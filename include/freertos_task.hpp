@@ -819,7 +819,18 @@ public:
    * @return BaseType_t  pdTRUE if the notification was given, pdFALSE otherwise
    */
   BaseType_t notify_isr(const uint32_t val, eNotifyAction action,
-                        BaseType_t &higherPriorityTaskWoken = nullptr) {
+                        BaseType_t &higherPriorityTaskWoken) {
+    return m_task.notify_isr(val, action, higherPriorityTaskWoken);
+  }
+  /**
+   * @brief Notify the task from an ISR and query the previous value.
+   *
+   * @param val  notification value
+   * @param action  notification action
+   * @return BaseType_t  pdTRUE if the notification was given, pdFALSE otherwise
+   */
+  BaseType_t notify_isr(const uint32_t val, eNotifyAction action) {
+    BaseType_t higherPriorityTaskWoken = pdFALSE;
     return m_task.notify_isr(val, action, higherPriorityTaskWoken);
   }
   /**
@@ -831,10 +842,23 @@ public:
    * @param higherPriorityTaskWoken  higher priority task woken
    * @return BaseType_t  pdTRUE if the notification was given, pdFALSE otherwise
    */
-  BaseType_t
-  notify_and_query_isr(const uint32_t val, eNotifyAction action,
-                       uint32_t &prev_value,
-                       BaseType_t &higherPriorityTaskWoken = nullptr) {
+  BaseType_t notify_and_query_isr(const uint32_t val, eNotifyAction action,
+                                  uint32_t &prev_value,
+                                  BaseType_t &higherPriorityTaskWoken) {
+    return m_task.notify_and_query_isr(val, action, prev_value,
+                                       higherPriorityTaskWoken);
+  }
+  /**
+   * @brief Notify the task from an ISR and query the previous value.
+   *
+   * @param val  notification value
+   * @param action  notification action
+   * @param prev_value  previous value
+   * @return BaseType_t  pdTRUE if the notification was given, pdFALSE otherwise
+   */
+  BaseType_t notify_and_query_isr(const uint32_t val, eNotifyAction action,
+                                  uint32_t &prev_value) {
+    BaseType_t higherPriorityTaskWoken = pdFALSE;
     return m_task.notify_and_query_isr(val, action, prev_value,
                                        higherPriorityTaskWoken);
   }

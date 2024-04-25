@@ -151,6 +151,17 @@ public:
     return xSemaphoreGiveFromISR(m_semaphore, &high_priority_task_woken);
   }
   /**
+   * @brief Give the binary semaphore from an ISR.
+   * @ref https://www.freertos.org/a00124.html
+   *
+   * @return BaseType_t pdTRUE if the semaphore was successfully given,
+   *
+   */
+  BaseType_t give_isr(void) {
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+    return xSemaphoreGiveFromISR(m_semaphore, &xHigherPriorityTaskWoken);
+  }
+  /**
    * @brief Take the binary semaphore.
    * @ref https://www.freertos.org/a00122.html
    *
@@ -176,6 +187,26 @@ public:
   BaseType_t take_isr(BaseType_t &high_priority_task_woken) {
     return xSemaphoreTakeFromISR(m_semaphore, &high_priority_task_woken);
   }
+  /**
+   * @brief Take the binary semaphore from an ISR.
+   * @ref https://www.freertos.org/xSemaphoreTakeFromISR.html
+   *
+   * @return BaseType_t pdTRUE if the semaphore was successfully taken,
+   * otherwise pdFALSE.
+   *
+   */
+  BaseType_t take_isr(void) {
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+    return xSemaphoreTakeFromISR(m_semaphore, &xHigherPriorityTaskWoken);
+  }
+  /**
+   * @brief Take the binary semaphore.
+   *
+   * @param timeout timeout to wait for the semaphore.
+   * @return BaseType_t pdTRUE if the semaphore was successfully taken,
+   * otherwise pdFALSE.
+   *
+   */
   template <typename Rep, typename Period>
   BaseType_t take(const std::chrono::duration<Rep, Period> &timeout) {
     return take(
@@ -243,6 +274,17 @@ public:
     return xSemaphoreGiveFromISR(m_semaphore, &high_priority_task_woken);
   }
   /**
+   * @brief Give the counting semaphore from an ISR.
+   * @ref https://www.freertos.org/a00124.html
+   *
+   * @return BaseType_t pdTRUE if the semaphore was successfully given,
+   *
+   */
+  BaseType_t give_isr(void) {
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+    return xSemaphoreGiveFromISR(m_semaphore, &xHigherPriorityTaskWoken);
+  }
+  /**
    * @brief Take the counting semaphore.
    * @ref https://www.freertos.org/a00122.html
    *
@@ -267,6 +309,18 @@ public:
    */
   BaseType_t take_isr(BaseType_t &high_priority_task_woken) {
     return xSemaphoreTakeFromISR(m_semaphore, &high_priority_task_woken);
+  }
+  /**
+   * @brief Take the counting semaphore from an ISR.
+   * @ref https://www.freertos.org/xSemaphoreTakeFromISR.html
+   *
+   * @return BaseType_t pdTRUE if the semaphore was successfully taken,
+   * otherwise pdFALSE.
+   *
+   */
+  BaseType_t take_isr(void) {
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+    return xSemaphoreTakeFromISR(m_semaphore, &xHigherPriorityTaskWoken);
   }
   /**
    * @brief Take the counting semaphore.
@@ -402,6 +456,20 @@ public:
     return rc;
   }
   /**
+   * @brief Unlock the mutex from an ISR.
+   * @ref https://www.freertos.org/a00124.html
+   *
+   * @return BaseType_t pdTRUE if the mutex was successfully unlocked,
+   */
+  BaseType_t unlock_isr(void) {
+    BaseType_t high_priority_task_woken = pdFALSE;
+    auto rc = xSemaphoreGiveFromISR(m_semaphore, &high_priority_task_woken);
+    if (rc) {
+      m_locked = false;
+    }
+    return rc;
+  }
+  /**
    * @brief Lock the mutex.
    * @ref https://www.freertos.org/a00122.html
    *
@@ -424,6 +492,20 @@ public:
    * @return BaseType_t pdTRUE if the mutex was successfully locked,
    */
   BaseType_t lock_isr(BaseType_t &high_priority_task_woken) {
+    auto rc = xSemaphoreTakeFromISR(m_semaphore, &high_priority_task_woken);
+    if (rc) {
+      m_locked = true;
+    }
+    return rc;
+  }
+  /**
+   * @brief Lock the mutex from an ISR.
+   * @ref https://www.freertos.org/xSemaphoreTakeFromISR.html
+   *
+   * @return BaseType_t pdTRUE if the mutex was successfully locked,
+   */
+  BaseType_t lock_isr(void) {
+    BaseType_t high_priority_task_woken = pdFALSE;
     auto rc = xSemaphoreTakeFromISR(m_semaphore, &high_priority_task_woken);
     if (rc) {
       m_locked = true;
@@ -527,6 +609,20 @@ public:
     return rc;
   }
   /**
+   * @brief Unlock the recursive mutex from an ISR.
+   * @ref https://www.freertos.org/a00124.html
+   *
+   * @return BaseType_t pdTRUE if the recursive mutex was successfully unlocked,
+   */
+  BaseType_t unlock_isr(void) {
+    BaseType_t high_priority_task_woken = pdFALSE;
+    auto rc = xSemaphoreGiveFromISR(m_semaphore, &high_priority_task_woken);
+    if (rc) {
+      m_locked = false;
+    }
+    return rc;
+  }
+  /**
    * @brief Lock the recursive mutex.
    * @ref https://www.freertos.org/a00122.html
    *
@@ -549,6 +645,20 @@ public:
    * @return BaseType_t pdTRUE if the recursive mutex was successfully locked,
    */
   BaseType_t lock_isr(BaseType_t &high_priority_task_woken) {
+    auto rc = xSemaphoreTakeFromISR(m_semaphore, &high_priority_task_woken);
+    if (rc) {
+      m_locked = true;
+    }
+    return rc;
+  }
+  /**
+   * @brief Lock the recursive mutex from an ISR.
+   * @ref https://www.freertos.org/xSemaphoreTakeFromISR.html
+   *
+   * @return BaseType_t pdTRUE if the recursive mutex was successfully locked,
+   */
+  BaseType_t lock_isr(void) {
+    BaseType_t high_priority_task_woken = pdFALSE;
     auto rc = xSemaphoreTakeFromISR(m_semaphore, &high_priority_task_woken);
     if (rc) {
       m_locked = true;

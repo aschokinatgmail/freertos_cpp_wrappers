@@ -214,6 +214,18 @@ public:
     return xQueueSendToBackFromISR(m_queue, &item, &higher_priority_task_woken);
   }
   /**
+   * @brief Posts an item to the back of a queue from an ISR.
+   * @ref https://www.freertos.org/xQueueSendToBackFromISR.html
+   *
+   * @param item An item to be posted on the queue.
+   * @return BaseType_t pdPASS if the item was successfully posted, otherwise
+   * errQUEUE_FULL.
+   */
+  BaseType_t send_back_isr(const T &item) {
+    BaseType_t higher_priority_task_woken = pdFALSE;
+    return xQueueSendToBackFromISR(m_queue, &item, &higher_priority_task_woken);
+  }
+  /**
    * @brief Posts an item to the front of a queue.
    * @ref https://www.freertos.org/xQueueSendToFront.html
    *
@@ -252,6 +264,19 @@ public:
    */
   BaseType_t send_front_isr(const T &item,
                             BaseType_t &higher_priority_task_woken) {
+    return xQueueSendToFrontFromISR(m_queue, &item,
+                                    &higher_priority_task_woken);
+  }
+  /**
+   * @brief Posts an item to the front of a queue from an ISR.
+   * @ref https://www.freertos.org/xQueueSendToFrontFromISR.html
+   *
+   * @param item An item to be posted on the queue.
+   * @return BaseType_t pdPASS if the item
+   * was successfully posted, otherwise errQUEUE_FULL.
+   */
+  BaseType_t send_front_isr(const T &item) {
+    BaseType_t higher_priority_task_woken = pdFALSE;
     return xQueueSendToFrontFromISR(m_queue, &item,
                                     &higher_priority_task_woken);
   }
@@ -326,6 +351,18 @@ public:
    * @brief Receive an item from a queue from an ISR.
    * @ref https://www.freertos.org/a00120.html
    *
+   * @param item An item placeholder for the item to be received from the queue.
+   * @return BaseType_t pdPASS if the item was successfully received, otherwise
+   * pdFALSE.
+   */
+  BaseType_t receive_isr(T &item) {
+    BaseType_t higher_priority_task_woken = pdFALSE;
+    return xQueueReceiveFromISR(m_queue, &item, &higher_priority_task_woken);
+  }
+  /**
+   * @brief Receive an item from a queue from an ISR.
+   * @ref https://www.freertos.org/a00120.html
+   *
    * @param higher_priority_task_woken  A variable to set to pdTRUE if the
    * action unblocked a task of higher priority.
    * @return optional<T> The item received from the queue or std::nullopt if the
@@ -338,6 +375,17 @@ public:
       return item;
     }
     return {};
+  }
+  /**
+   * @brief Receive an item from a queue from an ISR.
+   * @ref https://www.freertos.org/a00120.html
+   *
+   * @return optional<T> The item received from the queue or std::nullopt if the
+   * queue is empty.
+   */
+  optional<T> receive_isr(void) {
+    BaseType_t higher_priority_task_woken = pdFALSE;
+    return receive_isr(higher_priority_task_woken);
   }
   /**
    * @brief Return the number of items stored in the queue.
@@ -395,6 +443,18 @@ public:
     return xQueueOverwriteFromISR(m_queue, &item, &higher_priority_task_woken);
   }
   /**
+   * @brief A version of send_back method that overwrites the items in the queue
+   * from an ISR.
+   * @ref https://www.freertos.org/xQueueOverwriteFromISR.html
+   *
+   * @param item An item to be posted on the queue.
+   * @return BaseType_t pdPASS returned always.
+   */
+  BaseType_t overwrite_isr(const T &item) {
+    BaseType_t higher_priority_task_woken = pdFALSE;
+    return xQueueOverwriteFromISR(m_queue, &item, &higher_priority_task_woken);
+  }
+  /**
    * @brief Peek an item from a queue. The item is not removed from the queue.
    * @ref https://www.freertos.org/xQueuePeek.html
    *
@@ -433,6 +493,77 @@ public:
    */
   BaseType_t peek_isr(T &item, BaseType_t &higher_priority_task_woken) {
     return xQueuePeekFromISR(m_queue, &item, &higher_priority_task_woken);
+  }
+  /**
+   * @brief Peek an item from a queue from an ISR. The item is not removed from
+   * the queue.
+   * @ref https://www.freertos.org/xQueuePeekFromISR.html
+   *
+   * @param item An item placeholder for the item to be peeked from the queue.
+   * @return BaseType_t pdPASS if the item was successfully peeked, otherwise
+   * pdFALSE.
+   */
+  BaseType_t peek_isr(T &item) {
+    BaseType_t higher_priority_task_woken = pdFALSE;
+    return xQueuePeekFromISR(m_queue, &item, &higher_priority_task_woken);
+  }
+  /**
+   * @brief Peek an item from a queue. The item is not removed from the queue.
+   * @ref https://www.freertos.org/xQueuePeek.html
+   *
+   * @param ticks_to_wait Timeout in ticks to wait for the item to become
+   * available.
+   * @return optional<T> The item peeked from the queue or std::nullopt if the
+   * queue is empty.
+   */
+  optional<T> peek(TickType_t ticks_to_wait) {
+    T item;
+    if (xQueuePeek(m_queue, &item, ticks_to_wait) == pdPASS) {
+      return item;
+    }
+    return {};
+  }
+  /**
+   * @brief Peek an item from a queue. The item is not removed from the queue.
+   * @ref https://www.freertos.org/xQueuePeek.html
+   *
+   * @param timeout Timeout to wait for the item to become available.
+   * @return optional<T> The item peeked from the queue or std::nullopt if the
+   * queue is empty.
+   */
+  template <typename Rep, typename Period>
+  optional<T> peek(const std::chrono::duration<Rep, Period> &timeout) {
+    return peek(pdMS_TO_TICKS(timeout.count()));
+  }
+  /**
+   * @brief Peek an item from a queue from an ISR. The item is not removed from
+   * the queue.
+   * @ref https://www.freertos.org/xQueuePeekFromISR.html
+   *
+   * @param higher_priority_task_woken A variable to set to pdTRUE if the action
+   * unblocked a task of higher priority.
+   * @return optional<T> The item peeked from the queue or std::nullopt if the
+   * queue is empty.
+   */
+  optional<T> peek_isr(BaseType_t &higher_priority_task_woken) {
+    T item;
+    if (xQueuePeekFromISR(m_queue, &item, &higher_priority_task_woken) ==
+        pdPASS) {
+      return item;
+    }
+    return {};
+  }
+  /**
+   * @brief Peek an item from a queue from an ISR. The item is not removed from
+   * the queue.
+   * @ref https://www.freertos.org/xQueuePeekFromISR.html
+   *
+   * @return optional<T> The item peeked from the queue or std::nullopt if the
+   * queue is empty.
+   */
+  optional<T> peek_isr(void) {
+    BaseType_t higher_priority_task_woken = pdFALSE;
+    return peek_isr(higher_priority_task_woken);
   }
   /**
    * @brief Return the name of the queue.
