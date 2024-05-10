@@ -57,23 +57,21 @@ using std::function;
  *
  */
 class static_sw_timer_allocator {
-  StaticTimer_t m_timer_placeholder;
+  StaticTimer_t *m_timer_ph;
 
 public:
-  static_sw_timer_allocator() = default;
-  static_sw_timer_allocator(const static_sw_timer_allocator &) = delete;
-  static_sw_timer_allocator(static_sw_timer_allocator &&) = delete;
+  static_sw_timer_allocator() noexcept;
+  static_sw_timer_allocator(const static_sw_timer_allocator &src) noexcept;
+  static_sw_timer_allocator(static_sw_timer_allocator &&) noexcept;
+  ~static_sw_timer_allocator();
 
   static_sw_timer_allocator &
-  operator=(const static_sw_timer_allocator &) = delete;
-  static_sw_timer_allocator &operator=(static_sw_timer_allocator &&) = delete;
+  operator=(const static_sw_timer_allocator &) noexcept;
+  static_sw_timer_allocator &operator=(static_sw_timer_allocator &&) noexcept;
 
   TimerHandle_t create(const char *name, const TickType_t period_ticks,
                        UBaseType_t auto_reload, void *const timer_id,
-                       TimerCallbackFunction_t callback) {
-    return xTimerCreateStatic(name, period_ticks, auto_reload, timer_id,
-                              callback, &m_timer_placeholder);
-  }
+                       TimerCallbackFunction_t callback);
 };
 #endif
 #if configSUPPORT_DYNAMIC_ALLOCATION
@@ -150,8 +148,38 @@ public:
                   std::chrono::duration_cast<std::chrono::milliseconds>(period)
                       .count()),
               auto_reload, std::move(callback)} {}
-  timer(const timer &) = delete;
-  timer(timer &&src) = delete;
+  timer(const timer &src)
+      : m_allocator{src.m_allocator}, m_timer{nullptr},
+        m_callback{src.m_callback}, m_started{false} {
+    m_timer = m_allocator.create(
+        pcTimerGetName(src.m_timer), xTimerGetPeriod(src.m_timer),
+        uxTimerGetReloadMode(src.m_timer), this, callback_wrapper);
+    configASSERT(m_timer);
+    if (src.m_started) {
+      start();
+    }
+  }
+  timer(timer &&src)
+      : m_allocator{std::move(src.m_allocator)}, m_timer{nullptr}, m_callback{},
+        m_started{false} {
+    auto started = src.m_started;
+    xTimerStop(src.m_timer, portMAX_DELAY);
+    auto name = pcTimerGetName(src.m_timer);
+    auto period = xTimerGetPeriod(src.m_timer);
+    auto auto_reload = uxTimerGetReloadMode(src.m_timer);
+    m_callback = std::move(src.m_callback);
+    m_timer =
+        m_allocator.create(name, period, auto_reload, this, callback_wrapper);
+    configASSERT(m_timer);
+    xTimerDelete(src.m_timer, portMAX_DELAY);
+    while (xTimerIsTimerActive(src.m_timer) == pdTRUE) {
+      vTaskDelay(1);
+    }
+    src.m_timer = nullptr;
+    if (started) {
+      start();
+    }
+  }
   /**
    * @brief Destruct the timer object and delete the software timer kernel
    * object instance if it was created.
@@ -163,8 +191,54 @@ public:
     }
   }
 
-  timer &operator=(const timer &) = delete;
-  timer &operator=(timer &&src) = delete;
+  timer &operator=(const timer &src) {
+    if (this != &src) {
+      if (m_timer) {
+        xTimerDelete(m_timer, portMAX_DELAY);
+        while (xTimerIsTimerActive(m_timer) == pdTRUE) {
+          vTaskDelay(1);
+        }
+      }
+      m_allocator = src.m_allocator;
+      m_callback = src.m_callback;
+      m_timer = m_allocator.create(
+          pcTimerGetName(src.m_timer), xTimerGetPeriod(src.m_timer),
+          uxTimerGetReloadMode(src.m_timer), this, callback_wrapper);
+      configASSERT(m_timer);
+      if (src.m_started) {
+        start();
+      }
+    }
+    return *this;
+  }
+  timer &operator=(timer &&src) {
+    if (this != &src) {
+      if (m_timer) {
+        xTimerDelete(m_timer, portMAX_DELAY);
+        while (xTimerIsTimerActive(m_timer) == pdTRUE) {
+          vTaskDelay(1);
+        }
+      }
+      auto started = src.m_started;
+      xTimerStop(src.m_timer, portMAX_DELAY);
+      auto name = pcTimerGetName(src.m_timer);
+      auto period = xTimerGetPeriod(src.m_timer);
+      auto auto_reload = uxTimerGetReloadMode(src.m_timer);
+      m_callback = std::move(src.m_callback);
+      m_timer =
+          m_allocator.create(name, period, auto_reload, this, callback_wrapper);
+      configASSERT(m_timer);
+      xTimerDelete(src.m_timer, portMAX_DELAY);
+      while (xTimerIsTimerActive(src.m_timer) == pdTRUE) {
+        vTaskDelay(1);
+      }
+      src.m_timer = nullptr;
+      if (started) {
+        start();
+      }
+    }
+    return *this;
+  }
 
   /**
    * @brief Method to start the timer.
@@ -227,6 +301,9 @@ public:
    * @return BaseType_t pdPASS if the timer was stopped successfully else pdFAIL
    */
   BaseType_t stop(const TickType_t ticks_to_wait = portMAX_DELAY) {
+    if (!m_timer) {
+      return pdTRUE;
+    }
     auto rc = xTimerStop(m_timer, ticks_to_wait);
     if (rc) {
       m_started = false;
@@ -256,6 +333,9 @@ public:
    * @return BaseType_t pdPASS if the timer was stopped successfully else pdFAIL
    */
   BaseType_t stop_isr(BaseType_t &high_priority_task_woken) {
+    if (!m_timer) {
+      return pdTRUE;
+    }
     auto rc = xTimerStopFromISR(m_timer, &high_priority_task_woken);
     if (rc) {
       m_started = false;
@@ -280,6 +360,9 @@ public:
    * @return BaseType_t pdPASS if the timer was reset successfully else pdFAIL
    */
   BaseType_t reset(const TickType_t ticks_to_wait = portMAX_DELAY) {
+    if (!m_timer) {
+      return pdFALSE;
+    }
     return xTimerReset(m_timer, ticks_to_wait);
   }
   /**
@@ -305,6 +388,9 @@ public:
    * @return BaseType_t pdPASS if the timer was reset successfully else pdFAIL
    */
   BaseType_t reset_isr(BaseType_t &high_priority_task_woken) {
+    if (!m_timer) {
+      return pdFALSE;
+    }
     return xTimerResetFromISR(m_timer, &high_priority_task_woken);
   }
   /**
@@ -329,6 +415,9 @@ public:
    */
   BaseType_t period(const TickType_t new_period_ticks,
                     const TickType_t ticks_to_wait = portMAX_DELAY) {
+    if (!m_timer) {
+      return pdFALSE;
+    }
     return xTimerChangePeriod(m_timer, new_period_ticks, ticks_to_wait);
   }
   /**
@@ -362,6 +451,9 @@ public:
    */
   BaseType_t period_isr(const TickType_t new_period_ticks,
                         BaseType_t &high_priority_task_woken) {
+    if (!m_timer) {
+      return pdFALSE;
+    }
     return xTimerChangePeriodFromISR(m_timer, new_period_ticks,
                                      &high_priority_task_woken);
   }
@@ -424,7 +516,12 @@ public:
    * was woken
    * @return TickType_t timer period in ticks
    */
-  TickType_t period_ticks(void) const { return xTimerGetPeriod(m_timer); }
+  TickType_t period_ticks(void) const {
+    if (!m_timer) {
+      return 0;
+    }
+    return xTimerGetPeriod(m_timer);
+  }
   /**
    * @brief Method to get the period of the timer.
    *
@@ -441,7 +538,9 @@ public:
    * @return timer& reference to the timer object
    */
   timer &reload_mode(UBaseType_t auto_reload) {
-    vTimerSetReloadMode(m_timer, auto_reload);
+    if (m_timer) {
+      vTimerSetReloadMode(m_timer, auto_reload);
+    }
     return *this;
   }
   /**
@@ -451,7 +550,12 @@ public:
    * @return UBaseType_t pdTRUE if auto-reload mode is enabled, pdFALSE
    * otherwise
    */
-  UBaseType_t reload_mode(void) const { return uxTimerGetReloadMode(m_timer); }
+  UBaseType_t reload_mode(void) const {
+    if (!m_timer) {
+      return pdFALSE;
+    }
+    return uxTimerGetReloadMode(m_timer);
+  }
   /**
    * @brief Method to get number of remaining ticks before the timer expires.
    *
@@ -475,13 +579,23 @@ public:
    *
    * @return BaseType_t pdTRUE if the timer is running, pdFALSE otherwise
    */
-  BaseType_t running(void) const { return xTimerIsTimerActive(m_timer); }
+  BaseType_t running(void) const {
+    if (!m_timer) {
+      return pdFALSE;
+    }
+    return xTimerIsTimerActive(m_timer);
+  }
   /**
    * @brief Method to get the name of the timer.
    *
    * @return const char* name of the timer
    */
-  const char *name(void) const { return pcTimerGetName(m_timer); }
+  const char *name(void) const {
+    if (!m_timer) {
+      return nullptr;
+    }
+    return pcTimerGetName(m_timer);
+  }
 };
 
 #if configSUPPORT_STATIC_ALLOCATION

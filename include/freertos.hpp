@@ -36,6 +36,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #error "This header is for C++ only"
 #endif
 
+#include "freertos_cpp_wrappers_config.hpp"
+
+#include "private/default_params.hpp"
+
 #include "freertos_event_group.hpp"
 #include "freertos_message_buffer.hpp"
 #include "freertos_queue.hpp"
