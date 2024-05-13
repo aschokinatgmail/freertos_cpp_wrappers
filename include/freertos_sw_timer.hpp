@@ -107,7 +107,6 @@ template <typename SwTimerAllocator> class timer {
   SwTimerAllocator m_allocator;
   TimerHandle_t m_timer;
   timer_callback_t m_callback;
-  char m_name[configMAX_TASK_NAME_LEN + 1];
   uint8_t m_started : 1;
 
   static void callback_wrapper(TimerHandle_t t) {
@@ -127,10 +126,8 @@ public:
    */
   explicit timer(const char *name, const TickType_t period_ticks,
                  UBaseType_t auto_reload, timer_callback_t &&callback)
-      : m_timer{nullptr}, m_callback{callback}, m_name{}, m_started{false} {
-    strncpy(m_name, name, configMAX_TASK_NAME_LEN);
-    m_name[configMAX_TASK_NAME_LEN] = 0x00;
-    m_timer = m_allocator.create(m_name, period_ticks, auto_reload, this,
+      : m_timer{nullptr}, m_callback{callback}, m_started{false} {
+    m_timer = m_allocator.create(name, period_ticks, auto_reload, this,
                                  callback_wrapper);
     configASSERT(m_timer);
   }
@@ -155,8 +152,7 @@ public:
               auto_reload, std::move(callback)} {}
   timer(const timer &) = delete;
   timer(timer &&src) {
-    strncpy(m_name, src.m_name, configMAX_TASK_NAME_LEN);
-    m_name[configMAX_TASK_NAME_LEN] = 0x00;
+    auto name = pcTimerGetName(src.m_timer);
     auto period = xTimerGetPeriod(src.m_timer);
     auto auto_reload = uxTimerGetReloadMode(src.m_timer);
     auto rc = xTimerStop(src.m_timer, portMAX_DELAY);
@@ -171,7 +167,7 @@ public:
         }
         src.m_timer = nullptr;
         m_callback = std::move(src.m_callback);
-        m_timer = m_allocator.create(src.m_name, period, auto_reload, this,
+        m_timer = m_allocator.create(name, period, auto_reload, this,
                                      callback_wrapper);
         if (m_timer) {
           if (src.m_started) {
@@ -211,8 +207,7 @@ public:
         while (xTimerIsTimerActive(src.m_timer) != pdFALSE) {
           vTaskDelay(pdMS_TO_TICKS(1));
         }
-        strncpy(m_name, src.m_name, configMAX_TASK_NAME_LEN);
-        m_name[configMAX_TASK_NAME_LEN] = 0x00;
+        auto name = pcTimerGetName(src.m_timer);
         auto period = xTimerGetPeriod(src.m_timer);
         auto auto_reload = uxTimerGetReloadMode(src.m_timer);
         rc = xTimerDelete(src.m_timer, portMAX_DELAY);
@@ -222,7 +217,7 @@ public:
           }
           src.m_timer = nullptr;
           m_callback = std::move(src.m_callback);
-          m_timer = m_allocator.create(src.m_name, period, auto_reload, this,
+          m_timer = m_allocator.create(name, period, auto_reload, this,
                                        callback_wrapper);
           if (m_timer) {
             if (src.m_started) {
