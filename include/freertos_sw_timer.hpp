@@ -107,6 +107,7 @@ template <typename SwTimerAllocator> class timer {
   SwTimerAllocator m_allocator;
   TimerHandle_t m_timer;
   timer_callback_t m_callback;
+  char m_name[configMAX_TASK_NAME_LEN + 1];
   uint8_t m_started : 1;
 
   static void callback_wrapper(TimerHandle_t t) {
@@ -126,8 +127,10 @@ public:
    */
   explicit timer(const char *name, const TickType_t period_ticks,
                  UBaseType_t auto_reload, timer_callback_t &&callback)
-      : m_timer{nullptr}, m_callback{callback}, m_started{false} {
-    m_timer = m_allocator.create(name, period_ticks, auto_reload, this,
+      : m_timer{nullptr}, m_callback{callback}, m_name{}, m_started{false} {
+    strncpy(m_name, name, configMAX_TASK_NAME_LEN);
+    m_name[configMAX_TASK_NAME_LEN] = 0x00;
+    m_timer = m_allocator.create(m_name, period_ticks, auto_reload, this,
                                  callback_wrapper);
     configASSERT(m_timer);
   }
@@ -151,7 +154,36 @@ public:
                       .count()),
               auto_reload, std::move(callback)} {}
   timer(const timer &) = delete;
-  timer(timer &&src) = delete;
+  timer(timer &&src) {
+    strncpy(m_name, src.m_name, configMAX_TASK_NAME_LEN);
+    m_name[configMAX_TASK_NAME_LEN] = 0x00;
+    auto period = xTimerGetPeriod(src.m_timer);
+    auto auto_reload = uxTimerGetReloadMode(src.m_timer);
+    auto rc = xTimerStop(src.m_timer, portMAX_DELAY);
+    if (rc == pdPASS) {
+      while (xTimerIsTimerActive(src.m_timer) != pdFALSE) {
+        vTaskDelay(pdMS_TO_TICKS(1));
+      }
+      rc = xTimerDelete(src.m_timer, portMAX_DELAY);
+      if (rc == pdPASS) {
+        while (xTimerIsTimerActive(src.m_timer) != pdFALSE) {
+          vTaskDelay(pdMS_TO_TICKS(1));
+        }
+        src.m_timer = nullptr;
+        m_callback = std::move(src.m_callback);
+        m_timer = m_allocator.create(src.m_name, period, auto_reload, this,
+                                     callback_wrapper);
+        if (m_timer) {
+          if (src.m_started) {
+            rc = xTimerStart(m_timer, portMAX_DELAY);
+            if (rc == pdPASS) {
+              m_started = true;
+            }
+          }
+        }
+      }
+    }
+  }
   /**
    * @brief Destruct the timer object and delete the software timer kernel
    * object instance if it was created.
@@ -159,12 +191,52 @@ public:
    */
   ~timer(void) {
     if (m_timer) {
-      xTimerDelete(m_timer, portMAX_DELAY);
+      auto rc = xTimerDelete(m_timer, portMAX_DELAY);
+      if (rc == pdPASS) {
+        while (xTimerIsTimerActive(m_timer) != pdFALSE) {
+          vTaskDelay(pdMS_TO_TICKS(1));
+        }
+      }
     }
   }
 
   timer &operator=(const timer &) = delete;
-  timer &operator=(timer &&src) = delete;
+  timer &operator=(timer &&src) {
+    if (this != &src) {
+      if (m_timer) {
+        xTimerDelete(m_timer, portMAX_DELAY);
+      }
+      auto rc = xTimerStop(src.m_timer, portMAX_DELAY);
+      if (rc == pdPASS) {
+        while (xTimerIsTimerActive(src.m_timer) != pdFALSE) {
+          vTaskDelay(pdMS_TO_TICKS(1));
+        }
+        strncpy(m_name, src.m_name, configMAX_TASK_NAME_LEN);
+        m_name[configMAX_TASK_NAME_LEN] = 0x00;
+        auto period = xTimerGetPeriod(src.m_timer);
+        auto auto_reload = uxTimerGetReloadMode(src.m_timer);
+        rc = xTimerDelete(src.m_timer, portMAX_DELAY);
+        if (rc == pdPASS) {
+          while (xTimerIsTimerActive(src.m_timer) != pdFALSE) {
+            vTaskDelay(pdMS_TO_TICKS(1));
+          }
+          src.m_timer = nullptr;
+          m_callback = std::move(src.m_callback);
+          m_timer = m_allocator.create(src.m_name, period, auto_reload, this,
+                                       callback_wrapper);
+          if (m_timer) {
+            if (src.m_started) {
+              rc = xTimerStart(m_timer, portMAX_DELAY);
+              if (rc == pdPASS) {
+                m_started = true;
+              }
+            }
+          }
+        }
+      }
+    }
+    return *this;
+  }
 
   /**
    * @brief Method to start the timer.
@@ -174,6 +246,9 @@ public:
    * @return BaseType_t pdPASS if the timer was started successfully else pdFAIL
    */
   BaseType_t start(const TickType_t ticks_to_wait = portMAX_DELAY) {
+    if (!m_timer) {
+      return pdFAIL;
+    }
     auto rc = xTimerStart(m_timer, ticks_to_wait);
     if (rc) {
       m_started = true;
@@ -203,6 +278,9 @@ public:
    * @return BaseType_t pdPASS if the timer was started successfully else pdFAIL
    */
   BaseType_t start_isr(BaseType_t &high_priority_task_woken) {
+    if (!m_timer) {
+      return pdFAIL;
+    }
     auto rc = xTimerStartFromISR(m_timer, &high_priority_task_woken);
     if (rc) {
       m_started = true;
@@ -227,6 +305,9 @@ public:
    * @return BaseType_t pdPASS if the timer was stopped successfully else pdFAIL
    */
   BaseType_t stop(const TickType_t ticks_to_wait = portMAX_DELAY) {
+    if (!m_timer) {
+      return pdFAIL;
+    }
     auto rc = xTimerStop(m_timer, ticks_to_wait);
     if (rc) {
       m_started = false;
@@ -256,6 +337,9 @@ public:
    * @return BaseType_t pdPASS if the timer was stopped successfully else pdFAIL
    */
   BaseType_t stop_isr(BaseType_t &high_priority_task_woken) {
+    if (!m_timer) {
+      return pdFAIL;
+    }
     auto rc = xTimerStopFromISR(m_timer, &high_priority_task_woken);
     if (rc) {
       m_started = false;
@@ -280,6 +364,9 @@ public:
    * @return BaseType_t pdPASS if the timer was reset successfully else pdFAIL
    */
   BaseType_t reset(const TickType_t ticks_to_wait = portMAX_DELAY) {
+    if (!m_timer) {
+      return pdFAIL;
+    }
     return xTimerReset(m_timer, ticks_to_wait);
   }
   /**
@@ -305,6 +392,9 @@ public:
    * @return BaseType_t pdPASS if the timer was reset successfully else pdFAIL
    */
   BaseType_t reset_isr(BaseType_t &high_priority_task_woken) {
+    if (!m_timer) {
+      return pdFAIL;
+    }
     return xTimerResetFromISR(m_timer, &high_priority_task_woken);
   }
   /**
@@ -329,6 +419,9 @@ public:
    */
   BaseType_t period(const TickType_t new_period_ticks,
                     const TickType_t ticks_to_wait = portMAX_DELAY) {
+    if (!m_timer) {
+      return pdFAIL;
+    }
     return xTimerChangePeriod(m_timer, new_period_ticks, ticks_to_wait);
   }
   /**
@@ -362,6 +455,9 @@ public:
    */
   BaseType_t period_isr(const TickType_t new_period_ticks,
                         BaseType_t &high_priority_task_woken) {
+    if (!m_timer) {
+      return pdFAIL;
+    }
     return xTimerChangePeriodFromISR(m_timer, new_period_ticks,
                                      &high_priority_task_woken);
   }
@@ -424,7 +520,12 @@ public:
    * was woken
    * @return TickType_t timer period in ticks
    */
-  TickType_t period_ticks(void) const { return xTimerGetPeriod(m_timer); }
+  TickType_t period_ticks(void) const {
+    if (!m_timer) {
+      return 0;
+    }
+    return xTimerGetPeriod(m_timer);
+  }
   /**
    * @brief Method to get the period of the timer.
    *
@@ -441,7 +542,9 @@ public:
    * @return timer& reference to the timer object
    */
   timer &reload_mode(UBaseType_t auto_reload) {
-    vTimerSetReloadMode(m_timer, auto_reload);
+    if (m_timer) {
+      vTimerSetReloadMode(m_timer, auto_reload);
+    }
     return *this;
   }
   /**
@@ -458,7 +561,11 @@ public:
    * @return TickType_t number of remaining ticks before the timer expires.
    */
   TickType_t remaining_ticks(void) const {
-    return xTimerGetExpiryTime(m_timer) - xTaskGetTickCount();
+    if (m_timer) {
+      return xTimerGetExpiryTime(m_timer) - xTaskGetTickCount();
+    } else {
+      return 0;
+    }
   }
   /**
    * @brief Method to get the remaining time before the timer expires.
@@ -475,13 +582,23 @@ public:
    *
    * @return BaseType_t pdTRUE if the timer is running, pdFALSE otherwise
    */
-  BaseType_t running(void) const { return xTimerIsTimerActive(m_timer); }
+  BaseType_t running(void) const {
+    if (!m_timer) {
+      return pdFALSE;
+    }
+    return xTimerIsTimerActive(m_timer);
+  }
   /**
    * @brief Method to get the name of the timer.
    *
    * @return const char* name of the timer
    */
-  const char *name(void) const { return pcTimerGetName(m_timer); }
+  const char *name(void) const {
+    if (!m_timer) {
+      return nullptr;
+    }
+    return pcTimerGetName(m_timer);
+  }
 };
 
 #if configSUPPORT_STATIC_ALLOCATION
