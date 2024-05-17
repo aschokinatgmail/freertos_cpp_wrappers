@@ -75,10 +75,45 @@ public:
     return xSemaphoreCreateRecursiveMutexStatic(&m_semaphore_placeholder);
   }
 };
+class static_semaphore_allocator_ext {
+  StaticSemaphore_t &m_semaphore_placeholder;
+
+public:
+  static_semaphore_allocator_ext(void) = delete;
+  static_semaphore_allocator_ext(StaticSemaphore_t &semaphore_placeholder)
+      : m_semaphore_placeholder{semaphore_placeholder} {}
+  static_semaphore_allocator_ext(const static_semaphore_allocator_ext &src) =
+      delete;
+  static_semaphore_allocator_ext(static_semaphore_allocator_ext &&src)
+      : m_semaphore_placeholder{src.m_semaphore_placeholder} {}
+
+  static_semaphore_allocator_ext &
+  operator=(const static_semaphore_allocator_ext &src) = delete;
+  static_semaphore_allocator_ext &
+  operator=(static_semaphore_allocator_ext &&src) {
+    m_semaphore_placeholder = src.m_semaphore_placeholder;
+    return *this;
+  }
+
+  SemaphoreHandle_t create_binary() {
+    return xSemaphoreCreateBinaryStatic(&m_semaphore_placeholder);
+  }
+  SemaphoreHandle_t create_counting(UBaseType_t max_count) {
+    return xSemaphoreCreateCountingStatic(max_count, max_count,
+                                          &m_semaphore_placeholder);
+  }
+  SemaphoreHandle_t create_mutex() {
+    return xSemaphoreCreateMutexStatic(&m_semaphore_placeholder);
+  }
+  SemaphoreHandle_t create_recursive_mutex() {
+    return xSemaphoreCreateRecursiveMutexStatic(&m_semaphore_placeholder);
+  }
+};
 #endif
 #if configSUPPORT_DYNAMIC_ALLOCATION
 /**
- * @brief An allocator for the semaphore that uses a dynamic memory allocation.
+ * @brief An allocator for the semaphore that uses a dynamic memory
+ * allocation.
  *
  */
 class dynamic_semaphore_allocator {
@@ -564,6 +599,12 @@ public:
     m_semaphore = m_allocator.create_recursive_mutex();
     configASSERT(m_semaphore);
   }
+  explicit recursive_mutex(SemaphoreAllocator &&allocator)
+      : m_allocator{std::move(allocator)}, m_semaphore{nullptr},
+        m_locked{false} {
+    m_semaphore = m_allocator.create_recursive_mutex();
+    configASSERT(m_semaphore);
+  }
   recursive_mutex(const recursive_mutex &) = delete;
   recursive_mutex(recursive_mutex &&src) = delete;
   /**
@@ -876,6 +917,8 @@ using mutex = freertos::mutex<freertos::static_semaphore_allocator>;
  */
 using recursive_mutex =
     freertos::recursive_mutex<freertos::static_semaphore_allocator>;
+using recursive_mutex_ext =
+    freertos::recursive_mutex<freertos::static_semaphore_allocator_ext>;
 } // namespace sa
 #endif
 #if configSUPPORT_DYNAMIC_ALLOCATION
