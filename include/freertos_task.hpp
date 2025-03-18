@@ -60,7 +60,7 @@ template <size_t StackSize> class static_task_allocator {
 public:
   static_task_allocator() = default;
   static_task_allocator(const static_task_allocator &) = delete;
-  static_task_allocator(static_task_allocator &&) = delete;
+  static_task_allocator(static_task_allocator &&) = default;
 
   static_task_allocator &operator=(const static_task_allocator &) = delete;
   static_task_allocator &operator=(static_task_allocator &&) = delete;
@@ -132,7 +132,7 @@ public:
    */
   task(const char *name, UBaseType_t priority, task_routine_t &&task_routine,
        bool start_suspended = true)
-      : m_allocator{}, m_hTask{nullptr}, m_taskRoutine{task_routine},
+      : m_allocator{}, m_hTask{nullptr}, m_taskRoutine{std::move(task_routine)},
         m_start_suspended{start_suspended} {
     m_hTask = m_allocator.create(task_exec, name, priority, this);
   }
@@ -146,9 +146,8 @@ public:
    */
   task(const std::string &name, UBaseType_t priority,
        task_routine_t &&task_routine, bool start_suspended = true)
-      : task{name.c_str(), priority,
-             std::forward<std::function<void()>>(task_routine),
-             start_suspended} {}
+      : task{name.c_str(), priority, std::move(task_routine), start_suspended} {
+  }
 #else
   /**
    * @brief Construct a new task object
@@ -174,7 +173,7 @@ public:
              std::forward<std::function<void()>>(task_routine)} {}
 #endif
   task(const task &) = delete;
-  task(task &&other) = delete;
+  task(task &&other) = default;
   /**
    * @brief Destruct the task object and delete the task instance if it was
    * created.
@@ -544,9 +543,9 @@ public:
                 bool start_suspended = true)
       : periodic_task{name.c_str(),
                       priority,
-                      std::forward<std::function<void()>>(on_start),
-                      std::forward<std::function<void()>>(on_stop),
-                      std::forward<std::function<void()>>(periodic_routine),
+                      std::move(on_start),
+                      std::move(on_stop),
+                      std::move(periodic_routine),
                       period,
                       start_suspended} {}
   /**
@@ -564,9 +563,9 @@ public:
                 task_routine_t &&periodic_routine, bool start_suspended = true)
       : periodic_task{name,
                       priority,
-                      std::forward<task_routine_t>(on_start),
-                      std::forward<task_routine_t>(on_stop),
-                      std::forward<task_routine_t>(periodic_routine),
+                      std::move(on_start),
+                      std::move(on_stop),
+                      std::move(periodic_routine),
                       std::chrono::milliseconds{0},
                       start_suspended} {}
   /**
@@ -584,12 +583,12 @@ public:
                 task_routine_t &&periodic_routine, bool start_suspended = true)
       : periodic_task{name.c_str(),
                       priority,
-                      std::forward<std::function<void()>>(on_start),
-                      std::forward<std::function<void()>>(on_stop),
-                      std::forward<std::function<void()>>(periodic_routine),
+                      std::move(on_start),
+                      std::move(on_stop),
+                      std::move(periodic_routine),
                       start_suspended} {}
   periodic_task(const periodic_task &) = delete;
-  periodic_task(periodic_task &&other) = delete;
+  periodic_task(periodic_task &&other) = default;
   /**
    * @brief Destruct the periodic task object and delete the task instance if it
    * was created.

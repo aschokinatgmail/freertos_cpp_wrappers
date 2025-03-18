@@ -62,7 +62,7 @@ class static_sw_timer_allocator {
 public:
   static_sw_timer_allocator() = default;
   static_sw_timer_allocator(const static_sw_timer_allocator &) = delete;
-  static_sw_timer_allocator(static_sw_timer_allocator &&) = delete;
+  static_sw_timer_allocator(static_sw_timer_allocator &&) = default;
 
   static_sw_timer_allocator &
   operator=(const static_sw_timer_allocator &) = delete;
@@ -151,7 +151,7 @@ public:
                       .count()),
               auto_reload, std::move(callback)} {}
   timer(const timer &) = delete;
-  timer(timer &&src) = delete;
+  timer(timer &&src) = default;
   /**
    * @brief Destruct the timer object and delete the software timer kernel
    * object instance if it was created.
