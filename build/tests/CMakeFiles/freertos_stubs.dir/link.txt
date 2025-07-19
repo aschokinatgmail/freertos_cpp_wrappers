@@ -1,2 +1,0 @@
-/usr/bin/ar qc libfreertos_stubs.a CMakeFiles/freertos_stubs.dir/freertos_stubs/freertos_stubs.cpp.o
-/usr/bin/ranlib libfreertos_stubs.a

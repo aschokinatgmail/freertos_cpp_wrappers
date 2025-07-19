@@ -1,5 +1,0 @@
-add_test([=[FreeRTOSMessageBufferTest.HeaderCompilation]=]  /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build/tests/test_freertos_message_buffer [==[--gtest_filter=FreeRTOSMessageBufferTest.HeaderCompilation]==] --gtest_also_run_disabled_tests)
-set_tests_properties([=[FreeRTOSMessageBufferTest.HeaderCompilation]=]  PROPERTIES WORKING_DIRECTORY /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build/tests SKIP_REGULAR_EXPRESSION [==[\[  SKIPPED \]]==])
-add_test([=[FreeRTOSMessageBufferTest.TypeAccess]=]  /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build/tests/test_freertos_message_buffer [==[--gtest_filter=FreeRTOSMessageBufferTest.TypeAccess]==] --gtest_also_run_disabled_tests)
-set_tests_properties([=[FreeRTOSMessageBufferTest.TypeAccess]=]  PROPERTIES WORKING_DIRECTORY /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build/tests SKIP_REGULAR_EXPRESSION [==[\[  SKIPPED \]]==])
-set(  test_freertos_message_buffer_TESTS FreeRTOSMessageBufferTest.HeaderCompilation FreeRTOSMessageBufferTest.TypeAccess)

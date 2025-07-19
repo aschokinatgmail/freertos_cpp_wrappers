@@ -1,5 +1,0 @@
-add_test([=[FreeRTOSSwTimerTest.HeaderCompilation]=]  /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build/tests/test_freertos_sw_timer [==[--gtest_filter=FreeRTOSSwTimerTest.HeaderCompilation]==] --gtest_also_run_disabled_tests)
-set_tests_properties([=[FreeRTOSSwTimerTest.HeaderCompilation]=]  PROPERTIES WORKING_DIRECTORY /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build/tests SKIP_REGULAR_EXPRESSION [==[\[  SKIPPED \]]==])
-add_test([=[FreeRTOSSwTimerTest.TypeAccess]=]  /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build/tests/test_freertos_sw_timer [==[--gtest_filter=FreeRTOSSwTimerTest.TypeAccess]==] --gtest_also_run_disabled_tests)
-set_tests_properties([=[FreeRTOSSwTimerTest.TypeAccess]=]  PROPERTIES WORKING_DIRECTORY /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build/tests SKIP_REGULAR_EXPRESSION [==[\[  SKIPPED \]]==])
-set(  test_freertos_sw_timer_TESTS FreeRTOSSwTimerTest.HeaderCompilation FreeRTOSSwTimerTest.TypeAccess)

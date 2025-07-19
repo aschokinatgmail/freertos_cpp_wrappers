@@ -1,5 +1,0 @@
-add_test([=[FreeRTOSStreamBufferTest.HeaderCompilation]=]  /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build/tests/test_freertos_stream_buffer [==[--gtest_filter=FreeRTOSStreamBufferTest.HeaderCompilation]==] --gtest_also_run_disabled_tests)
-set_tests_properties([=[FreeRTOSStreamBufferTest.HeaderCompilation]=]  PROPERTIES WORKING_DIRECTORY /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build/tests SKIP_REGULAR_EXPRESSION [==[\[  SKIPPED \]]==])
-add_test([=[FreeRTOSStreamBufferTest.TypeAccess]=]  /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build/tests/test_freertos_stream_buffer [==[--gtest_filter=FreeRTOSStreamBufferTest.TypeAccess]==] --gtest_also_run_disabled_tests)
-set_tests_properties([=[FreeRTOSStreamBufferTest.TypeAccess]=]  PROPERTIES WORKING_DIRECTORY /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build/tests SKIP_REGULAR_EXPRESSION [==[\[  SKIPPED \]]==])
-set(  test_freertos_stream_buffer_TESTS FreeRTOSStreamBufferTest.HeaderCompilation FreeRTOSStreamBufferTest.TypeAccess)

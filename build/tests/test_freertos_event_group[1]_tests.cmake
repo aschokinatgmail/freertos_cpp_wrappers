@@ -1,5 +1,0 @@
-add_test([=[FreeRTOSEventGroupTest.HeaderCompilation]=]  /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build/tests/test_freertos_event_group [==[--gtest_filter=FreeRTOSEventGroupTest.HeaderCompilation]==] --gtest_also_run_disabled_tests)
-set_tests_properties([=[FreeRTOSEventGroupTest.HeaderCompilation]=]  PROPERTIES WORKING_DIRECTORY /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build/tests SKIP_REGULAR_EXPRESSION [==[\[  SKIPPED \]]==])
-add_test([=[FreeRTOSEventGroupTest.TypeAccess]=]  /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build/tests/test_freertos_event_group [==[--gtest_filter=FreeRTOSEventGroupTest.TypeAccess]==] --gtest_also_run_disabled_tests)
-set_tests_properties([=[FreeRTOSEventGroupTest.TypeAccess]=]  PROPERTIES WORKING_DIRECTORY /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build/tests SKIP_REGULAR_EXPRESSION [==[\[  SKIPPED \]]==])
-set(  test_freertos_event_group_TESTS FreeRTOSEventGroupTest.HeaderCompilation FreeRTOSEventGroupTest.TypeAccess)
