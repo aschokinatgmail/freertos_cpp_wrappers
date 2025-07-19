@@ -1,0 +1,5 @@
+add_test([=[FreeRTOSQueueTest.HeaderCompilation]=]  /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build/tests/test_freertos_queue [==[--gtest_filter=FreeRTOSQueueTest.HeaderCompilation]==] --gtest_also_run_disabled_tests)
+set_tests_properties([=[FreeRTOSQueueTest.HeaderCompilation]=]  PROPERTIES WORKING_DIRECTORY /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build/tests SKIP_REGULAR_EXPRESSION [==[\[  SKIPPED \]]==])
+add_test([=[FreeRTOSQueueTest.TypeAccess]=]  /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build/tests/test_freertos_queue [==[--gtest_filter=FreeRTOSQueueTest.TypeAccess]==] --gtest_also_run_disabled_tests)
+set_tests_properties([=[FreeRTOSQueueTest.TypeAccess]=]  PROPERTIES WORKING_DIRECTORY /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build/tests SKIP_REGULAR_EXPRESSION [==[\[  SKIPPED \]]==])
+set(  test_freertos_queue_TESTS FreeRTOSQueueTest.HeaderCompilation FreeRTOSQueueTest.TypeAccess)

@@ -1,0 +1,5 @@
+add_test([=[FreeRTOSSemaphoreTest.HeaderCompilation]=]  /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build/tests/test_freertos_semaphore [==[--gtest_filter=FreeRTOSSemaphoreTest.HeaderCompilation]==] --gtest_also_run_disabled_tests)
+set_tests_properties([=[FreeRTOSSemaphoreTest.HeaderCompilation]=]  PROPERTIES WORKING_DIRECTORY /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build/tests SKIP_REGULAR_EXPRESSION [==[\[  SKIPPED \]]==])
+add_test([=[FreeRTOSSemaphoreTest.TypeAccess]=]  /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build/tests/test_freertos_semaphore [==[--gtest_filter=FreeRTOSSemaphoreTest.TypeAccess]==] --gtest_also_run_disabled_tests)
+set_tests_properties([=[FreeRTOSSemaphoreTest.TypeAccess]=]  PROPERTIES WORKING_DIRECTORY /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build/tests SKIP_REGULAR_EXPRESSION [==[\[  SKIPPED \]]==])
+set(  test_freertos_semaphore_TESTS FreeRTOSSemaphoreTest.HeaderCompilation FreeRTOSSemaphoreTest.TypeAccess)

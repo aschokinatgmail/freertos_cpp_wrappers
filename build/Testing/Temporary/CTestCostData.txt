@@ -1,0 +1,18 @@
+FreeRTOSTest.HeaderCompilation 1 0.00223937
+FreeRTOSTest.NamespaceAccess 1 0.00160536
+FreeRTOSEventGroupTest.HeaderCompilation 1 0.00162594
+FreeRTOSEventGroupTest.TypeAccess 1 0.00156144
+FreeRTOSMessageBufferTest.HeaderCompilation 1 0.00159647
+FreeRTOSMessageBufferTest.TypeAccess 1 0.00157141
+FreeRTOSQueueTest.HeaderCompilation 1 0.00159586
+FreeRTOSQueueTest.TypeAccess 1 0.00155816
+FreeRTOSSemaphoreTest.HeaderCompilation 1 0.00159482
+FreeRTOSSemaphoreTest.TypeAccess 1 0.00155699
+FreeRTOSStreamBufferTest.HeaderCompilation 1 0.00158479
+FreeRTOSStreamBufferTest.TypeAccess 1 0.00155759
+FreeRTOSSwTimerTest.HeaderCompilation 1 0.00163599
+FreeRTOSSwTimerTest.TypeAccess 1 0.0015371
+FreeRTOSTaskTest.HeaderCompilation 1 0.00164819
+FreeRTOSTaskTest.TypeAccess 1 0.00158652
+FreeRTOSTaskTest.DelayFunctionAccess 1 0.00157603
+---

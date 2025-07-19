@@ -1,0 +1,5 @@
+add_test([=[FreeRTOSTest.HeaderCompilation]=]  /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build/tests/test_freertos [==[--gtest_filter=FreeRTOSTest.HeaderCompilation]==] --gtest_also_run_disabled_tests)
+set_tests_properties([=[FreeRTOSTest.HeaderCompilation]=]  PROPERTIES WORKING_DIRECTORY /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build/tests SKIP_REGULAR_EXPRESSION [==[\[  SKIPPED \]]==])
+add_test([=[FreeRTOSTest.NamespaceAccess]=]  /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build/tests/test_freertos [==[--gtest_filter=FreeRTOSTest.NamespaceAccess]==] --gtest_also_run_disabled_tests)
+set_tests_properties([=[FreeRTOSTest.NamespaceAccess]=]  PROPERTIES WORKING_DIRECTORY /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build/tests SKIP_REGULAR_EXPRESSION [==[\[  SKIPPED \]]==])
+set(  test_freertos_TESTS FreeRTOSTest.HeaderCompilation FreeRTOSTest.NamespaceAccess)

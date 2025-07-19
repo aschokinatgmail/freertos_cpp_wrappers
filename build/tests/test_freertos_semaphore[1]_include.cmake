@@ -1,0 +1,5 @@
+if(EXISTS "/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build/tests/test_freertos_semaphore[1]_tests.cmake")
+  include("/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build/tests/test_freertos_semaphore[1]_tests.cmake")
+else()
+  add_test(test_freertos_semaphore_NOT_BUILT test_freertos_semaphore_NOT_BUILT)
+endif()

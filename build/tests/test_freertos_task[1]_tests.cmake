@@ -1,0 +1,7 @@
+add_test([=[FreeRTOSTaskTest.HeaderCompilation]=]  /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build/tests/test_freertos_task [==[--gtest_filter=FreeRTOSTaskTest.HeaderCompilation]==] --gtest_also_run_disabled_tests)
+set_tests_properties([=[FreeRTOSTaskTest.HeaderCompilation]=]  PROPERTIES WORKING_DIRECTORY /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build/tests SKIP_REGULAR_EXPRESSION [==[\[  SKIPPED \]]==])
+add_test([=[FreeRTOSTaskTest.TypeAccess]=]  /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build/tests/test_freertos_task [==[--gtest_filter=FreeRTOSTaskTest.TypeAccess]==] --gtest_also_run_disabled_tests)
+set_tests_properties([=[FreeRTOSTaskTest.TypeAccess]=]  PROPERTIES WORKING_DIRECTORY /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build/tests SKIP_REGULAR_EXPRESSION [==[\[  SKIPPED \]]==])
+add_test([=[FreeRTOSTaskTest.DelayFunctionAccess]=]  /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build/tests/test_freertos_task [==[--gtest_filter=FreeRTOSTaskTest.DelayFunctionAccess]==] --gtest_also_run_disabled_tests)
+set_tests_properties([=[FreeRTOSTaskTest.DelayFunctionAccess]=]  PROPERTIES WORKING_DIRECTORY /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build/tests SKIP_REGULAR_EXPRESSION [==[\[  SKIPPED \]]==])
+set(  test_freertos_task_TESTS FreeRTOSTaskTest.HeaderCompilation FreeRTOSTaskTest.TypeAccess FreeRTOSTaskTest.DelayFunctionAccess)
