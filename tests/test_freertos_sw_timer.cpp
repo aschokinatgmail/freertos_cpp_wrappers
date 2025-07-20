@@ -20,6 +20,35 @@
  * NOTE: Timer callbacks are normally executed by the FreeRTOS timer service task.
  * In host-based testing, callbacks are manually triggered in tests to verify functionality.
  * Some RTOS-specific timing behavior cannot be fully replicated in host environment.
+ *
+ * RTOS-ONLY OR UNTESTABLE FEATURES:
+ * =================================
+ * 1. Actual timer callback execution by the timer service task
+ *    - In real FreeRTOS, callbacks are invoked asynchronously by the timer service task
+ *    - Host testing can only verify callback registration, not automatic invocation timing
+ * 
+ * 2. Real-time timer expiry and automatic callback invocation
+ *    - Timer service task priority and preemption behavior cannot be simulated
+ *    - Actual timing precision depends on system tick frequency and load
+ * 
+ * 3. Timer queue overflow scenarios under high timer load
+ *    - FreeRTOS timer commands are queued to the timer service task
+ *    - Queue full conditions and their handling cannot be realistically tested
+ * 
+ * 4. Interrupt-based timer operations in real hardware context
+ *    - ISR timing constraints and priority inversion scenarios
+ *    - Hardware timer interrupt handling and context switching
+ * 
+ * 5. Memory allocation failures in resource-constrained environments
+ *    - Dynamic timer creation failures due to heap exhaustion
+ *    - Stack overflow scenarios in deeply nested timer callbacks
+ * 
+ * 6. Task synchronization and blocking behavior
+ *    - Timer delete operations blocking until timer service processes command
+ *    - Timeout behavior when timer commands cannot be queued immediately
+ * 
+ * These aspects require integration testing in the actual target RTOS environment
+ * or hardware-in-the-loop testing for complete validation.
  */
 
 #include <gtest/gtest.h>
