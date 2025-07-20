@@ -5,6 +5,16 @@ project(freertos_cpp_wrappers)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Add option for coverage
+option(ENABLE_COVERAGE "Enable code coverage" OFF)
+
+# Coverage flags
+if(ENABLE_COVERAGE)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage -fprofile-arcs -ftest-coverage")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --coverage -fprofile-arcs -ftest-coverage")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
+endif()
+
 # Find GoogleTest
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GTEST REQUIRED gtest_main)

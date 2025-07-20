@@ -233,7 +233,7 @@ public:
    */
   explicit counting_semaphore(UBaseType_t max_count = 1)
       : m_allocator{}, m_semaphore{nullptr} {
-    m_semaphore = m_allocator.create_counting(max_count, max_count);
+    m_semaphore = m_allocator.create_counting(max_count);
     configASSERT(m_semaphore);
   }
   counting_semaphore(const counting_semaphore &) = delete;

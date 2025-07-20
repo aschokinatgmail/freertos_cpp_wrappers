@@ -154,6 +154,20 @@ test_freertos_task/fast:
 	cd /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/test_freertos_task.dir/build.make tests/CMakeFiles/test_freertos_task.dir/build
 .PHONY : test_freertos_task/fast
 
+# Convenience name for target.
+tests/CMakeFiles/test_freertos_semaphore.dir/rule:
+	cd /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 tests/CMakeFiles/test_freertos_semaphore.dir/rule
+.PHONY : tests/CMakeFiles/test_freertos_semaphore.dir/rule
+
+# Convenience name for target.
+test_freertos_semaphore: tests/CMakeFiles/test_freertos_semaphore.dir/rule
+.PHONY : test_freertos_semaphore
+
+# fast build rule for target.
+test_freertos_semaphore/fast:
+	cd /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/test_freertos_semaphore.dir/build.make tests/CMakeFiles/test_freertos_semaphore.dir/build
+.PHONY : test_freertos_semaphore/fast
+
 mocks/freertos_mocks.o: mocks/freertos_mocks.cpp.o
 .PHONY : mocks/freertos_mocks.o
 
@@ -177,6 +191,30 @@ mocks/freertos_mocks.s: mocks/freertos_mocks.cpp.s
 mocks/freertos_mocks.cpp.s:
 	cd /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/freertos_mocks.dir/build.make tests/CMakeFiles/freertos_mocks.dir/mocks/freertos_mocks.cpp.s
 .PHONY : mocks/freertos_mocks.cpp.s
+
+test_freertos_semaphore.o: test_freertos_semaphore.cpp.o
+.PHONY : test_freertos_semaphore.o
+
+# target to build an object file
+test_freertos_semaphore.cpp.o:
+	cd /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/test_freertos_semaphore.dir/build.make tests/CMakeFiles/test_freertos_semaphore.dir/test_freertos_semaphore.cpp.o
+.PHONY : test_freertos_semaphore.cpp.o
+
+test_freertos_semaphore.i: test_freertos_semaphore.cpp.i
+.PHONY : test_freertos_semaphore.i
+
+# target to preprocess a source file
+test_freertos_semaphore.cpp.i:
+	cd /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/test_freertos_semaphore.dir/build.make tests/CMakeFiles/test_freertos_semaphore.dir/test_freertos_semaphore.cpp.i
+.PHONY : test_freertos_semaphore.cpp.i
+
+test_freertos_semaphore.s: test_freertos_semaphore.cpp.s
+.PHONY : test_freertos_semaphore.s
+
+# target to generate assembly for a file
+test_freertos_semaphore.cpp.s:
+	cd /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/test_freertos_semaphore.dir/build.make tests/CMakeFiles/test_freertos_semaphore.dir/test_freertos_semaphore.cpp.s
+.PHONY : test_freertos_semaphore.cpp.s
 
 test_freertos_task.o: test_freertos_task.cpp.o
 .PHONY : test_freertos_task.o
@@ -212,10 +250,14 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... test"
 	@echo "... freertos_mocks"
+	@echo "... test_freertos_semaphore"
 	@echo "... test_freertos_task"
 	@echo "... mocks/freertos_mocks.o"
 	@echo "... mocks/freertos_mocks.i"
 	@echo "... mocks/freertos_mocks.s"
+	@echo "... test_freertos_semaphore.o"
+	@echo "... test_freertos_semaphore.i"
+	@echo "... test_freertos_semaphore.s"
 	@echo "... test_freertos_task.o"
 	@echo "... test_freertos_task.i"
 	@echo "... test_freertos_task.s"

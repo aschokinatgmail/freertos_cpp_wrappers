@@ -6,5 +6,5 @@ CXX_DEFINES =
 
 CXX_INCLUDES = -I/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include -I/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/mocks
 
-CXX_FLAGS = -std=gnu++17
+CXX_FLAGS =  --coverage -fprofile-arcs -ftest-coverage -std=gnu++17
 

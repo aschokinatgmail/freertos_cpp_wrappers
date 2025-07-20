@@ -165,6 +165,19 @@ test_freertos_task/fast:
 	$(MAKE) $(MAKESILENT) -f tests/CMakeFiles/test_freertos_task.dir/build.make tests/CMakeFiles/test_freertos_task.dir/build
 .PHONY : test_freertos_task/fast
 
+#=============================================================================
+# Target rules for targets named test_freertos_semaphore
+
+# Build rule for target.
+test_freertos_semaphore: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test_freertos_semaphore
+.PHONY : test_freertos_semaphore
+
+# fast build rule for target.
+test_freertos_semaphore/fast:
+	$(MAKE) $(MAKESILENT) -f tests/CMakeFiles/test_freertos_semaphore.dir/build.make tests/CMakeFiles/test_freertos_semaphore.dir/build
+.PHONY : test_freertos_semaphore/fast
+
 src/freertos_task.o: src/freertos_task.cc.o
 .PHONY : src/freertos_task.o
 
@@ -200,6 +213,7 @@ help:
 	@echo "... test"
 	@echo "... freertos_cpp_wrappers"
 	@echo "... freertos_mocks"
+	@echo "... test_freertos_semaphore"
 	@echo "... test_freertos_task"
 	@echo "... src/freertos_task.o"
 	@echo "... src/freertos_task.i"

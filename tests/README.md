@@ -1,23 +1,25 @@
-# FreeRTOS Task Unit Tests
+# FreeRTOS C++ Wrapper Tests
 
-This directory contains comprehensive unit tests for the FreeRTOS C++ task wrapper library.
+This directory contains comprehensive unit tests for the FreeRTOS C++ wrapper library using GoogleTest and GoogleMock frameworks.
 
-## Overview
+## Test Structure
 
-The test suite provides comprehensive behavioral unit tests for:
-- Static and dynamic task allocators
-- Task construction, allocation, and deallocation 
-- Typical usage patterns: creation, starting, and deletion
-- Periodic task operation and timing
-- Stack allocation limitation (freertos::sa::task fails on stack)
-- Error and edge cases with invalid parameters
+### Completed Modules ✅
+- **Task Module** (`test_freertos_task.cpp`) - 46 tests
+- **Semaphore Module** (`test_freertos_semaphore.cpp`) - 39 tests
 
-## Features
+### Planned Modules 📋
+- Queue Module (`test_freertos_queue.cpp`)
+- Event Group Module (`test_freertos_event_group.cpp`)
+- Stream Buffer Module (`test_freertos_stream_buffer.cpp`)
+- Message Buffer Module (`test_freertos_message_buffer.cpp`)
+- Software Timer Module (`test_freertos_sw_timer.cpp`)
 
-- **Host-based testing**: Uses GoogleTest/GoogleMock with FreeRTOS API mocks
-- **Comprehensive coverage**: 46 tests covering all major functionality
-- **Clear documentation**: Comments explain untestable or RTOS-only features
-- **Template for future tests**: Can be used as a template for other modules
+## Test Coverage
+
+**Overall Coverage: 89.2%** (1,211 of 1,358 lines)
+
+See [COVERAGE_REPORT.md](../COVERAGE_REPORT.md) for detailed coverage analysis.
 
 ## Building and Running Tests
 

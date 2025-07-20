@@ -15,10 +15,15 @@ pkg_check_modules(GMOCK REQUIRED gmock_main)
 target_link_libraries(freertos_mocks PUBLIC ${GMOCK_LIBRARIES})
 target_compile_options(freertos_mocks PUBLIC ${GMOCK_CFLAGS_OTHER})
 
-# Add the main test executable
+# Add the main test executables
 add_executable(
     test_freertos_task
     test_freertos_task.cpp
+)
+
+add_executable(
+    test_freertos_semaphore
+    test_freertos_semaphore.cpp
 )
 
 target_link_libraries(
@@ -30,8 +35,19 @@ target_link_libraries(
     pthread
 )
 
+target_link_libraries(
+    test_freertos_semaphore
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    ${GMOCK_LIBRARIES}
+    pthread
+)
+
 target_compile_options(test_freertos_task PRIVATE ${GTEST_CFLAGS_OTHER} ${GMOCK_CFLAGS_OTHER})
+target_compile_options(test_freertos_semaphore PRIVATE ${GTEST_CFLAGS_OTHER} ${GMOCK_CFLAGS_OTHER})
 
 # Discover tests
 include(GoogleTest)
 gtest_discover_tests(test_freertos_task)
+gtest_discover_tests(test_freertos_semaphore)

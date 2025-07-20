@@ -253,4 +253,102 @@ TaskHookFunction_t ulTaskGetApplicationTaskTagFromISR(TaskHandle_t xTask) {
     return nullptr;
 }
 
+// Semaphore API implementations
+SemaphoreHandle_t xSemaphoreCreateBinary(void) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xSemaphoreCreateBinary();
+    }
+    return nullptr;
+}
+
+SemaphoreHandle_t xSemaphoreCreateBinaryStatic(StaticSemaphore_t* pxSemaphoreBuffer) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xSemaphoreCreateBinaryStatic(pxSemaphoreBuffer);
+    }
+    return nullptr;
+}
+
+SemaphoreHandle_t xSemaphoreCreateCounting(UBaseType_t uxMaxCount, UBaseType_t uxInitialCount) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xSemaphoreCreateCounting(uxMaxCount, uxInitialCount);
+    }
+    return nullptr;
+}
+
+SemaphoreHandle_t xSemaphoreCreateCountingStatic(UBaseType_t uxMaxCount, UBaseType_t uxInitialCount, StaticSemaphore_t* pxSemaphoreBuffer) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xSemaphoreCreateCountingStatic(uxMaxCount, uxInitialCount, pxSemaphoreBuffer);
+    }
+    return nullptr;
+}
+
+SemaphoreHandle_t xSemaphoreCreateMutex(void) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xSemaphoreCreateMutex();
+    }
+    return nullptr;
+}
+
+SemaphoreHandle_t xSemaphoreCreateMutexStatic(StaticSemaphore_t* pxMutexBuffer) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xSemaphoreCreateMutexStatic(pxMutexBuffer);
+    }
+    return nullptr;
+}
+
+SemaphoreHandle_t xSemaphoreCreateRecursiveMutex(void) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xSemaphoreCreateRecursiveMutex();
+    }
+    return nullptr;
+}
+
+SemaphoreHandle_t xSemaphoreCreateRecursiveMutexStatic(StaticSemaphore_t* pxMutexBuffer) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xSemaphoreCreateRecursiveMutexStatic(pxMutexBuffer);
+    }
+    return nullptr;
+}
+
+BaseType_t xSemaphoreGive(SemaphoreHandle_t xSemaphore) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xSemaphoreGive(xSemaphore);
+    }
+    return pdFALSE;
+}
+
+BaseType_t xSemaphoreGiveFromISR(SemaphoreHandle_t xSemaphore, BaseType_t* pxHigherPriorityTaskWoken) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xSemaphoreGiveFromISR(xSemaphore, pxHigherPriorityTaskWoken);
+    }
+    return pdFALSE;
+}
+
+BaseType_t xSemaphoreTake(SemaphoreHandle_t xSemaphore, TickType_t xTicksToWait) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xSemaphoreTake(xSemaphore, xTicksToWait);
+    }
+    return pdFALSE;
+}
+
+BaseType_t xSemaphoreTakeFromISR(SemaphoreHandle_t xSemaphore, BaseType_t* pxHigherPriorityTaskWoken) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xSemaphoreTakeFromISR(xSemaphore, pxHigherPriorityTaskWoken);
+    }
+    return pdFALSE;
+}
+
+UBaseType_t uxSemaphoreGetCount(SemaphoreHandle_t xSemaphore) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->uxSemaphoreGetCount(xSemaphore);
+    }
+    return 0;
+}
+
+void vSemaphoreDelete(SemaphoreHandle_t xSemaphore) {
+    if (g_freertos_mock) {
+        g_freertos_mock->vSemaphoreDelete(xSemaphore);
+    }
+}
+
 }

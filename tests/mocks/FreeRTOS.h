@@ -48,6 +48,14 @@ typedef enum {
 // Feature flags (enabled for comprehensive testing)
 #define INCLUDE_vTaskSuspend 1
 #define INCLUDE_vTaskDelete 1
+
+// Semaphore types
+typedef void* SemaphoreHandle_t;
+
+// Semaphore static allocation structures (empty for mock)
+typedef struct {
+    uint8_t dummy[80]; // Placeholder size
+} StaticSemaphore_t;
 #define INCLUDE_xTaskAbortDelay 1
 #define INCLUDE_uxTaskPriorityGet 1
 #define INCLUDE_vTaskPrioritySet 1
@@ -93,6 +101,9 @@ typedef void (*TaskHookFunction_t)(void);
 #define taskDISABLE_INTERRUPTS()         // Host testing: Interrupt disable not applicable
 #define taskENABLE_INTERRUPTS()          // Host testing: Interrupt enable not applicable
 #define taskYIELD()                      // Host testing: Task yield stubbed
+
+// Assert macro (no-op for host testing with comment)
+#define configASSERT(x)                  // Host testing: Assert not applicable, condition: x
 
 // Scheduler control macros
 #define vTaskSuspendAll()                // Host testing: Scheduler suspend stubbed
@@ -163,6 +174,24 @@ public:
     MOCK_METHOD(void, vTaskSetApplicationTaskTag, (TaskHandle_t xTask, TaskHookFunction_t pxHookFunction));
     MOCK_METHOD(TaskHookFunction_t, ulTaskGetApplicationTaskTag, (TaskHandle_t xTask));
     MOCK_METHOD(TaskHookFunction_t, ulTaskGetApplicationTaskTagFromISR, (TaskHandle_t xTask));
+    
+    // Semaphore creation
+    MOCK_METHOD(SemaphoreHandle_t, xSemaphoreCreateBinary, ());
+    MOCK_METHOD(SemaphoreHandle_t, xSemaphoreCreateBinaryStatic, (StaticSemaphore_t* pxSemaphoreBuffer));
+    MOCK_METHOD(SemaphoreHandle_t, xSemaphoreCreateCounting, (UBaseType_t uxMaxCount, UBaseType_t uxInitialCount));
+    MOCK_METHOD(SemaphoreHandle_t, xSemaphoreCreateCountingStatic, (UBaseType_t uxMaxCount, UBaseType_t uxInitialCount, StaticSemaphore_t* pxSemaphoreBuffer));
+    MOCK_METHOD(SemaphoreHandle_t, xSemaphoreCreateMutex, ());
+    MOCK_METHOD(SemaphoreHandle_t, xSemaphoreCreateMutexStatic, (StaticSemaphore_t* pxMutexBuffer));
+    MOCK_METHOD(SemaphoreHandle_t, xSemaphoreCreateRecursiveMutex, ());
+    MOCK_METHOD(SemaphoreHandle_t, xSemaphoreCreateRecursiveMutexStatic, (StaticSemaphore_t* pxMutexBuffer));
+    
+    // Semaphore operations
+    MOCK_METHOD(BaseType_t, xSemaphoreGive, (SemaphoreHandle_t xSemaphore));
+    MOCK_METHOD(BaseType_t, xSemaphoreGiveFromISR, (SemaphoreHandle_t xSemaphore, BaseType_t* pxHigherPriorityTaskWoken));
+    MOCK_METHOD(BaseType_t, xSemaphoreTake, (SemaphoreHandle_t xSemaphore, TickType_t xTicksToWait));
+    MOCK_METHOD(BaseType_t, xSemaphoreTakeFromISR, (SemaphoreHandle_t xSemaphore, BaseType_t* pxHigherPriorityTaskWoken));
+    MOCK_METHOD(UBaseType_t, uxSemaphoreGetCount, (SemaphoreHandle_t xSemaphore));
+    MOCK_METHOD(void, vSemaphoreDelete, (SemaphoreHandle_t xSemaphore));
 };
 
 // Global mock instance
@@ -209,4 +238,20 @@ extern "C" {
     void vTaskSetApplicationTaskTag(TaskHandle_t xTask, TaskHookFunction_t pxHookFunction);
     TaskHookFunction_t ulTaskGetApplicationTaskTag(TaskHandle_t xTask);
     TaskHookFunction_t ulTaskGetApplicationTaskTagFromISR(TaskHandle_t xTask);
+    
+    // Semaphore functions
+    SemaphoreHandle_t xSemaphoreCreateBinary(void);
+    SemaphoreHandle_t xSemaphoreCreateBinaryStatic(StaticSemaphore_t* pxSemaphoreBuffer);
+    SemaphoreHandle_t xSemaphoreCreateCounting(UBaseType_t uxMaxCount, UBaseType_t uxInitialCount);
+    SemaphoreHandle_t xSemaphoreCreateCountingStatic(UBaseType_t uxMaxCount, UBaseType_t uxInitialCount, StaticSemaphore_t* pxSemaphoreBuffer);
+    SemaphoreHandle_t xSemaphoreCreateMutex(void);
+    SemaphoreHandle_t xSemaphoreCreateMutexStatic(StaticSemaphore_t* pxMutexBuffer);
+    SemaphoreHandle_t xSemaphoreCreateRecursiveMutex(void);
+    SemaphoreHandle_t xSemaphoreCreateRecursiveMutexStatic(StaticSemaphore_t* pxMutexBuffer);
+    BaseType_t xSemaphoreGive(SemaphoreHandle_t xSemaphore);
+    BaseType_t xSemaphoreGiveFromISR(SemaphoreHandle_t xSemaphore, BaseType_t* pxHigherPriorityTaskWoken);
+    BaseType_t xSemaphoreTake(SemaphoreHandle_t xSemaphore, TickType_t xTicksToWait);
+    BaseType_t xSemaphoreTakeFromISR(SemaphoreHandle_t xSemaphore, BaseType_t* pxHigherPriorityTaskWoken);
+    UBaseType_t uxSemaphoreGetCount(SemaphoreHandle_t xSemaphore);
+    void vSemaphoreDelete(SemaphoreHandle_t xSemaphore);
 }
