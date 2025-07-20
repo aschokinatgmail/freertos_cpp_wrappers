@@ -1,0 +1,12 @@
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build/CMakeFiles/freertos_cpp_wrappers.dir
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build/CMakeFiles/test.dir
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build/CMakeFiles/edit_cache.dir
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build/CMakeFiles/rebuild_cache.dir
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build/tests/CMakeFiles/freertos_mocks.dir
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build/tests/CMakeFiles/test_freertos_task.dir
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build/tests/CMakeFiles/test_freertos_semaphore.dir
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build/tests/CMakeFiles/test_freertos_queue.dir
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build/tests/CMakeFiles/test_freertos_event_group.dir
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build/tests/CMakeFiles/test.dir
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build/tests/CMakeFiles/edit_cache.dir
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build/tests/CMakeFiles/rebuild_cache.dir

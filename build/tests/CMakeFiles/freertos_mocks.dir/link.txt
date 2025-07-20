@@ -1,0 +1,2 @@
+/usr/bin/ar qc libfreertos_mocks.a CMakeFiles/freertos_mocks.dir/mocks/freertos_mocks.cpp.o
+/usr/bin/ranlib libfreertos_mocks.a

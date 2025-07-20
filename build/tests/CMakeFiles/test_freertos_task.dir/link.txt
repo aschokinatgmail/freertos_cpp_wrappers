@@ -1,0 +1,1 @@
+/usr/bin/c++ -Wl,--dependency-file=CMakeFiles/test_freertos_task.dir/link.d CMakeFiles/test_freertos_task.dir/test_freertos_task.cpp.o -o test_freertos_task  ../libfreertos_cpp_wrappers.a libfreertos_mocks.a -lgtest_main -lgtest -lgmock_main -lgmock -lgtest -lpthread

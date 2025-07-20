@@ -1,0 +1,2 @@
+/usr/bin/ar qc libfreertos_cpp_wrappers.a CMakeFiles/freertos_cpp_wrappers.dir/src/freertos_task.cc.o
+/usr/bin/ranlib libfreertos_cpp_wrappers.a

@@ -173,7 +173,16 @@ public:
              std::forward<std::function<void()>>(task_routine)} {}
 #endif
   task(const task &) = delete;
-  task(task &&other) = default;
+  task(task &&other) noexcept 
+      : m_allocator(std::move(other.m_allocator)),
+        m_hTask(other.m_hTask),
+        m_taskRoutine(std::move(other.m_taskRoutine))
+#if INCLUDE_vTaskSuspend
+        , m_start_suspended(other.m_start_suspended)
+#endif
+  {
+    other.m_hTask = nullptr; // Transfer ownership - moved-from object should not delete the task
+  }
   /**
    * @brief Destruct the task object and delete the task instance if it was
    * created.
@@ -225,7 +234,9 @@ public:
    *
    * @return BaseType_t pdTRUE if the delay was aborted, pdFALSE otherwise
    */
-  BaseType_t abort_delay(void) { return xTaskAbortDelay(m_hTask); }
+  BaseType_t abort_delay(void) { 
+    return m_hTask ? xTaskAbortDelay(m_hTask) : pdFALSE; 
+  }
 #endif
 #if INCLUDE_uxTaskPriorityGet && configUSE_MUTEXES
   /**
@@ -588,7 +599,15 @@ public:
                       std::move(periodic_routine),
                       start_suspended} {}
   periodic_task(const periodic_task &) = delete;
-  periodic_task(periodic_task &&other) = default;
+  periodic_task(periodic_task &&other) noexcept 
+      : m_period(other.m_period),
+        m_on_start(std::move(other.m_on_start)),
+        m_on_stop(std::move(other.m_on_stop)),
+        m_periodic_routine(std::move(other.m_periodic_routine)),
+        m_task(std::move(other.m_task))
+  {
+    // m_task move constructor will handle ownership transfer
+  }
   /**
    * @brief Destruct the periodic task object and delete the task instance if it
    * was created.
@@ -994,7 +1013,7 @@ void delay_until(const std::chrono::steady_clock::time_point &wakeTime);
 template <size_t status_array_capacity> class task_system_status {
   TaskStatus_t m_status_array[status_array_capacity];
   UBaseType_t m_task_count;
-  long m_total_run_time;
+  uint32_t m_total_run_time;
 
 public:
   /**
