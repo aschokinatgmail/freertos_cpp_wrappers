@@ -145,7 +145,7 @@ public:
   template <typename Rep, typename Period>
   BaseType_t send(const T &item,
                   const std::chrono::duration<Rep, Period> &timeout) {
-    return send(item, pdMS_TO_TICKS(timeout.count()));
+    return send(item, pdMS_TO_TICKS(std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count()));
   }
   /**
    * @brief Posts an item to the back of a queue from an ISR.
@@ -197,7 +197,7 @@ public:
   template <typename Rep, typename Period>
   BaseType_t send_back(const T &item,
                        const std::chrono::duration<Rep, Period> &timeout) {
-    return send_back(item, pdMS_TO_TICKS(timeout.count()));
+    return send_back(item, pdMS_TO_TICKS(std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count()));
   }
   /**
    * @brief Posts an item to the back of a queue from an ISR.
@@ -250,7 +250,7 @@ public:
   template <typename Rep, typename Period>
   BaseType_t send_front(const T &item,
                         const std::chrono::duration<Rep, Period> &timeout) {
-    return send_front(item, pdMS_TO_TICKS(timeout.count()));
+    return send_front(item, pdMS_TO_TICKS(std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count()));
   }
   /**
    * @brief Posts an item to the front of a queue from an ISR.
@@ -320,7 +320,7 @@ public:
   template <typename Rep, typename Period>
   BaseType_t receive(T &item,
                      const std::chrono::duration<Rep, Period> &timeout) {
-    return receive(item, pdMS_TO_TICKS(timeout.count()));
+    return receive(item, pdMS_TO_TICKS(std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count()));
   }
   /**
    * @brief Receive an item from a queue.
@@ -332,7 +332,7 @@ public:
    */
   template <typename Rep, typename Period>
   optional<T> receive(const std::chrono::duration<Rep, Period> &timeout) {
-    return receive(pdMS_TO_TICKS(timeout.count()));
+    return receive(pdMS_TO_TICKS(std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count()));
   }
   /**
    * @brief Receive an item from a queue from an ISR.
@@ -359,23 +359,7 @@ public:
     BaseType_t higher_priority_task_woken = pdFALSE;
     return xQueueReceiveFromISR(m_queue, &item, &higher_priority_task_woken);
   }
-  /**
-   * @brief Receive an item from a queue from an ISR.
-   * @ref https://www.freertos.org/a00120.html
-   *
-   * @param higher_priority_task_woken  A variable to set to pdTRUE if the
-   * action unblocked a task of higher priority.
-   * @return optional<T> The item received from the queue or std::nullopt if the
-   * queue is empty.
-   */
-  optional<T> receive_isr(BaseType_t &higher_priority_task_woken) {
-    T item;
-    if (xQueueReceiveFromISR(m_queue, &item, &higher_priority_task_woken) ==
-        pdPASS) {
-      return item;
-    }
-    return {};
-  }
+
   /**
    * @brief Receive an item from a queue from an ISR.
    * @ref https://www.freertos.org/a00120.html
@@ -384,8 +368,13 @@ public:
    * queue is empty.
    */
   optional<T> receive_isr(void) {
+    T item;
     BaseType_t higher_priority_task_woken = pdFALSE;
-    return receive_isr(higher_priority_task_woken);
+    if (xQueueReceiveFromISR(m_queue, &item, &higher_priority_task_woken) ==
+        pdPASS) {
+      return item;
+    }
+    return {};
   }
   /**
    * @brief Return the number of items stored in the queue.
@@ -478,7 +467,7 @@ public:
    */
   template <typename Rep, typename Period>
   BaseType_t peek(T &item, const std::chrono::duration<Rep, Period> &timeout) {
-    return peek(item, pdMS_TO_TICKS(timeout.count()));
+    return peek(item, pdMS_TO_TICKS(std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count()));
   }
   /**
    * @brief Peek an item from a queue from an ISR. The item is not removed from
@@ -533,26 +522,9 @@ public:
    */
   template <typename Rep, typename Period>
   optional<T> peek(const std::chrono::duration<Rep, Period> &timeout) {
-    return peek(pdMS_TO_TICKS(timeout.count()));
+    return peek(pdMS_TO_TICKS(std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count()));
   }
-  /**
-   * @brief Peek an item from a queue from an ISR. The item is not removed from
-   * the queue.
-   * @ref https://www.freertos.org/xQueuePeekFromISR.html
-   *
-   * @param higher_priority_task_woken A variable to set to pdTRUE if the action
-   * unblocked a task of higher priority.
-   * @return optional<T> The item peeked from the queue or std::nullopt if the
-   * queue is empty.
-   */
-  optional<T> peek_isr(BaseType_t &higher_priority_task_woken) {
-    T item;
-    if (xQueuePeekFromISR(m_queue, &item, &higher_priority_task_woken) ==
-        pdPASS) {
-      return item;
-    }
-    return {};
-  }
+
   /**
    * @brief Peek an item from a queue from an ISR. The item is not removed from
    * the queue.
@@ -562,8 +534,13 @@ public:
    * queue is empty.
    */
   optional<T> peek_isr(void) {
+    T item;
     BaseType_t higher_priority_task_woken = pdFALSE;
-    return peek_isr(higher_priority_task_woken);
+    if (xQueuePeekFromISR(m_queue, &item, &higher_priority_task_woken) ==
+        pdPASS) {
+      return item;
+    }
+    return {};
   }
   /**
    * @brief Return the name of the queue.

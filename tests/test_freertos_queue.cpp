@@ -352,7 +352,7 @@ TEST_F(FreeRTOSQueueTest, QueueReceiveISR) {
 TEST_F(FreeRTOSQueueTest, QueueReceiveChronoTimeout) {
     EXPECT_CALL(*mock, xQueueCreate(4, sizeof(uint32_t)))
         .WillOnce(Return(mock_queue_handle));
-    EXPECT_CALL(*mock, xQueueReceive(mock_queue_handle, NotNull(), 1)) // 1 second = 1 tick with current conversion
+    EXPECT_CALL(*mock, xQueueReceive(mock_queue_handle, NotNull(), 1000)) // 1 second = 1000 ms
         .WillOnce(Return(pdPASS));
     EXPECT_CALL(*mock, pcQueueGetName(mock_queue_handle))
         .WillOnce(Return(nullptr));
@@ -708,4 +708,214 @@ TEST_F(FreeRTOSQueueTest, QueueAPICompleteness) {
      * in task notifications are not covered by these basic wrapper classes.
      */
     EXPECT_TRUE(true); // Placeholder for documentation
+}
+
+// =============================================================================
+// Enhanced Data Type Variety Tests  
+// =============================================================================
+
+TEST_F(FreeRTOSQueueTest, QueueWithVariousDataTypes) {
+    QueueHandle_t mock_int8_handle = reinterpret_cast<QueueHandle_t>(0x11111111);
+    QueueHandle_t mock_int16_handle = reinterpret_cast<QueueHandle_t>(0x22222222);
+    QueueHandle_t mock_int64_handle = reinterpret_cast<QueueHandle_t>(0x33333333);
+    
+    // Test with different basic types
+    EXPECT_CALL(*mock, xQueueCreate(5, sizeof(int8_t)))
+        .WillOnce(Return(mock_int8_handle));
+    EXPECT_CALL(*mock, pcQueueGetName(mock_int8_handle))
+        .WillOnce(Return(nullptr));
+    EXPECT_CALL(*mock, vQueueDelete(mock_int8_handle));
+    
+    freertos::queue<5, int8_t, freertos::dynamic_queue_allocator<5, int8_t>> int8_queue;
+    
+    // Test with int16_t
+    EXPECT_CALL(*mock, xQueueCreate(3, sizeof(int16_t)))
+        .WillOnce(Return(mock_int16_handle));
+    EXPECT_CALL(*mock, pcQueueGetName(mock_int16_handle))
+        .WillOnce(Return(nullptr));
+    EXPECT_CALL(*mock, vQueueDelete(mock_int16_handle));
+    
+    freertos::queue<3, int16_t, freertos::dynamic_queue_allocator<3, int16_t>> int16_queue;
+    
+    // Test with int64_t
+    EXPECT_CALL(*mock, xQueueCreate(2, sizeof(int64_t)))
+        .WillOnce(Return(mock_int64_handle));
+    EXPECT_CALL(*mock, pcQueueGetName(mock_int64_handle))
+        .WillOnce(Return(nullptr));
+    EXPECT_CALL(*mock, vQueueDelete(mock_int64_handle));
+    
+    freertos::queue<2, int64_t, freertos::dynamic_queue_allocator<2, int64_t>> int64_queue;
+}
+
+TEST_F(FreeRTOSQueueTest, QueueWithEnumTypes) {
+    enum class Priority : uint8_t { LOW = 1, MEDIUM = 2, HIGH = 3 };
+    
+    EXPECT_CALL(*mock, xQueueCreate(4, sizeof(Priority)))
+        .WillOnce(Return(mock_queue_handle));
+    EXPECT_CALL(*mock, xQueueSend(mock_queue_handle, NotNull(), 50))
+        .WillOnce(Return(pdPASS));
+    EXPECT_CALL(*mock, xQueueReceive(mock_queue_handle, NotNull(), 100))
+        .WillOnce(Return(pdPASS));
+    EXPECT_CALL(*mock, pcQueueGetName(mock_queue_handle))
+        .WillOnce(Return(nullptr));
+    EXPECT_CALL(*mock, vQueueDelete(mock_queue_handle));
+    
+    freertos::queue<4, Priority, freertos::dynamic_queue_allocator<4, Priority>> priority_queue;
+    
+    Priority test_priority = Priority::HIGH;
+    auto send_result = priority_queue.send(test_priority, 50);
+    EXPECT_EQ(send_result, pdPASS);
+    
+    Priority received_priority;
+    auto receive_result = priority_queue.receive(received_priority, 100);
+    EXPECT_EQ(receive_result, pdPASS);
+}
+
+TEST_F(FreeRTOSQueueTest, QueueWithPointerTypes) {
+    using DataPtr = uint32_t*;
+    
+    EXPECT_CALL(*mock, xQueueCreate(10, sizeof(DataPtr)))
+        .WillOnce(Return(mock_queue_handle));
+    EXPECT_CALL(*mock, xQueueSend(mock_queue_handle, NotNull(), 0))
+        .WillOnce(Return(pdPASS));
+    EXPECT_CALL(*mock, pcQueueGetName(mock_queue_handle))
+        .WillOnce(Return(nullptr));
+    EXPECT_CALL(*mock, vQueueDelete(mock_queue_handle));
+    
+    freertos::queue<10, DataPtr, freertos::dynamic_queue_allocator<10, DataPtr>> ptr_queue;
+    
+    uint32_t test_data = 42;
+    DataPtr test_ptr = &test_data;
+    auto result = ptr_queue.send(test_ptr, 0);
+    EXPECT_EQ(result, pdPASS);
+}
+
+// =============================================================================
+// Comprehensive Chrono Duration Tests
+// =============================================================================
+
+TEST_F(FreeRTOSQueueTest, QueueChronoMicrosecondsTimeout) {
+    EXPECT_CALL(*mock, xQueueCreate(3, sizeof(float)))
+        .WillOnce(Return(mock_queue_handle));
+    EXPECT_CALL(*mock, xQueueReceive(mock_queue_handle, NotNull(), 0)) // 500µs = 0ms after duration_cast
+        .WillOnce(Return(pdPASS));
+    EXPECT_CALL(*mock, pcQueueGetName(mock_queue_handle))
+        .WillOnce(Return(nullptr));
+    EXPECT_CALL(*mock, vQueueDelete(mock_queue_handle));
+    
+    freertos::queue<3, float, freertos::dynamic_queue_allocator<3, float>> queue;
+    
+    float received_value;
+    auto result = queue.receive(received_value, std::chrono::microseconds(500));
+    EXPECT_EQ(result, pdPASS);
+}
+
+TEST_F(FreeRTOSQueueTest, QueueChronoMinutesTimeout) {
+    EXPECT_CALL(*mock, xQueueCreate(2, sizeof(double)))
+        .WillOnce(Return(mock_queue_handle));
+    EXPECT_CALL(*mock, xQueueSend(mock_queue_handle, NotNull(), 60000)) // 1 minute = 60000ms
+        .WillOnce(Return(pdPASS));
+    EXPECT_CALL(*mock, pcQueueGetName(mock_queue_handle))
+        .WillOnce(Return(nullptr));
+    EXPECT_CALL(*mock, vQueueDelete(mock_queue_handle));
+    
+    freertos::queue<2, double, freertos::dynamic_queue_allocator<2, double>> queue;
+    
+    double test_value = 3.14159;
+    auto result = queue.send(test_value, std::chrono::minutes(1));
+    EXPECT_EQ(result, pdPASS);
+}
+
+TEST_F(FreeRTOSQueueTest, QueueChronoNanosecondsTimeout) {
+    EXPECT_CALL(*mock, xQueueCreate(5, sizeof(uint64_t)))
+        .WillOnce(Return(mock_queue_handle));
+    EXPECT_CALL(*mock, xQueuePeek(mock_queue_handle, NotNull(), 1)) // 1000000ns = 1ms
+        .WillOnce(Return(pdPASS));
+    EXPECT_CALL(*mock, pcQueueGetName(mock_queue_handle))
+        .WillOnce(Return(nullptr));
+    EXPECT_CALL(*mock, vQueueDelete(mock_queue_handle));
+    
+    freertos::queue<5, uint64_t, freertos::dynamic_queue_allocator<5, uint64_t>> queue;
+    
+    uint64_t peeked_value;
+    auto result = queue.peek(peeked_value, std::chrono::nanoseconds(1000000));
+    EXPECT_EQ(result, pdPASS);
+}
+
+TEST_F(FreeRTOSQueueTest, QueueChronoOptionalReceiveVariousDurations) {
+    EXPECT_CALL(*mock, xQueueCreate(4, sizeof(int32_t)))
+        .WillOnce(Return(mock_queue_handle));
+    EXPECT_CALL(*mock, xQueueReceive(mock_queue_handle, NotNull(), 5000)) // 5 seconds = 5000ms
+        .WillOnce(Return(pdPASS));
+    EXPECT_CALL(*mock, pcQueueGetName(mock_queue_handle))
+        .WillOnce(Return(nullptr));
+    EXPECT_CALL(*mock, vQueueDelete(mock_queue_handle));
+    
+    freertos::queue<4, int32_t, freertos::dynamic_queue_allocator<4, int32_t>> queue;
+    
+    auto result = queue.receive(std::chrono::seconds(5));
+    EXPECT_TRUE(result.has_value());
+}
+
+// =============================================================================
+// Enhanced Static Allocator Tests with Different Types
+// =============================================================================
+
+TEST_F(FreeRTOSQueueTest, StaticQueueAllocatorWithVariousTypes) {
+    QueueHandle_t mock_bool_handle = reinterpret_cast<QueueHandle_t>(0x44444444);
+    QueueHandle_t mock_char_handle = reinterpret_cast<QueueHandle_t>(0x55555555);
+    
+    // Test with bool type
+    EXPECT_CALL(*mock, xQueueCreateStatic(8, sizeof(bool), NotNull(), NotNull()))
+        .WillOnce(Return(mock_bool_handle));
+    EXPECT_CALL(*mock, pcQueueGetName(mock_bool_handle))
+        .WillOnce(Return(nullptr));
+    EXPECT_CALL(*mock, vQueueDelete(mock_bool_handle));
+    
+    freertos::sa::queue<8, bool> bool_queue;
+    
+    // Test with char type  
+    EXPECT_CALL(*mock, xQueueCreateStatic(16, sizeof(char), NotNull(), NotNull()))
+        .WillOnce(Return(mock_char_handle));
+    EXPECT_CALL(*mock, pcQueueGetName(mock_char_handle))
+        .WillOnce(Return(nullptr));
+    EXPECT_CALL(*mock, vQueueDelete(mock_char_handle));
+    
+    freertos::sa::queue<16, char> char_queue;
+}
+
+// =============================================================================
+// ISR Operations with Different Data Types
+// =============================================================================
+
+TEST_F(FreeRTOSQueueTest, QueueISROperationsWithDifferentTypes) {
+    // Test ISR operations with uint16_t
+    EXPECT_CALL(*mock, xQueueCreate(6, sizeof(uint16_t)))
+        .WillOnce(Return(mock_queue_handle));
+    EXPECT_CALL(*mock, xQueueSendFromISR(mock_queue_handle, NotNull(), NotNull()))
+        .WillOnce(Return(pdPASS));
+    EXPECT_CALL(*mock, xQueueReceiveFromISR(mock_queue_handle, NotNull(), NotNull()))
+        .Times(2)  // Called twice: once for receive_isr(ref) and once for receive_isr()
+        .WillRepeatedly(Return(pdPASS));
+    EXPECT_CALL(*mock, pcQueueGetName(mock_queue_handle))
+        .WillOnce(Return(nullptr));
+    EXPECT_CALL(*mock, vQueueDelete(mock_queue_handle));
+    
+    freertos::queue<6, uint16_t, freertos::dynamic_queue_allocator<6, uint16_t>> queue;
+    
+    uint16_t test_value = 0xABCD;
+    BaseType_t higher_priority_task_woken = pdFALSE;
+    
+    // Test send_isr with reference parameter
+    auto send_result = queue.send_isr(test_value, higher_priority_task_woken);
+    EXPECT_EQ(send_result, pdPASS);
+    
+    // Test receive_isr with reference parameter
+    uint16_t received_value;
+    auto receive_result = queue.receive_isr(received_value, higher_priority_task_woken);
+    EXPECT_EQ(receive_result, pdPASS);
+    
+    // Test receive_isr returning optional (no reference parameter)
+    auto optional_result = queue.receive_isr();
+    EXPECT_TRUE(optional_result.has_value());
 }
