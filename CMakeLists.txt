@@ -15,10 +15,30 @@ if(ENABLE_COVERAGE)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
 endif()
 
-# Find GoogleTest
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(GTEST REQUIRED gtest_main)
-pkg_check_modules(GMOCK REQUIRED gmock_main)
+# Find GoogleTest - try FetchContent if PkgConfig fails
+find_package(PkgConfig)
+if(PkgConfig_FOUND)
+    pkg_check_modules(GTEST gtest_main)
+    pkg_check_modules(GMOCK gmock_main)
+endif()
+
+if(NOT GTEST_FOUND)
+    # Use FetchContent to download GoogleTest
+    include(FetchContent)
+    FetchContent_Declare(
+        googletest
+        URL https://github.com/google/googletest/archive/03597a01ee50e33277e995ac2c2e0400bbfd58bb.zip
+    )
+    # For Windows: Prevent overriding the parent project's compiler/linker settings
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+    FetchContent_MakeAvailable(googletest)
+    
+    # Set variables for compatibility
+    set(GTEST_LIBRARIES gtest_main)
+    set(GMOCK_LIBRARIES gmock_main)
+    set(GTEST_CFLAGS_OTHER "")
+    set(GMOCK_CFLAGS_OTHER "")
+endif()
 
 # Enable testing
 enable_testing()
