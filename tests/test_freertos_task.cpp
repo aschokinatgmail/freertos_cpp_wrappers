@@ -792,17 +792,14 @@ TEST_F(FreeRTOSTaskTest, TaskMoveConstruction) {
     sa::task<1024> original_task("MoveTest", 2, [](){});
     EXPECT_EQ(original_task.handle(), mock_task_handle);
     
-    // Due to default move constructor, both objects will have the same handle
-    // and both destructors will be called (this is a limitation of the current implementation)
+    // With proper move constructor, only the moved-to object should call destructor
     EXPECT_CALL(*mock, vTaskDelete(mock_task_handle))
-        .Times(2);  // Both original and moved objects will call destructor
+        .Times(1);  // Only the moved-to object will call destructor
     
     // Move construction
     sa::task<1024> moved_task = std::move(original_task);
     EXPECT_EQ(moved_task.handle(), mock_task_handle);
-    
-    // NOTE: In a proper move constructor, the moved-from object should have a null handle
-    // to prevent double deletion. This test documents the current limitation.
+    EXPECT_EQ(original_task.handle(), nullptr);  // moved-from object should have null handle
 }
 
 TEST_F(FreeRTOSTaskTest, PeriodicTaskMoveConstruction) {
@@ -813,20 +810,17 @@ TEST_F(FreeRTOSTaskTest, PeriodicTaskMoveConstruction) {
         [](){}, [](){}, [](){}, 100ms);
     EXPECT_EQ(original_task.handle(), mock_task_handle);
     
-    // Due to default move constructor, both objects will have the same handle
-    // and both destructors will be called (this is a limitation of the current implementation)
+    // With proper move constructor, only the moved-to object should call destructor
     EXPECT_CALL(*mock, xTaskAbortDelay(mock_task_handle))
-        .Times(2)  // Both original and moved objects will call destructor
-        .WillRepeatedly(Return(pdTRUE));
+        .Times(1)  // Only the moved-to object will call destructor
+        .WillOnce(Return(pdTRUE));
     EXPECT_CALL(*mock, vTaskDelete(mock_task_handle))
-        .Times(2);  // Both original and moved objects will call destructor
+        .Times(1);  // Only the moved-to object will call destructor
     
     // Move construction
     sa::periodic_task<1024> moved_task = std::move(original_task);
     EXPECT_EQ(moved_task.handle(), mock_task_handle);
-    
-    // NOTE: In a proper move constructor, the moved-from object should have a null handle
-    // to prevent double deletion. This test documents the current limitation.
+    EXPECT_EQ(original_task.handle(), nullptr);  // moved-from object should have null handle
 }
 
 // Test entry point
