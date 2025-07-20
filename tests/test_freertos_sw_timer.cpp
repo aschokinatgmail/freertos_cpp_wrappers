@@ -851,6 +851,249 @@ TEST_F(FreeRTOSSwTimerTest, ChronoCompatibility) {
 #endif // configSUPPORT_STATIC_ALLOCATION
 
 // =============================================================================
+// MIXED DURATION TYPES TESTS
+// =============================================================================
+
+#if configSUPPORT_STATIC_ALLOCATION
+
+TEST_F(FreeRTOSSwTimerTest, PeriodChangeWithMixedDurationTypes) {
+    EXPECT_CALL(*mock, xTimerCreateStatic(_, _, _, _, _, _))
+        .WillOnce(Return(mock_timer_handle));
+    
+    auto callback = createTestCallback();
+    sa::timer test_timer("TestTimer", 1000, pdTRUE, std::move(callback));
+    
+    // Test period change with different duration types: seconds and milliseconds
+    EXPECT_CALL(*mock, xTimerChangePeriod(mock_timer_handle, 2000, 500))
+        .WillOnce(Return(pdPASS));
+    
+    // This should work: 2 seconds period, 500ms timeout
+    BaseType_t result = test_timer.period(2s, 500ms);
+    EXPECT_EQ(result, pdPASS);
+    
+    expectDestructor();
+}
+
+TEST_F(FreeRTOSSwTimerTest, PeriodChangeWithVariousDurationCombinations) {
+    EXPECT_CALL(*mock, xTimerCreateStatic(_, _, _, _, _, _))
+        .WillOnce(Return(mock_timer_handle));
+    
+    auto callback = createTestCallback();
+    sa::timer test_timer("TestTimer", 1000, pdTRUE, std::move(callback));
+    
+    // Test various duration type combinations
+    
+    // Test 1: milliseconds period, seconds timeout
+    EXPECT_CALL(*mock, xTimerChangePeriod(mock_timer_handle, 1500, 1000))
+        .WillOnce(Return(pdPASS));
+    BaseType_t result1 = test_timer.period(1500ms, 1s);
+    EXPECT_EQ(result1, pdPASS);
+    
+    // Test 2: seconds period, milliseconds timeout
+    EXPECT_CALL(*mock, xTimerChangePeriod(mock_timer_handle, 3000, 250))
+        .WillOnce(Return(pdPASS));
+    BaseType_t result2 = test_timer.period(3s, 250ms);
+    EXPECT_EQ(result2, pdPASS);
+    
+    // Test 3: both in seconds but different granularity
+    EXPECT_CALL(*mock, xTimerChangePeriod(mock_timer_handle, 5000, 2000))
+        .WillOnce(Return(pdPASS));
+    BaseType_t result3 = test_timer.period(std::chrono::seconds(5), std::chrono::milliseconds(2000));
+    EXPECT_EQ(result3, pdPASS);
+    
+    expectDestructor();
+}
+
+TEST_F(FreeRTOSSwTimerTest, PeriodChangeWithMicrosecondPrecision) {
+    EXPECT_CALL(*mock, xTimerCreateStatic(_, _, _, _, _, _))
+        .WillOnce(Return(mock_timer_handle));
+    
+    auto callback = createTestCallback();
+    sa::timer test_timer("TestTimer", 1000, pdTRUE, std::move(callback));
+    
+    // Test microseconds to milliseconds conversion
+    // 1500000 microseconds = 1500 milliseconds
+    EXPECT_CALL(*mock, xTimerChangePeriod(mock_timer_handle, 1500, 500))
+        .WillOnce(Return(pdPASS));
+    BaseType_t result1 = test_timer.period(std::chrono::microseconds(1500000), 500ms);
+    EXPECT_EQ(result1, pdPASS);
+    
+    // Test milliseconds to microseconds timeout conversion  
+    // 750000 microseconds = 750 milliseconds
+    EXPECT_CALL(*mock, xTimerChangePeriod(mock_timer_handle, 2000, 750))
+        .WillOnce(Return(pdPASS));
+    BaseType_t result2 = test_timer.period(2s, std::chrono::microseconds(750000));
+    EXPECT_EQ(result2, pdPASS);
+    
+    expectDestructor();
+}
+
+TEST_F(FreeRTOSSwTimerTest, PeriodChangeWithMinutePrecision) {
+    EXPECT_CALL(*mock, xTimerCreateStatic(_, _, _, _, _, _))
+        .WillOnce(Return(mock_timer_handle));
+    
+    auto callback = createTestCallback();
+    sa::timer test_timer("TestTimer", 1000, pdTRUE, std::move(callback));
+    
+    // Test minutes to milliseconds conversion
+    // 2 minutes = 120000 milliseconds  
+    EXPECT_CALL(*mock, xTimerChangePeriod(mock_timer_handle, 120000, 5000))
+        .WillOnce(Return(pdPASS));
+    BaseType_t result1 = test_timer.period(std::chrono::minutes(2), 5s);
+    EXPECT_EQ(result1, pdPASS);
+    
+    // Test seconds to minutes timeout conversion
+    // 0.5 minutes = 30000 milliseconds
+    EXPECT_CALL(*mock, xTimerChangePeriod(mock_timer_handle, 10000, 30000))
+        .WillOnce(Return(pdPASS));
+    BaseType_t result2 = test_timer.period(10s, std::chrono::duration<double, std::ratio<60>>(0.5));
+    EXPECT_EQ(result2, pdPASS);
+    
+    expectDestructor();
+}
+
+TEST_F(FreeRTOSSwTimerTest, PeriodChangeWithFloatingPointDurations) {
+    EXPECT_CALL(*mock, xTimerCreateStatic(_, _, _, _, _, _))
+        .WillOnce(Return(mock_timer_handle));
+    
+    auto callback = createTestCallback();
+    sa::timer test_timer("TestTimer", 1000, pdTRUE, std::move(callback));
+    
+    // Test floating point seconds
+    // 2.5 seconds = 2500 milliseconds
+    EXPECT_CALL(*mock, xTimerChangePeriod(mock_timer_handle, 2500, 1500))
+        .WillOnce(Return(pdPASS));
+    BaseType_t result1 = test_timer.period(std::chrono::duration<double>(2.5), 1500ms);
+    EXPECT_EQ(result1, pdPASS);
+    
+    // Test fractional milliseconds (truncated to integer)
+    // 1234.567 milliseconds -> 1234 milliseconds
+    EXPECT_CALL(*mock, xTimerChangePeriod(mock_timer_handle, 1234, 3000))
+        .WillOnce(Return(pdPASS));
+    BaseType_t result2 = test_timer.period(std::chrono::duration<double, std::milli>(1234.567), 3s);
+    EXPECT_EQ(result2, pdPASS);
+    
+    expectDestructor();
+}
+
+TEST_F(FreeRTOSSwTimerTest, PeriodChangeEdgeCaseDurations) {
+    EXPECT_CALL(*mock, xTimerCreateStatic(_, _, _, _, _, _))
+        .WillOnce(Return(mock_timer_handle));
+    
+    auto callback = createTestCallback();
+    sa::timer test_timer("TestTimer", 1000, pdTRUE, std::move(callback));
+    
+    // Test zero durations
+    EXPECT_CALL(*mock, xTimerChangePeriod(mock_timer_handle, 0, 0))
+        .WillOnce(Return(pdPASS));
+    BaseType_t result1 = test_timer.period(0ms, 0s);
+    EXPECT_EQ(result1, pdPASS);
+    
+    // Test very small durations that round to zero
+    EXPECT_CALL(*mock, xTimerChangePeriod(mock_timer_handle, 0, 1))
+        .WillOnce(Return(pdPASS));
+    BaseType_t result2 = test_timer.period(std::chrono::microseconds(500), 1ms);  // 0.5ms rounds to 0
+    EXPECT_EQ(result2, pdPASS);
+    
+    // Test maximum practical durations
+    // Use large but reasonable values to avoid overflow
+    EXPECT_CALL(*mock, xTimerChangePeriod(mock_timer_handle, 3600000, 1800000))  // 1 hour, 30 minutes
+        .WillOnce(Return(pdPASS));
+    BaseType_t result3 = test_timer.period(std::chrono::hours(1), std::chrono::minutes(30));
+    EXPECT_EQ(result3, pdPASS);
+    
+    expectDestructor();
+}
+
+TEST_F(FreeRTOSSwTimerTest, ConstructorWithVariousDurationTypes) {
+    // Test constructor with floating point seconds
+    TimerHandle_t handle1 = reinterpret_cast<TimerHandle_t>(0x11111111);
+    EXPECT_CALL(*mock, xTimerCreateStatic(_, 2500, _, _, _, _))  // 2.5 seconds = 2500ms
+        .WillOnce(Return(handle1));
+    
+    auto callback1 = createTestCallback();
+    sa::timer test_timer1("TestTimer1", std::chrono::duration<double>(2.5), pdTRUE, std::move(callback1));
+    expectDestructor(handle1);
+    
+    // Test constructor with minutes
+    TimerHandle_t handle2 = reinterpret_cast<TimerHandle_t>(0x22222222);
+    EXPECT_CALL(*mock, xTimerCreateStatic(_, 120000, _, _, _, _))  // 2 minutes = 120000ms
+        .WillOnce(Return(handle2));
+    
+    auto callback2 = createTestCallback();
+    sa::timer test_timer2("TestTimer2", std::chrono::minutes(2), pdFALSE, std::move(callback2));
+    expectDestructor(handle2);
+    
+    // Test constructor with microseconds
+    TimerHandle_t handle3 = reinterpret_cast<TimerHandle_t>(0x33333333);
+    EXPECT_CALL(*mock, xTimerCreateStatic(_, 5000, _, _, _, _))  // 5000000 microseconds = 5000ms
+        .WillOnce(Return(handle3));
+    
+    auto callback3 = createTestCallback();
+    sa::timer test_timer3("TestTimer3", std::chrono::microseconds(5000000), pdTRUE, std::move(callback3));
+    expectDestructor(handle3);
+}
+
+TEST_F(FreeRTOSSwTimerTest, StartStopResetWithMixedDurationTypes) {
+    EXPECT_CALL(*mock, xTimerCreateStatic(_, _, _, _, _, _))
+        .WillOnce(Return(mock_timer_handle));
+    
+    auto callback = createTestCallback();
+    sa::timer test_timer("TestTimer", 1000, pdTRUE, std::move(callback));
+    
+    // Test start with seconds
+    EXPECT_CALL(*mock, xTimerStart(mock_timer_handle, 2000))  // 2 seconds = 2000ms
+        .WillOnce(Return(pdPASS));
+    BaseType_t result1 = test_timer.start(2s);
+    EXPECT_EQ(result1, pdPASS);
+    
+    // Test stop with microseconds  
+    EXPECT_CALL(*mock, xTimerStop(mock_timer_handle, 750))  // 750000 microseconds = 750ms
+        .WillOnce(Return(pdPASS));
+    BaseType_t result2 = test_timer.stop(std::chrono::microseconds(750000));
+    EXPECT_EQ(result2, pdPASS);
+    
+    // Test reset with floating point seconds
+    EXPECT_CALL(*mock, xTimerReset(mock_timer_handle, 1500))  // 1.5 seconds = 1500ms
+        .WillOnce(Return(pdPASS));
+    BaseType_t result3 = test_timer.reset(std::chrono::duration<double>(1.5));
+    EXPECT_EQ(result3, pdPASS);
+    
+    expectDestructor();
+}
+
+TEST_F(FreeRTOSSwTimerTest, ISRFunctionsWithMixedDurationTypes) {
+    EXPECT_CALL(*mock, xTimerCreateStatic(_, _, _, _, _, _))
+        .WillOnce(Return(mock_timer_handle));
+    
+    auto callback = createTestCallback();
+    sa::timer test_timer("TestTimer", 1000, pdTRUE, std::move(callback));
+    
+    // Test period_isr with seconds
+    EXPECT_CALL(*mock, xTimerChangePeriodFromISR(mock_timer_handle, 5000, NotNull()))  // 5 seconds = 5000ms
+        .WillOnce(Return(pdPASS));
+    BaseType_t high_priority_woken = pdFALSE;
+    BaseType_t result1 = test_timer.period_isr(5s, high_priority_woken);
+    EXPECT_EQ(result1, pdPASS);
+    
+    // Test period_isr with microseconds (no high_priority_woken parameter)
+    EXPECT_CALL(*mock, xTimerChangePeriodFromISR(mock_timer_handle, 3000, NotNull()))  // 3000000 microseconds = 3000ms
+        .WillOnce(Return(pdPASS));
+    BaseType_t result2 = test_timer.period_isr(std::chrono::microseconds(3000000));
+    EXPECT_EQ(result2, pdPASS);
+    
+    // Test period_isr with floating point duration
+    EXPECT_CALL(*mock, xTimerChangePeriodFromISR(mock_timer_handle, 7500, NotNull()))  // 7.5 seconds = 7500ms
+        .WillOnce(Return(pdPASS));
+    BaseType_t result3 = test_timer.period_isr(std::chrono::duration<double>(7.5));
+    EXPECT_EQ(result3, pdPASS);
+    
+    expectDestructor();
+}
+
+#endif // configSUPPORT_STATIC_ALLOCATION
+
+// =============================================================================
 // SINGLE-SHOT VS AUTO-RELOAD BEHAVIOR TESTS
 // =============================================================================
 
