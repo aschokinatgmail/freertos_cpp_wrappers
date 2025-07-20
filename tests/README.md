@@ -8,10 +8,10 @@ This directory contains comprehensive unit tests for the FreeRTOS C++ wrapper li
 - **Task Module** (`test_freertos_task.cpp`) - 46 tests
 - **Semaphore Module** (`test_freertos_semaphore.cpp`) - 68 tests
 - **Queue Module** (`test_freertos_queue.cpp`) - 49 tests
+- **Stream Buffer Module** (`test_freertos_stream_buffer.cpp`) - 47 tests
+- **Event Group Module** (`test_freertos_event_group.cpp`) - 30 tests
 
 ### Planned Modules 📋
-- Event Group Module (`test_freertos_event_group.cpp`)
-- Stream Buffer Module (`test_freertos_stream_buffer.cpp`)
 - Message Buffer Module (`test_freertos_message_buffer.cpp`)
 - Software Timer Module (`test_freertos_sw_timer.cpp`)
 
@@ -57,6 +57,8 @@ make -j$(nproc)
 ./tests/test_freertos_task
 ./tests/test_freertos_semaphore
 ./tests/test_freertos_queue
+./tests/test_freertos_stream_buffer
+./tests/test_freertos_event_group
 
 # Run tests with XML output
 ./tests/test_freertos_task --gtest_output=xml:test_results.xml
@@ -102,12 +104,26 @@ ctest --verbose
    - Overwrite operations for single-item queues
    - Reset functionality and error handling
 
-6. **Utility Function Tests**
+6. **Stream Buffer Tests**
+   - Static and dynamic stream buffer allocators
+   - Send operations (send, send_isr) with timeouts and partial sends
+   - Receive operations with timeouts and partial receives
+   - Stream buffer state operations (available bytes, free space, empty/full checks)
+   - Reset functionality and trigger level management
+   - Iterator-based operations and chrono timeout support
+
+7. **Event Group Tests**
+   - Static and dynamic event group allocators
+   - Bit manipulation operations (set, clear, wait for bits)
+   - Synchronization and wait operations with timeouts
+   - Event group state management and cleanup
+
+8. **Utility Function Tests**
    - Delay and timing functions
    - System information functions
    - Critical sections and barriers
 
-7. **Edge Cases and Error Handling**
+9. **Edge Cases and Error Handling**
    - Invalid parameters
    - Zero stack sizes
    - Move semantics limitations
@@ -130,6 +146,8 @@ The test framework includes comprehensive mocks for FreeRTOS APIs:
 - `tests/mocks/task.h` - Task-specific header stub
 - `tests/mocks/semphr.h` - Semaphore header stub
 - `tests/mocks/queue.h` - Queue header stub
+- `tests/mocks/stream_buffer.h` - Stream buffer header stub
+- `tests/mocks/event_groups.h` - Event group header stub
 
 ### Mock Features
 
@@ -198,6 +216,24 @@ When all tests pass, you should see:
 [----------] 49 tests from FreeRTOSQueueTest (X ms total)
 [==========] 49 tests from 1 test suite ran. (X ms total)
 [  PASSED  ] 49 tests.
+
+# Stream Buffer Tests
+[==========] Running 47 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 47 tests from FreeRTOSStreamBufferTest
+[       OK ] All tests completed successfully
+[----------] 47 tests from FreeRTOSStreamBufferTest (X ms total)
+[==========] 47 tests from 1 test suite ran. (X ms total)
+[  PASSED  ] 47 tests.
+
+# Event Group Tests
+[==========] Running 30 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 30 tests from FreeRTOSEventGroupTest
+[       OK ] All tests completed successfully
+[----------] 30 tests from FreeRTOSEventGroupTest (X ms total)
+[==========] 30 tests from 1 test suite ran. (X ms total)
+[  PASSED  ] 30 tests.
 ```
 
 ## Integration with CI/CD
