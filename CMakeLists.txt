@@ -15,6 +15,19 @@ if(ENABLE_COVERAGE)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
 endif()
 
+# =============================================================================
+# STATIC ANALYSIS CONFIGURATION (clang-tidy)
+# =============================================================================
+
+# Option to enable/disable clang-tidy static analysis for library modules
+option(ENABLE_CLANG_TIDY "Enable clang-tidy static analysis for library modules" ON)
+
+# Option to treat clang-tidy warnings as errors (useful for CI)
+option(CLANG_TIDY_WARNINGS_AS_ERRORS "Treat clang-tidy warnings as errors" OFF)
+
+# Option to generate clang-tidy report
+option(GENERATE_CLANG_TIDY_REPORT "Generate clang-tidy static analysis report" ON)
+
 # Find GoogleTest
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GTEST REQUIRED gtest_main)
@@ -31,6 +44,116 @@ include_directories(tests/mocks)
 add_library(freertos_cpp_wrappers 
     src/freertos_task.cc
 )
+
+# =============================================================================
+# APPLY STATIC ANALYSIS TO LIBRARY MODULES ONLY
+# =============================================================================
+
+if(ENABLE_CLANG_TIDY)
+    # Find clang-tidy executable
+    find_program(CLANG_TIDY_EXE NAMES clang-tidy)
+    
+    if(CLANG_TIDY_EXE)
+        message(STATUS "clang-tidy found: ${CLANG_TIDY_EXE}")
+        
+        # Define clang-tidy checks for library modules
+        # To extend or modify the check set, update the list below:
+        # - cppcoreguidelines-*: C++ Core Guidelines compliance
+        # - cert-*: CERT C++ Secure Coding Standard
+        # - google-*: Google C++ Style Guide compliance  
+        # - hicpp-*: High Integrity C++ Coding Standard
+        # Add additional check patterns with commas, or exclude specific checks with '-pattern'
+        # For faster builds during development, consider using a subset like: "readability-*,performance-*"
+        set(CLANG_TIDY_CHECKS
+            "cppcoreguidelines-*,cert-*,google-*,hicpp-*"
+        )
+        
+        # Set up clang-tidy command with report generation
+        if(GENERATE_CLANG_TIDY_REPORT)
+            set(CLANG_TIDY_REPORT_FILE "${CMAKE_BINARY_DIR}/clang-tidy-report.txt")
+            message(STATUS "clang-tidy report will be generated at: ${CLANG_TIDY_REPORT_FILE}")
+        endif()
+        
+        # Configure clang-tidy for library targets only
+        # Note: Warnings-as-errors can be disabled during development by setting CLANG_TIDY_WARNINGS_AS_ERRORS=OFF
+        if(CLANG_TIDY_WARNINGS_AS_ERRORS)
+            if(GENERATE_CLANG_TIDY_REPORT)
+                set(CLANG_TIDY_COMMAND 
+                    ${CLANG_TIDY_EXE}
+                    --checks=${CLANG_TIDY_CHECKS}
+                    --warnings-as-errors=*
+                    --export-fixes=${CMAKE_BINARY_DIR}/clang-tidy-fixes.yaml
+                )
+            else()
+                set(CLANG_TIDY_COMMAND 
+                    ${CLANG_TIDY_EXE}
+                    --checks=${CLANG_TIDY_CHECKS}
+                    --warnings-as-errors=*
+                    --quiet
+                )
+            endif()
+            message(STATUS "clang-tidy warnings will be treated as errors for library modules")
+        else()
+            if(GENERATE_CLANG_TIDY_REPORT)
+                set(CLANG_TIDY_COMMAND 
+                    ${CLANG_TIDY_EXE}
+                    --checks=${CLANG_TIDY_CHECKS}
+                    --export-fixes=${CMAKE_BINARY_DIR}/clang-tidy-fixes.yaml
+                )
+            else()
+                set(CLANG_TIDY_COMMAND 
+                    ${CLANG_TIDY_EXE}
+                    --checks=${CLANG_TIDY_CHECKS}
+                    --quiet
+                )
+            endif()
+            message(STATUS "clang-tidy warnings will NOT be treated as errors for library modules")
+        endif()
+        
+        # Apply clang-tidy only to the library target
+        set_target_properties(freertos_cpp_wrappers PROPERTIES
+            CXX_CLANG_TIDY "${CLANG_TIDY_COMMAND}"
+        )
+        
+        # Create a custom target for generating a detailed static analysis report
+        if(GENERATE_CLANG_TIDY_REPORT)
+            add_custom_target(static-analysis-report
+                COMMAND ${CLANG_TIDY_EXE} 
+                    --checks=${CLANG_TIDY_CHECKS}
+                    --format-style=file
+                    --export-fixes=${CMAKE_BINARY_DIR}/clang-tidy-fixes.yaml
+                    --system-headers=false
+                    --header-filter=".*include.*"
+                    ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cc
+                    -- 
+                    -I${CMAKE_CURRENT_SOURCE_DIR}/include
+                    -I${CMAKE_CURRENT_SOURCE_DIR}/tests/mocks
+                    -std=c++17
+                    -DUNIT_TESTING=1
+                    > ${CLANG_TIDY_REPORT_FILE} 2>&1 || true
+                COMMAND ${CMAKE_COMMAND} -E echo "Static analysis report generated: ${CLANG_TIDY_REPORT_FILE}"
+                COMMAND ${CMAKE_COMMAND} -E echo "Fixes exported to: ${CMAKE_BINARY_DIR}/clang-tidy-fixes.yaml"
+                COMMAND ${CMAKE_COMMAND} -E echo ""
+                COMMAND ${CMAKE_COMMAND} -E echo "Report Summary:"
+                COMMAND grep -c "warning:" ${CLANG_TIDY_REPORT_FILE} || ${CMAKE_COMMAND} -E echo "0 warnings found"
+                COMMAND grep -c "error:" ${CLANG_TIDY_REPORT_FILE} || ${CMAKE_COMMAND} -E echo "0 errors found"
+                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                COMMENT "Generating comprehensive static analysis report for library modules"
+            )
+            message(STATUS "Run 'make static-analysis-report' to generate a detailed static analysis report")
+        endif()
+        
+        message(STATUS "clang-tidy enabled for library modules with checks: ${CLANG_TIDY_CHECKS}")
+    else()
+        message(WARNING "clang-tidy not found! Static analysis will be skipped. Install clang-tidy to enable static analysis.")
+    endif()
+else()
+    message(STATUS "clang-tidy disabled via ENABLE_CLANG_TIDY=OFF")
+endif()
+
+# =============================================================================
+# END STATIC ANALYSIS CONFIGURATION  
+# =============================================================================
 
 # Add tests subdirectory
 add_subdirectory(tests)
