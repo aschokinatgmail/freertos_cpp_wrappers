@@ -50,7 +50,7 @@ namespace freertos {
  *
  */
 class static_semaphore_allocator {
-  StaticSemaphore_t m_semaphore_placeholder;
+  StaticSemaphore_t m_semaphore_placeholder{};
 
 public:
   static_semaphore_allocator() = default;

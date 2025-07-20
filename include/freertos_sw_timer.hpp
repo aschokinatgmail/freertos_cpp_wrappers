@@ -57,7 +57,7 @@ using std::function;
  *
  */
 class static_sw_timer_allocator {
-  StaticTimer_t m_timer_placeholder;
+  StaticTimer_t m_timer_placeholder{};
 
 public:
   static_sw_timer_allocator() = default;

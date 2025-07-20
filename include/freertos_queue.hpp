@@ -52,7 +52,7 @@ using std::optional;
  *
  */
 template <size_t QueueLength, typename T> class static_queue_allocator {
-  StaticQueue_t m_queue_placeholder;
+  StaticQueue_t m_queue_placeholder{};
   std::array<uint8_t, QueueLength * sizeof(T)> m_storage;
 
 public:

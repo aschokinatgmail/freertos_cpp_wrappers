@@ -56,7 +56,7 @@ using namespace std::chrono_literals;
  */
 template <size_t StackSize> class static_task_allocator {
   std::array<StackType_t, StackSize / sizeof(StackType_t)> m_stackBuffer;
-  StaticTask_t m_taskBuffer;
+  StaticTask_t m_taskBuffer{};
 
 public:
   static_task_allocator() = default;
@@ -1153,7 +1153,7 @@ public:
    * @brief Construct a new critical section isr object
    *
    */
-  critical_section_isr(void) {}
+  critical_section_isr(void) = default;
   /**
    * @brief Destroy the critical section isr object
    *

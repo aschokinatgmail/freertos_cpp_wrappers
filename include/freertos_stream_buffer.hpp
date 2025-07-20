@@ -51,7 +51,7 @@ namespace freertos {
  *
  */
 template <size_t StreamBufferSize> class static_stream_buffer_allocator {
-  StaticStreamBuffer_t m_stream_buffer_placeholder;
+  StaticStreamBuffer_t m_stream_buffer_placeholder{};
   std::array<uint8_t, StreamBufferSize> m_storage;
 
 public:

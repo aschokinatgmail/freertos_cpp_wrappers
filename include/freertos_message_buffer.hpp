@@ -50,7 +50,7 @@ namespace freertos {
  *
  */
 template <size_t MessageBufferSize> class static_message_buffer_allocator {
-  StaticMessageBuffer_t m_message_buffer_placeholder;
+  StaticMessageBuffer_t m_message_buffer_placeholder{};
   std::array<uint8_t, MessageBufferSize> m_storage;
 
 public:
