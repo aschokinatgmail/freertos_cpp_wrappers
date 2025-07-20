@@ -24,6 +24,9 @@ Makefile
 # Executables
 *.exe
 test_freertos_task
+test_freertos_semaphore
+test_freertos_queue
+test_freertos_event_group
 
 # Test results
 *.xml
