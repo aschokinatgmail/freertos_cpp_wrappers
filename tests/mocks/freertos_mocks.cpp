@@ -728,4 +728,164 @@ void* pvTimerGetTimerID(TimerHandle_t xTimer) {
     return nullptr;
 }
 
+void vMessageBufferDelete(MessageBufferHandle_t xMessageBuffer) {
+    if (g_freertos_mock) {
+        g_freertos_mock->vMessageBufferDelete(xMessageBuffer);
+    }
+}
+
+size_t xMessageBufferSend(MessageBufferHandle_t xMessageBuffer, const void* pvTxData, size_t xDataLengthBytes, TickType_t xTicksToWait) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xMessageBufferSend(xMessageBuffer, pvTxData, xDataLengthBytes, xTicksToWait);
+    }
+    return 0;
+}
+
+size_t xMessageBufferSendFromISR(MessageBufferHandle_t xMessageBuffer, const void* pvTxData, size_t xDataLengthBytes, BaseType_t* pxHigherPriorityTaskWoken) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xMessageBufferSendFromISR(xMessageBuffer, pvTxData, xDataLengthBytes, pxHigherPriorityTaskWoken);
+    }
+    return 0;
+}
+
+size_t xMessageBufferReceive(MessageBufferHandle_t xMessageBuffer, void* pvRxData, size_t xBufferLengthBytes, TickType_t xTicksToWait) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xMessageBufferReceive(xMessageBuffer, pvRxData, xBufferLengthBytes, xTicksToWait);
+    }
+    return 0;
+}
+
+size_t xMessageBufferReceiveFromISR(MessageBufferHandle_t xMessageBuffer, void* pvRxData, size_t xBufferLengthBytes, BaseType_t* pxHigherPriorityTaskWoken) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xMessageBufferReceiveFromISR(xMessageBuffer, pvRxData, xBufferLengthBytes, pxHigherPriorityTaskWoken);
+    }
+    return 0;
+}
+
+size_t xMessageBufferSpaceAvailable(MessageBufferHandle_t xMessageBuffer) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xMessageBufferSpaceAvailable(xMessageBuffer);
+    }
+    return 0;
+}
+
+BaseType_t xMessageBufferReset(MessageBufferHandle_t xMessageBuffer) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xMessageBufferReset(xMessageBuffer);
+    }
+    return pdPASS;
+}
+
+BaseType_t xMessageBufferIsEmpty(MessageBufferHandle_t xMessageBuffer) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xMessageBufferIsEmpty(xMessageBuffer);
+    }
+    return pdTRUE;
+}
+
+BaseType_t xMessageBufferIsFull(MessageBufferHandle_t xMessageBuffer) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xMessageBufferIsFull(xMessageBuffer);
+    }
+    return pdFALSE;
+}
+
+// Stream buffer function implementations
+StreamBufferHandle_t xStreamBufferCreate(size_t xBufferSizeBytes, size_t xTriggerLevelBytes) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xStreamBufferCreate(xBufferSizeBytes, xTriggerLevelBytes);
+    }
+    return nullptr;
+}
+
+StreamBufferHandle_t xStreamBufferCreateStatic(size_t xBufferSizeBytes, size_t xTriggerLevelBytes, 
+                                               uint8_t* pucStreamBufferStorageArea, 
+                                               StaticStreamBuffer_t* pxStaticStreamBuffer) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xStreamBufferCreateStatic(xBufferSizeBytes, xTriggerLevelBytes, 
+                                                          pucStreamBufferStorageArea, pxStaticStreamBuffer);
+    }
+    return nullptr;
+}
+
+void vStreamBufferDelete(StreamBufferHandle_t xStreamBuffer) {
+    if (g_freertos_mock) {
+        g_freertos_mock->vStreamBufferDelete(xStreamBuffer);
+    }
+}
+
+size_t xStreamBufferSend(StreamBufferHandle_t xStreamBuffer, const void* pvTxData, 
+                        size_t xDataLengthBytes, TickType_t xTicksToWait) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xStreamBufferSend(xStreamBuffer, pvTxData, xDataLengthBytes, xTicksToWait);
+    }
+    return 0;
+}
+
+size_t xStreamBufferSendFromISR(StreamBufferHandle_t xStreamBuffer, const void* pvTxData, 
+                               size_t xDataLengthBytes, BaseType_t* pxHigherPriorityTaskWoken) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xStreamBufferSendFromISR(xStreamBuffer, pvTxData, xDataLengthBytes, pxHigherPriorityTaskWoken);
+    }
+    return 0;
+}
+
+size_t xStreamBufferReceive(StreamBufferHandle_t xStreamBuffer, void* pvRxData, 
+                           size_t xBufferLengthBytes, TickType_t xTicksToWait) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xStreamBufferReceive(xStreamBuffer, pvRxData, xBufferLengthBytes, xTicksToWait);
+    }
+    return 0;
+}
+
+size_t xStreamBufferReceiveFromISR(StreamBufferHandle_t xStreamBuffer, void* pvRxData, 
+                                  size_t xBufferLengthBytes, BaseType_t* pxHigherPriorityTaskWoken) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xStreamBufferReceiveFromISR(xStreamBuffer, pvRxData, xBufferLengthBytes, pxHigherPriorityTaskWoken);
+    }
+    return 0;
+}
+
+size_t xStreamBufferBytesAvailable(StreamBufferHandle_t xStreamBuffer) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xStreamBufferBytesAvailable(xStreamBuffer);
+    }
+    return 0;
+}
+
+size_t xStreamBufferSpacesAvailable(StreamBufferHandle_t xStreamBuffer) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xStreamBufferSpacesAvailable(xStreamBuffer);
+    }
+    return 0;
+}
+
+BaseType_t xStreamBufferIsEmpty(StreamBufferHandle_t xStreamBuffer) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xStreamBufferIsEmpty(xStreamBuffer);
+    }
+    return pdTRUE;
+}
+
+BaseType_t xStreamBufferIsFull(StreamBufferHandle_t xStreamBuffer) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xStreamBufferIsFull(xStreamBuffer);
+    }
+    return pdFALSE;
+}
+
+BaseType_t xStreamBufferReset(StreamBufferHandle_t xStreamBuffer) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xStreamBufferReset(xStreamBuffer);
+    }
+    return pdPASS;
+}
+
+BaseType_t xStreamBufferSetTriggerLevel(StreamBufferHandle_t xStreamBuffer, size_t xTriggerLevel) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xStreamBufferSetTriggerLevel(xStreamBuffer, xTriggerLevel);
+    }
+    return pdPASS;
+}
+
 }
