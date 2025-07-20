@@ -56,8 +56,11 @@ def parse_clang_tidy_output(input_file):
             message = match.group(5).strip()
             check_name = match.group(6)
             
-            # Extract filename for file analysis
+            # Extract filename for file analysis - exclude mocks
             filename = os.path.basename(file_path)
+            # Skip files from mocks directory
+            if '/mocks/' in file_path or 'mocks/' in file_path:
+                continue
             stats['files_analyzed'].add(filename)
             stats['issues_by_file'][filename] += 1
             
@@ -68,10 +71,13 @@ def parse_clang_tidy_output(input_file):
             category = check_name.split('-')[0] if '-' in check_name else check_name
             stats['check_categories'][category] += 1
         
-        # Also extract files mentioned in error processing lines
+        # Also extract files mentioned in error processing lines - exclude mocks
         # Pattern: "Error while processing /path/to/file.cc"
         error_files = re.findall(r'Error while processing ([^\s]+)', content)
         for file_path in error_files:
+            # Skip files from mocks directory
+            if '/mocks/' in file_path or 'mocks/' in file_path:
+                continue
             filename = os.path.basename(file_path)
             stats['files_analyzed'].add(filename)
     

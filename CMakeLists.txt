@@ -40,12 +40,23 @@ enable_testing()
 
 # Include directories
 include_directories(include)
-include_directories(tests/mocks)
+# Note: mocks directory will be added only to test targets to avoid clang-tidy issues
 
-# Add the library source files
+# Add the library source files - include all modules for static analysis
 add_library(freertos_cpp_wrappers 
     src/freertos_task.cc
+    include/freertos_event_group.hpp
+    include/freertos_message_buffer.hpp
+    include/freertos_queue.hpp
+    include/freertos_semaphore.hpp
+    include/freertos_stream_buffer.hpp
+    include/freertos_sw_timer.hpp
+    include/freertos_task.hpp
+    include/freertos.hpp
 )
+
+# Add include directories to the library target
+target_include_directories(freertos_cpp_wrappers PRIVATE tests/mocks)
 
 # =============================================================================
 # APPLY STATIC ANALYSIS TO LIBRARY MODULES ONLY
@@ -120,17 +131,24 @@ if(ENABLE_CLANG_TIDY)
         # Create a custom target for generating a detailed static analysis report with statistics
         if(GENERATE_CLANG_TIDY_REPORT)
             add_custom_target(static-analysis-report
-                # Run clang-tidy and capture output
+                # Run clang-tidy and capture output for all library modules (both .cc and .hpp files)
                 COMMAND ${CLANG_TIDY_EXE} 
                     --checks=${CLANG_TIDY_CHECKS}
                     --format-style=file
                     --export-fixes=${CMAKE_BINARY_DIR}/clang-tidy-fixes.yaml
                     --system-headers=false
-                    --header-filter=".*include.*"
+                    --header-filter="^${CMAKE_CURRENT_SOURCE_DIR}/include/.*"
                     ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cc
+                    ${CMAKE_CURRENT_SOURCE_DIR}/include/freertos_event_group.hpp
+                    ${CMAKE_CURRENT_SOURCE_DIR}/include/freertos_message_buffer.hpp
+                    ${CMAKE_CURRENT_SOURCE_DIR}/include/freertos_queue.hpp
+                    ${CMAKE_CURRENT_SOURCE_DIR}/include/freertos_semaphore.hpp
+                    ${CMAKE_CURRENT_SOURCE_DIR}/include/freertos_stream_buffer.hpp
+                    ${CMAKE_CURRENT_SOURCE_DIR}/include/freertos_sw_timer.hpp
+                    ${CMAKE_CURRENT_SOURCE_DIR}/include/freertos_task.hpp
                     -- 
                     -I${CMAKE_CURRENT_SOURCE_DIR}/include
-                    -I${CMAKE_CURRENT_SOURCE_DIR}/tests/mocks
+                    -isystem${CMAKE_CURRENT_SOURCE_DIR}/tests/mocks
                     -std=c++17
                     -DUNIT_TESTING=1
                     > ${CMAKE_BINARY_DIR}/clang-tidy-report.txt 2>&1 || true
