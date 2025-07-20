@@ -191,6 +191,19 @@ test_freertos_queue/fast:
 	$(MAKE) $(MAKESILENT) -f tests/CMakeFiles/test_freertos_queue.dir/build.make tests/CMakeFiles/test_freertos_queue.dir/build
 .PHONY : test_freertos_queue/fast
 
+#=============================================================================
+# Target rules for targets named test_freertos_event_group
+
+# Build rule for target.
+test_freertos_event_group: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test_freertos_event_group
+.PHONY : test_freertos_event_group
+
+# fast build rule for target.
+test_freertos_event_group/fast:
+	$(MAKE) $(MAKESILENT) -f tests/CMakeFiles/test_freertos_event_group.dir/build.make tests/CMakeFiles/test_freertos_event_group.dir/build
+.PHONY : test_freertos_event_group/fast
+
 src/freertos_task.o: src/freertos_task.cc.o
 .PHONY : src/freertos_task.o
 
@@ -226,6 +239,7 @@ help:
 	@echo "... test"
 	@echo "... freertos_cpp_wrappers"
 	@echo "... freertos_mocks"
+	@echo "... test_freertos_event_group"
 	@echo "... test_freertos_queue"
 	@echo "... test_freertos_semaphore"
 	@echo "... test_freertos_task"

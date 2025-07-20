@@ -1,7 +1,16 @@
 #include "FreeRTOS.h"
+#include "freertos_mocks.hpp"
+
+// Static member definitions for mock instance management
+std::shared_ptr<::testing::StrictMock<::FreeRTOSMock>> FreeRTOSMockInstance::instance_;
+
+void FreeRTOSMockInstance::setGlobalInstance(::FreeRTOSMock* mock) {
+    extern ::FreeRTOSMock* g_freertos_mock;
+    g_freertos_mock = mock;
+}
 
 // Global mock instance
-FreeRTOSMock* g_freertos_mock = nullptr;
+::FreeRTOSMock* g_freertos_mock = nullptr;
 
 // Function implementations that delegate to the mock
 extern "C" {
@@ -515,6 +524,82 @@ const char* pcQueueGetName(QueueHandle_t xQueue) {
         return g_freertos_mock->pcQueueGetName(xQueue);
     }
     return nullptr;
+}
+
+// Event Group function implementations
+EventGroupHandle_t xEventGroupCreate(void) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xEventGroupCreate();
+    }
+    return nullptr;
+}
+
+EventGroupHandle_t xEventGroupCreateStatic(StaticEventGroup_t* pxEventGroupBuffer) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xEventGroupCreateStatic(pxEventGroupBuffer);
+    }
+    return nullptr;
+}
+
+void vEventGroupDelete(EventGroupHandle_t xEventGroup) {
+    if (g_freertos_mock) {
+        g_freertos_mock->vEventGroupDelete(xEventGroup);
+    }
+}
+
+EventBits_t xEventGroupSetBits(EventGroupHandle_t xEventGroup, const EventBits_t uxBitsToSet) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xEventGroupSetBits(xEventGroup, uxBitsToSet);
+    }
+    return 0;
+}
+
+EventBits_t xEventGroupSetBitsFromISR(EventGroupHandle_t xEventGroup, const EventBits_t uxBitsToSet, BaseType_t* pxHigherPriorityTaskWoken) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xEventGroupSetBitsFromISR(xEventGroup, uxBitsToSet, pxHigherPriorityTaskWoken);
+    }
+    return 0;
+}
+
+EventBits_t xEventGroupClearBits(EventGroupHandle_t xEventGroup, const EventBits_t uxBitsToClear) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xEventGroupClearBits(xEventGroup, uxBitsToClear);
+    }
+    return 0;
+}
+
+EventBits_t xEventGroupWaitBits(EventGroupHandle_t xEventGroup, const EventBits_t uxBitsToWaitFor, const BaseType_t xClearOnExit, const BaseType_t xWaitForAllBits, TickType_t xTicksToWait) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xEventGroupWaitBits(xEventGroup, uxBitsToWaitFor, xClearOnExit, xWaitForAllBits, xTicksToWait);
+    }
+    return 0;
+}
+
+EventBits_t xEventGroupGetBits(EventGroupHandle_t xEventGroup) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xEventGroupGetBits(xEventGroup);
+    }
+    return 0;
+}
+
+EventBits_t xEventGroupGetBitsFromISR(EventGroupHandle_t xEventGroup) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xEventGroupGetBitsFromISR(xEventGroup);
+    }
+    return 0;
+}
+
+EventBits_t xEventGroupSync(EventGroupHandle_t xEventGroup, const EventBits_t uxBitsToSet, const EventBits_t uxBitsToWaitFor, TickType_t xTicksToWait) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xEventGroupSync(xEventGroup, uxBitsToSet, uxBitsToWaitFor, xTicksToWait);
+    }
+    return 0;
+}
+
+void portYIELD_FROM_ISR(BaseType_t xHigherPriorityTaskWoken) {
+    if (g_freertos_mock) {
+        g_freertos_mock->portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+    }
 }
 
 }

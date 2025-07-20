@@ -316,4 +316,5 @@ tests/CMakeFiles/freertos_mocks.dir/mocks/freertos_mocks.cpp.o: \
  /usr/include/gmock/gmock-more-actions.h \
  /usr/include/gmock/internal/custom/gmock-generated-actions.h \
  /usr/include/gmock/gmock-more-matchers.h \
- /usr/include/gmock/gmock-nice-strict.h
+ /usr/include/gmock/gmock-nice-strict.h \
+ /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/mocks/freertos_mocks.hpp

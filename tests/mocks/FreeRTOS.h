@@ -13,6 +13,13 @@ typedef uint32_t UBaseType_t;
 typedef int32_t BaseType_t;
 typedef uint32_t StackType_t;
 
+// Event Group types
+typedef void* EventGroupHandle_t;
+typedef uint32_t EventBits_t;
+typedef struct StaticEventGroup {
+    uint8_t dummy[24];  // Placeholder for static event group structure
+} StaticEventGroup_t;
+
 // FreeRTOS constants
 #define pdTRUE    1
 #define pdFALSE   0
@@ -247,10 +254,25 @@ public:
     MOCK_METHOD(void, vQueueAddToRegistry, (QueueHandle_t xQueue, const char* pcQueueName));
     MOCK_METHOD(void, vQueueUnregisterQueue, (QueueHandle_t xQueue));
     MOCK_METHOD(const char*, pcQueueGetName, (QueueHandle_t xQueue));
+    
+    // Event Group operations
+    MOCK_METHOD(EventGroupHandle_t, xEventGroupCreate, ());
+    MOCK_METHOD(EventGroupHandle_t, xEventGroupCreateStatic, (StaticEventGroup_t* pxEventGroupBuffer));
+    MOCK_METHOD(void, vEventGroupDelete, (EventGroupHandle_t xEventGroup));
+    MOCK_METHOD(EventBits_t, xEventGroupSetBits, (EventGroupHandle_t xEventGroup, const EventBits_t uxBitsToSet));
+    MOCK_METHOD(EventBits_t, xEventGroupSetBitsFromISR, (EventGroupHandle_t xEventGroup, const EventBits_t uxBitsToSet, BaseType_t* pxHigherPriorityTaskWoken));
+    MOCK_METHOD(EventBits_t, xEventGroupClearBits, (EventGroupHandle_t xEventGroup, const EventBits_t uxBitsToClear));
+    MOCK_METHOD(EventBits_t, xEventGroupWaitBits, (EventGroupHandle_t xEventGroup, const EventBits_t uxBitsToWaitFor, const BaseType_t xClearOnExit, const BaseType_t xWaitForAllBits, TickType_t xTicksToWait));
+    MOCK_METHOD(EventBits_t, xEventGroupGetBits, (EventGroupHandle_t xEventGroup));
+    MOCK_METHOD(EventBits_t, xEventGroupGetBitsFromISR, (EventGroupHandle_t xEventGroup));
+    MOCK_METHOD(EventBits_t, xEventGroupSync, (EventGroupHandle_t xEventGroup, const EventBits_t uxBitsToSet, const EventBits_t uxBitsToWaitFor, TickType_t xTicksToWait));
+    
+    // Port layer mocks (needed by event group ISR functions)
+    MOCK_METHOD(void, portYIELD_FROM_ISR, (BaseType_t xHigherPriorityTaskWoken));
 };
 
 // Global mock instance
-extern FreeRTOSMock* g_freertos_mock;
+extern ::FreeRTOSMock* g_freertos_mock;
 
 // Function declarations that delegate to the mock
 extern "C" {

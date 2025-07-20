@@ -7,3 +7,4 @@
 include("/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build/tests/test_freertos_task[1]_include.cmake")
 include("/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build/tests/test_freertos_semaphore[1]_include.cmake")
 include("/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build/tests/test_freertos_queue[1]_include.cmake")
+include("/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build/tests/test_freertos_event_group[1]_include.cmake")
