@@ -41,7 +41,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <cstdbool>
 #include <functional>
 #include <task.h>
-#include <time.h>
+#include <ctime>
 #include <timers.h>
 
 namespace freertos {

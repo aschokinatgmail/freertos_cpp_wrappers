@@ -408,8 +408,8 @@ public:
    * @return BaseType_t pdTRUE if the notification was given, pdFALSE otherwise
    */
   BaseType_t notify_isr(const uint32_t val, eNotifyAction action,
-                        BaseType_t &higherPriorityTaskWoken = nullptr) {
-    return xTaskNotifyFromISR(m_hTask, val, action, &higherPriorityTaskWoken);
+                        BaseType_t *higherPriorityTaskWoken = nullptr) {
+    return xTaskNotifyFromISR(m_hTask, val, action, higherPriorityTaskWoken);
   }
   /**
    * @brief Notify the task from an ISR and query the previous value.
@@ -423,9 +423,9 @@ public:
   BaseType_t
   notify_and_query_isr(const uint32_t val, eNotifyAction action,
                        uint32_t &prev_value,
-                       BaseType_t &higherPriorityTaskWoken = nullptr) {
+                       BaseType_t *higherPriorityTaskWoken = nullptr) {
     return xTaskNotifyAndQueryFromISR(m_hTask, val, action, &prev_value,
-                                      &higherPriorityTaskWoken);
+                                      higherPriorityTaskWoken);
   }
   /**
    * @brief Wait for the notification.
@@ -498,7 +498,7 @@ template <typename TaskAllocator> class periodic_task {
     while (is_running()) {
       if (0 != m_period.count()) {
 #if configUSE_TASK_NOTIFICATIONS
-        uint32_t notification_value;
+        uint32_t notification_value = 0;
         m_task.notify_wait(0, 0, notification_value, m_period);
 #else
         delay(m_period);
@@ -934,7 +934,7 @@ public:
 #endif
 };
 
-// TODO: add less than ms delays
+// TODO(maintainer): add less than ms delays
 
 /**
  * @brief Delay the task for the specified number of ticks.
