@@ -919,3 +919,76 @@ TEST_F(FreeRTOSQueueTest, QueueISROperationsWithDifferentTypes) {
     auto optional_result = queue.receive_isr();
     EXPECT_TRUE(optional_result.has_value());
 }
+
+// =============================================================================
+// Additional ISR Operations Tests (Missing Coverage)
+// =============================================================================
+
+TEST_F(FreeRTOSQueueTest, QueueSendBackISROperations) {
+    EXPECT_CALL(*mock, xQueueCreate(4, sizeof(uint32_t)))
+        .WillOnce(Return(mock_queue_handle));
+    EXPECT_CALL(*mock, xQueueSendToBackFromISR(mock_queue_handle, NotNull(), NotNull()))
+        .Times(2) // Called twice - once with ref param, once without (but with internal temp var)
+        .WillRepeatedly(Return(pdPASS));
+    EXPECT_CALL(*mock, pcQueueGetName(mock_queue_handle))
+        .WillOnce(Return(nullptr));
+    EXPECT_CALL(*mock, vQueueDelete(mock_queue_handle));
+    
+    freertos::queue<4, uint32_t, freertos::dynamic_queue_allocator<4, uint32_t>> queue;
+    
+    uint32_t test_value = 0x12345678;
+    BaseType_t higher_priority_task_woken = pdFALSE;
+    
+    // Test send_back_isr with reference parameter
+    auto result1 = queue.send_back_isr(test_value, higher_priority_task_woken);
+    EXPECT_EQ(result1, pdPASS);
+    
+    // Test send_back_isr without reference parameter (internal temp variable)
+    auto result2 = queue.send_back_isr(test_value);
+    EXPECT_EQ(result2, pdPASS);
+}
+
+TEST_F(FreeRTOSQueueTest, QueueSendFrontISROperations) {
+    EXPECT_CALL(*mock, xQueueCreate(3, sizeof(uint16_t)))
+        .WillOnce(Return(mock_queue_handle));
+    EXPECT_CALL(*mock, xQueueSendToFrontFromISR(mock_queue_handle, NotNull(), NotNull()))
+        .Times(2) // Called twice - once with ref param, once without (but with internal temp var)
+        .WillRepeatedly(Return(pdPASS));
+    EXPECT_CALL(*mock, pcQueueGetName(mock_queue_handle))
+        .WillOnce(Return(nullptr));
+    EXPECT_CALL(*mock, vQueueDelete(mock_queue_handle));
+    
+    freertos::queue<3, uint16_t, freertos::dynamic_queue_allocator<3, uint16_t>> queue;
+    
+    uint16_t test_value = 0xABCD;
+    BaseType_t higher_priority_task_woken = pdFALSE;
+    
+    // Test send_front_isr with reference parameter
+    auto result1 = queue.send_front_isr(test_value, higher_priority_task_woken);
+    EXPECT_EQ(result1, pdPASS);
+    
+    // Test send_front_isr without reference parameter (internal temp variable)
+    auto result2 = queue.send_front_isr(test_value);
+    EXPECT_EQ(result2, pdPASS);
+}
+
+TEST_F(FreeRTOSQueueTest, QueueMessagesWaitingISR) {
+    EXPECT_CALL(*mock, xQueueCreate(5, sizeof(double)))
+        .WillOnce(Return(mock_queue_handle));
+    EXPECT_CALL(*mock, uxQueueMessagesWaitingFromISR(mock_queue_handle))
+        .WillOnce(Return(3));
+    EXPECT_CALL(*mock, pcQueueGetName(mock_queue_handle))
+        .WillOnce(Return(nullptr));
+    EXPECT_CALL(*mock, vQueueDelete(mock_queue_handle));
+    
+    freertos::queue<5, double, freertos::dynamic_queue_allocator<5, double>> queue;
+    
+    /*
+     * ISR Messages Waiting Test:
+     * Tests the ISR-safe version of messages_waiting(). In a real FreeRTOS
+     * environment, this function would be called from an interrupt service routine
+     * where normal API functions cannot be used safely.
+     */
+    auto count = queue.messages_waiting_isr();
+    EXPECT_EQ(count, 3);
+}
