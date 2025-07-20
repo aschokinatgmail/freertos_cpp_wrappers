@@ -37,6 +37,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #endif
 
 #include <FreeRTOS.h>
+#include <array>
 #include <chrono>
 #include <optional>
 #include <stream_buffer.h>
@@ -51,7 +52,7 @@ namespace freertos {
  */
 template <size_t StreamBufferSize> class static_stream_buffer_allocator {
   StaticStreamBuffer_t m_stream_buffer_placeholder;
-  uint8_t m_storage[StreamBufferSize];
+  std::array<uint8_t, StreamBufferSize> m_storage;
 
 public:
   static_stream_buffer_allocator() = default;
@@ -67,7 +68,7 @@ public:
 
   StreamBufferHandle_t create(size_t trigger_level_bytes = 1) {
     return xStreamBufferCreateStatic(StreamBufferSize, trigger_level_bytes,
-                                     m_storage, &m_stream_buffer_placeholder);
+                                     m_storage.data(), &m_stream_buffer_placeholder);
   }
 };
 #endif

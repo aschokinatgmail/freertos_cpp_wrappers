@@ -37,6 +37,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #endif
 
 #include <FreeRTOS.h>
+#include <array>
 #include <cassert>
 #include <chrono>
 #include <functional>
@@ -54,7 +55,7 @@ using namespace std::chrono_literals;
  *
  */
 template <size_t StackSize> class static_task_allocator {
-  StackType_t m_stackBuffer[StackSize / sizeof(StackType_t)];
+  std::array<StackType_t, StackSize / sizeof(StackType_t)> m_stackBuffer;
   StaticTask_t m_taskBuffer;
 
 public:
@@ -70,7 +71,7 @@ public:
                       UBaseType_t priority, void *context) {
     return xTaskCreateStatic(taskFunction, name,
                              StackSize / sizeof(StackType_t), context, priority,
-                             m_stackBuffer, &m_taskBuffer);
+                             m_stackBuffer.data(), &m_taskBuffer);
   }
 };
 #endif
@@ -133,9 +134,8 @@ public:
    */
   task(const char *name, UBaseType_t priority, task_routine_t &&task_routine,
        bool start_suspended = true)
-      : m_allocator{}, m_hTask{nullptr}, m_taskRoutine{std::move(task_routine)},
-        m_start_suspended{start_suspended} {
-    m_hTask = m_allocator.create(task_exec, name, priority, this);
+      : m_allocator{}, m_hTask{m_allocator.create(task_exec, name, priority, this)}, 
+        m_taskRoutine{std::move(task_routine)}, m_start_suspended{start_suspended} {
   }
   /**
    * @brief Construct a new task object
@@ -531,8 +531,8 @@ public:
                 const std::chrono::duration<Rep, Period> &period,
                 bool start_suspended = true)
       : m_period{std::chrono::duration_cast<std::chrono::milliseconds>(period)},
-        m_on_start{on_start}, m_on_stop{on_stop},
-        m_periodic_routine{periodic_routine},
+        m_on_start{std::move(on_start)}, m_on_stop{std::move(on_stop)},
+        m_periodic_routine{std::move(periodic_routine)},
         m_task{name, priority, [this]() { run(); }, start_suspended} {}
   /**
    * @brief Construct a new periodic task object
@@ -1012,7 +1012,7 @@ void delay_until(const std::chrono::steady_clock::time_point &wakeTime);
  * @tparam status_array_capacity
  */
 template <size_t status_array_capacity> class task_system_status {
-  TaskStatus_t m_status_array[status_array_capacity]{};
+  std::array<TaskStatus_t, status_array_capacity> m_status_array{};
   UBaseType_t m_task_count{0};
   uint32_t m_total_run_time{0};
 
@@ -1022,7 +1022,7 @@ public:
    *
    */
   task_system_status(void) {
-    m_task_count = uxTaskGetSystemState(m_status_array, status_array_capacity,
+    m_task_count = uxTaskGetSystemState(m_status_array.data(), status_array_capacity,
                                         &m_total_run_time);
   }
 
@@ -1040,13 +1040,13 @@ public:
    *
    * @return const TaskStatus_t* begin iterator
    */
-  const TaskStatus_t *begin(void) const { return m_status_array; }
+  const TaskStatus_t *begin(void) const { return m_status_array.data(); }
   /**
    * @brief Return the end iterator of the task status array.
    *
    * @return const TaskStatus_t* end iterator
    */
-  const TaskStatus_t *end(void) const { return m_status_array + m_task_count; }
+  const TaskStatus_t *end(void) const { return m_status_array.data() + m_task_count; }
 };
 #endif
 #if INCLUDE_xTaskGetCurrentTaskHandle

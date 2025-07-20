@@ -37,6 +37,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #endif
 
 #include <FreeRTOS.h>
+#include <array>
 #include <chrono>
 #include <message_buffer.h>
 
@@ -50,7 +51,7 @@ namespace freertos {
  */
 template <size_t MessageBufferSize> class static_message_buffer_allocator {
   StaticMessageBuffer_t m_message_buffer_placeholder;
-  uint8_t m_storage[MessageBufferSize];
+  std::array<uint8_t, MessageBufferSize> m_storage;
 
 public:
   static_message_buffer_allocator() = default;
@@ -65,7 +66,7 @@ public:
   operator=(static_message_buffer_allocator &&) = delete;
 
   MessageBufferHandle_t create() {
-    return xMessageBufferCreateStatic(MessageBufferSize, m_storage,
+    return xMessageBufferCreateStatic(MessageBufferSize, m_storage.data(),
                                       &m_message_buffer_placeholder);
   }
 };

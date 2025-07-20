@@ -717,7 +717,7 @@ public:
  * @tparam Mutex type of the mutex to guard.
  */
 template <typename Mutex> class lock_guard {
-  Mutex &m_mutex;
+  Mutex &m_mutex; // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members): RAII design requires reference
 
 public:
   /**
@@ -754,7 +754,7 @@ public:
  * @tparam Mutex type of the mutex to guard.
  */
 template <typename Mutex> class try_lock_guard {
-  Mutex &m_mutex;
+  Mutex &m_mutex; // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members): RAII design requires reference
   bool m_lock_acquired{false};
 
 public:
@@ -796,7 +796,7 @@ public:
  * @tparam Mutex type of the mutex to guard.
  */
 template <typename Mutex> class lock_guard_isr {
-  Mutex &m_mutex;
+  Mutex &m_mutex; // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members): RAII design requires reference
   BaseType_t m_high_priority_task_woken{pdFALSE};
 
 public:
@@ -845,7 +845,7 @@ public:
  * @tparam Mutex type of the mutex to guard.
  */
 template <typename Mutex> class timeout_lock_guard {
-  Mutex &m_mutex;
+  Mutex &m_mutex; // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members): RAII design requires reference
 
 public:
   /**

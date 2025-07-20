@@ -37,6 +37,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #endif
 
 #include <FreeRTOS.h>
+#include <array>
 #include <chrono>
 #include <optional>
 #include <queue.h>
@@ -52,7 +53,7 @@ using std::optional;
  */
 template <size_t QueueLength, typename T> class static_queue_allocator {
   StaticQueue_t m_queue_placeholder;
-  uint8_t m_storage[QueueLength * sizeof(T)];
+  std::array<uint8_t, QueueLength * sizeof(T)> m_storage;
 
 public:
   static_queue_allocator() = default;
@@ -64,7 +65,7 @@ public:
   static_queue_allocator &operator=(static_queue_allocator &&) = delete;
 
   QueueHandle_t create() {
-    return xQueueCreateStatic(QueueLength, sizeof(T), m_storage,
+    return xQueueCreateStatic(QueueLength, sizeof(T), m_storage.data(),
                               &m_queue_placeholder);
   }
 };

@@ -127,7 +127,7 @@ public:
    */
   explicit timer(const char *name, const TickType_t period_ticks,
                  UBaseType_t auto_reload, timer_callback_t &&callback)
-      : m_timer{nullptr}, m_callback{callback}, m_started{false} {
+      : m_timer{nullptr}, m_callback{std::move(callback)}, m_started{false} {
     m_timer = m_allocator.create(name, period_ticks, auto_reload, this,
                                  callback_wrapper);
     configASSERT(m_timer);
