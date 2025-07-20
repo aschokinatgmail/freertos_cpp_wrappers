@@ -994,7 +994,7 @@ void delay_until(const std::chrono::steady_clock::time_point &wakeTime);
 template <size_t status_array_capacity> class task_system_status {
   TaskStatus_t m_status_array[status_array_capacity];
   UBaseType_t m_task_count;
-  long m_total_run_time;
+  uint32_t m_total_run_time;
 
 public:
   /**

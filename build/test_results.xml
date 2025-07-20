@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="46" failures="12" disabled="0" errors="0" time="0.003" timestamp="2025-07-20T02:52:08.249" name="AllTests">
+  <testsuite name="FreeRTOSTaskTest" tests="46" failures="12" disabled="0" skipped="0" errors="0" time="0.003" timestamp="2025-07-20T02:52:08.249">
+    <testcase name="StaticTaskAllocatorConstruction" file="/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp" line="56" status="run" result="completed" time="0." timestamp="2025-07-20T02:52:08.249" classname="FreeRTOSTaskTest" />
+    <testcase name="StaticTaskAllocatorCreate" file="/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp" line="68" status="run" result="completed" time="0." timestamp="2025-07-20T02:52:08.250" classname="FreeRTOSTaskTest">
+      <failure message="unknown file&#x0A;&#x0A;Unexpected mock function call - returning default value.&#x0A;    Function call: xTaskCreateStatic(0x557a51e29355, 0x557a51f3e1d9 pointing to &quot;TestTask&quot;, 256, NULL, 2, 0x7ffc4c2e1be0, 0x7ffc4c2e1fe0)&#x0A;          Returns: NULL&#x0A;Google Mock tried the following 1 expectation, but it didn&apos;t match:&#x0A;&#x0A;/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp:71: EXPECT_CALL(*mock, xTaskCreateStatic( NotNull(), StrEq(&quot;TestTask&quot;), 1024 / sizeof(StackType_t), NotNull(), 2, NotNull(), NotNull() ))...&#x0A;  Expected arg #3: isn&apos;t NULL&#x0A;           Actual: NULL&#x0A;         Expected: to be called once&#x0A;           Actual: never called - unsatisfied and active&#x0A;" type=""><![CDATA[unknown file
+
+Unexpected mock function call - returning default value.
+    Function call: xTaskCreateStatic(0x557a51e29355, 0x557a51f3e1d9 pointing to "TestTask", 256, NULL, 2, 0x7ffc4c2e1be0, 0x7ffc4c2e1fe0)
+          Returns: NULL
+Google Mock tried the following 1 expectation, but it didn't match:
+
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp:71: EXPECT_CALL(*mock, xTaskCreateStatic( NotNull(), StrEq("TestTask"), 1024 / sizeof(StackType_t), NotNull(), 2, NotNull(), NotNull() ))...
+  Expected arg #3: isn't NULL
+           Actual: NULL
+         Expected: to be called once
+           Actual: never called - unsatisfied and active
+]]></failure>
+      <failure message="/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp:84&#x0A;Expected equality of these values:&#x0A;  handle&#x0A;    Which is: NULL&#x0A;  mock_task_handle&#x0A;    Which is: 0x12345678&#x0A;" type=""><![CDATA[/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp:84
+Expected equality of these values:
+  handle
+    Which is: NULL
+  mock_task_handle
+    Which is: 0x12345678
+]]></failure>
+      <failure message="/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp:71&#x0A;Actual function call count doesn&apos;t match EXPECT_CALL(*mock, xTaskCreateStatic( NotNull(), StrEq(&quot;TestTask&quot;), 1024 / sizeof(StackType_t), NotNull(), 2, NotNull(), NotNull() ))...&#x0A;         Expected: to be called once&#x0A;           Actual: never called - unsatisfied and active&#x0A;" type=""><![CDATA[/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp:71
+Actual function call count doesn't match EXPECT_CALL(*mock, xTaskCreateStatic( NotNull(), StrEq("TestTask"), 1024 / sizeof(StackType_t), NotNull(), 2, NotNull(), NotNull() ))...
+         Expected: to be called once
+           Actual: never called - unsatisfied and active
+]]></failure>
+    </testcase>
+    <testcase name="StaticTaskAllocatorCreateNullReturn" file="/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp" line="87" status="run" result="completed" time="0." timestamp="2025-07-20T02:52:08.250" classname="FreeRTOSTaskTest" />
+    <testcase name="DynamicTaskAllocatorConstruction" file="/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp" line="104" status="run" result="completed" time="0." timestamp="2025-07-20T02:52:08.250" classname="FreeRTOSTaskTest" />
+    <testcase name="DynamicTaskAllocatorCreateSuccess" file="/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp" line="116" status="run" result="completed" time="0." timestamp="2025-07-20T02:52:08.250" classname="FreeRTOSTaskTest">
+      <failure message="unknown file&#x0A;&#x0A;Unexpected mock function call - returning default value.&#x0A;    Function call: xTaskCreate(0x557a51e29e23, 0x557a51f3e1d9 pointing to &quot;TestTask&quot;, 256, NULL, 2, 0x7ffc4c2e1ef0)&#x0A;          Returns: 0&#x0A;Google Mock tried the following 1 expectation, but it didn&apos;t match:&#x0A;&#x0A;/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp:119: EXPECT_CALL(*mock, xTaskCreate( NotNull(), StrEq(&quot;TestTask&quot;), 1024 / sizeof(StackType_t), NotNull(), 2, NotNull() ))...&#x0A;  Expected arg #3: isn&apos;t NULL&#x0A;           Actual: NULL&#x0A;         Expected: to be called once&#x0A;           Actual: never called - unsatisfied and active&#x0A;" type=""><![CDATA[unknown file
+
+Unexpected mock function call - returning default value.
+    Function call: xTaskCreate(0x557a51e29e23, 0x557a51f3e1d9 pointing to "TestTask", 256, NULL, 2, 0x7ffc4c2e1ef0)
+          Returns: 0
+Google Mock tried the following 1 expectation, but it didn't match:
+
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp:119: EXPECT_CALL(*mock, xTaskCreate( NotNull(), StrEq("TestTask"), 1024 / sizeof(StackType_t), NotNull(), 2, NotNull() ))...
+  Expected arg #3: isn't NULL
+           Actual: NULL
+         Expected: to be called once
+           Actual: never called - unsatisfied and active
+]]></failure>
+      <failure message="/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp:134&#x0A;Expected equality of these values:&#x0A;  handle&#x0A;    Which is: NULL&#x0A;  mock_task_handle&#x0A;    Which is: 0x12345678&#x0A;" type=""><![CDATA[/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp:134
+Expected equality of these values:
+  handle
+    Which is: NULL
+  mock_task_handle
+    Which is: 0x12345678
+]]></failure>
+      <failure message="/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp:119&#x0A;Actual function call count doesn&apos;t match EXPECT_CALL(*mock, xTaskCreate( NotNull(), StrEq(&quot;TestTask&quot;), 1024 / sizeof(StackType_t), NotNull(), 2, NotNull() ))...&#x0A;         Expected: to be called once&#x0A;           Actual: never called - unsatisfied and active&#x0A;" type=""><![CDATA[/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp:119
+Actual function call count doesn't match EXPECT_CALL(*mock, xTaskCreate( NotNull(), StrEq("TestTask"), 1024 / sizeof(StackType_t), NotNull(), 2, NotNull() ))...
+         Expected: to be called once
+           Actual: never called - unsatisfied and active
+]]></failure>
+    </testcase>
+    <testcase name="DynamicTaskAllocatorCreateFailure" file="/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp" line="137" status="run" result="completed" time="0." timestamp="2025-07-20T02:52:08.250" classname="FreeRTOSTaskTest" />
+    <testcase name="StaticTaskConstruction" file="/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp" line="154" status="run" result="completed" time="0." timestamp="2025-07-20T02:52:08.250" classname="FreeRTOSTaskTest">
+      <failure message="unknown file&#x0A;Uninteresting mock function call - returning directly.&#x0A;    Function call: vTaskDelete(0x12345678)&#x0A;" type=""><![CDATA[unknown file
+Uninteresting mock function call - returning directly.
+    Function call: vTaskDelete(0x12345678)
+]]></failure>
+    </testcase>
+    <testcase name="StaticTaskConstructionWithString" file="/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp" line="166" status="run" result="completed" time="0." timestamp="2025-07-20T02:52:08.250" classname="FreeRTOSTaskTest">
+      <failure message="unknown file&#x0A;Uninteresting mock function call - returning directly.&#x0A;    Function call: vTaskDelete(0x12345678)&#x0A;" type=""><![CDATA[unknown file
+Uninteresting mock function call - returning directly.
+    Function call: vTaskDelete(0x12345678)
+]]></failure>
+    </testcase>
+    <testcase name="StaticTaskDestruction" file="/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp" line="179" status="run" result="completed" time="0." timestamp="2025-07-20T02:52:08.250" classname="FreeRTOSTaskTest" />
+    <testcase name="StaticTaskDestructionNullHandle" file="/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp" line="190" status="run" result="completed" time="0." timestamp="2025-07-20T02:52:08.250" classname="FreeRTOSTaskTest" />
+    <testcase name="StaticTaskSuspendResume" file="/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp" line="203" status="run" result="completed" time="0." timestamp="2025-07-20T02:52:08.250" classname="FreeRTOSTaskTest" />
+    <testcase name="StaticTaskTerminate" file="/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp" line="223" status="run" result="completed" time="0." timestamp="2025-07-20T02:52:08.250" classname="FreeRTOSTaskTest" />
+    <testcase name="StaticTaskPriority" file="/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp" line="236" status="run" result="completed" time="0." timestamp="2025-07-20T02:52:08.251" classname="FreeRTOSTaskTest" />
+    <testcase name="StaticTaskName" file="/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp" line="253" status="run" result="completed" time="0." timestamp="2025-07-20T02:52:08.251" classname="FreeRTOSTaskTest" />
+    <testcase name="StaticTaskState" file="/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp" line="267" status="run" result="completed" time="0." timestamp="2025-07-20T02:52:08.251" classname="FreeRTOSTaskTest" />
+    <testcase name="DynamicTaskConstruction" file="/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp" line="285" status="run" result="completed" time="0." timestamp="2025-07-20T02:52:08.251" classname="FreeRTOSTaskTest" />
+    <testcase name="DynamicTaskConstructionFailure" file="/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp" line="301" status="run" result="completed" time="0." timestamp="2025-07-20T02:52:08.251" classname="FreeRTOSTaskTest" />
+    <testcase name="TaskNotifications" file="/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp" line="317" status="run" result="completed" time="0." timestamp="2025-07-20T02:52:08.251" classname="FreeRTOSTaskTest" />
+    <testcase name="PeriodicTaskConstruction" file="/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp" line="359" status="run" result="completed" time="0." timestamp="2025-07-20T02:52:08.251" classname="FreeRTOSTaskTest">
+      <failure message="unknown file&#x0A;Uninteresting mock function call - returning default value.&#x0A;    Function call: xTaskAbortDelay(0x12345678)&#x0A;          Returns: 0&#x0A;" type=""><![CDATA[unknown file
+Uninteresting mock function call - returning default value.
+    Function call: xTaskAbortDelay(0x12345678)
+          Returns: 0
+]]></failure>
+    </testcase>
+    <testcase name="PeriodicTaskWithString" file="/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp" line="381" status="run" result="completed" time="0." timestamp="2025-07-20T02:52:08.251" classname="FreeRTOSTaskTest">
+      <failure message="unknown file&#x0A;Uninteresting mock function call - returning default value.&#x0A;    Function call: xTaskAbortDelay(0x12345678)&#x0A;          Returns: 0&#x0A;" type=""><![CDATA[unknown file
+Uninteresting mock function call - returning default value.
+    Function call: xTaskAbortDelay(0x12345678)
+          Returns: 0
+]]></failure>
+    </testcase>
+    <testcase name="PeriodicTaskZeroPeriod" file="/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp" line="401" status="run" result="completed" time="0." timestamp="2025-07-20T02:52:08.251" classname="FreeRTOSTaskTest">
+      <failure message="unknown file&#x0A;Uninteresting mock function call - returning default value.&#x0A;    Function call: xTaskAbortDelay(0x12345678)&#x0A;          Returns: 0&#x0A;" type=""><![CDATA[unknown file
+Uninteresting mock function call - returning default value.
+    Function call: xTaskAbortDelay(0x12345678)
+          Returns: 0
+]]></failure>
+    </testcase>
+    <testcase name="PeriodicTaskNoPeriod" file="/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp" line="420" status="run" result="completed" time="0." timestamp="2025-07-20T02:52:08.251" classname="FreeRTOSTaskTest">
+      <failure message="unknown file&#x0A;Uninteresting mock function call - returning default value.&#x0A;    Function call: xTaskAbortDelay(0x12345678)&#x0A;          Returns: 0&#x0A;" type=""><![CDATA[unknown file
+Uninteresting mock function call - returning default value.
+    Function call: xTaskAbortDelay(0x12345678)
+          Returns: 0
+]]></failure>
+    </testcase>
+    <testcase name="PeriodicTaskIsRunning" file="/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp" line="439" status="run" result="completed" time="0." timestamp="2025-07-20T02:52:08.252" classname="FreeRTOSTaskTest">
+      <failure message="unknown file&#x0A;Uninteresting mock function call - returning default value.&#x0A;    Function call: xTaskAbortDelay(0x12345678)&#x0A;          Returns: 0&#x0A;" type=""><![CDATA[unknown file
+Uninteresting mock function call - returning default value.
+    Function call: xTaskAbortDelay(0x12345678)
+          Returns: 0
+]]></failure>
+    </testcase>
+    <testcase name="PeriodicTaskTerminate" file="/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp" line="480" status="run" result="completed" time="0." timestamp="2025-07-20T02:52:08.252" classname="FreeRTOSTaskTest">
+      <failure message="unknown file&#x0A;Uninteresting mock function call - returning default value.&#x0A;    Function call: xTaskAbortDelay(0x12345678)&#x0A;          Returns: 0&#x0A;" type=""><![CDATA[unknown file
+Uninteresting mock function call - returning default value.
+    Function call: xTaskAbortDelay(0x12345678)
+          Returns: 0
+]]></failure>
+    </testcase>
+    <testcase name="PeriodicTaskDestructorAbortDelay" file="/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp" line="500" status="run" result="completed" time="0." timestamp="2025-07-20T02:52:08.252" classname="FreeRTOSTaskTest" />
+    <testcase name="DelayFunction" file="/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp" line="525" status="run" result="completed" time="0." timestamp="2025-07-20T02:52:08.252" classname="FreeRTOSTaskTest" />
+    <testcase name="DelayUntilFunction" file="/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp" line="534" status="run" result="completed" time="0." timestamp="2025-07-20T02:52:08.252" classname="FreeRTOSTaskTest" />
+    <testcase name="SleepForFunction" file="/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp" line="545" status="run" result="completed" time="0." timestamp="2025-07-20T02:52:08.252" classname="FreeRTOSTaskTest" />
+    <testcase name="CurrentTaskHandle" file="/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp" line="550" status="run" result="completed" time="0." timestamp="2025-07-20T02:52:08.252" classname="FreeRTOSTaskTest" />
+    <testcase name="IdleTaskHandle" file="/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp" line="557" status="run" result="completed" time="0." timestamp="2025-07-20T02:52:08.252" classname="FreeRTOSTaskTest" />
+    <testcase name="TickCount" file="/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp" line="565" status="run" result="completed" time="0." timestamp="2025-07-20T02:52:08.252" classname="FreeRTOSTaskTest" />
+    <testcase name="TaskCount" file="/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp" line="577" status="run" result="completed" time="0." timestamp="2025-07-20T02:52:08.252" classname="FreeRTOSTaskTest" />
+    <testcase name="SchedulerState" file="/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp" line="584" status="run" result="completed" time="0." timestamp="2025-07-20T02:52:08.252" classname="FreeRTOSTaskTest" />
+    <testcase name="TimeSinceSchedulerStarted" file="/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp" line="591" status="run" result="completed" time="0." timestamp="2025-07-20T02:52:08.252" classname="FreeRTOSTaskTest" />
+    <testcase name="CriticalSection" file="/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp" line="607" status="run" result="completed" time="0." timestamp="2025-07-20T02:52:08.252" classname="FreeRTOSTaskTest" />
+    <testcase name="CriticalSectionISR" file="/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp" line="617" status="run" result="completed" time="0." timestamp="2025-07-20T02:52:08.252" classname="FreeRTOSTaskTest" />
+    <testcase name="InterruptBarrier" file="/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp" line="627" status="run" result="completed" time="0." timestamp="2025-07-20T02:52:08.252" classname="FreeRTOSTaskTest" />
+    <testcase name="SchedulerBarrier" file="/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp" line="637" status="run" result="completed" time="0." timestamp="2025-07-20T02:52:08.252" classname="FreeRTOSTaskTest" />
+    <testcase name="StackAllocationLimitation" file="/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp" line="651" status="run" result="completed" time="0." timestamp="2025-07-20T02:52:08.252" classname="FreeRTOSTaskTest" />
+    <testcase name="InvalidParameters" file="/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp" line="692" status="run" result="completed" time="0." timestamp="2025-07-20T02:52:08.252" classname="FreeRTOSTaskTest" />
+    <testcase name="ZeroStackSize" file="/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp" line="704" status="run" result="completed" time="0." timestamp="2025-07-20T02:52:08.253" classname="FreeRTOSTaskTest" />
+    <testcase name="VeryHighPriority" file="/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp" line="715" status="run" result="completed" time="0." timestamp="2025-07-20T02:52:08.253" classname="FreeRTOSTaskTest" />
+    <testcase name="TaskSystemStatus" file="/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp" line="728" status="run" result="completed" time="0." timestamp="2025-07-20T02:52:08.253" classname="FreeRTOSTaskTest" />
+    <testcase name="TaskChronoCompatibility" file="/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp" line="743" status="run" result="completed" time="0." timestamp="2025-07-20T02:52:08.253" classname="FreeRTOSTaskTest" />
+    <testcase name="TaskMoveConstruction" file="/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp" line="773" status="run" result="completed" time="0." timestamp="2025-07-20T02:52:08.253" classname="FreeRTOSTaskTest">
+      <failure message="/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp:785&#x0A;Mock function called more times than expected - returning directly.&#x0A;    Function call: vTaskDelete(0x12345678)&#x0A;         Expected: to be called once&#x0A;           Actual: called twice - over-saturated and active&#x0A;" type=""><![CDATA[/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp:785
+Mock function called more times than expected - returning directly.
+    Function call: vTaskDelete(0x12345678)
+         Expected: to be called once
+           Actual: called twice - over-saturated and active
+]]></failure>
+    </testcase>
+    <testcase name="PeriodicTaskMoveConstruction" file="/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp" line="788" status="run" result="completed" time="0." timestamp="2025-07-20T02:52:08.253" classname="FreeRTOSTaskTest">
+      <failure message="/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp:801&#x0A;Mock function called more times than expected - returning default value.&#x0A;    Function call: xTaskAbortDelay(0x12345678)&#x0A;          Returns: 0&#x0A;         Expected: to be called once&#x0A;           Actual: called twice - over-saturated and active&#x0A;" type=""><![CDATA[/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp:801
+Mock function called more times than expected - returning default value.
+    Function call: xTaskAbortDelay(0x12345678)
+          Returns: 0
+         Expected: to be called once
+           Actual: called twice - over-saturated and active
+]]></failure>
+      <failure message="/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp:803&#x0A;Mock function called more times than expected - returning directly.&#x0A;    Function call: vTaskDelete(0x12345678)&#x0A;         Expected: to be called once&#x0A;           Actual: called twice - over-saturated and active&#x0A;" type=""><![CDATA[/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_freertos_task.cpp:803
+Mock function called more times than expected - returning directly.
+    Function call: vTaskDelete(0x12345678)
+         Expected: to be called once
+           Actual: called twice - over-saturated and active
+]]></failure>
+    </testcase>
+  </testsuite>
+</testsuites>
