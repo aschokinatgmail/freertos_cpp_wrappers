@@ -728,6 +728,20 @@ void* pvTimerGetTimerID(TimerHandle_t xTimer) {
     return nullptr;
 }
 
+MessageBufferHandle_t xMessageBufferCreate(size_t xBufferSizeBytes) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xMessageBufferCreate(xBufferSizeBytes);
+    }
+    return nullptr;
+}
+
+MessageBufferHandle_t xMessageBufferCreateStatic(size_t xBufferSizeBytes, uint8_t* pucMessageBufferStorageArea, StaticMessageBuffer_t* pxStaticMessageBuffer) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xMessageBufferCreateStatic(xBufferSizeBytes, pucMessageBufferStorageArea, pxStaticMessageBuffer);
+    }
+    return nullptr;
+}
+
 void vMessageBufferDelete(MessageBufferHandle_t xMessageBuffer) {
     if (g_freertos_mock) {
         g_freertos_mock->vMessageBufferDelete(xMessageBuffer);

@@ -432,7 +432,6 @@ extern "C" {
     void vQueueUnregisterQueue(QueueHandle_t xQueue);
     const char* pcQueueGetName(QueueHandle_t xQueue);
     
-<<<<<<< HEAD
     // Timer functions
     TimerHandle_t xTimerCreate(const char* pcTimerName, TickType_t xTimerPeriodInTicks, UBaseType_t uxAutoReload, void* pvTimerID, TimerCallbackFunction_t pxCallbackFunction);
     TimerHandle_t xTimerCreateStatic(const char* pcTimerName, TickType_t xTimerPeriodInTicks, UBaseType_t uxAutoReload, void* pvTimerID, TimerCallbackFunction_t pxCallbackFunction, StaticTimer_t* pxTimerBuffer);
