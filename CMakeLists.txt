@@ -22,22 +22,13 @@ if(PkgConfig_FOUND)
     pkg_check_modules(GMOCK gmock_main)
 endif()
 
-if(NOT GTEST_FOUND)
-    # Use FetchContent to download GoogleTest
-    include(FetchContent)
-    FetchContent_Declare(
-        googletest
-        URL https://github.com/google/googletest/archive/03597a01ee50e33277e995ac2c2e0400bbfd58bb.zip
-    )
-    # For Windows: Prevent overriding the parent project's compiler/linker settings
-    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-    FetchContent_MakeAvailable(googletest)
-    
-    # Set variables for compatibility
-    set(GTEST_LIBRARIES gtest_main)
-    set(GMOCK_LIBRARIES gmock_main)
-    set(GTEST_CFLAGS_OTHER "")
-    set(GMOCK_CFLAGS_OTHER "")
+# Only build tests if GoogleTest is available
+if(GTEST_FOUND)
+    message(STATUS "GoogleTest found via PkgConfig - building tests")
+    # Add tests subdirectory
+    add_subdirectory(tests)
+else()
+    message(WARNING "GoogleTest not found - skipping tests. Install libgtest-dev and libgmock-dev to enable testing.")
 endif()
 
 # Enable testing
@@ -51,6 +42,3 @@ include_directories(tests/mocks)
 add_library(freertos_cpp_wrappers 
     src/freertos_task.cc
 )
-
-# Add tests subdirectory
-add_subdirectory(tests)
