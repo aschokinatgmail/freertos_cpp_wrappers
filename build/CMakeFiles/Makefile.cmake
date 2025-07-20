@@ -64,4 +64,5 @@ set(CMAKE_DEPEND_INFO_FILES
   "tests/CMakeFiles/freertos_mocks.dir/DependInfo.cmake"
   "tests/CMakeFiles/test_freertos_task.dir/DependInfo.cmake"
   "tests/CMakeFiles/test_freertos_semaphore.dir/DependInfo.cmake"
+  "tests/CMakeFiles/test_freertos_queue.dir/DependInfo.cmake"
   )

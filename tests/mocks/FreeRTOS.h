@@ -22,6 +22,13 @@ typedef uint32_t StackType_t;
 #define portMAX_DELAY 0xFFFFFFFF
 #define portTICK_PERIOD_MS 1
 
+// Queue error codes
+#define errQUEUE_EMPTY    0
+#define errQUEUE_FULL     0
+
+// Tick conversion macro
+#define pdMS_TO_TICKS(xTimeInMs) ((TickType_t)((xTimeInMs) / portTICK_PERIOD_MS))
+
 // Task states
 typedef enum {
     eRunning = 0,
@@ -56,6 +63,14 @@ typedef void* SemaphoreHandle_t;
 typedef struct {
     uint8_t dummy[80]; // Placeholder size
 } StaticSemaphore_t;
+
+// Queue types
+typedef void* QueueHandle_t;
+
+// Queue static allocation structure (opaque for mock)
+typedef struct {
+    uint8_t dummy[128]; // Placeholder size
+} StaticQueue_t;
 #define INCLUDE_xTaskAbortDelay 1
 #define INCLUDE_uxTaskPriorityGet 1
 #define INCLUDE_vTaskPrioritySet 1
@@ -192,6 +207,46 @@ public:
     MOCK_METHOD(BaseType_t, xSemaphoreTakeFromISR, (SemaphoreHandle_t xSemaphore, BaseType_t* pxHigherPriorityTaskWoken));
     MOCK_METHOD(UBaseType_t, uxSemaphoreGetCount, (SemaphoreHandle_t xSemaphore));
     MOCK_METHOD(void, vSemaphoreDelete, (SemaphoreHandle_t xSemaphore));
+    
+    // Queue creation and deletion
+    MOCK_METHOD(QueueHandle_t, xQueueCreate, (UBaseType_t uxQueueLength, UBaseType_t uxItemSize));
+    MOCK_METHOD(QueueHandle_t, xQueueCreateStatic, (UBaseType_t uxQueueLength, UBaseType_t uxItemSize, uint8_t* pucQueueStorage, StaticQueue_t* pxStaticQueue));
+    MOCK_METHOD(void, vQueueDelete, (QueueHandle_t xQueue));
+    
+    // Queue send operations
+    MOCK_METHOD(BaseType_t, xQueueSend, (QueueHandle_t xQueue, const void* pvItemToQueue, TickType_t xTicksToWait));
+    MOCK_METHOD(BaseType_t, xQueueSendToBack, (QueueHandle_t xQueue, const void* pvItemToQueue, TickType_t xTicksToWait));
+    MOCK_METHOD(BaseType_t, xQueueSendToFront, (QueueHandle_t xQueue, const void* pvItemToQueue, TickType_t xTicksToWait));
+    MOCK_METHOD(BaseType_t, xQueueSendFromISR, (QueueHandle_t xQueue, const void* pvItemToQueue, BaseType_t* pxHigherPriorityTaskWoken));
+    MOCK_METHOD(BaseType_t, xQueueSendToBackFromISR, (QueueHandle_t xQueue, const void* pvItemToQueue, BaseType_t* pxHigherPriorityTaskWoken));
+    MOCK_METHOD(BaseType_t, xQueueSendToFrontFromISR, (QueueHandle_t xQueue, const void* pvItemToQueue, BaseType_t* pxHigherPriorityTaskWoken));
+    
+    // Queue receive operations
+    MOCK_METHOD(BaseType_t, xQueueReceive, (QueueHandle_t xQueue, void* pvBuffer, TickType_t xTicksToWait));
+    MOCK_METHOD(BaseType_t, xQueueReceiveFromISR, (QueueHandle_t xQueue, void* pvBuffer, BaseType_t* pxHigherPriorityTaskWoken));
+    
+    // Queue peek operations
+    MOCK_METHOD(BaseType_t, xQueuePeek, (QueueHandle_t xQueue, void* pvBuffer, TickType_t xTicksToWait));
+    MOCK_METHOD(BaseType_t, xQueuePeekFromISR, (QueueHandle_t xQueue, void* pvBuffer, BaseType_t* pxHigherPriorityTaskWoken));
+    
+    // Queue info operations
+    MOCK_METHOD(UBaseType_t, uxQueueMessagesWaiting, (QueueHandle_t xQueue));
+    MOCK_METHOD(UBaseType_t, uxQueueMessagesWaitingFromISR, (QueueHandle_t xQueue));
+    MOCK_METHOD(UBaseType_t, uxQueueSpacesAvailable, (QueueHandle_t xQueue));
+    
+    // Queue state operations
+    MOCK_METHOD(BaseType_t, xQueueIsQueueEmptyFromISR, (QueueHandle_t xQueue));
+    MOCK_METHOD(BaseType_t, xQueueIsQueueFullFromISR, (QueueHandle_t xQueue));
+    
+    // Queue utility operations
+    MOCK_METHOD(BaseType_t, xQueueReset, (QueueHandle_t xQueue));
+    MOCK_METHOD(BaseType_t, xQueueOverwrite, (QueueHandle_t xQueue, const void* pvItemToQueue));
+    MOCK_METHOD(BaseType_t, xQueueOverwriteFromISR, (QueueHandle_t xQueue, const void* pvItemToQueue, BaseType_t* pxHigherPriorityTaskWoken));
+    
+    // Queue registry operations
+    MOCK_METHOD(void, vQueueAddToRegistry, (QueueHandle_t xQueue, const char* pcQueueName));
+    MOCK_METHOD(void, vQueueUnregisterQueue, (QueueHandle_t xQueue));
+    MOCK_METHOD(const char*, pcQueueGetName, (QueueHandle_t xQueue));
 };
 
 // Global mock instance
@@ -254,4 +309,30 @@ extern "C" {
     BaseType_t xSemaphoreTakeFromISR(SemaphoreHandle_t xSemaphore, BaseType_t* pxHigherPriorityTaskWoken);
     UBaseType_t uxSemaphoreGetCount(SemaphoreHandle_t xSemaphore);
     void vSemaphoreDelete(SemaphoreHandle_t xSemaphore);
+    
+    // Queue functions
+    QueueHandle_t xQueueCreate(UBaseType_t uxQueueLength, UBaseType_t uxItemSize);
+    QueueHandle_t xQueueCreateStatic(UBaseType_t uxQueueLength, UBaseType_t uxItemSize, uint8_t* pucQueueStorage, StaticQueue_t* pxStaticQueue);
+    void vQueueDelete(QueueHandle_t xQueue);
+    BaseType_t xQueueSend(QueueHandle_t xQueue, const void* pvItemToQueue, TickType_t xTicksToWait);
+    BaseType_t xQueueSendToBack(QueueHandle_t xQueue, const void* pvItemToQueue, TickType_t xTicksToWait);
+    BaseType_t xQueueSendToFront(QueueHandle_t xQueue, const void* pvItemToQueue, TickType_t xTicksToWait);
+    BaseType_t xQueueSendFromISR(QueueHandle_t xQueue, const void* pvItemToQueue, BaseType_t* pxHigherPriorityTaskWoken);
+    BaseType_t xQueueSendToBackFromISR(QueueHandle_t xQueue, const void* pvItemToQueue, BaseType_t* pxHigherPriorityTaskWoken);
+    BaseType_t xQueueSendToFrontFromISR(QueueHandle_t xQueue, const void* pvItemToQueue, BaseType_t* pxHigherPriorityTaskWoken);
+    BaseType_t xQueueReceive(QueueHandle_t xQueue, void* pvBuffer, TickType_t xTicksToWait);
+    BaseType_t xQueueReceiveFromISR(QueueHandle_t xQueue, void* pvBuffer, BaseType_t* pxHigherPriorityTaskWoken);
+    BaseType_t xQueuePeek(QueueHandle_t xQueue, void* pvBuffer, TickType_t xTicksToWait);
+    BaseType_t xQueuePeekFromISR(QueueHandle_t xQueue, void* pvBuffer, BaseType_t* pxHigherPriorityTaskWoken);
+    UBaseType_t uxQueueMessagesWaiting(QueueHandle_t xQueue);
+    UBaseType_t uxQueueMessagesWaitingFromISR(QueueHandle_t xQueue);
+    UBaseType_t uxQueueSpacesAvailable(QueueHandle_t xQueue);
+    BaseType_t xQueueIsQueueEmptyFromISR(QueueHandle_t xQueue);
+    BaseType_t xQueueIsQueueFullFromISR(QueueHandle_t xQueue);
+    BaseType_t xQueueReset(QueueHandle_t xQueue);
+    BaseType_t xQueueOverwrite(QueueHandle_t xQueue, const void* pvItemToQueue);
+    BaseType_t xQueueOverwriteFromISR(QueueHandle_t xQueue, const void* pvItemToQueue, BaseType_t* pxHigherPriorityTaskWoken);
+    void vQueueAddToRegistry(QueueHandle_t xQueue, const char* pcQueueName);
+    void vQueueUnregisterQueue(QueueHandle_t xQueue);
+    const char* pcQueueGetName(QueueHandle_t xQueue);
 }

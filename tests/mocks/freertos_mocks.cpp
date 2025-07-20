@@ -351,4 +351,170 @@ void vSemaphoreDelete(SemaphoreHandle_t xSemaphore) {
     }
 }
 
+// Queue function implementations
+QueueHandle_t xQueueCreate(UBaseType_t uxQueueLength, UBaseType_t uxItemSize) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xQueueCreate(uxQueueLength, uxItemSize);
+    }
+    return nullptr;
+}
+
+QueueHandle_t xQueueCreateStatic(UBaseType_t uxQueueLength, UBaseType_t uxItemSize, uint8_t* pucQueueStorage, StaticQueue_t* pxStaticQueue) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xQueueCreateStatic(uxQueueLength, uxItemSize, pucQueueStorage, pxStaticQueue);
+    }
+    return nullptr;
+}
+
+void vQueueDelete(QueueHandle_t xQueue) {
+    if (g_freertos_mock) {
+        g_freertos_mock->vQueueDelete(xQueue);
+    }
+}
+
+BaseType_t xQueueSend(QueueHandle_t xQueue, const void* pvItemToQueue, TickType_t xTicksToWait) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xQueueSend(xQueue, pvItemToQueue, xTicksToWait);
+    }
+    return pdFAIL;
+}
+
+BaseType_t xQueueSendToBack(QueueHandle_t xQueue, const void* pvItemToQueue, TickType_t xTicksToWait) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xQueueSendToBack(xQueue, pvItemToQueue, xTicksToWait);
+    }
+    return pdFAIL;
+}
+
+BaseType_t xQueueSendToFront(QueueHandle_t xQueue, const void* pvItemToQueue, TickType_t xTicksToWait) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xQueueSendToFront(xQueue, pvItemToQueue, xTicksToWait);
+    }
+    return pdFAIL;
+}
+
+BaseType_t xQueueSendFromISR(QueueHandle_t xQueue, const void* pvItemToQueue, BaseType_t* pxHigherPriorityTaskWoken) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xQueueSendFromISR(xQueue, pvItemToQueue, pxHigherPriorityTaskWoken);
+    }
+    return pdFAIL;
+}
+
+BaseType_t xQueueSendToBackFromISR(QueueHandle_t xQueue, const void* pvItemToQueue, BaseType_t* pxHigherPriorityTaskWoken) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xQueueSendToBackFromISR(xQueue, pvItemToQueue, pxHigherPriorityTaskWoken);
+    }
+    return pdFAIL;
+}
+
+BaseType_t xQueueSendToFrontFromISR(QueueHandle_t xQueue, const void* pvItemToQueue, BaseType_t* pxHigherPriorityTaskWoken) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xQueueSendToFrontFromISR(xQueue, pvItemToQueue, pxHigherPriorityTaskWoken);
+    }
+    return pdFAIL;
+}
+
+BaseType_t xQueueReceive(QueueHandle_t xQueue, void* pvBuffer, TickType_t xTicksToWait) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xQueueReceive(xQueue, pvBuffer, xTicksToWait);
+    }
+    return pdFAIL;
+}
+
+BaseType_t xQueueReceiveFromISR(QueueHandle_t xQueue, void* pvBuffer, BaseType_t* pxHigherPriorityTaskWoken) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xQueueReceiveFromISR(xQueue, pvBuffer, pxHigherPriorityTaskWoken);
+    }
+    return pdFAIL;
+}
+
+BaseType_t xQueuePeek(QueueHandle_t xQueue, void* pvBuffer, TickType_t xTicksToWait) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xQueuePeek(xQueue, pvBuffer, xTicksToWait);
+    }
+    return pdFAIL;
+}
+
+BaseType_t xQueuePeekFromISR(QueueHandle_t xQueue, void* pvBuffer, BaseType_t* pxHigherPriorityTaskWoken) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xQueuePeekFromISR(xQueue, pvBuffer, pxHigherPriorityTaskWoken);
+    }
+    return pdFAIL;
+}
+
+UBaseType_t uxQueueMessagesWaiting(QueueHandle_t xQueue) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->uxQueueMessagesWaiting(xQueue);
+    }
+    return 0;
+}
+
+UBaseType_t uxQueueMessagesWaitingFromISR(QueueHandle_t xQueue) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->uxQueueMessagesWaitingFromISR(xQueue);
+    }
+    return 0;
+}
+
+UBaseType_t uxQueueSpacesAvailable(QueueHandle_t xQueue) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->uxQueueSpacesAvailable(xQueue);
+    }
+    return 0;
+}
+
+BaseType_t xQueueIsQueueEmptyFromISR(QueueHandle_t xQueue) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xQueueIsQueueEmptyFromISR(xQueue);
+    }
+    return pdTRUE;
+}
+
+BaseType_t xQueueIsQueueFullFromISR(QueueHandle_t xQueue) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xQueueIsQueueFullFromISR(xQueue);
+    }
+    return pdFALSE;
+}
+
+BaseType_t xQueueReset(QueueHandle_t xQueue) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xQueueReset(xQueue);
+    }
+    return pdPASS;
+}
+
+BaseType_t xQueueOverwrite(QueueHandle_t xQueue, const void* pvItemToQueue) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xQueueOverwrite(xQueue, pvItemToQueue);
+    }
+    return pdPASS;
+}
+
+BaseType_t xQueueOverwriteFromISR(QueueHandle_t xQueue, const void* pvItemToQueue, BaseType_t* pxHigherPriorityTaskWoken) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xQueueOverwriteFromISR(xQueue, pvItemToQueue, pxHigherPriorityTaskWoken);
+    }
+    return pdPASS;
+}
+
+void vQueueAddToRegistry(QueueHandle_t xQueue, const char* pcQueueName) {
+    if (g_freertos_mock) {
+        g_freertos_mock->vQueueAddToRegistry(xQueue, pcQueueName);
+    }
+}
+
+void vQueueUnregisterQueue(QueueHandle_t xQueue) {
+    if (g_freertos_mock) {
+        g_freertos_mock->vQueueUnregisterQueue(xQueue);
+    }
+}
+
+const char* pcQueueGetName(QueueHandle_t xQueue) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->pcQueueGetName(xQueue);
+    }
+    return nullptr;
+}
+
 }
