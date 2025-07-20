@@ -95,13 +95,6 @@ typedef struct {
     uint8_t dummy[128]; // Placeholder size
 } StaticQueue_t;
 
-// Stream buffer types
-typedef void* StreamBufferHandle_t;
-
-// Stream buffer static allocation structure (opaque for mock)
-typedef struct {
-    uint8_t dummy[128]; // Placeholder size
-} StaticStreamBuffer_t;
 #define INCLUDE_xTaskAbortDelay 1
 #define INCLUDE_uxTaskPriorityGet 1
 #define INCLUDE_vTaskPrioritySet 1
