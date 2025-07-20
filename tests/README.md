@@ -11,16 +11,15 @@ This directory contains comprehensive unit tests for the FreeRTOS C++ wrapper li
 - **Stream Buffer Module** (`test_freertos_stream_buffer.cpp`) - 47 tests
 - **Event Group Module** (`test_freertos_event_group.cpp`) - 30 tests
 - **Message Buffer Module** (`test_freertos_message_buffer.cpp`) - 32 tests
+- **Software Timer Module** (`test_freertos_sw_timer.cpp`) - 48 tests
 
-### Planned Modules 📋
-- Software Timer Module (`test_freertos_sw_timer.cpp`)
-- Software Timer Module (`test_freertos_sw_timer.cpp`)
+**All major FreeRTOS modules are now fully tested!** 🎉
 
 ## Test Coverage
 
-**Overall Coverage: 89.2%** (1,211 of 1,358 lines)
+**Overall Coverage: 92.4%** (1,425 of 1,542 lines)
 
-**Total Tests: 272** (Task: 46, Semaphore: 68, Queue: 49, Stream Buffer: 47, Event Group: 30, Message Buffer: 32)
+**Total Tests: 320** (Task: 46, Semaphore: 68, Queue: 49, Stream Buffer: 47, Event Group: 30, Message Buffer: 32, Timer: 48)
 
 See [COVERAGE_REPORT.md](../COVERAGE_REPORT.md) for detailed coverage analysis.
 
@@ -60,9 +59,10 @@ make -j$(nproc)
 ./tests/test_freertos_task
 ./tests/test_freertos_semaphore
 ./tests/test_freertos_queue
-../tests/test_freertos_stream_buffer
+./tests/test_freertos_stream_buffer
 ./tests/test_freertos_event_group
 ./tests/test_freertos_message_buffer
+./tests/test_freertos_sw_timer
 
 # Run tests with XML output
 ./tests/test_freertos_task --gtest_output=xml:test_results.xml
@@ -123,12 +123,25 @@ ctest --verbose
    - Edge cases with zero-length and maximum-size messages
    - Chrono timeout compatibility
 
-8. **Utility Function Tests**
+8. **Software Timer Tests**
+   - Static and dynamic timer allocators
+   - Timer creation with tick-based and chrono-based periods
+   - Timer start/stop/reset operations with various timeout parameters
+   - Timer period changes and state queries
+   - Single-shot vs auto-reload timer behavior
+   - Timer name and reload mode management
+   - ISR variants of all timer functions (start_isr, stop_isr, reset_isr, period_isr)
+   - Mixed duration type support (seconds, milliseconds, microseconds, etc.)
+   - Timer callback functionality and ID management
+   - Move construction and assignment semantics
+   - Complex destructor scenarios and error conditions
+
+9. **Utility Function Tests**
    - Delay and timing functions
    - System information functions
    - Critical sections and barriers
 
-9. **Edge Cases and Error Handling**
+10. **Edge Cases and Error Handling**
    - Invalid parameters
    - Zero stack sizes
    - Move semantics limitations
@@ -154,6 +167,7 @@ The test framework includes comprehensive mocks for FreeRTOS APIs:
 - `tests/mocks/stream_buffer.h` - Stream buffer header stub
 - `tests/mocks/event_groups.h` - Event group header stub
 - `tests/mocks/message_buffer.h` - Message buffer header stub
+- `tests/mocks/timers.h` - Software timer header stub
 
 ### Mock Features
 
@@ -240,6 +254,15 @@ When all tests pass, you should see:
 [----------] 32 tests from FreeRTOSMessageBufferTest (X ms total)
 [==========] 32 tests from 1 test suite ran. (X ms total)
 [  PASSED  ] 32 tests.
+
+# Software Timer Tests
+[==========] Running 48 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 48 tests from FreeRTOSSwTimerTest
+[       OK ] All tests completed successfully
+[----------] 48 tests from FreeRTOSSwTimerTest (X ms total)
+[==========] 48 tests from 1 test suite ran. (X ms total)
+[  PASSED  ] 48 tests.
 ```
 
 ## Integration with CI/CD

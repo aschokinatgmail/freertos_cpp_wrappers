@@ -395,16 +395,18 @@ public:
    * @brief Method to change the period of the timer.
    * @ref https://www.freertos.org/xTimerChangePeriod.html
    *
-   * @tparam Rep duration representation type
-   * @tparam Period duration period type
+   * @tparam RepPeriod duration representation type for new period
+   * @tparam PeriodPeriod duration period type for new period
+   * @tparam RepTimeout duration representation type for timeout
+   * @tparam PeriodTimeout duration period type for timeout
    * @param new_period new period of the timer
    * @param timeout timeout to wait for the timer to change the period
    * @return BaseType_t pdPASS if the timer period was changed successfully else
    * pdFAIL
    */
-  template <typename Rep, typename Period>
-  BaseType_t period(const std::chrono::duration<Rep, Period> &new_period,
-                    const std::chrono::duration<Rep, Period> &timeout) {
+  template <typename RepPeriod, typename PeriodPeriod, typename RepTimeout, typename PeriodTimeout>
+  BaseType_t period(const std::chrono::duration<RepPeriod, PeriodPeriod> &new_period,
+                    const std::chrono::duration<RepTimeout, PeriodTimeout> &timeout) {
     return period(
         std::chrono::duration_cast<std::chrono::milliseconds>(new_period)
             .count(),

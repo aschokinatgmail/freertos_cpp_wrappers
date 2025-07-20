@@ -602,17 +602,128 @@ void portYIELD_FROM_ISR(BaseType_t xHigherPriorityTaskWoken) {
     }
 }
 
-// Message Buffer function implementations
-MessageBufferHandle_t xMessageBufferCreate(size_t xBufferSizeBytes) {
+// Timer function implementations
+TimerHandle_t xTimerCreate(const char* pcTimerName, TickType_t xTimerPeriodInTicks, UBaseType_t uxAutoReload, void* pvTimerID, TimerCallbackFunction_t pxCallbackFunction) {
     if (g_freertos_mock) {
-        return g_freertos_mock->xMessageBufferCreate(xBufferSizeBytes);
+        return g_freertos_mock->xTimerCreate(pcTimerName, xTimerPeriodInTicks, uxAutoReload, pvTimerID, pxCallbackFunction);
     }
     return nullptr;
 }
 
-MessageBufferHandle_t xMessageBufferCreateStatic(size_t xBufferSizeBytes, uint8_t* pucMessageBufferStorageArea, StaticMessageBuffer_t* pxStaticMessageBuffer) {
+TimerHandle_t xTimerCreateStatic(const char* pcTimerName, TickType_t xTimerPeriodInTicks, UBaseType_t uxAutoReload, void* pvTimerID, TimerCallbackFunction_t pxCallbackFunction, StaticTimer_t* pxTimerBuffer) {
     if (g_freertos_mock) {
-        return g_freertos_mock->xMessageBufferCreateStatic(xBufferSizeBytes, pucMessageBufferStorageArea, pxStaticMessageBuffer);
+        return g_freertos_mock->xTimerCreateStatic(pcTimerName, xTimerPeriodInTicks, uxAutoReload, pvTimerID, pxCallbackFunction, pxTimerBuffer);
+    }
+    return nullptr;
+}
+
+BaseType_t xTimerDelete(TimerHandle_t xTimer, TickType_t xTicksToWait) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xTimerDelete(xTimer, xTicksToWait);
+    }
+    return pdFAIL;
+}
+
+BaseType_t xTimerStart(TimerHandle_t xTimer, TickType_t xTicksToWait) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xTimerStart(xTimer, xTicksToWait);
+    }
+    return pdFAIL;
+}
+
+BaseType_t xTimerStartFromISR(TimerHandle_t xTimer, BaseType_t* pxHigherPriorityTaskWoken) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xTimerStartFromISR(xTimer, pxHigherPriorityTaskWoken);
+    }
+    return pdFAIL;
+}
+
+BaseType_t xTimerStop(TimerHandle_t xTimer, TickType_t xTicksToWait) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xTimerStop(xTimer, xTicksToWait);
+    }
+    return pdFAIL;
+}
+
+BaseType_t xTimerStopFromISR(TimerHandle_t xTimer, BaseType_t* pxHigherPriorityTaskWoken) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xTimerStopFromISR(xTimer, pxHigherPriorityTaskWoken);
+    }
+    return pdFAIL;
+}
+
+BaseType_t xTimerReset(TimerHandle_t xTimer, TickType_t xTicksToWait) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xTimerReset(xTimer, xTicksToWait);
+    }
+    return pdFAIL;
+}
+
+BaseType_t xTimerResetFromISR(TimerHandle_t xTimer, BaseType_t* pxHigherPriorityTaskWoken) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xTimerResetFromISR(xTimer, pxHigherPriorityTaskWoken);
+    }
+    return pdFAIL;
+}
+
+BaseType_t xTimerChangePeriod(TimerHandle_t xTimer, TickType_t xNewPeriod, TickType_t xTicksToWait) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xTimerChangePeriod(xTimer, xNewPeriod, xTicksToWait);
+    }
+    return pdFAIL;
+}
+
+BaseType_t xTimerChangePeriodFromISR(TimerHandle_t xTimer, TickType_t xNewPeriod, BaseType_t* pxHigherPriorityTaskWoken) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xTimerChangePeriodFromISR(xTimer, xNewPeriod, pxHigherPriorityTaskWoken);
+    }
+    return pdFAIL;
+}
+
+BaseType_t xTimerIsTimerActive(TimerHandle_t xTimer) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xTimerIsTimerActive(xTimer);
+    }
+    return pdFALSE;
+}
+
+TickType_t xTimerGetPeriod(TimerHandle_t xTimer) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xTimerGetPeriod(xTimer);
+    }
+    return 0;
+}
+
+TickType_t xTimerGetExpiryTime(TimerHandle_t xTimer) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xTimerGetExpiryTime(xTimer);
+    }
+    return 0;
+}
+
+UBaseType_t uxTimerGetReloadMode(TimerHandle_t xTimer) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->uxTimerGetReloadMode(xTimer);
+    }
+    return pdFALSE;
+}
+
+void vTimerSetReloadMode(TimerHandle_t xTimer, UBaseType_t uxAutoReload) {
+    if (g_freertos_mock) {
+        g_freertos_mock->vTimerSetReloadMode(xTimer, uxAutoReload);
+    }
+}
+
+const char* pcTimerGetName(TimerHandle_t xTimer) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->pcTimerGetName(xTimer);
+    }
+    return "UnknownTimer";
+}
+
+void* pvTimerGetTimerID(TimerHandle_t xTimer) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->pvTimerGetTimerID(xTimer);
     }
     return nullptr;
 }

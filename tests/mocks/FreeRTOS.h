@@ -71,6 +71,15 @@ typedef struct {
     uint8_t dummy[128]; // Placeholder size
 } StaticStreamBuffer_t;
 
+// Timer types
+typedef void* TimerHandle_t;
+typedef void (*TimerCallbackFunction_t)(TimerHandle_t xTimer);
+
+// Timer static allocation structure (opaque for mock)
+typedef struct {
+    uint8_t dummy[96]; // Placeholder size for static timer buffer
+} StaticTimer_t;
+
 // Static allocation support flag (enabled for testing)
 #define configSUPPORT_STATIC_ALLOCATION 1
 #define configSUPPORT_DYNAMIC_ALLOCATION 1
@@ -284,6 +293,26 @@ public:
     MOCK_METHOD(EventBits_t, xEventGroupGetBitsFromISR, (EventGroupHandle_t xEventGroup));
     MOCK_METHOD(EventBits_t, xEventGroupSync, (EventGroupHandle_t xEventGroup, const EventBits_t uxBitsToSet, const EventBits_t uxBitsToWaitFor, TickType_t xTicksToWait));
     
+    // Software Timer operations
+    MOCK_METHOD(TimerHandle_t, xTimerCreate, (const char* pcTimerName, TickType_t xTimerPeriodInTicks, UBaseType_t uxAutoReload, void* pvTimerID, TimerCallbackFunction_t pxCallbackFunction));
+    MOCK_METHOD(TimerHandle_t, xTimerCreateStatic, (const char* pcTimerName, TickType_t xTimerPeriodInTicks, UBaseType_t uxAutoReload, void* pvTimerID, TimerCallbackFunction_t pxCallbackFunction, StaticTimer_t* pxTimerBuffer));
+    MOCK_METHOD(BaseType_t, xTimerDelete, (TimerHandle_t xTimer, TickType_t xTicksToWait));
+    MOCK_METHOD(BaseType_t, xTimerStart, (TimerHandle_t xTimer, TickType_t xTicksToWait));
+    MOCK_METHOD(BaseType_t, xTimerStartFromISR, (TimerHandle_t xTimer, BaseType_t* pxHigherPriorityTaskWoken));
+    MOCK_METHOD(BaseType_t, xTimerStop, (TimerHandle_t xTimer, TickType_t xTicksToWait));
+    MOCK_METHOD(BaseType_t, xTimerStopFromISR, (TimerHandle_t xTimer, BaseType_t* pxHigherPriorityTaskWoken));
+    MOCK_METHOD(BaseType_t, xTimerReset, (TimerHandle_t xTimer, TickType_t xTicksToWait));
+    MOCK_METHOD(BaseType_t, xTimerResetFromISR, (TimerHandle_t xTimer, BaseType_t* pxHigherPriorityTaskWoken));
+    MOCK_METHOD(BaseType_t, xTimerChangePeriod, (TimerHandle_t xTimer, TickType_t xNewPeriod, TickType_t xTicksToWait));
+    MOCK_METHOD(BaseType_t, xTimerChangePeriodFromISR, (TimerHandle_t xTimer, TickType_t xNewPeriod, BaseType_t* pxHigherPriorityTaskWoken));
+    MOCK_METHOD(BaseType_t, xTimerIsTimerActive, (TimerHandle_t xTimer));
+    MOCK_METHOD(TickType_t, xTimerGetPeriod, (TimerHandle_t xTimer));
+    MOCK_METHOD(TickType_t, xTimerGetExpiryTime, (TimerHandle_t xTimer));
+    MOCK_METHOD(UBaseType_t, uxTimerGetReloadMode, (TimerHandle_t xTimer));
+    MOCK_METHOD(void, vTimerSetReloadMode, (TimerHandle_t xTimer, UBaseType_t uxAutoReload));
+    MOCK_METHOD(const char*, pcTimerGetName, (TimerHandle_t xTimer));
+    MOCK_METHOD(void*, pvTimerGetTimerID, (TimerHandle_t xTimer));
+
     // Message Buffer operations
     MOCK_METHOD(MessageBufferHandle_t, xMessageBufferCreate, (size_t xBufferSizeBytes));
     MOCK_METHOD(MessageBufferHandle_t, xMessageBufferCreateStatic, (size_t xBufferSizeBytes, uint8_t* pucMessageBufferStorageArea, StaticMessageBuffer_t* pxStaticMessageBuffer));
@@ -402,6 +431,27 @@ extern "C" {
     void vQueueAddToRegistry(QueueHandle_t xQueue, const char* pcQueueName);
     void vQueueUnregisterQueue(QueueHandle_t xQueue);
     const char* pcQueueGetName(QueueHandle_t xQueue);
+    
+<<<<<<< HEAD
+    // Timer functions
+    TimerHandle_t xTimerCreate(const char* pcTimerName, TickType_t xTimerPeriodInTicks, UBaseType_t uxAutoReload, void* pvTimerID, TimerCallbackFunction_t pxCallbackFunction);
+    TimerHandle_t xTimerCreateStatic(const char* pcTimerName, TickType_t xTimerPeriodInTicks, UBaseType_t uxAutoReload, void* pvTimerID, TimerCallbackFunction_t pxCallbackFunction, StaticTimer_t* pxTimerBuffer);
+    BaseType_t xTimerDelete(TimerHandle_t xTimer, TickType_t xTicksToWait);
+    BaseType_t xTimerStart(TimerHandle_t xTimer, TickType_t xTicksToWait);
+    BaseType_t xTimerStartFromISR(TimerHandle_t xTimer, BaseType_t* pxHigherPriorityTaskWoken);
+    BaseType_t xTimerStop(TimerHandle_t xTimer, TickType_t xTicksToWait);
+    BaseType_t xTimerStopFromISR(TimerHandle_t xTimer, BaseType_t* pxHigherPriorityTaskWoken);
+    BaseType_t xTimerReset(TimerHandle_t xTimer, TickType_t xTicksToWait);
+    BaseType_t xTimerResetFromISR(TimerHandle_t xTimer, BaseType_t* pxHigherPriorityTaskWoken);
+    BaseType_t xTimerChangePeriod(TimerHandle_t xTimer, TickType_t xNewPeriod, TickType_t xTicksToWait);
+    BaseType_t xTimerChangePeriodFromISR(TimerHandle_t xTimer, TickType_t xNewPeriod, BaseType_t* pxHigherPriorityTaskWoken);
+    BaseType_t xTimerIsTimerActive(TimerHandle_t xTimer);
+    TickType_t xTimerGetPeriod(TimerHandle_t xTimer);
+    TickType_t xTimerGetExpiryTime(TimerHandle_t xTimer);
+    UBaseType_t uxTimerGetReloadMode(TimerHandle_t xTimer);
+    void vTimerSetReloadMode(TimerHandle_t xTimer, UBaseType_t uxAutoReload);
+    const char* pcTimerGetName(TimerHandle_t xTimer);
+    void* pvTimerGetTimerID(TimerHandle_t xTimer);
     
     // Message Buffer functions
     MessageBufferHandle_t xMessageBufferCreate(size_t xBufferSizeBytes);
