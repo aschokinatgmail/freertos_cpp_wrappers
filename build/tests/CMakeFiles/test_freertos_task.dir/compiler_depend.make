@@ -404,7 +404,8 @@ tests/CMakeFiles/test_freertos_task.dir/test_freertos_task.cpp.o: /home/runner/w
   /usr/lib/gcc/x86_64-linux-gnu/13/include/stdint.h \
   /usr/lib/gcc/x86_64-linux-gnu/13/include/syslimits.h
 
-tests/test_freertos_task: /lib/x86_64-linux-gnu/libc.so.6 \
+tests/test_freertos_task: libfreertos_cpp_wrappers.a \
+  /lib/x86_64-linux-gnu/libc.so.6 \
   /lib/x86_64-linux-gnu/libm.so.6 \
   /lib/x86_64-linux-gnu/libmvec.so.1 \
   /lib64/ld-linux-x86-64.so.2 \
@@ -452,6 +453,8 @@ tests/CMakeFiles/test_freertos_task.dir/test_freertos_task.cpp.o:
 /lib64/ld-linux-x86-64.so.2:
 
 /lib/x86_64-linux-gnu/libmvec.so.1:
+
+libfreertos_cpp_wrappers.a:
 
 /usr/lib/gcc/x86_64-linux-gnu/13/include/stddef.h:
 

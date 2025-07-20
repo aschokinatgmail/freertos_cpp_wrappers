@@ -406,6 +406,7 @@ tests/CMakeFiles/test_freertos_task.dir/test_freertos_task.cpp.o
  /usr/lib/gcc/x86_64-linux-gnu/13/include/syslimits.h
 
 tests/test_freertos_task
+ /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/build/libfreertos_cpp_wrappers.a
  /lib/x86_64-linux-gnu/libc.so.6
  /lib/x86_64-linux-gnu/libm.so.6
  /lib/x86_64-linux-gnu/libmvec.so.1
