@@ -8,18 +8,19 @@ This directory contains comprehensive unit tests for the FreeRTOS C++ wrapper li
 - **Task Module** (`test_freertos_task.cpp`) - 46 tests
 - **Semaphore Module** (`test_freertos_semaphore.cpp`) - 68 tests
 - **Queue Module** (`test_freertos_queue.cpp`) - 49 tests
+- **Stream Buffer Module** (`test_freertos_stream_buffer.cpp`) - 47 tests
 - **Event Group Module** (`test_freertos_event_group.cpp`) - 30 tests
 - **Message Buffer Module** (`test_freertos_message_buffer.cpp`) - 32 tests
 
 ### Planned Modules 📋
-- Stream Buffer Module (`test_freertos_stream_buffer.cpp`)
+- Software Timer Module (`test_freertos_sw_timer.cpp`)
 - Software Timer Module (`test_freertos_sw_timer.cpp`)
 
 ## Test Coverage
 
 **Overall Coverage: 89.2%** (1,211 of 1,358 lines)
 
-**Total Tests: 225** (Task: 46, Semaphore: 68, Queue: 49, Event Group: 30, Message Buffer: 32)
+**Total Tests: 272** (Task: 46, Semaphore: 68, Queue: 49, Stream Buffer: 47, Event Group: 30, Message Buffer: 32)
 
 See [COVERAGE_REPORT.md](../COVERAGE_REPORT.md) for detailed coverage analysis.
 
@@ -59,6 +60,7 @@ make -j$(nproc)
 ./tests/test_freertos_task
 ./tests/test_freertos_semaphore
 ./tests/test_freertos_queue
+../tests/test_freertos_stream_buffer
 ./tests/test_freertos_event_group
 ./tests/test_freertos_message_buffer
 
@@ -149,6 +151,7 @@ The test framework includes comprehensive mocks for FreeRTOS APIs:
 - `tests/mocks/task.h` - Task-specific header stub
 - `tests/mocks/semphr.h` - Semaphore header stub
 - `tests/mocks/queue.h` - Queue header stub
+- `tests/mocks/stream_buffer.h` - Stream buffer header stub
 - `tests/mocks/event_groups.h` - Event group header stub
 - `tests/mocks/message_buffer.h` - Message buffer header stub
 
