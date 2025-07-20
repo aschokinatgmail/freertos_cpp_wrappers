@@ -61,6 +61,7 @@ class static_sw_timer_allocator {
 
 public:
   static_sw_timer_allocator() = default;
+  ~static_sw_timer_allocator() = default;
   static_sw_timer_allocator(const static_sw_timer_allocator &) = delete;
   static_sw_timer_allocator(static_sw_timer_allocator &&) = default;
 

@@ -54,6 +54,7 @@ class static_semaphore_allocator {
 
 public:
   static_semaphore_allocator() = default;
+  ~static_semaphore_allocator() = default;
   static_semaphore_allocator(const static_semaphore_allocator &) = delete;
   static_semaphore_allocator(static_semaphore_allocator &&) = delete;
 
@@ -727,11 +728,18 @@ public:
    * @param mutex mutex to guard
    */
   explicit lock_guard(Mutex &mutex) : m_mutex{mutex} { m_mutex.lock(); }
+  
   /**
    * @brief Destruct the lock guard object and unlock the mutex.
    *
    */
   ~lock_guard(void) { m_mutex.unlock(); }
+  
+  // Delete copy and move operations for RAII safety
+  lock_guard(const lock_guard &) = delete;
+  lock_guard(lock_guard &&) = delete;
+  lock_guard &operator=(const lock_guard &) = delete;
+  lock_guard &operator=(lock_guard &&) = delete;
 
   /**
    * @brief Checks if the mutex is locked.
@@ -769,6 +777,12 @@ public:
       m_mutex.unlock(); 
     }
   }
+  
+  // Delete copy and move operations for RAII safety
+  try_lock_guard(const try_lock_guard &) = delete;
+  try_lock_guard(try_lock_guard &&) = delete;
+  try_lock_guard &operator=(const try_lock_guard &) = delete;
+  try_lock_guard &operator=(try_lock_guard &&) = delete;
 
   /**
    * @brief Checks if the mutex is locked.
@@ -803,6 +817,12 @@ public:
    *
    */
   ~lock_guard_isr(void) { m_mutex.unlock_isr(m_high_priority_task_woken); }
+  
+  // Delete copy and move operations for RAII safety
+  lock_guard_isr(const lock_guard_isr &) = delete;
+  lock_guard_isr(lock_guard_isr &&) = delete;
+  lock_guard_isr &operator=(const lock_guard_isr &) = delete;
+  lock_guard_isr &operator=(lock_guard_isr &&) = delete;
 
   /**
    * @brief Checks if high priority task was woken.
@@ -858,6 +878,12 @@ public:
    *
    */
   ~timeout_lock_guard(void) { m_mutex.unlock(); }
+  
+  // Delete copy and move operations for RAII safety
+  timeout_lock_guard(const timeout_lock_guard &) = delete;
+  timeout_lock_guard(timeout_lock_guard &&) = delete;
+  timeout_lock_guard &operator=(const timeout_lock_guard &) = delete;
+  timeout_lock_guard &operator=(timeout_lock_guard &&) = delete;
 
   /**
    * @brief Checks if the mutex is locked.

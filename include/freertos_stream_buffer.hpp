@@ -55,6 +55,7 @@ template <size_t StreamBufferSize> class static_stream_buffer_allocator {
 
 public:
   static_stream_buffer_allocator() = default;
+  ~static_stream_buffer_allocator() = default;
   static_stream_buffer_allocator(const static_stream_buffer_allocator &) =
       delete;
   static_stream_buffer_allocator(static_stream_buffer_allocator &&) = delete;

@@ -59,6 +59,7 @@ template <size_t StackSize> class static_task_allocator {
 
 public:
   static_task_allocator() = default;
+  ~static_task_allocator() = default;
   static_task_allocator(const static_task_allocator &) = delete;
   static_task_allocator(static_task_allocator &&) = default;
 
@@ -1131,6 +1132,12 @@ public:
    *
    */
   ~critical_section(void) { taskEXIT_CRITICAL(); }
+  
+  // Delete copy and move operations for RAII safety
+  critical_section(const critical_section &) = delete;
+  critical_section(critical_section &&) = delete;
+  critical_section &operator=(const critical_section &) = delete;
+  critical_section &operator=(critical_section &&) = delete;
 };
 
 /**
@@ -1155,6 +1162,12 @@ public:
   ~critical_section_isr(void) {
     taskEXIT_CRITICAL_FROM_ISR(m_saved_interrupt_status);
   }
+  
+  // Delete copy and move operations for RAII safety
+  critical_section_isr(const critical_section_isr &) = delete;
+  critical_section_isr(critical_section_isr &&) = delete;
+  critical_section_isr &operator=(const critical_section_isr &) = delete;
+  critical_section_isr &operator=(critical_section_isr &&) = delete;
 };
 
 /**
@@ -1174,6 +1187,12 @@ public:
    *
    */
   ~interrupt_barrier(void) { taskENABLE_INTERRUPTS(); }
+  
+  // Delete copy and move operations for RAII safety
+  interrupt_barrier(const interrupt_barrier &) = delete;
+  interrupt_barrier(interrupt_barrier &&) = delete;
+  interrupt_barrier &operator=(const interrupt_barrier &) = delete;
+  interrupt_barrier &operator=(interrupt_barrier &&) = delete;
 };
 
 /**
@@ -1193,6 +1212,12 @@ public:
    *
    */
   ~scheduler_barrier(void) { xTaskResumeAll(); }
+  
+  // Delete copy and move operations for RAII safety
+  scheduler_barrier(const scheduler_barrier &) = delete;
+  scheduler_barrier(scheduler_barrier &&) = delete;
+  scheduler_barrier &operator=(const scheduler_barrier &) = delete;
+  scheduler_barrier &operator=(scheduler_barrier &&) = delete;
 };
 
 #if configSUPPORT_STATIC_ALLOCATION

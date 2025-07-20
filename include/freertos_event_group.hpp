@@ -52,6 +52,7 @@ class static_event_group_allocator {
 
 public:
   static_event_group_allocator() = default;
+  ~static_event_group_allocator() = default;
   static_event_group_allocator(const static_event_group_allocator &) = delete;
   static_event_group_allocator(static_event_group_allocator &&) = delete;
 

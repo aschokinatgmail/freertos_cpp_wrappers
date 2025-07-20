@@ -56,6 +56,7 @@ template <size_t QueueLength, typename T> class static_queue_allocator {
 
 public:
   static_queue_allocator() = default;
+  ~static_queue_allocator() = default;
   static_queue_allocator(const static_queue_allocator &) = delete;
   static_queue_allocator(static_queue_allocator &&) = delete;
 
