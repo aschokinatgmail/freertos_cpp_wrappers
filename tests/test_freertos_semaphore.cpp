@@ -642,6 +642,287 @@ TEST_F(FreeRTOSSemaphoreTest, RecursiveMutexNestedLockGuards) {
     EXPECT_FALSE(recursive_mutex.locked());
 }
 
+TEST_F(FreeRTOSSemaphoreTest, RecursiveMutexTryLockGuardRAII) {
+    /*
+     * Recursive Mutex Try Lock Guard RAII Test:
+     * Tests that try_lock_guard works correctly with recursive mutexes,
+     * providing RAII semantics with try_lock behavior.
+     */
+    EXPECT_CALL(*mock, xSemaphoreCreateRecursiveMutex())
+        .WillOnce(Return(mock_recursive_mutex_handle));
+    EXPECT_CALL(*mock, xSemaphoreTake(mock_recursive_mutex_handle, 0))
+        .WillOnce(Return(pdTRUE));
+    EXPECT_CALL(*mock, xSemaphoreGive(mock_recursive_mutex_handle))
+        .WillOnce(Return(pdTRUE));
+    EXPECT_CALL(*mock, vSemaphoreDelete(mock_recursive_mutex_handle));
+    
+    freertos::recursive_mutex<freertos::dynamic_semaphore_allocator> recursive_mutex;
+    
+    {
+        freertos::try_lock_guard<freertos::recursive_mutex<freertos::dynamic_semaphore_allocator>> guard(recursive_mutex);
+        // Recursive mutex should be locked here
+        EXPECT_TRUE(guard.locked());
+        EXPECT_TRUE(recursive_mutex.locked());
+    } // Try lock guard destructor should unlock the recursive mutex
+    
+    EXPECT_FALSE(recursive_mutex.locked());
+}
+
+TEST_F(FreeRTOSSemaphoreTest, RecursiveMutexTryLockGuardFailure) {
+    /*
+     * Recursive Mutex Try Lock Guard Failure Test:
+     * Tests try_lock_guard behavior when lock acquisition fails,
+     * ensuring proper RAII semantics even on failure.
+     */
+    EXPECT_CALL(*mock, xSemaphoreCreateRecursiveMutex())
+        .WillOnce(Return(mock_recursive_mutex_handle));
+    EXPECT_CALL(*mock, xSemaphoreTake(mock_recursive_mutex_handle, 0))
+        .WillOnce(Return(pdFALSE));
+    EXPECT_CALL(*mock, vSemaphoreDelete(mock_recursive_mutex_handle));
+    
+    freertos::recursive_mutex<freertos::dynamic_semaphore_allocator> recursive_mutex;
+    
+    {
+        freertos::try_lock_guard<freertos::recursive_mutex<freertos::dynamic_semaphore_allocator>> guard(recursive_mutex);
+        // Try lock should have failed
+        EXPECT_FALSE(guard.locked());
+        EXPECT_FALSE(recursive_mutex.locked());
+    } // Try lock guard destructor should not call unlock since lock failed
+    
+    EXPECT_FALSE(recursive_mutex.locked());
+}
+
+TEST_F(FreeRTOSSemaphoreTest, RecursiveMutexNestedTryLockGuards) {
+    /*
+     * Nested Try Lock Guards for Recursive Mutex Test:
+     * Tests RAII behavior with nested try_lock_guard on the same recursive mutex.
+     * This demonstrates recursive locking capability with try_lock semantics.
+     */
+    EXPECT_CALL(*mock, xSemaphoreCreateRecursiveMutex())
+        .WillOnce(Return(mock_recursive_mutex_handle));
+    EXPECT_CALL(*mock, xSemaphoreTake(mock_recursive_mutex_handle, 0))
+        .Times(2)  // Two nested try lock guards
+        .WillRepeatedly(Return(pdTRUE));
+    EXPECT_CALL(*mock, xSemaphoreGive(mock_recursive_mutex_handle))
+        .Times(2)  // Two corresponding unlocks
+        .WillRepeatedly(Return(pdTRUE));
+    EXPECT_CALL(*mock, vSemaphoreDelete(mock_recursive_mutex_handle));
+    
+    freertos::recursive_mutex<freertos::dynamic_semaphore_allocator> recursive_mutex;
+    
+    {
+        freertos::try_lock_guard<freertos::recursive_mutex<freertos::dynamic_semaphore_allocator>> guard1(recursive_mutex);
+        EXPECT_TRUE(guard1.locked());
+        EXPECT_TRUE(recursive_mutex.locked());
+        
+        {
+            freertos::try_lock_guard<freertos::recursive_mutex<freertos::dynamic_semaphore_allocator>> guard2(recursive_mutex);
+            EXPECT_TRUE(guard2.locked());
+            EXPECT_TRUE(recursive_mutex.locked());
+            
+            // Both guards are active here - mutex locked twice
+        } // guard2 destructor unlocks
+        
+        // guard1 still active
+        EXPECT_TRUE(recursive_mutex.locked());
+    } // guard1 destructor unlocks - final unlock
+    
+    EXPECT_FALSE(recursive_mutex.locked());
+}
+
+TEST_F(FreeRTOSSemaphoreTest, RecursiveMutexLockGuardISRRAII) {
+    /*
+     * Recursive Mutex Lock Guard ISR RAII Test:
+     * Tests that lock_guard_isr works correctly with recursive mutexes,
+     * providing RAII semantics for ISR contexts.
+     */
+    EXPECT_CALL(*mock, xSemaphoreCreateRecursiveMutex())
+        .WillOnce(Return(mock_recursive_mutex_handle));
+    EXPECT_CALL(*mock, xSemaphoreTakeFromISR(mock_recursive_mutex_handle, NotNull()))
+        .WillOnce(Return(pdTRUE));
+    EXPECT_CALL(*mock, xSemaphoreGiveFromISR(mock_recursive_mutex_handle, NotNull()))
+        .WillOnce(Return(pdTRUE));
+    EXPECT_CALL(*mock, vSemaphoreDelete(mock_recursive_mutex_handle));
+    
+    freertos::recursive_mutex<freertos::dynamic_semaphore_allocator> recursive_mutex;
+    
+    {
+        freertos::lock_guard_isr<freertos::recursive_mutex<freertos::dynamic_semaphore_allocator>> guard(recursive_mutex);
+        // Recursive mutex should be locked here
+        EXPECT_TRUE(guard.locked());
+        EXPECT_EQ(guard.high_priority_task_woken(), pdFALSE);
+    } // Lock guard ISR destructor should unlock the recursive mutex
+    
+    // Note: In host testing, locked() state behavior may vary from real RTOS
+}
+
+TEST_F(FreeRTOSSemaphoreTest, RecursiveMutexNestedLockGuardISR) {
+    /*
+     * Nested Lock Guard ISR for Recursive Mutex Test:
+     * Tests RAII behavior with nested lock_guard_isr on the same recursive mutex.
+     * This simulates nested ISR contexts acquiring the same recursive mutex.
+     */
+    EXPECT_CALL(*mock, xSemaphoreCreateRecursiveMutex())
+        .WillOnce(Return(mock_recursive_mutex_handle));
+    EXPECT_CALL(*mock, xSemaphoreTakeFromISR(mock_recursive_mutex_handle, NotNull()))
+        .Times(3)  // Three nested ISR lock guards
+        .WillRepeatedly(Return(pdTRUE));
+    EXPECT_CALL(*mock, xSemaphoreGiveFromISR(mock_recursive_mutex_handle, NotNull()))
+        .Times(3)  // Three corresponding unlocks
+        .WillRepeatedly(Return(pdTRUE));
+    EXPECT_CALL(*mock, vSemaphoreDelete(mock_recursive_mutex_handle));
+    
+    freertos::recursive_mutex<freertos::dynamic_semaphore_allocator> recursive_mutex;
+    
+    {
+        freertos::lock_guard_isr<freertos::recursive_mutex<freertos::dynamic_semaphore_allocator>> guard1(recursive_mutex);
+        EXPECT_TRUE(guard1.locked());
+        EXPECT_EQ(guard1.high_priority_task_woken(), pdFALSE);
+        
+        {
+            freertos::lock_guard_isr<freertos::recursive_mutex<freertos::dynamic_semaphore_allocator>> guard2(recursive_mutex);
+            EXPECT_TRUE(guard2.locked());
+            EXPECT_EQ(guard2.high_priority_task_woken(), pdFALSE);
+            
+            {
+                freertos::lock_guard_isr<freertos::recursive_mutex<freertos::dynamic_semaphore_allocator>> guard3(recursive_mutex);
+                EXPECT_TRUE(guard3.locked());
+                EXPECT_EQ(guard3.high_priority_task_woken(), pdFALSE);
+                
+                // All three ISR guards are active here - mutex locked 3 times
+            } // guard3 destructor unlocks
+            
+        } // guard2 destructor unlocks
+        
+    } // guard1 destructor unlocks - final unlock
+}
+
+TEST_F(FreeRTOSSemaphoreTest, RecursiveMutexTimeoutLockGuardRAII) {
+    /*
+     * Recursive Mutex Timeout Lock Guard RAII Test:
+     * Tests that timeout_lock_guard works correctly with recursive mutexes,
+     * providing RAII semantics with timeout-based acquisition.
+     */
+    EXPECT_CALL(*mock, xSemaphoreCreateRecursiveMutex())
+        .WillOnce(Return(mock_recursive_mutex_handle));
+    EXPECT_CALL(*mock, xSemaphoreTake(mock_recursive_mutex_handle, 1000))
+        .WillOnce(Return(pdTRUE));
+    EXPECT_CALL(*mock, xSemaphoreGive(mock_recursive_mutex_handle))
+        .WillOnce(Return(pdTRUE));
+    EXPECT_CALL(*mock, vSemaphoreDelete(mock_recursive_mutex_handle));
+    
+    freertos::recursive_mutex<freertos::dynamic_semaphore_allocator> recursive_mutex;
+    
+    {
+        freertos::timeout_lock_guard<freertos::recursive_mutex<freertos::dynamic_semaphore_allocator>> guard(recursive_mutex, 1000);
+        // Recursive mutex should be locked here
+        EXPECT_TRUE(guard.locked());
+    } // Timeout lock guard destructor should unlock the recursive mutex
+}
+
+TEST_F(FreeRTOSSemaphoreTest, RecursiveMutexTimeoutLockGuardChrono) {
+    /*
+     * Recursive Mutex Timeout Lock Guard Chrono Test:
+     * Tests timeout_lock_guard with recursive mutex using chrono duration.
+     */
+    EXPECT_CALL(*mock, xSemaphoreCreateRecursiveMutex())
+        .WillOnce(Return(mock_recursive_mutex_handle));
+    EXPECT_CALL(*mock, xSemaphoreTake(mock_recursive_mutex_handle, 500)) // 500ms
+        .WillOnce(Return(pdTRUE));
+    EXPECT_CALL(*mock, xSemaphoreGive(mock_recursive_mutex_handle))
+        .WillOnce(Return(pdTRUE));
+    EXPECT_CALL(*mock, vSemaphoreDelete(mock_recursive_mutex_handle));
+    
+    freertos::recursive_mutex<freertos::dynamic_semaphore_allocator> recursive_mutex;
+    
+    {
+        freertos::timeout_lock_guard<freertos::recursive_mutex<freertos::dynamic_semaphore_allocator>> guard(recursive_mutex, std::chrono::milliseconds(500));
+        // Recursive mutex should be locked here
+        EXPECT_TRUE(guard.locked());
+    } // Timeout lock guard destructor should unlock the recursive mutex
+}
+
+TEST_F(FreeRTOSSemaphoreTest, RecursiveMutexNestedTimeoutLockGuards) {
+    /*
+     * Nested Timeout Lock Guards for Recursive Mutex Test:
+     * Tests RAII behavior with nested timeout_lock_guard on the same recursive mutex.
+     * This demonstrates recursive locking capability with timeout semantics.
+     */
+    EXPECT_CALL(*mock, xSemaphoreCreateRecursiveMutex())
+        .WillOnce(Return(mock_recursive_mutex_handle));
+    EXPECT_CALL(*mock, xSemaphoreTake(mock_recursive_mutex_handle, 1000))
+        .WillOnce(Return(pdTRUE));
+    EXPECT_CALL(*mock, xSemaphoreTake(mock_recursive_mutex_handle, 500))
+        .WillOnce(Return(pdTRUE));
+    EXPECT_CALL(*mock, xSemaphoreGive(mock_recursive_mutex_handle))
+        .Times(2)  // Two corresponding unlocks
+        .WillRepeatedly(Return(pdTRUE));
+    EXPECT_CALL(*mock, vSemaphoreDelete(mock_recursive_mutex_handle));
+    
+    freertos::recursive_mutex<freertos::dynamic_semaphore_allocator> recursive_mutex;
+    
+    {
+        freertos::timeout_lock_guard<freertos::recursive_mutex<freertos::dynamic_semaphore_allocator>> guard1(recursive_mutex, 1000);
+        EXPECT_TRUE(guard1.locked());
+        
+        {
+            freertos::timeout_lock_guard<freertos::recursive_mutex<freertos::dynamic_semaphore_allocator>> guard2(recursive_mutex, std::chrono::milliseconds(500));
+            EXPECT_TRUE(guard2.locked());
+            
+            // Both guards are active here - mutex locked twice
+        } // guard2 destructor unlocks
+        
+        // guard1 still active
+    } // guard1 destructor unlocks - final unlock
+}
+
+TEST_F(FreeRTOSSemaphoreTest, RecursiveMutexMixedLockGuardTypes) {
+    /*
+     * Mixed Lock Guard Types for Recursive Mutex Test:
+     * Tests combining different lock guard types in nested scenarios
+     * to ensure they work together correctly with recursive mutexes.
+     */
+    EXPECT_CALL(*mock, xSemaphoreCreateRecursiveMutex())
+        .WillOnce(Return(mock_recursive_mutex_handle));
+    // Regular lock_guard uses portMAX_DELAY
+    EXPECT_CALL(*mock, xSemaphoreTake(mock_recursive_mutex_handle, portMAX_DELAY))
+        .WillOnce(Return(pdTRUE));
+    // try_lock_guard uses 0 timeout
+    EXPECT_CALL(*mock, xSemaphoreTake(mock_recursive_mutex_handle, 0))
+        .WillOnce(Return(pdTRUE));
+    // timeout_lock_guard uses specified timeout
+    EXPECT_CALL(*mock, xSemaphoreTake(mock_recursive_mutex_handle, 100))
+        .WillOnce(Return(pdTRUE));
+    EXPECT_CALL(*mock, xSemaphoreGive(mock_recursive_mutex_handle))
+        .Times(3)  // Three corresponding unlocks
+        .WillRepeatedly(Return(pdTRUE));
+    EXPECT_CALL(*mock, vSemaphoreDelete(mock_recursive_mutex_handle));
+    
+    freertos::recursive_mutex<freertos::dynamic_semaphore_allocator> recursive_mutex;
+    
+    {
+        freertos::lock_guard<freertos::recursive_mutex<freertos::dynamic_semaphore_allocator>> guard1(recursive_mutex);
+        EXPECT_TRUE(recursive_mutex.locked());
+        
+        {
+            freertos::try_lock_guard<freertos::recursive_mutex<freertos::dynamic_semaphore_allocator>> guard2(recursive_mutex);
+            EXPECT_TRUE(guard2.locked());
+            EXPECT_TRUE(recursive_mutex.locked());
+            
+            {
+                freertos::timeout_lock_guard<freertos::recursive_mutex<freertos::dynamic_semaphore_allocator>> guard3(recursive_mutex, 100);
+                EXPECT_TRUE(guard3.locked());
+                
+                // All three different guard types are active here
+            } // guard3 destructor unlocks
+            
+        } // guard2 destructor unlocks
+        
+    } // guard1 destructor unlocks - final unlock
+    
+    EXPECT_FALSE(recursive_mutex.locked());
+}
+
 // =============================================================================
 // Lock Guard Tests (RAII)
 // =============================================================================
