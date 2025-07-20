@@ -1,40 +1,42 @@
+# Static Analysis Report
 
-
-**Static Analysis Tool**: clang-tidy
-
-
-**Static Analysis Tool**: clang-tidy
-
+## Overview
 
 **Static Analysis Tool**: clang-tidy
-
-
-**Static Analysis Tool**: clang-tidy
-
-
-**Static Analysis Tool**: clang-tidy
-
-
-**Static Analysis Tool**: clang-tidy
-**Analysis Scope**: Library modules only src/ include/
+**Analysis Scope**: Library modules only - src/ include/
 **Check Sets**: cppcoreguidelines-*, cert-*, google-*, hicpp-*
 
+## Statistics
 
-**Analysis completed successfully**
+### Summary
 
+- **Total Issues Found**: 34358
+- **Warnings**: 34357
+- **Errors**: 1
+- **Files Analyzed**: 3
+- **Unique Check Types**: 9
 
+### Issues by Check Category
 
+- **cppcoreguidelines**: 27 issues
+- **google**: 1 issues
+- **clang**: 1 issues
 
-**Static Analysis Tool**: clang-tidy
-**Analysis Scope**: Library modules only src/ include/
-**Check Sets**: cppcoreguidelines-*, cert-*, google-*, hicpp-*
+### Files with Issues
 
+- **freertos_task.hpp**: 28 issues
+- **FreeRTOS.h**: 1 issues
 
-**Analysis completed successfully**
+### Analyzed Files
 
+- FreeRTOS.h
+- freertos_task.cc.
+- freertos_task.hpp
+
+## Detailed Analysis
 
 ```
-78406 warnings and 2 errors generated.
+34357 warnings and 1 error generated.
 Error while processing /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/src/freertos_task.cc.
 /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/src/../include/freertos_task.hpp:56:35: warning: class 'static_task_allocator' defines a copy constructor, a copy assignment operator, a move constructor and a move assignment operator but does not define a destructor [cppcoreguidelines-special-member-functions,hicpp-special-member-functions]
    56 | template <size_t StackSize> class static_task_allocator {
@@ -42,6 +44,9 @@ Error while processing /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrap
 /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/src/../include/freertos_task.hpp:57:3: warning: do not declare C-style arrays, use std::array<> instead [cppcoreguidelines-avoid-c-arrays,hicpp-avoid-c-arrays]
    57 |   StackType_t m_stackBuffer[StackSize / sizeof(StackType_t)];
       |   ^
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/src/../include/freertos_task.hpp:133:65: warning: rvalue reference parameter 'task_routine' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
+  133 |   task(const char *name, UBaseType_t priority, task_routine_t &&task_routine,
+      |                                                                 ^
 /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/src/../include/freertos_task.hpp:137:5: warning: 'm_hTask' should be initialized in a member initializer of the constructor [cppcoreguidelines-prefer-member-initializer]
   135 |       : m_allocator{}, m_hTask{nullptr}, m_taskRoutine{std::move(task_routine)},
       |                               ~~~~~~~~~
@@ -49,14 +54,9 @@ Error while processing /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrap
   136 |         m_start_suspended{start_suspended} {
   137 |     m_hTask = m_allocator.create(task_exec, name, priority, this);
       |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/src/../include/freertos_task.hpp:411:37: error: non-const lvalue reference to type 'BaseType_t' (aka 'int') cannot bind to a temporary of type 'std::nullptr_t' [clang-diagnostic-error]
-  411 |                         BaseType_t &higherPriorityTaskWoken = nullptr) {
-      |                                     ^                         ~~~~~~~
-/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/src/../include/freertos_task.hpp:411:37: note: passing argument to parameter 'higherPriorityTaskWoken' here
-/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/src/../include/freertos_task.hpp:426:36: error: non-const lvalue reference to type 'BaseType_t' (aka 'int') cannot bind to a temporary of type 'std::nullptr_t' [clang-diagnostic-error]
-  426 |                        BaseType_t &higherPriorityTaskWoken = nullptr) {
-      |                                    ^                         ~~~~~~~
-/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/src/../include/freertos_task.hpp:426:36: note: passing argument to parameter 'higherPriorityTaskWoken' here
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/src/../include/freertos_task.hpp:148:25: warning: rvalue reference parameter 'task_routine' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
+  148 |        task_routine_t &&task_routine, bool start_suspended = true)
+      |                         ^
 /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/src/../include/freertos_task.hpp:501:18: warning: variable 'notification_value' is not initialized [cppcoreguidelines-init-variables]
   501 |         uint32_t notification_value;
       |                  ^                 
@@ -69,6 +69,33 @@ Error while processing /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrap
       |                                                             ^
 /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/src/../include/freertos_task.hpp:529:34: warning: rvalue reference parameter 'periodic_routine' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
   529 |                 task_routine_t &&periodic_routine,
+      |                                  ^
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/src/../include/freertos_task.hpp:551:34: warning: rvalue reference parameter 'on_start' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
+  551 |                 task_routine_t &&on_start, task_routine_t &&on_stop,
+      |                                  ^
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/src/../include/freertos_task.hpp:551:61: warning: rvalue reference parameter 'on_stop' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
+  551 |                 task_routine_t &&on_start, task_routine_t &&on_stop,
+      |                                                             ^
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/src/../include/freertos_task.hpp:552:34: warning: rvalue reference parameter 'periodic_routine' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
+  552 |                 task_routine_t &&periodic_routine,
+      |                                  ^
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/src/../include/freertos_task.hpp:573:34: warning: rvalue reference parameter 'on_start' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
+  573 |                 task_routine_t &&on_start, task_routine_t &&on_stop,
+      |                                  ^
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/src/../include/freertos_task.hpp:573:61: warning: rvalue reference parameter 'on_stop' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
+  573 |                 task_routine_t &&on_start, task_routine_t &&on_stop,
+      |                                                             ^
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/src/../include/freertos_task.hpp:574:34: warning: rvalue reference parameter 'periodic_routine' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
+  574 |                 task_routine_t &&periodic_routine, bool start_suspended = true)
+      |                                  ^
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/src/../include/freertos_task.hpp:593:34: warning: rvalue reference parameter 'on_start' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
+  593 |                 task_routine_t &&on_start, task_routine_t &&on_stop,
+      |                                  ^
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/src/../include/freertos_task.hpp:593:61: warning: rvalue reference parameter 'on_stop' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
+  593 |                 task_routine_t &&on_start, task_routine_t &&on_stop,
+      |                                                             ^
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/src/../include/freertos_task.hpp:594:34: warning: rvalue reference parameter 'periodic_routine' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
+  594 |                 task_routine_t &&periodic_routine, bool start_suspended = true)
       |                                  ^
 /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/src/../include/freertos_task.hpp:937:1: warning: missing username/bug in TODO [google-readability-todo]
   937 | // TODO: add less than ms delays
@@ -141,12 +168,15 @@ Error while processing /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrap
 /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/src/../include/freertos_task.hpp:1184:7: warning: class 'scheduler_barrier' defines a non-default destructor but does not define a copy constructor, a copy assignment operator, a move constructor or a move assignment operator [cppcoreguidelines-special-member-functions,hicpp-special-member-functions]
  1184 | class scheduler_barrier {
       |       ^
-Suppressed 78494 warnings (78381 in non-user code, 113 NOLINT).
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/mocks/FreeRTOS.h:6:10: error: 'gmock/gmock.h' file not found [clang-diagnostic-error]
+    6 | #include <gmock/gmock.h>
+      |          ^~~~~~~~~~~~~~~
+Suppressed 34321 warnings (34321 in non-user code).
 Use -header-filter=.* to display errors from all non-system headers. Use -system-headers to display errors from system headers as well.
 Found compiler error(s).
 ```
 
 ---
-*Generated:\ July\ 20,\ 2025*
+*Generated: July 20, 2025*
 *Tool: clang-tidy*
 *Scope: Library modules only*

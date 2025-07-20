@@ -117,9 +117,10 @@ if(ENABLE_CLANG_TIDY)
             CXX_CLANG_TIDY "${CLANG_TIDY_COMMAND}"
         )
         
-        # Create a custom target for generating a detailed static analysis report
+        # Create a custom target for generating a detailed static analysis report with statistics
         if(GENERATE_CLANG_TIDY_REPORT)
             add_custom_target(static-analysis-report
+                # Run clang-tidy and capture output
                 COMMAND ${CLANG_TIDY_EXE} 
                     --checks=${CLANG_TIDY_CHECKS}
                     --format-style=file
@@ -133,32 +134,19 @@ if(ENABLE_CLANG_TIDY)
                     -std=c++17
                     -DUNIT_TESTING=1
                     > ${CMAKE_BINARY_DIR}/clang-tidy-report.txt 2>&1 || true
-                COMMAND ${CMAKE_COMMAND} -E echo "# Static Analysis Report" > ${CLANG_TIDY_REPORT_FILE}
-                COMMAND ${CMAKE_COMMAND} -E echo "" >> ${CLANG_TIDY_REPORT_FILE}
-                COMMAND ${CMAKE_COMMAND} -E echo "## Summary" >> ${CLANG_TIDY_REPORT_FILE}
-                COMMAND ${CMAKE_COMMAND} -E echo "" >> ${CLANG_TIDY_REPORT_FILE}
-                COMMAND ${CMAKE_COMMAND} -E echo "**Static Analysis Tool**: clang-tidy" >> ${CLANG_TIDY_REPORT_FILE}
-                COMMAND ${CMAKE_COMMAND} -E echo "**Analysis Scope**: Library modules only src/ include/" >> ${CLANG_TIDY_REPORT_FILE}
-                COMMAND ${CMAKE_COMMAND} -E echo "**Check Sets**: cppcoreguidelines-\\*, cert-\\*, google-\\*, hicpp-\\*" >> ${CLANG_TIDY_REPORT_FILE}
-                COMMAND ${CMAKE_COMMAND} -E echo "" >> ${CLANG_TIDY_REPORT_FILE}
-                COMMAND ${CMAKE_COMMAND} -E echo "## Results" >> ${CLANG_TIDY_REPORT_FILE}
-                COMMAND ${CMAKE_COMMAND} -E echo "" >> ${CLANG_TIDY_REPORT_FILE}
-                COMMAND ${CMAKE_COMMAND} -E echo "**Analysis completed successfully**" >> ${CLANG_TIDY_REPORT_FILE}
-                COMMAND ${CMAKE_COMMAND} -E echo "" >> ${CLANG_TIDY_REPORT_FILE}
-                COMMAND ${CMAKE_COMMAND} -E echo "## Detailed Analysis" >> ${CLANG_TIDY_REPORT_FILE}
-                COMMAND ${CMAKE_COMMAND} -E echo "" >> ${CLANG_TIDY_REPORT_FILE}
-                COMMAND ${CMAKE_COMMAND} -E echo "\\`\\`\\`" >> ${CLANG_TIDY_REPORT_FILE}
-                COMMAND cat ${CMAKE_BINARY_DIR}/clang-tidy-report.txt >> ${CLANG_TIDY_REPORT_FILE} 2>/dev/null || echo "No detailed output available" >> ${CLANG_TIDY_REPORT_FILE}
-                COMMAND ${CMAKE_COMMAND} -E echo "\\`\\`\\`" >> ${CLANG_TIDY_REPORT_FILE}
-                COMMAND ${CMAKE_COMMAND} -E echo "" >> ${CLANG_TIDY_REPORT_FILE}
-                COMMAND ${CMAKE_COMMAND} -E echo "---" >> ${CLANG_TIDY_REPORT_FILE}
-                COMMAND date +"*Generated: %B %d, %Y*" >> ${CLANG_TIDY_REPORT_FILE} || ${CMAKE_COMMAND} -E echo "*Generated: $(date)*" >> ${CLANG_TIDY_REPORT_FILE}
-                COMMAND ${CMAKE_COMMAND} -E echo "*Tool: clang-tidy*" >> ${CLANG_TIDY_REPORT_FILE}
-                COMMAND ${CMAKE_COMMAND} -E echo "*Scope: Library modules only*" >> ${CLANG_TIDY_REPORT_FILE}
-                COMMAND ${CMAKE_COMMAND} -E echo "Static analysis report generated: ${CLANG_TIDY_REPORT_FILE}"
+                
+                # Generate report using shell script
+                COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/scripts/generate_static_analysis_report.sh
+                    ${CMAKE_BINARY_DIR}/clang-tidy-report.txt
+                    ${CMAKE_BINARY_DIR}/clang-tidy-stats.md
+                    ${CLANG_TIDY_REPORT_FILE}
+                    ${CMAKE_CURRENT_SOURCE_DIR}
+                
+                # Status messages
                 COMMAND ${CMAKE_COMMAND} -E echo "Fixes exported to: ${CMAKE_BINARY_DIR}/clang-tidy-fixes.yaml"
+                
                 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-                COMMENT "Generating comprehensive static analysis report for library modules"
+                COMMENT "Generating comprehensive static analysis report with statistics for library modules"
             )
             message(STATUS "Run 'make static-analysis-report' to generate a detailed static analysis report")
         endif()
