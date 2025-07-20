@@ -666,6 +666,140 @@ TEST_F(FreeRTOSSemaphoreTest, LockGuardRAII) {
     EXPECT_FALSE(mutex.locked());
 }
 
+TEST_F(FreeRTOSSemaphoreTest, TryLockGuardRAII) {
+    EXPECT_CALL(*mock, xSemaphoreCreateMutex())
+        .WillOnce(Return(mock_mutex_handle));
+    EXPECT_CALL(*mock, xSemaphoreTake(mock_mutex_handle, 0))
+        .WillOnce(Return(pdTRUE));
+    EXPECT_CALL(*mock, xSemaphoreGive(mock_mutex_handle))
+        .WillOnce(Return(pdTRUE));
+    EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex_handle));
+    
+    freertos::mutex<freertos::dynamic_semaphore_allocator> mutex;
+    
+    {
+        freertos::try_lock_guard<freertos::mutex<freertos::dynamic_semaphore_allocator>> guard(mutex);
+        // Mutex should be locked here (try_lock succeeded)
+        EXPECT_TRUE(mutex.locked());
+        EXPECT_TRUE(guard.locked());
+    } // Try lock guard destructor should unlock the mutex
+    
+    EXPECT_FALSE(mutex.locked());
+}
+
+TEST_F(FreeRTOSSemaphoreTest, TryLockGuardFailure) {
+    EXPECT_CALL(*mock, xSemaphoreCreateMutex())
+        .WillOnce(Return(mock_mutex_handle));
+    EXPECT_CALL(*mock, xSemaphoreTake(mock_mutex_handle, 0))
+        .WillOnce(Return(pdFALSE));
+    EXPECT_CALL(*mock, xSemaphoreGive(mock_mutex_handle))
+        .WillOnce(Return(pdTRUE));
+    EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex_handle));
+    
+    freertos::mutex<freertos::dynamic_semaphore_allocator> mutex;
+    
+    {
+        freertos::try_lock_guard<freertos::mutex<freertos::dynamic_semaphore_allocator>> guard(mutex);
+        // Mutex should not be locked (try_lock failed)
+        EXPECT_FALSE(mutex.locked());
+        EXPECT_FALSE(guard.locked());
+    } // Try lock guard destructor should still call unlock (even though not locked)
+    
+    EXPECT_FALSE(mutex.locked());
+}
+
+TEST_F(FreeRTOSSemaphoreTest, LockGuardISRRAII) {
+    EXPECT_CALL(*mock, xSemaphoreCreateMutex())
+        .WillOnce(Return(mock_mutex_handle));
+    EXPECT_CALL(*mock, xSemaphoreTakeFromISR(mock_mutex_handle, ::testing::NotNull()))
+        .WillOnce(Return(pdTRUE));
+    EXPECT_CALL(*mock, xSemaphoreGiveFromISR(mock_mutex_handle, ::testing::NotNull()))
+        .WillOnce(Return(pdTRUE));
+    EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex_handle));
+    
+    freertos::mutex<freertos::dynamic_semaphore_allocator> mutex;
+    
+    {
+        /*
+         * ISR Lock Guard Test:
+         * This tests the lock_guard_isr which is designed for use in ISR contexts.
+         * In a real FreeRTOS environment, this would be used inside interrupt service
+         * routines. Here we test the API compatibility and parameter passing.
+         */
+        freertos::lock_guard_isr<freertos::mutex<freertos::dynamic_semaphore_allocator>> guard(mutex);
+        // Mutex should be locked here
+        EXPECT_TRUE(mutex.locked());
+        EXPECT_TRUE(guard.locked());
+        // Check if high priority task woken flag is accessible
+        EXPECT_EQ(guard.high_priority_task_woken(), pdFALSE);
+    } // ISR lock guard destructor should unlock the mutex
+    
+    EXPECT_FALSE(mutex.locked());
+}
+
+TEST_F(FreeRTOSSemaphoreTest, TimeoutLockGuardRAII) {
+    EXPECT_CALL(*mock, xSemaphoreCreateMutex())
+        .WillOnce(Return(mock_mutex_handle));
+    EXPECT_CALL(*mock, xSemaphoreTake(mock_mutex_handle, 1000))
+        .WillOnce(Return(pdTRUE));
+    EXPECT_CALL(*mock, xSemaphoreGive(mock_mutex_handle))
+        .WillOnce(Return(pdTRUE));
+    EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex_handle));
+    
+    freertos::mutex<freertos::dynamic_semaphore_allocator> mutex;
+    
+    {
+        freertos::timeout_lock_guard<freertos::mutex<freertos::dynamic_semaphore_allocator>> guard(mutex, 1000);
+        // Mutex should be locked here (lock with timeout succeeded)
+        EXPECT_TRUE(mutex.locked());
+        EXPECT_TRUE(guard.locked());
+    } // Timeout lock guard destructor should unlock the mutex
+    
+    EXPECT_FALSE(mutex.locked());
+}
+
+TEST_F(FreeRTOSSemaphoreTest, TimeoutLockGuardChronoRAII) {
+    EXPECT_CALL(*mock, xSemaphoreCreateMutex())
+        .WillOnce(Return(mock_mutex_handle));
+    EXPECT_CALL(*mock, xSemaphoreTake(mock_mutex_handle, 500)) // 500ms
+        .WillOnce(Return(pdTRUE));
+    EXPECT_CALL(*mock, xSemaphoreGive(mock_mutex_handle))
+        .WillOnce(Return(pdTRUE));
+    EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex_handle));
+    
+    freertos::mutex<freertos::dynamic_semaphore_allocator> mutex;
+    
+    {
+        freertos::timeout_lock_guard<freertos::mutex<freertos::dynamic_semaphore_allocator>> guard(mutex, std::chrono::milliseconds(500));
+        // Mutex should be locked here (lock with chrono timeout succeeded)
+        EXPECT_TRUE(mutex.locked());
+        EXPECT_TRUE(guard.locked());
+    } // Timeout lock guard destructor should unlock the mutex
+    
+    EXPECT_FALSE(mutex.locked());
+}
+
+TEST_F(FreeRTOSSemaphoreTest, TimeoutLockGuardFailure) {
+    EXPECT_CALL(*mock, xSemaphoreCreateMutex())
+        .WillOnce(Return(mock_mutex_handle));
+    EXPECT_CALL(*mock, xSemaphoreTake(mock_mutex_handle, 100))
+        .WillOnce(Return(pdFALSE));
+    EXPECT_CALL(*mock, xSemaphoreGive(mock_mutex_handle))
+        .WillOnce(Return(pdTRUE));
+    EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex_handle));
+    
+    freertos::mutex<freertos::dynamic_semaphore_allocator> mutex;
+    
+    {
+        freertos::timeout_lock_guard<freertos::mutex<freertos::dynamic_semaphore_allocator>> guard(mutex, 100);
+        // Mutex should not be locked (lock with timeout failed)
+        EXPECT_FALSE(mutex.locked());
+        EXPECT_FALSE(guard.locked());
+    } // Timeout lock guard destructor should still call unlock (even though not locked)
+    
+    EXPECT_FALSE(mutex.locked());
+}
+
 // =============================================================================
 // Error Handling and Edge Cases
 // =============================================================================
@@ -772,6 +906,209 @@ TEST_F(FreeRTOSSemaphoreTest, StaticVsDynamicBehavior) {
     auto result2 = dynamic_sem.give();
     
     EXPECT_EQ(result1, result2);
+}
+
+// =============================================================================
+// Namespace Alias Tests
+// =============================================================================
+
+TEST_F(FreeRTOSSemaphoreTest, StaticAliasNamespace) {
+    /*
+     * Static Allocation Namespace Alias Test:
+     * Tests that the 'sa' namespace aliases work correctly and provide
+     * the same functionality as the templated classes with static allocator.
+     */
+    EXPECT_CALL(*mock, xSemaphoreCreateBinaryStatic(::testing::NotNull()))
+        .WillOnce(Return(mock_semaphore_handle));
+    EXPECT_CALL(*mock, xSemaphoreGive(mock_semaphore_handle))
+        .WillOnce(Return(pdTRUE));
+    EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
+    
+    freertos::sa::binary_semaphore semaphore;
+    auto result = semaphore.give();
+    EXPECT_EQ(result, pdTRUE);
+}
+
+TEST_F(FreeRTOSSemaphoreTest, DynamicAliasNamespace) {
+    /*
+     * Dynamic Allocation Namespace Alias Test:
+     * Tests that the 'da' namespace aliases work correctly and provide
+     * the same functionality as the templated classes with dynamic allocator.
+     */
+    EXPECT_CALL(*mock, xSemaphoreCreateBinary())
+        .WillOnce(Return(mock_semaphore_handle));
+    EXPECT_CALL(*mock, xSemaphoreTake(mock_semaphore_handle, portMAX_DELAY))
+        .WillOnce(Return(pdTRUE));
+    EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
+    
+    freertos::da::binary_semaphore semaphore;
+    auto result = semaphore.take();
+    EXPECT_EQ(result, pdTRUE);
+}
+
+TEST_F(FreeRTOSSemaphoreTest, NamespaceAliasCountingSemaphore) {
+    EXPECT_CALL(*mock, xSemaphoreCreateCounting(5, 5))
+        .WillOnce(Return(mock_semaphore_handle));
+    EXPECT_CALL(*mock, uxSemaphoreGetCount(mock_semaphore_handle))
+        .WillOnce(Return(3));
+    EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
+    
+    freertos::da::counting_semaphore semaphore(5);
+    auto count = semaphore.count();
+    EXPECT_EQ(count, 3);
+}
+
+TEST_F(FreeRTOSSemaphoreTest, NamespaceAliasMutex) {
+    EXPECT_CALL(*mock, xSemaphoreCreateMutex())
+        .WillOnce(Return(mock_mutex_handle));
+    EXPECT_CALL(*mock, xSemaphoreTake(mock_mutex_handle, 0))
+        .WillOnce(Return(pdTRUE));
+    EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex_handle));
+    
+    freertos::da::mutex mutex;
+    auto result = mutex.try_lock();
+    EXPECT_EQ(result, pdTRUE);
+    EXPECT_TRUE(mutex.locked());
+}
+
+TEST_F(FreeRTOSSemaphoreTest, NamespaceAliasRecursiveMutex) {
+    EXPECT_CALL(*mock, xSemaphoreCreateRecursiveMutex())
+        .WillOnce(Return(mock_recursive_mutex_handle));
+    EXPECT_CALL(*mock, xSemaphoreTake(mock_recursive_mutex_handle, portMAX_DELAY))
+        .WillOnce(Return(pdTRUE));
+    EXPECT_CALL(*mock, xSemaphoreGive(mock_recursive_mutex_handle))
+        .WillOnce(Return(pdTRUE));
+    EXPECT_CALL(*mock, vSemaphoreDelete(mock_recursive_mutex_handle));
+    
+    freertos::da::recursive_mutex recursive_mutex;
+    auto lock_result = recursive_mutex.lock();
+    auto unlock_result = recursive_mutex.unlock();
+    
+    EXPECT_EQ(lock_result, pdTRUE);
+    EXPECT_EQ(unlock_result, pdTRUE);
+}
+
+// =============================================================================
+// Additional Edge Cases and Comprehensive Tests
+// =============================================================================
+
+TEST_F(FreeRTOSSemaphoreTest, CountingSemaphoreMultipleOperators) {
+    /*
+     * Counting Semaphore Multiple Operations Test:
+     * Tests various combinations of operators and operations on counting semaphores
+     * to ensure they work correctly in different sequences.
+     */
+    EXPECT_CALL(*mock, xSemaphoreCreateCounting(10, 10))
+        .WillOnce(Return(mock_semaphore_handle));
+    EXPECT_CALL(*mock, xSemaphoreGive(mock_semaphore_handle))
+        .Times(7); // 2 from ++, 5 from +=5
+    EXPECT_CALL(*mock, xSemaphoreTake(mock_semaphore_handle, portMAX_DELAY))
+        .Times(3); // 3 from --
+    EXPECT_CALL(*mock, uxSemaphoreGetCount(mock_semaphore_handle))
+        .WillOnce(Return(9));
+    EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
+    
+    freertos::counting_semaphore<freertos::dynamic_semaphore_allocator> semaphore(10);
+    
+    // Test pre-increment
+    ++semaphore;
+    // Test post-increment  
+    semaphore++;
+    // Test compound assignment
+    semaphore += 5;
+    // Test pre-decrement
+    --semaphore;
+    // Test post-decrement
+    semaphore--;
+    // Test another decrement
+    --semaphore;
+    
+    // Check final count
+    auto count = semaphore.count();
+    EXPECT_EQ(count, 9);
+}
+
+TEST_F(FreeRTOSSemaphoreTest, MutexUnlockWithoutLock) {
+    /*
+     * Mutex Unlock Without Lock Test:
+     * Tests the behavior when trying to unlock a mutex that hasn't been locked.
+     * This is an edge case that could happen in error scenarios.
+     */
+    EXPECT_CALL(*mock, xSemaphoreCreateMutex())
+        .WillOnce(Return(mock_mutex_handle));
+    EXPECT_CALL(*mock, xSemaphoreGive(mock_mutex_handle))
+        .WillOnce(Return(pdFALSE)); // FreeRTOS may return false for unlocking unlocked mutex
+    EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex_handle));
+    
+    freertos::mutex<freertos::dynamic_semaphore_allocator> mutex;
+    
+    // Try to unlock without locking first
+    auto result = mutex.unlock();
+    EXPECT_EQ(result, pdFALSE);
+    EXPECT_FALSE(mutex.locked()); // Should remain unlocked
+}
+
+TEST_F(FreeRTOSSemaphoreTest, BinarySemaphoreMultipleGive) {
+    /*
+     * Binary Semaphore Multiple Give Test:
+     * Tests giving a binary semaphore multiple times. In FreeRTOS, giving
+     * a binary semaphore that's already given should have no effect.
+     */
+    EXPECT_CALL(*mock, xSemaphoreCreateBinary())
+        .WillOnce(Return(mock_semaphore_handle));
+    EXPECT_CALL(*mock, xSemaphoreGive(mock_semaphore_handle))
+        .Times(3)
+        .WillOnce(Return(pdTRUE))    // First give succeeds
+        .WillOnce(Return(pdFALSE))   // Second give fails (already given)
+        .WillOnce(Return(pdFALSE));  // Third give fails (already given)
+    EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
+    
+    freertos::binary_semaphore<freertos::dynamic_semaphore_allocator> semaphore;
+    
+    auto result1 = semaphore.give();
+    auto result2 = semaphore.give();
+    auto result3 = semaphore.give();
+    
+    EXPECT_EQ(result1, pdTRUE);
+    EXPECT_EQ(result2, pdFALSE);
+    EXPECT_EQ(result3, pdFALSE);
+}
+
+TEST_F(FreeRTOSSemaphoreTest, BinarySemaphoreTakeUntaken) {
+    /*
+     * Binary Semaphore Take Untaken Test:
+     * Tests taking a binary semaphore that hasn't been given with zero timeout.
+     * This should fail immediately.
+     */
+    EXPECT_CALL(*mock, xSemaphoreCreateBinary())
+        .WillOnce(Return(mock_semaphore_handle));
+    EXPECT_CALL(*mock, xSemaphoreTake(mock_semaphore_handle, 0))
+        .WillOnce(Return(pdFALSE));
+    EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
+    
+    freertos::binary_semaphore<freertos::dynamic_semaphore_allocator> semaphore;
+    
+    auto result = semaphore.take(0);
+    EXPECT_EQ(result, pdFALSE);
+}
+
+TEST_F(FreeRTOSSemaphoreTest, CountingSemaphoreEdgeCounts) {
+    /*
+     * Counting Semaphore Edge Count Test:
+     * Tests counting semaphore with edge case count values including
+     * boundary conditions.
+     */
+    const UBaseType_t max_count = UINT32_MAX;
+    
+    EXPECT_CALL(*mock, xSemaphoreCreateCounting(max_count, max_count))
+        .WillOnce(Return(mock_semaphore_handle));
+    EXPECT_CALL(*mock, uxSemaphoreGetCount(mock_semaphore_handle))
+        .WillOnce(Return(max_count));
+    EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
+    
+    freertos::counting_semaphore<freertos::dynamic_semaphore_allocator> semaphore(max_count);
+    auto count = semaphore.count();
+    EXPECT_EQ(count, max_count);
 }
 
 // =============================================================================
