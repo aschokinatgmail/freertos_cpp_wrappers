@@ -102,16 +102,15 @@ public:
  * allocation.
  */
 template <typename SemaphoreAllocator> class binary_semaphore {
-  SemaphoreAllocator m_allocator;
-  SemaphoreHandle_t m_semaphore;
+  SemaphoreAllocator m_allocator{};
+  SemaphoreHandle_t m_semaphore{nullptr};
 
 public:
   /**
    * @brief Construct a new binary semaphore object
    *
    */
-  binary_semaphore() : m_allocator{}, m_semaphore{nullptr} {
-    m_semaphore = m_allocator.create_binary();
+  binary_semaphore() : m_semaphore{m_allocator.create_binary()} {
     configASSERT(m_semaphore);
   }
   binary_semaphore(const binary_semaphore &) = delete;
@@ -222,8 +221,8 @@ public:
  * allocation.
  */
 template <typename SemaphoreAllocator> class counting_semaphore {
-  SemaphoreAllocator m_allocator;
-  SemaphoreHandle_t m_semaphore;
+  SemaphoreAllocator m_allocator{};
+  SemaphoreHandle_t m_semaphore{nullptr};
 
 public:
   /**
@@ -233,8 +232,7 @@ public:
    *
    */
   explicit counting_semaphore(UBaseType_t max_count = 1)
-      : m_allocator{}, m_semaphore{nullptr} {
-    m_semaphore = m_allocator.create_counting(max_count);
+      : m_semaphore{m_allocator.create_counting(max_count)} {
     configASSERT(m_semaphore);
   }
   counting_semaphore(const counting_semaphore &) = delete;
@@ -356,19 +354,21 @@ public:
   }
   /**
    * @brief Give the counting semaphore.
+   * Note: Post-increment returns reference instead of copy for RAII safety
    *
    * @return counting_semaphore& reference to the counting semaphore.
    */
-  counting_semaphore &operator++(int) {
+  counting_semaphore &operator++(int) { // NOLINT(cert-dcl21-cpp): RAII class, copy is deleted
     give();
     return *this;
   }
   /**
    * @brief Take the counting semaphore.
+   * Note: Post-decrement returns reference instead of copy for RAII safety
    *
    * @return counting_semaphore& reference to the counting semaphore.
    */
-  counting_semaphore &operator--(int) {
+  counting_semaphore &operator--(int) { // NOLINT(cert-dcl21-cpp): RAII class, copy is deleted
     take();
     return *this;
   }
@@ -399,8 +399,8 @@ public:
  * allocation.
  */
 template <typename SemaphoreAllocator> class mutex {
-  SemaphoreAllocator m_allocator;
-  SemaphoreHandle_t m_semaphore;
+  SemaphoreAllocator m_allocator{};
+  SemaphoreHandle_t m_semaphore{nullptr};
   uint8_t m_locked : 1;
 
 public:
@@ -408,8 +408,7 @@ public:
    * @brief Construct a new mutex object
    *
    */
-  mutex() : m_allocator{}, m_semaphore{nullptr}, m_locked{false} {
-    m_semaphore = m_allocator.create_mutex();
+  mutex() : m_semaphore{m_allocator.create_mutex()}, m_locked{false} {
     configASSERT(m_semaphore);
   }
   mutex(const mutex &) = delete;
@@ -552,18 +551,17 @@ public:
  * allocation.
  */
 template <typename SemaphoreAllocator> class recursive_mutex {
-  SemaphoreAllocator m_allocator;
-  SemaphoreHandle_t m_semaphore;
+  SemaphoreAllocator m_allocator{};
+  SemaphoreHandle_t m_semaphore{nullptr};
   uint8_t m_locked : 1;
-  uint8_t m_lock_count;
+  uint8_t m_lock_count{0};
 
 public:
   /**
    * @brief Construct a new recursive mutex object
    *
    */
-  recursive_mutex() : m_allocator{}, m_semaphore{nullptr}, m_locked{false}, m_lock_count{0} {
-    m_semaphore = m_allocator.create_recursive_mutex();
+  recursive_mutex() : m_semaphore{m_allocator.create_recursive_mutex()}, m_locked{false} {
     configASSERT(m_semaphore);
   }
   recursive_mutex(const recursive_mutex &) = delete;
@@ -757,7 +755,7 @@ public:
  */
 template <typename Mutex> class try_lock_guard {
   Mutex &m_mutex;
-  bool m_lock_acquired;
+  bool m_lock_acquired{false};
 
 public:
   /**
@@ -765,8 +763,7 @@ public:
    *
    * @param mutex mutex to guard
    */
-  explicit try_lock_guard(Mutex &mutex) : m_mutex{mutex}, m_lock_acquired{false} { 
-    m_lock_acquired = m_mutex.try_lock(); 
+  explicit try_lock_guard(Mutex &mutex) : m_mutex{mutex}, m_lock_acquired{static_cast<bool>(m_mutex.try_lock())} {
   }
   /**
    * @brief Destruct the try lock guard object and unlock the mutex.
@@ -800,7 +797,7 @@ public:
  */
 template <typename Mutex> class lock_guard_isr {
   Mutex &m_mutex;
-  BaseType_t m_high_priority_task_woken;
+  BaseType_t m_high_priority_task_woken{pdFALSE};
 
 public:
   /**
@@ -809,7 +806,7 @@ public:
    * @param mutex mutex to guard
    */
   explicit lock_guard_isr(Mutex &mutex)
-      : m_mutex{mutex}, m_high_priority_task_woken{pdFALSE} {
+      : m_mutex{mutex} {
     m_mutex.lock_isr(m_high_priority_task_woken);
   }
   /**

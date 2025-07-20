@@ -170,7 +170,7 @@ public:
   }
 
   timer &operator=(const timer &) = delete;
-  timer &operator=(timer &&src) {
+  timer &operator=(timer &&src) noexcept {
     if (this != &src) {
       if (m_timer) {
         xTimerDelete(m_timer, portMAX_DELAY);

@@ -88,8 +88,8 @@ public:
  * @tparam QueueAllocator The type of the allocator to use.
  */
 template <size_t QueueLength, typename T, typename QueueAllocator> class queue {
-  QueueAllocator m_allocator;
-  QueueHandle_t m_queue;
+  QueueAllocator m_allocator{};
+  QueueHandle_t m_queue{nullptr};
 
 public:
   /**
@@ -99,8 +99,7 @@ public:
    * in the queue registry. If nullptr, the queue will not be registered.
    */
   explicit queue(const char *registred_name = nullptr)
-      : m_allocator{}, m_queue{nullptr} {
-    m_queue = m_allocator.create();
+      : m_queue{m_allocator.create()} {
     configASSERT(m_queue);
     if (registred_name != nullptr) {
       vQueueAddToRegistry(m_queue, registred_name);

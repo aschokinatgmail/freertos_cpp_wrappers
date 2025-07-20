@@ -92,16 +92,15 @@ public:
  */
 template <size_t MessageBufferSize, typename MessageBufferAllocator>
 class message_buffer {
-  MessageBufferAllocator m_allocator;
-  MessageBufferHandle_t m_message_buffer;
+  MessageBufferAllocator m_allocator{};
+  MessageBufferHandle_t m_message_buffer{nullptr};
 
 public:
   /**
    * @brief Construct a new message buffer object
    *
    */
-  explicit message_buffer() : m_allocator{}, m_message_buffer{nullptr} {
-    m_message_buffer = m_allocator.create();
+  explicit message_buffer() : m_message_buffer{m_allocator.create()} {
     configASSERT(m_message_buffer);
   }
   message_buffer(const message_buffer &) = delete;

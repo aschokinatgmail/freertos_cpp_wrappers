@@ -1012,16 +1012,16 @@ void delay_until(const std::chrono::steady_clock::time_point &wakeTime);
  * @tparam status_array_capacity
  */
 template <size_t status_array_capacity> class task_system_status {
-  TaskStatus_t m_status_array[status_array_capacity];
-  UBaseType_t m_task_count;
-  uint32_t m_total_run_time;
+  TaskStatus_t m_status_array[status_array_capacity]{};
+  UBaseType_t m_task_count{0};
+  uint32_t m_total_run_time{0};
 
 public:
   /**
    * @brief Construct a new task system status object
    *
    */
-  task_system_status(void) : m_task_count{0}, m_total_run_time{0} {
+  task_system_status(void) {
     m_task_count = uxTaskGetSystemState(m_status_array, status_array_capacity,
                                         &m_total_run_time);
   }
@@ -1146,15 +1146,14 @@ public:
  *
  */
 class critical_section_isr {
-  UBaseType_t m_saved_interrupt_status;
+  UBaseType_t m_saved_interrupt_status{taskENTER_CRITICAL_FROM_ISR()};
 
 public:
   /**
    * @brief Construct a new critical section isr object
    *
    */
-  critical_section_isr(void)
-      : m_saved_interrupt_status{taskENTER_CRITICAL_FROM_ISR()} {}
+  critical_section_isr(void) {}
   /**
    * @brief Destroy the critical section isr object
    *

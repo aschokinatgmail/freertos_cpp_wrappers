@@ -93,8 +93,8 @@ public:
  */
 template <size_t StreamBufferSize, typename StreamBufferAllocator>
 class stream_buffer {
-  StreamBufferAllocator m_allocator;
-  StreamBufferHandle_t m_stream_buffer;
+  StreamBufferAllocator m_allocator{};
+  StreamBufferHandle_t m_stream_buffer{nullptr};
 
 public:
   /**
@@ -104,8 +104,7 @@ public:
    * buffer before a task that is blocked on a read operation will be unblocked
    */
   explicit stream_buffer(size_t trigger_level_bytes = 1)
-      : m_allocator{}, m_stream_buffer{nullptr} {
-    m_stream_buffer = m_allocator.create(trigger_level_bytes);
+      : m_stream_buffer{m_allocator.create(trigger_level_bytes)} {
     configASSERT(m_stream_buffer);
   }
   stream_buffer(const stream_buffer &) = delete;
