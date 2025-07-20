@@ -15,10 +15,21 @@ if(ENABLE_COVERAGE)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
 endif()
 
-# Find GoogleTest
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(GTEST REQUIRED gtest_main)
-pkg_check_modules(GMOCK REQUIRED gmock_main)
+# Find GoogleTest - try FetchContent if PkgConfig fails
+find_package(PkgConfig)
+if(PkgConfig_FOUND)
+    pkg_check_modules(GTEST gtest_main)
+    pkg_check_modules(GMOCK gmock_main)
+endif()
+
+# Only build tests if GoogleTest is available
+if(GTEST_FOUND)
+    message(STATUS "GoogleTest found via PkgConfig - building tests")
+    # Add tests subdirectory
+    add_subdirectory(tests)
+else()
+    message(WARNING "GoogleTest not found - skipping tests. Install libgtest-dev and libgmock-dev to enable testing.")
+endif()
 
 # Enable testing
 enable_testing()
@@ -31,6 +42,3 @@ include_directories(tests/mocks)
 add_library(freertos_cpp_wrappers 
     src/freertos_task.cc
 )
-
-# Add tests subdirectory
-add_subdirectory(tests)
