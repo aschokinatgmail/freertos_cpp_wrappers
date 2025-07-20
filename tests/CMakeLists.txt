@@ -36,6 +36,11 @@ add_executable(
     test_freertos_event_group.cpp
 )
 
+add_executable(
+    test_freertos_stream_buffer
+    test_freertos_stream_buffer.cpp
+)
+
 target_link_libraries(
     test_freertos_task
     freertos_cpp_wrappers
@@ -72,10 +77,20 @@ target_link_libraries(
     pthread
 )
 
+target_link_libraries(
+    test_freertos_stream_buffer
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    ${GMOCK_LIBRARIES}
+    pthread
+)
+
 target_compile_options(test_freertos_task PRIVATE ${GTEST_CFLAGS_OTHER} ${GMOCK_CFLAGS_OTHER})
 target_compile_options(test_freertos_semaphore PRIVATE ${GTEST_CFLAGS_OTHER} ${GMOCK_CFLAGS_OTHER})
 target_compile_options(test_freertos_queue PRIVATE ${GTEST_CFLAGS_OTHER} ${GMOCK_CFLAGS_OTHER})
 target_compile_options(test_freertos_event_group PRIVATE ${GTEST_CFLAGS_OTHER} ${GMOCK_CFLAGS_OTHER})
+target_compile_options(test_freertos_stream_buffer PRIVATE ${GTEST_CFLAGS_OTHER} ${GMOCK_CFLAGS_OTHER})
 
 # Discover tests
 include(GoogleTest)
@@ -83,3 +98,4 @@ gtest_discover_tests(test_freertos_task)
 gtest_discover_tests(test_freertos_semaphore)
 gtest_discover_tests(test_freertos_queue)
 gtest_discover_tests(test_freertos_event_group)
+gtest_discover_tests(test_freertos_stream_buffer)

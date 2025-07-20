@@ -78,6 +78,14 @@ typedef void* QueueHandle_t;
 typedef struct {
     uint8_t dummy[128]; // Placeholder size
 } StaticQueue_t;
+
+// Stream buffer types
+typedef void* StreamBufferHandle_t;
+
+// Stream buffer static allocation structure (opaque for mock)
+typedef struct {
+    uint8_t dummy[128]; // Placeholder size
+} StaticStreamBuffer_t;
 #define INCLUDE_xTaskAbortDelay 1
 #define INCLUDE_uxTaskPriorityGet 1
 #define INCLUDE_vTaskPrioritySet 1
@@ -267,6 +275,21 @@ public:
     MOCK_METHOD(EventBits_t, xEventGroupGetBitsFromISR, (EventGroupHandle_t xEventGroup));
     MOCK_METHOD(EventBits_t, xEventGroupSync, (EventGroupHandle_t xEventGroup, const EventBits_t uxBitsToSet, const EventBits_t uxBitsToWaitFor, TickType_t xTicksToWait));
     
+    // Stream Buffer operations
+    MOCK_METHOD(StreamBufferHandle_t, xStreamBufferCreate, (size_t xBufferSizeBytes, size_t xTriggerLevelBytes));
+    MOCK_METHOD(StreamBufferHandle_t, xStreamBufferCreateStatic, (size_t xBufferSizeBytes, size_t xTriggerLevelBytes, uint8_t* pucStreamBufferStorageArea, StaticStreamBuffer_t* pxStaticStreamBuffer));
+    MOCK_METHOD(void, vStreamBufferDelete, (StreamBufferHandle_t xStreamBuffer));
+    MOCK_METHOD(size_t, xStreamBufferSend, (StreamBufferHandle_t xStreamBuffer, const void* pvTxData, size_t xDataLengthBytes, TickType_t xTicksToWait));
+    MOCK_METHOD(size_t, xStreamBufferSendFromISR, (StreamBufferHandle_t xStreamBuffer, const void* pvTxData, size_t xDataLengthBytes, BaseType_t* pxHigherPriorityTaskWoken));
+    MOCK_METHOD(size_t, xStreamBufferReceive, (StreamBufferHandle_t xStreamBuffer, void* pvRxData, size_t xBufferLengthBytes, TickType_t xTicksToWait));
+    MOCK_METHOD(size_t, xStreamBufferReceiveFromISR, (StreamBufferHandle_t xStreamBuffer, void* pvRxData, size_t xBufferLengthBytes, BaseType_t* pxHigherPriorityTaskWoken));
+    MOCK_METHOD(size_t, xStreamBufferBytesAvailable, (StreamBufferHandle_t xStreamBuffer));
+    MOCK_METHOD(size_t, xStreamBufferSpacesAvailable, (StreamBufferHandle_t xStreamBuffer));
+    MOCK_METHOD(BaseType_t, xStreamBufferIsEmpty, (StreamBufferHandle_t xStreamBuffer));
+    MOCK_METHOD(BaseType_t, xStreamBufferIsFull, (StreamBufferHandle_t xStreamBuffer));
+    MOCK_METHOD(BaseType_t, xStreamBufferReset, (StreamBufferHandle_t xStreamBuffer));
+    MOCK_METHOD(BaseType_t, xStreamBufferSetTriggerLevel, (StreamBufferHandle_t xStreamBuffer, size_t xTriggerLevel));
+    
     // Port layer mocks (needed by event group ISR functions)
     MOCK_METHOD(void, portYIELD_FROM_ISR, (BaseType_t xHigherPriorityTaskWoken));
 };
@@ -357,4 +380,25 @@ extern "C" {
     void vQueueAddToRegistry(QueueHandle_t xQueue, const char* pcQueueName);
     void vQueueUnregisterQueue(QueueHandle_t xQueue);
     const char* pcQueueGetName(QueueHandle_t xQueue);
+    
+    // Stream buffer function declarations
+    StreamBufferHandle_t xStreamBufferCreate(size_t xBufferSizeBytes, size_t xTriggerLevelBytes);
+    StreamBufferHandle_t xStreamBufferCreateStatic(size_t xBufferSizeBytes, size_t xTriggerLevelBytes, 
+                                                   uint8_t* pucStreamBufferStorageArea, 
+                                                   StaticStreamBuffer_t* pxStaticStreamBuffer);
+    void vStreamBufferDelete(StreamBufferHandle_t xStreamBuffer);
+    size_t xStreamBufferSend(StreamBufferHandle_t xStreamBuffer, const void* pvTxData, 
+                            size_t xDataLengthBytes, TickType_t xTicksToWait);
+    size_t xStreamBufferSendFromISR(StreamBufferHandle_t xStreamBuffer, const void* pvTxData, 
+                                   size_t xDataLengthBytes, BaseType_t* pxHigherPriorityTaskWoken);
+    size_t xStreamBufferReceive(StreamBufferHandle_t xStreamBuffer, void* pvRxData, 
+                               size_t xBufferLengthBytes, TickType_t xTicksToWait);
+    size_t xStreamBufferReceiveFromISR(StreamBufferHandle_t xStreamBuffer, void* pvRxData, 
+                                      size_t xBufferLengthBytes, BaseType_t* pxHigherPriorityTaskWoken);
+    size_t xStreamBufferBytesAvailable(StreamBufferHandle_t xStreamBuffer);
+    size_t xStreamBufferSpacesAvailable(StreamBufferHandle_t xStreamBuffer);
+    BaseType_t xStreamBufferIsEmpty(StreamBufferHandle_t xStreamBuffer);
+    BaseType_t xStreamBufferIsFull(StreamBufferHandle_t xStreamBuffer);
+    BaseType_t xStreamBufferReset(StreamBufferHandle_t xStreamBuffer);
+    BaseType_t xStreamBufferSetTriggerLevel(StreamBufferHandle_t xStreamBuffer, size_t xTriggerLevel);
 }
