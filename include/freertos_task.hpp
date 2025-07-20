@@ -37,6 +37,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #endif
 
 #include <FreeRTOS.h>
+#include <array>
 #include <cassert>
 #include <chrono>
 #include <functional>
@@ -54,11 +55,12 @@ using namespace std::chrono_literals;
  *
  */
 template <size_t StackSize> class static_task_allocator {
-  StackType_t m_stackBuffer[StackSize / sizeof(StackType_t)];
-  StaticTask_t m_taskBuffer;
+  std::array<StackType_t, StackSize / sizeof(StackType_t)> m_stackBuffer;
+  StaticTask_t m_taskBuffer{};
 
 public:
   static_task_allocator() = default;
+  ~static_task_allocator() = default;
   static_task_allocator(const static_task_allocator &) = delete;
   static_task_allocator(static_task_allocator &&) = default;
 
@@ -69,7 +71,7 @@ public:
                       UBaseType_t priority, void *context) {
     return xTaskCreateStatic(taskFunction, name,
                              StackSize / sizeof(StackType_t), context, priority,
-                             m_stackBuffer, &m_taskBuffer);
+                             m_stackBuffer.data(), &m_taskBuffer);
   }
 };
 #endif
@@ -132,9 +134,8 @@ public:
    */
   task(const char *name, UBaseType_t priority, task_routine_t &&task_routine,
        bool start_suspended = true)
-      : m_allocator{}, m_hTask{nullptr}, m_taskRoutine{std::move(task_routine)},
-        m_start_suspended{start_suspended} {
-    m_hTask = m_allocator.create(task_exec, name, priority, this);
+      : m_allocator{}, m_hTask{m_allocator.create(task_exec, name, priority, this)}, 
+        m_taskRoutine{std::move(task_routine)}, m_start_suspended{start_suspended} {
   }
   /**
    * @brief Construct a new task object
@@ -408,8 +409,8 @@ public:
    * @return BaseType_t pdTRUE if the notification was given, pdFALSE otherwise
    */
   BaseType_t notify_isr(const uint32_t val, eNotifyAction action,
-                        BaseType_t &higherPriorityTaskWoken = nullptr) {
-    return xTaskNotifyFromISR(m_hTask, val, action, &higherPriorityTaskWoken);
+                        BaseType_t *higherPriorityTaskWoken = nullptr) {
+    return xTaskNotifyFromISR(m_hTask, val, action, higherPriorityTaskWoken);
   }
   /**
    * @brief Notify the task from an ISR and query the previous value.
@@ -423,9 +424,9 @@ public:
   BaseType_t
   notify_and_query_isr(const uint32_t val, eNotifyAction action,
                        uint32_t &prev_value,
-                       BaseType_t &higherPriorityTaskWoken = nullptr) {
+                       BaseType_t *higherPriorityTaskWoken = nullptr) {
     return xTaskNotifyAndQueryFromISR(m_hTask, val, action, &prev_value,
-                                      &higherPriorityTaskWoken);
+                                      higherPriorityTaskWoken);
   }
   /**
    * @brief Wait for the notification.
@@ -498,7 +499,7 @@ template <typename TaskAllocator> class periodic_task {
     while (is_running()) {
       if (0 != m_period.count()) {
 #if configUSE_TASK_NOTIFICATIONS
-        uint32_t notification_value;
+        uint32_t notification_value = 0;
         m_task.notify_wait(0, 0, notification_value, m_period);
 #else
         delay(m_period);
@@ -530,8 +531,8 @@ public:
                 const std::chrono::duration<Rep, Period> &period,
                 bool start_suspended = true)
       : m_period{std::chrono::duration_cast<std::chrono::milliseconds>(period)},
-        m_on_start{on_start}, m_on_stop{on_stop},
-        m_periodic_routine{periodic_routine},
+        m_on_start{std::move(on_start)}, m_on_stop{std::move(on_stop)},
+        m_periodic_routine{std::move(periodic_routine)},
         m_task{name, priority, [this]() { run(); }, start_suspended} {}
   /**
    * @brief Construct a new periodic task object
@@ -934,7 +935,7 @@ public:
 #endif
 };
 
-// TODO: add less than ms delays
+// TODO(maintainer): add less than ms delays
 
 /**
  * @brief Delay the task for the specified number of ticks.
@@ -1011,17 +1012,17 @@ void delay_until(const std::chrono::steady_clock::time_point &wakeTime);
  * @tparam status_array_capacity
  */
 template <size_t status_array_capacity> class task_system_status {
-  TaskStatus_t m_status_array[status_array_capacity];
-  UBaseType_t m_task_count;
-  uint32_t m_total_run_time;
+  std::array<TaskStatus_t, status_array_capacity> m_status_array{};
+  UBaseType_t m_task_count{0};
+  uint32_t m_total_run_time{0};
 
 public:
   /**
    * @brief Construct a new task system status object
    *
    */
-  task_system_status(void) : m_task_count{0}, m_total_run_time{0} {
-    m_task_count = uxTaskGetSystemState(m_status_array, status_array_capacity,
+  task_system_status(void) {
+    m_task_count = uxTaskGetSystemState(m_status_array.data(), status_array_capacity,
                                         &m_total_run_time);
   }
 
@@ -1039,13 +1040,13 @@ public:
    *
    * @return const TaskStatus_t* begin iterator
    */
-  const TaskStatus_t *begin(void) const { return m_status_array; }
+  const TaskStatus_t *begin(void) const { return m_status_array.data(); }
   /**
    * @brief Return the end iterator of the task status array.
    *
    * @return const TaskStatus_t* end iterator
    */
-  const TaskStatus_t *end(void) const { return m_status_array + m_task_count; }
+  const TaskStatus_t *end(void) const { return m_status_array.data() + m_task_count; }
 };
 #endif
 #if INCLUDE_xTaskGetCurrentTaskHandle
@@ -1131,6 +1132,12 @@ public:
    *
    */
   ~critical_section(void) { taskEXIT_CRITICAL(); }
+  
+  // Delete copy and move operations for RAII safety
+  critical_section(const critical_section &) = delete;
+  critical_section(critical_section &&) = delete;
+  critical_section &operator=(const critical_section &) = delete;
+  critical_section &operator=(critical_section &&) = delete;
 };
 
 /**
@@ -1139,15 +1146,14 @@ public:
  *
  */
 class critical_section_isr {
-  UBaseType_t m_saved_interrupt_status;
+  UBaseType_t m_saved_interrupt_status{taskENTER_CRITICAL_FROM_ISR()};
 
 public:
   /**
    * @brief Construct a new critical section isr object
    *
    */
-  critical_section_isr(void)
-      : m_saved_interrupt_status{taskENTER_CRITICAL_FROM_ISR()} {}
+  critical_section_isr(void) = default;
   /**
    * @brief Destroy the critical section isr object
    *
@@ -1155,6 +1161,12 @@ public:
   ~critical_section_isr(void) {
     taskEXIT_CRITICAL_FROM_ISR(m_saved_interrupt_status);
   }
+  
+  // Delete copy and move operations for RAII safety
+  critical_section_isr(const critical_section_isr &) = delete;
+  critical_section_isr(critical_section_isr &&) = delete;
+  critical_section_isr &operator=(const critical_section_isr &) = delete;
+  critical_section_isr &operator=(critical_section_isr &&) = delete;
 };
 
 /**
@@ -1174,6 +1186,12 @@ public:
    *
    */
   ~interrupt_barrier(void) { taskENABLE_INTERRUPTS(); }
+  
+  // Delete copy and move operations for RAII safety
+  interrupt_barrier(const interrupt_barrier &) = delete;
+  interrupt_barrier(interrupt_barrier &&) = delete;
+  interrupt_barrier &operator=(const interrupt_barrier &) = delete;
+  interrupt_barrier &operator=(interrupt_barrier &&) = delete;
 };
 
 /**
@@ -1193,6 +1211,12 @@ public:
    *
    */
   ~scheduler_barrier(void) { xTaskResumeAll(); }
+  
+  // Delete copy and move operations for RAII safety
+  scheduler_barrier(const scheduler_barrier &) = delete;
+  scheduler_barrier(scheduler_barrier &&) = delete;
+  scheduler_barrier &operator=(const scheduler_barrier &) = delete;
+  scheduler_barrier &operator=(scheduler_barrier &&) = delete;
 };
 
 #if configSUPPORT_STATIC_ALLOCATION

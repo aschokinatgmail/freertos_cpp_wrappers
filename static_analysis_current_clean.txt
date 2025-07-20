@@ -1,0 +1,121 @@
+[1/7] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp.
+34385 warnings and 1 error generated.
+Error while processing /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp.
+[2/7] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_semaphore.hpp.
+41137 warnings and 2 errors generated.
+Error while processing /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_semaphore.hpp.
+[3/7] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_queue.hpp.
+54912 warnings and 3 errors generated.
+Error while processing /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_queue.hpp.
+[4/7] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_message_buffer.hpp.
+66732 warnings and 4 errors generated.
+Error while processing /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_message_buffer.hpp.
+[5/7] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_stream_buffer.hpp.
+80507 warnings and 5 errors generated.
+Error while processing /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_stream_buffer.hpp.
+[6/7] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_sw_timer.hpp.
+106962 warnings and 6 errors generated.
+Error while processing /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_sw_timer.hpp.
+[7/7] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_event_group.hpp.
+113715 warnings and 7 errors generated.
+Error while processing /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_event_group.hpp.
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_event_group.hpp:39:10: error: 'FreeRTOS.h' file not found [clang-diagnostic-error]
+   39 | #include <FreeRTOS.h>
+      |          ^~~~~~~~~~~~
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_event_group.hpp:94:3: warning: constructor does not initialize these fields: m_event_group [cppcoreguidelines-pro-type-member-init,hicpp-member-init]
+   87 |   EventGroupHandle_t m_event_group;
+      |                                   
+      |                                   {}
+   88 | 
+   89 | public:
+   90 |   /**
+   91 |    * @brief Construct a new event group object
+   92 |    *
+   93 |    */
+   94 |   event_group(void) : m_event_group(m_allocator.create()) {}
+      |   ^
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_event_group.hpp:94:3: warning: use '= default' to define a trivial default constructor [hicpp-use-equals-default]
+   94 |   event_group(void) : m_event_group(m_allocator.create()) {}
+      |   ^                                                       ~~
+      |                                                           = default;
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_message_buffer.hpp:39:10: error: 'FreeRTOS.h' file not found [clang-diagnostic-error]
+   39 | #include <FreeRTOS.h>
+      |          ^~~~~~~~~~~~
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_message_buffer.hpp:104:12: warning: use '= default' to define a trivial default constructor [hicpp-use-equals-default]
+  104 |   explicit message_buffer() : m_message_buffer{m_allocator.create()} {
+      |            ^
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_queue.hpp:39:10: error: 'FreeRTOS.h' file not found [clang-diagnostic-error]
+   39 | #include <FreeRTOS.h>
+      |          ^~~~~~~~~~~~
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_semaphore.hpp:39:10: error: 'FreeRTOS.h' file not found [clang-diagnostic-error]
+   39 | #include <FreeRTOS.h>
+      |          ^~~~~~~~~~~~
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_semaphore.hpp:113:3: warning: use '= default' to define a trivial default constructor [hicpp-use-equals-default]
+  113 |   binary_semaphore() : m_semaphore{m_allocator.create_binary()} {
+      |   ^
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_semaphore.hpp:816:3: warning: use '= default' to define a trivial destructor [hicpp-use-equals-default]
+  816 |   ~lock_guard_isr(void) { m_mutex.unlock_isr(m_high_priority_task_woken); }
+      |   ^
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_stream_buffer.hpp:39:10: error: 'FreeRTOS.h' file not found [clang-diagnostic-error]
+   39 | #include <FreeRTOS.h>
+      |          ^~~~~~~~~~~~
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_sw_timer.hpp:39:10: error: 'FreeRTOS.h' file not found [clang-diagnostic-error]
+   39 | #include <FreeRTOS.h>
+      |          ^~~~~~~~~~~~
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:39:10: error: 'FreeRTOS.h' file not found [clang-diagnostic-error]
+   39 | #include <FreeRTOS.h>
+      |          ^~~~~~~~~~~~
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:160:3: warning: constructor does not initialize these fields: m_hTask [cppcoreguidelines-pro-type-member-init,hicpp-member-init]
+  108 |   task(const char *name, UBaseType_t priority, task_routine_t &&task_routine)
+      |   ^
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:160:65: warning: rvalue reference parameter 'task_routine' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
+  160 |   task(const char *name, UBaseType_t priority, task_routine_t &&task_routine)
+      |                                                                 ^
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:172:25: warning: rvalue reference parameter 'task_routine' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
+  172 |        task_routine_t &&task_routine)
+      |                         ^
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:177:3: warning: constructor does not initialize these fields: m_hTask [cppcoreguidelines-pro-type-member-init,hicpp-member-init]
+  177 |   task(task &&other) noexcept 
+      |   ^
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:529:34: warning: rvalue reference parameter 'on_start' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
+  529 |                 task_routine_t &&on_start, task_routine_t &&on_stop,
+      |                                  ^
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:529:61: warning: rvalue reference parameter 'on_stop' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
+  529 |                 task_routine_t &&on_start, task_routine_t &&on_stop,
+      |                                                             ^
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:530:34: warning: rvalue reference parameter 'periodic_routine' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
+  530 |                 task_routine_t &&periodic_routine,
+      |                                  ^
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:552:34: warning: rvalue reference parameter 'on_start' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
+  552 |                 task_routine_t &&on_start, task_routine_t &&on_stop,
+      |                                  ^
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:552:61: warning: rvalue reference parameter 'on_stop' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
+  552 |                 task_routine_t &&on_start, task_routine_t &&on_stop,
+      |                                                             ^
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:553:34: warning: rvalue reference parameter 'periodic_routine' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
+  553 |                 task_routine_t &&periodic_routine,
+      |                                  ^
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:574:34: warning: rvalue reference parameter 'on_start' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
+  574 |                 task_routine_t &&on_start, task_routine_t &&on_stop,
+      |                                  ^
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:574:61: warning: rvalue reference parameter 'on_stop' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
+  574 |                 task_routine_t &&on_start, task_routine_t &&on_stop,
+      |                                                             ^
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:575:34: warning: rvalue reference parameter 'periodic_routine' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
+  575 |                 task_routine_t &&periodic_routine, bool start_suspended = true)
+      |                                  ^
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:594:34: warning: rvalue reference parameter 'on_start' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
+  594 |                 task_routine_t &&on_start, task_routine_t &&on_stop,
+      |                                  ^
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:594:61: warning: rvalue reference parameter 'on_stop' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
+  594 |                 task_routine_t &&on_start, task_routine_t &&on_stop,
+      |                                                             ^
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:595:34: warning: rvalue reference parameter 'periodic_routine' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
+  595 |                 task_routine_t &&periodic_routine, bool start_suspended = true)
+      |                                  ^
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:1161:3: warning: use '= default' to define a trivial destructor [hicpp-use-equals-default]
+ 1161 |   ~critical_section_isr(void) {
+      |   ^
+Suppressed 113692 warnings (113690 in non-user code, 2 NOLINT).
+Use -header-filter=.* to display errors from all non-system headers. Use -system-headers to display errors from system headers as well.
+Found compiler error(s).

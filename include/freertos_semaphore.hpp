@@ -40,7 +40,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <chrono>
 #include <semphr.h>
 #include <task.h>
-#include <time.h>
+#include <ctime>
 
 namespace freertos {
 
@@ -50,10 +50,11 @@ namespace freertos {
  *
  */
 class static_semaphore_allocator {
-  StaticSemaphore_t m_semaphore_placeholder;
+  StaticSemaphore_t m_semaphore_placeholder{};
 
 public:
   static_semaphore_allocator() = default;
+  ~static_semaphore_allocator() = default;
   static_semaphore_allocator(const static_semaphore_allocator &) = delete;
   static_semaphore_allocator(static_semaphore_allocator &&) = delete;
 
@@ -101,16 +102,15 @@ public:
  * allocation.
  */
 template <typename SemaphoreAllocator> class binary_semaphore {
-  SemaphoreAllocator m_allocator;
-  SemaphoreHandle_t m_semaphore;
+  SemaphoreAllocator m_allocator{};
+  SemaphoreHandle_t m_semaphore{nullptr};
 
 public:
   /**
    * @brief Construct a new binary semaphore object
    *
    */
-  binary_semaphore() : m_allocator{}, m_semaphore{nullptr} {
-    m_semaphore = m_allocator.create_binary();
+  binary_semaphore() : m_semaphore{m_allocator.create_binary()} {
     configASSERT(m_semaphore);
   }
   binary_semaphore(const binary_semaphore &) = delete;
@@ -221,8 +221,8 @@ public:
  * allocation.
  */
 template <typename SemaphoreAllocator> class counting_semaphore {
-  SemaphoreAllocator m_allocator;
-  SemaphoreHandle_t m_semaphore;
+  SemaphoreAllocator m_allocator{};
+  SemaphoreHandle_t m_semaphore{nullptr};
 
 public:
   /**
@@ -232,8 +232,7 @@ public:
    *
    */
   explicit counting_semaphore(UBaseType_t max_count = 1)
-      : m_allocator{}, m_semaphore{nullptr} {
-    m_semaphore = m_allocator.create_counting(max_count);
+      : m_semaphore{m_allocator.create_counting(max_count)} {
     configASSERT(m_semaphore);
   }
   counting_semaphore(const counting_semaphore &) = delete;
@@ -355,19 +354,21 @@ public:
   }
   /**
    * @brief Give the counting semaphore.
+   * Note: Post-increment returns reference instead of copy for RAII safety
    *
    * @return counting_semaphore& reference to the counting semaphore.
    */
-  counting_semaphore &operator++(int) {
+  counting_semaphore &operator++(int) { // NOLINT(cert-dcl21-cpp): RAII class, copy is deleted
     give();
     return *this;
   }
   /**
    * @brief Take the counting semaphore.
+   * Note: Post-decrement returns reference instead of copy for RAII safety
    *
    * @return counting_semaphore& reference to the counting semaphore.
    */
-  counting_semaphore &operator--(int) {
+  counting_semaphore &operator--(int) { // NOLINT(cert-dcl21-cpp): RAII class, copy is deleted
     take();
     return *this;
   }
@@ -398,8 +399,8 @@ public:
  * allocation.
  */
 template <typename SemaphoreAllocator> class mutex {
-  SemaphoreAllocator m_allocator;
-  SemaphoreHandle_t m_semaphore;
+  SemaphoreAllocator m_allocator{};
+  SemaphoreHandle_t m_semaphore{nullptr};
   uint8_t m_locked : 1;
 
 public:
@@ -407,8 +408,7 @@ public:
    * @brief Construct a new mutex object
    *
    */
-  mutex() : m_allocator{}, m_semaphore{nullptr}, m_locked{false} {
-    m_semaphore = m_allocator.create_mutex();
+  mutex() : m_semaphore{m_allocator.create_mutex()}, m_locked{false} {
     configASSERT(m_semaphore);
   }
   mutex(const mutex &) = delete;
@@ -551,18 +551,17 @@ public:
  * allocation.
  */
 template <typename SemaphoreAllocator> class recursive_mutex {
-  SemaphoreAllocator m_allocator;
-  SemaphoreHandle_t m_semaphore;
+  SemaphoreAllocator m_allocator{};
+  SemaphoreHandle_t m_semaphore{nullptr};
   uint8_t m_locked : 1;
-  uint8_t m_lock_count;
+  uint8_t m_lock_count{0};
 
 public:
   /**
    * @brief Construct a new recursive mutex object
    *
    */
-  recursive_mutex() : m_allocator{}, m_semaphore{nullptr}, m_locked{false}, m_lock_count{0} {
-    m_semaphore = m_allocator.create_recursive_mutex();
+  recursive_mutex() : m_semaphore{m_allocator.create_recursive_mutex()}, m_locked{false} {
     configASSERT(m_semaphore);
   }
   recursive_mutex(const recursive_mutex &) = delete;
@@ -718,7 +717,7 @@ public:
  * @tparam Mutex type of the mutex to guard.
  */
 template <typename Mutex> class lock_guard {
-  Mutex &m_mutex;
+  Mutex &m_mutex; // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members): RAII design requires reference
 
 public:
   /**
@@ -727,11 +726,18 @@ public:
    * @param mutex mutex to guard
    */
   explicit lock_guard(Mutex &mutex) : m_mutex{mutex} { m_mutex.lock(); }
+  
   /**
    * @brief Destruct the lock guard object and unlock the mutex.
    *
    */
   ~lock_guard(void) { m_mutex.unlock(); }
+  
+  // Delete copy and move operations for RAII safety
+  lock_guard(const lock_guard &) = delete;
+  lock_guard(lock_guard &&) = delete;
+  lock_guard &operator=(const lock_guard &) = delete;
+  lock_guard &operator=(lock_guard &&) = delete;
 
   /**
    * @brief Checks if the mutex is locked.
@@ -748,8 +754,8 @@ public:
  * @tparam Mutex type of the mutex to guard.
  */
 template <typename Mutex> class try_lock_guard {
-  Mutex &m_mutex;
-  bool m_lock_acquired;
+  Mutex &m_mutex; // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members): RAII design requires reference
+  bool m_lock_acquired{false};
 
 public:
   /**
@@ -757,8 +763,7 @@ public:
    *
    * @param mutex mutex to guard
    */
-  explicit try_lock_guard(Mutex &mutex) : m_mutex{mutex}, m_lock_acquired{false} { 
-    m_lock_acquired = m_mutex.try_lock(); 
+  explicit try_lock_guard(Mutex &mutex) : m_mutex{mutex}, m_lock_acquired{static_cast<bool>(m_mutex.try_lock())} {
   }
   /**
    * @brief Destruct the try lock guard object and unlock the mutex.
@@ -769,6 +774,12 @@ public:
       m_mutex.unlock(); 
     }
   }
+  
+  // Delete copy and move operations for RAII safety
+  try_lock_guard(const try_lock_guard &) = delete;
+  try_lock_guard(try_lock_guard &&) = delete;
+  try_lock_guard &operator=(const try_lock_guard &) = delete;
+  try_lock_guard &operator=(try_lock_guard &&) = delete;
 
   /**
    * @brief Checks if the mutex is locked.
@@ -785,8 +796,8 @@ public:
  * @tparam Mutex type of the mutex to guard.
  */
 template <typename Mutex> class lock_guard_isr {
-  Mutex &m_mutex;
-  BaseType_t m_high_priority_task_woken;
+  Mutex &m_mutex; // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members): RAII design requires reference
+  BaseType_t m_high_priority_task_woken{pdFALSE};
 
 public:
   /**
@@ -795,7 +806,7 @@ public:
    * @param mutex mutex to guard
    */
   explicit lock_guard_isr(Mutex &mutex)
-      : m_mutex{mutex}, m_high_priority_task_woken{pdFALSE} {
+      : m_mutex{mutex} {
     m_mutex.lock_isr(m_high_priority_task_woken);
   }
   /**
@@ -803,6 +814,12 @@ public:
    *
    */
   ~lock_guard_isr(void) { m_mutex.unlock_isr(m_high_priority_task_woken); }
+  
+  // Delete copy and move operations for RAII safety
+  lock_guard_isr(const lock_guard_isr &) = delete;
+  lock_guard_isr(lock_guard_isr &&) = delete;
+  lock_guard_isr &operator=(const lock_guard_isr &) = delete;
+  lock_guard_isr &operator=(lock_guard_isr &&) = delete;
 
   /**
    * @brief Checks if high priority task was woken.
@@ -828,7 +845,7 @@ public:
  * @tparam Mutex type of the mutex to guard.
  */
 template <typename Mutex> class timeout_lock_guard {
-  Mutex &m_mutex;
+  Mutex &m_mutex; // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members): RAII design requires reference
 
 public:
   /**
@@ -858,6 +875,12 @@ public:
    *
    */
   ~timeout_lock_guard(void) { m_mutex.unlock(); }
+  
+  // Delete copy and move operations for RAII safety
+  timeout_lock_guard(const timeout_lock_guard &) = delete;
+  timeout_lock_guard(timeout_lock_guard &&) = delete;
+  timeout_lock_guard &operator=(const timeout_lock_guard &) = delete;
+  timeout_lock_guard &operator=(timeout_lock_guard &&) = delete;
 
   /**
    * @brief Checks if the mutex is locked.

@@ -41,7 +41,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <cstdbool>
 #include <functional>
 #include <task.h>
-#include <time.h>
+#include <ctime>
 #include <timers.h>
 
 namespace freertos {
@@ -57,10 +57,11 @@ using std::function;
  *
  */
 class static_sw_timer_allocator {
-  StaticTimer_t m_timer_placeholder;
+  StaticTimer_t m_timer_placeholder{};
 
 public:
   static_sw_timer_allocator() = default;
+  ~static_sw_timer_allocator() = default;
   static_sw_timer_allocator(const static_sw_timer_allocator &) = delete;
   static_sw_timer_allocator(static_sw_timer_allocator &&) = default;
 
@@ -126,7 +127,7 @@ public:
    */
   explicit timer(const char *name, const TickType_t period_ticks,
                  UBaseType_t auto_reload, timer_callback_t &&callback)
-      : m_timer{nullptr}, m_callback{callback}, m_started{false} {
+      : m_timer{nullptr}, m_callback{std::move(callback)}, m_started{false} {
     m_timer = m_allocator.create(name, period_ticks, auto_reload, this,
                                  callback_wrapper);
     configASSERT(m_timer);
@@ -169,7 +170,7 @@ public:
   }
 
   timer &operator=(const timer &) = delete;
-  timer &operator=(timer &&src) {
+  timer &operator=(timer &&src) noexcept {
     if (this != &src) {
       if (m_timer) {
         xTimerDelete(m_timer, portMAX_DELAY);

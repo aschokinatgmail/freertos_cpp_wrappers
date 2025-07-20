@@ -37,6 +37,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #endif
 
 #include <FreeRTOS.h>
+#include <array>
 #include <chrono>
 #include <optional>
 #include <queue.h>
@@ -51,11 +52,12 @@ using std::optional;
  *
  */
 template <size_t QueueLength, typename T> class static_queue_allocator {
-  StaticQueue_t m_queue_placeholder;
-  uint8_t m_storage[QueueLength * sizeof(T)];
+  StaticQueue_t m_queue_placeholder{};
+  std::array<uint8_t, QueueLength * sizeof(T)> m_storage;
 
 public:
   static_queue_allocator() = default;
+  ~static_queue_allocator() = default;
   static_queue_allocator(const static_queue_allocator &) = delete;
   static_queue_allocator(static_queue_allocator &&) = delete;
 
@@ -63,7 +65,7 @@ public:
   static_queue_allocator &operator=(static_queue_allocator &&) = delete;
 
   QueueHandle_t create() {
-    return xQueueCreateStatic(QueueLength, sizeof(T), m_storage,
+    return xQueueCreateStatic(QueueLength, sizeof(T), m_storage.data(),
                               &m_queue_placeholder);
   }
 };
@@ -87,8 +89,8 @@ public:
  * @tparam QueueAllocator The type of the allocator to use.
  */
 template <size_t QueueLength, typename T, typename QueueAllocator> class queue {
-  QueueAllocator m_allocator;
-  QueueHandle_t m_queue;
+  QueueAllocator m_allocator{};
+  QueueHandle_t m_queue{nullptr};
 
 public:
   /**
@@ -98,8 +100,7 @@ public:
    * in the queue registry. If nullptr, the queue will not be registered.
    */
   explicit queue(const char *registred_name = nullptr)
-      : m_allocator{}, m_queue{nullptr} {
-    m_queue = m_allocator.create();
+      : m_queue{m_allocator.create()} {
     configASSERT(m_queue);
     if (registred_name != nullptr) {
       vQueueAddToRegistry(m_queue, registred_name);

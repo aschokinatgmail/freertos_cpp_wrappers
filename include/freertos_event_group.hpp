@@ -48,10 +48,11 @@ namespace freertos {
  *
  */
 class static_event_group_allocator {
-  StaticEventGroup_t m_event_group_placeholder;
+  StaticEventGroup_t m_event_group_placeholder{};
 
 public:
   static_event_group_allocator() = default;
+  ~static_event_group_allocator() = default;
   static_event_group_allocator(const static_event_group_allocator &) = delete;
   static_event_group_allocator(static_event_group_allocator &&) = delete;
 
