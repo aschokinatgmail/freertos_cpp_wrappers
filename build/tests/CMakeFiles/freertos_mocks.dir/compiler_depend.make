@@ -3,6 +3,7 @@
 
 tests/CMakeFiles/freertos_mocks.dir/mocks/freertos_mocks.cpp.o: /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/mocks/freertos_mocks.cpp \
   /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/mocks/FreeRTOS.h \
+  /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/mocks/freertos_mocks.hpp \
   /usr/include/alloca.h \
   /usr/include/asm-generic/bitsperlong.h \
   /usr/include/asm-generic/errno-base.h \
@@ -470,11 +471,7 @@ tests/CMakeFiles/freertos_mocks.dir/mocks/freertos_mocks.cpp.o: /home/runner/wor
 
 /usr/include/x86_64-linux-gnu/bits/types/siginfo_t.h:
 
-/usr/include/c++/13/string:
-
-/usr/include/c++/13/bits/locale_facets_nonio.h:
-
-/usr/include/c++/13/bits/chrono.h:
+/usr/include/x86_64-linux-gnu/bits/types/locale_t.h:
 
 /usr/include/c++/13/streambuf:
 
@@ -491,10 +488,6 @@ tests/CMakeFiles/freertos_mocks.dir/mocks/freertos_mocks.cpp.o: /home/runner/wor
 /usr/include/c++/13/pstl/glue_memory_defs.h:
 
 /usr/include/gmock/gmock-function-mocker.h:
-
-/usr/include/c++/13/iostream:
-
-/usr/include/libintl.h:
 
 /usr/include/c++/13/iosfwd:
 
@@ -584,8 +577,6 @@ tests/CMakeFiles/freertos_mocks.dir/mocks/freertos_mocks.cpp.o: /home/runner/wor
 
 /usr/include/x86_64-linux-gnu/bits/pthreadtypes.h:
 
-/usr/include/x86_64-linux-gnu/bits/types/locale_t.h:
-
 /usr/include/c++/13/bits/stl_multiset.h:
 
 /usr/include/c++/13/bits/stl_multimap.h:
@@ -656,15 +647,29 @@ tests/CMakeFiles/freertos_mocks.dir/mocks/freertos_mocks.cpp.o: /home/runner/wor
 
 /usr/include/c++/13/bits/shared_ptr_atomic.h:
 
-/usr/include/c++/13/bits/cxxabi_forced.h:
+/usr/include/c++/13/bits/locale_facets_nonio.h:
 
-/usr/include/c++/13/bits/locale_classes.h:
+/usr/include/c++/13/bits/chrono.h:
+
+/usr/include/c++/13/string:
 
 /usr/include/c++/13/bits/basic_ios.tcc:
 
 /usr/include/x86_64-linux-gnu/bits/byteswap.h:
 
 /usr/include/c++/13/vector:
+
+/usr/include/c++/13/iostream:
+
+/usr/include/libintl.h:
+
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/mocks/freertos_mocks.hpp:
+
+/usr/include/x86_64-linux-gnu/bits/endianness.h:
+
+/usr/include/x86_64-linux-gnu/bits/floatn.h:
+
+/usr/include/x86_64-linux-gnu/bits/pthread_stack_min-dynamic.h:
 
 /usr/include/c++/13/bits/charconv.h:
 
@@ -685,6 +690,12 @@ tests/CMakeFiles/freertos_mocks.dir/mocks/freertos_mocks.cpp.o: /home/runner/wor
 /usr/include/c++/13/bits/atomic_lockfree_defines.h:
 
 /usr/include/x86_64-linux-gnu/bits/fp-logb.h:
+
+/usr/include/c++/13/map:
+
+/usr/include/c++/13/backward/binders.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/__fpos_t.h:
 
 /usr/include/alloca.h:
 
@@ -711,12 +722,6 @@ tests/CMakeFiles/freertos_mocks.dir/mocks/freertos_mocks.cpp.o: /home/runner/wor
 /usr/include/c++/13/bits/cpp_type_traits.h:
 
 /usr/include/c++/13/bits/parse_numbers.h:
-
-/usr/include/c++/13/map:
-
-/usr/include/c++/13/backward/binders.h:
-
-/usr/include/x86_64-linux-gnu/bits/types/__fpos_t.h:
 
 /usr/include/c++/13/cerrno:
 
@@ -761,6 +766,10 @@ tests/CMakeFiles/freertos_mocks.dir/mocks/freertos_mocks.cpp.o: /home/runner/wor
 /usr/include/c++/13/backward/auto_ptr.h:
 
 /usr/include/c++/13/condition_variable:
+
+/usr/include/c++/13/bits/cxxabi_forced.h:
+
+/usr/include/c++/13/bits/locale_classes.h:
 
 /usr/include/c++/13/istream:
 
@@ -1107,12 +1116,6 @@ tests/CMakeFiles/freertos_mocks.dir/mocks/freertos_mocks.cpp.o: /home/runner/wor
 /usr/include/x86_64-linux-gnu/bits/endian.h:
 
 /usr/include/x86_64-linux-gnu/bits/errno.h:
-
-/usr/include/x86_64-linux-gnu/bits/endianness.h:
-
-/usr/include/x86_64-linux-gnu/bits/floatn.h:
-
-/usr/include/x86_64-linux-gnu/bits/pthread_stack_min-dynamic.h:
 
 /usr/include/gtest/gtest-death-test.h:
 

@@ -4,6 +4,7 @@
 tests/CMakeFiles/freertos_mocks.dir/mocks/freertos_mocks.cpp.o
  /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/mocks/freertos_mocks.cpp
  /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/mocks/FreeRTOS.h
+ /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/mocks/freertos_mocks.hpp
  /usr/include/alloca.h
  /usr/include/asm-generic/bitsperlong.h
  /usr/include/asm-generic/errno-base.h
