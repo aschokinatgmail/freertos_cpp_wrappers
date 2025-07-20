@@ -516,16 +516,15 @@ TEST_F(FreeRTOSSemaphoreTest, RecursiveMutexNestedLocks) {
     EXPECT_EQ(lock3, pdTRUE);
     EXPECT_TRUE(recursive_mutex.locked());
     
-    // Unlock once - should still be locked
+    // Unlock once - should still be locked (recursive count: 3->2)
     auto unlock1 = recursive_mutex.unlock();
     EXPECT_EQ(unlock1, pdTRUE);
-    // Note: locked() state in wrapper reflects any lock, not lock count
-    EXPECT_FALSE(recursive_mutex.locked()); // Wrapper sets false on any unlock
+    EXPECT_TRUE(recursive_mutex.locked()); // Still locked with count 2
     
-    // Unlock second time
+    // Unlock second time (recursive count: 2->1)
     auto unlock2 = recursive_mutex.unlock();
     EXPECT_EQ(unlock2, pdTRUE);
-    EXPECT_FALSE(recursive_mutex.locked());
+    EXPECT_TRUE(recursive_mutex.locked()); // Still locked with count 1
     
     // Final unlock
     auto unlock3 = recursive_mutex.unlock();
@@ -973,8 +972,7 @@ TEST_F(FreeRTOSSemaphoreTest, TryLockGuardFailure) {
         .WillOnce(Return(mock_mutex_handle));
     EXPECT_CALL(*mock, xSemaphoreTake(mock_mutex_handle, 0))
         .WillOnce(Return(pdFALSE));
-    EXPECT_CALL(*mock, xSemaphoreGive(mock_mutex_handle))
-        .WillOnce(Return(pdTRUE));
+    // xSemaphoreGive should NOT be called since lock failed
     EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex_handle));
     
     freertos::mutex<freertos::dynamic_semaphore_allocator> mutex;
@@ -984,7 +982,7 @@ TEST_F(FreeRTOSSemaphoreTest, TryLockGuardFailure) {
         // Mutex should not be locked (try_lock failed)
         EXPECT_FALSE(mutex.locked());
         EXPECT_FALSE(guard.locked());
-    } // Try lock guard destructor should still call unlock (even though not locked)
+    } // Try lock guard destructor should NOT call unlock since lock failed
     
     EXPECT_FALSE(mutex.locked());
 }

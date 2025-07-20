@@ -554,13 +554,14 @@ template <typename SemaphoreAllocator> class recursive_mutex {
   SemaphoreAllocator m_allocator;
   SemaphoreHandle_t m_semaphore;
   uint8_t m_locked : 1;
+  uint8_t m_lock_count;
 
 public:
   /**
    * @brief Construct a new recursive mutex object
    *
    */
-  recursive_mutex() : m_allocator{}, m_semaphore{nullptr}, m_locked{false} {
+  recursive_mutex() : m_allocator{}, m_semaphore{nullptr}, m_locked{false}, m_lock_count{0} {
     m_semaphore = m_allocator.create_recursive_mutex();
     configASSERT(m_semaphore);
   }
@@ -588,8 +589,11 @@ public:
    */
   BaseType_t unlock() {
     auto rc = xSemaphoreGive(m_semaphore);
-    if (rc) {
-      m_locked = false;
+    if (rc && m_lock_count > 0) {
+      m_lock_count--;
+      if (m_lock_count == 0) {
+        m_locked = false;
+      }
     }
     return rc;
   }
@@ -603,8 +607,11 @@ public:
    */
   BaseType_t unlock_isr(BaseType_t &high_priority_task_woken) {
     auto rc = xSemaphoreGiveFromISR(m_semaphore, &high_priority_task_woken);
-    if (rc) {
-      m_locked = false;
+    if (rc && m_lock_count > 0) {
+      m_lock_count--;
+      if (m_lock_count == 0) {
+        m_locked = false;
+      }
     }
     return rc;
   }
@@ -617,8 +624,11 @@ public:
   BaseType_t unlock_isr(void) {
     BaseType_t high_priority_task_woken = pdFALSE;
     auto rc = xSemaphoreGiveFromISR(m_semaphore, &high_priority_task_woken);
-    if (rc) {
-      m_locked = false;
+    if (rc && m_lock_count > 0) {
+      m_lock_count--;
+      if (m_lock_count == 0) {
+        m_locked = false;
+      }
     }
     return rc;
   }
@@ -633,6 +643,7 @@ public:
     auto rc = xSemaphoreTake(m_semaphore, ticks_to_wait);
     if (rc) {
       m_locked = true;
+      m_lock_count++;
     }
     return rc;
   }
@@ -648,6 +659,7 @@ public:
     auto rc = xSemaphoreTakeFromISR(m_semaphore, &high_priority_task_woken);
     if (rc) {
       m_locked = true;
+      m_lock_count++;
     }
     return rc;
   }
@@ -662,6 +674,7 @@ public:
     auto rc = xSemaphoreTakeFromISR(m_semaphore, &high_priority_task_woken);
     if (rc) {
       m_locked = true;
+      m_lock_count++;
     }
     return rc;
   }
@@ -686,6 +699,7 @@ public:
     auto rc = xSemaphoreTake(m_semaphore, 0);
     if (rc) {
       m_locked = true;
+      m_lock_count++;
     }
     return rc;
   }
@@ -735,6 +749,7 @@ public:
  */
 template <typename Mutex> class try_lock_guard {
   Mutex &m_mutex;
+  bool m_lock_acquired;
 
 public:
   /**
@@ -742,19 +757,25 @@ public:
    *
    * @param mutex mutex to guard
    */
-  explicit try_lock_guard(Mutex &mutex) : m_mutex{mutex} { m_mutex.try_lock(); }
+  explicit try_lock_guard(Mutex &mutex) : m_mutex{mutex}, m_lock_acquired{false} { 
+    m_lock_acquired = m_mutex.try_lock(); 
+  }
   /**
    * @brief Destruct the try lock guard object and unlock the mutex.
    *
    */
-  ~try_lock_guard(void) { m_mutex.unlock(); }
+  ~try_lock_guard(void) { 
+    if (m_lock_acquired) {
+      m_mutex.unlock(); 
+    }
+  }
 
   /**
    * @brief Checks if the mutex is locked.
    *
    * @return  true if the mutex is locked, otherwise false.
    */
-  bool locked(void) const { return m_mutex.locked(); }
+  bool locked(void) const { return m_lock_acquired && m_mutex.locked(); }
 };
 
 /**
