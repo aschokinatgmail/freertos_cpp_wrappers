@@ -10,14 +10,17 @@ This directory contains comprehensive unit tests for the FreeRTOS C++ wrapper li
 - **Queue Module** (`test_freertos_queue.cpp`) - 49 tests
 - **Stream Buffer Module** (`test_freertos_stream_buffer.cpp`) - 47 tests
 - **Event Group Module** (`test_freertos_event_group.cpp`) - 30 tests
+- **Message Buffer Module** (`test_freertos_message_buffer.cpp`) - 32 tests
 
 ### Planned Modules 📋
-- Message Buffer Module (`test_freertos_message_buffer.cpp`)
+- Software Timer Module (`test_freertos_sw_timer.cpp`)
 - Software Timer Module (`test_freertos_sw_timer.cpp`)
 
 ## Test Coverage
 
 **Overall Coverage: 89.2%** (1,211 of 1,358 lines)
+
+**Total Tests: 272** (Task: 46, Semaphore: 68, Queue: 49, Stream Buffer: 47, Event Group: 30, Message Buffer: 32)
 
 See [COVERAGE_REPORT.md](../COVERAGE_REPORT.md) for detailed coverage analysis.
 
@@ -57,8 +60,9 @@ make -j$(nproc)
 ./tests/test_freertos_task
 ./tests/test_freertos_semaphore
 ./tests/test_freertos_queue
-./tests/test_freertos_stream_buffer
+../tests/test_freertos_stream_buffer
 ./tests/test_freertos_event_group
+./tests/test_freertos_message_buffer
 
 # Run tests with XML output
 ./tests/test_freertos_task --gtest_output=xml:test_results.xml
@@ -104,19 +108,20 @@ ctest --verbose
    - Overwrite operations for single-item queues
    - Reset functionality and error handling
 
-6. **Stream Buffer Tests**
-   - Static and dynamic stream buffer allocators
-   - Send operations (send, send_isr) with timeouts and partial sends
-   - Receive operations with timeouts and partial receives
-   - Stream buffer state operations (available bytes, free space, empty/full checks)
-   - Reset functionality and trigger level management
-   - Iterator-based operations and chrono timeout support
-
-7. **Event Group Tests**
+6. **Event Group Tests**
    - Static and dynamic event group allocators
-   - Bit manipulation operations (set, clear, wait for bits)
-   - Synchronization and wait operations with timeouts
-   - Event group state management and cleanup
+   - Bit setting and clearing operations
+   - Waiting for bits with AND/OR logic
+   - Timeout handling and ISR variants
+   - Event group state queries and error handling
+
+7. **Message Buffer Tests**
+   - Static and dynamic message buffer allocators
+   - Send and receive operations with variable-length messages
+   - Buffer state management (space available, empty/full checks)
+   - Reset functionality and timeout handling
+   - Edge cases with zero-length and maximum-size messages
+   - Chrono timeout compatibility
 
 8. **Utility Function Tests**
    - Delay and timing functions
@@ -148,6 +153,7 @@ The test framework includes comprehensive mocks for FreeRTOS APIs:
 - `tests/mocks/queue.h` - Queue header stub
 - `tests/mocks/stream_buffer.h` - Stream buffer header stub
 - `tests/mocks/event_groups.h` - Event group header stub
+- `tests/mocks/message_buffer.h` - Message buffer header stub
 
 ### Mock Features
 
@@ -217,15 +223,6 @@ When all tests pass, you should see:
 [==========] 49 tests from 1 test suite ran. (X ms total)
 [  PASSED  ] 49 tests.
 
-# Stream Buffer Tests
-[==========] Running 47 tests from 1 test suite.
-[----------] Global test environment set-up.
-[----------] 47 tests from FreeRTOSStreamBufferTest
-[       OK ] All tests completed successfully
-[----------] 47 tests from FreeRTOSStreamBufferTest (X ms total)
-[==========] 47 tests from 1 test suite ran. (X ms total)
-[  PASSED  ] 47 tests.
-
 # Event Group Tests
 [==========] Running 30 tests from 1 test suite.
 [----------] Global test environment set-up.
@@ -234,6 +231,15 @@ When all tests pass, you should see:
 [----------] 30 tests from FreeRTOSEventGroupTest (X ms total)
 [==========] 30 tests from 1 test suite ran. (X ms total)
 [  PASSED  ] 30 tests.
+
+# Message Buffer Tests
+[==========] Running 32 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 32 tests from FreeRTOSMessageBufferTest
+[       OK ] All tests completed successfully
+[----------] 32 tests from FreeRTOSMessageBufferTest (X ms total)
+[==========] 32 tests from 1 test suite ran. (X ms total)
+[  PASSED  ] 32 tests.
 ```
 
 ## Integration with CI/CD
