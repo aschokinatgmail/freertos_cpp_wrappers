@@ -55,6 +55,14 @@ typedef enum {
     eSetValueWithoutOverwrite
 } eNotifyAction;
 
+// Message Buffer types
+typedef void* MessageBufferHandle_t;
+
+// Message Buffer static allocation structure (opaque for mock)
+typedef struct {
+    uint8_t dummy[128]; // Placeholder size
+} StaticMessageBuffer_t;
+
 // Static allocation support flag (enabled for testing)
 #define configSUPPORT_STATIC_ALLOCATION 1
 #define configSUPPORT_DYNAMIC_ALLOCATION 1
@@ -267,6 +275,19 @@ public:
     MOCK_METHOD(EventBits_t, xEventGroupGetBitsFromISR, (EventGroupHandle_t xEventGroup));
     MOCK_METHOD(EventBits_t, xEventGroupSync, (EventGroupHandle_t xEventGroup, const EventBits_t uxBitsToSet, const EventBits_t uxBitsToWaitFor, TickType_t xTicksToWait));
     
+    // Message Buffer operations
+    MOCK_METHOD(MessageBufferHandle_t, xMessageBufferCreate, (size_t xBufferSizeBytes));
+    MOCK_METHOD(MessageBufferHandle_t, xMessageBufferCreateStatic, (size_t xBufferSizeBytes, uint8_t* pucMessageBufferStorageArea, StaticMessageBuffer_t* pxStaticMessageBuffer));
+    MOCK_METHOD(void, vMessageBufferDelete, (MessageBufferHandle_t xMessageBuffer));
+    MOCK_METHOD(size_t, xMessageBufferSend, (MessageBufferHandle_t xMessageBuffer, const void* pvTxData, size_t xDataLengthBytes, TickType_t xTicksToWait));
+    MOCK_METHOD(size_t, xMessageBufferSendFromISR, (MessageBufferHandle_t xMessageBuffer, const void* pvTxData, size_t xDataLengthBytes, BaseType_t* pxHigherPriorityTaskWoken));
+    MOCK_METHOD(size_t, xMessageBufferReceive, (MessageBufferHandle_t xMessageBuffer, void* pvRxData, size_t xBufferLengthBytes, TickType_t xTicksToWait));
+    MOCK_METHOD(size_t, xMessageBufferReceiveFromISR, (MessageBufferHandle_t xMessageBuffer, void* pvRxData, size_t xBufferLengthBytes, BaseType_t* pxHigherPriorityTaskWoken));
+    MOCK_METHOD(size_t, xMessageBufferSpaceAvailable, (MessageBufferHandle_t xMessageBuffer));
+    MOCK_METHOD(BaseType_t, xMessageBufferReset, (MessageBufferHandle_t xMessageBuffer));
+    MOCK_METHOD(BaseType_t, xMessageBufferIsEmpty, (MessageBufferHandle_t xMessageBuffer));
+    MOCK_METHOD(BaseType_t, xMessageBufferIsFull, (MessageBufferHandle_t xMessageBuffer));
+    
     // Port layer mocks (needed by event group ISR functions)
     MOCK_METHOD(void, portYIELD_FROM_ISR, (BaseType_t xHigherPriorityTaskWoken));
 };
@@ -357,4 +378,17 @@ extern "C" {
     void vQueueAddToRegistry(QueueHandle_t xQueue, const char* pcQueueName);
     void vQueueUnregisterQueue(QueueHandle_t xQueue);
     const char* pcQueueGetName(QueueHandle_t xQueue);
+    
+    // Message Buffer functions
+    MessageBufferHandle_t xMessageBufferCreate(size_t xBufferSizeBytes);
+    MessageBufferHandle_t xMessageBufferCreateStatic(size_t xBufferSizeBytes, uint8_t* pucMessageBufferStorageArea, StaticMessageBuffer_t* pxStaticMessageBuffer);
+    void vMessageBufferDelete(MessageBufferHandle_t xMessageBuffer);
+    size_t xMessageBufferSend(MessageBufferHandle_t xMessageBuffer, const void* pvTxData, size_t xDataLengthBytes, TickType_t xTicksToWait);
+    size_t xMessageBufferSendFromISR(MessageBufferHandle_t xMessageBuffer, const void* pvTxData, size_t xDataLengthBytes, BaseType_t* pxHigherPriorityTaskWoken);
+    size_t xMessageBufferReceive(MessageBufferHandle_t xMessageBuffer, void* pvRxData, size_t xBufferLengthBytes, TickType_t xTicksToWait);
+    size_t xMessageBufferReceiveFromISR(MessageBufferHandle_t xMessageBuffer, void* pvRxData, size_t xBufferLengthBytes, BaseType_t* pxHigherPriorityTaskWoken);
+    size_t xMessageBufferSpaceAvailable(MessageBufferHandle_t xMessageBuffer);
+    BaseType_t xMessageBufferReset(MessageBufferHandle_t xMessageBuffer);
+    BaseType_t xMessageBufferIsEmpty(MessageBufferHandle_t xMessageBuffer);
+    BaseType_t xMessageBufferIsFull(MessageBufferHandle_t xMessageBuffer);
 }

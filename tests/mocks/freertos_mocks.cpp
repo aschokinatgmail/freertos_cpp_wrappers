@@ -602,4 +602,81 @@ void portYIELD_FROM_ISR(BaseType_t xHigherPriorityTaskWoken) {
     }
 }
 
+// Message Buffer function implementations
+MessageBufferHandle_t xMessageBufferCreate(size_t xBufferSizeBytes) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xMessageBufferCreate(xBufferSizeBytes);
+    }
+    return nullptr;
+}
+
+MessageBufferHandle_t xMessageBufferCreateStatic(size_t xBufferSizeBytes, uint8_t* pucMessageBufferStorageArea, StaticMessageBuffer_t* pxStaticMessageBuffer) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xMessageBufferCreateStatic(xBufferSizeBytes, pucMessageBufferStorageArea, pxStaticMessageBuffer);
+    }
+    return nullptr;
+}
+
+void vMessageBufferDelete(MessageBufferHandle_t xMessageBuffer) {
+    if (g_freertos_mock) {
+        g_freertos_mock->vMessageBufferDelete(xMessageBuffer);
+    }
+}
+
+size_t xMessageBufferSend(MessageBufferHandle_t xMessageBuffer, const void* pvTxData, size_t xDataLengthBytes, TickType_t xTicksToWait) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xMessageBufferSend(xMessageBuffer, pvTxData, xDataLengthBytes, xTicksToWait);
+    }
+    return 0;
+}
+
+size_t xMessageBufferSendFromISR(MessageBufferHandle_t xMessageBuffer, const void* pvTxData, size_t xDataLengthBytes, BaseType_t* pxHigherPriorityTaskWoken) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xMessageBufferSendFromISR(xMessageBuffer, pvTxData, xDataLengthBytes, pxHigherPriorityTaskWoken);
+    }
+    return 0;
+}
+
+size_t xMessageBufferReceive(MessageBufferHandle_t xMessageBuffer, void* pvRxData, size_t xBufferLengthBytes, TickType_t xTicksToWait) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xMessageBufferReceive(xMessageBuffer, pvRxData, xBufferLengthBytes, xTicksToWait);
+    }
+    return 0;
+}
+
+size_t xMessageBufferReceiveFromISR(MessageBufferHandle_t xMessageBuffer, void* pvRxData, size_t xBufferLengthBytes, BaseType_t* pxHigherPriorityTaskWoken) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xMessageBufferReceiveFromISR(xMessageBuffer, pvRxData, xBufferLengthBytes, pxHigherPriorityTaskWoken);
+    }
+    return 0;
+}
+
+size_t xMessageBufferSpaceAvailable(MessageBufferHandle_t xMessageBuffer) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xMessageBufferSpaceAvailable(xMessageBuffer);
+    }
+    return 0;
+}
+
+BaseType_t xMessageBufferReset(MessageBufferHandle_t xMessageBuffer) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xMessageBufferReset(xMessageBuffer);
+    }
+    return pdPASS;
+}
+
+BaseType_t xMessageBufferIsEmpty(MessageBufferHandle_t xMessageBuffer) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xMessageBufferIsEmpty(xMessageBuffer);
+    }
+    return pdTRUE;
+}
+
+BaseType_t xMessageBufferIsFull(MessageBufferHandle_t xMessageBuffer) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xMessageBufferIsFull(xMessageBuffer);
+    }
+    return pdFALSE;
+}
+
 }
