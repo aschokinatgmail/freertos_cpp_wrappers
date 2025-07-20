@@ -61,6 +61,15 @@ protected:
         return [this]() { callback_count++; };
     }
     
+    // Helper function to set up standard destructor expectations
+    void expectDestructor(TimerHandle_t timer_handle = nullptr) {
+        TimerHandle_t handle = timer_handle ? timer_handle : mock_timer_handle;
+        EXPECT_CALL(*mock, xTimerDelete(handle, portMAX_DELAY))
+            .WillOnce(Return(pdPASS));
+        EXPECT_CALL(*mock, xTimerIsTimerActive(handle))
+            .WillOnce(Return(pdFALSE));
+    }
+    
     // Helper function to manually trigger timer callback (simulates timer expiry)
     // In real FreeRTOS, this would be called by the timer service task
     void triggerTimerCallback(TimerHandle_t timer_handle) {
@@ -192,16 +201,25 @@ TEST_F(FreeRTOSSwTimerTest, StaticTimerConstruction) {
     EXPECT_CALL(*mock, xTimerCreateStatic(_, _, _, _, _, _))
         .WillOnce(Return(mock_timer_handle));
     
+    // Expectations for destructor
+    EXPECT_CALL(*mock, xTimerDelete(mock_timer_handle, portMAX_DELAY))
+        .WillOnce(Return(pdPASS));
+    EXPECT_CALL(*mock, xTimerIsTimerActive(mock_timer_handle))
+        .WillOnce(Return(pdFALSE));
+    
     auto callback = createTestCallback();
     sa::timer test_timer("TestTimer", 1000, pdTRUE, std::move(callback));
-    
-    // Timer should be constructed successfully
-    // Destructor expectations will be set up in TearDown
 }
 
 TEST_F(FreeRTOSSwTimerTest, StaticTimerConstructionWithChrono) {
     EXPECT_CALL(*mock, xTimerCreateStatic(_, 500, _, _, _, _))  // 500ms = 500 ticks
         .WillOnce(Return(mock_timer_handle));
+    
+    // Expectations for destructor
+    EXPECT_CALL(*mock, xTimerDelete(mock_timer_handle, portMAX_DELAY))
+        .WillOnce(Return(pdPASS));
+    EXPECT_CALL(*mock, xTimerIsTimerActive(mock_timer_handle))
+        .WillOnce(Return(pdFALSE));
     
     auto callback = createTestCallback();
     sa::timer test_timer("TestTimer", 500ms, pdFALSE, std::move(callback));
@@ -243,11 +261,15 @@ TEST_F(FreeRTOSSwTimerTest, StaticTimerStart) {
     auto callback = createTestCallback();
     sa::timer test_timer("TestTimer", 1000, pdTRUE, std::move(callback));
     
+
+    expectDestructor();
     EXPECT_CALL(*mock, xTimerStart(mock_timer_handle, portMAX_DELAY))
         .WillOnce(Return(pdPASS));
     
     BaseType_t result = test_timer.start();
     EXPECT_EQ(result, pdPASS);
+    
+    expectDestructor();
 }
 
 TEST_F(FreeRTOSSwTimerTest, StaticTimerStartWithTimeout) {
@@ -257,11 +279,15 @@ TEST_F(FreeRTOSSwTimerTest, StaticTimerStartWithTimeout) {
     auto callback = createTestCallback();
     sa::timer test_timer("TestTimer", 1000, pdTRUE, std::move(callback));
     
+
+    expectDestructor();
     EXPECT_CALL(*mock, xTimerStart(mock_timer_handle, 100))
         .WillOnce(Return(pdPASS));
     
     BaseType_t result = test_timer.start(100);
     EXPECT_EQ(result, pdPASS);
+    
+    expectDestructor();
 }
 
 TEST_F(FreeRTOSSwTimerTest, StaticTimerStartWithChrono) {
@@ -271,11 +297,15 @@ TEST_F(FreeRTOSSwTimerTest, StaticTimerStartWithChrono) {
     auto callback = createTestCallback();
     sa::timer test_timer("TestTimer", 1000, pdTRUE, std::move(callback));
     
+
+    expectDestructor();
     EXPECT_CALL(*mock, xTimerStart(mock_timer_handle, 250))
         .WillOnce(Return(pdPASS));
     
     BaseType_t result = test_timer.start(250ms);
     EXPECT_EQ(result, pdPASS);
+    
+    expectDestructor();
 }
 
 TEST_F(FreeRTOSSwTimerTest, StaticTimerStop) {
@@ -285,11 +315,15 @@ TEST_F(FreeRTOSSwTimerTest, StaticTimerStop) {
     auto callback = createTestCallback();
     sa::timer test_timer("TestTimer", 1000, pdTRUE, std::move(callback));
     
+
+    expectDestructor();
     EXPECT_CALL(*mock, xTimerStop(mock_timer_handle, portMAX_DELAY))
         .WillOnce(Return(pdPASS));
     
     BaseType_t result = test_timer.stop();
     EXPECT_EQ(result, pdPASS);
+    
+    expectDestructor();
 }
 
 TEST_F(FreeRTOSSwTimerTest, StaticTimerReset) {
@@ -299,11 +333,15 @@ TEST_F(FreeRTOSSwTimerTest, StaticTimerReset) {
     auto callback = createTestCallback();
     sa::timer test_timer("TestTimer", 1000, pdTRUE, std::move(callback));
     
+
+    expectDestructor();
     EXPECT_CALL(*mock, xTimerReset(mock_timer_handle, portMAX_DELAY))
         .WillOnce(Return(pdPASS));
     
     BaseType_t result = test_timer.reset();
     EXPECT_EQ(result, pdPASS);
+    
+    expectDestructor();
 }
 
 TEST_F(FreeRTOSSwTimerTest, StaticTimerPeriodChange) {
@@ -313,11 +351,15 @@ TEST_F(FreeRTOSSwTimerTest, StaticTimerPeriodChange) {
     auto callback = createTestCallback();
     sa::timer test_timer("TestTimer", 1000, pdTRUE, std::move(callback));
     
+
+    expectDestructor();
     EXPECT_CALL(*mock, xTimerChangePeriod(mock_timer_handle, 2000, portMAX_DELAY))
         .WillOnce(Return(pdPASS));
     
     BaseType_t result = test_timer.period(2000);
     EXPECT_EQ(result, pdPASS);
+    
+    expectDestructor();
 }
 
 TEST_F(FreeRTOSSwTimerTest, StaticTimerIsRunning) {
@@ -327,11 +369,15 @@ TEST_F(FreeRTOSSwTimerTest, StaticTimerIsRunning) {
     auto callback = createTestCallback();
     sa::timer test_timer("TestTimer", 1000, pdTRUE, std::move(callback));
     
+
+    expectDestructor();
     EXPECT_CALL(*mock, xTimerIsTimerActive(mock_timer_handle))
         .WillOnce(Return(pdTRUE));
     
     BaseType_t result = test_timer.running();
     EXPECT_EQ(result, pdTRUE);
+    
+    expectDestructor();
 }
 
 TEST_F(FreeRTOSSwTimerTest, StaticTimerGetPeriod) {
@@ -341,14 +387,19 @@ TEST_F(FreeRTOSSwTimerTest, StaticTimerGetPeriod) {
     auto callback = createTestCallback();
     sa::timer test_timer("TestTimer", 1000, pdTRUE, std::move(callback));
     
+
+    expectDestructor();
     EXPECT_CALL(*mock, xTimerGetPeriod(mock_timer_handle))
-        .WillOnce(Return(1000));
+        .Times(2)  // Called twice: once for period_ticks(), once for period()
+        .WillRepeatedly(Return(1000));
     
     TickType_t period = test_timer.period_ticks();
     EXPECT_EQ(period, 1000);
     
     auto period_ms = test_timer.period();
     EXPECT_EQ(period_ms.count(), 1000);
+    
+    expectDestructor();
 }
 
 TEST_F(FreeRTOSSwTimerTest, StaticTimerGetName) {
@@ -363,6 +414,8 @@ TEST_F(FreeRTOSSwTimerTest, StaticTimerGetName) {
     
     const char* name = test_timer.name();
     EXPECT_STREQ(name, "TestTimer");
+    
+    expectDestructor();
 }
 
 TEST_F(FreeRTOSSwTimerTest, StaticTimerReloadMode) {
@@ -382,6 +435,8 @@ TEST_F(FreeRTOSSwTimerTest, StaticTimerReloadMode) {
     
     UBaseType_t mode = test_timer.reload_mode();
     EXPECT_EQ(mode, pdFALSE);
+    
+    expectDestructor();
 }
 
 #endif // configSUPPORT_STATIC_ALLOCATION
@@ -398,6 +453,8 @@ TEST_F(FreeRTOSSwTimerTest, DynamicTimerConstruction) {
     
     auto callback = createTestCallback();
     da::timer test_timer("TestTimer", 1000, pdFALSE, std::move(callback));
+    
+    expectDestructor();
 }
 
 TEST_F(FreeRTOSSwTimerTest, DynamicTimerConstructionFailure) {
@@ -428,6 +485,8 @@ TEST_F(FreeRTOSSwTimerTest, StaticTimerStartFromISR) {
     auto callback = createTestCallback();
     sa::timer test_timer("TestTimer", 1000, pdTRUE, std::move(callback));
     
+
+    expectDestructor();
     EXPECT_CALL(*mock, xTimerStartFromISR(mock_timer_handle, NotNull()))
         .WillOnce(Return(pdPASS));
     
@@ -443,6 +502,8 @@ TEST_F(FreeRTOSSwTimerTest, StaticTimerStartFromISRNoParam) {
     auto callback = createTestCallback();
     sa::timer test_timer("TestTimer", 1000, pdTRUE, std::move(callback));
     
+
+    expectDestructor();
     EXPECT_CALL(*mock, xTimerStartFromISR(mock_timer_handle, NotNull()))
         .WillOnce(Return(pdPASS));
     
@@ -457,6 +518,8 @@ TEST_F(FreeRTOSSwTimerTest, StaticTimerStopFromISR) {
     auto callback = createTestCallback();
     sa::timer test_timer("TestTimer", 1000, pdTRUE, std::move(callback));
     
+
+    expectDestructor();
     EXPECT_CALL(*mock, xTimerStopFromISR(mock_timer_handle, NotNull()))
         .WillOnce(Return(pdPASS));
     
@@ -472,6 +535,8 @@ TEST_F(FreeRTOSSwTimerTest, StaticTimerResetFromISR) {
     auto callback = createTestCallback();
     sa::timer test_timer("TestTimer", 1000, pdTRUE, std::move(callback));
     
+
+    expectDestructor();
     EXPECT_CALL(*mock, xTimerResetFromISR(mock_timer_handle, NotNull()))
         .WillOnce(Return(pdPASS));
     
@@ -487,6 +552,8 @@ TEST_F(FreeRTOSSwTimerTest, StaticTimerPeriodFromISR) {
     auto callback = createTestCallback();
     sa::timer test_timer("TestTimer", 1000, pdTRUE, std::move(callback));
     
+
+    expectDestructor();
     EXPECT_CALL(*mock, xTimerChangePeriodFromISR(mock_timer_handle, 2000, NotNull()))
         .WillOnce(Return(pdPASS));
     
@@ -510,6 +577,8 @@ TEST_F(FreeRTOSSwTimerTest, StaticTimerRemainingTime) {
     auto callback = createTestCallback();
     sa::timer test_timer("TestTimer", 1000, pdTRUE, std::move(callback));
     
+
+    expectDestructor();
     // Mock timer expiry time and current tick count
     EXPECT_CALL(*mock, xTimerGetExpiryTime(mock_timer_handle))
         .WillOnce(Return(5000));
@@ -530,6 +599,8 @@ TEST_F(FreeRTOSSwTimerTest, StaticTimerRemainingTimeNullHandle) {
     auto callback = createTestCallback();
     sa::timer test_timer("TestTimer", 1000, pdTRUE, std::move(callback));
     
+
+    expectDestructor();
     TickType_t remaining = test_timer.remaining_ticks();
     EXPECT_EQ(remaining, 0);
     
@@ -553,6 +624,8 @@ TEST_F(FreeRTOSSwTimerTest, TimerOperationsWithNullHandle) {
     auto callback = createTestCallback();
     sa::timer test_timer("TestTimer", 1000, pdTRUE, std::move(callback));
     
+
+    expectDestructor();
     // All operations should return appropriate failure values
     EXPECT_EQ(test_timer.start(), pdFAIL);
     EXPECT_EQ(test_timer.stop(), pdFAIL);
@@ -574,6 +647,8 @@ TEST_F(FreeRTOSSwTimerTest, TimerFailureConditions) {
     auto callback = createTestCallback();
     sa::timer test_timer("TestTimer", 1000, pdTRUE, std::move(callback));
     
+
+    expectDestructor();
     // Test various failure conditions
     EXPECT_CALL(*mock, xTimerStart(mock_timer_handle, _))
         .WillOnce(Return(pdFAIL));
@@ -671,6 +746,8 @@ TEST_F(FreeRTOSSwTimerTest, ChronoCompatibility) {
     auto callback = createTestCallback();
     sa::timer test_timer("TestTimer", 1s, pdTRUE, std::move(callback));
     
+
+    expectDestructor();
     // Test chrono-based operations
     EXPECT_CALL(*mock, xTimerStart(mock_timer_handle, 500))  // 500ms timeout
         .WillOnce(Return(pdPASS));
@@ -716,6 +793,8 @@ TEST_F(FreeRTOSSwTimerTest, SingleShotTimerBehavior) {
     auto callback = createTestCallback();
     sa::timer test_timer("SingleShot", 1000, pdFALSE, std::move(callback));
     
+
+    expectDestructor();
     // Verify reload mode
     EXPECT_CALL(*mock, uxTimerGetReloadMode(mock_timer_handle))
         .WillOnce(Return(pdFALSE));
@@ -730,6 +809,8 @@ TEST_F(FreeRTOSSwTimerTest, AutoReloadTimerBehavior) {
     auto callback = createTestCallback();
     sa::timer test_timer("AutoReload", 1000, pdTRUE, std::move(callback));
     
+
+    expectDestructor();
     // Verify reload mode
     EXPECT_CALL(*mock, uxTimerGetReloadMode(mock_timer_handle))
         .WillOnce(Return(pdTRUE));
@@ -759,6 +840,8 @@ TEST_F(FreeRTOSSwTimerTest, CallbackFunctionality) {
     auto callback = createTestCallback();
     sa::timer test_timer("TestTimer", 1000, pdTRUE, std::move(callback));
     
+
+    expectDestructor();
     // Note: In a real FreeRTOS environment, the callback would be invoked
     // by the timer service task when the timer expires. In this host-based
     // test environment, we can only verify that the timer was created with
@@ -790,6 +873,8 @@ TEST_F(FreeRTOSSwTimerTest, DestructorComplexScenarios) {
     auto callback = createTestCallback();
     sa::timer test_timer("TestTimer", 1000, pdTRUE, std::move(callback));
     
+
+    expectDestructor();
     // Test destructor when timer deletion fails
     EXPECT_CALL(*mock, xTimerDelete(mock_timer_handle, portMAX_DELAY))
         .WillOnce(Return(pdFAIL));  // Deletion fails
@@ -807,6 +892,8 @@ TEST_F(FreeRTOSSwTimerTest, DestructorWithActiveTimer) {
     auto callback = createTestCallback();
     sa::timer test_timer("TestTimer", 1000, pdTRUE, std::move(callback));
     
+
+    expectDestructor();
     // Test destructor when timer is still active after deletion request
     EXPECT_CALL(*mock, xTimerDelete(mock_timer_handle, portMAX_DELAY))
         .WillOnce(Return(pdPASS));
