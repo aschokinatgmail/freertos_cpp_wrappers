@@ -6,10 +6,10 @@ This directory contains comprehensive unit tests for the FreeRTOS C++ wrapper li
 
 ### Completed Modules ✅
 - **Task Module** (`test_freertos_task.cpp`) - 46 tests
-- **Semaphore Module** (`test_freertos_semaphore.cpp`) - 39 tests
+- **Semaphore Module** (`test_freertos_semaphore.cpp`) - 68 tests
+- **Queue Module** (`test_freertos_queue.cpp`) - 49 tests
 
 ### Planned Modules 📋
-- Queue Module (`test_freertos_queue.cpp`)
 - Event Group Module (`test_freertos_event_group.cpp`)
 - Stream Buffer Module (`test_freertos_stream_buffer.cpp`)
 - Message Buffer Module (`test_freertos_message_buffer.cpp`)
@@ -55,6 +55,8 @@ make -j$(nproc)
 ```bash
 # Run all tests
 ./tests/test_freertos_task
+./tests/test_freertos_semaphore
+./tests/test_freertos_queue
 
 # Run tests with XML output
 ./tests/test_freertos_task --gtest_output=xml:test_results.xml
@@ -91,12 +93,21 @@ ctest --verbose
    - Task lifecycle management
    - Running state checking
 
-5. **Utility Function Tests**
+5. **Queue Tests**
+   - Static and dynamic queue allocators
+   - Send operations (send, send_back, send_front) with timeouts and ISR variants  
+   - Receive operations with optional<T> and reference variants
+   - Peek operations (non-destructive read)
+   - Queue state operations (messages_waiting, spaces_available, empty/full checks)
+   - Overwrite operations for single-item queues
+   - Reset functionality and error handling
+
+6. **Utility Function Tests**
    - Delay and timing functions
    - System information functions
    - Critical sections and barriers
 
-6. **Edge Cases and Error Handling**
+7. **Edge Cases and Error Handling**
    - Invalid parameters
    - Zero stack sizes
    - Move semantics limitations
@@ -118,6 +129,7 @@ The test framework includes comprehensive mocks for FreeRTOS APIs:
 - `tests/mocks/freertos_mocks.cpp` - Mock implementation
 - `tests/mocks/task.h` - Task-specific header stub
 - `tests/mocks/semphr.h` - Semaphore header stub
+- `tests/mocks/queue.h` - Queue header stub
 
 ### Mock Features
 
@@ -160,6 +172,7 @@ This test suite serves as a template for testing other FreeRTOS wrapper modules:
 When all tests pass, you should see:
 
 ```
+# Task Tests
 [==========] Running 46 tests from 1 test suite.
 [----------] Global test environment set-up.
 [----------] 46 tests from FreeRTOSTaskTest
@@ -167,6 +180,24 @@ When all tests pass, you should see:
 [----------] 46 tests from FreeRTOSTaskTest (X ms total)
 [==========] 46 tests from 1 test suite ran. (X ms total)
 [  PASSED  ] 46 tests.
+
+# Semaphore Tests  
+[==========] Running 68 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 68 tests from FreeRTOSSemaphoreTest
+[       OK ] All tests completed successfully
+[----------] 68 tests from FreeRTOSSemaphoreTest (X ms total)
+[==========] 68 tests from 1 test suite ran. (X ms total)
+[  PASSED  ] 68 tests.
+
+# Queue Tests
+[==========] Running 49 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 49 tests from FreeRTOSQueueTest
+[       OK ] All tests completed successfully
+[----------] 49 tests from FreeRTOSQueueTest (X ms total)
+[==========] 49 tests from 1 test suite ran. (X ms total)
+[  PASSED  ] 49 tests.
 ```
 
 ## Integration with CI/CD
