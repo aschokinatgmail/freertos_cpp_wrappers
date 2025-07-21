@@ -11,7 +11,7 @@ This directory contains comprehensive unit tests for the FreeRTOS C++ wrapper li
 - **Stream Buffer Module** (`test_freertos_stream_buffer.cpp`) - 47 tests
 - **Event Group Module** (`test_freertos_event_group.cpp`) - 30 tests
 - **Message Buffer Module** (`test_freertos_message_buffer.cpp`) - 32 tests
-- **Software Timer Module** (`test_freertos_sw_timer.cpp`) - 48 tests
+- **Software Timer Module** (`test_freertos_sw_timer.cpp`) - 50 tests
 
 **All major FreeRTOS modules are now fully tested!** 🎉
 
@@ -19,7 +19,7 @@ This directory contains comprehensive unit tests for the FreeRTOS C++ wrapper li
 
 **Overall Coverage: 92.4%** (1,425 of 1,542 lines)
 
-**Total Tests: 320** (Task: 46, Semaphore: 68, Queue: 49, Stream Buffer: 47, Event Group: 30, Message Buffer: 32, Timer: 48)
+**Total Tests: 322** (Task: 46, Semaphore: 68, Queue: 49, Stream Buffer: 47, Event Group: 30, Message Buffer: 32, Timer: 50)
 
 See [COVERAGE_REPORT.md](../COVERAGE_REPORT.md) for detailed coverage analysis.
 
@@ -184,7 +184,7 @@ The tests document a current limitation where static tasks cannot be safely allo
 
 ### Move Constructor Behavior
 
-The tests reveal that the current move constructor implementation uses default memberwise move, which can lead to double deletion of task handles. This is documented in the move construction tests.
+Previously, the tests documented that the move constructor implementation used default memberwise move, which could lead to double deletion of timer handles. This has been fixed in the current implementation with proper move constructor that transfers ownership and prevents double deletion.
 
 ### RTOS-Only Features
 
@@ -256,13 +256,13 @@ When all tests pass, you should see:
 [  PASSED  ] 32 tests.
 
 # Software Timer Tests
-[==========] Running 48 tests from 1 test suite.
+[==========] Running 50 tests from 1 test suite.
 [----------] Global test environment set-up.
-[----------] 48 tests from FreeRTOSSwTimerTest
+[----------] 50 tests from FreeRTOSSwTimerTest
 [       OK ] All tests completed successfully
-[----------] 48 tests from FreeRTOSSwTimerTest (X ms total)
-[==========] 48 tests from 1 test suite ran. (X ms total)
-[  PASSED  ] 48 tests.
+[----------] 50 tests from FreeRTOSSwTimerTest (X ms total)
+[==========] 50 tests from 1 test suite ran. (X ms total)
+[  PASSED  ] 50 tests.
 ```
 
 ## Integration with CI/CD
