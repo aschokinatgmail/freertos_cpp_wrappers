@@ -105,11 +105,11 @@ using task_routine_t = std::function<void(void)>;
  */
 template <typename TaskAllocator> class task {
   TaskAllocator m_allocator;
-  TaskHandle_t m_hTask;
   task_routine_t m_taskRoutine;
 #if INCLUDE_vTaskSuspend
   uint8_t m_start_suspended : 1;
 #endif
+  TaskHandle_t m_hTask;
 
   static void task_exec(void *context) {
     auto pThis = static_cast<task *>(context);
@@ -134,9 +134,9 @@ public:
    */
   task(const char *name, UBaseType_t priority, task_routine_t &&task_routine,
        bool start_suspended = true)
-      : m_allocator{}, m_hTask{m_allocator.create(task_exec, name, priority, this)}, 
-        m_taskRoutine{std::move(task_routine)}, m_start_suspended{start_suspended} {
-  }
+      : m_allocator{}, m_taskRoutine{std::move(task_routine)},
+        m_start_suspended{start_suspended},
+        m_hTask{m_allocator.create(task_exec, name, priority, this)} {}
   /**
    * @brief Construct a new task object
    *
@@ -158,9 +158,8 @@ public:
    * @param task_routine  task routine function
    */
   task(const char *name, UBaseType_t priority, task_routine_t &&task_routine)
-      : m_allocator{}, m_hTask{nullptr}, m_taskRoutine{task_routine} {
-    m_hTask = m_allocator.create(task_exec, name, priority, this);
-  }
+      : m_allocator{}, m_taskRoutine{task_routine},
+        m_hTask{m_allocator.create(task_exec, name, priority, this)} {}
   /**
    * @brief Construct a new task object
    *
@@ -174,15 +173,16 @@ public:
              std::forward<std::function<void()>>(task_routine)} {}
 #endif
   task(const task &) = delete;
-  task(task &&other) noexcept 
-      : m_allocator(std::move(other.m_allocator)),
-        m_hTask(other.m_hTask),
+  task(task &&other) noexcept
+      : m_allocator(std::move(other.m_allocator)), m_hTask(other.m_hTask),
         m_taskRoutine(std::move(other.m_taskRoutine))
 #if INCLUDE_vTaskSuspend
-        , m_start_suspended(other.m_start_suspended)
+        ,
+        m_start_suspended(other.m_start_suspended)
 #endif
   {
-    other.m_hTask = nullptr; // Transfer ownership - moved-from object should not delete the task
+    other.m_hTask = nullptr; // Transfer ownership - moved-from object should
+                             // not delete the task
   }
   /**
    * @brief Destruct the task object and delete the task instance if it was
@@ -235,8 +235,8 @@ public:
    *
    * @return BaseType_t pdTRUE if the delay was aborted, pdFALSE otherwise
    */
-  BaseType_t abort_delay(void) { 
-    return m_hTask ? xTaskAbortDelay(m_hTask) : pdFALSE; 
+  BaseType_t abort_delay(void) {
+    return m_hTask ? xTaskAbortDelay(m_hTask) : pdFALSE;
   }
 #endif
 #if INCLUDE_uxTaskPriorityGet && configUSE_MUTEXES
@@ -600,13 +600,11 @@ public:
                       std::move(periodic_routine),
                       start_suspended} {}
   periodic_task(const periodic_task &) = delete;
-  periodic_task(periodic_task &&other) noexcept 
-      : m_period(other.m_period),
-        m_on_start(std::move(other.m_on_start)),
+  periodic_task(periodic_task &&other) noexcept
+      : m_period(other.m_period), m_on_start(std::move(other.m_on_start)),
         m_on_stop(std::move(other.m_on_stop)),
         m_periodic_routine(std::move(other.m_periodic_routine)),
-        m_task(std::move(other.m_task))
-  {
+        m_task(std::move(other.m_task)) {
     // m_task move constructor will handle ownership transfer
   }
   /**
@@ -1022,8 +1020,8 @@ public:
    *
    */
   task_system_status(void) {
-    m_task_count = uxTaskGetSystemState(m_status_array.data(), status_array_capacity,
-                                        &m_total_run_time);
+    m_task_count = uxTaskGetSystemState(
+        m_status_array.data(), status_array_capacity, &m_total_run_time);
   }
 
   /**
@@ -1046,7 +1044,9 @@ public:
    *
    * @return const TaskStatus_t* end iterator
    */
-  const TaskStatus_t *end(void) const { return m_status_array.data() + m_task_count; }
+  const TaskStatus_t *end(void) const {
+    return m_status_array.data() + m_task_count;
+  }
 };
 #endif
 #if INCLUDE_xTaskGetCurrentTaskHandle
@@ -1132,7 +1132,7 @@ public:
    *
    */
   ~critical_section(void) { taskEXIT_CRITICAL(); }
-  
+
   // Delete copy and move operations for RAII safety
   critical_section(const critical_section &) = delete;
   critical_section(critical_section &&) = delete;
@@ -1161,7 +1161,7 @@ public:
   ~critical_section_isr(void) {
     taskEXIT_CRITICAL_FROM_ISR(m_saved_interrupt_status);
   }
-  
+
   // Delete copy and move operations for RAII safety
   critical_section_isr(const critical_section_isr &) = delete;
   critical_section_isr(critical_section_isr &&) = delete;
@@ -1186,7 +1186,7 @@ public:
    *
    */
   ~interrupt_barrier(void) { taskENABLE_INTERRUPTS(); }
-  
+
   // Delete copy and move operations for RAII safety
   interrupt_barrier(const interrupt_barrier &) = delete;
   interrupt_barrier(interrupt_barrier &&) = delete;
@@ -1211,7 +1211,7 @@ public:
    *
    */
   ~scheduler_barrier(void) { xTaskResumeAll(); }
-  
+
   // Delete copy and move operations for RAII safety
   scheduler_barrier(const scheduler_barrier &) = delete;
   scheduler_barrier(scheduler_barrier &&) = delete;
