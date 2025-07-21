@@ -152,7 +152,26 @@ public:
                       .count()),
               auto_reload, std::move(callback)} {}
   timer(const timer &) = delete;
-  timer(timer &&src) = default;
+  /**
+   * @brief Move constructor that properly transfers timer ownership.
+   * 
+   * This constructor ensures that when a timer is moved, the source timer's
+   * handle is set to nullptr to prevent double deletion. Previously, the
+   * default move constructor would perform a shallow copy, causing both
+   * source and destination timers to share the same handle, leading to
+   * premature timer deletion when the source was destroyed.
+   * 
+   * @param src The source timer to move from (will be invalidated)
+   */
+  timer(timer &&src) noexcept 
+      : m_allocator(std::move(src.m_allocator)), 
+        m_timer(src.m_timer), 
+        m_callback(std::move(src.m_callback)), 
+        m_started(src.m_started) {
+    // Transfer ownership: clear the source timer handle to prevent double deletion
+    src.m_timer = nullptr;
+    src.m_started = false;
+  }
   /**
    * @brief Destruct the timer object and delete the software timer kernel
    * object instance if it was created.

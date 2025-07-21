@@ -5,14 +5,14 @@ Lightweight collection of FreeRTOS API wrappers compliant to modern C++ standard
 ## Features
 
 - Modern C++17 RAII wrappers for FreeRTOS APIs
-- Comprehensive test coverage (320+ tests)
+- Comprehensive test coverage (322+ tests)
 - Static analysis integration with clang-tidy
 - Support for both static and dynamic allocation strategies
 - chrono compatibility for timeout handling
 
 ## Testing
 
-The project includes comprehensive test coverage with 320 automated tests covering all major functionality:
+The project includes comprehensive test coverage with 322 automated tests covering all major functionality:
 
 - **Task Module**: 46 tests (lifecycle, periodic tasks, move semantics)
 - **Semaphore Module**: 68 tests (binary, counting, mutexes, lock guards)  
@@ -20,7 +20,7 @@ The project includes comprehensive test coverage with 320 automated tests coveri
 - **Event Group Module**: 30 tests (bit operations, wait conditions)
 - **Stream Buffer Module**: 47 tests (buffer operations, ISR variants)
 - **Message Buffer Module**: 32 tests (variable-length messages, allocators)
-- **Timer Module**: 48 tests (duration types, callback functionality)
+- **Timer Module**: 50 tests (duration types, callback functionality, move semantics)
 
 ### Running Tests
 

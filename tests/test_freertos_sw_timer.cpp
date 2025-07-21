@@ -718,6 +718,41 @@ TEST_F(FreeRTOSSwTimerTest, TimerFailureConditions) {
 
 #if configSUPPORT_STATIC_ALLOCATION
 
+TEST_F(FreeRTOSSwTimerTest, TimerMoveConstructionIssueScenario) {
+    // This test reproduces the exact scenario described in GitHub issue #10
+    // where a timer is assigned to an etl::optional-like container
+    
+    struct TimerContainer {
+        sa::timer timer;
+        
+        // Constructor that takes a timer by move
+        TimerContainer(sa::timer&& t) : timer(std::move(t)) {}
+    };
+    
+    // Set up expectations for timer creation
+    EXPECT_CALL(*mock, xTimerCreateStatic(_, _, _, _, _, _))
+        .WillOnce(Return(mock_timer_handle));
+    
+    // With the fix, only one delete should occur when container goes out of scope
+    EXPECT_CALL(*mock, xTimerDelete(mock_timer_handle, portMAX_DELAY))
+        .Times(1)  // Should only be called once from container destructor
+        .WillOnce(Return(pdPASS));
+    EXPECT_CALL(*mock, xTimerIsTimerActive(mock_timer_handle))
+        .Times(1)  // Should only be called once
+        .WillOnce(Return(pdFALSE));
+    
+    {
+        auto callback = createTestCallback();
+        // This simulates: m_timer = freertos::sa::timer{...};
+        TimerContainer container(sa::timer("TestTimer", 1000, pdFALSE, std::move(callback)));
+        
+        // At this point, the temporary timer has been moved into the container
+        // and should have transferred ownership properly (m_timer set to nullptr)
+        // The container timer should be fully functional
+        
+    } // Container destructor should properly clean up the timer
+}
+
 TEST_F(FreeRTOSSwTimerTest, TimerMoveConstruction) {
     EXPECT_CALL(*mock, xTimerCreateStatic(_, _, _, _, _, _))
         .WillOnce(Return(mock_timer_handle));
@@ -726,14 +761,13 @@ TEST_F(FreeRTOSSwTimerTest, TimerMoveConstruction) {
         .WillOnce(Return(pdPASS));
     
     // Expectations for destructor when moved_timer goes out of scope
-    // Note: With default move constructor, both source and moved objects
-    // may try to delete the timer, but only one should succeed
+    // With proper move constructor, only the moved-to object should delete the timer
     EXPECT_CALL(*mock, xTimerDelete(mock_timer_handle, portMAX_DELAY))
-        .Times(AtMost(2))  // May be called 1 or 2 times
-        .WillRepeatedly(Return(pdPASS));
+        .Times(1)  // Should only be called once from moved_timer destructor
+        .WillOnce(Return(pdPASS));
     EXPECT_CALL(*mock, xTimerIsTimerActive(mock_timer_handle))
-        .Times(AtMost(2))  // May be called 1 or 2 times  
-        .WillRepeatedly(Return(pdFALSE));
+        .Times(1)  // Should only be called once
+        .WillOnce(Return(pdFALSE));
     
     auto callback = createTestCallback();
     sa::timer source_timer("TestTimer", 1000, pdTRUE, std::move(callback));
@@ -743,6 +777,42 @@ TEST_F(FreeRTOSSwTimerTest, TimerMoveConstruction) {
     
     // Test that moved timer works
     EXPECT_EQ(moved_timer.start(), pdPASS);
+}
+
+TEST_F(FreeRTOSSwTimerTest, MovedFromTimerIsInvalidated) {
+    // Test that a timer that has been moved from is properly invalidated
+    // and its operations fail gracefully
+    
+    EXPECT_CALL(*mock, xTimerCreateStatic(_, _, _, _, _, _))
+        .WillOnce(Return(mock_timer_handle));
+    
+    auto callback = createTestCallback();
+    sa::timer source_timer("TestTimer", 1000, pdTRUE, std::move(callback));
+    
+    // Move the timer
+    sa::timer moved_timer = std::move(source_timer);
+    
+    // The moved-from timer should now have a null handle
+    // and its operations should return failure values gracefully
+    EXPECT_EQ(source_timer.start(), pdFAIL);
+    EXPECT_EQ(source_timer.stop(), pdFAIL);
+    EXPECT_EQ(source_timer.reset(), pdFAIL);
+    EXPECT_EQ(source_timer.running(), pdFALSE);
+    EXPECT_EQ(source_timer.period_ticks(), 0);
+    EXPECT_EQ(source_timer.name(), nullptr);
+    
+    // The moved-to timer should work normally
+    EXPECT_CALL(*mock, xTimerStart(mock_timer_handle, _))
+        .WillOnce(Return(pdPASS));
+    EXPECT_EQ(moved_timer.start(), pdPASS);
+    
+    // Cleanup expectations
+    EXPECT_CALL(*mock, xTimerDelete(mock_timer_handle, portMAX_DELAY))
+        .Times(1)  // Only called once from moved_timer destructor
+        .WillOnce(Return(pdPASS));
+    EXPECT_CALL(*mock, xTimerIsTimerActive(mock_timer_handle))
+        .Times(1)
+        .WillOnce(Return(pdFALSE));
 }
 
 TEST_F(FreeRTOSSwTimerTest, TimerMoveAssignment) {
