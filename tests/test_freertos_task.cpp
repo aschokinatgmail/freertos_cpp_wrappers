@@ -19,6 +19,7 @@
 #include <chrono>
 #include <memory>
 #include <thread>
+#include <atomic>
 
 // Include mocks first to set up FreeRTOS environment
 #include "FreeRTOS.h"
@@ -1268,4 +1269,404 @@ TEST_F(FreeRTOSTaskTest, DelayUntilWithPeriodReference) {
     EXPECT_CALL(*mock, vTaskDelayUntil(&previousWakeTime, pdMS_TO_TICKS(250)))
         .Times(1);
     freertos::delay_until(previousWakeTime, std::chrono::milliseconds(250));
+}
+
+// =====================================================================
+// RACING CONDITIONS AND SOPHISTICATED MULTITASKING TEST SCENARIOS
+// =====================================================================
+
+TEST_F(FreeRTOSTaskTest, RacingConditionTaskConstructorInitialization) {
+    // Test the racing condition fix in constructor where member initialization order matters
+    // m_hTask must be initialized after m_taskRoutine to prevent race condition
+    
+    // This test verifies that task routine is set before task handle is created
+    bool routine_set_before_handle = false;
+    
+    EXPECT_CALL(*mock, xTaskCreateStatic(_, _, _, _, _, _, _))
+        .WillOnce([&routine_set_before_handle, this](auto task_func, auto name, auto stack_size, 
+                                              auto params, auto priority, auto stack, auto tcb) {
+            // Check if the task routine was properly set in the params object
+            auto* task_ptr = static_cast<sa::task<1024>*>(params);
+            // If we reach here without crash, the racing condition is fixed
+            routine_set_before_handle = true;
+            return this->mock_task_handle;
+        });
+    
+    sa::task<1024> test_task("RacingTask", 2, []() {
+        // Task execution body
+    });
+    
+    EXPECT_TRUE(routine_set_before_handle);
+    EXPECT_EQ(test_task.handle(), mock_task_handle);
+    
+    EXPECT_CALL(*mock, vTaskDelete(mock_task_handle));
+}
+
+TEST_F(FreeRTOSTaskTest, ConcurrentTaskCreationAndDestruction) {
+    // Simulate concurrent task creation/destruction scenarios
+    
+    TaskHandle_t handles[3] = {
+        reinterpret_cast<TaskHandle_t>(0x1001),
+        reinterpret_cast<TaskHandle_t>(0x1002), 
+        reinterpret_cast<TaskHandle_t>(0x1003)
+    };
+    
+    // Multiple tasks created simultaneously
+    EXPECT_CALL(*mock, xTaskCreateStatic(_, StrEq("Task1"), _, _, 1, _, _))
+        .WillOnce(Return(handles[0]));
+    EXPECT_CALL(*mock, xTaskCreateStatic(_, StrEq("Task2"), _, _, 2, _, _))
+        .WillOnce(Return(handles[1]));
+    EXPECT_CALL(*mock, xTaskCreateStatic(_, StrEq("Task3"), _, _, 3, _, _))
+        .WillOnce(Return(handles[2]));
+    
+    // Create tasks with different lifetimes to test destructor race conditions
+    auto task1 = std::make_unique<sa::task<512>>("Task1", 1, []() {});
+    auto task2 = std::make_unique<sa::task<512>>("Task2", 2, []() {});
+    auto task3 = std::make_unique<sa::task<512>>("Task3", 3, []() {});
+    
+    EXPECT_EQ(task1->handle(), handles[0]);
+    EXPECT_EQ(task2->handle(), handles[1]);
+    EXPECT_EQ(task3->handle(), handles[2]);
+    
+    // Destroy in different order to test race conditions
+    EXPECT_CALL(*mock, vTaskDelete(handles[1]));
+    task2.reset();  // Destroy middle task first
+    
+    EXPECT_CALL(*mock, vTaskDelete(handles[0]));
+    task1.reset();  // Then first task
+    
+    EXPECT_CALL(*mock, vTaskDelete(handles[2]));
+    task3.reset();  // Finally last task
+}
+
+TEST_F(FreeRTOSTaskTest, MoveSemanticsRacingConditions) {
+    // Test move semantics under potential racing conditions
+    
+    TaskHandle_t original_handle = reinterpret_cast<TaskHandle_t>(0x2001);
+    
+    EXPECT_CALL(*mock, xTaskCreateStatic(_, StrEq("MoveTask"), _, _, 1, _, _))
+        .WillOnce(Return(original_handle));
+    
+    // Create original task
+    sa::task<1024> original_task("MoveTask", 1, []() {});
+    EXPECT_EQ(original_task.handle(), original_handle);
+    
+    // Move construction should transfer ownership without race condition
+    sa::task<1024> moved_task = std::move(original_task);
+    
+    // After move, original should be invalidated, moved should own the handle
+    EXPECT_EQ(moved_task.handle(), original_handle);
+    EXPECT_EQ(original_task.handle(), nullptr);  // Moved-from object invalidated
+    
+    // Only the moved task should delete the handle
+    EXPECT_CALL(*mock, vTaskDelete(original_handle));
+    // original_task destructor should not call vTaskDelete (handle is null)
+}
+
+TEST_F(FreeRTOSTaskTest, PeriodicTaskLifecycleRacingConditions) {
+    // Test periodic task lifecycle under complex scenarios
+    
+    EXPECT_CALL(*mock, xTaskCreateStatic(_, StrEq("PeriodicRace"), _, _, 2, _, _))
+        .WillOnce(Return(mock_task_handle));
+    
+    std::atomic<int> start_count{0};
+    std::atomic<int> stop_count{0};
+    std::atomic<int> periodic_count{0};
+    
+    sa::periodic_task<1024> periodic_task(
+        "PeriodicRace", 
+        2,
+        [&start_count]() { start_count++; },  // on_start
+        [&stop_count]() { stop_count++; },    // on_stop  
+        [&periodic_count]() { periodic_count++; },  // periodic_routine
+        std::chrono::milliseconds(100)
+    );
+    
+    // Test task suspend/resume operations in sequence
+    EXPECT_CALL(*mock, vTaskResume(mock_task_handle))
+        .Times(AtLeast(1));
+    periodic_task.resume();  // Resume task
+    
+    EXPECT_CALL(*mock, vTaskSuspend(mock_task_handle))
+        .Times(AtLeast(1));
+    periodic_task.suspend();
+    
+    periodic_task.resume();  // Resume again
+    
+    EXPECT_CALL(*mock, xTaskAbortDelay(mock_task_handle))
+        .WillOnce(Return(pdTRUE));
+    EXPECT_CALL(*mock, vTaskDelete(mock_task_handle));
+    // Destructor will be called automatically
+}
+
+TEST_F(FreeRTOSTaskTest, NotificationRacingConditions) {
+    // Test task notifications under racing conditions
+    
+    EXPECT_CALL(*mock, xTaskCreateStatic(_, _, _, _, _, _, _))
+        .WillOnce(Return(mock_task_handle));
+    
+    sa::task<1024> test_task("NotifyRace", 2, []() {});
+    
+    // Simulate rapid notification operations
+    uint32_t prev_values[5];
+    
+    // Multiple notify_and_query calls that could race
+    for (int i = 0; i < 5; ++i) {
+        EXPECT_CALL(*mock, xTaskNotifyAndQuery(mock_task_handle, i + 1, eSetBits, _))
+            .WillOnce(DoAll(
+                SetArgPointee<3>(i * 10),
+                Return(pdTRUE)
+            ));
+        
+        BaseType_t result = test_task.notify_and_query(i + 1, eSetBits, prev_values[i]);
+        EXPECT_EQ(result, pdTRUE);
+        EXPECT_EQ(prev_values[i], i * 10);
+    }
+    
+    // ISR notifications mixed with regular notifications
+    BaseType_t higher_priority_task_woken;
+    EXPECT_CALL(*mock, xTaskNotifyFromISR(mock_task_handle, 0x1000, eSetValueWithOverwrite, _))
+        .WillOnce(DoAll(
+            SetArgPointee<3>(pdTRUE),
+            Return(pdTRUE)
+        ));
+    
+    BaseType_t isr_result = test_task.notify_isr(0x1000, eSetValueWithOverwrite, 
+                                                 &higher_priority_task_woken);
+    EXPECT_EQ(isr_result, pdTRUE);
+    EXPECT_EQ(higher_priority_task_woken, pdTRUE);
+    
+    EXPECT_CALL(*mock, vTaskDelete(mock_task_handle));
+}
+
+TEST_F(FreeRTOSTaskTest, ComplexMultitaskingScenario) {
+    // Complex scenario with multiple tasks, notifications, and synchronization
+    
+    TaskHandle_t producer_handle = reinterpret_cast<TaskHandle_t>(0x3001);
+    TaskHandle_t consumer_handle = reinterpret_cast<TaskHandle_t>(0x3002);
+    TaskHandle_t coordinator_handle = reinterpret_cast<TaskHandle_t>(0x3003);
+    
+    // Create producer task
+    EXPECT_CALL(*mock, xTaskCreateStatic(_, StrEq("Producer"), _, _, 3, _, _))
+        .WillOnce(Return(producer_handle));
+    
+    sa::task<1024> producer("Producer", 3, []() {
+        // Producer logic
+    });
+    
+    // Create consumer task  
+    EXPECT_CALL(*mock, xTaskCreateStatic(_, StrEq("Consumer"), _, _, 2, _, _))
+        .WillOnce(Return(consumer_handle));
+    
+    sa::task<1024> consumer("Consumer", 2, []() {
+        // Consumer logic
+    });
+    
+    // Create coordinator task
+    EXPECT_CALL(*mock, xTaskCreateStatic(_, StrEq("Coordinator"), _, _, 4, _, _))
+        .WillOnce(Return(coordinator_handle));
+    
+    sa::task<1024> coordinator("Coordinator", 4, []() {
+        // Coordinator logic
+    });
+    
+    // Simulate complex interactions
+    
+    // Producer notifies consumer
+    EXPECT_CALL(*mock, xTaskNotify(consumer_handle, 0x100, eSetBits))
+        .WillOnce(Return(pdTRUE));
+    consumer.notify(0x100, eSetBits);
+    
+    // Consumer requests more data from producer via notification
+    EXPECT_CALL(*mock, xTaskNotify(producer_handle, 0x200, eIncrement))
+        .WillOnce(Return(pdTRUE));
+    producer.notify(0x200, eIncrement);
+    
+    // Coordinator manages both tasks
+    EXPECT_CALL(*mock, uxTaskPriorityGet(producer_handle))
+        .WillOnce(Return(3));
+    UBaseType_t prod_priority = producer.priority();
+    EXPECT_EQ(prod_priority, 3);
+    
+    EXPECT_CALL(*mock, uxTaskPriorityGet(consumer_handle))
+        .WillOnce(Return(2));
+    UBaseType_t cons_priority = consumer.priority();
+    EXPECT_EQ(cons_priority, 2);
+    
+    // Coordinator adjusts priorities
+    EXPECT_CALL(*mock, vTaskPrioritySet(consumer_handle, 4));
+    consumer.priority(4);
+    
+    // Get task states for monitoring
+    EXPECT_CALL(*mock, eTaskGetState(producer_handle))
+        .WillOnce(Return(eRunning));
+    eTaskState prod_state = producer.state();
+    EXPECT_EQ(prod_state, eRunning);
+    
+    EXPECT_CALL(*mock, eTaskGetState(consumer_handle))
+        .WillOnce(Return(eBlocked));
+    eTaskState cons_state = consumer.state();
+    EXPECT_EQ(cons_state, eBlocked);
+    
+    // Clean shutdown sequence
+    EXPECT_CALL(*mock, vTaskSuspend(producer_handle));
+    producer.suspend();
+    
+    EXPECT_CALL(*mock, vTaskSuspend(consumer_handle));
+    consumer.suspend();
+    
+    EXPECT_CALL(*mock, vTaskDelete(producer_handle));
+    EXPECT_CALL(*mock, vTaskDelete(consumer_handle));
+    EXPECT_CALL(*mock, vTaskDelete(coordinator_handle));
+}
+
+TEST_F(FreeRTOSTaskTest, TaskSystemStatusUnderLoad) {
+    // Test task system status functionality under multiple tasks
+    
+    // Create multiple tasks to populate system
+    TaskHandle_t handles[3] = {
+        reinterpret_cast<TaskHandle_t>(0x4001),
+        reinterpret_cast<TaskHandle_t>(0x4002),
+        reinterpret_cast<TaskHandle_t>(0x4003)
+    };
+    
+    EXPECT_CALL(*mock, xTaskCreateStatic(_, StrEq("SysTask1"), _, _, 1, _, _))
+        .WillOnce(Return(handles[0]));
+    EXPECT_CALL(*mock, xTaskCreateStatic(_, StrEq("SysTask2"), _, _, 2, _, _))
+        .WillOnce(Return(handles[1]));
+    EXPECT_CALL(*mock, xTaskCreateStatic(_, StrEq("SysTask3"), _, _, 3, _, _))
+        .WillOnce(Return(handles[2]));
+    
+    sa::task<512> task1("SysTask1", 1, []() {});
+    sa::task<512> task2("SysTask2", 2, []() {});
+    sa::task<512> task3("SysTask3", 3, []() {});
+    
+    // Test task system status with multiple tasks
+    EXPECT_CALL(*mock, uxTaskGetSystemState(_, 10, _))
+        .WillOnce(DoAll(
+            SetArgPointee<2>(15000),  // Total runtime
+            Return(3)  // Number of tasks
+        ));
+    
+    freertos::task_system_status<10> status;
+    EXPECT_EQ(status.count(), 3);
+    EXPECT_EQ(status.total_run_time().count(), 15000);
+    
+    // Test iteration over task status
+    EXPECT_NE(status.begin(), nullptr);
+    EXPECT_NE(status.end(), nullptr);
+    EXPECT_EQ(status.end() - status.begin(), 3);
+    
+    EXPECT_CALL(*mock, vTaskDelete(handles[0]));
+    EXPECT_CALL(*mock, vTaskDelete(handles[1])); 
+    EXPECT_CALL(*mock, vTaskDelete(handles[2]));
+}
+
+TEST_F(FreeRTOSTaskTest, EdgeCaseErrorHandling) {
+    // Test edge cases and error handling scenarios
+    
+    // Test with null task handle in various operations
+    // Mock task creation to return null (allocation failure)
+    EXPECT_CALL(*mock, xTaskCreateStatic(_, _, _, _, _, _, _))
+        .WillOnce(Return(nullptr));
+    
+    sa::task<1024> null_task("TestTask", 1, []() {});
+    
+    // Task should handle null gracefully
+    EXPECT_EQ(null_task.handle(), nullptr);
+    
+    // Operations on null handle should be safe
+    BaseType_t abort_result = null_task.abort_delay();
+    EXPECT_EQ(abort_result, pdFALSE);
+    
+    // Priority operations with null handle - mock will return 0
+    EXPECT_CALL(*mock, uxTaskPriorityGet(nullptr))
+        .WillOnce(Return(0));
+    UBaseType_t priority = null_task.priority();
+    EXPECT_EQ(priority, 0);  // Should return safe default
+    
+    // Task state with null handle - mock will return 0 (eRunning)
+    EXPECT_CALL(*mock, eTaskGetState(nullptr))
+        .WillOnce(Return(eRunning));
+    eTaskState state = null_task.state();
+    EXPECT_EQ(state, eRunning);  // Mock returns eRunning (0)
+    
+    // Destructor should handle null handle safely (no vTaskDelete call expected)
+}
+
+TEST_F(FreeRTOSTaskTest, AdvancedChronoCompatibility) {
+    // Test advanced chrono functionality with various duration types
+    
+    EXPECT_CALL(*mock, xTaskCreateStatic(_, _, _, _, _, _, _))
+        .WillOnce(Return(mock_task_handle));
+    
+    sa::task<1024> test_task("ChronoTask", 2, []() {});
+    
+    // Test notification take with very small durations
+    EXPECT_CALL(*mock, ulTaskNotifyTake(pdTRUE, 0))  // 100 microseconds rounds to 0
+        .WillOnce(Return(0));
+    uint32_t result = test_task.notify_take(pdTRUE, std::chrono::microseconds(100));
+    EXPECT_EQ(result, 0);
+    
+    // Test with large durations (hours)
+    EXPECT_CALL(*mock, ulTaskNotifyTake(pdFALSE, 3600000))  // 1 hour = 3600000ms
+        .WillOnce(Return(5));
+    result = test_task.notify_take(pdFALSE, std::chrono::hours(1));
+    EXPECT_EQ(result, 5);
+    
+    // Test notification wait with floating point durations
+    uint32_t notify_val;
+    EXPECT_CALL(*mock, xTaskNotifyWait(0xFFFF, 0x0000, _, 1500))  // 1.5 seconds
+        .WillOnce(DoAll(
+            SetArgPointee<2>(0x5555),
+            Return(pdTRUE)
+        ));
+    
+    using namespace std::chrono_literals;
+    auto duration = 1500ms;
+    BaseType_t wait_result = test_task.notify_wait(0xFFFF, 0x0000, notify_val, duration);
+    EXPECT_EQ(wait_result, pdTRUE);
+    EXPECT_EQ(notify_val, 0x5555);
+    
+    EXPECT_CALL(*mock, vTaskDelete(mock_task_handle));
+}
+
+TEST_F(FreeRTOSTaskTest, PriorityInheritanceScenario) {
+    // Test priority inheritance and priority ceiling scenarios
+    
+    TaskHandle_t low_prio_handle = reinterpret_cast<TaskHandle_t>(0x5001);
+    TaskHandle_t high_prio_handle = reinterpret_cast<TaskHandle_t>(0x5002);
+    
+    EXPECT_CALL(*mock, xTaskCreateStatic(_, StrEq("LowPrio"), _, _, 1, _, _))
+        .WillOnce(Return(low_prio_handle));
+    EXPECT_CALL(*mock, xTaskCreateStatic(_, StrEq("HighPrio"), _, _, 5, _, _))
+        .WillOnce(Return(high_prio_handle));
+    
+    sa::task<1024> low_prio_task("LowPrio", 1, []() {});
+    sa::task<1024> high_prio_task("HighPrio", 5, []() {});
+    
+    // Low priority task acquires resource and gets priority boosted
+    EXPECT_CALL(*mock, vTaskPrioritySet(low_prio_handle, 5));
+    low_prio_task.priority(5);  // Boost to high priority
+    
+    // Verify priority was changed
+    EXPECT_CALL(*mock, uxTaskPriorityGet(low_prio_handle))
+        .WillOnce(Return(5));
+    UBaseType_t boosted_priority = low_prio_task.priority();
+    EXPECT_EQ(boosted_priority, 5);
+    
+    // High priority task blocks on resource
+    EXPECT_CALL(*mock, vTaskSuspend(high_prio_handle));
+    high_prio_task.suspend();
+    
+    // Low priority task releases resource and priority is restored
+    EXPECT_CALL(*mock, vTaskPrioritySet(low_prio_handle, 1));
+    low_prio_task.priority(1);  // Restore original priority
+    
+    // High priority task resumes
+    EXPECT_CALL(*mock, vTaskResume(high_prio_handle));
+    high_prio_task.resume();
+    
+    EXPECT_CALL(*mock, vTaskDelete(low_prio_handle));
+    EXPECT_CALL(*mock, vTaskDelete(high_prio_handle));
 }

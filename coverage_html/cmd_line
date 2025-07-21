@@ -1,0 +1,1 @@
+genhtml task_coverage.info --output-directory coverage_html
