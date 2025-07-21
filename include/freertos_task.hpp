@@ -827,7 +827,7 @@ public:
    */
   BaseType_t notfy_and_query(const uint32_t val, eNotifyAction action,
                              uint32_t &prev_value) {
-    return m_task.notify_and_query(val, action, prev_value);
+    return m_task.notfy_and_query(val, action, prev_value);
   }
   /**
    * @brief Notify the task from an ISR.

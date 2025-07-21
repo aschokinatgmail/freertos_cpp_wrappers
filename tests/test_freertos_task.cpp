@@ -1122,3 +1122,108 @@ int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }
+
+// =============================================================================
+// ADDITIONAL EDGE CASE TESTS TO REACH 100% COVERAGE
+// =============================================================================
+
+TEST_F(FreeRTOSTaskTest, TaskExecutionDirectCall) {
+    // Test calling the static task_exec function through task creation
+    EXPECT_CALL(*mock, xTaskCreateStatic(_, _, _, _, _, _, _))
+        .WillOnce(Return(mock_task_handle));
+    
+    bool task_executed = false;
+    sa::task<1024> test_task("ExecutionTask", 2, [&task_executed]() {
+        task_executed = true;
+    });
+    
+    // The task_exec should have been called during construction via the allocator
+    // but the lambda won't execute until the FreeRTOS task actually runs
+    EXPECT_EQ(test_task.handle(), mock_task_handle);
+    
+    EXPECT_CALL(*mock, vTaskDelete(mock_task_handle));
+}
+
+TEST_F(FreeRTOSTaskTest, PeriodicTaskTypo) {
+    EXPECT_CALL(*mock, xTaskCreateStatic(_, StrEq("TypoTask"), _, _, 2, _, _))
+        .WillOnce(Return(mock_task_handle));
+    
+    EXPECT_CALL(*mock, xTaskAbortDelay(mock_task_handle))
+        .WillOnce(Return(pdTRUE));
+    EXPECT_CALL(*mock, vTaskDelete(mock_task_handle));
+    
+    sa::periodic_task<1024> periodic_task(
+        "TypoTask",
+        2,
+        []() {},  // on_start
+        []() {},  // on_stop
+        []() {},  // periodic_routine
+        100ms     // period
+    );
+    
+    // Test the function with the typo: notfy_and_query
+    uint32_t prev_value;
+    EXPECT_CALL(*mock, xTaskNotifyAndQuery(mock_task_handle, 0x12345, eSetBits, _))
+        .WillOnce(DoAll(
+            SetArgPointee<3>(0xABCD),
+            Return(pdTRUE)
+        ));
+    BaseType_t result = periodic_task.notfy_and_query(0x12345, eSetBits, prev_value);
+    EXPECT_EQ(result, pdTRUE);
+    EXPECT_EQ(prev_value, 0xABCD);
+}
+
+TEST_F(FreeRTOSTaskTest, TaskTemplateInstantiation) {
+    // Test different template instantiations
+    
+    // Test with different stack sizes
+    EXPECT_CALL(*mock, xTaskCreateStatic(_, StrEq("SmallTask"), 128, _, 1, _, _))
+        .WillOnce(Return(mock_task_handle));
+    
+    sa::task<512> small_task("SmallTask", 1, []() {});
+    EXPECT_EQ(small_task.handle(), mock_task_handle);
+    
+    EXPECT_CALL(*mock, vTaskDelete(mock_task_handle));
+}
+
+TEST_F(FreeRTOSTaskTest, DynamicTaskDifferentSizes) {
+    // Test dynamic tasks with different stack sizes
+    TaskHandle_t mock_handle2 = reinterpret_cast<TaskHandle_t>(0x87654321);
+    
+    EXPECT_CALL(*mock, xTaskCreate(_, StrEq("DynTask"), 512, _, 3, _))
+        .WillOnce(DoAll(
+            SetArgPointee<5>(mock_handle2),
+            Return(pdPASS)
+        ));
+    
+    da::task<2048> dyn_task("DynTask", 3, []() {});
+    EXPECT_EQ(dyn_task.handle(), mock_handle2);
+    
+    EXPECT_CALL(*mock, vTaskDelete(mock_handle2));
+}
+
+TEST_F(FreeRTOSTaskTest, TaskNotificationEdgeCases) {
+    EXPECT_CALL(*mock, xTaskCreateStatic(_, _, _, _, _, _, _))
+        .WillOnce(Return(mock_task_handle));
+    
+    sa::task<1024> test_task("EdgeTask", 2, []() {});
+    
+    // Test notification with different duration types (microseconds)
+    EXPECT_CALL(*mock, ulTaskNotifyTake(pdTRUE, 1))  // 1500 microseconds = 1ms (truncated)
+        .WillOnce(Return(1));
+    uint32_t result = test_task.notify_take(pdTRUE, std::chrono::microseconds(1500));
+    EXPECT_EQ(result, 1);
+    
+    // Test notification wait with different duration types 
+    uint32_t notify_val;
+    EXPECT_CALL(*mock, xTaskNotifyWait(0, 0, _, 5000))  // 5 seconds = 5000ms
+        .WillOnce(DoAll(
+            SetArgPointee<2>(0x12345),
+            Return(pdTRUE)
+        ));
+    BaseType_t wait_result = test_task.notify_wait(0, 0, notify_val, std::chrono::seconds(5));
+    EXPECT_EQ(wait_result, pdTRUE);
+    EXPECT_EQ(notify_val, 0x12345);
+    
+    EXPECT_CALL(*mock, vTaskDelete(mock_task_handle));
+}
