@@ -509,14 +509,14 @@ TEST_F(FreeRTOSTaskTest, TaskNotificationsExtended) {
     
     sa::task<1024> test_task("ExtendedNotifyTask", 2, []() {});
     
-    // Test notfy_and_query (note: typo in original function name)
+    // Test notify_and_query (fixed typo: was notfy_and_query)
     uint32_t prev_value;
     EXPECT_CALL(*mock, xTaskNotifyAndQuery(mock_task_handle, 0x87654321, eIncrement, _))
         .WillOnce(DoAll(
             SetArgPointee<3>(0x11111111),
             Return(pdTRUE)
         ));
-    BaseType_t result = test_task.notfy_and_query(0x87654321, eIncrement, prev_value);
+    BaseType_t result = test_task.notify_and_query(0x87654321, eIncrement, prev_value);
     EXPECT_EQ(result, pdTRUE);
     EXPECT_EQ(prev_value, 0x11111111);
     
@@ -1161,14 +1161,14 @@ TEST_F(FreeRTOSTaskTest, PeriodicTaskTypo) {
         100ms     // period
     );
     
-    // Test the function with the typo: notfy_and_query
+    // Test the function (fixed typo: was notfy_and_query)
     uint32_t prev_value;
     EXPECT_CALL(*mock, xTaskNotifyAndQuery(mock_task_handle, 0x12345, eSetBits, _))
         .WillOnce(DoAll(
             SetArgPointee<3>(0xABCD),
             Return(pdTRUE)
         ));
-    BaseType_t result = periodic_task.notfy_and_query(0x12345, eSetBits, prev_value);
+    BaseType_t result = periodic_task.notify_and_query(0x12345, eSetBits, prev_value);
     EXPECT_EQ(result, pdTRUE);
     EXPECT_EQ(prev_value, 0xABCD);
 }

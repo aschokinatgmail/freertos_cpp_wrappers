@@ -396,8 +396,8 @@ public:
    * @param prev_value previous value
    * @return BaseType_t pdTRUE if the notification was given, pdFALSE otherwise
    */
-  BaseType_t notfy_and_query(const uint32_t val, eNotifyAction action,
-                             uint32_t &prev_value) {
+  BaseType_t notify_and_query(const uint32_t val, eNotifyAction action,
+                              uint32_t &prev_value) {
     return xTaskNotifyAndQuery(m_hTask, val, action, &prev_value);
   }
   /**
@@ -825,9 +825,9 @@ public:
    * @param prev_value  previous value
    * @return BaseType_t  pdTRUE if the notification was given, pdFALSE otherwise
    */
-  BaseType_t notfy_and_query(const uint32_t val, eNotifyAction action,
-                             uint32_t &prev_value) {
-    return m_task.notfy_and_query(val, action, prev_value);
+  BaseType_t notify_and_query(const uint32_t val, eNotifyAction action,
+                              uint32_t &prev_value) {
+    return m_task.notify_and_query(val, action, prev_value);
   }
   /**
    * @brief Notify the task from an ISR.
