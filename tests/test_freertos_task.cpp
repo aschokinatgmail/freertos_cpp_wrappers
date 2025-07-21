@@ -1227,3 +1227,45 @@ TEST_F(FreeRTOSTaskTest, TaskNotificationEdgeCases) {
     
     EXPECT_CALL(*mock, vTaskDelete(mock_task_handle));
 }
+
+// Additional test cases to improve coverage
+
+TEST_F(FreeRTOSTaskTest, TaskSystemStatusTemplate) {
+    // Test task_system_status template class
+    EXPECT_CALL(*mock, uxTaskGetSystemState(_, 10, _))
+        .WillOnce(DoAll(
+            SetArgPointee<2>(12345),
+            Return(5)
+        ));
+    
+    freertos::task_system_status<10> status;
+    EXPECT_EQ(status.count(), 5);
+    EXPECT_EQ(status.total_run_time().count(), 12345);
+    
+    // Test iterators
+    EXPECT_NE(status.begin(), nullptr);
+    EXPECT_NE(status.end(), nullptr);
+}
+
+TEST_F(FreeRTOSTaskTest, DelayFunctionsWithDifferentDurations) {
+    // Test delay with various chrono duration types
+    EXPECT_CALL(*mock, vTaskDelay(pdMS_TO_TICKS(2000)))
+        .Times(1);
+    freertos::delay(std::chrono::seconds(2));
+    
+    EXPECT_CALL(*mock, vTaskDelay(pdMS_TO_TICKS(1500)))
+        .Times(1);
+    freertos::delay(std::chrono::milliseconds(1500));
+    
+    EXPECT_CALL(*mock, vTaskDelay(pdMS_TO_TICKS(500)))
+        .Times(1);
+    freertos::sleep_for(std::chrono::milliseconds(500));
+}
+
+TEST_F(FreeRTOSTaskTest, DelayUntilWithPeriodReference) {
+    TickType_t previousWakeTime = 100;
+    
+    EXPECT_CALL(*mock, vTaskDelayUntil(&previousWakeTime, pdMS_TO_TICKS(250)))
+        .Times(1);
+    freertos::delay_until(previousWakeTime, std::chrono::milliseconds(250));
+}
