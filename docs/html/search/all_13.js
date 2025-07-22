@@ -1,20 +1,7 @@
 var searchData=
 [
-  ['_7ebinary_5fsemaphore_0',['~binary_semaphore',['../classfreertos_1_1binary__semaphore.html#a07f06fa64b66a2118ddfd252d3cdb2c6',1,'freertos::binary_semaphore']]],
-  ['_7ecounting_5fsemaphore_1',['~counting_semaphore',['../classfreertos_1_1counting__semaphore.html#a0e311fe69b3117605c0f8110fced8e05',1,'freertos::counting_semaphore']]],
-  ['_7ecritical_5fsection_2',['~critical_section',['../classfreertos_1_1critical__section.html#a921279b4dc747e42188717820843783c',1,'freertos::critical_section']]],
-  ['_7ecritical_5fsection_5fisr_3',['~critical_section_isr',['../classfreertos_1_1critical__section__isr.html#a4d5d92eff3d601235e41acdedc057799',1,'freertos::critical_section_isr']]],
-  ['_7eevent_5fgroup_4',['~event_group',['../classfreertos_1_1event__group.html#a26e2dfa374407947265a5976078f7a1a',1,'freertos::event_group']]],
-  ['_7einterrupt_5fbarrier_5',['~interrupt_barrier',['../classfreertos_1_1interrupt__barrier.html#a850028aca48871908d647fd900a1398e',1,'freertos::interrupt_barrier']]],
-  ['_7elock_5fguard_6',['~lock_guard',['../classfreertos_1_1lock__guard.html#af46d4af2d983d17c333f0265c941cad4',1,'freertos::lock_guard']]],
-  ['_7elock_5fguard_5fisr_7',['~lock_guard_isr',['../classfreertos_1_1lock__guard__isr.html#a9008d32cb43029a2ccd29242ac713cec',1,'freertos::lock_guard_isr']]],
-  ['_7emessage_5fbuffer_8',['~message_buffer',['../classfreertos_1_1message__buffer.html#a753bcad0484e4f15f4d3fe826d572065',1,'freertos::message_buffer']]],
-  ['_7emutex_9',['~mutex',['../classfreertos_1_1mutex.html#a2d55a618d9301d78fee3ea2dbc0c54f7',1,'freertos::mutex']]],
-  ['_7eperiodic_5ftask_10',['~periodic_task',['../classfreertos_1_1periodic__task.html#a4b1c8813efc6cb4d7bef04927c807c25',1,'freertos::periodic_task']]],
-  ['_7erecursive_5fmutex_11',['~recursive_mutex',['../classfreertos_1_1recursive__mutex.html#a52e086a6726491c42e5d2d41bbd679c3',1,'freertos::recursive_mutex']]],
-  ['_7escheduler_5fbarrier_12',['~scheduler_barrier',['../classfreertos_1_1scheduler__barrier.html#a6324492efcd303e272c153839b9d7c23',1,'freertos::scheduler_barrier']]],
-  ['_7estream_5fbuffer_13',['~stream_buffer',['../classfreertos_1_1stream__buffer.html#af794c9d0804051e899ae5e24d1d6b4ce',1,'freertos::stream_buffer']]],
-  ['_7etask_14',['~task',['../classfreertos_1_1task.html#aa945ed853fdba9f5b9d7e18f859871ac',1,'freertos::task']]],
-  ['_7etimeout_5flock_5fguard_15',['~timeout_lock_guard',['../classfreertos_1_1timeout__lock__guard.html#a6c2adfd05626569df6c17190de6bb01f',1,'freertos::timeout_lock_guard']]],
-  ['_7etry_5flock_5fguard_16',['~try_lock_guard',['../classfreertos_1_1try__lock__guard.html#a4a8bc0b81f03b273d3c006a83c68e1ad',1,'freertos::try_lock_guard']]]
+  ['unlock_0',['unlock',['../classfreertos_1_1mutex.html#ab574313e4a5c41a11e10ce9e07f6b271',1,'freertos::mutex::unlock()'],['../classfreertos_1_1recursive__mutex.html#a47fd10b3cb192ef884366130178c240a',1,'freertos::recursive_mutex::unlock()']]],
+  ['unlock_5fisr_1',['unlock_isr',['../classfreertos_1_1mutex.html#a1c464217282db088a058756eec1827ab',1,'freertos::mutex::unlock_isr(BaseType_t &amp;high_priority_task_woken)'],['../classfreertos_1_1mutex.html#a95f57c23a03edd90798962cdbb9c275c',1,'freertos::mutex::unlock_isr(void)'],['../classfreertos_1_1recursive__mutex.html#ac052f05534988d032bf5505bd6be5bd1',1,'freertos::recursive_mutex::unlock_isr(BaseType_t &amp;high_priority_task_woken)'],['../classfreertos_1_1recursive__mutex.html#a3b7db3999f3ce6fd4275e4b9c0410e12',1,'freertos::recursive_mutex::unlock_isr(void)']]],
+  ['usage_20examples_2',['Usage Examples',['../index.html#examples_sec',1,'']]],
+  ['usage_20examples_3a_3',['usage examples:',['../classfreertos_1_1queue.html#autotoc_md1',1,'Usage Examples:'],['../classfreertos_1_1binary__semaphore.html#autotoc_md7',1,'Usage Examples:'],['../classfreertos_1_1task.html#autotoc_md12',1,'Usage Examples:']]]
 ];

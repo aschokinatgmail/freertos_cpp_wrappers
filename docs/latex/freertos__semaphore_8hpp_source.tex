@@ -42,359 +42,446 @@
 \DoxyCodeLine{00038\ }
 \DoxyCodeLine{00039\ \textcolor{preprocessor}{\#include\ <FreeRTOS.h>}}
 \DoxyCodeLine{00040\ \textcolor{preprocessor}{\#include\ <chrono>}}
-\DoxyCodeLine{00041\ \textcolor{preprocessor}{\#include\ <semphr.h>}}
-\DoxyCodeLine{00042\ \textcolor{preprocessor}{\#include\ <task.h>}}
-\DoxyCodeLine{00043\ \textcolor{preprocessor}{\#include\ <time.h>}}
+\DoxyCodeLine{00041\ \textcolor{preprocessor}{\#include\ <ctime>}}
+\DoxyCodeLine{00042\ \textcolor{preprocessor}{\#include\ <semphr.h>}}
+\DoxyCodeLine{00043\ \textcolor{preprocessor}{\#include\ <task.h>}}
 \DoxyCodeLine{00044\ }
 \DoxyCodeLine{00045\ \textcolor{keyword}{namespace\ }freertos\ \{}
 \DoxyCodeLine{00046\ }
 \DoxyCodeLine{00047\ \textcolor{preprocessor}{\#if\ configSUPPORT\_STATIC\_ALLOCATION}}
 \DoxyCodeLine{00052\ \textcolor{keyword}{class\ }static\_semaphore\_allocator\ \{}
-\DoxyCodeLine{00053\ \ \ StaticSemaphore\_t\ m\_semaphore\_placeholder;}
+\DoxyCodeLine{00053\ \ \ StaticSemaphore\_t\ m\_semaphore\_placeholder\{\};}
 \DoxyCodeLine{00054\ }
 \DoxyCodeLine{00055\ \textcolor{keyword}{public}:}
 \DoxyCodeLine{00056\ \ \ static\_semaphore\_allocator()\ =\ \textcolor{keywordflow}{default};}
-\DoxyCodeLine{00057\ \ \ static\_semaphore\_allocator(\textcolor{keyword}{const}\ static\_semaphore\_allocator\ \&)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{00058\ \ \ static\_semaphore\_allocator(static\_semaphore\_allocator\ \&\&)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{00059\ }
-\DoxyCodeLine{00060\ \ \ static\_semaphore\_allocator\ \&}
-\DoxyCodeLine{00061\ \ \ operator=(\textcolor{keyword}{const}\ static\_semaphore\_allocator\ \&)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{00062\ \ \ static\_semaphore\_allocator\ \&operator=(static\_semaphore\_allocator\ \&\&)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{00063\ }
-\DoxyCodeLine{00064\ \ \ SemaphoreHandle\_t\ create\_binary()\ \{}
-\DoxyCodeLine{00065\ \ \ \ \ \textcolor{keywordflow}{return}\ xSemaphoreCreateBinaryStatic(\&m\_semaphore\_placeholder);}
-\DoxyCodeLine{00066\ \ \ \}}
-\DoxyCodeLine{00067\ \ \ SemaphoreHandle\_t\ create\_counting(UBaseType\_t\ max\_count)\ \{}
-\DoxyCodeLine{00068\ \ \ \ \ \textcolor{keywordflow}{return}\ xSemaphoreCreateCountingStatic(max\_count,\ max\_count,}
-\DoxyCodeLine{00069\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \&m\_semaphore\_placeholder);}
-\DoxyCodeLine{00070\ \ \ \}}
-\DoxyCodeLine{00071\ \ \ SemaphoreHandle\_t\ create\_mutex()\ \{}
-\DoxyCodeLine{00072\ \ \ \ \ \textcolor{keywordflow}{return}\ xSemaphoreCreateMutexStatic(\&m\_semaphore\_placeholder);}
-\DoxyCodeLine{00073\ \ \ \}}
-\DoxyCodeLine{00074\ \ \ SemaphoreHandle\_t\ create\_recursive\_mutex()\ \{}
-\DoxyCodeLine{00075\ \ \ \ \ \textcolor{keywordflow}{return}\ xSemaphoreCreateRecursiveMutexStatic(\&m\_semaphore\_placeholder);}
-\DoxyCodeLine{00076\ \ \ \}}
-\DoxyCodeLine{00077\ \};}
-\DoxyCodeLine{00078\ \textcolor{preprocessor}{\#endif}}
-\DoxyCodeLine{00079\ \textcolor{preprocessor}{\#if\ configSUPPORT\_DYNAMIC\_ALLOCATION}}
-\DoxyCodeLine{00084\ \textcolor{keyword}{class\ }dynamic\_semaphore\_allocator\ \{}
-\DoxyCodeLine{00085\ \textcolor{keyword}{public}:}
-\DoxyCodeLine{00086\ \ \ SemaphoreHandle\_t\ create\_binary()\ \{\ \textcolor{keywordflow}{return}\ xSemaphoreCreateBinary();\ \}}
-\DoxyCodeLine{00087\ \ \ SemaphoreHandle\_t\ create\_counting(UBaseType\_t\ max\_count)\ \{}
-\DoxyCodeLine{00088\ \ \ \ \ \textcolor{keywordflow}{return}\ xSemaphoreCreateCounting(max\_count,\ max\_count);}
-\DoxyCodeLine{00089\ \ \ \}}
-\DoxyCodeLine{00090\ \ \ SemaphoreHandle\_t\ create\_mutex()\ \{\ \textcolor{keywordflow}{return}\ xSemaphoreCreateMutex();\ \}}
-\DoxyCodeLine{00091\ \ \ SemaphoreHandle\_t\ create\_recursive\_mutex()\ \{}
-\DoxyCodeLine{00092\ \ \ \ \ \textcolor{keywordflow}{return}\ xSemaphoreCreateRecursiveMutex();}
-\DoxyCodeLine{00093\ \ \ \}}
-\DoxyCodeLine{00094\ \};}
-\DoxyCodeLine{00095\ \textcolor{preprocessor}{\#endif}}
-\DoxyCodeLine{00096\ }
-\DoxyCodeLine{00103\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ SemaphoreAllocator>\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classfreertos_1_1binary__semaphore}{binary\_semaphore}}\ \{}
-\DoxyCodeLine{00104\ \ \ SemaphoreAllocator\ m\_allocator;}
-\DoxyCodeLine{00105\ \ \ SemaphoreHandle\_t\ m\_semaphore;}
-\DoxyCodeLine{00106\ }
-\DoxyCodeLine{00107\ \textcolor{keyword}{public}:}
-\DoxyCodeLine{00112\ \ \ \mbox{\hyperlink{classfreertos_1_1binary__semaphore_a189b6bee4f0abb59109cd0e110c3d56f}{binary\_semaphore}}()\ :\ m\_allocator\{\},\ m\_semaphore\{nullptr\}\ \{}
-\DoxyCodeLine{00113\ \ \ \ \ m\_semaphore\ =\ m\_allocator.create\_binary();}
-\DoxyCodeLine{00114\ \ \ \ \ configASSERT(m\_semaphore);}
-\DoxyCodeLine{00115\ \ \ \}}
-\DoxyCodeLine{00116\ \ \ \mbox{\hyperlink{classfreertos_1_1binary__semaphore_a189b6bee4f0abb59109cd0e110c3d56f}{binary\_semaphore}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1binary__semaphore}{binary\_semaphore}}\ \&)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{00117\ \ \ \mbox{\hyperlink{classfreertos_1_1binary__semaphore_a189b6bee4f0abb59109cd0e110c3d56f}{binary\_semaphore}}(\mbox{\hyperlink{classfreertos_1_1binary__semaphore}{binary\_semaphore}}\ \&\&src)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{00123\ \ \ \mbox{\hyperlink{classfreertos_1_1binary__semaphore_a07f06fa64b66a2118ddfd252d3cdb2c6}{\string~binary\_semaphore}}(\textcolor{keywordtype}{void})\ \{}
-\DoxyCodeLine{00124\ \ \ \ \ \textcolor{keywordflow}{if}\ (m\_semaphore)\ \{}
-\DoxyCodeLine{00125\ \ \ \ \ \ \ vSemaphoreDelete(m\_semaphore);}
-\DoxyCodeLine{00126\ \ \ \ \ \}}
-\DoxyCodeLine{00127\ \ \ \}}
-\DoxyCodeLine{00128\ }
-\DoxyCodeLine{00129\ \ \ \mbox{\hyperlink{classfreertos_1_1binary__semaphore}{binary\_semaphore}}\ \&operator=(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1binary__semaphore}{binary\_semaphore}}\ \&)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{00130\ \ \ \mbox{\hyperlink{classfreertos_1_1binary__semaphore}{binary\_semaphore}}\ \&operator=(\mbox{\hyperlink{classfreertos_1_1binary__semaphore}{binary\_semaphore}}\ \&\&src)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{00131\ }
-\DoxyCodeLine{00140\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1binary__semaphore_a36fd71685f5c119bccc9e03fe52a70fc}{give}}()\ \{\ \textcolor{keywordflow}{return}\ xSemaphoreGive(m\_semaphore);\ \}}
-\DoxyCodeLine{00150\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1binary__semaphore_a139c85ca3cb7439696734efbcad91786}{give\_isr}}(BaseType\_t\ \&high\_priority\_task\_woken)\ \{}
-\DoxyCodeLine{00151\ \ \ \ \ \textcolor{keywordflow}{return}\ xSemaphoreGiveFromISR(m\_semaphore,\ \&high\_priority\_task\_woken);}
-\DoxyCodeLine{00152\ \ \ \}}
-\DoxyCodeLine{00162\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1binary__semaphore_a9c157a3f25082aaa4e5fa1a606d9efd0}{take}}(\textcolor{keyword}{const}\ TickType\_t\ ticks\_to\_wait\ =\ portMAX\_DELAY)\ \{}
-\DoxyCodeLine{00163\ \ \ \ \ \textcolor{keywordflow}{return}\ xSemaphoreTake(m\_semaphore,\ ticks\_to\_wait);}
-\DoxyCodeLine{00164\ \ \ \}}
-\DoxyCodeLine{00176\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1binary__semaphore_a14d8aea4fbb3baba51c9d9ea7e82120b}{take\_isr}}(BaseType\_t\ \&high\_priority\_task\_woken)\ \{}
-\DoxyCodeLine{00177\ \ \ \ \ \textcolor{keywordflow}{return}\ xSemaphoreTakeFromISR(m\_semaphore,\ \&high\_priority\_task\_woken);}
-\DoxyCodeLine{00178\ \ \ \}}
-\DoxyCodeLine{00179\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Rep,\ \textcolor{keyword}{typename}\ Period>}
-\DoxyCodeLine{00180\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1binary__semaphore_a9c157a3f25082aaa4e5fa1a606d9efd0}{take}}(\textcolor{keyword}{const}\ std::chrono::duration<Rep,\ Period>\ \&timeout)\ \{}
-\DoxyCodeLine{00181\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classfreertos_1_1binary__semaphore_a9c157a3f25082aaa4e5fa1a606d9efd0}{take}}(}
-\DoxyCodeLine{00182\ \ \ \ \ \ \ \ \ std::chrono::duration\_cast<std::chrono::milliseconds>(timeout).count());}
-\DoxyCodeLine{00183\ \ \ \}}
-\DoxyCodeLine{00184\ \};}
-\DoxyCodeLine{00185\ }
-\DoxyCodeLine{00192\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ SemaphoreAllocator>\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classfreertos_1_1counting__semaphore}{counting\_semaphore}}\ \{}
-\DoxyCodeLine{00193\ \ \ SemaphoreAllocator\ m\_allocator;}
-\DoxyCodeLine{00194\ \ \ SemaphoreHandle\_t\ m\_semaphore;}
-\DoxyCodeLine{00195\ }
-\DoxyCodeLine{00196\ \textcolor{keyword}{public}:}
-\DoxyCodeLine{00203\ \ \ \textcolor{keyword}{explicit}\ \mbox{\hyperlink{classfreertos_1_1counting__semaphore_a8f9489d541ce2cf2f04a2daadb690cac}{counting\_semaphore}}(UBaseType\_t\ max\_count\ =\ 1)}
-\DoxyCodeLine{00204\ \ \ \ \ \ \ :\ m\_allocator\{\},\ m\_semaphore\{nullptr\}\ \{}
-\DoxyCodeLine{00205\ \ \ \ \ m\_semaphore\ =\ m\_allocator.create\_counting(max\_count,\ max\_count);}
-\DoxyCodeLine{00206\ \ \ \ \ configASSERT(m\_semaphore);}
-\DoxyCodeLine{00207\ \ \ \}}
-\DoxyCodeLine{00208\ \ \ \mbox{\hyperlink{classfreertos_1_1counting__semaphore_a8f9489d541ce2cf2f04a2daadb690cac}{counting\_semaphore}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1counting__semaphore}{counting\_semaphore}}\ \&)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{00209\ \ \ \mbox{\hyperlink{classfreertos_1_1counting__semaphore_a8f9489d541ce2cf2f04a2daadb690cac}{counting\_semaphore}}(\mbox{\hyperlink{classfreertos_1_1counting__semaphore}{counting\_semaphore}}\ \&\&src)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{00215\ \ \ \mbox{\hyperlink{classfreertos_1_1counting__semaphore_a0e311fe69b3117605c0f8110fced8e05}{\string~counting\_semaphore}}(\textcolor{keywordtype}{void})\ \{}
-\DoxyCodeLine{00216\ \ \ \ \ \textcolor{keywordflow}{if}\ (m\_semaphore)\ \{}
-\DoxyCodeLine{00217\ \ \ \ \ \ \ vSemaphoreDelete(m\_semaphore);}
-\DoxyCodeLine{00218\ \ \ \ \ \}}
-\DoxyCodeLine{00219\ \ \ \}}
-\DoxyCodeLine{00220\ }
-\DoxyCodeLine{00221\ \ \ \mbox{\hyperlink{classfreertos_1_1counting__semaphore}{counting\_semaphore}}\ \&operator=(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1counting__semaphore}{counting\_semaphore}}\ \&)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{00222\ \ \ \mbox{\hyperlink{classfreertos_1_1counting__semaphore}{counting\_semaphore}}\ \&operator=(\mbox{\hyperlink{classfreertos_1_1counting__semaphore}{counting\_semaphore}}\ \&\&src)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{00223\ }
-\DoxyCodeLine{00232\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1counting__semaphore_a6407b3c89aa245c9976afee2456df085}{give}}()\ \{\ \textcolor{keywordflow}{return}\ xSemaphoreGive(m\_semaphore);\ \}}
-\DoxyCodeLine{00242\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1counting__semaphore_a8d2d7eb7c84eff0fa2705fd6e1e14f88}{give\_isr}}(BaseType\_t\ \&high\_priority\_task\_woken)\ \{}
-\DoxyCodeLine{00243\ \ \ \ \ \textcolor{keywordflow}{return}\ xSemaphoreGiveFromISR(m\_semaphore,\ \&high\_priority\_task\_woken);}
-\DoxyCodeLine{00244\ \ \ \}}
-\DoxyCodeLine{00254\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1counting__semaphore_a47ef131ae9b50fbcbc3db1aa7eb2aa5d}{take}}(\textcolor{keyword}{const}\ TickType\_t\ ticks\_to\_wait\ =\ portMAX\_DELAY)\ \{}
-\DoxyCodeLine{00255\ \ \ \ \ \textcolor{keywordflow}{return}\ xSemaphoreTake(m\_semaphore,\ ticks\_to\_wait);}
-\DoxyCodeLine{00256\ \ \ \}}
-\DoxyCodeLine{00268\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1counting__semaphore_a346dae83ff7201eb62e9b94fedc0d2de}{take\_isr}}(BaseType\_t\ \&high\_priority\_task\_woken)\ \{}
-\DoxyCodeLine{00269\ \ \ \ \ \textcolor{keywordflow}{return}\ xSemaphoreTakeFromISR(m\_semaphore,\ \&high\_priority\_task\_woken);}
-\DoxyCodeLine{00270\ \ \ \}}
-\DoxyCodeLine{00279\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Rep,\ \textcolor{keyword}{typename}\ Period>}
-\DoxyCodeLine{00280\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1counting__semaphore_ab844536d406d6d303ef0df8f0e43a6ad}{take}}(\textcolor{keyword}{const}\ std::chrono::duration<Rep,\ Period>\ \&timeout)\ \{}
-\DoxyCodeLine{00281\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classfreertos_1_1counting__semaphore_a47ef131ae9b50fbcbc3db1aa7eb2aa5d}{take}}(}
-\DoxyCodeLine{00282\ \ \ \ \ \ \ \ \ std::chrono::duration\_cast<std::chrono::milliseconds>(timeout).\mbox{\hyperlink{classfreertos_1_1counting__semaphore_a9c485144e9aa39623e887d5b1cf3d1e8}{count}}());}
-\DoxyCodeLine{00283\ \ \ \}}
-\DoxyCodeLine{00289\ \ \ \mbox{\hyperlink{classfreertos_1_1counting__semaphore}{counting\_semaphore}}\ \&\mbox{\hyperlink{classfreertos_1_1counting__semaphore_ad7430310882c46c2c92e680884b9ef45}{operator++}}()\ \{}
-\DoxyCodeLine{00290\ \ \ \ \ \mbox{\hyperlink{classfreertos_1_1counting__semaphore_a6407b3c89aa245c9976afee2456df085}{give}}();}
-\DoxyCodeLine{00291\ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
-\DoxyCodeLine{00292\ \ \ \}}
-\DoxyCodeLine{00298\ \ \ \mbox{\hyperlink{classfreertos_1_1counting__semaphore}{counting\_semaphore}}\ \&\mbox{\hyperlink{classfreertos_1_1counting__semaphore_aa1f738a641c3532b03907c89b157fbd7}{operator-\/-\/}}()\ \{}
-\DoxyCodeLine{00299\ \ \ \ \ \mbox{\hyperlink{classfreertos_1_1counting__semaphore_a47ef131ae9b50fbcbc3db1aa7eb2aa5d}{take}}();}
-\DoxyCodeLine{00300\ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
-\DoxyCodeLine{00301\ \ \ \}}
-\DoxyCodeLine{00307\ \ \ \mbox{\hyperlink{classfreertos_1_1counting__semaphore}{counting\_semaphore}}\ \&\mbox{\hyperlink{classfreertos_1_1counting__semaphore_a057a0916be711f3814d2a79e7ee954ec}{operator++}}(\textcolor{keywordtype}{int})\ \{}
-\DoxyCodeLine{00308\ \ \ \ \ \mbox{\hyperlink{classfreertos_1_1counting__semaphore_a6407b3c89aa245c9976afee2456df085}{give}}();}
-\DoxyCodeLine{00309\ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
-\DoxyCodeLine{00310\ \ \ \}}
-\DoxyCodeLine{00316\ \ \ \mbox{\hyperlink{classfreertos_1_1counting__semaphore}{counting\_semaphore}}\ \&\mbox{\hyperlink{classfreertos_1_1counting__semaphore_aaa3590f1722ea0a4a764580911b2c2a0}{operator-\/-\/}}(\textcolor{keywordtype}{int})\ \{}
-\DoxyCodeLine{00317\ \ \ \ \ \mbox{\hyperlink{classfreertos_1_1counting__semaphore_a47ef131ae9b50fbcbc3db1aa7eb2aa5d}{take}}();}
-\DoxyCodeLine{00318\ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
-\DoxyCodeLine{00319\ \ \ \}}
-\DoxyCodeLine{00325\ \ \ UBaseType\_t\ \mbox{\hyperlink{classfreertos_1_1counting__semaphore_a9c485144e9aa39623e887d5b1cf3d1e8}{count}}()\ \{\ \textcolor{keywordflow}{return}\ uxSemaphoreGetCount(m\_semaphore);\ \}}
-\DoxyCodeLine{00332\ \ \ \mbox{\hyperlink{classfreertos_1_1counting__semaphore}{counting\_semaphore}}\ \&\mbox{\hyperlink{classfreertos_1_1counting__semaphore_a97b87512097d920ac945d1d7488a9632}{operator+=}}(UBaseType\_t\ \mbox{\hyperlink{classfreertos_1_1counting__semaphore_a9c485144e9aa39623e887d5b1cf3d1e8}{count}})\ \{}
-\DoxyCodeLine{00333\ \ \ \ \ \textcolor{keywordflow}{while}\ (\mbox{\hyperlink{classfreertos_1_1counting__semaphore_a9c485144e9aa39623e887d5b1cf3d1e8}{count}}-\/-\/)\ \{}
-\DoxyCodeLine{00334\ \ \ \ \ \ \ \mbox{\hyperlink{classfreertos_1_1counting__semaphore_a6407b3c89aa245c9976afee2456df085}{give}}();}
-\DoxyCodeLine{00335\ \ \ \ \ \}}
-\DoxyCodeLine{00336\ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
-\DoxyCodeLine{00337\ \ \ \}}
-\DoxyCodeLine{00338\ \};}
-\DoxyCodeLine{00339\ }
-\DoxyCodeLine{00346\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ SemaphoreAllocator>\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classfreertos_1_1mutex}{mutex}}\ \{}
-\DoxyCodeLine{00347\ \ \ SemaphoreAllocator\ m\_allocator;}
-\DoxyCodeLine{00348\ \ \ SemaphoreHandle\_t\ m\_semaphore;}
-\DoxyCodeLine{00349\ \ \ uint8\_t\ m\_locked\ :\ 1;}
-\DoxyCodeLine{00350\ }
-\DoxyCodeLine{00351\ \textcolor{keyword}{public}:}
-\DoxyCodeLine{00356\ \ \ \mbox{\hyperlink{classfreertos_1_1mutex_ae8300c5670725537b1e9d0bf930b65b3}{mutex}}()\ :\ m\_allocator\{\},\ m\_semaphore\{nullptr\},\ m\_locked\{false\}\ \{}
-\DoxyCodeLine{00357\ \ \ \ \ m\_semaphore\ =\ m\_allocator.create\_mutex();}
-\DoxyCodeLine{00358\ \ \ \ \ configASSERT(m\_semaphore);}
-\DoxyCodeLine{00359\ \ \ \}}
-\DoxyCodeLine{00360\ \ \ \mbox{\hyperlink{classfreertos_1_1mutex_ae8300c5670725537b1e9d0bf930b65b3}{mutex}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1mutex}{mutex}}\ \&)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{00361\ \ \ \mbox{\hyperlink{classfreertos_1_1mutex_ae8300c5670725537b1e9d0bf930b65b3}{mutex}}(\mbox{\hyperlink{classfreertos_1_1mutex}{mutex}}\ \&\&src)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{00367\ \ \ \mbox{\hyperlink{classfreertos_1_1mutex_a2d55a618d9301d78fee3ea2dbc0c54f7}{\string~mutex}}(\textcolor{keywordtype}{void})\ \{}
-\DoxyCodeLine{00368\ \ \ \ \ \textcolor{keywordflow}{if}\ (m\_semaphore)\ \{}
-\DoxyCodeLine{00369\ \ \ \ \ \ \ vSemaphoreDelete(m\_semaphore);}
-\DoxyCodeLine{00370\ \ \ \ \ \}}
+\DoxyCodeLine{00057\ \ \ \string~static\_semaphore\_allocator()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00058\ \ \ static\_semaphore\_allocator(\textcolor{keyword}{const}\ static\_semaphore\_allocator\ \&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00059\ \ \ static\_semaphore\_allocator(static\_semaphore\_allocator\ \&\&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00060\ }
+\DoxyCodeLine{00061\ \ \ static\_semaphore\_allocator\ \&}
+\DoxyCodeLine{00062\ \ \ operator=(\textcolor{keyword}{const}\ static\_semaphore\_allocator\ \&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00063\ \ \ static\_semaphore\_allocator\ \&operator=(static\_semaphore\_allocator\ \&\&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00064\ }
+\DoxyCodeLine{00065\ \ \ SemaphoreHandle\_t\ create\_binary()\ \{}
+\DoxyCodeLine{00066\ \ \ \ \ \textcolor{keywordflow}{return}\ xSemaphoreCreateBinaryStatic(\&m\_semaphore\_placeholder);}
+\DoxyCodeLine{00067\ \ \ \}}
+\DoxyCodeLine{00068\ \ \ SemaphoreHandle\_t\ create\_counting(UBaseType\_t\ max\_count)\ \{}
+\DoxyCodeLine{00069\ \ \ \ \ \textcolor{keywordflow}{return}\ xSemaphoreCreateCountingStatic(max\_count,\ max\_count,}
+\DoxyCodeLine{00070\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \&m\_semaphore\_placeholder);}
+\DoxyCodeLine{00071\ \ \ \}}
+\DoxyCodeLine{00072\ \ \ SemaphoreHandle\_t\ create\_mutex()\ \{}
+\DoxyCodeLine{00073\ \ \ \ \ \textcolor{keywordflow}{return}\ xSemaphoreCreateMutexStatic(\&m\_semaphore\_placeholder);}
+\DoxyCodeLine{00074\ \ \ \}}
+\DoxyCodeLine{00075\ \ \ SemaphoreHandle\_t\ create\_recursive\_mutex()\ \{}
+\DoxyCodeLine{00076\ \ \ \ \ \textcolor{keywordflow}{return}\ xSemaphoreCreateRecursiveMutexStatic(\&m\_semaphore\_placeholder);}
+\DoxyCodeLine{00077\ \ \ \}}
+\DoxyCodeLine{00078\ \};}
+\DoxyCodeLine{00079\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00080\ \textcolor{preprocessor}{\#if\ configSUPPORT\_DYNAMIC\_ALLOCATION}}
+\DoxyCodeLine{00085\ \textcolor{keyword}{class\ }dynamic\_semaphore\_allocator\ \{}
+\DoxyCodeLine{00086\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00087\ \ \ SemaphoreHandle\_t\ create\_binary()\ \{\ \textcolor{keywordflow}{return}\ xSemaphoreCreateBinary();\ \}}
+\DoxyCodeLine{00088\ \ \ SemaphoreHandle\_t\ create\_counting(UBaseType\_t\ max\_count)\ \{}
+\DoxyCodeLine{00089\ \ \ \ \ \textcolor{keywordflow}{return}\ xSemaphoreCreateCounting(max\_count,\ max\_count);}
+\DoxyCodeLine{00090\ \ \ \}}
+\DoxyCodeLine{00091\ \ \ SemaphoreHandle\_t\ create\_mutex()\ \{\ \textcolor{keywordflow}{return}\ xSemaphoreCreateMutex();\ \}}
+\DoxyCodeLine{00092\ \ \ SemaphoreHandle\_t\ create\_recursive\_mutex()\ \{}
+\DoxyCodeLine{00093\ \ \ \ \ \textcolor{keywordflow}{return}\ xSemaphoreCreateRecursiveMutex();}
+\DoxyCodeLine{00094\ \ \ \}}
+\DoxyCodeLine{00095\ \};}
+\DoxyCodeLine{00096\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00097\ }
+\DoxyCodeLine{00164\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ SemaphoreAllocator>\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classfreertos_1_1binary__semaphore}{binary\_semaphore}}\ \{}
+\DoxyCodeLine{00165\ \ \ SemaphoreAllocator\ m\_allocator\{\};}
+\DoxyCodeLine{00166\ \ \ SemaphoreHandle\_t\ m\_semaphore\{\textcolor{keyword}{nullptr}\};}
+\DoxyCodeLine{00167\ }
+\DoxyCodeLine{00168\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00173\ \ \ \mbox{\hyperlink{classfreertos_1_1binary__semaphore_a189b6bee4f0abb59109cd0e110c3d56f}{binary\_semaphore}}()\ :\ m\_semaphore\{m\_allocator.create\_binary()\}\ \{}
+\DoxyCodeLine{00174\ \ \ \ \ configASSERT(m\_semaphore);}
+\DoxyCodeLine{00175\ \ \ \}}
+\DoxyCodeLine{00176\ \ \ \mbox{\hyperlink{classfreertos_1_1binary__semaphore_a189b6bee4f0abb59109cd0e110c3d56f}{binary\_semaphore}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1binary__semaphore}{binary\_semaphore}}\ \&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00177\ \ \ \mbox{\hyperlink{classfreertos_1_1binary__semaphore_a189b6bee4f0abb59109cd0e110c3d56f}{binary\_semaphore}}(\mbox{\hyperlink{classfreertos_1_1binary__semaphore}{binary\_semaphore}}\ \&\&src)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00183\ \ \ \mbox{\hyperlink{classfreertos_1_1binary__semaphore_a07f06fa64b66a2118ddfd252d3cdb2c6}{\string~binary\_semaphore}}(\textcolor{keywordtype}{void})\ \{}
+\DoxyCodeLine{00184\ \ \ \ \ \textcolor{keywordflow}{if}\ (m\_semaphore)\ \{}
+\DoxyCodeLine{00185\ \ \ \ \ \ \ vSemaphoreDelete(m\_semaphore);}
+\DoxyCodeLine{00186\ \ \ \ \ \}}
+\DoxyCodeLine{00187\ \ \ \}}
+\DoxyCodeLine{00188\ }
+\DoxyCodeLine{00189\ \ \ \mbox{\hyperlink{classfreertos_1_1binary__semaphore}{binary\_semaphore}}\ \&operator=(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1binary__semaphore}{binary\_semaphore}}\ \&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00190\ \ \ \mbox{\hyperlink{classfreertos_1_1binary__semaphore}{binary\_semaphore}}\ \&operator=(\mbox{\hyperlink{classfreertos_1_1binary__semaphore}{binary\_semaphore}}\ \&\&src)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00191\ }
+\DoxyCodeLine{00200\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1binary__semaphore_a36fd71685f5c119bccc9e03fe52a70fc}{give}}()\ \{\ \textcolor{keywordflow}{return}\ xSemaphoreGive(m\_semaphore);\ \}}
+\DoxyCodeLine{00210\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1binary__semaphore_a139c85ca3cb7439696734efbcad91786}{give\_isr}}(BaseType\_t\ \&high\_priority\_task\_woken)\ \{}
+\DoxyCodeLine{00211\ \ \ \ \ \textcolor{keywordflow}{return}\ xSemaphoreGiveFromISR(m\_semaphore,\ \&high\_priority\_task\_woken);}
+\DoxyCodeLine{00212\ \ \ \}}
+\DoxyCodeLine{00220\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1binary__semaphore_acbee9cb6f8621c7ffe2b179559169b7d}{give\_isr}}(\textcolor{keywordtype}{void})\ \{}
+\DoxyCodeLine{00221\ \ \ \ \ BaseType\_t\ xHigherPriorityTaskWoken\ =\ pdFALSE;}
+\DoxyCodeLine{00222\ \ \ \ \ \textcolor{keywordflow}{return}\ xSemaphoreGiveFromISR(m\_semaphore,\ \&xHigherPriorityTaskWoken);}
+\DoxyCodeLine{00223\ \ \ \}}
+\DoxyCodeLine{00233\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1binary__semaphore_a9c157a3f25082aaa4e5fa1a606d9efd0}{take}}(\textcolor{keyword}{const}\ TickType\_t\ ticks\_to\_wait\ =\ portMAX\_DELAY)\ \{}
+\DoxyCodeLine{00234\ \ \ \ \ \textcolor{keywordflow}{return}\ xSemaphoreTake(m\_semaphore,\ ticks\_to\_wait);}
+\DoxyCodeLine{00235\ \ \ \}}
+\DoxyCodeLine{00247\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1binary__semaphore_a14d8aea4fbb3baba51c9d9ea7e82120b}{take\_isr}}(BaseType\_t\ \&high\_priority\_task\_woken)\ \{}
+\DoxyCodeLine{00248\ \ \ \ \ \textcolor{keywordflow}{return}\ xSemaphoreTakeFromISR(m\_semaphore,\ \&high\_priority\_task\_woken);}
+\DoxyCodeLine{00249\ \ \ \}}
+\DoxyCodeLine{00258\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1binary__semaphore_a7c0a56528e51347c31fd40b269b9b78b}{take\_isr}}(\textcolor{keywordtype}{void})\ \{}
+\DoxyCodeLine{00259\ \ \ \ \ BaseType\_t\ xHigherPriorityTaskWoken\ =\ pdFALSE;}
+\DoxyCodeLine{00260\ \ \ \ \ \textcolor{keywordflow}{return}\ xSemaphoreTakeFromISR(m\_semaphore,\ \&xHigherPriorityTaskWoken);}
+\DoxyCodeLine{00261\ \ \ \}}
+\DoxyCodeLine{00270\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Rep,\ \textcolor{keyword}{typename}\ Period>}
+\DoxyCodeLine{00271\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1binary__semaphore_a56c8efb4ba1bc09fc04a1e3493f7c0ad}{take}}(\textcolor{keyword}{const}\ std::chrono::duration<Rep,\ Period>\ \&timeout)\ \{}
+\DoxyCodeLine{00272\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classfreertos_1_1binary__semaphore_a9c157a3f25082aaa4e5fa1a606d9efd0}{take}}(}
+\DoxyCodeLine{00273\ \ \ \ \ \ \ \ \ std::chrono::duration\_cast<std::chrono::milliseconds>(timeout).count());}
+\DoxyCodeLine{00274\ \ \ \}}
+\DoxyCodeLine{00275\ \};}
+\DoxyCodeLine{00276\ }
+\DoxyCodeLine{00283\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ SemaphoreAllocator>\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classfreertos_1_1counting__semaphore}{counting\_semaphore}}\ \{}
+\DoxyCodeLine{00284\ \ \ SemaphoreAllocator\ m\_allocator\{\};}
+\DoxyCodeLine{00285\ \ \ SemaphoreHandle\_t\ m\_semaphore\{\textcolor{keyword}{nullptr}\};}
+\DoxyCodeLine{00286\ }
+\DoxyCodeLine{00287\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00294\ \ \ \textcolor{keyword}{explicit}\ \mbox{\hyperlink{classfreertos_1_1counting__semaphore_a8f9489d541ce2cf2f04a2daadb690cac}{counting\_semaphore}}(UBaseType\_t\ max\_count\ =\ 1)}
+\DoxyCodeLine{00295\ \ \ \ \ \ \ :\ m\_semaphore\{m\_allocator.create\_counting(max\_count)\}\ \{}
+\DoxyCodeLine{00296\ \ \ \ \ configASSERT(m\_semaphore);}
+\DoxyCodeLine{00297\ \ \ \}}
+\DoxyCodeLine{00298\ \ \ \mbox{\hyperlink{classfreertos_1_1counting__semaphore}{counting\_semaphore}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1counting__semaphore}{counting\_semaphore}}\ \&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00299\ \ \ \mbox{\hyperlink{classfreertos_1_1counting__semaphore}{counting\_semaphore}}(\mbox{\hyperlink{classfreertos_1_1counting__semaphore}{counting\_semaphore}}\ \&\&src)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00305\ \ \ \mbox{\hyperlink{classfreertos_1_1counting__semaphore_a0e311fe69b3117605c0f8110fced8e05}{\string~counting\_semaphore}}(\textcolor{keywordtype}{void})\ \{}
+\DoxyCodeLine{00306\ \ \ \ \ \textcolor{keywordflow}{if}\ (m\_semaphore)\ \{}
+\DoxyCodeLine{00307\ \ \ \ \ \ \ vSemaphoreDelete(m\_semaphore);}
+\DoxyCodeLine{00308\ \ \ \ \ \}}
+\DoxyCodeLine{00309\ \ \ \}}
+\DoxyCodeLine{00310\ }
+\DoxyCodeLine{00311\ \ \ \mbox{\hyperlink{classfreertos_1_1counting__semaphore}{counting\_semaphore}}\ \&operator=(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1counting__semaphore}{counting\_semaphore}}\ \&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00312\ \ \ \mbox{\hyperlink{classfreertos_1_1counting__semaphore}{counting\_semaphore}}\ \&operator=(\mbox{\hyperlink{classfreertos_1_1counting__semaphore}{counting\_semaphore}}\ \&\&src)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00313\ }
+\DoxyCodeLine{00322\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1counting__semaphore_a6407b3c89aa245c9976afee2456df085}{give}}()\ \{\ \textcolor{keywordflow}{return}\ xSemaphoreGive(m\_semaphore);\ \}}
+\DoxyCodeLine{00332\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1counting__semaphore_a8d2d7eb7c84eff0fa2705fd6e1e14f88}{give\_isr}}(BaseType\_t\ \&high\_priority\_task\_woken)\ \{}
+\DoxyCodeLine{00333\ \ \ \ \ \textcolor{keywordflow}{return}\ xSemaphoreGiveFromISR(m\_semaphore,\ \&high\_priority\_task\_woken);}
+\DoxyCodeLine{00334\ \ \ \}}
+\DoxyCodeLine{00342\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1counting__semaphore_a7e4965d714cfeed587ce3ccc2aa5db67}{give\_isr}}(\textcolor{keywordtype}{void})\ \{}
+\DoxyCodeLine{00343\ \ \ \ \ BaseType\_t\ xHigherPriorityTaskWoken\ =\ pdFALSE;}
+\DoxyCodeLine{00344\ \ \ \ \ \textcolor{keywordflow}{return}\ xSemaphoreGiveFromISR(m\_semaphore,\ \&xHigherPriorityTaskWoken);}
+\DoxyCodeLine{00345\ \ \ \}}
+\DoxyCodeLine{00355\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1counting__semaphore_a47ef131ae9b50fbcbc3db1aa7eb2aa5d}{take}}(\textcolor{keyword}{const}\ TickType\_t\ ticks\_to\_wait\ =\ portMAX\_DELAY)\ \{}
+\DoxyCodeLine{00356\ \ \ \ \ \textcolor{keywordflow}{return}\ xSemaphoreTake(m\_semaphore,\ ticks\_to\_wait);}
+\DoxyCodeLine{00357\ \ \ \}}
+\DoxyCodeLine{00369\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1counting__semaphore_a346dae83ff7201eb62e9b94fedc0d2de}{take\_isr}}(BaseType\_t\ \&high\_priority\_task\_woken)\ \{}
+\DoxyCodeLine{00370\ \ \ \ \ \textcolor{keywordflow}{return}\ xSemaphoreTakeFromISR(m\_semaphore,\ \&high\_priority\_task\_woken);}
 \DoxyCodeLine{00371\ \ \ \}}
-\DoxyCodeLine{00372\ }
-\DoxyCodeLine{00373\ \ \ \mbox{\hyperlink{classfreertos_1_1mutex}{mutex}}\ \&operator=(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1mutex}{mutex}}\ \&)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{00374\ \ \ \mbox{\hyperlink{classfreertos_1_1mutex}{mutex}}\ \&operator=(\mbox{\hyperlink{classfreertos_1_1mutex}{mutex}}\ \&\&src)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{00375\ }
-\DoxyCodeLine{00382\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1mutex_ab574313e4a5c41a11e10ce9e07f6b271}{unlock}}()\ \{}
-\DoxyCodeLine{00383\ \ \ \ \ \textcolor{keyword}{auto}\ rc\ =\ xSemaphoreGive(m\_semaphore);}
-\DoxyCodeLine{00384\ \ \ \ \ \textcolor{keywordflow}{if}\ (rc)\ \{}
-\DoxyCodeLine{00385\ \ \ \ \ \ \ m\_locked\ =\ \textcolor{keyword}{false};}
-\DoxyCodeLine{00386\ \ \ \ \ \}}
-\DoxyCodeLine{00387\ \ \ \ \ \textcolor{keywordflow}{return}\ rc;}
-\DoxyCodeLine{00388\ \ \ \}}
-\DoxyCodeLine{00397\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1mutex_a1c464217282db088a058756eec1827ab}{unlock\_isr}}(BaseType\_t\ \&high\_priority\_task\_woken)\ \{}
-\DoxyCodeLine{00398\ \ \ \ \ \textcolor{keyword}{auto}\ rc\ =\ xSemaphoreGiveFromISR(m\_semaphore,\ \&high\_priority\_task\_woken);}
-\DoxyCodeLine{00399\ \ \ \ \ \textcolor{keywordflow}{if}\ (rc)\ \{}
-\DoxyCodeLine{00400\ \ \ \ \ \ \ m\_locked\ =\ \textcolor{keyword}{false};}
-\DoxyCodeLine{00401\ \ \ \ \ \}}
-\DoxyCodeLine{00402\ \ \ \ \ \textcolor{keywordflow}{return}\ rc;}
-\DoxyCodeLine{00403\ \ \ \}}
-\DoxyCodeLine{00411\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1mutex_af1a6122cc4563cc4aaac5a6c38eca973}{lock}}(\textcolor{keyword}{const}\ TickType\_t\ ticks\_to\_wait\ =\ portMAX\_DELAY)\ \{}
-\DoxyCodeLine{00412\ \ \ \ \ \textcolor{keyword}{auto}\ rc\ =\ xSemaphoreTake(m\_semaphore,\ ticks\_to\_wait);}
-\DoxyCodeLine{00413\ \ \ \ \ \textcolor{keywordflow}{if}\ (rc)\ \{}
-\DoxyCodeLine{00414\ \ \ \ \ \ \ m\_locked\ =\ \textcolor{keyword}{true};}
-\DoxyCodeLine{00415\ \ \ \ \ \}}
-\DoxyCodeLine{00416\ \ \ \ \ \textcolor{keywordflow}{return}\ rc;}
-\DoxyCodeLine{00417\ \ \ \}}
-\DoxyCodeLine{00426\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1mutex_acbb1833541559e923fd673540a9e2181}{lock\_isr}}(BaseType\_t\ \&high\_priority\_task\_woken)\ \{}
-\DoxyCodeLine{00427\ \ \ \ \ \textcolor{keyword}{auto}\ rc\ =\ xSemaphoreTakeFromISR(m\_semaphore,\ \&high\_priority\_task\_woken);}
-\DoxyCodeLine{00428\ \ \ \ \ \textcolor{keywordflow}{if}\ (rc)\ \{}
-\DoxyCodeLine{00429\ \ \ \ \ \ \ m\_locked\ =\ \textcolor{keyword}{true};}
-\DoxyCodeLine{00430\ \ \ \ \ \}}
-\DoxyCodeLine{00431\ \ \ \ \ \textcolor{keywordflow}{return}\ rc;}
-\DoxyCodeLine{00432\ \ \ \}}
-\DoxyCodeLine{00439\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Rep,\ \textcolor{keyword}{typename}\ Period>}
-\DoxyCodeLine{00440\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1mutex_a2d32f868c9d02f94bb236e263b672f8b}{lock}}(\textcolor{keyword}{const}\ std::chrono::duration<Rep,\ Period>\ \&timeout)\ \{}
-\DoxyCodeLine{00441\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classfreertos_1_1mutex_af1a6122cc4563cc4aaac5a6c38eca973}{lock}}(}
-\DoxyCodeLine{00442\ \ \ \ \ \ \ \ \ std::chrono::duration\_cast<std::chrono::milliseconds>(timeout).count());}
-\DoxyCodeLine{00443\ \ \ \}}
-\DoxyCodeLine{00450\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1mutex_ad226f3e71d224b90615fb50bb214bf9f}{try\_lock}}()\ \{}
-\DoxyCodeLine{00451\ \ \ \ \ \textcolor{keyword}{auto}\ rc\ =\ xSemaphoreTake(m\_semaphore,\ 0);}
-\DoxyCodeLine{00452\ \ \ \ \ \textcolor{keywordflow}{if}\ (rc)\ \{}
-\DoxyCodeLine{00453\ \ \ \ \ \ \ m\_locked\ =\ \textcolor{keyword}{true};}
-\DoxyCodeLine{00454\ \ \ \ \ \}}
-\DoxyCodeLine{00455\ \ \ \ \ \textcolor{keywordflow}{return}\ rc;}
-\DoxyCodeLine{00456\ \ \ \}}
-\DoxyCodeLine{00462\ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classfreertos_1_1mutex_a2e2d859d027fd89e9201a2fc208ce953}{locked}}(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ m\_locked;\ \}}
-\DoxyCodeLine{00463\ \};}
-\DoxyCodeLine{00464\ }
-\DoxyCodeLine{00471\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ SemaphoreAllocator>\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classfreertos_1_1recursive__mutex}{recursive\_mutex}}\ \{}
-\DoxyCodeLine{00472\ \ \ SemaphoreAllocator\ m\_allocator;}
-\DoxyCodeLine{00473\ \ \ SemaphoreHandle\_t\ m\_semaphore;}
-\DoxyCodeLine{00474\ \ \ uint8\_t\ m\_locked\ :\ 1;}
-\DoxyCodeLine{00475\ }
-\DoxyCodeLine{00476\ \textcolor{keyword}{public}:}
-\DoxyCodeLine{00481\ \ \ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_ab9a7a225d849f32dcb429fd92669ef06}{recursive\_mutex}}()\ :\ m\_allocator\{\},\ m\_semaphore\{nullptr\},\ m\_locked\{false\}\ \{}
-\DoxyCodeLine{00482\ \ \ \ \ m\_semaphore\ =\ m\_allocator.create\_recursive\_mutex();}
-\DoxyCodeLine{00483\ \ \ \ \ configASSERT(m\_semaphore);}
-\DoxyCodeLine{00484\ \ \ \}}
-\DoxyCodeLine{00485\ \ \ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_ab9a7a225d849f32dcb429fd92669ef06}{recursive\_mutex}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1recursive__mutex}{recursive\_mutex}}\ \&)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{00486\ \ \ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_ab9a7a225d849f32dcb429fd92669ef06}{recursive\_mutex}}(\mbox{\hyperlink{classfreertos_1_1recursive__mutex}{recursive\_mutex}}\ \&\&src)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{00492\ \ \ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_a52e086a6726491c42e5d2d41bbd679c3}{\string~recursive\_mutex}}(\textcolor{keywordtype}{void})\ \{}
-\DoxyCodeLine{00493\ \ \ \ \ \textcolor{keywordflow}{if}\ (m\_semaphore)\ \{}
-\DoxyCodeLine{00494\ \ \ \ \ \ \ vSemaphoreDelete(m\_semaphore);}
-\DoxyCodeLine{00495\ \ \ \ \ \}}
-\DoxyCodeLine{00496\ \ \ \}}
-\DoxyCodeLine{00497\ }
-\DoxyCodeLine{00498\ \ \ \mbox{\hyperlink{classfreertos_1_1recursive__mutex}{recursive\_mutex}}\ \&operator=(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1recursive__mutex}{recursive\_mutex}}\ \&)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{00499\ \ \ \mbox{\hyperlink{classfreertos_1_1recursive__mutex}{recursive\_mutex}}\ \&operator=(\mbox{\hyperlink{classfreertos_1_1recursive__mutex}{recursive\_mutex}}\ \&\&src)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{00500\ }
-\DoxyCodeLine{00507\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_a47fd10b3cb192ef884366130178c240a}{unlock}}()\ \{}
-\DoxyCodeLine{00508\ \ \ \ \ \textcolor{keyword}{auto}\ rc\ =\ xSemaphoreGive(m\_semaphore);}
-\DoxyCodeLine{00509\ \ \ \ \ \textcolor{keywordflow}{if}\ (rc)\ \{}
-\DoxyCodeLine{00510\ \ \ \ \ \ \ m\_locked\ =\ \textcolor{keyword}{false};}
-\DoxyCodeLine{00511\ \ \ \ \ \}}
-\DoxyCodeLine{00512\ \ \ \ \ \textcolor{keywordflow}{return}\ rc;}
-\DoxyCodeLine{00513\ \ \ \}}
-\DoxyCodeLine{00522\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_ac052f05534988d032bf5505bd6be5bd1}{unlock\_isr}}(BaseType\_t\ \&high\_priority\_task\_woken)\ \{}
-\DoxyCodeLine{00523\ \ \ \ \ \textcolor{keyword}{auto}\ rc\ =\ xSemaphoreGiveFromISR(m\_semaphore,\ \&high\_priority\_task\_woken);}
-\DoxyCodeLine{00524\ \ \ \ \ \textcolor{keywordflow}{if}\ (rc)\ \{}
-\DoxyCodeLine{00525\ \ \ \ \ \ \ m\_locked\ =\ \textcolor{keyword}{false};}
-\DoxyCodeLine{00526\ \ \ \ \ \}}
-\DoxyCodeLine{00527\ \ \ \ \ \textcolor{keywordflow}{return}\ rc;}
-\DoxyCodeLine{00528\ \ \ \}}
-\DoxyCodeLine{00536\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_acb1c0619ac4ca0e62173a8ebeef12e69}{lock}}(\textcolor{keyword}{const}\ TickType\_t\ ticks\_to\_wait\ =\ portMAX\_DELAY)\ \{}
-\DoxyCodeLine{00537\ \ \ \ \ \textcolor{keyword}{auto}\ rc\ =\ xSemaphoreTake(m\_semaphore,\ ticks\_to\_wait);}
-\DoxyCodeLine{00538\ \ \ \ \ \textcolor{keywordflow}{if}\ (rc)\ \{}
-\DoxyCodeLine{00539\ \ \ \ \ \ \ m\_locked\ =\ \textcolor{keyword}{true};}
-\DoxyCodeLine{00540\ \ \ \ \ \}}
-\DoxyCodeLine{00541\ \ \ \ \ \textcolor{keywordflow}{return}\ rc;}
-\DoxyCodeLine{00542\ \ \ \}}
-\DoxyCodeLine{00551\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_ad1002ee47642a565fa898e194f3604b4}{lock\_isr}}(BaseType\_t\ \&high\_priority\_task\_woken)\ \{}
-\DoxyCodeLine{00552\ \ \ \ \ \textcolor{keyword}{auto}\ rc\ =\ xSemaphoreTakeFromISR(m\_semaphore,\ \&high\_priority\_task\_woken);}
-\DoxyCodeLine{00553\ \ \ \ \ \textcolor{keywordflow}{if}\ (rc)\ \{}
-\DoxyCodeLine{00554\ \ \ \ \ \ \ m\_locked\ =\ \textcolor{keyword}{true};}
-\DoxyCodeLine{00555\ \ \ \ \ \}}
-\DoxyCodeLine{00556\ \ \ \ \ \textcolor{keywordflow}{return}\ rc;}
-\DoxyCodeLine{00557\ \ \ \}}
-\DoxyCodeLine{00564\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Rep,\ \textcolor{keyword}{typename}\ Period>}
-\DoxyCodeLine{00565\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_ab3e95b964f62311ea06e33542507fb89}{lock}}(\textcolor{keyword}{const}\ std::chrono::duration<Rep,\ Period>\ \&timeout)\ \{}
-\DoxyCodeLine{00566\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_acb1c0619ac4ca0e62173a8ebeef12e69}{lock}}(}
-\DoxyCodeLine{00567\ \ \ \ \ \ \ \ \ std::chrono::duration\_cast<std::chrono::milliseconds>(timeout).count());}
-\DoxyCodeLine{00568\ \ \ \}}
-\DoxyCodeLine{00575\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_ab6a508d720641f15c1fe2b293e96ae50}{try\_lock}}()\ \{}
-\DoxyCodeLine{00576\ \ \ \ \ \textcolor{keyword}{auto}\ rc\ =\ xSemaphoreTake(m\_semaphore,\ 0);}
-\DoxyCodeLine{00577\ \ \ \ \ \textcolor{keywordflow}{if}\ (rc)\ \{}
-\DoxyCodeLine{00578\ \ \ \ \ \ \ m\_locked\ =\ \textcolor{keyword}{true};}
-\DoxyCodeLine{00579\ \ \ \ \ \}}
-\DoxyCodeLine{00580\ \ \ \ \ \textcolor{keywordflow}{return}\ rc;}
-\DoxyCodeLine{00581\ \ \ \}}
-\DoxyCodeLine{00587\ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_a50a8c8b3aaeff40407e15d3eb597e8d8}{locked}}(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ m\_locked;\ \}}
-\DoxyCodeLine{00588\ \};}
-\DoxyCodeLine{00589\ }
-\DoxyCodeLine{00596\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Mutex>\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classfreertos_1_1lock__guard}{lock\_guard}}\ \{}
-\DoxyCodeLine{00597\ \ \ Mutex\ \&m\_mutex;}
-\DoxyCodeLine{00598\ }
-\DoxyCodeLine{00599\ \textcolor{keyword}{public}:}
-\DoxyCodeLine{00605\ \ \ \textcolor{keyword}{explicit}\ \mbox{\hyperlink{classfreertos_1_1lock__guard_a8276ed46c1507dc9c8c27a5bd56c4d9e}{lock\_guard}}(Mutex\ \&\mbox{\hyperlink{classfreertos_1_1mutex}{mutex}})\ :\ m\_mutex\{\mbox{\hyperlink{classfreertos_1_1mutex}{mutex}}\}\ \{\ m\_mutex.\mbox{\hyperlink{classfreertos_1_1mutex_af1a6122cc4563cc4aaac5a6c38eca973}{lock}}();\ \}}
-\DoxyCodeLine{00610\ \ \ \mbox{\hyperlink{classfreertos_1_1lock__guard_af46d4af2d983d17c333f0265c941cad4}{\string~lock\_guard}}(\textcolor{keywordtype}{void})\ \{\ m\_mutex.unlock();\ \}}
-\DoxyCodeLine{00611\ }
-\DoxyCodeLine{00617\ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classfreertos_1_1lock__guard_aab62d6459ed0be2ee1211fe2b3c0b4d1}{locked}}(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ m\_mutex.locked();\ \}}
-\DoxyCodeLine{00618\ \};}
+\DoxyCodeLine{00380\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1counting__semaphore_a66948f9f30c590a07e78e5f1eb2a9f09}{take\_isr}}(\textcolor{keywordtype}{void})\ \{}
+\DoxyCodeLine{00381\ \ \ \ \ BaseType\_t\ xHigherPriorityTaskWoken\ =\ pdFALSE;}
+\DoxyCodeLine{00382\ \ \ \ \ \textcolor{keywordflow}{return}\ xSemaphoreTakeFromISR(m\_semaphore,\ \&xHigherPriorityTaskWoken);}
+\DoxyCodeLine{00383\ \ \ \}}
+\DoxyCodeLine{00392\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Rep,\ \textcolor{keyword}{typename}\ Period>}
+\DoxyCodeLine{00393\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1counting__semaphore_ab844536d406d6d303ef0df8f0e43a6ad}{take}}(\textcolor{keyword}{const}\ std::chrono::duration<Rep,\ Period>\ \&timeout)\ \{}
+\DoxyCodeLine{00394\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classfreertos_1_1counting__semaphore_a47ef131ae9b50fbcbc3db1aa7eb2aa5d}{take}}(}
+\DoxyCodeLine{00395\ \ \ \ \ \ \ \ \ std::chrono::duration\_cast<std::chrono::milliseconds>(timeout).\mbox{\hyperlink{classfreertos_1_1counting__semaphore_a9c485144e9aa39623e887d5b1cf3d1e8}{count}}());}
+\DoxyCodeLine{00396\ \ \ \}}
+\DoxyCodeLine{00402\ \ \ \mbox{\hyperlink{classfreertos_1_1counting__semaphore}{counting\_semaphore}}\ \&\mbox{\hyperlink{classfreertos_1_1counting__semaphore_ad7430310882c46c2c92e680884b9ef45}{operator++}}()\ \{}
+\DoxyCodeLine{00403\ \ \ \ \ \mbox{\hyperlink{classfreertos_1_1counting__semaphore_a6407b3c89aa245c9976afee2456df085}{give}}();}
+\DoxyCodeLine{00404\ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00405\ \ \ \}}
+\DoxyCodeLine{00411\ \ \ \mbox{\hyperlink{classfreertos_1_1counting__semaphore}{counting\_semaphore}}\ \&\mbox{\hyperlink{classfreertos_1_1counting__semaphore_aa1f738a641c3532b03907c89b157fbd7}{operator-\/-\/}}()\ \{}
+\DoxyCodeLine{00412\ \ \ \ \ \mbox{\hyperlink{classfreertos_1_1counting__semaphore_a47ef131ae9b50fbcbc3db1aa7eb2aa5d}{take}}();}
+\DoxyCodeLine{00413\ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00414\ \ \ \}}
+\DoxyCodeLine{00421\ \ \ \mbox{\hyperlink{classfreertos_1_1counting__semaphore}{counting\_semaphore}}\ \&}
+\DoxyCodeLine{00422\ \ \ \mbox{\hyperlink{classfreertos_1_1counting__semaphore_a057a0916be711f3814d2a79e7ee954ec}{operator++}}(\textcolor{keywordtype}{int})\ \{\ \textcolor{comment}{//\ NOLINT(cert-\/dcl21-\/cpp):\ RAII\ class,\ copy\ is\ deleted}}
+\DoxyCodeLine{00423\ \ \ \ \ \mbox{\hyperlink{classfreertos_1_1counting__semaphore_a6407b3c89aa245c9976afee2456df085}{give}}();}
+\DoxyCodeLine{00424\ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00425\ \ \ \}}
+\DoxyCodeLine{00432\ \ \ \mbox{\hyperlink{classfreertos_1_1counting__semaphore}{counting\_semaphore}}\ \&}
+\DoxyCodeLine{00433\ \ \ \mbox{\hyperlink{classfreertos_1_1counting__semaphore_aaa3590f1722ea0a4a764580911b2c2a0}{operator-\/-\/}}(\textcolor{keywordtype}{int})\ \{\ \textcolor{comment}{//\ NOLINT(cert-\/dcl21-\/cpp):\ RAII\ class,\ copy\ is\ deleted}}
+\DoxyCodeLine{00434\ \ \ \ \ \mbox{\hyperlink{classfreertos_1_1counting__semaphore_a47ef131ae9b50fbcbc3db1aa7eb2aa5d}{take}}();}
+\DoxyCodeLine{00435\ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00436\ \ \ \}}
+\DoxyCodeLine{00442\ \ \ UBaseType\_t\ \mbox{\hyperlink{classfreertos_1_1counting__semaphore_a9c485144e9aa39623e887d5b1cf3d1e8}{count}}()\ \{\ \textcolor{keywordflow}{return}\ uxSemaphoreGetCount(m\_semaphore);\ \}}
+\DoxyCodeLine{00449\ \ \ \mbox{\hyperlink{classfreertos_1_1counting__semaphore}{counting\_semaphore}}\ \&\mbox{\hyperlink{classfreertos_1_1counting__semaphore_a97b87512097d920ac945d1d7488a9632}{operator+=}}(UBaseType\_t\ \mbox{\hyperlink{classfreertos_1_1counting__semaphore_a9c485144e9aa39623e887d5b1cf3d1e8}{count}})\ \{}
+\DoxyCodeLine{00450\ \ \ \ \ \textcolor{keywordflow}{while}\ (\mbox{\hyperlink{classfreertos_1_1counting__semaphore_a9c485144e9aa39623e887d5b1cf3d1e8}{count}}-\/-\/)\ \{}
+\DoxyCodeLine{00451\ \ \ \ \ \ \ \mbox{\hyperlink{classfreertos_1_1counting__semaphore_a6407b3c89aa245c9976afee2456df085}{give}}();}
+\DoxyCodeLine{00452\ \ \ \ \ \}}
+\DoxyCodeLine{00453\ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00454\ \ \ \}}
+\DoxyCodeLine{00455\ \};}
+\DoxyCodeLine{00456\ }
+\DoxyCodeLine{00463\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ SemaphoreAllocator>\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classfreertos_1_1mutex}{mutex}}\ \{}
+\DoxyCodeLine{00464\ \ \ SemaphoreAllocator\ m\_allocator\{\};}
+\DoxyCodeLine{00465\ \ \ SemaphoreHandle\_t\ m\_semaphore\{\textcolor{keyword}{nullptr}\};}
+\DoxyCodeLine{00466\ \ \ uint8\_t\ m\_locked\ :\ 1;}
+\DoxyCodeLine{00467\ }
+\DoxyCodeLine{00468\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00473\ \ \ \mbox{\hyperlink{classfreertos_1_1mutex_ae8300c5670725537b1e9d0bf930b65b3}{mutex}}()\ :\ m\_semaphore\{m\_allocator.create\_mutex()\},\ m\_locked\{false\}\ \{}
+\DoxyCodeLine{00474\ \ \ \ \ configASSERT(m\_semaphore);}
+\DoxyCodeLine{00475\ \ \ \}}
+\DoxyCodeLine{00476\ \ \ \mbox{\hyperlink{classfreertos_1_1mutex_ae8300c5670725537b1e9d0bf930b65b3}{mutex}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1mutex}{mutex}}\ \&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00477\ \ \ \mbox{\hyperlink{classfreertos_1_1mutex_ae8300c5670725537b1e9d0bf930b65b3}{mutex}}(\mbox{\hyperlink{classfreertos_1_1mutex}{mutex}}\ \&\&src)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00483\ \ \ \mbox{\hyperlink{classfreertos_1_1mutex_a2d55a618d9301d78fee3ea2dbc0c54f7}{\string~mutex}}(\textcolor{keywordtype}{void})\ \{}
+\DoxyCodeLine{00484\ \ \ \ \ \textcolor{keywordflow}{if}\ (m\_semaphore)\ \{}
+\DoxyCodeLine{00485\ \ \ \ \ \ \ vSemaphoreDelete(m\_semaphore);}
+\DoxyCodeLine{00486\ \ \ \ \ \}}
+\DoxyCodeLine{00487\ \ \ \}}
+\DoxyCodeLine{00488\ }
+\DoxyCodeLine{00489\ \ \ \mbox{\hyperlink{classfreertos_1_1mutex}{mutex}}\ \&operator=(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1mutex}{mutex}}\ \&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00490\ \ \ \mbox{\hyperlink{classfreertos_1_1mutex}{mutex}}\ \&operator=(\mbox{\hyperlink{classfreertos_1_1mutex}{mutex}}\ \&\&src)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00491\ }
+\DoxyCodeLine{00498\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1mutex_ab574313e4a5c41a11e10ce9e07f6b271}{unlock}}()\ \{}
+\DoxyCodeLine{00499\ \ \ \ \ \textcolor{keyword}{auto}\ rc\ =\ xSemaphoreGive(m\_semaphore);}
+\DoxyCodeLine{00500\ \ \ \ \ \textcolor{keywordflow}{if}\ (rc)\ \{}
+\DoxyCodeLine{00501\ \ \ \ \ \ \ m\_locked\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00502\ \ \ \ \ \}}
+\DoxyCodeLine{00503\ \ \ \ \ \textcolor{keywordflow}{return}\ rc;}
+\DoxyCodeLine{00504\ \ \ \}}
+\DoxyCodeLine{00513\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1mutex_a1c464217282db088a058756eec1827ab}{unlock\_isr}}(BaseType\_t\ \&high\_priority\_task\_woken)\ \{}
+\DoxyCodeLine{00514\ \ \ \ \ \textcolor{keyword}{auto}\ rc\ =\ xSemaphoreGiveFromISR(m\_semaphore,\ \&high\_priority\_task\_woken);}
+\DoxyCodeLine{00515\ \ \ \ \ \textcolor{keywordflow}{if}\ (rc)\ \{}
+\DoxyCodeLine{00516\ \ \ \ \ \ \ m\_locked\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00517\ \ \ \ \ \}}
+\DoxyCodeLine{00518\ \ \ \ \ \textcolor{keywordflow}{return}\ rc;}
+\DoxyCodeLine{00519\ \ \ \}}
+\DoxyCodeLine{00526\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1mutex_a95f57c23a03edd90798962cdbb9c275c}{unlock\_isr}}(\textcolor{keywordtype}{void})\ \{}
+\DoxyCodeLine{00527\ \ \ \ \ BaseType\_t\ high\_priority\_task\_woken\ =\ pdFALSE;}
+\DoxyCodeLine{00528\ \ \ \ \ \textcolor{keyword}{auto}\ rc\ =\ xSemaphoreGiveFromISR(m\_semaphore,\ \&high\_priority\_task\_woken);}
+\DoxyCodeLine{00529\ \ \ \ \ \textcolor{keywordflow}{if}\ (rc)\ \{}
+\DoxyCodeLine{00530\ \ \ \ \ \ \ m\_locked\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00531\ \ \ \ \ \}}
+\DoxyCodeLine{00532\ \ \ \ \ \textcolor{keywordflow}{return}\ rc;}
+\DoxyCodeLine{00533\ \ \ \}}
+\DoxyCodeLine{00541\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1mutex_af1a6122cc4563cc4aaac5a6c38eca973}{lock}}(\textcolor{keyword}{const}\ TickType\_t\ ticks\_to\_wait\ =\ portMAX\_DELAY)\ \{}
+\DoxyCodeLine{00542\ \ \ \ \ \textcolor{keyword}{auto}\ rc\ =\ xSemaphoreTake(m\_semaphore,\ ticks\_to\_wait);}
+\DoxyCodeLine{00543\ \ \ \ \ \textcolor{keywordflow}{if}\ (rc)\ \{}
+\DoxyCodeLine{00544\ \ \ \ \ \ \ m\_locked\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{00545\ \ \ \ \ \}}
+\DoxyCodeLine{00546\ \ \ \ \ \textcolor{keywordflow}{return}\ rc;}
+\DoxyCodeLine{00547\ \ \ \}}
+\DoxyCodeLine{00556\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1mutex_acbb1833541559e923fd673540a9e2181}{lock\_isr}}(BaseType\_t\ \&high\_priority\_task\_woken)\ \{}
+\DoxyCodeLine{00557\ \ \ \ \ \textcolor{keyword}{auto}\ rc\ =\ xSemaphoreTakeFromISR(m\_semaphore,\ \&high\_priority\_task\_woken);}
+\DoxyCodeLine{00558\ \ \ \ \ \textcolor{keywordflow}{if}\ (rc)\ \{}
+\DoxyCodeLine{00559\ \ \ \ \ \ \ m\_locked\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{00560\ \ \ \ \ \}}
+\DoxyCodeLine{00561\ \ \ \ \ \textcolor{keywordflow}{return}\ rc;}
+\DoxyCodeLine{00562\ \ \ \}}
+\DoxyCodeLine{00569\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1mutex_a757ff2deb21e085d412990a7915abf73}{lock\_isr}}(\textcolor{keywordtype}{void})\ \{}
+\DoxyCodeLine{00570\ \ \ \ \ BaseType\_t\ high\_priority\_task\_woken\ =\ pdFALSE;}
+\DoxyCodeLine{00571\ \ \ \ \ \textcolor{keyword}{auto}\ rc\ =\ xSemaphoreTakeFromISR(m\_semaphore,\ \&high\_priority\_task\_woken);}
+\DoxyCodeLine{00572\ \ \ \ \ \textcolor{keywordflow}{if}\ (rc)\ \{}
+\DoxyCodeLine{00573\ \ \ \ \ \ \ m\_locked\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{00574\ \ \ \ \ \}}
+\DoxyCodeLine{00575\ \ \ \ \ \textcolor{keywordflow}{return}\ rc;}
+\DoxyCodeLine{00576\ \ \ \}}
+\DoxyCodeLine{00583\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Rep,\ \textcolor{keyword}{typename}\ Period>}
+\DoxyCodeLine{00584\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1mutex_a2d32f868c9d02f94bb236e263b672f8b}{lock}}(\textcolor{keyword}{const}\ std::chrono::duration<Rep,\ Period>\ \&timeout)\ \{}
+\DoxyCodeLine{00585\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classfreertos_1_1mutex_af1a6122cc4563cc4aaac5a6c38eca973}{lock}}(}
+\DoxyCodeLine{00586\ \ \ \ \ \ \ \ \ std::chrono::duration\_cast<std::chrono::milliseconds>(timeout).count());}
+\DoxyCodeLine{00587\ \ \ \}}
+\DoxyCodeLine{00594\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1mutex_ad226f3e71d224b90615fb50bb214bf9f}{try\_lock}}()\ \{}
+\DoxyCodeLine{00595\ \ \ \ \ \textcolor{keyword}{auto}\ rc\ =\ xSemaphoreTake(m\_semaphore,\ 0);}
+\DoxyCodeLine{00596\ \ \ \ \ \textcolor{keywordflow}{if}\ (rc)\ \{}
+\DoxyCodeLine{00597\ \ \ \ \ \ \ m\_locked\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{00598\ \ \ \ \ \}}
+\DoxyCodeLine{00599\ \ \ \ \ \textcolor{keywordflow}{return}\ rc;}
+\DoxyCodeLine{00600\ \ \ \}}
+\DoxyCodeLine{00606\ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classfreertos_1_1mutex_a2e2d859d027fd89e9201a2fc208ce953}{locked}}(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ m\_locked;\ \}}
+\DoxyCodeLine{00607\ \};}
+\DoxyCodeLine{00608\ }
+\DoxyCodeLine{00615\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ SemaphoreAllocator>\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classfreertos_1_1recursive__mutex}{recursive\_mutex}}\ \{}
+\DoxyCodeLine{00616\ \ \ SemaphoreAllocator\ m\_allocator\{\};}
+\DoxyCodeLine{00617\ \ \ SemaphoreHandle\_t\ m\_semaphore\{\textcolor{keyword}{nullptr}\};}
+\DoxyCodeLine{00618\ \ \ uint8\_t\ m\_lock\_count\{0\};}
 \DoxyCodeLine{00619\ }
-\DoxyCodeLine{00626\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Mutex>\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classfreertos_1_1try__lock__guard}{try\_lock\_guard}}\ \{}
-\DoxyCodeLine{00627\ \ \ Mutex\ \&m\_mutex;}
-\DoxyCodeLine{00628\ }
-\DoxyCodeLine{00629\ \textcolor{keyword}{public}:}
-\DoxyCodeLine{00635\ \ \ \textcolor{keyword}{explicit}\ \mbox{\hyperlink{classfreertos_1_1try__lock__guard_a90264ae7f771340603a3ff10489f22c2}{try\_lock\_guard}}(Mutex\ \&\mbox{\hyperlink{classfreertos_1_1mutex}{mutex}})\ :\ m\_mutex\{\mbox{\hyperlink{classfreertos_1_1mutex}{mutex}}\}\ \{\ m\_mutex.\mbox{\hyperlink{classfreertos_1_1mutex_ad226f3e71d224b90615fb50bb214bf9f}{try\_lock}}();\ \}}
-\DoxyCodeLine{00640\ \ \ \mbox{\hyperlink{classfreertos_1_1try__lock__guard_a4a8bc0b81f03b273d3c006a83c68e1ad}{\string~try\_lock\_guard}}(\textcolor{keywordtype}{void})\ \{\ m\_mutex.unlock();\ \}}
-\DoxyCodeLine{00641\ }
-\DoxyCodeLine{00647\ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classfreertos_1_1try__lock__guard_af8716e8b1a49863fda189d53489f8814}{locked}}(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ m\_mutex.locked();\ \}}
-\DoxyCodeLine{00648\ \};}
-\DoxyCodeLine{00649\ }
-\DoxyCodeLine{00656\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Mutex>\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classfreertos_1_1lock__guard__isr}{lock\_guard\_isr}}\ \{}
-\DoxyCodeLine{00657\ \ \ Mutex\ \&m\_mutex;}
-\DoxyCodeLine{00658\ \ \ BaseType\_t\ m\_high\_priority\_task\_woken;}
-\DoxyCodeLine{00659\ }
-\DoxyCodeLine{00660\ \textcolor{keyword}{public}:}
-\DoxyCodeLine{00666\ \ \ \textcolor{keyword}{explicit}\ \mbox{\hyperlink{classfreertos_1_1lock__guard__isr_aadeffd401db0f3fe52fb5beba6373158}{lock\_guard\_isr}}(Mutex\ \&\mbox{\hyperlink{classfreertos_1_1mutex}{mutex}})}
-\DoxyCodeLine{00667\ \ \ \ \ \ \ :\ m\_mutex\{\mbox{\hyperlink{classfreertos_1_1mutex}{mutex}}\},\ m\_high\_priority\_task\_woken\{pdFALSE\}\ \{}
-\DoxyCodeLine{00668\ \ \ \ \ m\_mutex.\mbox{\hyperlink{classfreertos_1_1mutex_acbb1833541559e923fd673540a9e2181}{lock\_isr}}(m\_high\_priority\_task\_woken);}
-\DoxyCodeLine{00669\ \ \ \}}
-\DoxyCodeLine{00674\ \ \ \mbox{\hyperlink{classfreertos_1_1lock__guard__isr_a9008d32cb43029a2ccd29242ac713cec}{\string~lock\_guard\_isr}}(\textcolor{keywordtype}{void})\ \{\ m\_mutex.unlock\_isr(m\_high\_priority\_task\_woken);\ \}}
-\DoxyCodeLine{00675\ }
-\DoxyCodeLine{00682\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1lock__guard__isr_a1852af1aab57024fbe24e79a3fb31fd0}{high\_priority\_task\_woken}}(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{}
-\DoxyCodeLine{00683\ \ \ \ \ \textcolor{keywordflow}{return}\ m\_high\_priority\_task\_woken;}
-\DoxyCodeLine{00684\ \ \ \}}
-\DoxyCodeLine{00690\ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classfreertos_1_1lock__guard__isr_a24efba54d6b36741d788345b71d5eb8e}{locked}}(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ m\_mutex.locked();\ \}}
-\DoxyCodeLine{00691\ \};}
-\DoxyCodeLine{00692\ }
-\DoxyCodeLine{00699\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Mutex>\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classfreertos_1_1timeout__lock__guard}{timeout\_lock\_guard}}\ \{}
-\DoxyCodeLine{00700\ \ \ Mutex\ \&m\_mutex;}
-\DoxyCodeLine{00701\ }
-\DoxyCodeLine{00702\ \textcolor{keyword}{public}:}
-\DoxyCodeLine{00709\ \ \ \mbox{\hyperlink{classfreertos_1_1timeout__lock__guard_a6194a77fdb07d2b52977a393dfd2311d}{timeout\_lock\_guard}}(Mutex\ \&\mbox{\hyperlink{classfreertos_1_1mutex}{mutex}},\ TickType\_t\ ticks\_to\_wait)\ :\ m\_mutex\{\mbox{\hyperlink{classfreertos_1_1mutex}{mutex}}\}\ \{}
-\DoxyCodeLine{00710\ \ \ \ \ m\_mutex.\mbox{\hyperlink{classfreertos_1_1mutex_af1a6122cc4563cc4aaac5a6c38eca973}{lock}}(ticks\_to\_wait);}
-\DoxyCodeLine{00711\ \ \ \}}
-\DoxyCodeLine{00718\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Rep,\ \textcolor{keyword}{typename}\ Period>}
-\DoxyCodeLine{00719\ \ \ \mbox{\hyperlink{classfreertos_1_1timeout__lock__guard_a1e807fedd780a126608d57924472f121}{timeout\_lock\_guard}}(Mutex\ \&\mbox{\hyperlink{classfreertos_1_1mutex}{mutex}},}
-\DoxyCodeLine{00720\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::chrono::duration<Rep,\ Period>\ \&timeout)}
-\DoxyCodeLine{00721\ \ \ \ \ \ \ :\ m\_mutex\{\mbox{\hyperlink{classfreertos_1_1mutex}{mutex}}\}\ \{}
-\DoxyCodeLine{00722\ \ \ \ \ m\_mutex.\mbox{\hyperlink{classfreertos_1_1mutex_af1a6122cc4563cc4aaac5a6c38eca973}{lock}}(}
-\DoxyCodeLine{00723\ \ \ \ \ \ \ \ \ std::chrono::duration\_cast<std::chrono::milliseconds>(timeout).count());}
-\DoxyCodeLine{00724\ \ \ \}}
-\DoxyCodeLine{00729\ \ \ \mbox{\hyperlink{classfreertos_1_1timeout__lock__guard_a6c2adfd05626569df6c17190de6bb01f}{\string~timeout\_lock\_guard}}(\textcolor{keywordtype}{void})\ \{\ m\_mutex.unlock();\ \}}
-\DoxyCodeLine{00730\ }
-\DoxyCodeLine{00736\ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classfreertos_1_1timeout__lock__guard_a0f514d8cf9abe0a1a40dc8c18ca313ee}{locked}}(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ m\_mutex.locked();\ \}}
-\DoxyCodeLine{00737\ \};}
-\DoxyCodeLine{00738\ }
-\DoxyCodeLine{00739\ \textcolor{preprocessor}{\#if\ configSUPPORT\_STATIC\_ALLOCATION}}
-\DoxyCodeLine{00745\ \textcolor{keyword}{namespace\ }sa\ \{}
-\DoxyCodeLine{00750\ \textcolor{keyword}{using\ }binary\_semaphore\ =}
-\DoxyCodeLine{00751\ \ \ \ \ \mbox{\hyperlink{classfreertos_1_1binary__semaphore}{freertos::binary\_semaphore<freertos::static\_semaphore\_allocator>}};}
-\DoxyCodeLine{00756\ \textcolor{keyword}{using\ }counting\_semaphore\ =}
-\DoxyCodeLine{00757\ \ \ \ \ \mbox{\hyperlink{classfreertos_1_1counting__semaphore}{freertos::counting\_semaphore<freertos::static\_semaphore\_allocator>}};}
-\DoxyCodeLine{00762\ \textcolor{keyword}{using\ }mutex\ =\ \mbox{\hyperlink{classfreertos_1_1mutex}{freertos::mutex<freertos::static\_semaphore\_allocator>}};}
-\DoxyCodeLine{00767\ \textcolor{keyword}{using\ }recursive\_mutex\ =}
-\DoxyCodeLine{00768\ \ \ \ \ \mbox{\hyperlink{classfreertos_1_1recursive__mutex}{freertos::recursive\_mutex<freertos::static\_semaphore\_allocator>}};}
-\DoxyCodeLine{00769\ \}\ \textcolor{comment}{//\ namespace\ sa}}
-\DoxyCodeLine{00770\ \textcolor{preprocessor}{\#endif}}
-\DoxyCodeLine{00771\ \textcolor{preprocessor}{\#if\ configSUPPORT\_DYNAMIC\_ALLOCATION}}
-\DoxyCodeLine{00777\ \textcolor{keyword}{namespace\ }da\ \{}
-\DoxyCodeLine{00782\ \textcolor{keyword}{using\ }binary\_semaphore\ =}
-\DoxyCodeLine{00783\ \ \ \ \ \mbox{\hyperlink{classfreertos_1_1binary__semaphore}{freertos::binary\_semaphore<freertos::dynamic\_semaphore\_allocator>}};}
-\DoxyCodeLine{00788\ \textcolor{keyword}{using\ }counting\_semaphore\ =}
-\DoxyCodeLine{00789\ \ \ \ \ \mbox{\hyperlink{classfreertos_1_1counting__semaphore}{freertos::counting\_semaphore<freertos::dynamic\_semaphore\_allocator>}};}
-\DoxyCodeLine{00794\ \textcolor{keyword}{using\ }mutex\ =\ \mbox{\hyperlink{classfreertos_1_1mutex}{freertos::mutex<freertos::dynamic\_semaphore\_allocator>}};}
-\DoxyCodeLine{00799\ \textcolor{keyword}{using\ }recursive\_mutex\ =}
-\DoxyCodeLine{00800\ \ \ \ \ \mbox{\hyperlink{classfreertos_1_1recursive__mutex}{freertos::recursive\_mutex<freertos::dynamic\_semaphore\_allocator>}};}
-\DoxyCodeLine{00801\ \}\ \textcolor{comment}{//\ namespace\ da}}
-\DoxyCodeLine{00802\ \textcolor{preprocessor}{\#endif}}
-\DoxyCodeLine{00803\ }
-\DoxyCodeLine{00804\ \}\ \textcolor{comment}{//\ namespace\ freertos}}
+\DoxyCodeLine{00620\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00625\ \ \ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_ab9a7a225d849f32dcb429fd92669ef06}{recursive\_mutex}}()\ :\ m\_semaphore\{m\_allocator.create\_recursive\_mutex()\}\ \{}
+\DoxyCodeLine{00626\ \ \ \ \ configASSERT(m\_semaphore);}
+\DoxyCodeLine{00627\ \ \ \}}
+\DoxyCodeLine{00628\ \ \ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_ab9a7a225d849f32dcb429fd92669ef06}{recursive\_mutex}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1recursive__mutex}{recursive\_mutex}}\ \&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00629\ \ \ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_ab9a7a225d849f32dcb429fd92669ef06}{recursive\_mutex}}(\mbox{\hyperlink{classfreertos_1_1recursive__mutex}{recursive\_mutex}}\ \&\&src)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00635\ \ \ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_a52e086a6726491c42e5d2d41bbd679c3}{\string~recursive\_mutex}}(\textcolor{keywordtype}{void})\ \{}
+\DoxyCodeLine{00636\ \ \ \ \ \textcolor{keywordflow}{if}\ (m\_semaphore)\ \{}
+\DoxyCodeLine{00637\ \ \ \ \ \ \ vSemaphoreDelete(m\_semaphore);}
+\DoxyCodeLine{00638\ \ \ \ \ \}}
+\DoxyCodeLine{00639\ \ \ \}}
+\DoxyCodeLine{00640\ }
+\DoxyCodeLine{00641\ \ \ \mbox{\hyperlink{classfreertos_1_1recursive__mutex}{recursive\_mutex}}\ \&operator=(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1recursive__mutex}{recursive\_mutex}}\ \&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00642\ \ \ \mbox{\hyperlink{classfreertos_1_1recursive__mutex}{recursive\_mutex}}\ \&operator=(\mbox{\hyperlink{classfreertos_1_1recursive__mutex}{recursive\_mutex}}\ \&\&src)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00643\ }
+\DoxyCodeLine{00650\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_a47fd10b3cb192ef884366130178c240a}{unlock}}()\ \{}
+\DoxyCodeLine{00651\ \ \ \ \ \textcolor{keyword}{auto}\ rc\ =\ xSemaphoreGiveRecursive(m\_semaphore);}
+\DoxyCodeLine{00652\ \ \ \ \ \textcolor{keywordflow}{if}\ (rc\ \&\&\ m\_lock\_count\ >\ 0)\ \{}
+\DoxyCodeLine{00653\ \ \ \ \ \ \ m\_lock\_count-\/-\/;}
+\DoxyCodeLine{00654\ \ \ \ \ \}}
+\DoxyCodeLine{00655\ \ \ \ \ \textcolor{keywordflow}{return}\ rc;}
+\DoxyCodeLine{00656\ \ \ \}}
+\DoxyCodeLine{00665\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_ac052f05534988d032bf5505bd6be5bd1}{unlock\_isr}}(BaseType\_t\ \&high\_priority\_task\_woken)\ \{}
+\DoxyCodeLine{00666\ \ \ \ \ \textcolor{keyword}{auto}\ rc\ =\ xSemaphoreGiveFromISR(m\_semaphore,\ \&high\_priority\_task\_woken);}
+\DoxyCodeLine{00667\ \ \ \ \ \textcolor{keywordflow}{if}\ (rc\ \&\&\ m\_lock\_count\ >\ 0)\ \{}
+\DoxyCodeLine{00668\ \ \ \ \ \ \ m\_lock\_count-\/-\/;}
+\DoxyCodeLine{00669\ \ \ \ \ \}}
+\DoxyCodeLine{00670\ \ \ \ \ \textcolor{keywordflow}{return}\ rc;}
+\DoxyCodeLine{00671\ \ \ \}}
+\DoxyCodeLine{00678\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_a3b7db3999f3ce6fd4275e4b9c0410e12}{unlock\_isr}}(\textcolor{keywordtype}{void})\ \{}
+\DoxyCodeLine{00679\ \ \ \ \ BaseType\_t\ high\_priority\_task\_woken\ =\ pdFALSE;}
+\DoxyCodeLine{00680\ \ \ \ \ \textcolor{keyword}{auto}\ rc\ =\ xSemaphoreGiveFromISR(m\_semaphore,\ \&high\_priority\_task\_woken);}
+\DoxyCodeLine{00681\ \ \ \ \ \textcolor{keywordflow}{if}\ (rc\ \&\&\ m\_lock\_count\ >\ 0)\ \{}
+\DoxyCodeLine{00682\ \ \ \ \ \ \ m\_lock\_count-\/-\/;}
+\DoxyCodeLine{00683\ \ \ \ \ \}}
+\DoxyCodeLine{00684\ \ \ \ \ \textcolor{keywordflow}{return}\ rc;}
+\DoxyCodeLine{00685\ \ \ \}}
+\DoxyCodeLine{00693\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_acb1c0619ac4ca0e62173a8ebeef12e69}{lock}}(\textcolor{keyword}{const}\ TickType\_t\ ticks\_to\_wait\ =\ portMAX\_DELAY)\ \{}
+\DoxyCodeLine{00694\ \ \ \ \ \textcolor{keyword}{auto}\ rc\ =\ xSemaphoreTakeRecursive(m\_semaphore,\ ticks\_to\_wait);}
+\DoxyCodeLine{00695\ \ \ \ \ \textcolor{keywordflow}{if}\ (rc)\ \{}
+\DoxyCodeLine{00696\ \ \ \ \ \ \ m\_lock\_count++;}
+\DoxyCodeLine{00697\ \ \ \ \ \}}
+\DoxyCodeLine{00698\ \ \ \ \ \textcolor{keywordflow}{return}\ rc;}
+\DoxyCodeLine{00699\ \ \ \}}
+\DoxyCodeLine{00708\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_ad1002ee47642a565fa898e194f3604b4}{lock\_isr}}(BaseType\_t\ \&high\_priority\_task\_woken)\ \{}
+\DoxyCodeLine{00709\ \ \ \ \ \textcolor{keyword}{auto}\ rc\ =\ xSemaphoreTakeFromISR(m\_semaphore,\ \&high\_priority\_task\_woken);}
+\DoxyCodeLine{00710\ \ \ \ \ \textcolor{keywordflow}{if}\ (rc)\ \{}
+\DoxyCodeLine{00711\ \ \ \ \ \ \ m\_lock\_count++;}
+\DoxyCodeLine{00712\ \ \ \ \ \}}
+\DoxyCodeLine{00713\ \ \ \ \ \textcolor{keywordflow}{return}\ rc;}
+\DoxyCodeLine{00714\ \ \ \}}
+\DoxyCodeLine{00721\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_a1d2d36ec832730964edc4bdb5d2fb6b4}{lock\_isr}}(\textcolor{keywordtype}{void})\ \{}
+\DoxyCodeLine{00722\ \ \ \ \ BaseType\_t\ high\_priority\_task\_woken\ =\ pdFALSE;}
+\DoxyCodeLine{00723\ \ \ \ \ \textcolor{keyword}{auto}\ rc\ =\ xSemaphoreTakeFromISR(m\_semaphore,\ \&high\_priority\_task\_woken);}
+\DoxyCodeLine{00724\ \ \ \ \ \textcolor{keywordflow}{if}\ (rc)\ \{}
+\DoxyCodeLine{00725\ \ \ \ \ \ \ m\_lock\_count++;}
+\DoxyCodeLine{00726\ \ \ \ \ \}}
+\DoxyCodeLine{00727\ \ \ \ \ \textcolor{keywordflow}{return}\ rc;}
+\DoxyCodeLine{00728\ \ \ \}}
+\DoxyCodeLine{00735\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Rep,\ \textcolor{keyword}{typename}\ Period>}
+\DoxyCodeLine{00736\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_ab3e95b964f62311ea06e33542507fb89}{lock}}(\textcolor{keyword}{const}\ std::chrono::duration<Rep,\ Period>\ \&timeout)\ \{}
+\DoxyCodeLine{00737\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_acb1c0619ac4ca0e62173a8ebeef12e69}{lock}}(}
+\DoxyCodeLine{00738\ \ \ \ \ \ \ \ \ std::chrono::duration\_cast<std::chrono::milliseconds>(timeout).count());}
+\DoxyCodeLine{00739\ \ \ \}}
+\DoxyCodeLine{00746\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_ab6a508d720641f15c1fe2b293e96ae50}{try\_lock}}()\ \{}
+\DoxyCodeLine{00747\ \ \ \ \ \textcolor{keyword}{auto}\ rc\ =\ xSemaphoreTakeRecursive(m\_semaphore,\ 0);}
+\DoxyCodeLine{00748\ \ \ \ \ \textcolor{keywordflow}{if}\ (rc)\ \{}
+\DoxyCodeLine{00749\ \ \ \ \ \ \ m\_lock\_count++;}
+\DoxyCodeLine{00750\ \ \ \ \ \}}
+\DoxyCodeLine{00751\ \ \ \ \ \textcolor{keywordflow}{return}\ rc;}
+\DoxyCodeLine{00752\ \ \ \}}
+\DoxyCodeLine{00758\ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_a50a8c8b3aaeff40407e15d3eb597e8d8}{locked}}(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ m\_lock\_count\ >\ 0;\ \}}
+\DoxyCodeLine{00759\ \};}
+\DoxyCodeLine{00760\ }
+\DoxyCodeLine{00767\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Mutex>\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classfreertos_1_1lock__guard}{lock\_guard}}\ \{}
+\DoxyCodeLine{00768\ \ \ Mutex\ \&m\_mutex;\ \textcolor{comment}{//\ NOLINT(cppcoreguidelines-\/avoid-\/const-\/or-\/ref-\/data-\/members):}}
+\DoxyCodeLine{00769\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ RAII\ design\ requires\ reference}}
+\DoxyCodeLine{00770\ }
+\DoxyCodeLine{00771\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00777\ \ \ \textcolor{keyword}{explicit}\ \mbox{\hyperlink{classfreertos_1_1lock__guard_a8276ed46c1507dc9c8c27a5bd56c4d9e}{lock\_guard}}(Mutex\ \&\mbox{\hyperlink{classfreertos_1_1mutex}{mutex}})\ :\ m\_mutex\{\mbox{\hyperlink{classfreertos_1_1mutex}{mutex}}\}\ \{\ m\_mutex.\mbox{\hyperlink{classfreertos_1_1mutex_af1a6122cc4563cc4aaac5a6c38eca973}{lock}}();\ \}}
+\DoxyCodeLine{00778\ }
+\DoxyCodeLine{00783\ \ \ \mbox{\hyperlink{classfreertos_1_1lock__guard_af46d4af2d983d17c333f0265c941cad4}{\string~lock\_guard}}(\textcolor{keywordtype}{void})\ \{\ m\_mutex.unlock();\ \}}
+\DoxyCodeLine{00784\ }
+\DoxyCodeLine{00785\ \ \ \textcolor{comment}{//\ Delete\ copy\ and\ move\ operations\ for\ RAII\ safety}}
+\DoxyCodeLine{00786\ \ \ \mbox{\hyperlink{classfreertos_1_1lock__guard}{lock\_guard}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1lock__guard}{lock\_guard}}\ \&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00787\ \ \ \mbox{\hyperlink{classfreertos_1_1lock__guard}{lock\_guard}}(\mbox{\hyperlink{classfreertos_1_1lock__guard}{lock\_guard}}\ \&\&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00788\ \ \ \mbox{\hyperlink{classfreertos_1_1lock__guard}{lock\_guard}}\ \&operator=(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1lock__guard}{lock\_guard}}\ \&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00789\ \ \ \mbox{\hyperlink{classfreertos_1_1lock__guard}{lock\_guard}}\ \&operator=(\mbox{\hyperlink{classfreertos_1_1lock__guard}{lock\_guard}}\ \&\&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00790\ }
+\DoxyCodeLine{00796\ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classfreertos_1_1lock__guard_aab62d6459ed0be2ee1211fe2b3c0b4d1}{locked}}(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ m\_mutex.locked();\ \}}
+\DoxyCodeLine{00797\ \};}
+\DoxyCodeLine{00798\ }
+\DoxyCodeLine{00805\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Mutex>\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classfreertos_1_1try__lock__guard}{try\_lock\_guard}}\ \{}
+\DoxyCodeLine{00806\ \ \ Mutex\ \&m\_mutex;\ \textcolor{comment}{//\ NOLINT(cppcoreguidelines-\/avoid-\/const-\/or-\/ref-\/data-\/members):}}
+\DoxyCodeLine{00807\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ RAII\ design\ requires\ reference}}
+\DoxyCodeLine{00808\ \ \ \textcolor{keywordtype}{bool}\ m\_lock\_acquired\{\textcolor{keyword}{false}\};}
+\DoxyCodeLine{00809\ }
+\DoxyCodeLine{00810\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00816\ \ \ \textcolor{keyword}{explicit}\ \mbox{\hyperlink{classfreertos_1_1try__lock__guard_a90264ae7f771340603a3ff10489f22c2}{try\_lock\_guard}}(Mutex\ \&\mbox{\hyperlink{classfreertos_1_1mutex}{mutex}})}
+\DoxyCodeLine{00817\ \ \ \ \ \ \ :\ m\_mutex\{\mbox{\hyperlink{classfreertos_1_1mutex}{mutex}}\},\ m\_lock\_acquired\{static\_cast<bool>(m\_mutex.try\_lock())\}\ \{}
+\DoxyCodeLine{00818\ \ \ \}}
+\DoxyCodeLine{00823\ \ \ \mbox{\hyperlink{classfreertos_1_1try__lock__guard_a4a8bc0b81f03b273d3c006a83c68e1ad}{\string~try\_lock\_guard}}(\textcolor{keywordtype}{void})\ \{}
+\DoxyCodeLine{00824\ \ \ \ \ \textcolor{keywordflow}{if}\ (m\_lock\_acquired)\ \{}
+\DoxyCodeLine{00825\ \ \ \ \ \ \ m\_mutex.unlock();}
+\DoxyCodeLine{00826\ \ \ \ \ \}}
+\DoxyCodeLine{00827\ \ \ \}}
+\DoxyCodeLine{00828\ }
+\DoxyCodeLine{00829\ \ \ \textcolor{comment}{//\ Delete\ copy\ and\ move\ operations\ for\ RAII\ safety}}
+\DoxyCodeLine{00830\ \ \ \mbox{\hyperlink{classfreertos_1_1try__lock__guard}{try\_lock\_guard}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1try__lock__guard}{try\_lock\_guard}}\ \&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00831\ \ \ \mbox{\hyperlink{classfreertos_1_1try__lock__guard}{try\_lock\_guard}}(\mbox{\hyperlink{classfreertos_1_1try__lock__guard}{try\_lock\_guard}}\ \&\&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00832\ \ \ \mbox{\hyperlink{classfreertos_1_1try__lock__guard}{try\_lock\_guard}}\ \&operator=(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1try__lock__guard}{try\_lock\_guard}}\ \&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00833\ \ \ \mbox{\hyperlink{classfreertos_1_1try__lock__guard}{try\_lock\_guard}}\ \&operator=(\mbox{\hyperlink{classfreertos_1_1try__lock__guard}{try\_lock\_guard}}\ \&\&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00834\ }
+\DoxyCodeLine{00840\ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classfreertos_1_1try__lock__guard_af8716e8b1a49863fda189d53489f8814}{locked}}(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ m\_lock\_acquired\ \&\&\ m\_mutex.locked();\ \}}
+\DoxyCodeLine{00841\ \};}
+\DoxyCodeLine{00842\ }
+\DoxyCodeLine{00849\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Mutex>\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classfreertos_1_1lock__guard__isr}{lock\_guard\_isr}}\ \{}
+\DoxyCodeLine{00850\ \ \ Mutex\ \&m\_mutex;\ \textcolor{comment}{//\ NOLINT(cppcoreguidelines-\/avoid-\/const-\/or-\/ref-\/data-\/members):}}
+\DoxyCodeLine{00851\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ RAII\ design\ requires\ reference}}
+\DoxyCodeLine{00852\ \ \ BaseType\_t\ m\_high\_priority\_task\_woken\{pdFALSE\};}
+\DoxyCodeLine{00853\ }
+\DoxyCodeLine{00854\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00860\ \ \ \textcolor{keyword}{explicit}\ \mbox{\hyperlink{classfreertos_1_1lock__guard__isr_aadeffd401db0f3fe52fb5beba6373158}{lock\_guard\_isr}}(Mutex\ \&\mbox{\hyperlink{classfreertos_1_1mutex}{mutex}})\ :\ m\_mutex\{\mbox{\hyperlink{classfreertos_1_1mutex}{mutex}}\}\ \{}
+\DoxyCodeLine{00861\ \ \ \ \ m\_mutex.\mbox{\hyperlink{classfreertos_1_1mutex_acbb1833541559e923fd673540a9e2181}{lock\_isr}}(m\_high\_priority\_task\_woken);}
+\DoxyCodeLine{00862\ \ \ \}}
+\DoxyCodeLine{00867\ \ \ \mbox{\hyperlink{classfreertos_1_1lock__guard__isr_a9008d32cb43029a2ccd29242ac713cec}{\string~lock\_guard\_isr}}(\textcolor{keywordtype}{void})\ \{\ m\_mutex.unlock\_isr(m\_high\_priority\_task\_woken);\ \}}
+\DoxyCodeLine{00868\ }
+\DoxyCodeLine{00869\ \ \ \textcolor{comment}{//\ Delete\ copy\ and\ move\ operations\ for\ RAII\ safety}}
+\DoxyCodeLine{00870\ \ \ \mbox{\hyperlink{classfreertos_1_1lock__guard__isr}{lock\_guard\_isr}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1lock__guard__isr}{lock\_guard\_isr}}\ \&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00871\ \ \ \mbox{\hyperlink{classfreertos_1_1lock__guard__isr}{lock\_guard\_isr}}(\mbox{\hyperlink{classfreertos_1_1lock__guard__isr}{lock\_guard\_isr}}\ \&\&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00872\ \ \ \mbox{\hyperlink{classfreertos_1_1lock__guard__isr}{lock\_guard\_isr}}\ \&operator=(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1lock__guard__isr}{lock\_guard\_isr}}\ \&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00873\ \ \ \mbox{\hyperlink{classfreertos_1_1lock__guard__isr}{lock\_guard\_isr}}\ \&operator=(\mbox{\hyperlink{classfreertos_1_1lock__guard__isr}{lock\_guard\_isr}}\ \&\&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00874\ }
+\DoxyCodeLine{00881\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1lock__guard__isr_a1852af1aab57024fbe24e79a3fb31fd0}{high\_priority\_task\_woken}}(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00882\ \ \ \ \ \textcolor{keywordflow}{return}\ m\_high\_priority\_task\_woken;}
+\DoxyCodeLine{00883\ \ \ \}}
+\DoxyCodeLine{00889\ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classfreertos_1_1lock__guard__isr_a24efba54d6b36741d788345b71d5eb8e}{locked}}(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ m\_mutex.locked();\ \}}
+\DoxyCodeLine{00890\ \};}
+\DoxyCodeLine{00891\ }
+\DoxyCodeLine{00898\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Mutex>\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classfreertos_1_1timeout__lock__guard}{timeout\_lock\_guard}}\ \{}
+\DoxyCodeLine{00899\ \ \ Mutex\ \&m\_mutex;\ \textcolor{comment}{//\ NOLINT(cppcoreguidelines-\/avoid-\/const-\/or-\/ref-\/data-\/members):}}
+\DoxyCodeLine{00900\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ RAII\ design\ requires\ reference}}
+\DoxyCodeLine{00901\ \ \ \textcolor{keywordtype}{bool}\ m\_lock\_acquired\{\textcolor{keyword}{false}\};}
+\DoxyCodeLine{00902\ }
+\DoxyCodeLine{00903\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00910\ \ \ \mbox{\hyperlink{classfreertos_1_1timeout__lock__guard_a6194a77fdb07d2b52977a393dfd2311d}{timeout\_lock\_guard}}(Mutex\ \&\mbox{\hyperlink{classfreertos_1_1mutex}{mutex}},\ TickType\_t\ ticks\_to\_wait)}
+\DoxyCodeLine{00911\ \ \ \ \ \ \ :\ m\_mutex\{\mbox{\hyperlink{classfreertos_1_1mutex}{mutex}}\},}
+\DoxyCodeLine{00912\ \ \ \ \ \ \ \ \ m\_lock\_acquired\{static\_cast<bool>(m\_mutex.lock(ticks\_to\_wait))\}\ \{\}}
+\DoxyCodeLine{00919\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Rep,\ \textcolor{keyword}{typename}\ Period>}
+\DoxyCodeLine{00920\ \ \ \mbox{\hyperlink{classfreertos_1_1timeout__lock__guard_a1e807fedd780a126608d57924472f121}{timeout\_lock\_guard}}(Mutex\ \&\mbox{\hyperlink{classfreertos_1_1mutex}{mutex}},}
+\DoxyCodeLine{00921\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::chrono::duration<Rep,\ Period>\ \&timeout)}
+\DoxyCodeLine{00922\ \ \ \ \ \ \ :\ m\_mutex\{\mbox{\hyperlink{classfreertos_1_1mutex}{mutex}}\},}
+\DoxyCodeLine{00923\ \ \ \ \ \ \ \ \ m\_lock\_acquired\{static\_cast<bool>(m\_mutex.lock(}
+\DoxyCodeLine{00924\ \ \ \ \ \ \ \ \ \ \ \ \ std::chrono::duration\_cast<std::chrono::milliseconds>(timeout)}
+\DoxyCodeLine{00925\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ .count()))\}\ \{\}}
+\DoxyCodeLine{00930\ \ \ \mbox{\hyperlink{classfreertos_1_1timeout__lock__guard_a6c2adfd05626569df6c17190de6bb01f}{\string~timeout\_lock\_guard}}(\textcolor{keywordtype}{void})\ \{}
+\DoxyCodeLine{00931\ \ \ \ \ \textcolor{keywordflow}{if}\ (m\_lock\_acquired)\ \{}
+\DoxyCodeLine{00932\ \ \ \ \ \ \ m\_mutex.unlock();}
+\DoxyCodeLine{00933\ \ \ \ \ \}}
+\DoxyCodeLine{00934\ \ \ \}}
+\DoxyCodeLine{00935\ }
+\DoxyCodeLine{00936\ \ \ \textcolor{comment}{//\ Delete\ copy\ and\ move\ operations\ for\ RAII\ safety}}
+\DoxyCodeLine{00937\ \ \ \mbox{\hyperlink{classfreertos_1_1timeout__lock__guard}{timeout\_lock\_guard}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1timeout__lock__guard}{timeout\_lock\_guard}}\ \&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00938\ \ \ \mbox{\hyperlink{classfreertos_1_1timeout__lock__guard}{timeout\_lock\_guard}}(\mbox{\hyperlink{classfreertos_1_1timeout__lock__guard}{timeout\_lock\_guard}}\ \&\&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00939\ \ \ \mbox{\hyperlink{classfreertos_1_1timeout__lock__guard}{timeout\_lock\_guard}}\ \&operator=(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1timeout__lock__guard}{timeout\_lock\_guard}}\ \&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00940\ \ \ \mbox{\hyperlink{classfreertos_1_1timeout__lock__guard}{timeout\_lock\_guard}}\ \&operator=(\mbox{\hyperlink{classfreertos_1_1timeout__lock__guard}{timeout\_lock\_guard}}\ \&\&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00941\ }
+\DoxyCodeLine{00947\ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classfreertos_1_1timeout__lock__guard_a0f514d8cf9abe0a1a40dc8c18ca313ee}{locked}}(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ m\_lock\_acquired\ \&\&\ m\_mutex.locked();\ \}}
+\DoxyCodeLine{00948\ \};}
+\DoxyCodeLine{00949\ }
+\DoxyCodeLine{00950\ \textcolor{preprocessor}{\#if\ configSUPPORT\_STATIC\_ALLOCATION}}
+\DoxyCodeLine{00956\ \textcolor{keyword}{namespace\ }sa\ \{}
+\DoxyCodeLine{00961\ \textcolor{keyword}{using\ }binary\_semaphore\ =}
+\DoxyCodeLine{00962\ \ \ \ \ \mbox{\hyperlink{classfreertos_1_1binary__semaphore}{freertos::binary\_semaphore<freertos::static\_semaphore\_allocator>}};}
+\DoxyCodeLine{00967\ \textcolor{keyword}{using\ }counting\_semaphore\ =}
+\DoxyCodeLine{00968\ \ \ \ \ \mbox{\hyperlink{classfreertos_1_1counting__semaphore}{freertos::counting\_semaphore<freertos::static\_semaphore\_allocator>}};}
+\DoxyCodeLine{00973\ \textcolor{keyword}{using\ }mutex\ =\ \mbox{\hyperlink{classfreertos_1_1mutex}{freertos::mutex<freertos::static\_semaphore\_allocator>}};}
+\DoxyCodeLine{00978\ \textcolor{keyword}{using\ }recursive\_mutex\ =}
+\DoxyCodeLine{00979\ \ \ \ \ \mbox{\hyperlink{classfreertos_1_1recursive__mutex}{freertos::recursive\_mutex<freertos::static\_semaphore\_allocator>}};}
+\DoxyCodeLine{00980\ \}\ \textcolor{comment}{//\ namespace\ sa}}
+\DoxyCodeLine{00981\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00982\ \textcolor{preprocessor}{\#if\ configSUPPORT\_DYNAMIC\_ALLOCATION}}
+\DoxyCodeLine{00988\ \textcolor{keyword}{namespace\ }da\ \{}
+\DoxyCodeLine{00993\ \textcolor{keyword}{using\ }binary\_semaphore\ =}
+\DoxyCodeLine{00994\ \ \ \ \ \mbox{\hyperlink{classfreertos_1_1binary__semaphore}{freertos::binary\_semaphore<freertos::dynamic\_semaphore\_allocator>}};}
+\DoxyCodeLine{00999\ \textcolor{keyword}{using\ }counting\_semaphore\ =}
+\DoxyCodeLine{01000\ \ \ \ \ \mbox{\hyperlink{classfreertos_1_1counting__semaphore}{freertos::counting\_semaphore<freertos::dynamic\_semaphore\_allocator>}};}
+\DoxyCodeLine{01005\ \textcolor{keyword}{using\ }mutex\ =\ \mbox{\hyperlink{classfreertos_1_1mutex}{freertos::mutex<freertos::dynamic\_semaphore\_allocator>}};}
+\DoxyCodeLine{01010\ \textcolor{keyword}{using\ }recursive\_mutex\ =}
+\DoxyCodeLine{01011\ \ \ \ \ \mbox{\hyperlink{classfreertos_1_1recursive__mutex}{freertos::recursive\_mutex<freertos::dynamic\_semaphore\_allocator>}};}
+\DoxyCodeLine{01012\ \}\ \textcolor{comment}{//\ namespace\ da}}
+\DoxyCodeLine{01013\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{01014\ }
+\DoxyCodeLine{01015\ \}\ \textcolor{comment}{//\ namespace\ freertos}}
 
 \end{DoxyCode}

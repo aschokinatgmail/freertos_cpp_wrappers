@@ -2,6 +2,26 @@
 
 Lightweight collection of FreeRTOS API wrappers compliant to modern C++ standards
 
+## 📚 Documentation
+
+**[View Online Documentation](docs/html/index.html)** - Comprehensive API reference with examples
+
+The library now features modern, user-friendly documentation with:
+- **Interactive examples** for all major components
+- **Step-by-step tutorials** for getting started
+- **Best practices guide** for optimal usage
+- **API reference** with detailed explanations
+- **Mobile-responsive design** for convenient access
+
+### Generating Documentation
+
+```bash
+# Generate HTML documentation
+doxygen Doxyfile
+
+# Documentation will be available in docs/html/index.html
+```
+
 ## Features
 
 - Modern C++17 RAII wrappers for FreeRTOS APIs

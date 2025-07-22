@@ -96,10 +96,70 @@ public:
 #endif
 
 /**
- * @brief A wrapper for the FreeRTOS binary semaphore.
- *
- * @tparam SemaphoreAllocator type of the semaphore allocator to use for memory
- * allocation.
+ * @brief A modern C++ wrapper for FreeRTOS binary semaphores.
+ * 
+ * Binary semaphores are used for both mutual exclusion and task synchronization.
+ * Unlike mutexes, binary semaphores do not implement priority inheritance.
+ * 
+ * @tparam SemaphoreAllocator Type of allocator (static or dynamic)
+ * 
+ * ## Features:
+ * - RAII automatic cleanup
+ * - std::chrono timeout support  
+ * - ISR-safe operations
+ * - Exception-safe design
+ * - No copy/move to prevent accidental resource duplication
+ * 
+ * ## Usage Examples:
+ * 
+ * ### Basic Signaling:
+ * ```cpp
+ * freertos::binary_semaphore signal_sem;
+ * 
+ * // Producer task
+ * freertos::task<512> producer("Producer", 3, [&]() {
+ *     while (true) {
+ *         produce_data();
+ *         signal_sem.give();  // Signal consumer
+ *         vTaskDelay(pdMS_TO_TICKS(1000));
+ *     }
+ * });
+ * 
+ * // Consumer task  
+ * freertos::task<512> consumer("Consumer", 2, [&]() {
+ *     while (true) {
+ *         if (signal_sem.take(std::chrono::seconds(5))) {
+ *             consume_data();
+ *         } else {
+ *             printf("Timeout waiting for signal\\n");
+ *         }
+ *     }
+ * });
+ * ```
+ * 
+ * ### ISR Communication:
+ * ```cpp
+ * freertos::binary_semaphore isr_sem;
+ * 
+ * void timer_interrupt_handler() {
+ *     BaseType_t task_woken = pdFALSE;
+ *     isr_sem.give_isr(task_woken);
+ *     portYIELD_FROM_ISR(task_woken);
+ * }
+ * 
+ * freertos::task<1024> handler_task("Handler", 5, [&]() {
+ *     while (true) {
+ *         if (isr_sem.take()) {
+ *             handle_timer_event();
+ *         }
+ *     }
+ * });
+ * ```
+ * 
+ * ### Static Allocation:
+ * ```cpp
+ * freertos::binary_semaphore<freertos::static_semaphore_allocator> static_sem;
+ * ```
  */
 template <typename SemaphoreAllocator> class binary_semaphore {
   SemaphoreAllocator m_allocator{};
