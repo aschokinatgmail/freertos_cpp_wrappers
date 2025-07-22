@@ -45,7 +45,7 @@
 \DoxyCodeLine{00041\ \textcolor{preprocessor}{\#include\ <cstdbool>}}
 \DoxyCodeLine{00042\ \textcolor{preprocessor}{\#include\ <functional>}}
 \DoxyCodeLine{00043\ \textcolor{preprocessor}{\#include\ <task.h>}}
-\DoxyCodeLine{00044\ \textcolor{preprocessor}{\#include\ <time.h>}}
+\DoxyCodeLine{00044\ \textcolor{preprocessor}{\#include\ <ctime>}}
 \DoxyCodeLine{00045\ \textcolor{preprocessor}{\#include\ <timers.h>}}
 \DoxyCodeLine{00046\ }
 \DoxyCodeLine{00047\ \textcolor{keyword}{namespace\ }freertos\ \{}
@@ -56,176 +56,299 @@
 \DoxyCodeLine{00052\ }
 \DoxyCodeLine{00053\ \textcolor{preprocessor}{\#if\ configSUPPORT\_STATIC\_ALLOCATION}}
 \DoxyCodeLine{00059\ \textcolor{keyword}{class\ }static\_sw\_timer\_allocator\ \{}
-\DoxyCodeLine{00060\ \ \ StaticTimer\_t\ m\_timer\_placeholder;}
+\DoxyCodeLine{00060\ \ \ StaticTimer\_t\ m\_timer\_placeholder\{\};}
 \DoxyCodeLine{00061\ }
 \DoxyCodeLine{00062\ \textcolor{keyword}{public}:}
 \DoxyCodeLine{00063\ \ \ static\_sw\_timer\_allocator()\ =\ \textcolor{keywordflow}{default};}
-\DoxyCodeLine{00064\ \ \ static\_sw\_timer\_allocator(\textcolor{keyword}{const}\ static\_sw\_timer\_allocator\ \&)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{00065\ \ \ static\_sw\_timer\_allocator(static\_sw\_timer\_allocator\ \&\&)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{00066\ }
-\DoxyCodeLine{00067\ \ \ static\_sw\_timer\_allocator\ \&}
-\DoxyCodeLine{00068\ \ \ operator=(\textcolor{keyword}{const}\ static\_sw\_timer\_allocator\ \&)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{00069\ \ \ static\_sw\_timer\_allocator\ \&operator=(static\_sw\_timer\_allocator\ \&\&)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{00070\ }
-\DoxyCodeLine{00071\ \ \ TimerHandle\_t\ create(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ *name,\ \textcolor{keyword}{const}\ TickType\_t\ period\_ticks,}
-\DoxyCodeLine{00072\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ UBaseType\_t\ auto\_reload,\ \textcolor{keywordtype}{void}\ *\textcolor{keyword}{const}\ timer\_id,}
-\DoxyCodeLine{00073\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ TimerCallbackFunction\_t\ callback)\ \{}
-\DoxyCodeLine{00074\ \ \ \ \ \textcolor{keywordflow}{return}\ xTimerCreateStatic(name,\ period\_ticks,\ auto\_reload,\ timer\_id,}
-\DoxyCodeLine{00075\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ callback,\ \&m\_timer\_placeholder);}
-\DoxyCodeLine{00076\ \ \ \}}
-\DoxyCodeLine{00077\ \};}
-\DoxyCodeLine{00078\ \textcolor{preprocessor}{\#endif}}
-\DoxyCodeLine{00079\ \textcolor{preprocessor}{\#if\ configSUPPORT\_DYNAMIC\_ALLOCATION}}
-\DoxyCodeLine{00085\ \textcolor{keyword}{class\ }dynamic\_sw\_timer\_allocator\ \{}
-\DoxyCodeLine{00086\ \textcolor{keyword}{public}:}
-\DoxyCodeLine{00087\ \ \ TimerHandle\_t\ create(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ *name,\ \textcolor{keyword}{const}\ TickType\_t\ period\_ticks,}
-\DoxyCodeLine{00088\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ UBaseType\_t\ auto\_reload,\ \textcolor{keywordtype}{void}\ *\textcolor{keyword}{const}\ timer\_id,}
-\DoxyCodeLine{00089\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ TimerCallbackFunction\_t\ callback)\ \{}
-\DoxyCodeLine{00090\ \ \ \ \ \textcolor{keywordflow}{return}\ xTimerCreate(name,\ period\_ticks,\ auto\_reload,\ timer\_id,\ callback);}
-\DoxyCodeLine{00091\ \ \ \}}
-\DoxyCodeLine{00092\ \};}
-\DoxyCodeLine{00093\ \textcolor{preprocessor}{\#endif}}
-\DoxyCodeLine{00094\ }
-\DoxyCodeLine{00099\ \textcolor{keyword}{using\ }timer\_callback\_t\ =\ function<void()>;}
-\DoxyCodeLine{00100\ }
-\DoxyCodeLine{00106\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ SwTimerAllocator>\ \textcolor{keyword}{class\ }timer\ \{}
-\DoxyCodeLine{00107\ \ \ SwTimerAllocator\ m\_allocator;}
-\DoxyCodeLine{00108\ \ \ TimerHandle\_t\ m\_timer;}
-\DoxyCodeLine{00109\ \ \ timer\_callback\_t\ m\_callback;}
-\DoxyCodeLine{00110\ \ \ uint8\_t\ m\_started\ :\ 1;}
-\DoxyCodeLine{00111\ }
-\DoxyCodeLine{00112\ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}\ callback\_wrapper(TimerHandle\_t\ t)\ \{}
-\DoxyCodeLine{00113\ \ \ \ \ \textcolor{keyword}{auto}\ *\textcolor{keyword}{const}\ self\ =\ \textcolor{keyword}{static\_cast<}timer\ *\textcolor{keyword}{>}(pvTimerGetTimerID(t));}
-\DoxyCodeLine{00114\ \ \ \ \ configASSERT(self);}
-\DoxyCodeLine{00115\ \ \ \ \ self-\/>m\_callback();}
-\DoxyCodeLine{00116\ \ \ \}}
-\DoxyCodeLine{00117\ }
-\DoxyCodeLine{00118\ \textcolor{keyword}{public}:}
-\DoxyCodeLine{00127\ \ \ \textcolor{keyword}{explicit}\ timer(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ *name,\ \textcolor{keyword}{const}\ TickType\_t\ period\_ticks,}
-\DoxyCodeLine{00128\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ UBaseType\_t\ auto\_reload,\ timer\_callback\_t\ \&\&callback)}
-\DoxyCodeLine{00129\ \ \ \ \ \ \ :\ m\_timer\{nullptr\},\ m\_callback\{callback\},\ m\_started\{false\}\ \{}
-\DoxyCodeLine{00130\ \ \ \ \ m\_timer\ =\ m\_allocator.create(name,\ period\_ticks,\ auto\_reload,\ \textcolor{keyword}{this},}
-\DoxyCodeLine{00131\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ callback\_wrapper);}
-\DoxyCodeLine{00132\ \ \ \ \ configASSERT(m\_timer);}
-\DoxyCodeLine{00133\ \ \ \}}
-\DoxyCodeLine{00144\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Rep,\ \textcolor{keyword}{typename}\ Period>}
-\DoxyCodeLine{00145\ \ \ \textcolor{keyword}{explicit}\ timer(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ *name,}
-\DoxyCodeLine{00146\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::chrono::duration<Rep,\ Period>\ \&period,}
-\DoxyCodeLine{00147\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ UBaseType\_t\ auto\_reload,\ timer\_callback\_t\ \&\&callback)}
-\DoxyCodeLine{00148\ \ \ \ \ \ \ :\ timer\{name,}
-\DoxyCodeLine{00149\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ static\_cast<TickType\_t>(}
-\DoxyCodeLine{00150\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::chrono::duration\_cast<std::chrono::milliseconds>(period)}
-\DoxyCodeLine{00151\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ .count()),}
-\DoxyCodeLine{00152\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ auto\_reload,\ std::move(callback)\}\ \{\}}
-\DoxyCodeLine{00153\ \ \ timer(\textcolor{keyword}{const}\ timer\ \&)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{00154\ \ \ timer(timer\ \&\&src)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{00160\ \ \ \string~timer(\textcolor{keywordtype}{void})\ \{}
-\DoxyCodeLine{00161\ \ \ \ \ \textcolor{keywordflow}{if}\ (m\_timer)\ \{}
-\DoxyCodeLine{00162\ \ \ \ \ \ \ xTimerDelete(m\_timer,\ portMAX\_DELAY);}
-\DoxyCodeLine{00163\ \ \ \ \ \}}
-\DoxyCodeLine{00164\ \ \ \}}
-\DoxyCodeLine{00165\ }
-\DoxyCodeLine{00166\ \ \ timer\ \&operator=(\textcolor{keyword}{const}\ timer\ \&)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{00167\ \ \ timer\ \&operator=(timer\ \&\&src)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{00168\ }
-\DoxyCodeLine{00176\ \ \ BaseType\_t\ start(\textcolor{keyword}{const}\ TickType\_t\ ticks\_to\_wait\ =\ portMAX\_DELAY)\ \{}
-\DoxyCodeLine{00177\ \ \ \ \ \textcolor{keyword}{auto}\ rc\ =\ xTimerStart(m\_timer,\ ticks\_to\_wait);}
-\DoxyCodeLine{00178\ \ \ \ \ \textcolor{keywordflow}{if}\ (rc)\ \{}
-\DoxyCodeLine{00179\ \ \ \ \ \ \ m\_started\ =\ \textcolor{keyword}{true};}
-\DoxyCodeLine{00180\ \ \ \ \ \}}
-\DoxyCodeLine{00181\ \ \ \ \ \textcolor{keywordflow}{return}\ rc;}
-\DoxyCodeLine{00182\ \ \ \}}
-\DoxyCodeLine{00192\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Rep,\ \textcolor{keyword}{typename}\ Period>}
-\DoxyCodeLine{00193\ \ \ BaseType\_t\ start(\textcolor{keyword}{const}\ std::chrono::duration<Rep,\ Period>\ \&timeout)\ \{}
-\DoxyCodeLine{00194\ \ \ \ \ \textcolor{keywordflow}{return}\ start(}
-\DoxyCodeLine{00195\ \ \ \ \ \ \ \ \ std::chrono::duration\_cast<std::chrono::milliseconds>(timeout).count());}
-\DoxyCodeLine{00196\ \ \ \}}
-\DoxyCodeLine{00205\ \ \ BaseType\_t\ start\_isr(BaseType\_t\ \&high\_priority\_task\_woken)\ \{}
-\DoxyCodeLine{00206\ \ \ \ \ \textcolor{keyword}{auto}\ rc\ =\ xTimerStartFromISR(m\_timer,\ \&high\_priority\_task\_woken);}
-\DoxyCodeLine{00207\ \ \ \ \ \textcolor{keywordflow}{if}\ (rc)\ \{}
-\DoxyCodeLine{00208\ \ \ \ \ \ \ m\_started\ =\ \textcolor{keyword}{true};}
-\DoxyCodeLine{00209\ \ \ \ \ \}}
-\DoxyCodeLine{00210\ \ \ \ \ \textcolor{keywordflow}{return}\ rc;}
-\DoxyCodeLine{00211\ \ \ \}}
-\DoxyCodeLine{00219\ \ \ BaseType\_t\ stop(\textcolor{keyword}{const}\ TickType\_t\ ticks\_to\_wait\ =\ portMAX\_DELAY)\ \{}
-\DoxyCodeLine{00220\ \ \ \ \ \textcolor{keyword}{auto}\ rc\ =\ xTimerStop(m\_timer,\ ticks\_to\_wait);}
-\DoxyCodeLine{00221\ \ \ \ \ \textcolor{keywordflow}{if}\ (rc)\ \{}
-\DoxyCodeLine{00222\ \ \ \ \ \ \ m\_started\ =\ \textcolor{keyword}{false};}
-\DoxyCodeLine{00223\ \ \ \ \ \}}
-\DoxyCodeLine{00224\ \ \ \ \ \textcolor{keywordflow}{return}\ rc;}
-\DoxyCodeLine{00225\ \ \ \}}
-\DoxyCodeLine{00235\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Rep,\ \textcolor{keyword}{typename}\ Period>}
-\DoxyCodeLine{00236\ \ \ BaseType\_t\ stop(\textcolor{keyword}{const}\ std::chrono::duration<Rep,\ Period>\ \&timeout)\ \{}
-\DoxyCodeLine{00237\ \ \ \ \ \textcolor{keywordflow}{return}\ stop(}
-\DoxyCodeLine{00238\ \ \ \ \ \ \ \ \ std::chrono::duration\_cast<std::chrono::milliseconds>(timeout).count());}
-\DoxyCodeLine{00239\ \ \ \}}
-\DoxyCodeLine{00248\ \ \ BaseType\_t\ stop\_isr(BaseType\_t\ \&high\_priority\_task\_woken)\ \{}
-\DoxyCodeLine{00249\ \ \ \ \ \textcolor{keyword}{auto}\ rc\ =\ xTimerStopFromISR(m\_timer,\ \&high\_priority\_task\_woken);}
-\DoxyCodeLine{00250\ \ \ \ \ \textcolor{keywordflow}{if}\ (rc)\ \{}
-\DoxyCodeLine{00251\ \ \ \ \ \ \ m\_started\ =\ \textcolor{keyword}{false};}
-\DoxyCodeLine{00252\ \ \ \ \ \}}
-\DoxyCodeLine{00253\ \ \ \ \ \textcolor{keywordflow}{return}\ rc;}
-\DoxyCodeLine{00254\ \ \ \}}
-\DoxyCodeLine{00262\ \ \ BaseType\_t\ reset(\textcolor{keyword}{const}\ TickType\_t\ ticks\_to\_wait\ =\ portMAX\_DELAY)\ \{}
-\DoxyCodeLine{00263\ \ \ \ \ \textcolor{keywordflow}{return}\ xTimerReset(m\_timer,\ ticks\_to\_wait);}
-\DoxyCodeLine{00264\ \ \ \}}
-\DoxyCodeLine{00274\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Rep,\ \textcolor{keyword}{typename}\ Period>}
-\DoxyCodeLine{00275\ \ \ BaseType\_t\ reset(\textcolor{keyword}{const}\ std::chrono::duration<Rep,\ Period>\ \&timeout)\ \{}
-\DoxyCodeLine{00276\ \ \ \ \ \textcolor{keywordflow}{return}\ reset(}
-\DoxyCodeLine{00277\ \ \ \ \ \ \ \ \ std::chrono::duration\_cast<std::chrono::milliseconds>(timeout).count());}
-\DoxyCodeLine{00278\ \ \ \}}
-\DoxyCodeLine{00287\ \ \ BaseType\_t\ reset\_isr(BaseType\_t\ \&high\_priority\_task\_woken)\ \{}
-\DoxyCodeLine{00288\ \ \ \ \ \textcolor{keywordflow}{return}\ xTimerResetFromISR(m\_timer,\ \&high\_priority\_task\_woken);}
-\DoxyCodeLine{00289\ \ \ \}}
-\DoxyCodeLine{00300\ \ \ BaseType\_t\ period(\textcolor{keyword}{const}\ TickType\_t\ new\_period\_ticks,}
-\DoxyCodeLine{00301\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ TickType\_t\ ticks\_to\_wait\ =\ portMAX\_DELAY)\ \{}
-\DoxyCodeLine{00302\ \ \ \ \ \textcolor{keywordflow}{return}\ xTimerChangePeriod(m\_timer,\ new\_period\_ticks,\ ticks\_to\_wait);}
+\DoxyCodeLine{00064\ \ \ \string~static\_sw\_timer\_allocator()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00065\ \ \ static\_sw\_timer\_allocator(\textcolor{keyword}{const}\ static\_sw\_timer\_allocator\ \&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00066\ \ \ static\_sw\_timer\_allocator(static\_sw\_timer\_allocator\ \&\&)\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00067\ }
+\DoxyCodeLine{00068\ \ \ static\_sw\_timer\_allocator\ \&}
+\DoxyCodeLine{00069\ \ \ operator=(\textcolor{keyword}{const}\ static\_sw\_timer\_allocator\ \&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00070\ \ \ static\_sw\_timer\_allocator\ \&operator=(static\_sw\_timer\_allocator\ \&\&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00071\ }
+\DoxyCodeLine{00072\ \ \ TimerHandle\_t\ create(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ *name,\ \textcolor{keyword}{const}\ TickType\_t\ period\_ticks,}
+\DoxyCodeLine{00073\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ UBaseType\_t\ auto\_reload,\ \textcolor{keywordtype}{void}\ *\textcolor{keyword}{const}\ timer\_id,}
+\DoxyCodeLine{00074\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ TimerCallbackFunction\_t\ callback)\ \{}
+\DoxyCodeLine{00075\ \ \ \ \ \textcolor{keywordflow}{return}\ xTimerCreateStatic(name,\ period\_ticks,\ auto\_reload,\ timer\_id,}
+\DoxyCodeLine{00076\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ callback,\ \&m\_timer\_placeholder);}
+\DoxyCodeLine{00077\ \ \ \}}
+\DoxyCodeLine{00078\ \};}
+\DoxyCodeLine{00079\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00080\ \textcolor{preprocessor}{\#if\ configSUPPORT\_DYNAMIC\_ALLOCATION}}
+\DoxyCodeLine{00086\ \textcolor{keyword}{class\ }dynamic\_sw\_timer\_allocator\ \{}
+\DoxyCodeLine{00087\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00088\ \ \ TimerHandle\_t\ create(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ *name,\ \textcolor{keyword}{const}\ TickType\_t\ period\_ticks,}
+\DoxyCodeLine{00089\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ UBaseType\_t\ auto\_reload,\ \textcolor{keywordtype}{void}\ *\textcolor{keyword}{const}\ timer\_id,}
+\DoxyCodeLine{00090\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ TimerCallbackFunction\_t\ callback)\ \{}
+\DoxyCodeLine{00091\ \ \ \ \ \textcolor{keywordflow}{return}\ xTimerCreate(name,\ period\_ticks,\ auto\_reload,\ timer\_id,\ callback);}
+\DoxyCodeLine{00092\ \ \ \}}
+\DoxyCodeLine{00093\ \};}
+\DoxyCodeLine{00094\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00095\ }
+\DoxyCodeLine{00100\ \textcolor{keyword}{using\ }timer\_callback\_t\ =\ function<void()>;}
+\DoxyCodeLine{00101\ }
+\DoxyCodeLine{00107\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ SwTimerAllocator>\ \textcolor{keyword}{class\ }timer\ \{}
+\DoxyCodeLine{00108\ \ \ SwTimerAllocator\ m\_allocator;}
+\DoxyCodeLine{00109\ \ \ TimerHandle\_t\ m\_timer;}
+\DoxyCodeLine{00110\ \ \ timer\_callback\_t\ m\_callback;}
+\DoxyCodeLine{00111\ \ \ uint8\_t\ m\_started\ :\ 1;}
+\DoxyCodeLine{00112\ }
+\DoxyCodeLine{00113\ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}\ callback\_wrapper(TimerHandle\_t\ t)\ \{}
+\DoxyCodeLine{00114\ \ \ \ \ \textcolor{keyword}{auto}\ *\textcolor{keyword}{const}\ self\ =\ \textcolor{keyword}{static\_cast<}timer\ *\textcolor{keyword}{>}(pvTimerGetTimerID(t));}
+\DoxyCodeLine{00115\ \ \ \ \ configASSERT(self);}
+\DoxyCodeLine{00116\ \ \ \ \ self-\/>m\_callback();}
+\DoxyCodeLine{00117\ \ \ \}}
+\DoxyCodeLine{00118\ }
+\DoxyCodeLine{00119\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00128\ \ \ \textcolor{keyword}{explicit}\ timer(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ *name,\ \textcolor{keyword}{const}\ TickType\_t\ period\_ticks,}
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ UBaseType\_t\ auto\_reload,\ timer\_callback\_t\ \&\&callback)}
+\DoxyCodeLine{00130\ \ \ \ \ \ \ :\ m\_timer\{nullptr\},\ m\_callback\{std::move(callback)\},\ m\_started\{false\}\ \{}
+\DoxyCodeLine{00131\ \ \ \ \ m\_timer\ =\ m\_allocator.create(name,\ period\_ticks,\ auto\_reload,\ \textcolor{keyword}{this},}
+\DoxyCodeLine{00132\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ callback\_wrapper);}
+\DoxyCodeLine{00133\ \ \ \ \ configASSERT(m\_timer);}
+\DoxyCodeLine{00134\ \ \ \}}
+\DoxyCodeLine{00145\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Rep,\ \textcolor{keyword}{typename}\ Period>}
+\DoxyCodeLine{00146\ \ \ \textcolor{keyword}{explicit}\ timer(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ *name,}
+\DoxyCodeLine{00147\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::chrono::duration<Rep,\ Period>\ \&period,}
+\DoxyCodeLine{00148\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ UBaseType\_t\ auto\_reload,\ timer\_callback\_t\ \&\&callback)}
+\DoxyCodeLine{00149\ \ \ \ \ \ \ :\ timer\{name,}
+\DoxyCodeLine{00150\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ static\_cast<TickType\_t>(}
+\DoxyCodeLine{00151\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::chrono::duration\_cast<std::chrono::milliseconds>(period)}
+\DoxyCodeLine{00152\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ .count()),}
+\DoxyCodeLine{00153\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ auto\_reload,\ std::move(callback)\}\ \{\}}
+\DoxyCodeLine{00154\ \ \ timer(\textcolor{keyword}{const}\ timer\ \&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00166\ \ \ timer(timer\ \&\&src)\ noexcept\ }
+\DoxyCodeLine{00167\ \ \ \ \ \ \ :\ m\_allocator(std::move(src.m\_allocator)),\ }
+\DoxyCodeLine{00168\ \ \ \ \ \ \ \ \ m\_timer(src.m\_timer),\ }
+\DoxyCodeLine{00169\ \ \ \ \ \ \ \ \ m\_callback(std::move(src.m\_callback)),\ }
+\DoxyCodeLine{00170\ \ \ \ \ \ \ \ \ m\_started(src.m\_started)\ \{}
+\DoxyCodeLine{00171\ \ \ \ \ \textcolor{comment}{//\ Transfer\ ownership:\ clear\ the\ source\ timer\ handle\ to\ prevent\ double\ deletion}}
+\DoxyCodeLine{00172\ \ \ \ \ src.m\_timer\ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{00173\ \ \ \ \ src.m\_started\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00174\ \ \ \}}
+\DoxyCodeLine{00180\ \ \ \string~timer(\textcolor{keywordtype}{void})\ \{}
+\DoxyCodeLine{00181\ \ \ \ \ \textcolor{keywordflow}{if}\ (m\_timer)\ \{}
+\DoxyCodeLine{00182\ \ \ \ \ \ \ \textcolor{keyword}{auto}\ rc\ =\ xTimerDelete(m\_timer,\ portMAX\_DELAY);}
+\DoxyCodeLine{00183\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (rc\ ==\ pdPASS)\ \{}
+\DoxyCodeLine{00184\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (xTimerIsTimerActive(m\_timer)\ !=\ pdFALSE)\ \{}
+\DoxyCodeLine{00185\ \ \ \ \ \ \ \ \ \ \ vTaskDelay(pdMS\_TO\_TICKS(1));}
+\DoxyCodeLine{00186\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00187\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00188\ \ \ \ \ \}}
+\DoxyCodeLine{00189\ \ \ \}}
+\DoxyCodeLine{00190\ }
+\DoxyCodeLine{00191\ \ \ timer\ \&operator=(\textcolor{keyword}{const}\ timer\ \&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00192\ \ \ timer\ \&operator=(timer\ \&\&src)\ \textcolor{keyword}{noexcept}\ \{}
+\DoxyCodeLine{00193\ \ \ \ \ \textcolor{keywordflow}{if}\ (\textcolor{keyword}{this}\ !=\ \&src)\ \{}
+\DoxyCodeLine{00194\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (m\_timer)\ \{}
+\DoxyCodeLine{00195\ \ \ \ \ \ \ \ \ xTimerDelete(m\_timer,\ portMAX\_DELAY);}
+\DoxyCodeLine{00196\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00197\ \ \ \ \ \ \ \textcolor{keyword}{auto}\ rc\ =\ xTimerStop(src.m\_timer,\ portMAX\_DELAY);}
+\DoxyCodeLine{00198\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (rc\ ==\ pdPASS)\ \{}
+\DoxyCodeLine{00199\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (xTimerIsTimerActive(src.m\_timer)\ !=\ pdFALSE)\ \{}
+\DoxyCodeLine{00200\ \ \ \ \ \ \ \ \ \ \ vTaskDelay(pdMS\_TO\_TICKS(1));}
+\DoxyCodeLine{00201\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00202\ \ \ \ \ \ \ \ \ \textcolor{keyword}{auto}\ name\ =\ pcTimerGetName(src.m\_timer);}
+\DoxyCodeLine{00203\ \ \ \ \ \ \ \ \ \textcolor{keyword}{auto}\ period\ =\ xTimerGetPeriod(src.m\_timer);}
+\DoxyCodeLine{00204\ \ \ \ \ \ \ \ \ \textcolor{keyword}{auto}\ auto\_reload\ =\ uxTimerGetReloadMode(src.m\_timer);}
+\DoxyCodeLine{00205\ \ \ \ \ \ \ \ \ rc\ =\ xTimerDelete(src.m\_timer,\ portMAX\_DELAY);}
+\DoxyCodeLine{00206\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (rc\ ==\ pdPASS)\ \{}
+\DoxyCodeLine{00207\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (xTimerIsTimerActive(src.m\_timer)\ !=\ pdFALSE)\ \{}
+\DoxyCodeLine{00208\ \ \ \ \ \ \ \ \ \ \ \ \ vTaskDelay(pdMS\_TO\_TICKS(1));}
+\DoxyCodeLine{00209\ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00210\ \ \ \ \ \ \ \ \ \ \ src.m\_timer\ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{00211\ \ \ \ \ \ \ \ \ \ \ m\_callback\ =\ std::move(src.m\_callback);}
+\DoxyCodeLine{00212\ \ \ \ \ \ \ \ \ \ \ m\_timer\ =\ m\_allocator.create(name,\ period,\ auto\_reload,\ \textcolor{keyword}{this},}
+\DoxyCodeLine{00213\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ callback\_wrapper);}
+\DoxyCodeLine{00214\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (m\_timer)\ \{}
+\DoxyCodeLine{00215\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (src.m\_started)\ \{}
+\DoxyCodeLine{00216\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ rc\ =\ xTimerStart(m\_timer,\ portMAX\_DELAY);}
+\DoxyCodeLine{00217\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (rc\ ==\ pdPASS)\ \{}
+\DoxyCodeLine{00218\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ m\_started\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{00219\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00220\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00221\ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00222\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00223\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00224\ \ \ \ \ \}}
+\DoxyCodeLine{00225\ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00226\ \ \ \}}
+\DoxyCodeLine{00227\ }
+\DoxyCodeLine{00235\ \ \ BaseType\_t\ start(\textcolor{keyword}{const}\ TickType\_t\ ticks\_to\_wait\ =\ portMAX\_DELAY)\ \{}
+\DoxyCodeLine{00236\ \ \ \ \ \textcolor{keywordflow}{if}\ (!m\_timer)\ \{}
+\DoxyCodeLine{00237\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ pdFAIL;}
+\DoxyCodeLine{00238\ \ \ \ \ \}}
+\DoxyCodeLine{00239\ \ \ \ \ \textcolor{keyword}{auto}\ rc\ =\ xTimerStart(m\_timer,\ ticks\_to\_wait);}
+\DoxyCodeLine{00240\ \ \ \ \ \textcolor{keywordflow}{if}\ (rc)\ \{}
+\DoxyCodeLine{00241\ \ \ \ \ \ \ m\_started\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{00242\ \ \ \ \ \}}
+\DoxyCodeLine{00243\ \ \ \ \ \textcolor{keywordflow}{return}\ rc;}
+\DoxyCodeLine{00244\ \ \ \}}
+\DoxyCodeLine{00254\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Rep,\ \textcolor{keyword}{typename}\ Period>}
+\DoxyCodeLine{00255\ \ \ BaseType\_t\ start(\textcolor{keyword}{const}\ std::chrono::duration<Rep,\ Period>\ \&timeout)\ \{}
+\DoxyCodeLine{00256\ \ \ \ \ \textcolor{keywordflow}{return}\ start(}
+\DoxyCodeLine{00257\ \ \ \ \ \ \ \ \ std::chrono::duration\_cast<std::chrono::milliseconds>(timeout).count());}
+\DoxyCodeLine{00258\ \ \ \}}
+\DoxyCodeLine{00267\ \ \ BaseType\_t\ start\_isr(BaseType\_t\ \&high\_priority\_task\_woken)\ \{}
+\DoxyCodeLine{00268\ \ \ \ \ \textcolor{keywordflow}{if}\ (!m\_timer)\ \{}
+\DoxyCodeLine{00269\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ pdFAIL;}
+\DoxyCodeLine{00270\ \ \ \ \ \}}
+\DoxyCodeLine{00271\ \ \ \ \ \textcolor{keyword}{auto}\ rc\ =\ xTimerStartFromISR(m\_timer,\ \&high\_priority\_task\_woken);}
+\DoxyCodeLine{00272\ \ \ \ \ \textcolor{keywordflow}{if}\ (rc)\ \{}
+\DoxyCodeLine{00273\ \ \ \ \ \ \ m\_started\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{00274\ \ \ \ \ \}}
+\DoxyCodeLine{00275\ \ \ \ \ \textcolor{keywordflow}{return}\ rc;}
+\DoxyCodeLine{00276\ \ \ \}}
+\DoxyCodeLine{00283\ \ \ BaseType\_t\ start\_isr(\textcolor{keywordtype}{void})\ \{}
+\DoxyCodeLine{00284\ \ \ \ \ BaseType\_t\ high\_priority\_task\_woken\ =\ pdFALSE;}
+\DoxyCodeLine{00285\ \ \ \ \ \textcolor{keywordflow}{return}\ start\_isr(high\_priority\_task\_woken);}
+\DoxyCodeLine{00286\ \ \ \}}
+\DoxyCodeLine{00294\ \ \ BaseType\_t\ stop(\textcolor{keyword}{const}\ TickType\_t\ ticks\_to\_wait\ =\ portMAX\_DELAY)\ \{}
+\DoxyCodeLine{00295\ \ \ \ \ \textcolor{keywordflow}{if}\ (!m\_timer)\ \{}
+\DoxyCodeLine{00296\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ pdFAIL;}
+\DoxyCodeLine{00297\ \ \ \ \ \}}
+\DoxyCodeLine{00298\ \ \ \ \ \textcolor{keyword}{auto}\ rc\ =\ xTimerStop(m\_timer,\ ticks\_to\_wait);}
+\DoxyCodeLine{00299\ \ \ \ \ \textcolor{keywordflow}{if}\ (rc)\ \{}
+\DoxyCodeLine{00300\ \ \ \ \ \ \ m\_started\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00301\ \ \ \ \ \}}
+\DoxyCodeLine{00302\ \ \ \ \ \textcolor{keywordflow}{return}\ rc;}
 \DoxyCodeLine{00303\ \ \ \}}
-\DoxyCodeLine{00315\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Rep,\ \textcolor{keyword}{typename}\ Period>}
-\DoxyCodeLine{00316\ \ \ BaseType\_t\ period(\textcolor{keyword}{const}\ std::chrono::duration<Rep,\ Period>\ \&new\_period,}
-\DoxyCodeLine{00317\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::chrono::duration<Rep,\ Period>\ \&timeout)\ \{}
-\DoxyCodeLine{00318\ \ \ \ \ \textcolor{keywordflow}{return}\ period(}
-\DoxyCodeLine{00319\ \ \ \ \ \ \ \ \ std::chrono::duration\_cast<std::chrono::milliseconds>(new\_period)}
-\DoxyCodeLine{00320\ \ \ \ \ \ \ \ \ \ \ \ \ .count(),}
-\DoxyCodeLine{00321\ \ \ \ \ \ \ \ \ std::chrono::duration\_cast<std::chrono::milliseconds>(timeout).count());}
-\DoxyCodeLine{00322\ \ \ \}}
-\DoxyCodeLine{00333\ \ \ BaseType\_t\ period\_isr(\textcolor{keyword}{const}\ TickType\_t\ new\_period\_ticks,}
-\DoxyCodeLine{00334\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ BaseType\_t\ \&high\_priority\_task\_woken)\ \{}
-\DoxyCodeLine{00335\ \ \ \ \ \textcolor{keywordflow}{return}\ xTimerChangePeriodFromISR(m\_timer,\ new\_period\_ticks,}
-\DoxyCodeLine{00336\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \&high\_priority\_task\_woken);}
-\DoxyCodeLine{00337\ \ \ \}}
-\DoxyCodeLine{00350\ \ \ BaseType\_t\ period\_ticks(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ xTimerGetPeriod(m\_timer);\ \}}
-\DoxyCodeLine{00351\ \ \ std::chrono::milliseconds\ period(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{}
-\DoxyCodeLine{00352\ \ \ \ \ \textcolor{keywordflow}{return}\ std::chrono::milliseconds\{period\_ticks()\};}
-\DoxyCodeLine{00353\ \ \ \}}
-\DoxyCodeLine{00361\ \ \ timer\ \&reload\_mode(UBaseType\_t\ auto\_reload)\ \{}
-\DoxyCodeLine{00362\ \ \ \ \ vTimerSetReloadMode(m\_timer,\ auto\_reload);}
-\DoxyCodeLine{00363\ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
-\DoxyCodeLine{00364\ \ \ \}}
-\DoxyCodeLine{00372\ \ \ UBaseType\_t\ reload\_mode(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ uxTimerGetReloadMode(m\_timer);\ \}}
-\DoxyCodeLine{00378\ \ \ BaseType\_t\ remaining\_ticks(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{}
-\DoxyCodeLine{00379\ \ \ \ \ \textcolor{keywordflow}{return}\ xTimerGetExpiryTime(m\_timer)\ -\/\ xTaskGetTickCount();}
-\DoxyCodeLine{00380\ \ \ \}}
-\DoxyCodeLine{00387\ \ \ std::chrono::milliseconds\ remaining\_time(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{}
-\DoxyCodeLine{00388\ \ \ \ \ \textcolor{keywordflow}{return}\ std::chrono::milliseconds\{remaining\_ticks()\};}
-\DoxyCodeLine{00389\ \ \ \}}
-\DoxyCodeLine{00396\ \ \ BaseType\_t\ running(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ xTimerIsTimerActive(m\_timer);\ \}}
-\DoxyCodeLine{00402\ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ *name(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ pcTimerGetName(m\_timer);\ \}}
-\DoxyCodeLine{00403\ \};}
-\DoxyCodeLine{00404\ }
-\DoxyCodeLine{00405\ \textcolor{preprocessor}{\#if\ configSUPPORT\_STATIC\_ALLOCATION}}
-\DoxyCodeLine{00410\ \textcolor{keyword}{namespace\ }sa\ \{}
-\DoxyCodeLine{00415\ \textcolor{keyword}{using\ }timer\ =\ freertos::timer<freertos::static\_sw\_timer\_allocator>;}
-\DoxyCodeLine{00416\ \}\ \textcolor{comment}{//\ namespace\ sa}}
-\DoxyCodeLine{00417\ \textcolor{preprocessor}{\#endif}}
-\DoxyCodeLine{00418\ \textcolor{preprocessor}{\#if\ configSUPPORT\_DYNAMIC\_ALLOCATION}}
-\DoxyCodeLine{00423\ \textcolor{keyword}{namespace\ }da\ \{}
-\DoxyCodeLine{00428\ \textcolor{keyword}{using\ }timer\ =\ freertos::timer<freertos::dynamic\_sw\_timer\_allocator>;}
-\DoxyCodeLine{00429\ \}\ \textcolor{comment}{//\ namespace\ da}}
-\DoxyCodeLine{00430\ \textcolor{preprocessor}{\#endif}}
-\DoxyCodeLine{00431\ }
-\DoxyCodeLine{00432\ \textcolor{preprocessor}{\#endif}}
-\DoxyCodeLine{00433\ }
-\DoxyCodeLine{00434\ \}\ \textcolor{comment}{//\ namespace\ freertos}}
+\DoxyCodeLine{00313\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Rep,\ \textcolor{keyword}{typename}\ Period>}
+\DoxyCodeLine{00314\ \ \ BaseType\_t\ stop(\textcolor{keyword}{const}\ std::chrono::duration<Rep,\ Period>\ \&timeout)\ \{}
+\DoxyCodeLine{00315\ \ \ \ \ \textcolor{keywordflow}{return}\ stop(}
+\DoxyCodeLine{00316\ \ \ \ \ \ \ \ \ std::chrono::duration\_cast<std::chrono::milliseconds>(timeout).count());}
+\DoxyCodeLine{00317\ \ \ \}}
+\DoxyCodeLine{00326\ \ \ BaseType\_t\ stop\_isr(BaseType\_t\ \&high\_priority\_task\_woken)\ \{}
+\DoxyCodeLine{00327\ \ \ \ \ \textcolor{keywordflow}{if}\ (!m\_timer)\ \{}
+\DoxyCodeLine{00328\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ pdFAIL;}
+\DoxyCodeLine{00329\ \ \ \ \ \}}
+\DoxyCodeLine{00330\ \ \ \ \ \textcolor{keyword}{auto}\ rc\ =\ xTimerStopFromISR(m\_timer,\ \&high\_priority\_task\_woken);}
+\DoxyCodeLine{00331\ \ \ \ \ \textcolor{keywordflow}{if}\ (rc)\ \{}
+\DoxyCodeLine{00332\ \ \ \ \ \ \ m\_started\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00333\ \ \ \ \ \}}
+\DoxyCodeLine{00334\ \ \ \ \ \textcolor{keywordflow}{return}\ rc;}
+\DoxyCodeLine{00335\ \ \ \}}
+\DoxyCodeLine{00342\ \ \ BaseType\_t\ stop\_isr(\textcolor{keywordtype}{void})\ \{}
+\DoxyCodeLine{00343\ \ \ \ \ BaseType\_t\ high\_priority\_task\_woken\ =\ pdFALSE;}
+\DoxyCodeLine{00344\ \ \ \ \ \textcolor{keywordflow}{return}\ stop\_isr(high\_priority\_task\_woken);}
+\DoxyCodeLine{00345\ \ \ \}}
+\DoxyCodeLine{00353\ \ \ BaseType\_t\ reset(\textcolor{keyword}{const}\ TickType\_t\ ticks\_to\_wait\ =\ portMAX\_DELAY)\ \{}
+\DoxyCodeLine{00354\ \ \ \ \ \textcolor{keywordflow}{if}\ (!m\_timer)\ \{}
+\DoxyCodeLine{00355\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ pdFAIL;}
+\DoxyCodeLine{00356\ \ \ \ \ \}}
+\DoxyCodeLine{00357\ \ \ \ \ \textcolor{keywordflow}{return}\ xTimerReset(m\_timer,\ ticks\_to\_wait);}
+\DoxyCodeLine{00358\ \ \ \}}
+\DoxyCodeLine{00368\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Rep,\ \textcolor{keyword}{typename}\ Period>}
+\DoxyCodeLine{00369\ \ \ BaseType\_t\ reset(\textcolor{keyword}{const}\ std::chrono::duration<Rep,\ Period>\ \&timeout)\ \{}
+\DoxyCodeLine{00370\ \ \ \ \ \textcolor{keywordflow}{return}\ reset(}
+\DoxyCodeLine{00371\ \ \ \ \ \ \ \ \ std::chrono::duration\_cast<std::chrono::milliseconds>(timeout).count());}
+\DoxyCodeLine{00372\ \ \ \}}
+\DoxyCodeLine{00381\ \ \ BaseType\_t\ reset\_isr(BaseType\_t\ \&high\_priority\_task\_woken)\ \{}
+\DoxyCodeLine{00382\ \ \ \ \ \textcolor{keywordflow}{if}\ (!m\_timer)\ \{}
+\DoxyCodeLine{00383\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ pdFAIL;}
+\DoxyCodeLine{00384\ \ \ \ \ \}}
+\DoxyCodeLine{00385\ \ \ \ \ \textcolor{keywordflow}{return}\ xTimerResetFromISR(m\_timer,\ \&high\_priority\_task\_woken);}
+\DoxyCodeLine{00386\ \ \ \}}
+\DoxyCodeLine{00393\ \ \ BaseType\_t\ reset\_isr(\textcolor{keywordtype}{void})\ \{}
+\DoxyCodeLine{00394\ \ \ \ \ BaseType\_t\ high\_priority\_task\_woken\ =\ pdFALSE;}
+\DoxyCodeLine{00395\ \ \ \ \ \textcolor{keywordflow}{return}\ reset\_isr(high\_priority\_task\_woken);}
+\DoxyCodeLine{00396\ \ \ \}}
+\DoxyCodeLine{00407\ \ \ BaseType\_t\ period(\textcolor{keyword}{const}\ TickType\_t\ new\_period\_ticks,}
+\DoxyCodeLine{00408\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ TickType\_t\ ticks\_to\_wait\ =\ portMAX\_DELAY)\ \{}
+\DoxyCodeLine{00409\ \ \ \ \ \textcolor{keywordflow}{if}\ (!m\_timer)\ \{}
+\DoxyCodeLine{00410\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ pdFAIL;}
+\DoxyCodeLine{00411\ \ \ \ \ \}}
+\DoxyCodeLine{00412\ \ \ \ \ \textcolor{keywordflow}{return}\ xTimerChangePeriod(m\_timer,\ new\_period\_ticks,\ ticks\_to\_wait);}
+\DoxyCodeLine{00413\ \ \ \}}
+\DoxyCodeLine{00427\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ RepPeriod,\ \textcolor{keyword}{typename}\ PeriodPeriod,\ \textcolor{keyword}{typename}\ RepTimeout,\ \textcolor{keyword}{typename}\ PeriodTimeout>}
+\DoxyCodeLine{00428\ \ \ BaseType\_t\ period(\textcolor{keyword}{const}\ std::chrono::duration<RepPeriod,\ PeriodPeriod>\ \&new\_period,}
+\DoxyCodeLine{00429\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::chrono::duration<RepTimeout,\ PeriodTimeout>\ \&timeout)\ \{}
+\DoxyCodeLine{00430\ \ \ \ \ \textcolor{keywordflow}{return}\ period(}
+\DoxyCodeLine{00431\ \ \ \ \ \ \ \ \ std::chrono::duration\_cast<std::chrono::milliseconds>(new\_period)}
+\DoxyCodeLine{00432\ \ \ \ \ \ \ \ \ \ \ \ \ .count(),}
+\DoxyCodeLine{00433\ \ \ \ \ \ \ \ \ std::chrono::duration\_cast<std::chrono::milliseconds>(timeout).count());}
+\DoxyCodeLine{00434\ \ \ \}}
+\DoxyCodeLine{00445\ \ \ BaseType\_t\ period\_isr(\textcolor{keyword}{const}\ TickType\_t\ new\_period\_ticks,}
+\DoxyCodeLine{00446\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ BaseType\_t\ \&high\_priority\_task\_woken)\ \{}
+\DoxyCodeLine{00447\ \ \ \ \ \textcolor{keywordflow}{if}\ (!m\_timer)\ \{}
+\DoxyCodeLine{00448\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ pdFAIL;}
+\DoxyCodeLine{00449\ \ \ \ \ \}}
+\DoxyCodeLine{00450\ \ \ \ \ \textcolor{keywordflow}{return}\ xTimerChangePeriodFromISR(m\_timer,\ new\_period\_ticks,}
+\DoxyCodeLine{00451\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \&high\_priority\_task\_woken);}
+\DoxyCodeLine{00452\ \ \ \}}
+\DoxyCodeLine{00465\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Rep,\ \textcolor{keyword}{typename}\ Period>}
+\DoxyCodeLine{00466\ \ \ BaseType\_t\ period\_isr(\textcolor{keyword}{const}\ std::chrono::duration<Rep,\ Period>\ \&new\_period,}
+\DoxyCodeLine{00467\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ BaseType\_t\ \&high\_priority\_task\_woken)\ \{}
+\DoxyCodeLine{00468\ \ \ \ \ \textcolor{keywordflow}{return}\ period\_isr(}
+\DoxyCodeLine{00469\ \ \ \ \ \ \ \ \ std::chrono::duration\_cast<std::chrono::milliseconds>(new\_period)}
+\DoxyCodeLine{00470\ \ \ \ \ \ \ \ \ \ \ \ \ .count(),}
+\DoxyCodeLine{00471\ \ \ \ \ \ \ \ \ high\_priority\_task\_woken);}
+\DoxyCodeLine{00472\ \ \ \}}
+\DoxyCodeLine{00481\ \ \ BaseType\_t\ period\_isr(\textcolor{keyword}{const}\ TickType\_t\ new\_period\_ticks)\ \{}
+\DoxyCodeLine{00482\ \ \ \ \ BaseType\_t\ high\_priority\_task\_woken\ =\ pdFALSE;}
+\DoxyCodeLine{00483\ \ \ \ \ \textcolor{keywordflow}{return}\ period\_isr(new\_period\_ticks,\ high\_priority\_task\_woken);}
+\DoxyCodeLine{00484\ \ \ \}}
+\DoxyCodeLine{00495\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Rep,\ \textcolor{keyword}{typename}\ Period>}
+\DoxyCodeLine{00496\ \ \ BaseType\_t\ period\_isr(\textcolor{keyword}{const}\ std::chrono::duration<Rep,\ Period>\ \&new\_period)\ \{}
+\DoxyCodeLine{00497\ \ \ \ \ \textcolor{keywordflow}{return}\ period\_isr(}
+\DoxyCodeLine{00498\ \ \ \ \ \ \ \ \ std::chrono::duration\_cast<std::chrono::milliseconds>(new\_period)}
+\DoxyCodeLine{00499\ \ \ \ \ \ \ \ \ \ \ \ \ .count());}
+\DoxyCodeLine{00500\ \ \ \}}
+\DoxyCodeLine{00512\ \ \ TickType\_t\ period\_ticks(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00513\ \ \ \ \ \textcolor{keywordflow}{if}\ (!m\_timer)\ \{}
+\DoxyCodeLine{00514\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ 0;}
+\DoxyCodeLine{00515\ \ \ \ \ \}}
+\DoxyCodeLine{00516\ \ \ \ \ \textcolor{keywordflow}{return}\ xTimerGetPeriod(m\_timer);}
+\DoxyCodeLine{00517\ \ \ \}}
+\DoxyCodeLine{00523\ \ \ std::chrono::milliseconds\ period(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00524\ \ \ \ \ \textcolor{keywordflow}{return}\ std::chrono::milliseconds\{period\_ticks()\};}
+\DoxyCodeLine{00525\ \ \ \}}
+\DoxyCodeLine{00533\ \ \ timer\ \&reload\_mode(UBaseType\_t\ auto\_reload)\ \{}
+\DoxyCodeLine{00534\ \ \ \ \ \textcolor{keywordflow}{if}\ (m\_timer)\ \{}
+\DoxyCodeLine{00535\ \ \ \ \ \ \ vTimerSetReloadMode(m\_timer,\ auto\_reload);}
+\DoxyCodeLine{00536\ \ \ \ \ \}}
+\DoxyCodeLine{00537\ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00538\ \ \ \}}
+\DoxyCodeLine{00546\ \ \ UBaseType\_t\ reload\_mode(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ uxTimerGetReloadMode(m\_timer);\ \}}
+\DoxyCodeLine{00552\ \ \ TickType\_t\ remaining\_ticks(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00553\ \ \ \ \ \textcolor{keywordflow}{if}\ (m\_timer)\ \{}
+\DoxyCodeLine{00554\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ xTimerGetExpiryTime(m\_timer)\ -\/\ xTaskGetTickCount();}
+\DoxyCodeLine{00555\ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{00556\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ 0;}
+\DoxyCodeLine{00557\ \ \ \ \ \}}
+\DoxyCodeLine{00558\ \ \ \}}
+\DoxyCodeLine{00565\ \ \ std::chrono::milliseconds\ remaining\_time(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00566\ \ \ \ \ \textcolor{keywordflow}{return}\ std::chrono::milliseconds\{remaining\_ticks()\};}
+\DoxyCodeLine{00567\ \ \ \}}
+\DoxyCodeLine{00574\ \ \ BaseType\_t\ running(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00575\ \ \ \ \ \textcolor{keywordflow}{if}\ (!m\_timer)\ \{}
+\DoxyCodeLine{00576\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ pdFALSE;}
+\DoxyCodeLine{00577\ \ \ \ \ \}}
+\DoxyCodeLine{00578\ \ \ \ \ \textcolor{keywordflow}{return}\ xTimerIsTimerActive(m\_timer);}
+\DoxyCodeLine{00579\ \ \ \}}
+\DoxyCodeLine{00585\ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ *name(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00586\ \ \ \ \ \textcolor{keywordflow}{if}\ (!m\_timer)\ \{}
+\DoxyCodeLine{00587\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{00588\ \ \ \ \ \}}
+\DoxyCodeLine{00589\ \ \ \ \ \textcolor{keywordflow}{return}\ pcTimerGetName(m\_timer);}
+\DoxyCodeLine{00590\ \ \ \}}
+\DoxyCodeLine{00591\ \};}
+\DoxyCodeLine{00592\ }
+\DoxyCodeLine{00593\ \textcolor{preprocessor}{\#if\ configSUPPORT\_STATIC\_ALLOCATION}}
+\DoxyCodeLine{00598\ \textcolor{keyword}{namespace\ }sa\ \{}
+\DoxyCodeLine{00603\ \textcolor{keyword}{using\ }timer\ =\ freertos::timer<freertos::static\_sw\_timer\_allocator>;}
+\DoxyCodeLine{00604\ \}\ \textcolor{comment}{//\ namespace\ sa}}
+\DoxyCodeLine{00605\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00606\ \textcolor{preprocessor}{\#if\ configSUPPORT\_DYNAMIC\_ALLOCATION}}
+\DoxyCodeLine{00611\ \textcolor{keyword}{namespace\ }da\ \{}
+\DoxyCodeLine{00616\ \textcolor{keyword}{using\ }timer\ =\ freertos::timer<freertos::dynamic\_sw\_timer\_allocator>;}
+\DoxyCodeLine{00617\ \}\ \textcolor{comment}{//\ namespace\ da}}
+\DoxyCodeLine{00618\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00619\ }
+\DoxyCodeLine{00620\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00621\ }
+\DoxyCodeLine{00622\ \}\ \textcolor{comment}{//\ namespace\ freertos}}
 
 \end{DoxyCode}

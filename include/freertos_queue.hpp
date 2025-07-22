@@ -82,11 +82,107 @@ public:
 #endif
 
 /**
- * @brief A wrapper for the FreeRTOS queue.
- *
- * @tparam QueueLength The maximum number of items that the queue can hold.
- * @tparam T The type of the items that the queue will hold.
- * @tparam QueueAllocator The type of the allocator to use.
+ * @brief A modern C++ wrapper for FreeRTOS queues with type safety.
+ * 
+ * This class provides a type-safe, RAII wrapper around FreeRTOS queues for 
+ * inter-task communication. It supports compile-time type checking, automatic
+ * resource management, and std::chrono timeout support.
+ * 
+ * @tparam QueueLength The maximum number of items that the queue can hold
+ * @tparam T The type of items stored in the queue (must be copyable)
+ * @tparam QueueAllocator The allocator type (static or dynamic)
+ * 
+ * ## Features:
+ * - Type-safe item storage and retrieval
+ * - RAII automatic resource management
+ * - std::chrono timeout support
+ * - ISR-safe operations
+ * - Optional queue registry integration
+ * - Move semantics prevention for safety
+ * 
+ * ## Usage Examples:
+ * 
+ * ### Basic Message Passing:
+ * ```cpp
+ * // Create a queue for 10 integers
+ * freertos::queue<10, int> int_queue;
+ * 
+ * // Producer task
+ * freertos::task<512> producer("Producer", 3, [&]() {
+ *     for (int i = 0; i < 20; ++i) {
+ *         if (int_queue.send(i, std::chrono::milliseconds(100))) {
+ *             printf("Sent: %d\\n", i);
+ *         } else {
+ *             printf("Failed to send: %d\\n", i);
+ *         }
+ *         vTaskDelay(pdMS_TO_TICKS(500));
+ *     }
+ * });
+ * 
+ * // Consumer task
+ * freertos::task<512> consumer("Consumer", 2, [&]() {
+ *     while (true) {
+ *         int value;
+ *         if (int_queue.receive(value, std::chrono::seconds(1))) {
+ *             printf("Received: %d\\n", value);
+ *         } else {
+ *             printf("Timeout - no data\\n");
+ *         }
+ *     }
+ * });
+ * ```
+ * 
+ * ### Complex Data Types:
+ * ```cpp
+ * struct SensorData {
+ *     float temperature;
+ *     float humidity;
+ *     uint32_t timestamp;
+ * };
+ * 
+ * freertos::queue<5, SensorData> sensor_queue("SensorQueue");
+ * 
+ * // Send sensor data
+ * SensorData data{25.5f, 60.2f, xTaskGetTickCount()};
+ * if (sensor_queue.send(data, 100ms)) {
+ *     printf("Sensor data sent\\n");
+ * }
+ * 
+ * // Receive sensor data
+ * SensorData received;
+ * if (sensor_queue.receive(received, 1s)) {
+ *     printf("Temperature: %.1f°C, Humidity: %.1f%%\\n", 
+ *            received.temperature, received.humidity);
+ * }
+ * ```
+ * 
+ * ### ISR Communication:
+ * ```cpp
+ * freertos::queue<32, uint8_t> isr_queue;
+ * 
+ * void uart_interrupt_handler() {
+ *     uint8_t received_byte = read_uart_register();
+ *     BaseType_t task_woken = pdFALSE;
+ *     
+ *     if (isr_queue.send_isr(received_byte, task_woken)) {
+ *         portYIELD_FROM_ISR(task_woken);
+ *     }
+ * }
+ * 
+ * freertos::task<1024> uart_handler("UartHandler", 4, [&]() {
+ *     while (true) {
+ *         uint8_t byte;
+ *         if (isr_queue.receive(byte)) {
+ *             process_received_byte(byte);
+ *         }
+ *     }
+ * });
+ * ```
+ * 
+ * ### Static Allocation:
+ * ```cpp
+ * freertos::queue<16, float, freertos::static_queue_allocator<16, float>> static_queue;
+ * ```
  */
 template <size_t QueueLength, typename T, typename QueueAllocator> class queue {
   QueueAllocator m_allocator{};
