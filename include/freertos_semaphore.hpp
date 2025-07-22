@@ -555,7 +555,7 @@ public:
 template <typename SemaphoreAllocator> class recursive_mutex {
   SemaphoreAllocator m_allocator{};
   SemaphoreHandle_t m_semaphore{nullptr};
-  uint8_t m_lock_count{0};
+  uint8_t m_recustions_count{0};
 
 public:
   /**
@@ -586,11 +586,12 @@ public:
    * @ref https://www.freertos.org/a00123.html
    *
    * @return BaseType_t pdTRUE if the recursive mutex was successfully unlocked,
+   * otherwise pdFALSE.
    */
   BaseType_t unlock() {
     auto rc = xSemaphoreGiveRecursive(m_semaphore);
-    if (rc && m_lock_count > 0) {
-      m_lock_count--;
+    if (rc && m_recustions_count > 0) {
+      m_recustions_count--;
     }
     return rc;
   }
@@ -604,8 +605,8 @@ public:
    */
   BaseType_t unlock_isr(BaseType_t &high_priority_task_woken) {
     auto rc = xSemaphoreGiveFromISR(m_semaphore, &high_priority_task_woken);
-    if (rc && m_lock_count > 0) {
-      m_lock_count--;
+    if (rc && m_recustions_count > 0) {
+      m_recustions_count--;
     }
     return rc;
   }
@@ -618,8 +619,8 @@ public:
   BaseType_t unlock_isr(void) {
     BaseType_t high_priority_task_woken = pdFALSE;
     auto rc = xSemaphoreGiveFromISR(m_semaphore, &high_priority_task_woken);
-    if (rc && m_lock_count > 0) {
-      m_lock_count--;
+    if (rc && m_recustions_count > 0) {
+      m_recustions_count--;
     }
     return rc;
   }
@@ -633,7 +634,7 @@ public:
   BaseType_t lock(const TickType_t ticks_to_wait = portMAX_DELAY) {
     auto rc = xSemaphoreTakeRecursive(m_semaphore, ticks_to_wait);
     if (rc) {
-      m_lock_count++;
+      m_recustions_count++;
     }
     return rc;
   }
@@ -648,7 +649,7 @@ public:
   BaseType_t lock_isr(BaseType_t &high_priority_task_woken) {
     auto rc = xSemaphoreTakeFromISR(m_semaphore, &high_priority_task_woken);
     if (rc) {
-      m_lock_count++;
+      m_recustions_count++;
     }
     return rc;
   }
@@ -662,7 +663,7 @@ public:
     BaseType_t high_priority_task_woken = pdFALSE;
     auto rc = xSemaphoreTakeFromISR(m_semaphore, &high_priority_task_woken);
     if (rc) {
-      m_lock_count++;
+      m_recustions_count++;
     }
     return rc;
   }
@@ -686,7 +687,7 @@ public:
   BaseType_t try_lock() {
     auto rc = xSemaphoreTakeRecursive(m_semaphore, 0);
     if (rc) {
-      m_lock_count++;
+      m_recustions_count++;
     }
     return rc;
   }
@@ -695,7 +696,13 @@ public:
    *
    * @return bool true if the recursive mutex is locked, otherwise false.
    */
-  bool locked(void) const { return m_lock_count > 0; }
+  bool locked(void) const { return m_recustions_count > 0; }
+  /**
+   * @brief Get the number of recursions of the recursive mutex.
+   *
+   * @return uint8_t number of recursions of the recursive mutex.
+   */
+  uint8_t recursions_count(void) const { return m_recustions_count; }
 };
 
 /**
