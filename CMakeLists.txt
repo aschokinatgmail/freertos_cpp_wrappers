@@ -139,6 +139,7 @@ if(ENABLE_CLANG_TIDY)
                     --system-headers=false
                     --header-filter="^${CMAKE_CURRENT_SOURCE_DIR}/include/.*"
                     ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cc
+                    ${CMAKE_CURRENT_SOURCE_DIR}/include/freertos.hpp
                     ${CMAKE_CURRENT_SOURCE_DIR}/include/freertos_event_group.hpp
                     ${CMAKE_CURRENT_SOURCE_DIR}/include/freertos_message_buffer.hpp
                     ${CMAKE_CURRENT_SOURCE_DIR}/include/freertos_queue.hpp
@@ -178,7 +179,54 @@ else()
 endif()
 
 # =============================================================================
-# END STATIC ANALYSIS CONFIGURATION  
+# VALIDATION AND VERIFICATION REPORT GENERATION
+# =============================================================================
+
+# Add custom target for generating validation and verification report
+add_custom_target(validation-verification-report
+    # Clean previous coverage data
+    COMMAND find . -name "*.gcda" -delete || true
+    
+    # Build project (ensure latest code is compiled)
+    COMMAND ${CMAKE_COMMAND} --build . --target freertos_cpp_wrappers
+    COMMAND ${CMAKE_COMMAND} --build . --target freertos_mocks
+    COMMAND ${CMAKE_COMMAND} --build . --parallel
+    
+    # Run all tests
+    COMMAND ctest --verbose --output-on-failure
+    
+    # Generate coverage data
+    COMMAND lcov --capture --directory . --output-file coverage.info --ignore-errors mismatch,negative,gcov
+    COMMAND lcov --remove coverage.info '/usr/*' --output-file coverage_filtered.info
+    
+    # Generate static analysis report
+    COMMAND ${CMAKE_COMMAND} --build . --target static-analysis-report
+    
+    # Generate validation and verification report
+    COMMAND python3 ${CMAKE_CURRENT_SOURCE_DIR}/scripts/generate_validation_verification_report.py 
+        ${CMAKE_BINARY_DIR} 
+        ${CMAKE_CURRENT_SOURCE_DIR}/VALIDATION_VERIFICATION_REPORT.md
+    
+    # Status messages
+    COMMAND ${CMAKE_COMMAND} -E echo ""
+    COMMAND ${CMAKE_COMMAND} -E echo "=== Reports Generated ==="
+    COMMAND ${CMAKE_COMMAND} -E echo "1. STATIC_ANALYSIS_REPORT.md - Static code analysis for main modules"
+    COMMAND ${CMAKE_COMMAND} -E echo "2. VALIDATION_VERIFICATION_REPORT.md - Test execution and coverage analysis"
+    COMMAND ${CMAKE_COMMAND} -E echo ""
+    
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    COMMENT "Running tests and generating validation & verification reports"
+)
+
+# Make the reports depend on having coverage enabled
+if(NOT ENABLE_COVERAGE)
+    message(WARNING "Coverage not enabled. Run with -DENABLE_COVERAGE=ON for complete validation reports.")
+endif()
+
+message(STATUS "Run 'make validation-verification-report' to generate both required reports automatically")
+
+# =============================================================================
+# END VALIDATION AND VERIFICATION REPORT GENERATION
 # =============================================================================
 
 # Only build tests if GoogleTest is available
