@@ -450,9 +450,9 @@ TEST_F(FreeRTOSSemaphoreTest, RecursiveMutexConstruction) {
 TEST_F(FreeRTOSSemaphoreTest, RecursiveMutexLockUnlock) {
     EXPECT_CALL(*mock, xSemaphoreCreateRecursiveMutex())
         .WillOnce(Return(mock_recursive_mutex_handle));
-    EXPECT_CALL(*mock, xSemaphoreTake(mock_recursive_mutex_handle, portMAX_DELAY))
+    EXPECT_CALL(*mock, xSemaphoreTakeRecursive(mock_recursive_mutex_handle, portMAX_DELAY))
         .WillOnce(Return(pdTRUE));
-    EXPECT_CALL(*mock, xSemaphoreGive(mock_recursive_mutex_handle))
+    EXPECT_CALL(*mock, xSemaphoreGiveRecursive(mock_recursive_mutex_handle))
         .WillOnce(Return(pdTRUE));
     EXPECT_CALL(*mock, vSemaphoreDelete(mock_recursive_mutex_handle));
     
@@ -470,7 +470,7 @@ TEST_F(FreeRTOSSemaphoreTest, RecursiveMutexLockUnlock) {
 TEST_F(FreeRTOSSemaphoreTest, RecursiveMutexTryLock) {
     EXPECT_CALL(*mock, xSemaphoreCreateRecursiveMutex())
         .WillOnce(Return(mock_recursive_mutex_handle));
-    EXPECT_CALL(*mock, xSemaphoreTake(mock_recursive_mutex_handle, 0))
+    EXPECT_CALL(*mock, xSemaphoreTakeRecursive(mock_recursive_mutex_handle, 0))
         .WillOnce(Return(pdTRUE));
     EXPECT_CALL(*mock, vSemaphoreDelete(mock_recursive_mutex_handle));
     
@@ -491,10 +491,10 @@ TEST_F(FreeRTOSSemaphoreTest, RecursiveMutexNestedLocks) {
      */
     EXPECT_CALL(*mock, xSemaphoreCreateRecursiveMutex())
         .WillOnce(Return(mock_recursive_mutex_handle));
-    EXPECT_CALL(*mock, xSemaphoreTake(mock_recursive_mutex_handle, portMAX_DELAY))
+    EXPECT_CALL(*mock, xSemaphoreTakeRecursive(mock_recursive_mutex_handle, portMAX_DELAY))
         .Times(3)  // Lock 3 times
         .WillRepeatedly(Return(pdTRUE));
-    EXPECT_CALL(*mock, xSemaphoreGive(mock_recursive_mutex_handle))
+    EXPECT_CALL(*mock, xSemaphoreGiveRecursive(mock_recursive_mutex_handle))
         .Times(3)  // Must unlock 3 times
         .WillRepeatedly(Return(pdTRUE));
     EXPECT_CALL(*mock, vSemaphoreDelete(mock_recursive_mutex_handle));
@@ -540,10 +540,10 @@ TEST_F(FreeRTOSSemaphoreTest, RecursiveMutexNestedFunction) {
      */
     EXPECT_CALL(*mock, xSemaphoreCreateRecursiveMutex())
         .WillOnce(Return(mock_recursive_mutex_handle));
-    EXPECT_CALL(*mock, xSemaphoreTake(mock_recursive_mutex_handle, portMAX_DELAY))
+    EXPECT_CALL(*mock, xSemaphoreTakeRecursive(mock_recursive_mutex_handle, portMAX_DELAY))
         .Times(5)  // Recursive depth of 5
         .WillRepeatedly(Return(pdTRUE));
-    EXPECT_CALL(*mock, xSemaphoreGive(mock_recursive_mutex_handle))
+    EXPECT_CALL(*mock, xSemaphoreGiveRecursive(mock_recursive_mutex_handle))
         .Times(5)  // Must unlock same number of times
         .WillRepeatedly(Return(pdTRUE));
     EXPECT_CALL(*mock, vSemaphoreDelete(mock_recursive_mutex_handle));
@@ -581,9 +581,9 @@ TEST_F(FreeRTOSSemaphoreTest, RecursiveMutexLockGuardRAII) {
      */
     EXPECT_CALL(*mock, xSemaphoreCreateRecursiveMutex())
         .WillOnce(Return(mock_recursive_mutex_handle));
-    EXPECT_CALL(*mock, xSemaphoreTake(mock_recursive_mutex_handle, portMAX_DELAY))
+    EXPECT_CALL(*mock, xSemaphoreTakeRecursive(mock_recursive_mutex_handle, portMAX_DELAY))
         .WillOnce(Return(pdTRUE));
-    EXPECT_CALL(*mock, xSemaphoreGive(mock_recursive_mutex_handle))
+    EXPECT_CALL(*mock, xSemaphoreGiveRecursive(mock_recursive_mutex_handle))
         .WillOnce(Return(pdTRUE));
     EXPECT_CALL(*mock, vSemaphoreDelete(mock_recursive_mutex_handle));
     
@@ -606,10 +606,10 @@ TEST_F(FreeRTOSSemaphoreTest, RecursiveMutexNestedLockGuards) {
      */
     EXPECT_CALL(*mock, xSemaphoreCreateRecursiveMutex())
         .WillOnce(Return(mock_recursive_mutex_handle));
-    EXPECT_CALL(*mock, xSemaphoreTake(mock_recursive_mutex_handle, portMAX_DELAY))
+    EXPECT_CALL(*mock, xSemaphoreTakeRecursive(mock_recursive_mutex_handle, portMAX_DELAY))
         .Times(3)  // Three nested lock guards
         .WillRepeatedly(Return(pdTRUE));
-    EXPECT_CALL(*mock, xSemaphoreGive(mock_recursive_mutex_handle))
+    EXPECT_CALL(*mock, xSemaphoreGiveRecursive(mock_recursive_mutex_handle))
         .Times(3)  // Three corresponding unlocks
         .WillRepeatedly(Return(pdTRUE));
     EXPECT_CALL(*mock, vSemaphoreDelete(mock_recursive_mutex_handle));
@@ -649,9 +649,9 @@ TEST_F(FreeRTOSSemaphoreTest, RecursiveMutexTryLockGuardRAII) {
      */
     EXPECT_CALL(*mock, xSemaphoreCreateRecursiveMutex())
         .WillOnce(Return(mock_recursive_mutex_handle));
-    EXPECT_CALL(*mock, xSemaphoreTake(mock_recursive_mutex_handle, 0))
+    EXPECT_CALL(*mock, xSemaphoreTakeRecursive(mock_recursive_mutex_handle, 0))
         .WillOnce(Return(pdTRUE));
-    EXPECT_CALL(*mock, xSemaphoreGive(mock_recursive_mutex_handle))
+    EXPECT_CALL(*mock, xSemaphoreGiveRecursive(mock_recursive_mutex_handle))
         .WillOnce(Return(pdTRUE));
     EXPECT_CALL(*mock, vSemaphoreDelete(mock_recursive_mutex_handle));
     
@@ -675,7 +675,7 @@ TEST_F(FreeRTOSSemaphoreTest, RecursiveMutexTryLockGuardFailure) {
      */
     EXPECT_CALL(*mock, xSemaphoreCreateRecursiveMutex())
         .WillOnce(Return(mock_recursive_mutex_handle));
-    EXPECT_CALL(*mock, xSemaphoreTake(mock_recursive_mutex_handle, 0))
+    EXPECT_CALL(*mock, xSemaphoreTakeRecursive(mock_recursive_mutex_handle, 0))
         .WillOnce(Return(pdFALSE));
     EXPECT_CALL(*mock, vSemaphoreDelete(mock_recursive_mutex_handle));
     
@@ -699,10 +699,10 @@ TEST_F(FreeRTOSSemaphoreTest, RecursiveMutexNestedTryLockGuards) {
      */
     EXPECT_CALL(*mock, xSemaphoreCreateRecursiveMutex())
         .WillOnce(Return(mock_recursive_mutex_handle));
-    EXPECT_CALL(*mock, xSemaphoreTake(mock_recursive_mutex_handle, 0))
+    EXPECT_CALL(*mock, xSemaphoreTakeRecursive(mock_recursive_mutex_handle, 0))
         .Times(2)  // Two nested try lock guards
         .WillRepeatedly(Return(pdTRUE));
-    EXPECT_CALL(*mock, xSemaphoreGive(mock_recursive_mutex_handle))
+    EXPECT_CALL(*mock, xSemaphoreGiveRecursive(mock_recursive_mutex_handle))
         .Times(2)  // Two corresponding unlocks
         .WillRepeatedly(Return(pdTRUE));
     EXPECT_CALL(*mock, vSemaphoreDelete(mock_recursive_mutex_handle));
@@ -804,9 +804,9 @@ TEST_F(FreeRTOSSemaphoreTest, RecursiveMutexTimeoutLockGuardRAII) {
      */
     EXPECT_CALL(*mock, xSemaphoreCreateRecursiveMutex())
         .WillOnce(Return(mock_recursive_mutex_handle));
-    EXPECT_CALL(*mock, xSemaphoreTake(mock_recursive_mutex_handle, 1000))
+    EXPECT_CALL(*mock, xSemaphoreTakeRecursive(mock_recursive_mutex_handle, 1000))
         .WillOnce(Return(pdTRUE));
-    EXPECT_CALL(*mock, xSemaphoreGive(mock_recursive_mutex_handle))
+    EXPECT_CALL(*mock, xSemaphoreGiveRecursive(mock_recursive_mutex_handle))
         .WillOnce(Return(pdTRUE));
     EXPECT_CALL(*mock, vSemaphoreDelete(mock_recursive_mutex_handle));
     
@@ -826,9 +826,9 @@ TEST_F(FreeRTOSSemaphoreTest, RecursiveMutexTimeoutLockGuardChrono) {
      */
     EXPECT_CALL(*mock, xSemaphoreCreateRecursiveMutex())
         .WillOnce(Return(mock_recursive_mutex_handle));
-    EXPECT_CALL(*mock, xSemaphoreTake(mock_recursive_mutex_handle, 500)) // 500ms
+    EXPECT_CALL(*mock, xSemaphoreTakeRecursive(mock_recursive_mutex_handle, 500)) // 500ms
         .WillOnce(Return(pdTRUE));
-    EXPECT_CALL(*mock, xSemaphoreGive(mock_recursive_mutex_handle))
+    EXPECT_CALL(*mock, xSemaphoreGiveRecursive(mock_recursive_mutex_handle))
         .WillOnce(Return(pdTRUE));
     EXPECT_CALL(*mock, vSemaphoreDelete(mock_recursive_mutex_handle));
     
@@ -849,11 +849,11 @@ TEST_F(FreeRTOSSemaphoreTest, RecursiveMutexNestedTimeoutLockGuards) {
      */
     EXPECT_CALL(*mock, xSemaphoreCreateRecursiveMutex())
         .WillOnce(Return(mock_recursive_mutex_handle));
-    EXPECT_CALL(*mock, xSemaphoreTake(mock_recursive_mutex_handle, 1000))
+    EXPECT_CALL(*mock, xSemaphoreTakeRecursive(mock_recursive_mutex_handle, 1000))
         .WillOnce(Return(pdTRUE));
-    EXPECT_CALL(*mock, xSemaphoreTake(mock_recursive_mutex_handle, 500))
+    EXPECT_CALL(*mock, xSemaphoreTakeRecursive(mock_recursive_mutex_handle, 500))
         .WillOnce(Return(pdTRUE));
-    EXPECT_CALL(*mock, xSemaphoreGive(mock_recursive_mutex_handle))
+    EXPECT_CALL(*mock, xSemaphoreGiveRecursive(mock_recursive_mutex_handle))
         .Times(2)  // Two corresponding unlocks
         .WillRepeatedly(Return(pdTRUE));
     EXPECT_CALL(*mock, vSemaphoreDelete(mock_recursive_mutex_handle));
@@ -884,15 +884,15 @@ TEST_F(FreeRTOSSemaphoreTest, RecursiveMutexMixedLockGuardTypes) {
     EXPECT_CALL(*mock, xSemaphoreCreateRecursiveMutex())
         .WillOnce(Return(mock_recursive_mutex_handle));
     // Regular lock_guard uses portMAX_DELAY
-    EXPECT_CALL(*mock, xSemaphoreTake(mock_recursive_mutex_handle, portMAX_DELAY))
+    EXPECT_CALL(*mock, xSemaphoreTakeRecursive(mock_recursive_mutex_handle, portMAX_DELAY))
         .WillOnce(Return(pdTRUE));
     // try_lock_guard uses 0 timeout
-    EXPECT_CALL(*mock, xSemaphoreTake(mock_recursive_mutex_handle, 0))
+    EXPECT_CALL(*mock, xSemaphoreTakeRecursive(mock_recursive_mutex_handle, 0))
         .WillOnce(Return(pdTRUE));
     // timeout_lock_guard uses specified timeout
-    EXPECT_CALL(*mock, xSemaphoreTake(mock_recursive_mutex_handle, 100))
+    EXPECT_CALL(*mock, xSemaphoreTakeRecursive(mock_recursive_mutex_handle, 100))
         .WillOnce(Return(pdTRUE));
-    EXPECT_CALL(*mock, xSemaphoreGive(mock_recursive_mutex_handle))
+    EXPECT_CALL(*mock, xSemaphoreGiveRecursive(mock_recursive_mutex_handle))
         .Times(3)  // Three corresponding unlocks
         .WillRepeatedly(Return(pdTRUE));
     EXPECT_CALL(*mock, vSemaphoreDelete(mock_recursive_mutex_handle));
@@ -930,7 +930,7 @@ TEST_F(FreeRTOSSemaphoreTest, RecursiveMutexTimeoutLockGuardFailure) {
      */
     EXPECT_CALL(*mock, xSemaphoreCreateRecursiveMutex())
         .WillOnce(Return(mock_recursive_mutex_handle));
-    EXPECT_CALL(*mock, xSemaphoreTake(mock_recursive_mutex_handle, 500))
+    EXPECT_CALL(*mock, xSemaphoreTakeRecursive(mock_recursive_mutex_handle, 500))
         .WillOnce(Return(pdFALSE)); // Lock fails due to timeout
     // Note: xSemaphoreGive should NOT be called since lock failed
     EXPECT_CALL(*mock, vSemaphoreDelete(mock_recursive_mutex_handle));
@@ -955,7 +955,7 @@ TEST_F(FreeRTOSSemaphoreTest, RecursiveMutexTryLockGuardAcquiredStateTrackingFai
      */
     EXPECT_CALL(*mock, xSemaphoreCreateRecursiveMutex())
         .WillOnce(Return(mock_recursive_mutex_handle));
-    EXPECT_CALL(*mock, xSemaphoreTake(mock_recursive_mutex_handle, 0))
+    EXPECT_CALL(*mock, xSemaphoreTakeRecursive(mock_recursive_mutex_handle, 0))
         .WillOnce(Return(pdFALSE)); // try_lock fails
     // Note: xSemaphoreGive should NOT be called since lock failed
     EXPECT_CALL(*mock, vSemaphoreDelete(mock_recursive_mutex_handle));
@@ -1292,14 +1292,14 @@ TEST_F(FreeRTOSSemaphoreTest, RecursiveMutexLockGuardAcquiredStateTracking) {
         .WillOnce(Return(mock_recursive_mutex_handle));
     
     // try_lock succeeds
-    EXPECT_CALL(*mock, xSemaphoreTake(mock_recursive_mutex_handle, 0))
+    EXPECT_CALL(*mock, xSemaphoreTakeRecursive(mock_recursive_mutex_handle, 0))
         .WillOnce(Return(pdTRUE));
     // timeout lock fails
-    EXPECT_CALL(*mock, xSemaphoreTake(mock_recursive_mutex_handle, 300))
+    EXPECT_CALL(*mock, xSemaphoreTakeRecursive(mock_recursive_mutex_handle, 300))
         .WillOnce(Return(pdFALSE));
     
     // Only one unlock should be called (from the successful try_lock_guard)
-    EXPECT_CALL(*mock, xSemaphoreGive(mock_recursive_mutex_handle))
+    EXPECT_CALL(*mock, xSemaphoreGiveRecursive(mock_recursive_mutex_handle))
         .WillOnce(Return(pdTRUE));
     
     EXPECT_CALL(*mock, vSemaphoreDelete(mock_recursive_mutex_handle));
@@ -1499,9 +1499,9 @@ TEST_F(FreeRTOSSemaphoreTest, NamespaceAliasMutex) {
 TEST_F(FreeRTOSSemaphoreTest, NamespaceAliasRecursiveMutex) {
     EXPECT_CALL(*mock, xSemaphoreCreateRecursiveMutex())
         .WillOnce(Return(mock_recursive_mutex_handle));
-    EXPECT_CALL(*mock, xSemaphoreTake(mock_recursive_mutex_handle, portMAX_DELAY))
+    EXPECT_CALL(*mock, xSemaphoreTakeRecursive(mock_recursive_mutex_handle, portMAX_DELAY))
         .WillOnce(Return(pdTRUE));
-    EXPECT_CALL(*mock, xSemaphoreGive(mock_recursive_mutex_handle))
+    EXPECT_CALL(*mock, xSemaphoreGiveRecursive(mock_recursive_mutex_handle))
         .WillOnce(Return(pdTRUE));
     EXPECT_CALL(*mock, vSemaphoreDelete(mock_recursive_mutex_handle));
     

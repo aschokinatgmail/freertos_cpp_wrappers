@@ -347,6 +347,20 @@ BaseType_t xSemaphoreTakeFromISR(SemaphoreHandle_t xSemaphore, BaseType_t* pxHig
     return pdFALSE;
 }
 
+BaseType_t xSemaphoreGiveRecursive(SemaphoreHandle_t xMutex) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xSemaphoreGiveRecursive(xMutex);
+    }
+    return pdFALSE;
+}
+
+BaseType_t xSemaphoreTakeRecursive(SemaphoreHandle_t xMutex, TickType_t xTicksToWait) {
+    if (g_freertos_mock) {
+        return g_freertos_mock->xSemaphoreTakeRecursive(xMutex, xTicksToWait);
+    }
+    return pdFALSE;
+}
+
 UBaseType_t uxSemaphoreGetCount(SemaphoreHandle_t xSemaphore) {
     if (g_freertos_mock) {
         return g_freertos_mock->uxSemaphoreGetCount(xSemaphore);

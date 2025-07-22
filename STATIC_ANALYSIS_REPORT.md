@@ -13,25 +13,28 @@
 - **Total Issues Found**: 0
 - **Warnings**: 0
 - **Errors**: 0
-- **Files Analyzed**: 1
-- **Unique Check Types**: 1
+- **Files Analyzed**: 2
+- **Unique Check Types**: 2
 
 ### Suppressed Issues
 
-- **Total Suppressed**: 628028
+- **Total Suppressed**: 628026
 - **Non-user Code**: 627122
-- **NOLINT Directives**: 906
+- **NOLINT Directives**: 904
 
 ### Issues by Check Category
 
+- **cert**: 2 issues
 - **cppcoreguidelines**: 1 issues
 
 ### Files with Issues
 
+- **freertos_semaphore.hpp**: 2 issues
 - **freertos_sw_timer.hpp**: 1 issues
 
 ### Analyzed Files
 
+- freertos_semaphore.hpp
 - freertos_sw_timer.hpp
 
 ## Detailed Analysis
@@ -46,13 +49,21 @@
 [4/8] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_queue.hpp.
 313564 warnings generated.
 [5/8] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_semaphore.hpp.
-391956 warnings generated.
+391958 warnings generated.
 [6/8] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_stream_buffer.hpp.
-470348 warnings generated.
+470350 warnings generated.
 [7/8] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_sw_timer.hpp.
-548743 warnings generated.
+548745 warnings generated.
 [8/8] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp.
-627123 warnings generated.
+627125 warnings generated.
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_semaphore.hpp:361:3: warning: overloaded 'operator++' returns a reference instead of a constant object type [cert-dcl21-cpp]
+  361 |   counting_semaphore &
+      |   ^~~~~~~~~~~~~~~~~~~~
+      |   const counting_semaphore<SemaphoreAllocator> 
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_semaphore.hpp:372:3: warning: overloaded 'operator--' returns a reference instead of a constant object type [cert-dcl21-cpp]
+  372 |   counting_semaphore &
+      |   ^~~~~~~~~~~~~~~~~~~~
+      |   const counting_semaphore<SemaphoreAllocator> 
 /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_sw_timer.hpp:131:5: warning: 'm_timer' should be initialized in a member initializer of the constructor [cppcoreguidelines-prefer-member-initializer]
   130 |       : m_timer{nullptr}, m_callback{std::move(callback)}, m_started{false} {
       |                ~~~~~~~~~
@@ -60,7 +71,7 @@
       |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   132 |                                  callback_wrapper);
       |                                  ~~~~~~~~~~~~~~~~~~
-Suppressed 628028 warnings (627122 in non-user code, 906 NOLINT).
+Suppressed 628026 warnings (627122 in non-user code, 904 NOLINT).
 Use -header-filter=.* to display errors from all non-system headers. Use -system-headers to display errors from system headers as well.
 ```
 

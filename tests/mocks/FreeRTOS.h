@@ -238,6 +238,8 @@ public:
     MOCK_METHOD(BaseType_t, xSemaphoreGiveFromISR, (SemaphoreHandle_t xSemaphore, BaseType_t* pxHigherPriorityTaskWoken));
     MOCK_METHOD(BaseType_t, xSemaphoreTake, (SemaphoreHandle_t xSemaphore, TickType_t xTicksToWait));
     MOCK_METHOD(BaseType_t, xSemaphoreTakeFromISR, (SemaphoreHandle_t xSemaphore, BaseType_t* pxHigherPriorityTaskWoken));
+    MOCK_METHOD(BaseType_t, xSemaphoreGiveRecursive, (SemaphoreHandle_t xMutex));
+    MOCK_METHOD(BaseType_t, xSemaphoreTakeRecursive, (SemaphoreHandle_t xMutex, TickType_t xTicksToWait));
     MOCK_METHOD(UBaseType_t, uxSemaphoreGetCount, (SemaphoreHandle_t xSemaphore));
     MOCK_METHOD(void, vSemaphoreDelete, (SemaphoreHandle_t xSemaphore));
     
@@ -403,6 +405,8 @@ extern "C" {
     BaseType_t xSemaphoreGiveFromISR(SemaphoreHandle_t xSemaphore, BaseType_t* pxHigherPriorityTaskWoken);
     BaseType_t xSemaphoreTake(SemaphoreHandle_t xSemaphore, TickType_t xTicksToWait);
     BaseType_t xSemaphoreTakeFromISR(SemaphoreHandle_t xSemaphore, BaseType_t* pxHigherPriorityTaskWoken);
+    BaseType_t xSemaphoreGiveRecursive(SemaphoreHandle_t xMutex);
+    BaseType_t xSemaphoreTakeRecursive(SemaphoreHandle_t xMutex, TickType_t xTicksToWait);
     UBaseType_t uxSemaphoreGetCount(SemaphoreHandle_t xSemaphore);
     void vSemaphoreDelete(SemaphoreHandle_t xSemaphore);
     
