@@ -213,6 +213,35 @@ def get_source_context(file_path, line_num, context_lines=2):
     except Exception:
         return f"Unable to read source context for line {line_num}"
 
+def demangle_function_name(mangled_name):
+    """Convert mangled C++ function names to more readable format"""
+    # Simple demangling for common patterns
+    if mangled_name.startswith('_ZN'):
+        # Try to extract meaningful parts from common patterns
+        if 'Task' in mangled_name:
+            if 'taskFunc' in mangled_name or '8taskFunc' in mangled_name:
+                return 'Task::taskFunc'
+            elif 'C1' in mangled_name or 'C2' in mangled_name:
+                return 'Task::Task (constructor)'
+            elif 'D1' in mangled_name or 'D2' in mangled_name:
+                return 'Task::~Task (destructor)'
+            elif 'suspend' in mangled_name:
+                return 'Task::suspend'
+            elif 'resume' in mangled_name:
+                return 'Task::resume'
+            elif 'notify' in mangled_name:
+                return 'Task::notify'
+        
+        if 'Semaphore' in mangled_name:
+            if 'lock' in mangled_name:
+                return 'Semaphore::lock'
+            elif 'unlock' in mangled_name:
+                return 'Semaphore::unlock'
+        
+        # Generic fallback
+        return f"C++ function ({mangled_name[:30]}...)" if len(mangled_name) > 30 else f"C++ function ({mangled_name})"
+    
+    return mangled_name
 def categorize_uncovered_code(uncovered_data, project_root):
     """Categorize uncovered code by type and provide explanations"""
     categories = {
@@ -242,35 +271,42 @@ def categorize_uncovered_code(uncovered_data, project_root):
     for func_info in uncovered_data.get('uncovered_functions', []):
         func_name = func_info.get('function', '')
         file_path = func_info.get('file', '')
+        readable_name = demangle_function_name(func_name)
         
         # Categorize based on function name patterns
-        if any(pattern in func_name.lower() for pattern in ['taskfunc', 'run', 'exec', 'internal', '_zn']):
+        func_lower = func_name.lower()
+        readable_lower = readable_name.lower()
+        
+        if any(pattern in func_lower for pattern in ['taskfunc', 'run', 'exec', 'internal', '_zn']) or \
+           any(pattern in readable_lower for pattern in ['taskfunc', 'constructor', 'destructor']):
             categories['internal_kernel_functions']['items'].append({
                 'type': 'function',
-                'name': func_name,
+                'name': readable_name,
                 'file': os.path.basename(file_path),
-                'location': f"{os.path.basename(file_path)}:{func_name}()"
+                'location': f"{os.path.basename(file_path)}:{readable_name}()"
             })
-        elif any(pattern in func_name.lower() for pattern in ['error', 'fail', 'exception', 'abort']):
+        elif any(pattern in func_lower for pattern in ['error', 'fail', 'exception', 'abort']) or \
+             any(pattern in readable_lower for pattern in ['error', 'fail', 'exception']):
             categories['error_handling_paths']['items'].append({
                 'type': 'function',
-                'name': func_name,
+                'name': readable_name,
                 'file': os.path.basename(file_path),
-                'location': f"{os.path.basename(file_path)}:{func_name}()"
+                'location': f"{os.path.basename(file_path)}:{readable_name}()"
             })
-        elif any(pattern in func_name.lower() for pattern in ['platform', 'special', 'config']):
+        elif any(pattern in func_lower for pattern in ['platform', 'special', 'config']) or \
+             any(pattern in readable_lower for pattern in ['notify', 'platform', 'special']):
             categories['platform_specific_code']['items'].append({
                 'type': 'function',
-                'name': func_name,
+                'name': readable_name,
                 'file': os.path.basename(file_path),
-                'location': f"{os.path.basename(file_path)}:{func_name}()"
+                'location': f"{os.path.basename(file_path)}:{readable_name}()"
             })
         else:
             categories['defensive_programming']['items'].append({
                 'type': 'function',
-                'name': func_name,
+                'name': readable_name,
                 'file': os.path.basename(file_path),
-                'location': f"{os.path.basename(file_path)}:{func_name}()"
+                'location': f"{os.path.basename(file_path)}:{readable_name}()"
             })
     
     # Analyze uncovered lines with context
