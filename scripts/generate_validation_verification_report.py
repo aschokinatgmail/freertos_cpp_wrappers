@@ -49,7 +49,7 @@ def parse_ctest_output(build_dir):
                     
                 # Extract test name (everything after the colon and before the status)
                 name_part = parts[1].strip()
-                status_match = re.search(r'(.+?)\s+\.\.\.\s+(Passed|Failed)\s+(\d+\.\d+)\s+sec', name_part)
+                status_match = re.search(r'(.+?)\s+\.+\s+(Passed|Failed)\s+(\d+\.\d+)\s+sec', name_part)
                 
                 if status_match:
                     test_name = status_match.group(1).strip()
@@ -169,19 +169,19 @@ def categorize_tests(tests):
     
     for test in tests:
         name = test.get('name', '')
-        if 'Task' in name:
+        if 'FreeRTOSTaskTest' in name or 'TaskTest' in name:
             categories['Task'].append(test)
-        elif 'Semaphore' in name:
+        elif 'FreeRTOSSemaphoreTest' in name or 'SemaphoreTest' in name:
             categories['Semaphore'].append(test)
-        elif 'Queue' in name:
+        elif 'FreeRTOSQueueTest' in name or 'QueueTest' in name:
             categories['Queue'].append(test)
-        elif 'EventGroup' in name:
+        elif 'FreeRTOSEventGroupTest' in name or 'EventGroupTest' in name:
             categories['EventGroup'].append(test)
-        elif 'StreamBuffer' in name:
+        elif 'FreeRTOSStreamBufferTest' in name or 'StreamBufferTest' in name:
             categories['StreamBuffer'].append(test)
-        elif 'MessageBuffer' in name:
+        elif 'FreeRTOSMessageBufferTest' in name or 'MessageBufferTest' in name:
             categories['MessageBuffer'].append(test)
-        elif 'Timer' in name:
+        elif 'FreeRTOSTimerTest' in name or 'TimerTest' in name or 'SwTimerTest' in name:
             categories['Timer'].append(test)
         elif 'Enhanced' in name:
             categories['Enhanced'].append(test)

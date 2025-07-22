@@ -139,6 +139,7 @@ if(ENABLE_CLANG_TIDY)
                     --system-headers=false
                     --header-filter="^${CMAKE_CURRENT_SOURCE_DIR}/include/.*"
                     ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cc
+                    ${CMAKE_CURRENT_SOURCE_DIR}/include/freertos.hpp
                     ${CMAKE_CURRENT_SOURCE_DIR}/include/freertos_event_group.hpp
                     ${CMAKE_CURRENT_SOURCE_DIR}/include/freertos_message_buffer.hpp
                     ${CMAKE_CURRENT_SOURCE_DIR}/include/freertos_queue.hpp
