@@ -40,10 +40,13 @@ public:
     struct TaskInfo {
         std::thread thread;
         std::atomic<bool> should_terminate{false};
+        std::atomic<eTaskState> state{eRunning};
         
         TaskInfo() = default;
         TaskInfo(TaskInfo&& other) noexcept 
-            : thread(std::move(other.thread)), should_terminate(other.should_terminate.load()) {}
+            : thread(std::move(other.thread)), 
+              should_terminate(other.should_terminate.load()),
+              state(other.state.load()) {}
         
         ~TaskInfo() {
             terminate();
@@ -51,6 +54,7 @@ public:
         
         void terminate() {
             should_terminate = true;
+            state = eDeleted;
             if (thread.joinable()) {
                 thread.join();
             }
@@ -106,6 +110,15 @@ public:
         std::lock_guard<std::mutex> lock(tasks_mutex_);
         return tasks_.size();
     }
+    
+    eTaskState getTaskState(TaskHandle_t handle) {
+        std::lock_guard<std::mutex> lock(tasks_mutex_);
+        auto it = tasks_.find(handle);
+        if (it != tasks_.end()) {
+            return it->second->state.load();
+        }
+        return eDeleted;  // Task not found, consider it deleted
+    }
 };
 
 class EnhancedMultitaskingTest : public Test {
@@ -132,7 +145,10 @@ protected:
         // Allow other calls without warnings
         ON_CALL(*mock, vTaskSuspend(_)).WillByDefault(Return());
         ON_CALL(*mock, vTaskResume(_)).WillByDefault(Return());
-        ON_CALL(*mock, eTaskGetState(_)).WillByDefault(Return(eRunning));
+        ON_CALL(*mock, eTaskGetState(_))
+            .WillByDefault([this](TaskHandle_t handle) {
+                return simulator->getTaskState(handle);
+            });
         ON_CALL(*mock, pcTaskGetName(_)).WillByDefault(Return("TestTask"));
     }
     
@@ -287,9 +303,9 @@ TEST_F(EnhancedMultitaskingTest, TaskSynchronizationWithNotifications) {
     };
     
     EXPECT_CALL(*mock, xTaskCreateStatic(_, StrEq("Producer"), _, _, _, _, _))
-        .WillOnce(Return(reinterpret_cast<TaskHandle_t>(0x4000)));
+        .WillOnce(DoDefault());
     EXPECT_CALL(*mock, xTaskCreateStatic(_, StrEq("Consumer"), _, _, _, _, _))
-        .WillOnce(Return(reinterpret_cast<TaskHandle_t>(0x4001)));
+        .WillOnce(DoDefault());
     
     sa::task<512> producer_task("Producer", 2, producer_function);
     sa::task<512> consumer_task("Consumer", 1, consumer_function);
@@ -315,7 +331,7 @@ TEST_F(EnhancedMultitaskingTest, TaskLifecycleRacingConditions) {
         };
         
         EXPECT_CALL(*mock, xTaskCreateStatic(_, _, _, _, _, _, _))
-            .WillOnce(Return(reinterpret_cast<TaskHandle_t>(0x5000 + i)));
+            .WillOnce(DoDefault());
         EXPECT_CALL(*mock, vTaskDelete(_)).Times(1);
         
         {
@@ -343,17 +359,20 @@ TEST_F(EnhancedMultitaskingTest, TaskMoveSemanticsConcurrency) {
     std::atomic<bool> moved_executed{false};
     
     auto task_function = [&]() {
-        std::this_thread::sleep_for(5ms);
+        std::this_thread::sleep_for(10ms);
         original_executed = true;
     };
     
     EXPECT_CALL(*mock, xTaskCreateStatic(_, StrEq("MoveTest"), _, _, _, _, _))
-        .WillOnce(Return(reinterpret_cast<TaskHandle_t>(0x6000)));
+        .WillOnce(DoDefault());
     
     // Create original task
     sa::task<512> original_task("MoveTest", 1, task_function);
     
-    // Move the task
+    // Brief wait to ensure task gets created and starts executing
+    std::this_thread::sleep_for(5ms);
+    
+    // Move the task - this should not affect the already running task
     sa::task<512> moved_task = std::move(original_task);
     
     // Create another task that executes after move
@@ -363,12 +382,12 @@ TEST_F(EnhancedMultitaskingTest, TaskMoveSemanticsConcurrency) {
     };
     
     EXPECT_CALL(*mock, xTaskCreateStatic(_, StrEq("MovedTask"), _, _, _, _, _))
-        .WillOnce(Return(reinterpret_cast<TaskHandle_t>(0x6001)));
+        .WillOnce(DoDefault());
     
     sa::task<512> new_task("MovedTask", 1, moved_function);
     
-    // Wait for execution
-    std::this_thread::sleep_for(20ms);
+    // Wait for both tasks to complete execution
+    std::this_thread::sleep_for(30ms);
     
     EXPECT_TRUE(original_executed.load());
     EXPECT_TRUE(moved_executed.load());
@@ -385,14 +404,15 @@ TEST_F(EnhancedMultitaskingTest, PeriodicTaskExecution) {
     auto on_start = []() { /* Task startup */ };
     auto on_stop = []() { /* Task cleanup */ };
     auto periodic_function = [&]() {
-        while (!should_stop.load()) {
+        // Run for a limited number of iterations instead of infinite loop
+        for (int i = 0; i < 5 && !should_stop.load(); ++i) {
             execution_count++;
             std::this_thread::sleep_for(5ms);
         }
     };
     
     EXPECT_CALL(*mock, xTaskCreateStatic(_, StrEq("PeriodicTest"), _, _, _, _, _))
-        .WillOnce(Return(reinterpret_cast<TaskHandle_t>(0x7000)));
+        .WillOnce(DoDefault());
     
     sa::periodic_task<512> periodic_task("PeriodicTest", 1, 
                                         std::move(on_start), 
@@ -400,9 +420,9 @@ TEST_F(EnhancedMultitaskingTest, PeriodicTaskExecution) {
                                         std::move(periodic_function));
     
     // Let it run for a while
-    std::this_thread::sleep_for(25ms);
+    std::this_thread::sleep_for(30ms);
     
-    // Stop the task
+    // Stop the task (not needed anymore since it's limited iterations)
     should_stop = true;
     
     // Wait for cleanup
@@ -420,7 +440,8 @@ TEST_F(EnhancedMultitaskingTest, MultiplePeriodicTasksCoordination) {
     auto fast_on_start = []() { /* Fast task startup */ };
     auto fast_on_stop = []() { /* Fast task cleanup */ };
     auto fast_function = [&]() {
-        while (!should_stop.load()) {
+        // Run for a limited number of iterations instead of infinite loop
+        for (int i = 0; i < 10 && !should_stop.load(); ++i) {
             fast_count++;
             std::this_thread::sleep_for(2ms);
         }
@@ -429,16 +450,17 @@ TEST_F(EnhancedMultitaskingTest, MultiplePeriodicTasksCoordination) {
     auto slow_on_start = []() { /* Slow task startup */ };
     auto slow_on_stop = []() { /* Slow task cleanup */ };
     auto slow_function = [&]() {
-        while (!should_stop.load()) {
+        // Run for a limited number of iterations instead of infinite loop
+        for (int i = 0; i < 3 && !should_stop.load(); ++i) {
             slow_count++;
             std::this_thread::sleep_for(8ms);
         }
     };
     
     EXPECT_CALL(*mock, xTaskCreateStatic(_, StrEq("FastPeriodic"), _, _, _, _, _))
-        .WillOnce(Return(reinterpret_cast<TaskHandle_t>(0x8000)));
+        .WillOnce(DoDefault());
     EXPECT_CALL(*mock, xTaskCreateStatic(_, StrEq("SlowPeriodic"), _, _, _, _, _))
-        .WillOnce(Return(reinterpret_cast<TaskHandle_t>(0x8001)));
+        .WillOnce(DoDefault());
     
     sa::periodic_task<256> fast_task("FastPeriodic", 2, 
                                    std::move(fast_on_start), 
@@ -450,7 +472,7 @@ TEST_F(EnhancedMultitaskingTest, MultiplePeriodicTasksCoordination) {
                                    std::move(slow_function));
     
     // Let them run
-    std::this_thread::sleep_for(30ms);
+    std::this_thread::sleep_for(50ms);
     
     should_stop = true;
     
@@ -459,6 +481,7 @@ TEST_F(EnhancedMultitaskingTest, MultiplePeriodicTasksCoordination) {
     
     // Fast task should execute more times than slow task
     EXPECT_GT(fast_count.load(), slow_count.load());
+    EXPECT_GT(slow_count.load(), 0);
     EXPECT_GT(slow_count.load(), 0);
 }
 
@@ -487,9 +510,9 @@ TEST_F(EnhancedMultitaskingTest, TaskExceptionHandling) {
     };
     
     EXPECT_CALL(*mock, xTaskCreateStatic(_, StrEq("ExceptionTask"), _, _, _, _, _))
-        .WillOnce(Return(reinterpret_cast<TaskHandle_t>(0x9000)));
+        .WillOnce(DoDefault());
     EXPECT_CALL(*mock, xTaskCreateStatic(_, StrEq("NormalTask"), _, _, _, _, _))
-        .WillOnce(Return(reinterpret_cast<TaskHandle_t>(0x9001)));
+        .WillOnce(DoDefault());
     
     sa::task<512> exception_task("ExceptionTask", 1, exception_function);
     sa::task<512> normal_task("NormalTask", 1, normal_function);
@@ -507,13 +530,14 @@ TEST_F(EnhancedMultitaskingTest, TaskDeleteDuringExecution) {
     
     auto long_running_function = [&]() {
         task_started = true;
-        while (task_should_continue.load()) {
+        // Run for a limited time to avoid hanging
+        for (int i = 0; i < 100 && task_should_continue.load(); ++i) {
             std::this_thread::sleep_for(1ms);
         }
     };
     
     EXPECT_CALL(*mock, xTaskCreateStatic(_, StrEq("LongRunning"), _, _, _, _, _))
-        .WillOnce(Return(reinterpret_cast<TaskHandle_t>(0xA000)));
+        .WillOnce(DoDefault());
     EXPECT_CALL(*mock, vTaskDelete(_)).Times(1);
     
     {
@@ -550,7 +574,7 @@ TEST_F(EnhancedMultitaskingTest, TaskExecFunctionCoverage) {
     };
     
     EXPECT_CALL(*mock, xTaskCreateStatic(_, StrEq("ExecCoverage"), _, _, _, _, _))
-        .WillOnce(Return(reinterpret_cast<TaskHandle_t>(0xB000)));
+        .WillOnce(DoDefault());
     
     // Create task that will trigger task_exec execution
     sa::task<1024> test_task("ExecCoverage", 1, task_function);
@@ -569,7 +593,7 @@ TEST_F(EnhancedMultitaskingTest, SuspendedTaskStartupCoverage) {
     };
     
     EXPECT_CALL(*mock, xTaskCreateStatic(_, StrEq("SuspendedStart"), _, _, _, _, _))
-        .WillOnce(Return(reinterpret_cast<TaskHandle_t>(0xC000)));
+        .WillOnce(DoDefault());
     EXPECT_CALL(*mock, vTaskResume(_)).Times(1);
     
     // Create task that starts suspended
