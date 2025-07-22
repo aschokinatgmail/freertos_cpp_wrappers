@@ -261,23 +261,19 @@ This report provides comprehensive validation and verification results for the F
 
 """
         
-        if failed_tests:
-            report_content += "**Failed Tests:**\n\n"
-            for test in failed_tests:
-                report_content += f"- ❌ **{test['name']}** (Test #{test['number']})\n"
-                report_content += f"  - **Failure Details**: [Test failure analysis needed]\n"
-                report_content += f"  - **Execution Time**: {test['time']:.3f}s\n\n"
+        # Detailed test results table
+        report_content += "**Detailed Test Results:**\n\n"
+        report_content += "| Test ID | Test Name | Outcome | Execution Time |\n"
+        report_content += "|---------|-----------|---------|----------------|\n"
         
-        # Sample of passed tests (first 10)
-        if passed_tests:
-            report_content += "**Sample Passed Tests:**\n\n"
-            sample_tests = passed_tests[:10]
-            for test in sample_tests:
-                report_content += f"- ✅ **{test['name']}** (Test #{test['number']}) - {test['time']:.3f}s\n"
-            
-            if len(passed_tests) > 10:
-                report_content += f"- ... and {len(passed_tests) - 10} more passed tests\n"
-            report_content += "\n"
+        # Sort tests by test number for consistent ordering
+        sorted_tests = sorted(tests, key=lambda x: int(x['number']))
+        
+        for test in sorted_tests:
+            outcome_icon = "✅ PASS" if test['status'] == 'Passed' else "❌ FAIL"
+            report_content += f"| {test['number']} | {test['name']} | {outcome_icon} | {test['time']:.3f}s |\n"
+        
+        report_content += "\n"
 
     # Add coverage analysis
     report_content += f"""## Code Coverage Analysis
