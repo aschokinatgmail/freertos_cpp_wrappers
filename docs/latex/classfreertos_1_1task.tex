@@ -33,6 +33,8 @@ A modern C++ wrapper for Free\+RTOS tasks with RAII semantics.
 \item 
 Task\+Handle\+\_\+t \mbox{\hyperlink{classfreertos_1_1task_a8dcf1f87c6ff7f6fd22028b816975cf0}{handle}} (void) const
 \begin{DoxyCompactList}\small\item\em Return the handle of the task. \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{classfreertos_1_1task_a27571468356b9515b6867ac8f680d126}{is\+\_\+running}} (void) const
+\begin{DoxyCompactList}\small\item\em Check if the task is running. \end{DoxyCompactList}\item 
 \Hypertarget{classfreertos_1_1task_a507100d53fbe90a1ae00c05e443f2f81}\label{classfreertos_1_1task_a507100d53fbe90a1ae00c05e443f2f81} 
 void {\bfseries terminate} (void)
 \begin{DoxyCompactList}\small\item\em Terminates the task. \end{DoxyCompactList}\item 
@@ -57,8 +59,7 @@ This class provides a type-\/safe, exception-\/safe wrapper around Free\+RTOS ta
 \begin{DoxyItemize}
 \item RAII automatic resource management
 \item Move semantics support
-\item Type-\/safe task function binding ~\newline
-
+\item Type-\/safe task function binding
 \item Configurable stack size at compile time
 \item Support for suspended task creation
 \item std\+::chrono timeout support
@@ -174,6 +175,20 @@ Return the handle of the task.
 
 \begin{DoxyReturn}{Returns}
 Task\+Handle\+\_\+t task handle 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1task_a27571468356b9515b6867ac8f680d126}\label{classfreertos_1_1task_a27571468356b9515b6867ac8f680d126} 
+\index{freertos::task$<$ TaskAllocator $>$@{freertos::task$<$ TaskAllocator $>$}!is\_running@{is\_running}}
+\index{is\_running@{is\_running}!freertos::task$<$ TaskAllocator $>$@{freertos::task$<$ TaskAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{is\_running()}{is\_running()}}
+{\footnotesize\ttfamily template$<$typename Task\+Allocator $>$ \\
+bool \mbox{\hyperlink{classfreertos_1_1task}{freertos\+::task}}$<$ Task\+Allocator $>$\+::is\+\_\+running (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Check if the task is running. 
+
+\begin{DoxyReturn}{Returns}
+bool true if the task is running, false otherwise 
 \end{DoxyReturn}
 \Hypertarget{classfreertos_1_1task_a3e6cd37028ea09cbfbade59fd0cbe7b2}\label{classfreertos_1_1task_a3e6cd37028ea09cbfbade59fd0cbe7b2} 
 \index{freertos::task$<$ TaskAllocator $>$@{freertos::task$<$ TaskAllocator $>$}!name@{name}}

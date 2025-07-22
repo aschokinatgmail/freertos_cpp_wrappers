@@ -158,468 +158,479 @@
 \DoxyCodeLine{00278\ \ \ \textcolor{keywordtype}{void}\ resume(\textcolor{keywordtype}{void})\ \{\ vTaskResume(m\_hTask);\ \}}
 \DoxyCodeLine{00284\ \ \ BaseType\_t\ resume\_isr(\textcolor{keywordtype}{void})\ \{\ \textcolor{keywordflow}{return}\ xTaskResumeFromISR(m\_hTask);\ \}}
 \DoxyCodeLine{00285\ \textcolor{preprocessor}{\#endif}}
-\DoxyCodeLine{00290\ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classfreertos_1_1task_a507100d53fbe90a1ae00c05e443f2f81}{terminate}}(\textcolor{keywordtype}{void})\ \{\ vTaskDelete(m\_hTask);\ \}}
-\DoxyCodeLine{00291\ \textcolor{preprocessor}{\#if\ INCLUDE\_xTaskAbortDelay}}
-\DoxyCodeLine{00297\ \ \ BaseType\_t\ abort\_delay(\textcolor{keywordtype}{void})\ \{}
-\DoxyCodeLine{00298\ \ \ \ \ \textcolor{keywordflow}{return}\ m\_hTask\ ?\ xTaskAbortDelay(m\_hTask)\ :\ pdFALSE;}
-\DoxyCodeLine{00299\ \ \ \}}
-\DoxyCodeLine{00300\ \textcolor{preprocessor}{\#endif}}
-\DoxyCodeLine{00301\ \textcolor{preprocessor}{\#if\ INCLUDE\_uxTaskPriorityGet\ \&\&\ configUSE\_MUTEXES}}
-\DoxyCodeLine{00307\ \ \ UBaseType\_t\ priority(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ uxTaskPriorityGet(m\_hTask);\ \}}
-\DoxyCodeLine{00313\ \ \ UBaseType\_t\ priority\_isr(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{}
-\DoxyCodeLine{00314\ \ \ \ \ \textcolor{keywordflow}{return}\ uxTaskPriorityGetFromISR(m\_hTask);}
+\DoxyCodeLine{00291\ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classfreertos_1_1task_a27571468356b9515b6867ac8f680d126}{is\_running}}(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00292\ \ \ \ \ \textcolor{keywordflow}{switch}\ (state())\ \{}
+\DoxyCodeLine{00293\ \ \ \ \ \textcolor{keywordflow}{case}\ eRunning:}
+\DoxyCodeLine{00294\ \ \ \ \ \textcolor{keywordflow}{case}\ eReady:}
+\DoxyCodeLine{00295\ \ \ \ \ \textcolor{keywordflow}{case}\ eBlocked:}
+\DoxyCodeLine{00296\ \ \ \ \ \textcolor{keywordflow}{case}\ eSuspended:}
+\DoxyCodeLine{00297\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{00298\ \ \ \ \ \textcolor{keywordflow}{default}:}
+\DoxyCodeLine{00299\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00300\ \ \ \ \ \}}
+\DoxyCodeLine{00301\ \ \ \}}
+\DoxyCodeLine{00306\ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classfreertos_1_1task_a507100d53fbe90a1ae00c05e443f2f81}{terminate}}(\textcolor{keywordtype}{void})\ \{\ vTaskDelete(m\_hTask);\ \}}
+\DoxyCodeLine{00307\ \textcolor{preprocessor}{\#if\ INCLUDE\_xTaskAbortDelay}}
+\DoxyCodeLine{00313\ \ \ BaseType\_t\ abort\_delay(\textcolor{keywordtype}{void})\ \{}
+\DoxyCodeLine{00314\ \ \ \ \ \textcolor{keywordflow}{return}\ m\_hTask\ ?\ xTaskAbortDelay(m\_hTask)\ :\ pdFALSE;}
 \DoxyCodeLine{00315\ \ \ \}}
 \DoxyCodeLine{00316\ \textcolor{preprocessor}{\#endif}}
-\DoxyCodeLine{00317\ \textcolor{preprocessor}{\#if\ INCLUDE\_vTaskPrioritySet}}
-\DoxyCodeLine{00324\ \ \ \mbox{\hyperlink{classfreertos_1_1task_ac4444b595f4b66ce5230b19e9a743a28}{task}}\ \&priority(UBaseType\_t\ priority)\ \{}
-\DoxyCodeLine{00325\ \ \ \ \ vTaskPrioritySet(m\_hTask,\ priority);}
-\DoxyCodeLine{00326\ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
-\DoxyCodeLine{00327\ \ \ \}}
-\DoxyCodeLine{00328\ \textcolor{preprocessor}{\#endif}}
-\DoxyCodeLine{00329\ \textcolor{preprocessor}{\#if\ configUSE\_TRACE\_FACILITY}}
-\DoxyCodeLine{00337\ \ \ TaskStatus\_t\ status(BaseType\_t\ getFreeStackSpace\ =\ pdFALSE,}
-\DoxyCodeLine{00338\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ eTaskState\ eState\ =\ eInvalid)\textcolor{keyword}{\ const\ }\{}
-\DoxyCodeLine{00339\ \ \ \ \ TaskStatus\_t\ status;}
-\DoxyCodeLine{00340\ \ \ \ \ vTaskGetInfo(m\_hTask,\ \&status,\ getFreeStackSpace,\ eState);}
-\DoxyCodeLine{00341\ \ \ \ \ \textcolor{keywordflow}{return}\ status;}
-\DoxyCodeLine{00342\ \ \ \}}
-\DoxyCodeLine{00343\ \textcolor{preprocessor}{\#endif}}
-\DoxyCodeLine{00344\ \textcolor{preprocessor}{\#if\ configUSE\_APPLICATION\_TASK\_TAG}}
-\DoxyCodeLine{00351\ \ \ \mbox{\hyperlink{classfreertos_1_1task_ac4444b595f4b66ce5230b19e9a743a28}{task}}\ \&tag(TaskHookFunction\_t\ tag)\ \{}
-\DoxyCodeLine{00352\ \ \ \ \ vTaskSetApplicationTaskTag(m\_hTask,\ tag);}
-\DoxyCodeLine{00353\ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
-\DoxyCodeLine{00354\ \ \ \}}
-\DoxyCodeLine{00360\ \ \ TaskHookFunction\_t\ tag(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{}
-\DoxyCodeLine{00361\ \ \ \ \ \textcolor{keywordflow}{return}\ ulTaskGetApplicationTaskTag(m\_hTask);}
-\DoxyCodeLine{00362\ \ \ \}}
-\DoxyCodeLine{00368\ \ \ TaskHookFunction\_t\ tag\_isr(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{}
-\DoxyCodeLine{00369\ \ \ \ \ \textcolor{keywordflow}{return}\ ulTaskGetApplicationTaskTagFromISR(m\_hTask);}
+\DoxyCodeLine{00317\ \textcolor{preprocessor}{\#if\ INCLUDE\_uxTaskPriorityGet\ \&\&\ configUSE\_MUTEXES}}
+\DoxyCodeLine{00323\ \ \ UBaseType\_t\ priority(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ uxTaskPriorityGet(m\_hTask);\ \}}
+\DoxyCodeLine{00329\ \ \ UBaseType\_t\ priority\_isr(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00330\ \ \ \ \ \textcolor{keywordflow}{return}\ uxTaskPriorityGetFromISR(m\_hTask);}
+\DoxyCodeLine{00331\ \ \ \}}
+\DoxyCodeLine{00332\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00333\ \textcolor{preprocessor}{\#if\ INCLUDE\_vTaskPrioritySet}}
+\DoxyCodeLine{00340\ \ \ \mbox{\hyperlink{classfreertos_1_1task_ac4444b595f4b66ce5230b19e9a743a28}{task}}\ \&priority(UBaseType\_t\ priority)\ \{}
+\DoxyCodeLine{00341\ \ \ \ \ vTaskPrioritySet(m\_hTask,\ priority);}
+\DoxyCodeLine{00342\ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00343\ \ \ \}}
+\DoxyCodeLine{00344\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00345\ \textcolor{preprocessor}{\#if\ configUSE\_TRACE\_FACILITY}}
+\DoxyCodeLine{00353\ \ \ TaskStatus\_t\ status(BaseType\_t\ getFreeStackSpace\ =\ pdFALSE,}
+\DoxyCodeLine{00354\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ eTaskState\ eState\ =\ eInvalid)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00355\ \ \ \ \ TaskStatus\_t\ status;}
+\DoxyCodeLine{00356\ \ \ \ \ vTaskGetInfo(m\_hTask,\ \&status,\ getFreeStackSpace,\ eState);}
+\DoxyCodeLine{00357\ \ \ \ \ \textcolor{keywordflow}{return}\ status;}
+\DoxyCodeLine{00358\ \ \ \}}
+\DoxyCodeLine{00359\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00360\ \textcolor{preprocessor}{\#if\ configUSE\_APPLICATION\_TASK\_TAG}}
+\DoxyCodeLine{00367\ \ \ \mbox{\hyperlink{classfreertos_1_1task_ac4444b595f4b66ce5230b19e9a743a28}{task}}\ \&tag(TaskHookFunction\_t\ tag)\ \{}
+\DoxyCodeLine{00368\ \ \ \ \ vTaskSetApplicationTaskTag(m\_hTask,\ tag);}
+\DoxyCodeLine{00369\ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
 \DoxyCodeLine{00370\ \ \ \}}
-\DoxyCodeLine{00371\ \textcolor{preprocessor}{\#endif}}
-\DoxyCodeLine{00372\ \textcolor{preprocessor}{\#if\ INCLUDE\_uxTaskGetStackHighWaterMark}}
-\DoxyCodeLine{00378\ \ \ \textcolor{keywordtype}{size\_t}\ stack\_high\_water\_mark(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{}
-\DoxyCodeLine{00379\ \ \ \ \ \textcolor{keywordflow}{return}\ uxTaskGetStackHighWaterMark(m\_hTask);}
-\DoxyCodeLine{00380\ \ \ \}}
-\DoxyCodeLine{00381\ \textcolor{preprocessor}{\#endif}}
-\DoxyCodeLine{00382\ \textcolor{preprocessor}{\#if\ INCLUDE\_uxTaskGetStackHighWaterMark2}}
-\DoxyCodeLine{00388\ \ \ \textcolor{keywordtype}{size\_t}\ stack\_high\_water\_mark2(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{}
-\DoxyCodeLine{00389\ \ \ \ \ \textcolor{keywordflow}{return}\ uxTaskGetStackHighWaterMark2(m\_hTask);}
-\DoxyCodeLine{00390\ \ \ \}}
-\DoxyCodeLine{00391\ \textcolor{preprocessor}{\#endif}}
-\DoxyCodeLine{00392\ \textcolor{preprocessor}{\#if\ INCLUDE\_eTaskGetState}}
-\DoxyCodeLine{00398\ \ \ eTaskState\ state(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ eTaskGetState(m\_hTask);\ \}}
-\DoxyCodeLine{00399\ \textcolor{preprocessor}{\#endif}}
-\DoxyCodeLine{00405\ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ *\mbox{\hyperlink{classfreertos_1_1task_a3e6cd37028ea09cbfbade59fd0cbe7b2}{name}}(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ pcTaskGetName(m\_hTask);\ \}}
-\DoxyCodeLine{00406\ \textcolor{comment}{//\ Task\ notification\ API}}
-\DoxyCodeLine{00407\ \textcolor{preprocessor}{\#if\ configUSE\_TASK\_NOTIFICATIONS}}
-\DoxyCodeLine{00413\ \ \ BaseType\_t\ notify\_give(\textcolor{keywordtype}{void})\ \{\ \textcolor{keywordflow}{return}\ xTaskNotifyGive(m\_hTask);\ \}}
-\DoxyCodeLine{00421\ \ \ uint32\_t\ notify\_take(BaseType\_t\ clearCountOnExit\ =\ pdTRUE,}
-\DoxyCodeLine{00422\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ TickType\_t\ ticksToWait\ =\ portMAX\_DELAY)\ \{}
-\DoxyCodeLine{00423\ \ \ \ \ \textcolor{keywordflow}{return}\ ulTaskNotifyTake(clearCountOnExit,\ ticksToWait);}
-\DoxyCodeLine{00424\ \ \ \}}
-\DoxyCodeLine{00432\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Rep,\ \textcolor{keyword}{typename}\ Period>}
-\DoxyCodeLine{00433\ \ \ uint32\_t\ notify\_take(BaseType\_t\ clearCountOnExit,}
-\DoxyCodeLine{00434\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::chrono::duration<Rep,\ Period>\ duration)\ \{}
-\DoxyCodeLine{00435\ \ \ \ \ \textcolor{keywordflow}{return}\ notify\_take(}
-\DoxyCodeLine{00436\ \ \ \ \ \ \ \ \ clearCountOnExit,}
-\DoxyCodeLine{00437\ \ \ \ \ \ \ \ \ std::chrono::duration\_cast<std::chrono::milliseconds>(duration)}
-\DoxyCodeLine{00438\ \ \ \ \ \ \ \ \ \ \ \ \ .count());}
-\DoxyCodeLine{00439\ \ \ \}}
-\DoxyCodeLine{00447\ \ \ BaseType\_t\ notify(\textcolor{keyword}{const}\ uint32\_t\ val,\ eNotifyAction\ action)\ \{}
-\DoxyCodeLine{00448\ \ \ \ \ \textcolor{keywordflow}{return}\ xTaskNotify(m\_hTask,\ val,\ action);}
-\DoxyCodeLine{00449\ \ \ \}}
-\DoxyCodeLine{00458\ \ \ BaseType\_t\ notify\_and\_query(\textcolor{keyword}{const}\ uint32\_t\ val,\ eNotifyAction\ action,}
-\DoxyCodeLine{00459\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ uint32\_t\ \&prev\_value)\ \{}
-\DoxyCodeLine{00460\ \ \ \ \ \textcolor{keywordflow}{return}\ xTaskNotifyAndQuery(m\_hTask,\ val,\ action,\ \&prev\_value);}
-\DoxyCodeLine{00461\ \ \ \}}
-\DoxyCodeLine{00470\ \ \ BaseType\_t\ notify\_isr(\textcolor{keyword}{const}\ uint32\_t\ val,\ eNotifyAction\ action,}
-\DoxyCodeLine{00471\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ BaseType\_t\ *higherPriorityTaskWoken\ =\ \textcolor{keyword}{nullptr})\ \{}
-\DoxyCodeLine{00472\ \ \ \ \ \textcolor{keywordflow}{return}\ xTaskNotifyFromISR(m\_hTask,\ val,\ action,\ higherPriorityTaskWoken);}
-\DoxyCodeLine{00473\ \ \ \}}
-\DoxyCodeLine{00483\ \ \ BaseType\_t}
-\DoxyCodeLine{00484\ \ \ notify\_and\_query\_isr(\textcolor{keyword}{const}\ uint32\_t\ val,\ eNotifyAction\ action,}
-\DoxyCodeLine{00485\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ uint32\_t\ \&prev\_value,}
-\DoxyCodeLine{00486\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ BaseType\_t\ *higherPriorityTaskWoken\ =\ \textcolor{keyword}{nullptr})\ \{}
-\DoxyCodeLine{00487\ \ \ \ \ \textcolor{keywordflow}{return}\ xTaskNotifyAndQueryFromISR(m\_hTask,\ val,\ action,\ \&prev\_value,}
-\DoxyCodeLine{00488\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ higherPriorityTaskWoken);}
+\DoxyCodeLine{00376\ \ \ TaskHookFunction\_t\ tag(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00377\ \ \ \ \ \textcolor{keywordflow}{return}\ ulTaskGetApplicationTaskTag(m\_hTask);}
+\DoxyCodeLine{00378\ \ \ \}}
+\DoxyCodeLine{00384\ \ \ TaskHookFunction\_t\ tag\_isr(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00385\ \ \ \ \ \textcolor{keywordflow}{return}\ ulTaskGetApplicationTaskTagFromISR(m\_hTask);}
+\DoxyCodeLine{00386\ \ \ \}}
+\DoxyCodeLine{00387\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00388\ \textcolor{preprocessor}{\#if\ INCLUDE\_uxTaskGetStackHighWaterMark}}
+\DoxyCodeLine{00394\ \ \ \textcolor{keywordtype}{size\_t}\ stack\_high\_water\_mark(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00395\ \ \ \ \ \textcolor{keywordflow}{return}\ uxTaskGetStackHighWaterMark(m\_hTask);}
+\DoxyCodeLine{00396\ \ \ \}}
+\DoxyCodeLine{00397\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00398\ \textcolor{preprocessor}{\#if\ INCLUDE\_uxTaskGetStackHighWaterMark2}}
+\DoxyCodeLine{00404\ \ \ \textcolor{keywordtype}{size\_t}\ stack\_high\_water\_mark2(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00405\ \ \ \ \ \textcolor{keywordflow}{return}\ uxTaskGetStackHighWaterMark2(m\_hTask);}
+\DoxyCodeLine{00406\ \ \ \}}
+\DoxyCodeLine{00407\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00408\ \textcolor{preprocessor}{\#if\ INCLUDE\_eTaskGetState}}
+\DoxyCodeLine{00414\ \ \ eTaskState\ state(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ eTaskGetState(m\_hTask);\ \}}
+\DoxyCodeLine{00415\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00421\ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ *\mbox{\hyperlink{classfreertos_1_1task_a3e6cd37028ea09cbfbade59fd0cbe7b2}{name}}(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ pcTaskGetName(m\_hTask);\ \}}
+\DoxyCodeLine{00422\ \textcolor{comment}{//\ Task\ notification\ API}}
+\DoxyCodeLine{00423\ \textcolor{preprocessor}{\#if\ configUSE\_TASK\_NOTIFICATIONS}}
+\DoxyCodeLine{00429\ \ \ BaseType\_t\ notify\_give(\textcolor{keywordtype}{void})\ \{\ \textcolor{keywordflow}{return}\ xTaskNotifyGive(m\_hTask);\ \}}
+\DoxyCodeLine{00437\ \ \ uint32\_t\ notify\_take(BaseType\_t\ clearCountOnExit\ =\ pdTRUE,}
+\DoxyCodeLine{00438\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ TickType\_t\ ticksToWait\ =\ portMAX\_DELAY)\ \{}
+\DoxyCodeLine{00439\ \ \ \ \ \textcolor{keywordflow}{return}\ ulTaskNotifyTake(clearCountOnExit,\ ticksToWait);}
+\DoxyCodeLine{00440\ \ \ \}}
+\DoxyCodeLine{00448\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Rep,\ \textcolor{keyword}{typename}\ Period>}
+\DoxyCodeLine{00449\ \ \ uint32\_t\ notify\_take(BaseType\_t\ clearCountOnExit,}
+\DoxyCodeLine{00450\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::chrono::duration<Rep,\ Period>\ duration)\ \{}
+\DoxyCodeLine{00451\ \ \ \ \ \textcolor{keywordflow}{return}\ notify\_take(}
+\DoxyCodeLine{00452\ \ \ \ \ \ \ \ \ clearCountOnExit,}
+\DoxyCodeLine{00453\ \ \ \ \ \ \ \ \ std::chrono::duration\_cast<std::chrono::milliseconds>(duration)}
+\DoxyCodeLine{00454\ \ \ \ \ \ \ \ \ \ \ \ \ .count());}
+\DoxyCodeLine{00455\ \ \ \}}
+\DoxyCodeLine{00463\ \ \ BaseType\_t\ notify(\textcolor{keyword}{const}\ uint32\_t\ val,\ eNotifyAction\ action)\ \{}
+\DoxyCodeLine{00464\ \ \ \ \ \textcolor{keywordflow}{return}\ xTaskNotify(m\_hTask,\ val,\ action);}
+\DoxyCodeLine{00465\ \ \ \}}
+\DoxyCodeLine{00474\ \ \ BaseType\_t\ notify\_and\_query(\textcolor{keyword}{const}\ uint32\_t\ val,\ eNotifyAction\ action,}
+\DoxyCodeLine{00475\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ uint32\_t\ \&prev\_value)\ \{}
+\DoxyCodeLine{00476\ \ \ \ \ \textcolor{keywordflow}{return}\ xTaskNotifyAndQuery(m\_hTask,\ val,\ action,\ \&prev\_value);}
+\DoxyCodeLine{00477\ \ \ \}}
+\DoxyCodeLine{00486\ \ \ BaseType\_t\ notify\_isr(\textcolor{keyword}{const}\ uint32\_t\ val,\ eNotifyAction\ action,}
+\DoxyCodeLine{00487\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ BaseType\_t\ *higherPriorityTaskWoken\ =\ \textcolor{keyword}{nullptr})\ \{}
+\DoxyCodeLine{00488\ \ \ \ \ \textcolor{keywordflow}{return}\ xTaskNotifyFromISR(m\_hTask,\ val,\ action,\ higherPriorityTaskWoken);}
 \DoxyCodeLine{00489\ \ \ \}}
-\DoxyCodeLine{00499\ \ \ BaseType\_t\ notify\_wait(uint32\_t\ ulBitsToClearOnEntry,}
-\DoxyCodeLine{00500\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ uint32\_t\ ulBitsToClearOnExit,}
-\DoxyCodeLine{00501\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ uint32\_t\ \&notification\_value,}
-\DoxyCodeLine{00502\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ TickType\_t\ xTicksToWait)\ \{}
-\DoxyCodeLine{00503\ \ \ \ \ \textcolor{keywordflow}{return}\ xTaskNotifyWait(ulBitsToClearOnEntry,\ ulBitsToClearOnExit,}
-\DoxyCodeLine{00504\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \&notification\_value,\ xTicksToWait);}
+\DoxyCodeLine{00499\ \ \ BaseType\_t}
+\DoxyCodeLine{00500\ \ \ notify\_and\_query\_isr(\textcolor{keyword}{const}\ uint32\_t\ val,\ eNotifyAction\ action,}
+\DoxyCodeLine{00501\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ uint32\_t\ \&prev\_value,}
+\DoxyCodeLine{00502\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ BaseType\_t\ *higherPriorityTaskWoken\ =\ \textcolor{keyword}{nullptr})\ \{}
+\DoxyCodeLine{00503\ \ \ \ \ \textcolor{keywordflow}{return}\ xTaskNotifyAndQueryFromISR(m\_hTask,\ val,\ action,\ \&prev\_value,}
+\DoxyCodeLine{00504\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ higherPriorityTaskWoken);}
 \DoxyCodeLine{00505\ \ \ \}}
-\DoxyCodeLine{00515\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Rep,\ \textcolor{keyword}{typename}\ Period>}
-\DoxyCodeLine{00516\ \ \ BaseType\_t\ notify\_wait(uint32\_t\ ulBitsToClearOnEntry,}
-\DoxyCodeLine{00517\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ uint32\_t\ ulBitsToClearOnExit,}
-\DoxyCodeLine{00518\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ uint32\_t\ \&notification\_value,}
-\DoxyCodeLine{00519\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::chrono::duration<Rep,\ Period>\ duration)\ \{}
-\DoxyCodeLine{00520\ \ \ \ \ \textcolor{keywordflow}{return}\ notify\_wait(}
-\DoxyCodeLine{00521\ \ \ \ \ \ \ \ \ ulBitsToClearOnEntry,\ ulBitsToClearOnExit,\ notification\_value,}
-\DoxyCodeLine{00522\ \ \ \ \ \ \ \ \ std::chrono::duration\_cast<std::chrono::milliseconds>(duration)}
-\DoxyCodeLine{00523\ \ \ \ \ \ \ \ \ \ \ \ \ .count());}
-\DoxyCodeLine{00524\ \ \ \}}
-\DoxyCodeLine{00531\ \ \ BaseType\_t\ notify\_state\_clear(\textcolor{keywordtype}{void})\ \{\ \textcolor{keywordflow}{return}\ xTaskNotifyStateClear(m\_hTask);\ \}}
-\DoxyCodeLine{00538\ \ \ uint32\_t\ notify\_value\_clear(uint32\_t\ ulBitsToClear)\ \{}
-\DoxyCodeLine{00539\ \ \ \ \ \textcolor{keywordflow}{return}\ ulTaskNotifyValueClear(m\_hTask,\ ulBitsToClear);}
+\DoxyCodeLine{00515\ \ \ BaseType\_t\ notify\_wait(uint32\_t\ ulBitsToClearOnEntry,}
+\DoxyCodeLine{00516\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ uint32\_t\ ulBitsToClearOnExit,}
+\DoxyCodeLine{00517\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ uint32\_t\ \&notification\_value,}
+\DoxyCodeLine{00518\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ TickType\_t\ xTicksToWait)\ \{}
+\DoxyCodeLine{00519\ \ \ \ \ \textcolor{keywordflow}{return}\ xTaskNotifyWait(ulBitsToClearOnEntry,\ ulBitsToClearOnExit,}
+\DoxyCodeLine{00520\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \&notification\_value,\ xTicksToWait);}
+\DoxyCodeLine{00521\ \ \ \}}
+\DoxyCodeLine{00531\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Rep,\ \textcolor{keyword}{typename}\ Period>}
+\DoxyCodeLine{00532\ \ \ BaseType\_t\ notify\_wait(uint32\_t\ ulBitsToClearOnEntry,}
+\DoxyCodeLine{00533\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ uint32\_t\ ulBitsToClearOnExit,}
+\DoxyCodeLine{00534\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ uint32\_t\ \&notification\_value,}
+\DoxyCodeLine{00535\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::chrono::duration<Rep,\ Period>\ duration)\ \{}
+\DoxyCodeLine{00536\ \ \ \ \ \textcolor{keywordflow}{return}\ notify\_wait(}
+\DoxyCodeLine{00537\ \ \ \ \ \ \ \ \ ulBitsToClearOnEntry,\ ulBitsToClearOnExit,\ notification\_value,}
+\DoxyCodeLine{00538\ \ \ \ \ \ \ \ \ std::chrono::duration\_cast<std::chrono::milliseconds>(duration)}
+\DoxyCodeLine{00539\ \ \ \ \ \ \ \ \ \ \ \ \ .count());}
 \DoxyCodeLine{00540\ \ \ \}}
-\DoxyCodeLine{00541\ \textcolor{preprocessor}{\#endif}}
-\DoxyCodeLine{00542\ \};}
-\DoxyCodeLine{00543\ }
-\DoxyCodeLine{00549\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ TaskAllocator>\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classfreertos_1_1periodic__task}{periodic\_task}}\ \{}
-\DoxyCodeLine{00550\ \ \ std::chrono::milliseconds\ m\_period;}
-\DoxyCodeLine{00551\ \ \ task\_routine\_t\ m\_on\_start;}
-\DoxyCodeLine{00552\ \ \ task\_routine\_t\ m\_on\_stop;}
-\DoxyCodeLine{00553\ \ \ task\_routine\_t\ m\_periodic\_routine;}
-\DoxyCodeLine{00554\ \ \ \mbox{\hyperlink{classfreertos_1_1task}{task<TaskAllocator>}}\ m\_task;}
-\DoxyCodeLine{00555\ }
-\DoxyCodeLine{00556\ \ \ \textcolor{keywordtype}{void}\ run()\ \{}
-\DoxyCodeLine{00557\ \ \ \ \ m\_on\_start();}
-\DoxyCodeLine{00558\ \ \ \ \ \textcolor{keywordflow}{while}\ (\mbox{\hyperlink{classfreertos_1_1periodic__task_a12c13f558eabec29a997e8330811eb37}{is\_running}}())\ \{}
-\DoxyCodeLine{00559\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (0\ !=\ m\_period.count())\ \{}
-\DoxyCodeLine{00560\ \textcolor{preprocessor}{\#if\ configUSE\_TASK\_NOTIFICATIONS}}
-\DoxyCodeLine{00561\ \ \ \ \ \ \ \ \ uint32\_t\ notification\_value\ =\ 0;}
-\DoxyCodeLine{00562\ \ \ \ \ \ \ \ \ m\_task.notify\_wait(0,\ 0,\ notification\_value,\ m\_period);}
-\DoxyCodeLine{00563\ \textcolor{preprocessor}{\#else}}
-\DoxyCodeLine{00564\ \ \ \ \ \ \ \ \ delay(m\_period);}
-\DoxyCodeLine{00565\ \textcolor{preprocessor}{\#endif}}
-\DoxyCodeLine{00566\ \ \ \ \ \ \ \}}
-\DoxyCodeLine{00567\ \ \ \ \ \ \ m\_periodic\_routine();}
-\DoxyCodeLine{00568\ \ \ \ \ \}}
-\DoxyCodeLine{00569\ \ \ \ \ m\_on\_stop();}
-\DoxyCodeLine{00570\ \ \ \}}
+\DoxyCodeLine{00547\ \ \ BaseType\_t\ notify\_state\_clear(\textcolor{keywordtype}{void})\ \{\ \textcolor{keywordflow}{return}\ xTaskNotifyStateClear(m\_hTask);\ \}}
+\DoxyCodeLine{00554\ \ \ uint32\_t\ notify\_value\_clear(uint32\_t\ ulBitsToClear)\ \{}
+\DoxyCodeLine{00555\ \ \ \ \ \textcolor{keywordflow}{return}\ ulTaskNotifyValueClear(m\_hTask,\ ulBitsToClear);}
+\DoxyCodeLine{00556\ \ \ \}}
+\DoxyCodeLine{00557\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00558\ \};}
+\DoxyCodeLine{00559\ }
+\DoxyCodeLine{00565\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ TaskAllocator>\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classfreertos_1_1periodic__task}{periodic\_task}}\ \{}
+\DoxyCodeLine{00566\ \ \ std::chrono::milliseconds\ m\_period;}
+\DoxyCodeLine{00567\ \ \ task\_routine\_t\ m\_on\_start;}
+\DoxyCodeLine{00568\ \ \ task\_routine\_t\ m\_on\_stop;}
+\DoxyCodeLine{00569\ \ \ task\_routine\_t\ m\_periodic\_routine;}
+\DoxyCodeLine{00570\ \ \ \mbox{\hyperlink{classfreertos_1_1task}{task<TaskAllocator>}}\ m\_task;}
 \DoxyCodeLine{00571\ }
-\DoxyCodeLine{00572\ \textcolor{keyword}{public}:}
-\DoxyCodeLine{00586\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Rep,\ \textcolor{keyword}{typename}\ Period>}
-\DoxyCodeLine{00587\ \ \ \mbox{\hyperlink{classfreertos_1_1periodic__task_a991b36acf5e9c45cd4ef782e60243490}{periodic\_task}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ *\mbox{\hyperlink{classfreertos_1_1periodic__task_a2b5806f904a18a13474efae6b00b74ab}{name}},\ UBaseType\_t\ priority,}
-\DoxyCodeLine{00588\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ task\_routine\_t\ \&\&on\_start,\ task\_routine\_t\ \&\&on\_stop,}
-\DoxyCodeLine{00589\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ task\_routine\_t\ \&\&periodic\_routine,}
-\DoxyCodeLine{00590\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::chrono::duration<Rep,\ Period>\ \&period,}
-\DoxyCodeLine{00591\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ start\_suspended\ =\ \textcolor{keyword}{true})}
-\DoxyCodeLine{00592\ \ \ \ \ \ \ :\ m\_period\{std::chrono::duration\_cast<std::chrono::milliseconds>(period)\},}
-\DoxyCodeLine{00593\ \ \ \ \ \ \ \ \ m\_on\_start\{std::move(on\_start)\},\ m\_on\_stop\{std::move(on\_stop)\},}
-\DoxyCodeLine{00594\ \ \ \ \ \ \ \ \ m\_periodic\_routine\{std::move(periodic\_routine)\},}
-\DoxyCodeLine{00595\ \ \ \ \ \ \ \ \ m\_task\{\mbox{\hyperlink{classfreertos_1_1periodic__task_a2b5806f904a18a13474efae6b00b74ab}{name}},\ priority,\ [this]()\ \{\ run();\ \},\ start\_suspended\}\ \{\}}
-\DoxyCodeLine{00609\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Rep,\ \textcolor{keyword}{typename}\ Period>}
-\DoxyCodeLine{00610\ \ \ \mbox{\hyperlink{classfreertos_1_1periodic__task_ae70905fca339425deac4f20a904f1fc3}{periodic\_task}}(\textcolor{keyword}{const}\ std::string\ \&name,\ UBaseType\_t\ priority,}
-\DoxyCodeLine{00611\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ task\_routine\_t\ \&\&on\_start,\ task\_routine\_t\ \&\&on\_stop,}
-\DoxyCodeLine{00612\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ task\_routine\_t\ \&\&periodic\_routine,}
-\DoxyCodeLine{00613\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::chrono::duration<Rep,\ Period>\ \&period,}
-\DoxyCodeLine{00614\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ start\_suspended\ =\ \textcolor{keyword}{true})}
-\DoxyCodeLine{00615\ \ \ \ \ \ \ :\ \mbox{\hyperlink{classfreertos_1_1periodic__task}{periodic\_task}}\{name.c\_str(),}
-\DoxyCodeLine{00616\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ priority,}
-\DoxyCodeLine{00617\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::move(on\_start),}
-\DoxyCodeLine{00618\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::move(on\_stop),}
-\DoxyCodeLine{00619\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::move(periodic\_routine),}
-\DoxyCodeLine{00620\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ period,}
-\DoxyCodeLine{00621\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ start\_suspended\}\ \{\}}
-\DoxyCodeLine{00632\ \ \ \mbox{\hyperlink{classfreertos_1_1periodic__task_a7499e655e45e533799806cda59cd3ff3}{periodic\_task}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ *name,\ UBaseType\_t\ priority,}
-\DoxyCodeLine{00633\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ task\_routine\_t\ \&\&on\_start,\ task\_routine\_t\ \&\&on\_stop,}
-\DoxyCodeLine{00634\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ task\_routine\_t\ \&\&periodic\_routine,\ \textcolor{keywordtype}{bool}\ start\_suspended\ =\ \textcolor{keyword}{true})}
-\DoxyCodeLine{00635\ \ \ \ \ \ \ :\ \mbox{\hyperlink{classfreertos_1_1periodic__task}{periodic\_task}}\{name,}
-\DoxyCodeLine{00636\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ priority,}
-\DoxyCodeLine{00637\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::move(on\_start),}
-\DoxyCodeLine{00638\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::move(on\_stop),}
-\DoxyCodeLine{00639\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::move(periodic\_routine),}
-\DoxyCodeLine{00640\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::chrono::milliseconds\{0\},}
-\DoxyCodeLine{00641\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ start\_suspended\}\ \{\}}
-\DoxyCodeLine{00652\ \ \ \mbox{\hyperlink{classfreertos_1_1periodic__task_a6bf73b66eed4feb14a604f94051709e2}{periodic\_task}}(\textcolor{keyword}{const}\ std::string\ \&name,\ UBaseType\_t\ priority,}
-\DoxyCodeLine{00653\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ task\_routine\_t\ \&\&on\_start,\ task\_routine\_t\ \&\&on\_stop,}
-\DoxyCodeLine{00654\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ task\_routine\_t\ \&\&periodic\_routine,\ \textcolor{keywordtype}{bool}\ start\_suspended\ =\ \textcolor{keyword}{true})}
-\DoxyCodeLine{00655\ \ \ \ \ \ \ :\ \mbox{\hyperlink{classfreertos_1_1periodic__task}{periodic\_task}}\{name.c\_str(),}
-\DoxyCodeLine{00656\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ priority,}
-\DoxyCodeLine{00657\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::move(on\_start),}
-\DoxyCodeLine{00658\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::move(on\_stop),}
-\DoxyCodeLine{00659\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::move(periodic\_routine),}
-\DoxyCodeLine{00660\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ start\_suspended\}\ \{\}}
-\DoxyCodeLine{00661\ \ \ \mbox{\hyperlink{classfreertos_1_1periodic__task}{periodic\_task}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1periodic__task}{periodic\_task}}\ \&)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{00662\ \ \ \mbox{\hyperlink{classfreertos_1_1periodic__task}{periodic\_task}}(\mbox{\hyperlink{classfreertos_1_1periodic__task}{periodic\_task}}\ \&\&other)\ noexcept}
-\DoxyCodeLine{00663\ \ \ \ \ \ \ :\ m\_period(other.m\_period),\ m\_on\_start(std::move(other.m\_on\_start)),}
-\DoxyCodeLine{00664\ \ \ \ \ \ \ \ \ m\_on\_stop(std::move(other.m\_on\_stop)),}
-\DoxyCodeLine{00665\ \ \ \ \ \ \ \ \ m\_periodic\_routine(std::move(other.m\_periodic\_routine)),}
-\DoxyCodeLine{00666\ \ \ \ \ \ \ \ \ m\_task(std::move(other.m\_task))\ \{}
-\DoxyCodeLine{00667\ \ \ \ \ \textcolor{comment}{//\ m\_task\ move\ constructor\ will\ handle\ ownership\ transfer}}
-\DoxyCodeLine{00668\ \ \ \}}
-\DoxyCodeLine{00674\ \ \ \mbox{\hyperlink{classfreertos_1_1periodic__task_a4b1c8813efc6cb4d7bef04927c807c25}{\string~periodic\_task}}(\textcolor{keywordtype}{void})\ \{}
-\DoxyCodeLine{00675\ \textcolor{preprocessor}{\#if\ INCLUDE\_xTaskAbortDelay}}
-\DoxyCodeLine{00676\ \ \ \ \ m\_task.abort\_delay();}
-\DoxyCodeLine{00677\ \textcolor{preprocessor}{\#endif}}
-\DoxyCodeLine{00678\ \ \ \}}
-\DoxyCodeLine{00679\ }
-\DoxyCodeLine{00680\ \ \ \mbox{\hyperlink{classfreertos_1_1periodic__task}{periodic\_task}}\ \&operator=(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1periodic__task}{periodic\_task}}\ \&)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{00681\ \ \ \mbox{\hyperlink{classfreertos_1_1periodic__task}{periodic\_task}}\ \&operator=(\mbox{\hyperlink{classfreertos_1_1periodic__task}{periodic\_task}}\ \&\&other)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{00682\ }
-\DoxyCodeLine{00688\ \ \ TaskHandle\_t\ \mbox{\hyperlink{classfreertos_1_1periodic__task_afa781adc0b809367c572305be78b0725}{handle}}(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ m\_task.handle();\ \}}
-\DoxyCodeLine{00689\ \textcolor{preprocessor}{\#if\ INCLUDE\_vTaskSuspend}}
-\DoxyCodeLine{00694\ \ \ \textcolor{keywordtype}{void}\ suspend(\textcolor{keywordtype}{void})\ \{\ m\_task.suspend();\ \}}
-\DoxyCodeLine{00699\ \ \ \textcolor{keywordtype}{void}\ resume(\textcolor{keywordtype}{void})\ \{\ m\_task.resume();\ \}}
-\DoxyCodeLine{00705\ \ \ BaseType\_t\ resume\_isr(\textcolor{keywordtype}{void})\ \{\ \textcolor{keywordflow}{return}\ m\_task.resume\_isr();\ \}}
-\DoxyCodeLine{00706\ \textcolor{preprocessor}{\#endif}}
-\DoxyCodeLine{00712\ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classfreertos_1_1periodic__task_a12c13f558eabec29a997e8330811eb37}{is\_running}}(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{}
-\DoxyCodeLine{00713\ \ \ \ \ \textcolor{keywordflow}{switch}\ (m\_task.state())\ \{}
-\DoxyCodeLine{00714\ \ \ \ \ \textcolor{keywordflow}{case}\ eRunning:}
-\DoxyCodeLine{00715\ \ \ \ \ \textcolor{keywordflow}{case}\ eReady:}
-\DoxyCodeLine{00716\ \ \ \ \ \textcolor{keywordflow}{case}\ eBlocked:}
-\DoxyCodeLine{00717\ \ \ \ \ \textcolor{keywordflow}{case}\ eSuspended:}
-\DoxyCodeLine{00718\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
-\DoxyCodeLine{00719\ \ \ \ \ \textcolor{keywordflow}{default}:}
-\DoxyCodeLine{00720\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
-\DoxyCodeLine{00721\ \ \ \ \ \}}
-\DoxyCodeLine{00722\ \ \ \}}
-\DoxyCodeLine{00727\ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classfreertos_1_1periodic__task_a304ec5187ac8b02a7b9fba55ed1c5462}{terminate}}(\textcolor{keywordtype}{void})\ \{\ m\_task.terminate();\ \}}
-\DoxyCodeLine{00728\ \textcolor{preprocessor}{\#if\ INCLUDE\_xTaskAbortDelay}}
-\DoxyCodeLine{00734\ \ \ BaseType\_t\ abort\_delay(\textcolor{keywordtype}{void})\ \{\ \textcolor{keywordflow}{return}\ m\_task.abort\_delay();\ \}}
-\DoxyCodeLine{00735\ \textcolor{preprocessor}{\#endif}}
-\DoxyCodeLine{00736\ \textcolor{preprocessor}{\#if\ INCLUDE\_uxTaskPriorityGet\ \&\&\ configUSE\_MUTEXES}}
-\DoxyCodeLine{00742\ \ \ UBaseType\_t\ priority(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ m\_task.priority();\ \}}
-\DoxyCodeLine{00748\ \ \ UBaseType\_t\ priority\_isr(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ m\_task.priority\_isr();\ \}}
-\DoxyCodeLine{00749\ \textcolor{preprocessor}{\#endif}}
-\DoxyCodeLine{00750\ \textcolor{preprocessor}{\#if\ INCLUDE\_vTaskPrioritySet}}
-\DoxyCodeLine{00757\ \ \ periodic\_task\ \&priority(UBaseType\_t\ priority)\ \{}
-\DoxyCodeLine{00758\ \ \ \ \ m\_task.priority(priority);}
-\DoxyCodeLine{00759\ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
-\DoxyCodeLine{00760\ \ \ \}}
-\DoxyCodeLine{00761\ \textcolor{preprocessor}{\#endif}}
-\DoxyCodeLine{00762\ \textcolor{preprocessor}{\#if\ configUSE\_TRACE\_FACILITY}}
-\DoxyCodeLine{00770\ \ \ TaskStatus\_t\ status(BaseType\_t\ getFreeStackSpace\ =\ pdFALSE,}
-\DoxyCodeLine{00771\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ eTaskState\ eState\ =\ eInvalid)\textcolor{keyword}{\ const\ }\{}
-\DoxyCodeLine{00772\ \ \ \ \ \textcolor{keywordflow}{return}\ m\_task.status(getFreeStackSpace,\ eState);}
-\DoxyCodeLine{00773\ \ \ \}}
-\DoxyCodeLine{00774\ \textcolor{preprocessor}{\#endif}}
-\DoxyCodeLine{00775\ \textcolor{preprocessor}{\#if\ configUSE\_APPLICATION\_TASK\_TAG}}
-\DoxyCodeLine{00782\ \ \ periodic\_task\ \&tag(TaskHookFunction\_t\ tag)\ \{}
-\DoxyCodeLine{00783\ \ \ \ \ m\_task.tag(tag);}
-\DoxyCodeLine{00784\ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
-\DoxyCodeLine{00785\ \ \ \}}
-\DoxyCodeLine{00791\ \ \ TaskHookFunction\_t\ tag(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ m\_task.tag();\ \}}
-\DoxyCodeLine{00797\ \ \ TaskHookFunction\_t\ tag\_isr(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ m\_task.tag\_isr();\ \}}
-\DoxyCodeLine{00798\ \textcolor{preprocessor}{\#endif}}
-\DoxyCodeLine{00799\ \textcolor{preprocessor}{\#if\ INCLUDE\_uxTaskGetStackHighWaterMark}}
-\DoxyCodeLine{00805\ \ \ \textcolor{keywordtype}{size\_t}\ stack\_high\_water\_mark(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{}
-\DoxyCodeLine{00806\ \ \ \ \ \textcolor{keywordflow}{return}\ m\_task.stack\_high\_water\_mark();}
-\DoxyCodeLine{00807\ \ \ \}}
-\DoxyCodeLine{00808\ \textcolor{preprocessor}{\#endif}}
-\DoxyCodeLine{00809\ \textcolor{preprocessor}{\#if\ INCLUDE\_uxTaskGetStackHighWaterMark2}}
-\DoxyCodeLine{00815\ \ \ \textcolor{keywordtype}{size\_t}\ stack\_high\_water\_mark2(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{}
-\DoxyCodeLine{00816\ \ \ \ \ \textcolor{keywordflow}{return}\ m\_task.stack\_high\_water\_mark2();}
-\DoxyCodeLine{00817\ \ \ \}}
-\DoxyCodeLine{00818\ \textcolor{preprocessor}{\#endif}}
-\DoxyCodeLine{00819\ \textcolor{preprocessor}{\#if\ INCLUDE\_eTaskGetState}}
-\DoxyCodeLine{00825\ \ \ eTaskState\ state(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ m\_task.state();\ \}}
-\DoxyCodeLine{00826\ \textcolor{preprocessor}{\#endif}}
-\DoxyCodeLine{00832\ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ *\mbox{\hyperlink{classfreertos_1_1periodic__task_a2b5806f904a18a13474efae6b00b74ab}{name}}(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ m\_task.name();\ \}}
-\DoxyCodeLine{00833\ \textcolor{comment}{//\ Task\ notification\ API}}
-\DoxyCodeLine{00834\ \textcolor{preprocessor}{\#if\ configUSE\_TASK\_NOTIFICATIONS}}
-\DoxyCodeLine{00840\ \ \ BaseType\_t\ notify\_give(\textcolor{keywordtype}{void})\ \{\ \textcolor{keywordflow}{return}\ m\_task.notify\_give();\ \}}
-\DoxyCodeLine{00848\ \ \ uint32\_t\ notify\_take(BaseType\_t\ clearCountOnExit\ =\ pdTRUE,}
-\DoxyCodeLine{00849\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ TickType\_t\ ticksToWait\ =\ portMAX\_DELAY)\ \{}
-\DoxyCodeLine{00850\ \ \ \ \ \textcolor{keywordflow}{return}\ m\_task.notify\_take(clearCountOnExit,\ ticksToWait);}
-\DoxyCodeLine{00851\ \ \ \}}
-\DoxyCodeLine{00859\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Rep,\ \textcolor{keyword}{typename}\ Period>}
-\DoxyCodeLine{00860\ \ \ uint32\_t\ notify\_take(BaseType\_t\ clearCountOnExit,}
-\DoxyCodeLine{00861\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::chrono::duration<Rep,\ Period>\ duration)\ \{}
-\DoxyCodeLine{00862\ \ \ \ \ \textcolor{keywordflow}{return}\ notify\_take(}
-\DoxyCodeLine{00863\ \ \ \ \ \ \ \ \ clearCountOnExit,}
-\DoxyCodeLine{00864\ \ \ \ \ \ \ \ \ std::chrono::duration\_cast<std::chrono::milliseconds>(duration)}
-\DoxyCodeLine{00865\ \ \ \ \ \ \ \ \ \ \ \ \ .count());}
-\DoxyCodeLine{00866\ \ \ \}}
-\DoxyCodeLine{00874\ \ \ BaseType\_t\ notify(\textcolor{keyword}{const}\ uint32\_t\ val,\ eNotifyAction\ action)\ \{}
-\DoxyCodeLine{00875\ \ \ \ \ \textcolor{keywordflow}{return}\ m\_task.notify(val,\ action);}
-\DoxyCodeLine{00876\ \ \ \}}
-\DoxyCodeLine{00885\ \ \ BaseType\_t\ notify\_and\_query(\textcolor{keyword}{const}\ uint32\_t\ val,\ eNotifyAction\ action,}
-\DoxyCodeLine{00886\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ uint32\_t\ \&prev\_value)\ \{}
-\DoxyCodeLine{00887\ \ \ \ \ \textcolor{keywordflow}{return}\ m\_task.notify\_and\_query(val,\ action,\ prev\_value);}
-\DoxyCodeLine{00888\ \ \ \}}
-\DoxyCodeLine{00897\ \ \ BaseType\_t\ notify\_isr(\textcolor{keyword}{const}\ uint32\_t\ val,\ eNotifyAction\ action,}
-\DoxyCodeLine{00898\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ BaseType\_t\ \&higherPriorityTaskWoken)\ \{}
-\DoxyCodeLine{00899\ \ \ \ \ \textcolor{keywordflow}{return}\ m\_task.notify\_isr(val,\ action,\ higherPriorityTaskWoken);}
-\DoxyCodeLine{00900\ \ \ \}}
-\DoxyCodeLine{00908\ \ \ BaseType\_t\ notify\_isr(\textcolor{keyword}{const}\ uint32\_t\ val,\ eNotifyAction\ action)\ \{}
-\DoxyCodeLine{00909\ \ \ \ \ BaseType\_t\ higherPriorityTaskWoken\ =\ pdFALSE;}
-\DoxyCodeLine{00910\ \ \ \ \ \textcolor{keywordflow}{return}\ m\_task.notify\_isr(val,\ action,\ higherPriorityTaskWoken);}
-\DoxyCodeLine{00911\ \ \ \}}
-\DoxyCodeLine{00921\ \ \ BaseType\_t\ notify\_and\_query\_isr(\textcolor{keyword}{const}\ uint32\_t\ val,\ eNotifyAction\ action,}
-\DoxyCodeLine{00922\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ uint32\_t\ \&prev\_value,}
-\DoxyCodeLine{00923\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ BaseType\_t\ \&higherPriorityTaskWoken)\ \{}
-\DoxyCodeLine{00924\ \ \ \ \ \textcolor{keywordflow}{return}\ m\_task.notify\_and\_query\_isr(val,\ action,\ prev\_value,}
-\DoxyCodeLine{00925\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ higherPriorityTaskWoken);}
-\DoxyCodeLine{00926\ \ \ \}}
-\DoxyCodeLine{00935\ \ \ BaseType\_t\ notify\_and\_query\_isr(\textcolor{keyword}{const}\ uint32\_t\ val,\ eNotifyAction\ action,}
-\DoxyCodeLine{00936\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ uint32\_t\ \&prev\_value)\ \{}
-\DoxyCodeLine{00937\ \ \ \ \ BaseType\_t\ higherPriorityTaskWoken\ =\ pdFALSE;}
-\DoxyCodeLine{00938\ \ \ \ \ \textcolor{keywordflow}{return}\ m\_task.notify\_and\_query\_isr(val,\ action,\ prev\_value,}
-\DoxyCodeLine{00939\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ higherPriorityTaskWoken);}
-\DoxyCodeLine{00940\ \ \ \}}
-\DoxyCodeLine{00950\ \ \ BaseType\_t\ notify\_wait(uint32\_t\ ulBitsToClearOnEntry,}
-\DoxyCodeLine{00951\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ uint32\_t\ ulBitsToClearOnExit,}
-\DoxyCodeLine{00952\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ uint32\_t\ \&notification\_value,}
-\DoxyCodeLine{00953\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ TickType\_t\ xTicksToWait)\ \{}
-\DoxyCodeLine{00954\ \ \ \ \ \textcolor{keywordflow}{return}\ m\_task.notify\_wait(ulBitsToClearOnEntry,\ ulBitsToClearOnExit,}
-\DoxyCodeLine{00955\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ notification\_value,\ xTicksToWait);}
+\DoxyCodeLine{00572\ \ \ \textcolor{keywordtype}{void}\ run()\ \{}
+\DoxyCodeLine{00573\ \ \ \ \ m\_on\_start();}
+\DoxyCodeLine{00574\ \ \ \ \ \textcolor{keywordflow}{while}\ (\mbox{\hyperlink{classfreertos_1_1periodic__task_a12c13f558eabec29a997e8330811eb37}{is\_running}}())\ \{}
+\DoxyCodeLine{00575\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (0\ !=\ m\_period.count())\ \{}
+\DoxyCodeLine{00576\ \textcolor{preprocessor}{\#if\ configUSE\_TASK\_NOTIFICATIONS}}
+\DoxyCodeLine{00577\ \ \ \ \ \ \ \ \ uint32\_t\ notification\_value\ =\ 0;}
+\DoxyCodeLine{00578\ \ \ \ \ \ \ \ \ m\_task.notify\_wait(0,\ 0,\ notification\_value,\ m\_period);}
+\DoxyCodeLine{00579\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00580\ \ \ \ \ \ \ \ \ delay(m\_period);}
+\DoxyCodeLine{00581\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00582\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00583\ \ \ \ \ \ \ m\_periodic\_routine();}
+\DoxyCodeLine{00584\ \ \ \ \ \}}
+\DoxyCodeLine{00585\ \ \ \ \ m\_on\_stop();}
+\DoxyCodeLine{00586\ \ \ \}}
+\DoxyCodeLine{00587\ }
+\DoxyCodeLine{00588\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00602\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Rep,\ \textcolor{keyword}{typename}\ Period>}
+\DoxyCodeLine{00603\ \ \ \mbox{\hyperlink{classfreertos_1_1periodic__task_a991b36acf5e9c45cd4ef782e60243490}{periodic\_task}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ *\mbox{\hyperlink{classfreertos_1_1periodic__task_a2b5806f904a18a13474efae6b00b74ab}{name}},\ UBaseType\_t\ priority,}
+\DoxyCodeLine{00604\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ task\_routine\_t\ \&\&on\_start,\ task\_routine\_t\ \&\&on\_stop,}
+\DoxyCodeLine{00605\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ task\_routine\_t\ \&\&periodic\_routine,}
+\DoxyCodeLine{00606\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::chrono::duration<Rep,\ Period>\ \&period,}
+\DoxyCodeLine{00607\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ start\_suspended\ =\ \textcolor{keyword}{true})}
+\DoxyCodeLine{00608\ \ \ \ \ \ \ :\ m\_period\{std::chrono::duration\_cast<std::chrono::milliseconds>(period)\},}
+\DoxyCodeLine{00609\ \ \ \ \ \ \ \ \ m\_on\_start\{std::move(on\_start)\},\ m\_on\_stop\{std::move(on\_stop)\},}
+\DoxyCodeLine{00610\ \ \ \ \ \ \ \ \ m\_periodic\_routine\{std::move(periodic\_routine)\},}
+\DoxyCodeLine{00611\ \ \ \ \ \ \ \ \ m\_task\{\mbox{\hyperlink{classfreertos_1_1periodic__task_a2b5806f904a18a13474efae6b00b74ab}{name}},\ priority,\ [this]()\ \{\ run();\ \},\ start\_suspended\}\ \{\}}
+\DoxyCodeLine{00625\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Rep,\ \textcolor{keyword}{typename}\ Period>}
+\DoxyCodeLine{00626\ \ \ \mbox{\hyperlink{classfreertos_1_1periodic__task_ae70905fca339425deac4f20a904f1fc3}{periodic\_task}}(\textcolor{keyword}{const}\ std::string\ \&name,\ UBaseType\_t\ priority,}
+\DoxyCodeLine{00627\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ task\_routine\_t\ \&\&on\_start,\ task\_routine\_t\ \&\&on\_stop,}
+\DoxyCodeLine{00628\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ task\_routine\_t\ \&\&periodic\_routine,}
+\DoxyCodeLine{00629\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::chrono::duration<Rep,\ Period>\ \&period,}
+\DoxyCodeLine{00630\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ start\_suspended\ =\ \textcolor{keyword}{true})}
+\DoxyCodeLine{00631\ \ \ \ \ \ \ :\ \mbox{\hyperlink{classfreertos_1_1periodic__task}{periodic\_task}}\{name.c\_str(),}
+\DoxyCodeLine{00632\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ priority,}
+\DoxyCodeLine{00633\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::move(on\_start),}
+\DoxyCodeLine{00634\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::move(on\_stop),}
+\DoxyCodeLine{00635\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::move(periodic\_routine),}
+\DoxyCodeLine{00636\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ period,}
+\DoxyCodeLine{00637\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ start\_suspended\}\ \{\}}
+\DoxyCodeLine{00648\ \ \ \mbox{\hyperlink{classfreertos_1_1periodic__task_a7499e655e45e533799806cda59cd3ff3}{periodic\_task}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ *name,\ UBaseType\_t\ priority,}
+\DoxyCodeLine{00649\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ task\_routine\_t\ \&\&on\_start,\ task\_routine\_t\ \&\&on\_stop,}
+\DoxyCodeLine{00650\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ task\_routine\_t\ \&\&periodic\_routine,\ \textcolor{keywordtype}{bool}\ start\_suspended\ =\ \textcolor{keyword}{true})}
+\DoxyCodeLine{00651\ \ \ \ \ \ \ :\ \mbox{\hyperlink{classfreertos_1_1periodic__task}{periodic\_task}}\{name,}
+\DoxyCodeLine{00652\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ priority,}
+\DoxyCodeLine{00653\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::move(on\_start),}
+\DoxyCodeLine{00654\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::move(on\_stop),}
+\DoxyCodeLine{00655\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::move(periodic\_routine),}
+\DoxyCodeLine{00656\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::chrono::milliseconds\{0\},}
+\DoxyCodeLine{00657\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ start\_suspended\}\ \{\}}
+\DoxyCodeLine{00668\ \ \ \mbox{\hyperlink{classfreertos_1_1periodic__task_a6bf73b66eed4feb14a604f94051709e2}{periodic\_task}}(\textcolor{keyword}{const}\ std::string\ \&name,\ UBaseType\_t\ priority,}
+\DoxyCodeLine{00669\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ task\_routine\_t\ \&\&on\_start,\ task\_routine\_t\ \&\&on\_stop,}
+\DoxyCodeLine{00670\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ task\_routine\_t\ \&\&periodic\_routine,\ \textcolor{keywordtype}{bool}\ start\_suspended\ =\ \textcolor{keyword}{true})}
+\DoxyCodeLine{00671\ \ \ \ \ \ \ :\ \mbox{\hyperlink{classfreertos_1_1periodic__task}{periodic\_task}}\{name.c\_str(),}
+\DoxyCodeLine{00672\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ priority,}
+\DoxyCodeLine{00673\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::move(on\_start),}
+\DoxyCodeLine{00674\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::move(on\_stop),}
+\DoxyCodeLine{00675\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::move(periodic\_routine),}
+\DoxyCodeLine{00676\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ start\_suspended\}\ \{\}}
+\DoxyCodeLine{00677\ \ \ \mbox{\hyperlink{classfreertos_1_1periodic__task}{periodic\_task}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1periodic__task}{periodic\_task}}\ \&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00678\ \ \ \mbox{\hyperlink{classfreertos_1_1periodic__task}{periodic\_task}}(\mbox{\hyperlink{classfreertos_1_1periodic__task}{periodic\_task}}\ \&\&other)\ noexcept}
+\DoxyCodeLine{00679\ \ \ \ \ \ \ :\ m\_period(other.m\_period),\ m\_on\_start(std::move(other.m\_on\_start)),}
+\DoxyCodeLine{00680\ \ \ \ \ \ \ \ \ m\_on\_stop(std::move(other.m\_on\_stop)),}
+\DoxyCodeLine{00681\ \ \ \ \ \ \ \ \ m\_periodic\_routine(std::move(other.m\_periodic\_routine)),}
+\DoxyCodeLine{00682\ \ \ \ \ \ \ \ \ m\_task(std::move(other.m\_task))\ \{}
+\DoxyCodeLine{00683\ \ \ \ \ \textcolor{comment}{//\ m\_task\ move\ constructor\ will\ handle\ ownership\ transfer}}
+\DoxyCodeLine{00684\ \ \ \}}
+\DoxyCodeLine{00690\ \ \ \mbox{\hyperlink{classfreertos_1_1periodic__task_a4b1c8813efc6cb4d7bef04927c807c25}{\string~periodic\_task}}(\textcolor{keywordtype}{void})\ \{}
+\DoxyCodeLine{00691\ \textcolor{preprocessor}{\#if\ INCLUDE\_xTaskAbortDelay}}
+\DoxyCodeLine{00692\ \ \ \ \ m\_task.abort\_delay();}
+\DoxyCodeLine{00693\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00694\ \ \ \}}
+\DoxyCodeLine{00695\ }
+\DoxyCodeLine{00696\ \ \ \mbox{\hyperlink{classfreertos_1_1periodic__task}{periodic\_task}}\ \&operator=(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1periodic__task}{periodic\_task}}\ \&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00697\ \ \ \mbox{\hyperlink{classfreertos_1_1periodic__task}{periodic\_task}}\ \&operator=(\mbox{\hyperlink{classfreertos_1_1periodic__task}{periodic\_task}}\ \&\&other)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00698\ }
+\DoxyCodeLine{00704\ \ \ TaskHandle\_t\ \mbox{\hyperlink{classfreertos_1_1periodic__task_afa781adc0b809367c572305be78b0725}{handle}}(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ m\_task.handle();\ \}}
+\DoxyCodeLine{00705\ \textcolor{preprocessor}{\#if\ INCLUDE\_vTaskSuspend}}
+\DoxyCodeLine{00710\ \ \ \textcolor{keywordtype}{void}\ suspend(\textcolor{keywordtype}{void})\ \{\ m\_task.suspend();\ \}}
+\DoxyCodeLine{00715\ \ \ \textcolor{keywordtype}{void}\ resume(\textcolor{keywordtype}{void})\ \{\ m\_task.resume();\ \}}
+\DoxyCodeLine{00721\ \ \ BaseType\_t\ resume\_isr(\textcolor{keywordtype}{void})\ \{\ \textcolor{keywordflow}{return}\ m\_task.resume\_isr();\ \}}
+\DoxyCodeLine{00722\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00728\ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classfreertos_1_1periodic__task_a12c13f558eabec29a997e8330811eb37}{is\_running}}(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00729\ \ \ \ \ \textcolor{keywordflow}{switch}\ (m\_task.state())\ \{}
+\DoxyCodeLine{00730\ \ \ \ \ \textcolor{keywordflow}{case}\ eRunning:}
+\DoxyCodeLine{00731\ \ \ \ \ \textcolor{keywordflow}{case}\ eReady:}
+\DoxyCodeLine{00732\ \ \ \ \ \textcolor{keywordflow}{case}\ eBlocked:}
+\DoxyCodeLine{00733\ \ \ \ \ \textcolor{keywordflow}{case}\ eSuspended:}
+\DoxyCodeLine{00734\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{00735\ \ \ \ \ \textcolor{keywordflow}{default}:}
+\DoxyCodeLine{00736\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00737\ \ \ \ \ \}}
+\DoxyCodeLine{00738\ \ \ \}}
+\DoxyCodeLine{00743\ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classfreertos_1_1periodic__task_a304ec5187ac8b02a7b9fba55ed1c5462}{terminate}}(\textcolor{keywordtype}{void})\ \{\ m\_task.terminate();\ \}}
+\DoxyCodeLine{00744\ \textcolor{preprocessor}{\#if\ INCLUDE\_xTaskAbortDelay}}
+\DoxyCodeLine{00750\ \ \ BaseType\_t\ abort\_delay(\textcolor{keywordtype}{void})\ \{\ \textcolor{keywordflow}{return}\ m\_task.abort\_delay();\ \}}
+\DoxyCodeLine{00751\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00752\ \textcolor{preprocessor}{\#if\ INCLUDE\_uxTaskPriorityGet\ \&\&\ configUSE\_MUTEXES}}
+\DoxyCodeLine{00758\ \ \ UBaseType\_t\ priority(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ m\_task.priority();\ \}}
+\DoxyCodeLine{00764\ \ \ UBaseType\_t\ priority\_isr(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ m\_task.priority\_isr();\ \}}
+\DoxyCodeLine{00765\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00766\ \textcolor{preprocessor}{\#if\ INCLUDE\_vTaskPrioritySet}}
+\DoxyCodeLine{00773\ \ \ periodic\_task\ \&priority(UBaseType\_t\ priority)\ \{}
+\DoxyCodeLine{00774\ \ \ \ \ m\_task.priority(priority);}
+\DoxyCodeLine{00775\ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00776\ \ \ \}}
+\DoxyCodeLine{00777\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00778\ \textcolor{preprocessor}{\#if\ configUSE\_TRACE\_FACILITY}}
+\DoxyCodeLine{00786\ \ \ TaskStatus\_t\ status(BaseType\_t\ getFreeStackSpace\ =\ pdFALSE,}
+\DoxyCodeLine{00787\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ eTaskState\ eState\ =\ eInvalid)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00788\ \ \ \ \ \textcolor{keywordflow}{return}\ m\_task.status(getFreeStackSpace,\ eState);}
+\DoxyCodeLine{00789\ \ \ \}}
+\DoxyCodeLine{00790\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00791\ \textcolor{preprocessor}{\#if\ configUSE\_APPLICATION\_TASK\_TAG}}
+\DoxyCodeLine{00798\ \ \ periodic\_task\ \&tag(TaskHookFunction\_t\ tag)\ \{}
+\DoxyCodeLine{00799\ \ \ \ \ m\_task.tag(tag);}
+\DoxyCodeLine{00800\ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00801\ \ \ \}}
+\DoxyCodeLine{00807\ \ \ TaskHookFunction\_t\ tag(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ m\_task.tag();\ \}}
+\DoxyCodeLine{00813\ \ \ TaskHookFunction\_t\ tag\_isr(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ m\_task.tag\_isr();\ \}}
+\DoxyCodeLine{00814\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00815\ \textcolor{preprocessor}{\#if\ INCLUDE\_uxTaskGetStackHighWaterMark}}
+\DoxyCodeLine{00821\ \ \ \textcolor{keywordtype}{size\_t}\ stack\_high\_water\_mark(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00822\ \ \ \ \ \textcolor{keywordflow}{return}\ m\_task.stack\_high\_water\_mark();}
+\DoxyCodeLine{00823\ \ \ \}}
+\DoxyCodeLine{00824\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00825\ \textcolor{preprocessor}{\#if\ INCLUDE\_uxTaskGetStackHighWaterMark2}}
+\DoxyCodeLine{00831\ \ \ \textcolor{keywordtype}{size\_t}\ stack\_high\_water\_mark2(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00832\ \ \ \ \ \textcolor{keywordflow}{return}\ m\_task.stack\_high\_water\_mark2();}
+\DoxyCodeLine{00833\ \ \ \}}
+\DoxyCodeLine{00834\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00835\ \textcolor{preprocessor}{\#if\ INCLUDE\_eTaskGetState}}
+\DoxyCodeLine{00841\ \ \ eTaskState\ state(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ m\_task.state();\ \}}
+\DoxyCodeLine{00842\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00848\ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ *\mbox{\hyperlink{classfreertos_1_1periodic__task_a2b5806f904a18a13474efae6b00b74ab}{name}}(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ m\_task.name();\ \}}
+\DoxyCodeLine{00849\ \textcolor{comment}{//\ Task\ notification\ API}}
+\DoxyCodeLine{00850\ \textcolor{preprocessor}{\#if\ configUSE\_TASK\_NOTIFICATIONS}}
+\DoxyCodeLine{00856\ \ \ BaseType\_t\ notify\_give(\textcolor{keywordtype}{void})\ \{\ \textcolor{keywordflow}{return}\ m\_task.notify\_give();\ \}}
+\DoxyCodeLine{00864\ \ \ uint32\_t\ notify\_take(BaseType\_t\ clearCountOnExit\ =\ pdTRUE,}
+\DoxyCodeLine{00865\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ TickType\_t\ ticksToWait\ =\ portMAX\_DELAY)\ \{}
+\DoxyCodeLine{00866\ \ \ \ \ \textcolor{keywordflow}{return}\ m\_task.notify\_take(clearCountOnExit,\ ticksToWait);}
+\DoxyCodeLine{00867\ \ \ \}}
+\DoxyCodeLine{00875\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Rep,\ \textcolor{keyword}{typename}\ Period>}
+\DoxyCodeLine{00876\ \ \ uint32\_t\ notify\_take(BaseType\_t\ clearCountOnExit,}
+\DoxyCodeLine{00877\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::chrono::duration<Rep,\ Period>\ duration)\ \{}
+\DoxyCodeLine{00878\ \ \ \ \ \textcolor{keywordflow}{return}\ notify\_take(}
+\DoxyCodeLine{00879\ \ \ \ \ \ \ \ \ clearCountOnExit,}
+\DoxyCodeLine{00880\ \ \ \ \ \ \ \ \ std::chrono::duration\_cast<std::chrono::milliseconds>(duration)}
+\DoxyCodeLine{00881\ \ \ \ \ \ \ \ \ \ \ \ \ .count());}
+\DoxyCodeLine{00882\ \ \ \}}
+\DoxyCodeLine{00890\ \ \ BaseType\_t\ notify(\textcolor{keyword}{const}\ uint32\_t\ val,\ eNotifyAction\ action)\ \{}
+\DoxyCodeLine{00891\ \ \ \ \ \textcolor{keywordflow}{return}\ m\_task.notify(val,\ action);}
+\DoxyCodeLine{00892\ \ \ \}}
+\DoxyCodeLine{00901\ \ \ BaseType\_t\ notify\_and\_query(\textcolor{keyword}{const}\ uint32\_t\ val,\ eNotifyAction\ action,}
+\DoxyCodeLine{00902\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ uint32\_t\ \&prev\_value)\ \{}
+\DoxyCodeLine{00903\ \ \ \ \ \textcolor{keywordflow}{return}\ m\_task.notify\_and\_query(val,\ action,\ prev\_value);}
+\DoxyCodeLine{00904\ \ \ \}}
+\DoxyCodeLine{00913\ \ \ BaseType\_t\ notify\_isr(\textcolor{keyword}{const}\ uint32\_t\ val,\ eNotifyAction\ action,}
+\DoxyCodeLine{00914\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ BaseType\_t\ \&higherPriorityTaskWoken)\ \{}
+\DoxyCodeLine{00915\ \ \ \ \ \textcolor{keywordflow}{return}\ m\_task.notify\_isr(val,\ action,\ higherPriorityTaskWoken);}
+\DoxyCodeLine{00916\ \ \ \}}
+\DoxyCodeLine{00924\ \ \ BaseType\_t\ notify\_isr(\textcolor{keyword}{const}\ uint32\_t\ val,\ eNotifyAction\ action)\ \{}
+\DoxyCodeLine{00925\ \ \ \ \ BaseType\_t\ higherPriorityTaskWoken\ =\ pdFALSE;}
+\DoxyCodeLine{00926\ \ \ \ \ \textcolor{keywordflow}{return}\ m\_task.notify\_isr(val,\ action,\ higherPriorityTaskWoken);}
+\DoxyCodeLine{00927\ \ \ \}}
+\DoxyCodeLine{00937\ \ \ BaseType\_t\ notify\_and\_query\_isr(\textcolor{keyword}{const}\ uint32\_t\ val,\ eNotifyAction\ action,}
+\DoxyCodeLine{00938\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ uint32\_t\ \&prev\_value,}
+\DoxyCodeLine{00939\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ BaseType\_t\ \&higherPriorityTaskWoken)\ \{}
+\DoxyCodeLine{00940\ \ \ \ \ \textcolor{keywordflow}{return}\ m\_task.notify\_and\_query\_isr(val,\ action,\ prev\_value,}
+\DoxyCodeLine{00941\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ higherPriorityTaskWoken);}
+\DoxyCodeLine{00942\ \ \ \}}
+\DoxyCodeLine{00951\ \ \ BaseType\_t\ notify\_and\_query\_isr(\textcolor{keyword}{const}\ uint32\_t\ val,\ eNotifyAction\ action,}
+\DoxyCodeLine{00952\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ uint32\_t\ \&prev\_value)\ \{}
+\DoxyCodeLine{00953\ \ \ \ \ BaseType\_t\ higherPriorityTaskWoken\ =\ pdFALSE;}
+\DoxyCodeLine{00954\ \ \ \ \ \textcolor{keywordflow}{return}\ m\_task.notify\_and\_query\_isr(val,\ action,\ prev\_value,}
+\DoxyCodeLine{00955\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ higherPriorityTaskWoken);}
 \DoxyCodeLine{00956\ \ \ \}}
-\DoxyCodeLine{00966\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Rep,\ \textcolor{keyword}{typename}\ Period>}
-\DoxyCodeLine{00967\ \ \ BaseType\_t\ notify\_wait(uint32\_t\ ulBitsToClearOnEntry,}
-\DoxyCodeLine{00968\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ uint32\_t\ ulBitsToClearOnExit,}
-\DoxyCodeLine{00969\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ uint32\_t\ \&notification\_value,}
-\DoxyCodeLine{00970\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::chrono::duration<Rep,\ Period>\ duration)\ \{}
-\DoxyCodeLine{00971\ \ \ \ \ \textcolor{keywordflow}{return}\ notify\_wait(}
-\DoxyCodeLine{00972\ \ \ \ \ \ \ \ \ ulBitsToClearOnEntry,\ ulBitsToClearOnExit,\ notification\_value,}
-\DoxyCodeLine{00973\ \ \ \ \ \ \ \ \ std::chrono::duration\_cast<std::chrono::milliseconds>(duration)}
-\DoxyCodeLine{00974\ \ \ \ \ \ \ \ \ \ \ \ \ .count());}
-\DoxyCodeLine{00975\ \ \ \}}
-\DoxyCodeLine{00982\ \ \ BaseType\_t\ notify\_state\_clear(\textcolor{keywordtype}{void})\ \{\ \textcolor{keywordflow}{return}\ m\_task.notify\_state\_clear();\ \}}
-\DoxyCodeLine{00989\ \ \ uint32\_t\ notify\_value\_clear(uint32\_t\ ulBitsToClear)\ \{}
-\DoxyCodeLine{00990\ \ \ \ \ \textcolor{keywordflow}{return}\ m\_task.notify\_value\_clear(ulBitsToClear);}
+\DoxyCodeLine{00966\ \ \ BaseType\_t\ notify\_wait(uint32\_t\ ulBitsToClearOnEntry,}
+\DoxyCodeLine{00967\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ uint32\_t\ ulBitsToClearOnExit,}
+\DoxyCodeLine{00968\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ uint32\_t\ \&notification\_value,}
+\DoxyCodeLine{00969\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ TickType\_t\ xTicksToWait)\ \{}
+\DoxyCodeLine{00970\ \ \ \ \ \textcolor{keywordflow}{return}\ m\_task.notify\_wait(ulBitsToClearOnEntry,\ ulBitsToClearOnExit,}
+\DoxyCodeLine{00971\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ notification\_value,\ xTicksToWait);}
+\DoxyCodeLine{00972\ \ \ \}}
+\DoxyCodeLine{00982\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Rep,\ \textcolor{keyword}{typename}\ Period>}
+\DoxyCodeLine{00983\ \ \ BaseType\_t\ notify\_wait(uint32\_t\ ulBitsToClearOnEntry,}
+\DoxyCodeLine{00984\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ uint32\_t\ ulBitsToClearOnExit,}
+\DoxyCodeLine{00985\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ uint32\_t\ \&notification\_value,}
+\DoxyCodeLine{00986\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::chrono::duration<Rep,\ Period>\ duration)\ \{}
+\DoxyCodeLine{00987\ \ \ \ \ \textcolor{keywordflow}{return}\ notify\_wait(}
+\DoxyCodeLine{00988\ \ \ \ \ \ \ \ \ ulBitsToClearOnEntry,\ ulBitsToClearOnExit,\ notification\_value,}
+\DoxyCodeLine{00989\ \ \ \ \ \ \ \ \ std::chrono::duration\_cast<std::chrono::milliseconds>(duration)}
+\DoxyCodeLine{00990\ \ \ \ \ \ \ \ \ \ \ \ \ .count());}
 \DoxyCodeLine{00991\ \ \ \}}
-\DoxyCodeLine{00992\ \textcolor{preprocessor}{\#endif}}
-\DoxyCodeLine{00993\ \};}
-\DoxyCodeLine{00994\ }
-\DoxyCodeLine{00995\ \textcolor{comment}{//\ TODO(maintainer):\ add\ less\ than\ ms\ delays}}
-\DoxyCodeLine{00996\ }
-\DoxyCodeLine{01002\ \textcolor{keywordtype}{void}\ delay(TickType\_t\ ticks);}
-\DoxyCodeLine{01003\ }
-\DoxyCodeLine{01011\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Rep,\ \textcolor{keyword}{typename}\ Period>}
-\DoxyCodeLine{01012\ \textcolor{keywordtype}{void}\ delay(std::chrono::duration<Rep,\ Period>\ duration)\ \{}
-\DoxyCodeLine{01013\ \ \ delay(}
-\DoxyCodeLine{01014\ \ \ \ \ \ \ std::chrono::duration\_cast<std::chrono::milliseconds>(duration).count());}
-\DoxyCodeLine{01015\ \}}
-\DoxyCodeLine{01016\ }
-\DoxyCodeLine{01024\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Rep,\ \textcolor{keyword}{typename}\ Period>}
-\DoxyCodeLine{01025\ \textcolor{keywordtype}{void}\ sleep\_for(std::chrono::duration<Rep,\ Period>\ duration)\ \{}
-\DoxyCodeLine{01026\ \ \ delay(duration);}
-\DoxyCodeLine{01027\ \}}
-\DoxyCodeLine{01028\ }
-\DoxyCodeLine{01036\ \textcolor{keywordtype}{void}\ delay\_until(TickType\_t\ \&previousWakeTime,\ TickType\_t\ period);}
-\DoxyCodeLine{01037\ }
-\DoxyCodeLine{01038\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Rep,\ \textcolor{keyword}{typename}\ Period>}
-\DoxyCodeLine{01039\ \textcolor{keywordtype}{void}\ delay\_until(TickType\_t\ \&previousWakeTime,}
-\DoxyCodeLine{01040\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::chrono::duration<Rep,\ Period>\ period)\ \{}
-\DoxyCodeLine{01041\ \ \ delay\_until(}
-\DoxyCodeLine{01042\ \ \ \ \ \ \ previousWakeTime,}
-\DoxyCodeLine{01043\ \ \ \ \ \ \ std::chrono::duration\_cast<std::chrono::milliseconds>(period).count());}
-\DoxyCodeLine{01044\ \}}
-\DoxyCodeLine{01045\ }
-\DoxyCodeLine{01053\ \textcolor{keywordtype}{void}\ delay\_until(\textcolor{keyword}{const}\ std::chrono::system\_clock::time\_point\ \&wakeTime);}
-\DoxyCodeLine{01061\ \textcolor{keywordtype}{void}\ delay\_until(\textcolor{keyword}{const}\ std::chrono::steady\_clock::time\_point\ \&wakeTime);}
-\DoxyCodeLine{01062\ }
-\DoxyCodeLine{01063\ \textcolor{comment}{//\ task\ utilities:}}
-\DoxyCodeLine{01064\ }
-\DoxyCodeLine{01065\ \textcolor{preprocessor}{\#if\ configUSE\_TRACE\_FACILITY}}
-\DoxyCodeLine{01071\ \textcolor{keyword}{template}\ <\textcolor{keywordtype}{size\_t}\ status\_array\_capacity>\ \textcolor{keyword}{class\ }task\_system\_status\ \{}
-\DoxyCodeLine{01072\ \ \ std::array<TaskStatus\_t,\ status\_array\_capacity>\ m\_status\_array\{\};}
-\DoxyCodeLine{01073\ \ \ UBaseType\_t\ m\_task\_count\{0\};}
-\DoxyCodeLine{01074\ \ \ uint32\_t\ m\_total\_run\_time\{0\};}
-\DoxyCodeLine{01075\ }
-\DoxyCodeLine{01076\ \textcolor{keyword}{public}:}
-\DoxyCodeLine{01081\ \ \ task\_system\_status(\textcolor{keywordtype}{void})\ \{}
-\DoxyCodeLine{01082\ \ \ \ \ m\_task\_count\ =\ uxTaskGetSystemState(}
-\DoxyCodeLine{01083\ \ \ \ \ \ \ \ \ m\_status\_array.data(),\ status\_array\_capacity,\ \&m\_total\_run\_time);}
-\DoxyCodeLine{01084\ \ \ \}}
-\DoxyCodeLine{01085\ }
-\DoxyCodeLine{01091\ \ \ UBaseType\_t\ count(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ m\_task\_count;\ \}}
-\DoxyCodeLine{01092\ \ \ std::chrono::milliseconds\ total\_run\_time(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{}
-\DoxyCodeLine{01093\ \ \ \ \ \textcolor{keywordflow}{return}\ std::chrono::milliseconds\{m\_total\_run\_time\};}
-\DoxyCodeLine{01094\ \ \ \}}
-\DoxyCodeLine{01100\ \ \ \textcolor{keyword}{const}\ TaskStatus\_t\ *begin(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ m\_status\_array.data();\ \}}
-\DoxyCodeLine{01106\ \ \ \textcolor{keyword}{const}\ TaskStatus\_t\ *end(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{}
-\DoxyCodeLine{01107\ \ \ \ \ \textcolor{keywordflow}{return}\ m\_status\_array.data()\ +\ m\_task\_count;}
-\DoxyCodeLine{01108\ \ \ \}}
-\DoxyCodeLine{01109\ \};}
-\DoxyCodeLine{01110\ \textcolor{preprocessor}{\#endif}}
-\DoxyCodeLine{01111\ \textcolor{preprocessor}{\#if\ INCLUDE\_xTaskGetCurrentTaskHandle}}
-\DoxyCodeLine{01117\ TaskHandle\_t\ current\_task\_handle(\textcolor{keywordtype}{void});}
-\DoxyCodeLine{01118\ \textcolor{preprocessor}{\#endif}}
-\DoxyCodeLine{01119\ \textcolor{preprocessor}{\#if\ INCLUDE\_xTaskGetIdleTaskHandle}}
-\DoxyCodeLine{01125\ TaskHandle\_t\ idle\_task\_handle(\textcolor{keywordtype}{void});}
+\DoxyCodeLine{00998\ \ \ BaseType\_t\ notify\_state\_clear(\textcolor{keywordtype}{void})\ \{\ \textcolor{keywordflow}{return}\ m\_task.notify\_state\_clear();\ \}}
+\DoxyCodeLine{01005\ \ \ uint32\_t\ notify\_value\_clear(uint32\_t\ ulBitsToClear)\ \{}
+\DoxyCodeLine{01006\ \ \ \ \ \textcolor{keywordflow}{return}\ m\_task.notify\_value\_clear(ulBitsToClear);}
+\DoxyCodeLine{01007\ \ \ \}}
+\DoxyCodeLine{01008\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{01009\ \};}
+\DoxyCodeLine{01010\ }
+\DoxyCodeLine{01011\ \textcolor{comment}{//\ TODO(maintainer):\ add\ less\ than\ ms\ delays}}
+\DoxyCodeLine{01012\ }
+\DoxyCodeLine{01018\ \textcolor{keywordtype}{void}\ delay(TickType\_t\ ticks);}
+\DoxyCodeLine{01019\ }
+\DoxyCodeLine{01027\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Rep,\ \textcolor{keyword}{typename}\ Period>}
+\DoxyCodeLine{01028\ \textcolor{keywordtype}{void}\ delay(std::chrono::duration<Rep,\ Period>\ duration)\ \{}
+\DoxyCodeLine{01029\ \ \ delay(}
+\DoxyCodeLine{01030\ \ \ \ \ \ \ std::chrono::duration\_cast<std::chrono::milliseconds>(duration).count());}
+\DoxyCodeLine{01031\ \}}
+\DoxyCodeLine{01032\ }
+\DoxyCodeLine{01040\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Rep,\ \textcolor{keyword}{typename}\ Period>}
+\DoxyCodeLine{01041\ \textcolor{keywordtype}{void}\ sleep\_for(std::chrono::duration<Rep,\ Period>\ duration)\ \{}
+\DoxyCodeLine{01042\ \ \ delay(duration);}
+\DoxyCodeLine{01043\ \}}
+\DoxyCodeLine{01044\ }
+\DoxyCodeLine{01052\ \textcolor{keywordtype}{void}\ delay\_until(TickType\_t\ \&previousWakeTime,\ TickType\_t\ period);}
+\DoxyCodeLine{01053\ }
+\DoxyCodeLine{01054\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Rep,\ \textcolor{keyword}{typename}\ Period>}
+\DoxyCodeLine{01055\ \textcolor{keywordtype}{void}\ delay\_until(TickType\_t\ \&previousWakeTime,}
+\DoxyCodeLine{01056\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::chrono::duration<Rep,\ Period>\ period)\ \{}
+\DoxyCodeLine{01057\ \ \ delay\_until(}
+\DoxyCodeLine{01058\ \ \ \ \ \ \ previousWakeTime,}
+\DoxyCodeLine{01059\ \ \ \ \ \ \ std::chrono::duration\_cast<std::chrono::milliseconds>(period).count());}
+\DoxyCodeLine{01060\ \}}
+\DoxyCodeLine{01061\ }
+\DoxyCodeLine{01069\ \textcolor{keywordtype}{void}\ delay\_until(\textcolor{keyword}{const}\ std::chrono::system\_clock::time\_point\ \&wakeTime);}
+\DoxyCodeLine{01077\ \textcolor{keywordtype}{void}\ delay\_until(\textcolor{keyword}{const}\ std::chrono::steady\_clock::time\_point\ \&wakeTime);}
+\DoxyCodeLine{01078\ }
+\DoxyCodeLine{01079\ \textcolor{comment}{//\ task\ utilities:}}
+\DoxyCodeLine{01080\ }
+\DoxyCodeLine{01081\ \textcolor{preprocessor}{\#if\ configUSE\_TRACE\_FACILITY}}
+\DoxyCodeLine{01087\ \textcolor{keyword}{template}\ <\textcolor{keywordtype}{size\_t}\ status\_array\_capacity>\ \textcolor{keyword}{class\ }task\_system\_status\ \{}
+\DoxyCodeLine{01088\ \ \ std::array<TaskStatus\_t,\ status\_array\_capacity>\ m\_status\_array\{\};}
+\DoxyCodeLine{01089\ \ \ UBaseType\_t\ m\_task\_count\{0\};}
+\DoxyCodeLine{01090\ \ \ uint32\_t\ m\_total\_run\_time\{0\};}
+\DoxyCodeLine{01091\ }
+\DoxyCodeLine{01092\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{01097\ \ \ task\_system\_status(\textcolor{keywordtype}{void})\ \{}
+\DoxyCodeLine{01098\ \ \ \ \ m\_task\_count\ =\ uxTaskGetSystemState(}
+\DoxyCodeLine{01099\ \ \ \ \ \ \ \ \ m\_status\_array.data(),\ status\_array\_capacity,\ \&m\_total\_run\_time);}
+\DoxyCodeLine{01100\ \ \ \}}
+\DoxyCodeLine{01101\ }
+\DoxyCodeLine{01107\ \ \ UBaseType\_t\ count(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ m\_task\_count;\ \}}
+\DoxyCodeLine{01108\ \ \ std::chrono::milliseconds\ total\_run\_time(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{01109\ \ \ \ \ \textcolor{keywordflow}{return}\ std::chrono::milliseconds\{m\_total\_run\_time\};}
+\DoxyCodeLine{01110\ \ \ \}}
+\DoxyCodeLine{01116\ \ \ \textcolor{keyword}{const}\ TaskStatus\_t\ *begin(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ m\_status\_array.data();\ \}}
+\DoxyCodeLine{01122\ \ \ \textcolor{keyword}{const}\ TaskStatus\_t\ *end(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{01123\ \ \ \ \ \textcolor{keywordflow}{return}\ m\_status\_array.data()\ +\ m\_task\_count;}
+\DoxyCodeLine{01124\ \ \ \}}
+\DoxyCodeLine{01125\ \};}
 \DoxyCodeLine{01126\ \textcolor{preprocessor}{\#endif}}
-\DoxyCodeLine{01127\ }
-\DoxyCodeLine{01133\ TickType\_t\ tick\_count(\textcolor{keywordtype}{void});}
-\DoxyCodeLine{01139\ TickType\_t\ tick\_count\_isr(\textcolor{keywordtype}{void});}
-\DoxyCodeLine{01140\ }
-\DoxyCodeLine{01146\ std::chrono::milliseconds\ time\_since\_scheduler\_started(\textcolor{keywordtype}{void});}
-\DoxyCodeLine{01152\ std::chrono::milliseconds\ time\_since\_scheduler\_started\_isr(\textcolor{keywordtype}{void});}
-\DoxyCodeLine{01153\ }
-\DoxyCodeLine{01154\ \textcolor{preprocessor}{\#if\ INCLUDE\_xTaskGetSchedulerState\ ||\ configUSE\_TIMERS}}
-\DoxyCodeLine{01160\ BaseType\_t\ get\_scheduler\_state(\textcolor{keywordtype}{void});}
-\DoxyCodeLine{01161\ \textcolor{preprocessor}{\#endif}}
-\DoxyCodeLine{01167\ UBaseType\_t\ task\_count(\textcolor{keywordtype}{void});}
-\DoxyCodeLine{01168\ }
-\DoxyCodeLine{01169\ \textcolor{comment}{//\ RTOS\ Kernel\ Control:}}
-\DoxyCodeLine{01170\ }
-\DoxyCodeLine{01175\ \textcolor{keywordtype}{void}\ yield(\textcolor{keywordtype}{void});}
-\DoxyCodeLine{01176\ }
-\DoxyCodeLine{01182\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classfreertos_1_1critical__section}{critical\_section}}\ \{}
-\DoxyCodeLine{01183\ \textcolor{keyword}{public}:}
-\DoxyCodeLine{01188\ \ \ \mbox{\hyperlink{classfreertos_1_1critical__section_ae3ff53f27085ba8e78b07031098b25f0}{critical\_section}}(\textcolor{keywordtype}{void})\ \{\ taskENTER\_CRITICAL();\ \}}
-\DoxyCodeLine{01193\ \ \ \mbox{\hyperlink{classfreertos_1_1critical__section_a921279b4dc747e42188717820843783c}{\string~critical\_section}}(\textcolor{keywordtype}{void})\ \{\ taskEXIT\_CRITICAL();\ \}}
-\DoxyCodeLine{01194\ }
-\DoxyCodeLine{01195\ \ \ \textcolor{comment}{//\ Delete\ copy\ and\ move\ operations\ for\ RAII\ safety}}
-\DoxyCodeLine{01196\ \ \ \mbox{\hyperlink{classfreertos_1_1critical__section}{critical\_section}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1critical__section}{critical\_section}}\ \&)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{01197\ \ \ \mbox{\hyperlink{classfreertos_1_1critical__section}{critical\_section}}(\mbox{\hyperlink{classfreertos_1_1critical__section}{critical\_section}}\ \&\&)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{01198\ \ \ \mbox{\hyperlink{classfreertos_1_1critical__section}{critical\_section}}\ \&operator=(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1critical__section}{critical\_section}}\ \&)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{01199\ \ \ \mbox{\hyperlink{classfreertos_1_1critical__section}{critical\_section}}\ \&operator=(\mbox{\hyperlink{classfreertos_1_1critical__section}{critical\_section}}\ \&\&)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{01200\ \};}
-\DoxyCodeLine{01201\ }
-\DoxyCodeLine{01207\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classfreertos_1_1critical__section__isr}{critical\_section\_isr}}\ \{}
-\DoxyCodeLine{01208\ \ \ UBaseType\_t\ m\_saved\_interrupt\_status\{taskENTER\_CRITICAL\_FROM\_ISR()\};}
-\DoxyCodeLine{01209\ }
-\DoxyCodeLine{01210\ \textcolor{keyword}{public}:}
-\DoxyCodeLine{01215\ \ \ \mbox{\hyperlink{classfreertos_1_1critical__section__isr_ab97018646d29cb7bb2b178e57088f245}{critical\_section\_isr}}(\textcolor{keywordtype}{void})\ =\ \textcolor{keywordflow}{default};}
-\DoxyCodeLine{01220\ \ \ \mbox{\hyperlink{classfreertos_1_1critical__section__isr_a4d5d92eff3d601235e41acdedc057799}{\string~critical\_section\_isr}}(\textcolor{keywordtype}{void})\ \{}
-\DoxyCodeLine{01221\ \ \ \ \ taskEXIT\_CRITICAL\_FROM\_ISR(m\_saved\_interrupt\_status);}
-\DoxyCodeLine{01222\ \ \ \}}
-\DoxyCodeLine{01223\ }
-\DoxyCodeLine{01224\ \ \ \textcolor{comment}{//\ Delete\ copy\ and\ move\ operations\ for\ RAII\ safety}}
-\DoxyCodeLine{01225\ \ \ \mbox{\hyperlink{classfreertos_1_1critical__section__isr}{critical\_section\_isr}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1critical__section__isr}{critical\_section\_isr}}\ \&)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{01226\ \ \ \mbox{\hyperlink{classfreertos_1_1critical__section__isr}{critical\_section\_isr}}(\mbox{\hyperlink{classfreertos_1_1critical__section__isr}{critical\_section\_isr}}\ \&\&)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{01227\ \ \ \mbox{\hyperlink{classfreertos_1_1critical__section__isr}{critical\_section\_isr}}\ \&operator=(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1critical__section__isr}{critical\_section\_isr}}\ \&)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{01228\ \ \ \mbox{\hyperlink{classfreertos_1_1critical__section__isr}{critical\_section\_isr}}\ \&operator=(\mbox{\hyperlink{classfreertos_1_1critical__section__isr}{critical\_section\_isr}}\ \&\&)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{01229\ \};}
-\DoxyCodeLine{01230\ }
-\DoxyCodeLine{01236\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classfreertos_1_1interrupt__barrier}{interrupt\_barrier}}\ \{}
-\DoxyCodeLine{01237\ \textcolor{keyword}{public}:}
-\DoxyCodeLine{01242\ \ \ \mbox{\hyperlink{classfreertos_1_1interrupt__barrier_a01039fc26b17de04fd266c8b5f8abfa5}{interrupt\_barrier}}(\textcolor{keywordtype}{void})\ \{\ taskDISABLE\_INTERRUPTS();\ \}}
-\DoxyCodeLine{01247\ \ \ \mbox{\hyperlink{classfreertos_1_1interrupt__barrier_a850028aca48871908d647fd900a1398e}{\string~interrupt\_barrier}}(\textcolor{keywordtype}{void})\ \{\ taskENABLE\_INTERRUPTS();\ \}}
-\DoxyCodeLine{01248\ }
-\DoxyCodeLine{01249\ \ \ \textcolor{comment}{//\ Delete\ copy\ and\ move\ operations\ for\ RAII\ safety}}
-\DoxyCodeLine{01250\ \ \ \mbox{\hyperlink{classfreertos_1_1interrupt__barrier}{interrupt\_barrier}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1interrupt__barrier}{interrupt\_barrier}}\ \&)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{01251\ \ \ \mbox{\hyperlink{classfreertos_1_1interrupt__barrier}{interrupt\_barrier}}(\mbox{\hyperlink{classfreertos_1_1interrupt__barrier}{interrupt\_barrier}}\ \&\&)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{01252\ \ \ \mbox{\hyperlink{classfreertos_1_1interrupt__barrier}{interrupt\_barrier}}\ \&operator=(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1interrupt__barrier}{interrupt\_barrier}}\ \&)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{01253\ \ \ \mbox{\hyperlink{classfreertos_1_1interrupt__barrier}{interrupt\_barrier}}\ \&operator=(\mbox{\hyperlink{classfreertos_1_1interrupt__barrier}{interrupt\_barrier}}\ \&\&)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{01254\ \};}
-\DoxyCodeLine{01255\ }
-\DoxyCodeLine{01261\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classfreertos_1_1scheduler__barrier}{scheduler\_barrier}}\ \{}
-\DoxyCodeLine{01262\ \textcolor{keyword}{public}:}
-\DoxyCodeLine{01267\ \ \ \mbox{\hyperlink{classfreertos_1_1scheduler__barrier_a0b7e4c52f93bb334506d5acf9662c021}{scheduler\_barrier}}(\textcolor{keywordtype}{void})\ \{\ vTaskSuspendAll();\ \}}
-\DoxyCodeLine{01272\ \ \ \mbox{\hyperlink{classfreertos_1_1scheduler__barrier_a6324492efcd303e272c153839b9d7c23}{\string~scheduler\_barrier}}(\textcolor{keywordtype}{void})\ \{\ xTaskResumeAll();\ \}}
-\DoxyCodeLine{01273\ }
-\DoxyCodeLine{01274\ \ \ \textcolor{comment}{//\ Delete\ copy\ and\ move\ operations\ for\ RAII\ safety}}
-\DoxyCodeLine{01275\ \ \ \mbox{\hyperlink{classfreertos_1_1scheduler__barrier}{scheduler\_barrier}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1scheduler__barrier}{scheduler\_barrier}}\ \&)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{01276\ \ \ \mbox{\hyperlink{classfreertos_1_1scheduler__barrier}{scheduler\_barrier}}(\mbox{\hyperlink{classfreertos_1_1scheduler__barrier}{scheduler\_barrier}}\ \&\&)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{01277\ \ \ \mbox{\hyperlink{classfreertos_1_1scheduler__barrier}{scheduler\_barrier}}\ \&operator=(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1scheduler__barrier}{scheduler\_barrier}}\ \&)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{01278\ \ \ \mbox{\hyperlink{classfreertos_1_1scheduler__barrier}{scheduler\_barrier}}\ \&operator=(\mbox{\hyperlink{classfreertos_1_1scheduler__barrier}{scheduler\_barrier}}\ \&\&)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{01279\ \};}
-\DoxyCodeLine{01280\ }
-\DoxyCodeLine{01281\ \textcolor{preprocessor}{\#if\ configSUPPORT\_STATIC\_ALLOCATION}}
-\DoxyCodeLine{01286\ \textcolor{keyword}{namespace\ }sa\ \{}
-\DoxyCodeLine{01292\ \textcolor{keyword}{template}\ <\textcolor{keywordtype}{size\_t}\ StackSize>}
-\DoxyCodeLine{01293\ \textcolor{keyword}{using\ }task\ =\ \mbox{\hyperlink{classfreertos_1_1task}{freertos::task<freertos::static\_task\_allocator<StackSize>}}>;}
-\DoxyCodeLine{01299\ \textcolor{keyword}{template}\ <\textcolor{keywordtype}{size\_t}\ StackSize>}
-\DoxyCodeLine{01300\ \textcolor{keyword}{using\ }periodic\_task\ =}
-\DoxyCodeLine{01301\ \ \ \ \ \mbox{\hyperlink{classfreertos_1_1periodic__task}{freertos::periodic\_task<freertos::static\_task\_allocator<StackSize>}}>;}
-\DoxyCodeLine{01302\ \}\ \textcolor{comment}{//\ namespace\ sa}}
-\DoxyCodeLine{01303\ \textcolor{preprocessor}{\#endif}}
-\DoxyCodeLine{01304\ \textcolor{preprocessor}{\#if\ configSUPPORT\_DYNAMIC\_ALLOCATION}}
-\DoxyCodeLine{01309\ \textcolor{keyword}{namespace\ }da\ \{}
+\DoxyCodeLine{01127\ \textcolor{preprocessor}{\#if\ INCLUDE\_xTaskGetCurrentTaskHandle}}
+\DoxyCodeLine{01133\ TaskHandle\_t\ current\_task\_handle(\textcolor{keywordtype}{void});}
+\DoxyCodeLine{01134\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{01135\ \textcolor{preprocessor}{\#if\ INCLUDE\_xTaskGetIdleTaskHandle}}
+\DoxyCodeLine{01141\ TaskHandle\_t\ idle\_task\_handle(\textcolor{keywordtype}{void});}
+\DoxyCodeLine{01142\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{01143\ }
+\DoxyCodeLine{01149\ TickType\_t\ tick\_count(\textcolor{keywordtype}{void});}
+\DoxyCodeLine{01155\ TickType\_t\ tick\_count\_isr(\textcolor{keywordtype}{void});}
+\DoxyCodeLine{01156\ }
+\DoxyCodeLine{01162\ std::chrono::milliseconds\ time\_since\_scheduler\_started(\textcolor{keywordtype}{void});}
+\DoxyCodeLine{01168\ std::chrono::milliseconds\ time\_since\_scheduler\_started\_isr(\textcolor{keywordtype}{void});}
+\DoxyCodeLine{01169\ }
+\DoxyCodeLine{01170\ \textcolor{preprocessor}{\#if\ INCLUDE\_xTaskGetSchedulerState\ ||\ configUSE\_TIMERS}}
+\DoxyCodeLine{01176\ BaseType\_t\ get\_scheduler\_state(\textcolor{keywordtype}{void});}
+\DoxyCodeLine{01177\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{01183\ UBaseType\_t\ task\_count(\textcolor{keywordtype}{void});}
+\DoxyCodeLine{01184\ }
+\DoxyCodeLine{01185\ \textcolor{comment}{//\ RTOS\ Kernel\ Control:}}
+\DoxyCodeLine{01186\ }
+\DoxyCodeLine{01191\ \textcolor{keywordtype}{void}\ yield(\textcolor{keywordtype}{void});}
+\DoxyCodeLine{01192\ }
+\DoxyCodeLine{01198\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classfreertos_1_1critical__section}{critical\_section}}\ \{}
+\DoxyCodeLine{01199\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{01204\ \ \ \mbox{\hyperlink{classfreertos_1_1critical__section_ae3ff53f27085ba8e78b07031098b25f0}{critical\_section}}(\textcolor{keywordtype}{void})\ \{\ taskENTER\_CRITICAL();\ \}}
+\DoxyCodeLine{01209\ \ \ \mbox{\hyperlink{classfreertos_1_1critical__section_a921279b4dc747e42188717820843783c}{\string~critical\_section}}(\textcolor{keywordtype}{void})\ \{\ taskEXIT\_CRITICAL();\ \}}
+\DoxyCodeLine{01210\ }
+\DoxyCodeLine{01211\ \ \ \textcolor{comment}{//\ Delete\ copy\ and\ move\ operations\ for\ RAII\ safety}}
+\DoxyCodeLine{01212\ \ \ \mbox{\hyperlink{classfreertos_1_1critical__section}{critical\_section}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1critical__section}{critical\_section}}\ \&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{01213\ \ \ \mbox{\hyperlink{classfreertos_1_1critical__section}{critical\_section}}(\mbox{\hyperlink{classfreertos_1_1critical__section}{critical\_section}}\ \&\&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{01214\ \ \ \mbox{\hyperlink{classfreertos_1_1critical__section}{critical\_section}}\ \&operator=(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1critical__section}{critical\_section}}\ \&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{01215\ \ \ \mbox{\hyperlink{classfreertos_1_1critical__section}{critical\_section}}\ \&operator=(\mbox{\hyperlink{classfreertos_1_1critical__section}{critical\_section}}\ \&\&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{01216\ \};}
+\DoxyCodeLine{01217\ }
+\DoxyCodeLine{01223\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classfreertos_1_1critical__section__isr}{critical\_section\_isr}}\ \{}
+\DoxyCodeLine{01224\ \ \ UBaseType\_t\ m\_saved\_interrupt\_status\{taskENTER\_CRITICAL\_FROM\_ISR()\};}
+\DoxyCodeLine{01225\ }
+\DoxyCodeLine{01226\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{01231\ \ \ \mbox{\hyperlink{classfreertos_1_1critical__section__isr_ab97018646d29cb7bb2b178e57088f245}{critical\_section\_isr}}(\textcolor{keywordtype}{void})\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{01236\ \ \ \mbox{\hyperlink{classfreertos_1_1critical__section__isr_a4d5d92eff3d601235e41acdedc057799}{\string~critical\_section\_isr}}(\textcolor{keywordtype}{void})\ \{}
+\DoxyCodeLine{01237\ \ \ \ \ taskEXIT\_CRITICAL\_FROM\_ISR(m\_saved\_interrupt\_status);}
+\DoxyCodeLine{01238\ \ \ \}}
+\DoxyCodeLine{01239\ }
+\DoxyCodeLine{01240\ \ \ \textcolor{comment}{//\ Delete\ copy\ and\ move\ operations\ for\ RAII\ safety}}
+\DoxyCodeLine{01241\ \ \ \mbox{\hyperlink{classfreertos_1_1critical__section__isr}{critical\_section\_isr}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1critical__section__isr}{critical\_section\_isr}}\ \&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{01242\ \ \ \mbox{\hyperlink{classfreertos_1_1critical__section__isr}{critical\_section\_isr}}(\mbox{\hyperlink{classfreertos_1_1critical__section__isr}{critical\_section\_isr}}\ \&\&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{01243\ \ \ \mbox{\hyperlink{classfreertos_1_1critical__section__isr}{critical\_section\_isr}}\ \&operator=(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1critical__section__isr}{critical\_section\_isr}}\ \&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{01244\ \ \ \mbox{\hyperlink{classfreertos_1_1critical__section__isr}{critical\_section\_isr}}\ \&operator=(\mbox{\hyperlink{classfreertos_1_1critical__section__isr}{critical\_section\_isr}}\ \&\&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{01245\ \};}
+\DoxyCodeLine{01246\ }
+\DoxyCodeLine{01252\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classfreertos_1_1interrupt__barrier}{interrupt\_barrier}}\ \{}
+\DoxyCodeLine{01253\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{01258\ \ \ \mbox{\hyperlink{classfreertos_1_1interrupt__barrier_a01039fc26b17de04fd266c8b5f8abfa5}{interrupt\_barrier}}(\textcolor{keywordtype}{void})\ \{\ taskDISABLE\_INTERRUPTS();\ \}}
+\DoxyCodeLine{01263\ \ \ \mbox{\hyperlink{classfreertos_1_1interrupt__barrier_a850028aca48871908d647fd900a1398e}{\string~interrupt\_barrier}}(\textcolor{keywordtype}{void})\ \{\ taskENABLE\_INTERRUPTS();\ \}}
+\DoxyCodeLine{01264\ }
+\DoxyCodeLine{01265\ \ \ \textcolor{comment}{//\ Delete\ copy\ and\ move\ operations\ for\ RAII\ safety}}
+\DoxyCodeLine{01266\ \ \ \mbox{\hyperlink{classfreertos_1_1interrupt__barrier}{interrupt\_barrier}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1interrupt__barrier}{interrupt\_barrier}}\ \&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{01267\ \ \ \mbox{\hyperlink{classfreertos_1_1interrupt__barrier}{interrupt\_barrier}}(\mbox{\hyperlink{classfreertos_1_1interrupt__barrier}{interrupt\_barrier}}\ \&\&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{01268\ \ \ \mbox{\hyperlink{classfreertos_1_1interrupt__barrier}{interrupt\_barrier}}\ \&operator=(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1interrupt__barrier}{interrupt\_barrier}}\ \&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{01269\ \ \ \mbox{\hyperlink{classfreertos_1_1interrupt__barrier}{interrupt\_barrier}}\ \&operator=(\mbox{\hyperlink{classfreertos_1_1interrupt__barrier}{interrupt\_barrier}}\ \&\&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{01270\ \};}
+\DoxyCodeLine{01271\ }
+\DoxyCodeLine{01277\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classfreertos_1_1scheduler__barrier}{scheduler\_barrier}}\ \{}
+\DoxyCodeLine{01278\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{01283\ \ \ \mbox{\hyperlink{classfreertos_1_1scheduler__barrier_a0b7e4c52f93bb334506d5acf9662c021}{scheduler\_barrier}}(\textcolor{keywordtype}{void})\ \{\ vTaskSuspendAll();\ \}}
+\DoxyCodeLine{01288\ \ \ \mbox{\hyperlink{classfreertos_1_1scheduler__barrier_a6324492efcd303e272c153839b9d7c23}{\string~scheduler\_barrier}}(\textcolor{keywordtype}{void})\ \{\ xTaskResumeAll();\ \}}
+\DoxyCodeLine{01289\ }
+\DoxyCodeLine{01290\ \ \ \textcolor{comment}{//\ Delete\ copy\ and\ move\ operations\ for\ RAII\ safety}}
+\DoxyCodeLine{01291\ \ \ \mbox{\hyperlink{classfreertos_1_1scheduler__barrier}{scheduler\_barrier}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1scheduler__barrier}{scheduler\_barrier}}\ \&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{01292\ \ \ \mbox{\hyperlink{classfreertos_1_1scheduler__barrier}{scheduler\_barrier}}(\mbox{\hyperlink{classfreertos_1_1scheduler__barrier}{scheduler\_barrier}}\ \&\&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{01293\ \ \ \mbox{\hyperlink{classfreertos_1_1scheduler__barrier}{scheduler\_barrier}}\ \&operator=(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1scheduler__barrier}{scheduler\_barrier}}\ \&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{01294\ \ \ \mbox{\hyperlink{classfreertos_1_1scheduler__barrier}{scheduler\_barrier}}\ \&operator=(\mbox{\hyperlink{classfreertos_1_1scheduler__barrier}{scheduler\_barrier}}\ \&\&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{01295\ \};}
+\DoxyCodeLine{01296\ }
+\DoxyCodeLine{01297\ \textcolor{preprocessor}{\#if\ configSUPPORT\_STATIC\_ALLOCATION}}
+\DoxyCodeLine{01302\ \textcolor{keyword}{namespace\ }sa\ \{}
+\DoxyCodeLine{01308\ \textcolor{keyword}{template}\ <\textcolor{keywordtype}{size\_t}\ StackSize>}
+\DoxyCodeLine{01309\ \textcolor{keyword}{using\ }task\ =\ \mbox{\hyperlink{classfreertos_1_1task}{freertos::task<freertos::static\_task\_allocator<StackSize>}}>;}
 \DoxyCodeLine{01315\ \textcolor{keyword}{template}\ <\textcolor{keywordtype}{size\_t}\ StackSize>}
-\DoxyCodeLine{01316\ \textcolor{keyword}{using\ }task\ =\ \mbox{\hyperlink{classfreertos_1_1task}{freertos::task<freertos::dynamic\_task\_allocator<StackSize>}}>;}
-\DoxyCodeLine{01322\ \textcolor{keyword}{template}\ <\textcolor{keywordtype}{size\_t}\ StackSize>}
-\DoxyCodeLine{01323\ \textcolor{keyword}{using\ }periodic\_task\ =}
-\DoxyCodeLine{01324\ \ \ \ \ \mbox{\hyperlink{classfreertos_1_1periodic__task}{freertos::periodic\_task<freertos::dynamic\_task\_allocator<StackSize>}}>;}
-\DoxyCodeLine{01325\ \}\ \textcolor{comment}{//\ namespace\ da}}
-\DoxyCodeLine{01326\ \textcolor{preprocessor}{\#endif}}
-\DoxyCodeLine{01327\ }
-\DoxyCodeLine{01328\ \}\ \textcolor{comment}{//\ namespace\ freertos}}
+\DoxyCodeLine{01316\ \textcolor{keyword}{using\ }periodic\_task\ =}
+\DoxyCodeLine{01317\ \ \ \ \ \mbox{\hyperlink{classfreertos_1_1periodic__task}{freertos::periodic\_task<freertos::static\_task\_allocator<StackSize>}}>;}
+\DoxyCodeLine{01318\ \}\ \textcolor{comment}{//\ namespace\ sa}}
+\DoxyCodeLine{01319\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{01320\ \textcolor{preprocessor}{\#if\ configSUPPORT\_DYNAMIC\_ALLOCATION}}
+\DoxyCodeLine{01325\ \textcolor{keyword}{namespace\ }da\ \{}
+\DoxyCodeLine{01331\ \textcolor{keyword}{template}\ <\textcolor{keywordtype}{size\_t}\ StackSize>}
+\DoxyCodeLine{01332\ \textcolor{keyword}{using\ }task\ =\ \mbox{\hyperlink{classfreertos_1_1task}{freertos::task<freertos::dynamic\_task\_allocator<StackSize>}}>;}
+\DoxyCodeLine{01338\ \textcolor{keyword}{template}\ <\textcolor{keywordtype}{size\_t}\ StackSize>}
+\DoxyCodeLine{01339\ \textcolor{keyword}{using\ }periodic\_task\ =}
+\DoxyCodeLine{01340\ \ \ \ \ \mbox{\hyperlink{classfreertos_1_1periodic__task}{freertos::periodic\_task<freertos::dynamic\_task\_allocator<StackSize>}}>;}
+\DoxyCodeLine{01341\ \}\ \textcolor{comment}{//\ namespace\ da}}
+\DoxyCodeLine{01342\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{01343\ }
+\DoxyCodeLine{01344\ \}\ \textcolor{comment}{//\ namespace\ freertos}}
 
 \end{DoxyCode}
