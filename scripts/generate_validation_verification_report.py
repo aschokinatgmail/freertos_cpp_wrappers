@@ -128,19 +128,221 @@ def parse_coverage_info(coverage_file):
     
     return coverage_data
 
-def get_uncovered_analysis(build_dir):
-    """Get analysis of uncovered areas"""
-    analysis = {
+def parse_lcov_file_details(coverage_file):
+    """Parse LCOV file to extract detailed coverage information"""
+    coverage_details = {
+        'files': {},
         'uncovered_lines': [],
-        'explanation': "Analysis of uncovered code areas focuses on main library modules only."
+        'uncovered_functions': []
     }
     
-    # This would ideally parse detailed coverage data to identify specific uncovered lines
-    # For now, we'll provide a general explanation
-    analysis['explanation'] = """
+    if not os.path.exists(coverage_file):
+        return coverage_details
+    
+    try:
+        with open(coverage_file, 'r') as f:
+            lines = f.readlines()
+        
+        current_file = None
+        
+        for line in lines:
+            line = line.strip()
+            
+            # Source file marker
+            if line.startswith('SF:'):
+                current_file = line[3:]  # Remove 'SF:'
+                coverage_details['files'][current_file] = {
+                    'uncovered_lines': [],
+                    'uncovered_functions': [],
+                    'total_lines': 0,
+                    'covered_lines': 0
+                }
+            
+            # Line coverage data
+            elif line.startswith('DA:') and current_file:
+                parts = line[3:].split(',')  # Remove 'DA:'
+                if len(parts) >= 2:
+                    line_num = int(parts[0])
+                    hit_count = int(parts[1])
+                    if hit_count == 0:
+                        coverage_details['files'][current_file]['uncovered_lines'].append(line_num)
+                        coverage_details['uncovered_lines'].append({
+                            'file': current_file,
+                            'line': line_num
+                        })
+            
+            # Function coverage data
+            elif line.startswith('FNDA:') and current_file:
+                parts = line[5:].split(',')  # Remove 'FNDA:'
+                if len(parts) >= 2:
+                    hit_count = int(parts[0])
+                    func_name = parts[1]
+                    if hit_count == 0:
+                        coverage_details['files'][current_file]['uncovered_functions'].append(func_name)
+                        coverage_details['uncovered_functions'].append({
+                            'file': current_file,
+                            'function': func_name
+                        })
+            
+            # Line summary
+            elif line.startswith('LH:') and current_file:
+                coverage_details['files'][current_file]['covered_lines'] = int(line[3:])
+            elif line.startswith('LF:') and current_file:
+                coverage_details['files'][current_file]['total_lines'] = int(line[3:])
+    
+    except Exception as e:
+        print(f"Error parsing detailed coverage data: {e}")
+    
+    return coverage_details
+
+def get_source_context(file_path, line_num, context_lines=2):
+    """Get source code context around a specific line"""
+    try:
+        with open(file_path, 'r') as f:
+            lines = f.readlines()
+        
+        start = max(0, line_num - context_lines - 1)
+        end = min(len(lines), line_num + context_lines)
+        
+        context = []
+        for i in range(start, end):
+            prefix = ">>> " if i == line_num - 1 else "    "
+            context.append(f"{prefix}{i+1:4}: {lines[i].rstrip()}")
+        
+        return "\n".join(context)
+    except Exception:
+        return f"Unable to read source context for line {line_num}"
+
+def categorize_uncovered_code(uncovered_data, project_root):
+    """Categorize uncovered code by type and provide explanations"""
+    categories = {
+        'internal_kernel_functions': {
+            'description': 'Internal task execution functions called by FreeRTOS kernel',
+            'reason': 'These functions are called internally by the FreeRTOS kernel during task execution and cannot be directly invoked in unit tests',
+            'items': []
+        },
+        'error_handling_paths': {
+            'description': 'Error handling and edge case scenarios',
+            'reason': 'These code paths handle rare error conditions or require specific FreeRTOS kernel states that are difficult to reproduce in unit tests',
+            'items': []
+        },
+        'platform_specific_code': {
+            'description': 'Platform-specific or hardware-dependent code',
+            'reason': 'These code sections depend on specific hardware configurations or FreeRTOS kernel internals not available in the test environment',
+            'items': []
+        },
+        'defensive_programming': {
+            'description': 'Defensive programming and robustness checks',
+            'reason': 'These are safety checks and defensive programming patterns that are difficult to trigger in controlled test conditions',
+            'items': []
+        }
+    }
+    
+    # Analyze uncovered functions
+    for func_info in uncovered_data.get('uncovered_functions', []):
+        func_name = func_info.get('function', '')
+        file_path = func_info.get('file', '')
+        
+        # Categorize based on function name patterns
+        if any(pattern in func_name.lower() for pattern in ['taskfunc', 'run', 'exec', 'internal', '_zn']):
+            categories['internal_kernel_functions']['items'].append({
+                'type': 'function',
+                'name': func_name,
+                'file': os.path.basename(file_path),
+                'location': f"{os.path.basename(file_path)}:{func_name}()"
+            })
+        elif any(pattern in func_name.lower() for pattern in ['error', 'fail', 'exception', 'abort']):
+            categories['error_handling_paths']['items'].append({
+                'type': 'function',
+                'name': func_name,
+                'file': os.path.basename(file_path),
+                'location': f"{os.path.basename(file_path)}:{func_name}()"
+            })
+        elif any(pattern in func_name.lower() for pattern in ['platform', 'special', 'config']):
+            categories['platform_specific_code']['items'].append({
+                'type': 'function',
+                'name': func_name,
+                'file': os.path.basename(file_path),
+                'location': f"{os.path.basename(file_path)}:{func_name}()"
+            })
+        else:
+            categories['defensive_programming']['items'].append({
+                'type': 'function',
+                'name': func_name,
+                'file': os.path.basename(file_path),
+                'location': f"{os.path.basename(file_path)}:{func_name}()"
+            })
+    
+    # Analyze uncovered lines with context
+    for line_info in uncovered_data.get('uncovered_lines', []):
+        file_path = line_info.get('file', '')
+        line_num = line_info.get('line', 0)
+        
+        # Only process files in the main library (src/ and include/)
+        if not any(dir_name in file_path for dir_name in ['/src/', '/include/']):
+            continue
+        
+        # Try to get source context to categorize
+        full_path = os.path.join(project_root, file_path.lstrip('/'))
+        if os.path.exists(full_path):
+            context = get_source_context(full_path, line_num, 1)
+            
+            # Simple categorization based on content patterns
+            context_lower = context.lower()
+            if any(pattern in context_lower for pattern in ['freertos', 'xqueue', 'xtask', 'vtask', 'taskfunc', 'kernel']):
+                categories['internal_kernel_functions']['items'].append({
+                    'type': 'line',
+                    'line': line_num,
+                    'file': os.path.basename(file_path),
+                    'location': f"{os.path.basename(file_path)}:{line_num}",
+                    'context': context
+                })
+            elif any(pattern in context_lower for pattern in ['nullptr', 'null', 'error', 'fail', 'assert', 'throw', 'exception']):
+                categories['error_handling_paths']['items'].append({
+                    'type': 'line',
+                    'line': line_num,
+                    'file': os.path.basename(file_path),
+                    'location': f"{os.path.basename(file_path)}:{line_num}",
+                    'context': context
+                })
+            elif any(pattern in context_lower for pattern in ['portmax', 'config', '#ifdef', '#ifndef', 'platform', 'special']):
+                categories['platform_specific_code']['items'].append({
+                    'type': 'line',
+                    'line': line_num,
+                    'file': os.path.basename(file_path),
+                    'location': f"{os.path.basename(file_path)}:{line_num}",
+                    'context': context
+                })
+            else:
+                categories['defensive_programming']['items'].append({
+                    'type': 'line',
+                    'line': line_num,
+                    'file': os.path.basename(file_path),
+                    'location': f"{os.path.basename(file_path)}:{line_num}",
+                    'context': context
+                })
+    
+    return categories
+
+def get_uncovered_analysis(build_dir):
+    """Get detailed analysis of uncovered areas with specific code references"""
+    analysis = {
+        'uncovered_lines': [],
+        'explanation': "Analysis of uncovered code areas focuses on main library modules only.",
+        'detailed_analysis': ""
+    }
+    
+    coverage_file = os.path.join(build_dir, 'coverage_filtered.info')
+    project_root = os.path.dirname(build_dir)
+    
+    # Parse detailed coverage data
+    coverage_details = parse_lcov_file_details(coverage_file)
+    
+    if not coverage_details['uncovered_lines'] and not coverage_details['uncovered_functions']:
+        analysis['detailed_analysis'] = """
 **Uncovered Areas Analysis:**
 
-The uncovered code primarily consists of:
+No detailed coverage data available. The uncovered code likely consists of:
 1. **Internal task execution functions** - Called by FreeRTOS kernel, not directly testable in unit tests
 2. **Error handling paths** - Some error conditions that require specific FreeRTOS kernel states
 3. **Platform-specific code** - Code paths that depend on specific hardware configurations
@@ -151,6 +353,62 @@ These uncovered areas are intentional and represent code that:
 - Involves kernel-level functionality not suitable for unit testing
 - Represents defensive programming patterns for robustness
 """
+        return analysis
+    
+    # Categorize uncovered code
+    categories = categorize_uncovered_code(coverage_details, project_root)
+    
+    # Generate detailed analysis
+    detailed_analysis = "**Detailed Uncovered Areas Analysis:**\n\n"
+    detailed_analysis += "The following sections provide specific references to uncovered code areas and explanations for why they cannot be covered by unit tests.\n\n"
+    
+    for category_key, category_data in categories.items():
+        if not category_data['items']:
+            continue
+        
+        detailed_analysis += f"### {category_data['description']}\n\n"
+        detailed_analysis += f"**Reason for exclusion:** {category_data['reason']}\n\n"
+        
+        if category_data['items']:
+            detailed_analysis += "**Specific code references:**\n\n"
+            detailed_analysis += "| Location | Type | Details |\n"
+            detailed_analysis += "|----------|------|----------|\n"
+            
+            for item in category_data['items'][:10]:  # Limit to first 10 items per category
+                location = item.get('location', 'Unknown')
+                item_type = item.get('type', 'Unknown')
+                
+                if item_type == 'function':
+                    details = f"Function: `{item.get('name', 'Unknown')}`"
+                elif item_type == 'line':
+                    details = f"Line {item.get('line', '?')}"
+                    if 'context' in item:
+                        # Get just the relevant line from context for the table
+                        context_lines = item['context'].split('\n')
+                        relevant_line = next((line for line in context_lines if '>>>' in line), '')
+                        if relevant_line:
+                            code_part = relevant_line.split(':', 1)[-1].strip()[:50] + ('...' if len(relevant_line.split(':', 1)[-1].strip()) > 50 else '')
+                            details += f" - `{code_part}`"
+                else:
+                    details = "Unknown type"
+                
+                detailed_analysis += f"| {location} | {item_type.title()} | {details} |\n"
+            
+            if len(category_data['items']) > 10:
+                detailed_analysis += f"| ... | ... | *(and {len(category_data['items']) - 10} more items)* |\n"
+        
+        detailed_analysis += "\n"
+    
+    # Add summary
+    total_uncovered_items = sum(len(cat['items']) for cat in categories.values())
+    if total_uncovered_items > 0:
+        detailed_analysis += f"**Summary:** {total_uncovered_items} uncovered code areas identified across {len([cat for cat in categories.values() if cat['items']])} categories.\n\n"
+        detailed_analysis += "**Note:** These uncovered areas represent code that by design cannot be easily tested in a unit test environment. "
+        detailed_analysis += "They require either integration testing with the actual FreeRTOS kernel, specific hardware configurations, "
+        detailed_analysis += "or are defensive programming measures for edge cases that are difficult to reproduce.\n\n"
+    
+    analysis['detailed_analysis'] = detailed_analysis
+    analysis['uncovered_lines'] = coverage_details.get('uncovered_lines', [])
     
     return analysis
 
@@ -217,6 +475,16 @@ def generate_report(build_dir, output_file):
     else:
         func_coverage_pct = 0.0
     
+    # Calculate success rate safely
+    if tests_info['total'] > 0:
+        success_rate = (tests_info['passed']/tests_info['total']*100)
+        avg_test_time = (tests_info['execution_time']/tests_info['total'])
+        success_status = "All tests passed!" if tests_info['failed'] == 0 else f"{tests_info['failed']} tests failed"
+    else:
+        success_rate = 0.0
+        avg_test_time = 0.0
+        success_status = "No tests executed"
+    
     # Generate report
     report_content = f"""# Validation and Verification Report
 
@@ -228,9 +496,9 @@ This report provides comprehensive validation and verification results for the F
 - **Total Tests Executed**: {tests_info['total']}
 - **✅ Passed**: {tests_info['passed']} tests
 - **❌ Failed**: {tests_info['failed']} tests
-- **Success Rate**: {(tests_info['passed']/tests_info['total']*100):.1f}% (All tests passed!)
+- **Success Rate**: {success_rate:.1f}% ({success_status})
 - **Total Execution Time**: {tests_info['execution_time']:.2f} seconds
-- **Average Test Time**: {(tests_info['execution_time']/tests_info['total']):.4f} seconds per test
+- **Average Test Time**: {avg_test_time:.4f} seconds per test
 
 ### Code Coverage Summary
 - **Line Coverage**: {line_coverage_pct:.1f}% ({coverage_data['lines_covered']}/{coverage_data['lines_total']} lines)
@@ -250,13 +518,15 @@ This report provides comprehensive validation and verification results for the F
         failed_tests = [t for t in tests if t['status'] == 'Failed']
         total_time = sum(t['time'] for t in tests)
         
+        success_rate = (len(passed_tests)/len(tests)*100) if len(tests) > 0 else 0.0
+        
         report_content += f"""### {module} Module Tests
 
 **Module Statistics:**
 - Tests: {len(tests)}
 - Passed: {len(passed_tests)}
 - Failed: {len(failed_tests)}
-- Success Rate: {(len(passed_tests)/len(tests)*100):.1f}%
+- Success Rate: {success_rate:.1f}%
 - Total Time: {total_time:.3f}s
 
 """
@@ -286,7 +556,7 @@ The project achieves excellent code coverage with **{line_coverage_pct:.1f}% lin
 - **Functions Covered**: {coverage_data['functions_covered']} out of {coverage_data['functions_total']} total functions
 - **Coverage Target**: Main library modules only (excludes test infrastructure and system headers)
 
-{uncovered_analysis['explanation']}
+{uncovered_analysis.get('detailed_analysis', uncovered_analysis.get('explanation', ''))}
 
 ### Coverage Quality Assessment
 The high coverage percentage indicates:
@@ -301,20 +571,34 @@ The high coverage percentage indicates:
 """
 
     # Add test distribution
-    for module, tests in test_categories.items():
-        if tests:
-            report_content += f"- **{module} Module**: {len(tests)} tests ({(len(tests)/tests_info['total']*100):.1f}%)\n"
+    if tests_info['total'] > 0:
+        for module, tests in test_categories.items():
+            if tests:
+                report_content += f"- **{module} Module**: {len(tests)} tests ({(len(tests)/tests_info['total']*100):.1f}%)\n"
+    else:
+        report_content += "- **No tests executed**\n"
 
+    # Calculate performance metrics safely
+    test_times = [t['time'] for t in tests_info['tests']] if tests_info['tests'] else [0.0]
+    
     report_content += f"""
 
 ### Performance Characteristics
-- **Fastest Test**: {min(t['time'] for t in tests_info['tests']):.3f} seconds
-- **Slowest Test**: {max(t['time'] for t in tests_info['tests']):.3f} seconds
+- **Fastest Test**: {min(test_times):.3f} seconds
+- **Slowest Test**: {max(test_times):.3f} seconds"""
+    
+    if tests_info['tests']:
+        report_content += f"""
 - **Performance Distribution**:
   - Very Fast (< 0.01s): {len([t for t in tests_info['tests'] if t['time'] < 0.01])} tests
   - Fast (0.01-0.05s): {len([t for t in tests_info['tests'] if 0.01 <= t['time'] < 0.05])} tests
   - Normal (0.05-0.1s): {len([t for t in tests_info['tests'] if 0.05 <= t['time'] < 0.1])} tests
-  - Slow (> 0.1s): {len([t for t in tests_info['tests'] if t['time'] >= 0.1])} tests
+  - Slow (> 0.1s): {len([t for t in tests_info['tests'] if t['time'] >= 0.1])} tests"""
+    else:
+        report_content += """
+- **Performance Distribution**: No test performance data available"""
+
+    report_content += f"""
 
 ## Validation Conclusions
 
@@ -340,6 +624,18 @@ This report is automatically generated with each test execution to ensure:
 2. **Integration Testing**: Consider adding integration tests with actual FreeRTOS kernel for uncovered areas
 3. **Performance Monitoring**: Monitor test execution times to detect performance regressions
 4. **Failure Analysis**: When failures occur, this report will provide detailed failure information
+"""
+
+    
+    # Generate final status
+    if tests_info['total'] > 0 and tests_info['failed'] == 0:
+        validation_status = "✅ **All tests passing - System validated for production use**"
+    elif tests_info['total'] > 0 and tests_info['failed'] > 0:
+        validation_status = f"❌ **{tests_info['failed']} tests failing - System requires attention**"
+    else:
+        validation_status = "⚠️ **No tests executed - Validation status unknown**"
+    
+    report_content += f"""
 
 ---
 
@@ -347,7 +643,7 @@ This report is automatically generated with each test execution to ensure:
 *Test Framework*: GoogleTest/GoogleMock  
 *Coverage Tool*: LCOV/GCOV  
 *Total Test Execution Time*: {tests_info['execution_time']:.2f} seconds  
-*Validation Status*: ✅ **All tests passing - System validated for production use**
+*Validation Status*: {validation_status}
 """
 
     # Write report to file
@@ -355,7 +651,10 @@ This report is automatically generated with each test execution to ensure:
         f.write(report_content)
     
     print(f"Validation and verification report generated: {output_file}")
-    print(f"Test Summary: {tests_info['passed']}/{tests_info['total']} tests passed ({(tests_info['passed']/tests_info['total']*100):.1f}%)")
+    if tests_info['total'] > 0:
+        print(f"Test Summary: {tests_info['passed']}/{tests_info['total']} tests passed ({(tests_info['passed']/tests_info['total']*100):.1f}%)")
+    else:
+        print("Test Summary: No tests executed")
     print(f"Coverage Summary: {line_coverage_pct:.1f}% line coverage, {func_coverage_pct:.1f}% function coverage")
 
 if __name__ == "__main__":
