@@ -922,6 +922,56 @@ TEST_F(FreeRTOSSemaphoreTest, RecursiveMutexMixedLockGuardTypes) {
     EXPECT_FALSE(recursive_mutex.locked());
 }
 
+TEST_F(FreeRTOSSemaphoreTest, RecursiveMutexTimeoutLockGuardFailure) {
+    /*
+     * Recursive Mutex Timeout Lock Guard Failure Test:
+     * Tests timeout_lock_guard behavior when lock acquisition fails due to timeout,
+     * ensuring that unlock is NOT called when the lock was never acquired.
+     */
+    EXPECT_CALL(*mock, xSemaphoreCreateRecursiveMutex())
+        .WillOnce(Return(mock_recursive_mutex_handle));
+    EXPECT_CALL(*mock, xSemaphoreTake(mock_recursive_mutex_handle, 500))
+        .WillOnce(Return(pdFALSE)); // Lock fails due to timeout
+    // Note: xSemaphoreGive should NOT be called since lock failed
+    EXPECT_CALL(*mock, vSemaphoreDelete(mock_recursive_mutex_handle));
+    
+    freertos::recursive_mutex<freertos::dynamic_semaphore_allocator> recursive_mutex;
+    
+    {
+        freertos::timeout_lock_guard<freertos::recursive_mutex<freertos::dynamic_semaphore_allocator>> guard(recursive_mutex, 500);
+        // Recursive mutex should not be locked (lock with timeout failed)
+        EXPECT_FALSE(recursive_mutex.locked());
+        EXPECT_FALSE(guard.locked());
+    } // Timeout lock guard destructor should NOT call unlock (since lock was never acquired)
+    
+    EXPECT_FALSE(recursive_mutex.locked());
+}
+
+TEST_F(FreeRTOSSemaphoreTest, RecursiveMutexTryLockGuardFailure) {
+    /*
+     * Recursive Mutex Try Lock Guard Failure Test:
+     * Tests try_lock_guard behavior when lock acquisition fails,
+     * ensuring that unlock is NOT called when the lock was never acquired.
+     */
+    EXPECT_CALL(*mock, xSemaphoreCreateRecursiveMutex())
+        .WillOnce(Return(mock_recursive_mutex_handle));
+    EXPECT_CALL(*mock, xSemaphoreTake(mock_recursive_mutex_handle, 0))
+        .WillOnce(Return(pdFALSE)); // try_lock fails
+    // Note: xSemaphoreGive should NOT be called since lock failed
+    EXPECT_CALL(*mock, vSemaphoreDelete(mock_recursive_mutex_handle));
+    
+    freertos::recursive_mutex<freertos::dynamic_semaphore_allocator> recursive_mutex;
+    
+    {
+        freertos::try_lock_guard<freertos::recursive_mutex<freertos::dynamic_semaphore_allocator>> guard(recursive_mutex);
+        // Recursive mutex should not be locked (try_lock failed)
+        EXPECT_FALSE(recursive_mutex.locked());
+        EXPECT_FALSE(guard.locked());
+    } // Try lock guard destructor should NOT call unlock (since lock was never acquired)
+    
+    EXPECT_FALSE(recursive_mutex.locked());
+}
+
 // =============================================================================
 // Lock Guard Tests (RAII)
 // =============================================================================
