@@ -755,7 +755,6 @@ public:
  */
 template <typename Mutex> class try_lock_guard {
   Mutex &m_mutex; // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members): RAII design requires reference
-  bool m_lock_acquired{false};
 
 public:
   /**
@@ -763,14 +762,15 @@ public:
    *
    * @param mutex mutex to guard
    */
-  explicit try_lock_guard(Mutex &mutex) : m_mutex{mutex}, m_lock_acquired{static_cast<bool>(m_mutex.try_lock())} {
+  explicit try_lock_guard(Mutex &mutex) : m_mutex{mutex} {
+    m_mutex.try_lock();
   }
   /**
    * @brief Destruct the try lock guard object and unlock the mutex.
    *
    */
   ~try_lock_guard(void) { 
-    if (m_lock_acquired) {
+    if (m_mutex.locked()) {
       m_mutex.unlock(); 
     }
   }
@@ -786,7 +786,7 @@ public:
    *
    * @return  true if the mutex is locked, otherwise false.
    */
-  bool locked(void) const { return m_lock_acquired && m_mutex.locked(); }
+  bool locked(void) const { return m_mutex.locked(); }
 };
 
 /**
@@ -874,7 +874,11 @@ public:
    * @brief Destruct the timeout lock guard object and unlock the mutex.
    *
    */
-  ~timeout_lock_guard(void) { m_mutex.unlock(); }
+  ~timeout_lock_guard(void) { 
+    if (m_mutex.locked()) {
+      m_mutex.unlock(); 
+    }
+  }
   
   // Delete copy and move operations for RAII safety
   timeout_lock_guard(const timeout_lock_guard &) = delete;

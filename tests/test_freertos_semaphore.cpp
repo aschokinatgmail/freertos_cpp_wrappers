@@ -1063,8 +1063,7 @@ TEST_F(FreeRTOSSemaphoreTest, TimeoutLockGuardFailure) {
         .WillOnce(Return(mock_mutex_handle));
     EXPECT_CALL(*mock, xSemaphoreTake(mock_mutex_handle, 100))
         .WillOnce(Return(pdFALSE));
-    EXPECT_CALL(*mock, xSemaphoreGive(mock_mutex_handle))
-        .WillOnce(Return(pdTRUE));
+    // Note: xSemaphoreGive should NOT be called since lock failed
     EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex_handle));
     
     freertos::mutex<freertos::dynamic_semaphore_allocator> mutex;
@@ -1074,7 +1073,7 @@ TEST_F(FreeRTOSSemaphoreTest, TimeoutLockGuardFailure) {
         // Mutex should not be locked (lock with timeout failed)
         EXPECT_FALSE(mutex.locked());
         EXPECT_FALSE(guard.locked());
-    } // Timeout lock guard destructor should still call unlock (even though not locked)
+    } // Timeout lock guard destructor should NOT call unlock (since lock was never acquired)
     
     EXPECT_FALSE(mutex.locked());
 }
