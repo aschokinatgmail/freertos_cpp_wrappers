@@ -287,7 +287,7 @@
 \DoxyCodeLine{00615\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ SemaphoreAllocator>\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classfreertos_1_1recursive__mutex}{recursive\_mutex}}\ \{}
 \DoxyCodeLine{00616\ \ \ SemaphoreAllocator\ m\_allocator\{\};}
 \DoxyCodeLine{00617\ \ \ SemaphoreHandle\_t\ m\_semaphore\{\textcolor{keyword}{nullptr}\};}
-\DoxyCodeLine{00618\ \ \ uint8\_t\ m\_lock\_count\{0\};}
+\DoxyCodeLine{00618\ \ \ uint8\_t\ m\_recursions\_count\{0\};}
 \DoxyCodeLine{00619\ }
 \DoxyCodeLine{00620\ \textcolor{keyword}{public}:}
 \DoxyCodeLine{00625\ \ \ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_ab9a7a225d849f32dcb429fd92669ef06}{recursive\_mutex}}()\ :\ m\_semaphore\{m\_allocator.create\_recursive\_mutex()\}\ \{}
@@ -304,184 +304,185 @@
 \DoxyCodeLine{00641\ \ \ \mbox{\hyperlink{classfreertos_1_1recursive__mutex}{recursive\_mutex}}\ \&operator=(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1recursive__mutex}{recursive\_mutex}}\ \&)\ =\ \textcolor{keyword}{delete};}
 \DoxyCodeLine{00642\ \ \ \mbox{\hyperlink{classfreertos_1_1recursive__mutex}{recursive\_mutex}}\ \&operator=(\mbox{\hyperlink{classfreertos_1_1recursive__mutex}{recursive\_mutex}}\ \&\&src)\ =\ \textcolor{keyword}{delete};}
 \DoxyCodeLine{00643\ }
-\DoxyCodeLine{00650\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_a47fd10b3cb192ef884366130178c240a}{unlock}}()\ \{}
-\DoxyCodeLine{00651\ \ \ \ \ \textcolor{keyword}{auto}\ rc\ =\ xSemaphoreGiveRecursive(m\_semaphore);}
-\DoxyCodeLine{00652\ \ \ \ \ \textcolor{keywordflow}{if}\ (rc\ \&\&\ m\_lock\_count\ >\ 0)\ \{}
-\DoxyCodeLine{00653\ \ \ \ \ \ \ m\_lock\_count-\/-\/;}
-\DoxyCodeLine{00654\ \ \ \ \ \}}
-\DoxyCodeLine{00655\ \ \ \ \ \textcolor{keywordflow}{return}\ rc;}
-\DoxyCodeLine{00656\ \ \ \}}
-\DoxyCodeLine{00665\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_ac052f05534988d032bf5505bd6be5bd1}{unlock\_isr}}(BaseType\_t\ \&high\_priority\_task\_woken)\ \{}
-\DoxyCodeLine{00666\ \ \ \ \ \textcolor{keyword}{auto}\ rc\ =\ xSemaphoreGiveFromISR(m\_semaphore,\ \&high\_priority\_task\_woken);}
-\DoxyCodeLine{00667\ \ \ \ \ \textcolor{keywordflow}{if}\ (rc\ \&\&\ m\_lock\_count\ >\ 0)\ \{}
-\DoxyCodeLine{00668\ \ \ \ \ \ \ m\_lock\_count-\/-\/;}
-\DoxyCodeLine{00669\ \ \ \ \ \}}
-\DoxyCodeLine{00670\ \ \ \ \ \textcolor{keywordflow}{return}\ rc;}
-\DoxyCodeLine{00671\ \ \ \}}
-\DoxyCodeLine{00678\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_a3b7db3999f3ce6fd4275e4b9c0410e12}{unlock\_isr}}(\textcolor{keywordtype}{void})\ \{}
-\DoxyCodeLine{00679\ \ \ \ \ BaseType\_t\ high\_priority\_task\_woken\ =\ pdFALSE;}
-\DoxyCodeLine{00680\ \ \ \ \ \textcolor{keyword}{auto}\ rc\ =\ xSemaphoreGiveFromISR(m\_semaphore,\ \&high\_priority\_task\_woken);}
-\DoxyCodeLine{00681\ \ \ \ \ \textcolor{keywordflow}{if}\ (rc\ \&\&\ m\_lock\_count\ >\ 0)\ \{}
-\DoxyCodeLine{00682\ \ \ \ \ \ \ m\_lock\_count-\/-\/;}
-\DoxyCodeLine{00683\ \ \ \ \ \}}
-\DoxyCodeLine{00684\ \ \ \ \ \textcolor{keywordflow}{return}\ rc;}
-\DoxyCodeLine{00685\ \ \ \}}
-\DoxyCodeLine{00693\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_acb1c0619ac4ca0e62173a8ebeef12e69}{lock}}(\textcolor{keyword}{const}\ TickType\_t\ ticks\_to\_wait\ =\ portMAX\_DELAY)\ \{}
-\DoxyCodeLine{00694\ \ \ \ \ \textcolor{keyword}{auto}\ rc\ =\ xSemaphoreTakeRecursive(m\_semaphore,\ ticks\_to\_wait);}
-\DoxyCodeLine{00695\ \ \ \ \ \textcolor{keywordflow}{if}\ (rc)\ \{}
-\DoxyCodeLine{00696\ \ \ \ \ \ \ m\_lock\_count++;}
-\DoxyCodeLine{00697\ \ \ \ \ \}}
-\DoxyCodeLine{00698\ \ \ \ \ \textcolor{keywordflow}{return}\ rc;}
-\DoxyCodeLine{00699\ \ \ \}}
-\DoxyCodeLine{00708\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_ad1002ee47642a565fa898e194f3604b4}{lock\_isr}}(BaseType\_t\ \&high\_priority\_task\_woken)\ \{}
-\DoxyCodeLine{00709\ \ \ \ \ \textcolor{keyword}{auto}\ rc\ =\ xSemaphoreTakeFromISR(m\_semaphore,\ \&high\_priority\_task\_woken);}
-\DoxyCodeLine{00710\ \ \ \ \ \textcolor{keywordflow}{if}\ (rc)\ \{}
-\DoxyCodeLine{00711\ \ \ \ \ \ \ m\_lock\_count++;}
-\DoxyCodeLine{00712\ \ \ \ \ \}}
-\DoxyCodeLine{00713\ \ \ \ \ \textcolor{keywordflow}{return}\ rc;}
-\DoxyCodeLine{00714\ \ \ \}}
-\DoxyCodeLine{00721\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_a1d2d36ec832730964edc4bdb5d2fb6b4}{lock\_isr}}(\textcolor{keywordtype}{void})\ \{}
-\DoxyCodeLine{00722\ \ \ \ \ BaseType\_t\ high\_priority\_task\_woken\ =\ pdFALSE;}
-\DoxyCodeLine{00723\ \ \ \ \ \textcolor{keyword}{auto}\ rc\ =\ xSemaphoreTakeFromISR(m\_semaphore,\ \&high\_priority\_task\_woken);}
-\DoxyCodeLine{00724\ \ \ \ \ \textcolor{keywordflow}{if}\ (rc)\ \{}
-\DoxyCodeLine{00725\ \ \ \ \ \ \ m\_lock\_count++;}
-\DoxyCodeLine{00726\ \ \ \ \ \}}
-\DoxyCodeLine{00727\ \ \ \ \ \textcolor{keywordflow}{return}\ rc;}
-\DoxyCodeLine{00728\ \ \ \}}
-\DoxyCodeLine{00735\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Rep,\ \textcolor{keyword}{typename}\ Period>}
-\DoxyCodeLine{00736\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_ab3e95b964f62311ea06e33542507fb89}{lock}}(\textcolor{keyword}{const}\ std::chrono::duration<Rep,\ Period>\ \&timeout)\ \{}
-\DoxyCodeLine{00737\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_acb1c0619ac4ca0e62173a8ebeef12e69}{lock}}(}
-\DoxyCodeLine{00738\ \ \ \ \ \ \ \ \ std::chrono::duration\_cast<std::chrono::milliseconds>(timeout).count());}
-\DoxyCodeLine{00739\ \ \ \}}
-\DoxyCodeLine{00746\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_ab6a508d720641f15c1fe2b293e96ae50}{try\_lock}}()\ \{}
-\DoxyCodeLine{00747\ \ \ \ \ \textcolor{keyword}{auto}\ rc\ =\ xSemaphoreTakeRecursive(m\_semaphore,\ 0);}
-\DoxyCodeLine{00748\ \ \ \ \ \textcolor{keywordflow}{if}\ (rc)\ \{}
-\DoxyCodeLine{00749\ \ \ \ \ \ \ m\_lock\_count++;}
-\DoxyCodeLine{00750\ \ \ \ \ \}}
-\DoxyCodeLine{00751\ \ \ \ \ \textcolor{keywordflow}{return}\ rc;}
-\DoxyCodeLine{00752\ \ \ \}}
-\DoxyCodeLine{00758\ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_a50a8c8b3aaeff40407e15d3eb597e8d8}{locked}}(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ m\_lock\_count\ >\ 0;\ \}}
-\DoxyCodeLine{00759\ \};}
-\DoxyCodeLine{00760\ }
-\DoxyCodeLine{00767\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Mutex>\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classfreertos_1_1lock__guard}{lock\_guard}}\ \{}
-\DoxyCodeLine{00768\ \ \ Mutex\ \&m\_mutex;\ \textcolor{comment}{//\ NOLINT(cppcoreguidelines-\/avoid-\/const-\/or-\/ref-\/data-\/members):}}
-\DoxyCodeLine{00769\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ RAII\ design\ requires\ reference}}
-\DoxyCodeLine{00770\ }
-\DoxyCodeLine{00771\ \textcolor{keyword}{public}:}
-\DoxyCodeLine{00777\ \ \ \textcolor{keyword}{explicit}\ \mbox{\hyperlink{classfreertos_1_1lock__guard_a8276ed46c1507dc9c8c27a5bd56c4d9e}{lock\_guard}}(Mutex\ \&\mbox{\hyperlink{classfreertos_1_1mutex}{mutex}})\ :\ m\_mutex\{\mbox{\hyperlink{classfreertos_1_1mutex}{mutex}}\}\ \{\ m\_mutex.\mbox{\hyperlink{classfreertos_1_1mutex_af1a6122cc4563cc4aaac5a6c38eca973}{lock}}();\ \}}
-\DoxyCodeLine{00778\ }
-\DoxyCodeLine{00783\ \ \ \mbox{\hyperlink{classfreertos_1_1lock__guard_af46d4af2d983d17c333f0265c941cad4}{\string~lock\_guard}}(\textcolor{keywordtype}{void})\ \{\ m\_mutex.unlock();\ \}}
-\DoxyCodeLine{00784\ }
-\DoxyCodeLine{00785\ \ \ \textcolor{comment}{//\ Delete\ copy\ and\ move\ operations\ for\ RAII\ safety}}
-\DoxyCodeLine{00786\ \ \ \mbox{\hyperlink{classfreertos_1_1lock__guard}{lock\_guard}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1lock__guard}{lock\_guard}}\ \&)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{00787\ \ \ \mbox{\hyperlink{classfreertos_1_1lock__guard}{lock\_guard}}(\mbox{\hyperlink{classfreertos_1_1lock__guard}{lock\_guard}}\ \&\&)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{00788\ \ \ \mbox{\hyperlink{classfreertos_1_1lock__guard}{lock\_guard}}\ \&operator=(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1lock__guard}{lock\_guard}}\ \&)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{00789\ \ \ \mbox{\hyperlink{classfreertos_1_1lock__guard}{lock\_guard}}\ \&operator=(\mbox{\hyperlink{classfreertos_1_1lock__guard}{lock\_guard}}\ \&\&)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{00790\ }
-\DoxyCodeLine{00796\ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classfreertos_1_1lock__guard_aab62d6459ed0be2ee1211fe2b3c0b4d1}{locked}}(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ m\_mutex.locked();\ \}}
-\DoxyCodeLine{00797\ \};}
-\DoxyCodeLine{00798\ }
-\DoxyCodeLine{00805\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Mutex>\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classfreertos_1_1try__lock__guard}{try\_lock\_guard}}\ \{}
-\DoxyCodeLine{00806\ \ \ Mutex\ \&m\_mutex;\ \textcolor{comment}{//\ NOLINT(cppcoreguidelines-\/avoid-\/const-\/or-\/ref-\/data-\/members):}}
-\DoxyCodeLine{00807\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ RAII\ design\ requires\ reference}}
-\DoxyCodeLine{00808\ \ \ \textcolor{keywordtype}{bool}\ m\_lock\_acquired\{\textcolor{keyword}{false}\};}
-\DoxyCodeLine{00809\ }
-\DoxyCodeLine{00810\ \textcolor{keyword}{public}:}
-\DoxyCodeLine{00816\ \ \ \textcolor{keyword}{explicit}\ \mbox{\hyperlink{classfreertos_1_1try__lock__guard_a90264ae7f771340603a3ff10489f22c2}{try\_lock\_guard}}(Mutex\ \&\mbox{\hyperlink{classfreertos_1_1mutex}{mutex}})}
-\DoxyCodeLine{00817\ \ \ \ \ \ \ :\ m\_mutex\{\mbox{\hyperlink{classfreertos_1_1mutex}{mutex}}\},\ m\_lock\_acquired\{static\_cast<bool>(m\_mutex.try\_lock())\}\ \{}
-\DoxyCodeLine{00818\ \ \ \}}
-\DoxyCodeLine{00823\ \ \ \mbox{\hyperlink{classfreertos_1_1try__lock__guard_a4a8bc0b81f03b273d3c006a83c68e1ad}{\string~try\_lock\_guard}}(\textcolor{keywordtype}{void})\ \{}
-\DoxyCodeLine{00824\ \ \ \ \ \textcolor{keywordflow}{if}\ (m\_lock\_acquired)\ \{}
-\DoxyCodeLine{00825\ \ \ \ \ \ \ m\_mutex.unlock();}
-\DoxyCodeLine{00826\ \ \ \ \ \}}
-\DoxyCodeLine{00827\ \ \ \}}
-\DoxyCodeLine{00828\ }
-\DoxyCodeLine{00829\ \ \ \textcolor{comment}{//\ Delete\ copy\ and\ move\ operations\ for\ RAII\ safety}}
-\DoxyCodeLine{00830\ \ \ \mbox{\hyperlink{classfreertos_1_1try__lock__guard}{try\_lock\_guard}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1try__lock__guard}{try\_lock\_guard}}\ \&)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{00831\ \ \ \mbox{\hyperlink{classfreertos_1_1try__lock__guard}{try\_lock\_guard}}(\mbox{\hyperlink{classfreertos_1_1try__lock__guard}{try\_lock\_guard}}\ \&\&)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{00832\ \ \ \mbox{\hyperlink{classfreertos_1_1try__lock__guard}{try\_lock\_guard}}\ \&operator=(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1try__lock__guard}{try\_lock\_guard}}\ \&)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{00833\ \ \ \mbox{\hyperlink{classfreertos_1_1try__lock__guard}{try\_lock\_guard}}\ \&operator=(\mbox{\hyperlink{classfreertos_1_1try__lock__guard}{try\_lock\_guard}}\ \&\&)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{00834\ }
-\DoxyCodeLine{00840\ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classfreertos_1_1try__lock__guard_af8716e8b1a49863fda189d53489f8814}{locked}}(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ m\_lock\_acquired\ \&\&\ m\_mutex.locked();\ \}}
-\DoxyCodeLine{00841\ \};}
-\DoxyCodeLine{00842\ }
-\DoxyCodeLine{00849\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Mutex>\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classfreertos_1_1lock__guard__isr}{lock\_guard\_isr}}\ \{}
-\DoxyCodeLine{00850\ \ \ Mutex\ \&m\_mutex;\ \textcolor{comment}{//\ NOLINT(cppcoreguidelines-\/avoid-\/const-\/or-\/ref-\/data-\/members):}}
-\DoxyCodeLine{00851\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ RAII\ design\ requires\ reference}}
-\DoxyCodeLine{00852\ \ \ BaseType\_t\ m\_high\_priority\_task\_woken\{pdFALSE\};}
-\DoxyCodeLine{00853\ }
-\DoxyCodeLine{00854\ \textcolor{keyword}{public}:}
-\DoxyCodeLine{00860\ \ \ \textcolor{keyword}{explicit}\ \mbox{\hyperlink{classfreertos_1_1lock__guard__isr_aadeffd401db0f3fe52fb5beba6373158}{lock\_guard\_isr}}(Mutex\ \&\mbox{\hyperlink{classfreertos_1_1mutex}{mutex}})\ :\ m\_mutex\{\mbox{\hyperlink{classfreertos_1_1mutex}{mutex}}\}\ \{}
-\DoxyCodeLine{00861\ \ \ \ \ m\_mutex.\mbox{\hyperlink{classfreertos_1_1mutex_acbb1833541559e923fd673540a9e2181}{lock\_isr}}(m\_high\_priority\_task\_woken);}
-\DoxyCodeLine{00862\ \ \ \}}
-\DoxyCodeLine{00867\ \ \ \mbox{\hyperlink{classfreertos_1_1lock__guard__isr_a9008d32cb43029a2ccd29242ac713cec}{\string~lock\_guard\_isr}}(\textcolor{keywordtype}{void})\ \{\ m\_mutex.unlock\_isr(m\_high\_priority\_task\_woken);\ \}}
-\DoxyCodeLine{00868\ }
-\DoxyCodeLine{00869\ \ \ \textcolor{comment}{//\ Delete\ copy\ and\ move\ operations\ for\ RAII\ safety}}
-\DoxyCodeLine{00870\ \ \ \mbox{\hyperlink{classfreertos_1_1lock__guard__isr}{lock\_guard\_isr}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1lock__guard__isr}{lock\_guard\_isr}}\ \&)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{00871\ \ \ \mbox{\hyperlink{classfreertos_1_1lock__guard__isr}{lock\_guard\_isr}}(\mbox{\hyperlink{classfreertos_1_1lock__guard__isr}{lock\_guard\_isr}}\ \&\&)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{00872\ \ \ \mbox{\hyperlink{classfreertos_1_1lock__guard__isr}{lock\_guard\_isr}}\ \&operator=(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1lock__guard__isr}{lock\_guard\_isr}}\ \&)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{00873\ \ \ \mbox{\hyperlink{classfreertos_1_1lock__guard__isr}{lock\_guard\_isr}}\ \&operator=(\mbox{\hyperlink{classfreertos_1_1lock__guard__isr}{lock\_guard\_isr}}\ \&\&)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{00874\ }
-\DoxyCodeLine{00881\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1lock__guard__isr_a1852af1aab57024fbe24e79a3fb31fd0}{high\_priority\_task\_woken}}(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{}
-\DoxyCodeLine{00882\ \ \ \ \ \textcolor{keywordflow}{return}\ m\_high\_priority\_task\_woken;}
-\DoxyCodeLine{00883\ \ \ \}}
-\DoxyCodeLine{00889\ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classfreertos_1_1lock__guard__isr_a24efba54d6b36741d788345b71d5eb8e}{locked}}(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ m\_mutex.locked();\ \}}
-\DoxyCodeLine{00890\ \};}
-\DoxyCodeLine{00891\ }
-\DoxyCodeLine{00898\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Mutex>\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classfreertos_1_1timeout__lock__guard}{timeout\_lock\_guard}}\ \{}
-\DoxyCodeLine{00899\ \ \ Mutex\ \&m\_mutex;\ \textcolor{comment}{//\ NOLINT(cppcoreguidelines-\/avoid-\/const-\/or-\/ref-\/data-\/members):}}
-\DoxyCodeLine{00900\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ RAII\ design\ requires\ reference}}
-\DoxyCodeLine{00901\ \ \ \textcolor{keywordtype}{bool}\ m\_lock\_acquired\{\textcolor{keyword}{false}\};}
-\DoxyCodeLine{00902\ }
-\DoxyCodeLine{00903\ \textcolor{keyword}{public}:}
-\DoxyCodeLine{00910\ \ \ \mbox{\hyperlink{classfreertos_1_1timeout__lock__guard_a6194a77fdb07d2b52977a393dfd2311d}{timeout\_lock\_guard}}(Mutex\ \&\mbox{\hyperlink{classfreertos_1_1mutex}{mutex}},\ TickType\_t\ ticks\_to\_wait)}
-\DoxyCodeLine{00911\ \ \ \ \ \ \ :\ m\_mutex\{\mbox{\hyperlink{classfreertos_1_1mutex}{mutex}}\},}
-\DoxyCodeLine{00912\ \ \ \ \ \ \ \ \ m\_lock\_acquired\{static\_cast<bool>(m\_mutex.lock(ticks\_to\_wait))\}\ \{\}}
-\DoxyCodeLine{00919\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Rep,\ \textcolor{keyword}{typename}\ Period>}
-\DoxyCodeLine{00920\ \ \ \mbox{\hyperlink{classfreertos_1_1timeout__lock__guard_a1e807fedd780a126608d57924472f121}{timeout\_lock\_guard}}(Mutex\ \&\mbox{\hyperlink{classfreertos_1_1mutex}{mutex}},}
-\DoxyCodeLine{00921\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::chrono::duration<Rep,\ Period>\ \&timeout)}
-\DoxyCodeLine{00922\ \ \ \ \ \ \ :\ m\_mutex\{\mbox{\hyperlink{classfreertos_1_1mutex}{mutex}}\},}
-\DoxyCodeLine{00923\ \ \ \ \ \ \ \ \ m\_lock\_acquired\{static\_cast<bool>(m\_mutex.lock(}
-\DoxyCodeLine{00924\ \ \ \ \ \ \ \ \ \ \ \ \ std::chrono::duration\_cast<std::chrono::milliseconds>(timeout)}
-\DoxyCodeLine{00925\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ .count()))\}\ \{\}}
-\DoxyCodeLine{00930\ \ \ \mbox{\hyperlink{classfreertos_1_1timeout__lock__guard_a6c2adfd05626569df6c17190de6bb01f}{\string~timeout\_lock\_guard}}(\textcolor{keywordtype}{void})\ \{}
-\DoxyCodeLine{00931\ \ \ \ \ \textcolor{keywordflow}{if}\ (m\_lock\_acquired)\ \{}
-\DoxyCodeLine{00932\ \ \ \ \ \ \ m\_mutex.unlock();}
-\DoxyCodeLine{00933\ \ \ \ \ \}}
-\DoxyCodeLine{00934\ \ \ \}}
-\DoxyCodeLine{00935\ }
-\DoxyCodeLine{00936\ \ \ \textcolor{comment}{//\ Delete\ copy\ and\ move\ operations\ for\ RAII\ safety}}
-\DoxyCodeLine{00937\ \ \ \mbox{\hyperlink{classfreertos_1_1timeout__lock__guard}{timeout\_lock\_guard}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1timeout__lock__guard}{timeout\_lock\_guard}}\ \&)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{00938\ \ \ \mbox{\hyperlink{classfreertos_1_1timeout__lock__guard}{timeout\_lock\_guard}}(\mbox{\hyperlink{classfreertos_1_1timeout__lock__guard}{timeout\_lock\_guard}}\ \&\&)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{00939\ \ \ \mbox{\hyperlink{classfreertos_1_1timeout__lock__guard}{timeout\_lock\_guard}}\ \&operator=(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1timeout__lock__guard}{timeout\_lock\_guard}}\ \&)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{00940\ \ \ \mbox{\hyperlink{classfreertos_1_1timeout__lock__guard}{timeout\_lock\_guard}}\ \&operator=(\mbox{\hyperlink{classfreertos_1_1timeout__lock__guard}{timeout\_lock\_guard}}\ \&\&)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{00941\ }
-\DoxyCodeLine{00947\ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classfreertos_1_1timeout__lock__guard_a0f514d8cf9abe0a1a40dc8c18ca313ee}{locked}}(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ m\_lock\_acquired\ \&\&\ m\_mutex.locked();\ \}}
-\DoxyCodeLine{00948\ \};}
-\DoxyCodeLine{00949\ }
-\DoxyCodeLine{00950\ \textcolor{preprocessor}{\#if\ configSUPPORT\_STATIC\_ALLOCATION}}
-\DoxyCodeLine{00956\ \textcolor{keyword}{namespace\ }sa\ \{}
-\DoxyCodeLine{00961\ \textcolor{keyword}{using\ }binary\_semaphore\ =}
-\DoxyCodeLine{00962\ \ \ \ \ \mbox{\hyperlink{classfreertos_1_1binary__semaphore}{freertos::binary\_semaphore<freertos::static\_semaphore\_allocator>}};}
-\DoxyCodeLine{00967\ \textcolor{keyword}{using\ }counting\_semaphore\ =}
-\DoxyCodeLine{00968\ \ \ \ \ \mbox{\hyperlink{classfreertos_1_1counting__semaphore}{freertos::counting\_semaphore<freertos::static\_semaphore\_allocator>}};}
-\DoxyCodeLine{00973\ \textcolor{keyword}{using\ }mutex\ =\ \mbox{\hyperlink{classfreertos_1_1mutex}{freertos::mutex<freertos::static\_semaphore\_allocator>}};}
-\DoxyCodeLine{00978\ \textcolor{keyword}{using\ }recursive\_mutex\ =}
-\DoxyCodeLine{00979\ \ \ \ \ \mbox{\hyperlink{classfreertos_1_1recursive__mutex}{freertos::recursive\_mutex<freertos::static\_semaphore\_allocator>}};}
-\DoxyCodeLine{00980\ \}\ \textcolor{comment}{//\ namespace\ sa}}
-\DoxyCodeLine{00981\ \textcolor{preprocessor}{\#endif}}
-\DoxyCodeLine{00982\ \textcolor{preprocessor}{\#if\ configSUPPORT\_DYNAMIC\_ALLOCATION}}
-\DoxyCodeLine{00988\ \textcolor{keyword}{namespace\ }da\ \{}
-\DoxyCodeLine{00993\ \textcolor{keyword}{using\ }binary\_semaphore\ =}
-\DoxyCodeLine{00994\ \ \ \ \ \mbox{\hyperlink{classfreertos_1_1binary__semaphore}{freertos::binary\_semaphore<freertos::dynamic\_semaphore\_allocator>}};}
-\DoxyCodeLine{00999\ \textcolor{keyword}{using\ }counting\_semaphore\ =}
-\DoxyCodeLine{01000\ \ \ \ \ \mbox{\hyperlink{classfreertos_1_1counting__semaphore}{freertos::counting\_semaphore<freertos::dynamic\_semaphore\_allocator>}};}
-\DoxyCodeLine{01005\ \textcolor{keyword}{using\ }mutex\ =\ \mbox{\hyperlink{classfreertos_1_1mutex}{freertos::mutex<freertos::dynamic\_semaphore\_allocator>}};}
-\DoxyCodeLine{01010\ \textcolor{keyword}{using\ }recursive\_mutex\ =}
-\DoxyCodeLine{01011\ \ \ \ \ \mbox{\hyperlink{classfreertos_1_1recursive__mutex}{freertos::recursive\_mutex<freertos::dynamic\_semaphore\_allocator>}};}
-\DoxyCodeLine{01012\ \}\ \textcolor{comment}{//\ namespace\ da}}
-\DoxyCodeLine{01013\ \textcolor{preprocessor}{\#endif}}
-\DoxyCodeLine{01014\ }
-\DoxyCodeLine{01015\ \}\ \textcolor{comment}{//\ namespace\ freertos}}
+\DoxyCodeLine{00651\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_a47fd10b3cb192ef884366130178c240a}{unlock}}()\ \{}
+\DoxyCodeLine{00652\ \ \ \ \ \textcolor{keyword}{auto}\ rc\ =\ xSemaphoreGiveRecursive(m\_semaphore);}
+\DoxyCodeLine{00653\ \ \ \ \ \textcolor{keywordflow}{if}\ (rc\ \&\&\ m\_recursions\_count\ >\ 0)\ \{}
+\DoxyCodeLine{00654\ \ \ \ \ \ \ m\_recursions\_count-\/-\/;}
+\DoxyCodeLine{00655\ \ \ \ \ \}}
+\DoxyCodeLine{00656\ \ \ \ \ \textcolor{keywordflow}{return}\ rc;}
+\DoxyCodeLine{00657\ \ \ \}}
+\DoxyCodeLine{00666\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_ac052f05534988d032bf5505bd6be5bd1}{unlock\_isr}}(BaseType\_t\ \&high\_priority\_task\_woken)\ \{}
+\DoxyCodeLine{00667\ \ \ \ \ \textcolor{keyword}{auto}\ rc\ =\ xSemaphoreGiveFromISR(m\_semaphore,\ \&high\_priority\_task\_woken);}
+\DoxyCodeLine{00668\ \ \ \ \ \textcolor{keywordflow}{if}\ (rc\ \&\&\ m\_recursions\_count\ >\ 0)\ \{}
+\DoxyCodeLine{00669\ \ \ \ \ \ \ m\_recursions\_count-\/-\/;}
+\DoxyCodeLine{00670\ \ \ \ \ \}}
+\DoxyCodeLine{00671\ \ \ \ \ \textcolor{keywordflow}{return}\ rc;}
+\DoxyCodeLine{00672\ \ \ \}}
+\DoxyCodeLine{00679\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_a3b7db3999f3ce6fd4275e4b9c0410e12}{unlock\_isr}}(\textcolor{keywordtype}{void})\ \{}
+\DoxyCodeLine{00680\ \ \ \ \ BaseType\_t\ high\_priority\_task\_woken\ =\ pdFALSE;}
+\DoxyCodeLine{00681\ \ \ \ \ \textcolor{keyword}{auto}\ rc\ =\ xSemaphoreGiveFromISR(m\_semaphore,\ \&high\_priority\_task\_woken);}
+\DoxyCodeLine{00682\ \ \ \ \ \textcolor{keywordflow}{if}\ (rc\ \&\&\ m\_recursions\_count\ >\ 0)\ \{}
+\DoxyCodeLine{00683\ \ \ \ \ \ \ m\_recursions\_count-\/-\/;}
+\DoxyCodeLine{00684\ \ \ \ \ \}}
+\DoxyCodeLine{00685\ \ \ \ \ \textcolor{keywordflow}{return}\ rc;}
+\DoxyCodeLine{00686\ \ \ \}}
+\DoxyCodeLine{00694\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_acb1c0619ac4ca0e62173a8ebeef12e69}{lock}}(\textcolor{keyword}{const}\ TickType\_t\ ticks\_to\_wait\ =\ portMAX\_DELAY)\ \{}
+\DoxyCodeLine{00695\ \ \ \ \ \textcolor{keyword}{auto}\ rc\ =\ xSemaphoreTakeRecursive(m\_semaphore,\ ticks\_to\_wait);}
+\DoxyCodeLine{00696\ \ \ \ \ \textcolor{keywordflow}{if}\ (rc)\ \{}
+\DoxyCodeLine{00697\ \ \ \ \ \ \ m\_recursions\_count++;}
+\DoxyCodeLine{00698\ \ \ \ \ \}}
+\DoxyCodeLine{00699\ \ \ \ \ \textcolor{keywordflow}{return}\ rc;}
+\DoxyCodeLine{00700\ \ \ \}}
+\DoxyCodeLine{00709\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_ad1002ee47642a565fa898e194f3604b4}{lock\_isr}}(BaseType\_t\ \&high\_priority\_task\_woken)\ \{}
+\DoxyCodeLine{00710\ \ \ \ \ \textcolor{keyword}{auto}\ rc\ =\ xSemaphoreTakeFromISR(m\_semaphore,\ \&high\_priority\_task\_woken);}
+\DoxyCodeLine{00711\ \ \ \ \ \textcolor{keywordflow}{if}\ (rc)\ \{}
+\DoxyCodeLine{00712\ \ \ \ \ \ \ m\_recursions\_count++;}
+\DoxyCodeLine{00713\ \ \ \ \ \}}
+\DoxyCodeLine{00714\ \ \ \ \ \textcolor{keywordflow}{return}\ rc;}
+\DoxyCodeLine{00715\ \ \ \}}
+\DoxyCodeLine{00722\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_a1d2d36ec832730964edc4bdb5d2fb6b4}{lock\_isr}}(\textcolor{keywordtype}{void})\ \{}
+\DoxyCodeLine{00723\ \ \ \ \ BaseType\_t\ high\_priority\_task\_woken\ =\ pdFALSE;}
+\DoxyCodeLine{00724\ \ \ \ \ \textcolor{keyword}{auto}\ rc\ =\ xSemaphoreTakeFromISR(m\_semaphore,\ \&high\_priority\_task\_woken);}
+\DoxyCodeLine{00725\ \ \ \ \ \textcolor{keywordflow}{if}\ (rc)\ \{}
+\DoxyCodeLine{00726\ \ \ \ \ \ \ m\_recursions\_count++;}
+\DoxyCodeLine{00727\ \ \ \ \ \}}
+\DoxyCodeLine{00728\ \ \ \ \ \textcolor{keywordflow}{return}\ rc;}
+\DoxyCodeLine{00729\ \ \ \}}
+\DoxyCodeLine{00736\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Rep,\ \textcolor{keyword}{typename}\ Period>}
+\DoxyCodeLine{00737\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_ab3e95b964f62311ea06e33542507fb89}{lock}}(\textcolor{keyword}{const}\ std::chrono::duration<Rep,\ Period>\ \&timeout)\ \{}
+\DoxyCodeLine{00738\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_acb1c0619ac4ca0e62173a8ebeef12e69}{lock}}(}
+\DoxyCodeLine{00739\ \ \ \ \ \ \ \ \ std::chrono::duration\_cast<std::chrono::milliseconds>(timeout).count());}
+\DoxyCodeLine{00740\ \ \ \}}
+\DoxyCodeLine{00747\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_ab6a508d720641f15c1fe2b293e96ae50}{try\_lock}}()\ \{}
+\DoxyCodeLine{00748\ \ \ \ \ \textcolor{keyword}{auto}\ rc\ =\ xSemaphoreTakeRecursive(m\_semaphore,\ 0);}
+\DoxyCodeLine{00749\ \ \ \ \ \textcolor{keywordflow}{if}\ (rc)\ \{}
+\DoxyCodeLine{00750\ \ \ \ \ \ \ m\_recursions\_count++;}
+\DoxyCodeLine{00751\ \ \ \ \ \}}
+\DoxyCodeLine{00752\ \ \ \ \ \textcolor{keywordflow}{return}\ rc;}
+\DoxyCodeLine{00753\ \ \ \}}
+\DoxyCodeLine{00759\ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_a50a8c8b3aaeff40407e15d3eb597e8d8}{locked}}(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ m\_recursions\_count\ >\ 0;\ \}}
+\DoxyCodeLine{00765\ \ \ uint8\_t\ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_a34374156091a4e09c8432b525b86e24f}{recursions\_count}}(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ m\_recursions\_count;\ \}}
+\DoxyCodeLine{00766\ \};}
+\DoxyCodeLine{00767\ }
+\DoxyCodeLine{00774\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Mutex>\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classfreertos_1_1lock__guard}{lock\_guard}}\ \{}
+\DoxyCodeLine{00775\ \ \ Mutex\ \&m\_mutex;\ \textcolor{comment}{//\ NOLINT(cppcoreguidelines-\/avoid-\/const-\/or-\/ref-\/data-\/members):}}
+\DoxyCodeLine{00776\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ RAII\ design\ requires\ reference}}
+\DoxyCodeLine{00777\ }
+\DoxyCodeLine{00778\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00784\ \ \ \textcolor{keyword}{explicit}\ \mbox{\hyperlink{classfreertos_1_1lock__guard_a8276ed46c1507dc9c8c27a5bd56c4d9e}{lock\_guard}}(Mutex\ \&\mbox{\hyperlink{classfreertos_1_1mutex}{mutex}})\ :\ m\_mutex\{\mbox{\hyperlink{classfreertos_1_1mutex}{mutex}}\}\ \{\ m\_mutex.\mbox{\hyperlink{classfreertos_1_1mutex_af1a6122cc4563cc4aaac5a6c38eca973}{lock}}();\ \}}
+\DoxyCodeLine{00785\ }
+\DoxyCodeLine{00790\ \ \ \mbox{\hyperlink{classfreertos_1_1lock__guard_af46d4af2d983d17c333f0265c941cad4}{\string~lock\_guard}}(\textcolor{keywordtype}{void})\ \{\ m\_mutex.unlock();\ \}}
+\DoxyCodeLine{00791\ }
+\DoxyCodeLine{00792\ \ \ \textcolor{comment}{//\ Delete\ copy\ and\ move\ operations\ for\ RAII\ safety}}
+\DoxyCodeLine{00793\ \ \ \mbox{\hyperlink{classfreertos_1_1lock__guard}{lock\_guard}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1lock__guard}{lock\_guard}}\ \&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00794\ \ \ \mbox{\hyperlink{classfreertos_1_1lock__guard}{lock\_guard}}(\mbox{\hyperlink{classfreertos_1_1lock__guard}{lock\_guard}}\ \&\&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00795\ \ \ \mbox{\hyperlink{classfreertos_1_1lock__guard}{lock\_guard}}\ \&operator=(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1lock__guard}{lock\_guard}}\ \&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00796\ \ \ \mbox{\hyperlink{classfreertos_1_1lock__guard}{lock\_guard}}\ \&operator=(\mbox{\hyperlink{classfreertos_1_1lock__guard}{lock\_guard}}\ \&\&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00797\ }
+\DoxyCodeLine{00803\ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classfreertos_1_1lock__guard_aab62d6459ed0be2ee1211fe2b3c0b4d1}{locked}}(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ m\_mutex.locked();\ \}}
+\DoxyCodeLine{00804\ \};}
+\DoxyCodeLine{00805\ }
+\DoxyCodeLine{00812\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Mutex>\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classfreertos_1_1try__lock__guard}{try\_lock\_guard}}\ \{}
+\DoxyCodeLine{00813\ \ \ Mutex\ \&m\_mutex;\ \textcolor{comment}{//\ NOLINT(cppcoreguidelines-\/avoid-\/const-\/or-\/ref-\/data-\/members):}}
+\DoxyCodeLine{00814\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ RAII\ design\ requires\ reference}}
+\DoxyCodeLine{00815\ \ \ \textcolor{keywordtype}{bool}\ m\_lock\_acquired\{\textcolor{keyword}{false}\};}
+\DoxyCodeLine{00816\ }
+\DoxyCodeLine{00817\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00823\ \ \ \textcolor{keyword}{explicit}\ \mbox{\hyperlink{classfreertos_1_1try__lock__guard_a90264ae7f771340603a3ff10489f22c2}{try\_lock\_guard}}(Mutex\ \&\mbox{\hyperlink{classfreertos_1_1mutex}{mutex}})}
+\DoxyCodeLine{00824\ \ \ \ \ \ \ :\ m\_mutex\{\mbox{\hyperlink{classfreertos_1_1mutex}{mutex}}\},\ m\_lock\_acquired\{static\_cast<bool>(m\_mutex.try\_lock())\}\ \{}
+\DoxyCodeLine{00825\ \ \ \}}
+\DoxyCodeLine{00830\ \ \ \mbox{\hyperlink{classfreertos_1_1try__lock__guard_a4a8bc0b81f03b273d3c006a83c68e1ad}{\string~try\_lock\_guard}}(\textcolor{keywordtype}{void})\ \{}
+\DoxyCodeLine{00831\ \ \ \ \ \textcolor{keywordflow}{if}\ (m\_lock\_acquired)\ \{}
+\DoxyCodeLine{00832\ \ \ \ \ \ \ m\_mutex.unlock();}
+\DoxyCodeLine{00833\ \ \ \ \ \}}
+\DoxyCodeLine{00834\ \ \ \}}
+\DoxyCodeLine{00835\ }
+\DoxyCodeLine{00836\ \ \ \textcolor{comment}{//\ Delete\ copy\ and\ move\ operations\ for\ RAII\ safety}}
+\DoxyCodeLine{00837\ \ \ \mbox{\hyperlink{classfreertos_1_1try__lock__guard}{try\_lock\_guard}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1try__lock__guard}{try\_lock\_guard}}\ \&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00838\ \ \ \mbox{\hyperlink{classfreertos_1_1try__lock__guard}{try\_lock\_guard}}(\mbox{\hyperlink{classfreertos_1_1try__lock__guard}{try\_lock\_guard}}\ \&\&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00839\ \ \ \mbox{\hyperlink{classfreertos_1_1try__lock__guard}{try\_lock\_guard}}\ \&operator=(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1try__lock__guard}{try\_lock\_guard}}\ \&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00840\ \ \ \mbox{\hyperlink{classfreertos_1_1try__lock__guard}{try\_lock\_guard}}\ \&operator=(\mbox{\hyperlink{classfreertos_1_1try__lock__guard}{try\_lock\_guard}}\ \&\&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00841\ }
+\DoxyCodeLine{00847\ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classfreertos_1_1try__lock__guard_af8716e8b1a49863fda189d53489f8814}{locked}}(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ m\_lock\_acquired\ \&\&\ m\_mutex.locked();\ \}}
+\DoxyCodeLine{00848\ \};}
+\DoxyCodeLine{00849\ }
+\DoxyCodeLine{00856\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Mutex>\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classfreertos_1_1lock__guard__isr}{lock\_guard\_isr}}\ \{}
+\DoxyCodeLine{00857\ \ \ Mutex\ \&m\_mutex;\ \textcolor{comment}{//\ NOLINT(cppcoreguidelines-\/avoid-\/const-\/or-\/ref-\/data-\/members):}}
+\DoxyCodeLine{00858\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ RAII\ design\ requires\ reference}}
+\DoxyCodeLine{00859\ \ \ BaseType\_t\ m\_high\_priority\_task\_woken\{pdFALSE\};}
+\DoxyCodeLine{00860\ }
+\DoxyCodeLine{00861\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00867\ \ \ \textcolor{keyword}{explicit}\ \mbox{\hyperlink{classfreertos_1_1lock__guard__isr_aadeffd401db0f3fe52fb5beba6373158}{lock\_guard\_isr}}(Mutex\ \&\mbox{\hyperlink{classfreertos_1_1mutex}{mutex}})\ :\ m\_mutex\{\mbox{\hyperlink{classfreertos_1_1mutex}{mutex}}\}\ \{}
+\DoxyCodeLine{00868\ \ \ \ \ m\_mutex.\mbox{\hyperlink{classfreertos_1_1mutex_acbb1833541559e923fd673540a9e2181}{lock\_isr}}(m\_high\_priority\_task\_woken);}
+\DoxyCodeLine{00869\ \ \ \}}
+\DoxyCodeLine{00874\ \ \ \mbox{\hyperlink{classfreertos_1_1lock__guard__isr_a9008d32cb43029a2ccd29242ac713cec}{\string~lock\_guard\_isr}}(\textcolor{keywordtype}{void})\ \{\ m\_mutex.unlock\_isr(m\_high\_priority\_task\_woken);\ \}}
+\DoxyCodeLine{00875\ }
+\DoxyCodeLine{00876\ \ \ \textcolor{comment}{//\ Delete\ copy\ and\ move\ operations\ for\ RAII\ safety}}
+\DoxyCodeLine{00877\ \ \ \mbox{\hyperlink{classfreertos_1_1lock__guard__isr}{lock\_guard\_isr}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1lock__guard__isr}{lock\_guard\_isr}}\ \&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00878\ \ \ \mbox{\hyperlink{classfreertos_1_1lock__guard__isr}{lock\_guard\_isr}}(\mbox{\hyperlink{classfreertos_1_1lock__guard__isr}{lock\_guard\_isr}}\ \&\&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00879\ \ \ \mbox{\hyperlink{classfreertos_1_1lock__guard__isr}{lock\_guard\_isr}}\ \&operator=(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1lock__guard__isr}{lock\_guard\_isr}}\ \&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00880\ \ \ \mbox{\hyperlink{classfreertos_1_1lock__guard__isr}{lock\_guard\_isr}}\ \&operator=(\mbox{\hyperlink{classfreertos_1_1lock__guard__isr}{lock\_guard\_isr}}\ \&\&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00881\ }
+\DoxyCodeLine{00888\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1lock__guard__isr_a1852af1aab57024fbe24e79a3fb31fd0}{high\_priority\_task\_woken}}(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00889\ \ \ \ \ \textcolor{keywordflow}{return}\ m\_high\_priority\_task\_woken;}
+\DoxyCodeLine{00890\ \ \ \}}
+\DoxyCodeLine{00896\ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classfreertos_1_1lock__guard__isr_a24efba54d6b36741d788345b71d5eb8e}{locked}}(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ m\_mutex.locked();\ \}}
+\DoxyCodeLine{00897\ \};}
+\DoxyCodeLine{00898\ }
+\DoxyCodeLine{00905\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Mutex>\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classfreertos_1_1timeout__lock__guard}{timeout\_lock\_guard}}\ \{}
+\DoxyCodeLine{00906\ \ \ Mutex\ \&m\_mutex;\ \textcolor{comment}{//\ NOLINT(cppcoreguidelines-\/avoid-\/const-\/or-\/ref-\/data-\/members):}}
+\DoxyCodeLine{00907\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ RAII\ design\ requires\ reference}}
+\DoxyCodeLine{00908\ \ \ \textcolor{keywordtype}{bool}\ m\_lock\_acquired\{\textcolor{keyword}{false}\};}
+\DoxyCodeLine{00909\ }
+\DoxyCodeLine{00910\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00917\ \ \ \mbox{\hyperlink{classfreertos_1_1timeout__lock__guard_a6194a77fdb07d2b52977a393dfd2311d}{timeout\_lock\_guard}}(Mutex\ \&\mbox{\hyperlink{classfreertos_1_1mutex}{mutex}},\ TickType\_t\ ticks\_to\_wait)}
+\DoxyCodeLine{00918\ \ \ \ \ \ \ :\ m\_mutex\{\mbox{\hyperlink{classfreertos_1_1mutex}{mutex}}\},}
+\DoxyCodeLine{00919\ \ \ \ \ \ \ \ \ m\_lock\_acquired\{static\_cast<bool>(m\_mutex.lock(ticks\_to\_wait))\}\ \{\}}
+\DoxyCodeLine{00926\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Rep,\ \textcolor{keyword}{typename}\ Period>}
+\DoxyCodeLine{00927\ \ \ \mbox{\hyperlink{classfreertos_1_1timeout__lock__guard_a1e807fedd780a126608d57924472f121}{timeout\_lock\_guard}}(Mutex\ \&\mbox{\hyperlink{classfreertos_1_1mutex}{mutex}},}
+\DoxyCodeLine{00928\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::chrono::duration<Rep,\ Period>\ \&timeout)}
+\DoxyCodeLine{00929\ \ \ \ \ \ \ :\ m\_mutex\{\mbox{\hyperlink{classfreertos_1_1mutex}{mutex}}\},}
+\DoxyCodeLine{00930\ \ \ \ \ \ \ \ \ m\_lock\_acquired\{static\_cast<bool>(m\_mutex.lock(}
+\DoxyCodeLine{00931\ \ \ \ \ \ \ \ \ \ \ \ \ std::chrono::duration\_cast<std::chrono::milliseconds>(timeout)}
+\DoxyCodeLine{00932\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ .count()))\}\ \{\}}
+\DoxyCodeLine{00937\ \ \ \mbox{\hyperlink{classfreertos_1_1timeout__lock__guard_a6c2adfd05626569df6c17190de6bb01f}{\string~timeout\_lock\_guard}}(\textcolor{keywordtype}{void})\ \{}
+\DoxyCodeLine{00938\ \ \ \ \ \textcolor{keywordflow}{if}\ (m\_lock\_acquired)\ \{}
+\DoxyCodeLine{00939\ \ \ \ \ \ \ m\_mutex.unlock();}
+\DoxyCodeLine{00940\ \ \ \ \ \}}
+\DoxyCodeLine{00941\ \ \ \}}
+\DoxyCodeLine{00942\ }
+\DoxyCodeLine{00943\ \ \ \textcolor{comment}{//\ Delete\ copy\ and\ move\ operations\ for\ RAII\ safety}}
+\DoxyCodeLine{00944\ \ \ \mbox{\hyperlink{classfreertos_1_1timeout__lock__guard}{timeout\_lock\_guard}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1timeout__lock__guard}{timeout\_lock\_guard}}\ \&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00945\ \ \ \mbox{\hyperlink{classfreertos_1_1timeout__lock__guard}{timeout\_lock\_guard}}(\mbox{\hyperlink{classfreertos_1_1timeout__lock__guard}{timeout\_lock\_guard}}\ \&\&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00946\ \ \ \mbox{\hyperlink{classfreertos_1_1timeout__lock__guard}{timeout\_lock\_guard}}\ \&operator=(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1timeout__lock__guard}{timeout\_lock\_guard}}\ \&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00947\ \ \ \mbox{\hyperlink{classfreertos_1_1timeout__lock__guard}{timeout\_lock\_guard}}\ \&operator=(\mbox{\hyperlink{classfreertos_1_1timeout__lock__guard}{timeout\_lock\_guard}}\ \&\&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00948\ }
+\DoxyCodeLine{00954\ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classfreertos_1_1timeout__lock__guard_a0f514d8cf9abe0a1a40dc8c18ca313ee}{locked}}(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ m\_lock\_acquired\ \&\&\ m\_mutex.locked();\ \}}
+\DoxyCodeLine{00955\ \};}
+\DoxyCodeLine{00956\ }
+\DoxyCodeLine{00957\ \textcolor{preprocessor}{\#if\ configSUPPORT\_STATIC\_ALLOCATION}}
+\DoxyCodeLine{00963\ \textcolor{keyword}{namespace\ }sa\ \{}
+\DoxyCodeLine{00968\ \textcolor{keyword}{using\ }binary\_semaphore\ =}
+\DoxyCodeLine{00969\ \ \ \ \ \mbox{\hyperlink{classfreertos_1_1binary__semaphore}{freertos::binary\_semaphore<freertos::static\_semaphore\_allocator>}};}
+\DoxyCodeLine{00974\ \textcolor{keyword}{using\ }counting\_semaphore\ =}
+\DoxyCodeLine{00975\ \ \ \ \ \mbox{\hyperlink{classfreertos_1_1counting__semaphore}{freertos::counting\_semaphore<freertos::static\_semaphore\_allocator>}};}
+\DoxyCodeLine{00980\ \textcolor{keyword}{using\ }mutex\ =\ \mbox{\hyperlink{classfreertos_1_1mutex}{freertos::mutex<freertos::static\_semaphore\_allocator>}};}
+\DoxyCodeLine{00985\ \textcolor{keyword}{using\ }recursive\_mutex\ =}
+\DoxyCodeLine{00986\ \ \ \ \ \mbox{\hyperlink{classfreertos_1_1recursive__mutex}{freertos::recursive\_mutex<freertos::static\_semaphore\_allocator>}};}
+\DoxyCodeLine{00987\ \}\ \textcolor{comment}{//\ namespace\ sa}}
+\DoxyCodeLine{00988\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00989\ \textcolor{preprocessor}{\#if\ configSUPPORT\_DYNAMIC\_ALLOCATION}}
+\DoxyCodeLine{00995\ \textcolor{keyword}{namespace\ }da\ \{}
+\DoxyCodeLine{01000\ \textcolor{keyword}{using\ }binary\_semaphore\ =}
+\DoxyCodeLine{01001\ \ \ \ \ \mbox{\hyperlink{classfreertos_1_1binary__semaphore}{freertos::binary\_semaphore<freertos::dynamic\_semaphore\_allocator>}};}
+\DoxyCodeLine{01006\ \textcolor{keyword}{using\ }counting\_semaphore\ =}
+\DoxyCodeLine{01007\ \ \ \ \ \mbox{\hyperlink{classfreertos_1_1counting__semaphore}{freertos::counting\_semaphore<freertos::dynamic\_semaphore\_allocator>}};}
+\DoxyCodeLine{01012\ \textcolor{keyword}{using\ }mutex\ =\ \mbox{\hyperlink{classfreertos_1_1mutex}{freertos::mutex<freertos::dynamic\_semaphore\_allocator>}};}
+\DoxyCodeLine{01017\ \textcolor{keyword}{using\ }recursive\_mutex\ =}
+\DoxyCodeLine{01018\ \ \ \ \ \mbox{\hyperlink{classfreertos_1_1recursive__mutex}{freertos::recursive\_mutex<freertos::dynamic\_semaphore\_allocator>}};}
+\DoxyCodeLine{01019\ \}\ \textcolor{comment}{//\ namespace\ da}}
+\DoxyCodeLine{01020\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{01021\ }
+\DoxyCodeLine{01022\ \}\ \textcolor{comment}{//\ namespace\ freertos}}
 
 \end{DoxyCode}
