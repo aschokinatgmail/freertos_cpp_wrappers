@@ -61,6 +61,16 @@ add_executable(
     test_freertos_semaphore_stl.cpp
 )
 
+add_executable(
+    test_enhanced_timeout_precision
+    test_enhanced_timeout_precision.cpp
+)
+
+add_executable(
+    test_enhanced_cpp17_features
+    test_enhanced_cpp17_features.cpp
+)
+
 target_link_libraries(
     test_freertos_task
     freertos_cpp_wrappers
@@ -151,6 +161,26 @@ target_link_libraries(
     pthread
 )
 
+target_link_libraries(
+    test_enhanced_timeout_precision
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    ${GMOCK_LIBRARIES}
+    gtest_main
+    pthread
+)
+
+target_link_libraries(
+    test_enhanced_cpp17_features
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    ${GMOCK_LIBRARIES}
+    gtest_main
+    pthread
+)
+
 target_compile_options(test_freertos_task PRIVATE ${GTEST_CFLAGS_OTHER} ${GMOCK_CFLAGS_OTHER})
 target_compile_options(test_freertos_semaphore PRIVATE ${GTEST_CFLAGS_OTHER} ${GMOCK_CFLAGS_OTHER})
 target_compile_options(test_freertos_queue PRIVATE ${GTEST_CFLAGS_OTHER} ${GMOCK_CFLAGS_OTHER})
@@ -160,6 +190,8 @@ target_compile_options(test_freertos_message_buffer PRIVATE ${GTEST_CFLAGS_OTHER
 target_compile_options(test_freertos_sw_timer PRIVATE ${GTEST_CFLAGS_OTHER} ${GMOCK_CFLAGS_OTHER})
 target_compile_options(test_enhanced_multitasking PRIVATE ${GTEST_CFLAGS_OTHER} ${GMOCK_CFLAGS_OTHER})
 target_compile_options(test_freertos_semaphore_stl PRIVATE ${GTEST_CFLAGS_OTHER} ${GMOCK_CFLAGS_OTHER})
+target_compile_options(test_enhanced_timeout_precision PRIVATE ${GTEST_CFLAGS_OTHER} ${GMOCK_CFLAGS_OTHER})
+target_compile_options(test_enhanced_cpp17_features PRIVATE ${GTEST_CFLAGS_OTHER} ${GMOCK_CFLAGS_OTHER})
 
 # Discover tests
 include(GoogleTest)
@@ -172,3 +204,5 @@ gtest_discover_tests(test_freertos_message_buffer)
 gtest_discover_tests(test_freertos_sw_timer)
 gtest_discover_tests(test_enhanced_multitasking)
 gtest_discover_tests(test_freertos_semaphore_stl)
+gtest_discover_tests(test_enhanced_timeout_precision)
+gtest_discover_tests(test_enhanced_cpp17_features)

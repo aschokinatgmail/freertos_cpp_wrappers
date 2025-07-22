@@ -5,16 +5,16 @@
 This report provides comprehensive validation and verification results for the FreeRTOS C++ Wrappers project, including detailed test execution outcomes and code coverage analysis.
 
 ### Test Execution Summary
-- **Total Tests Executed**: 397
-- **✅ Passed**: 397 tests
+- **Total Tests Executed**: 421
+- **✅ Passed**: 421 tests
 - **❌ Failed**: 0 tests
 - **Success Rate**: 100.0% (All tests passed!)
-- **Total Execution Time**: 5.89 seconds
+- **Total Execution Time**: 6.23 seconds
 - **Average Test Time**: 0.0148 seconds per test
 
 ### Code Coverage Summary
-- **Line Coverage**: 96.7% (6536/6758 lines)
-- **Function Coverage**: 95.8% (2653/2768 functions)
+- **Line Coverage**: 96.6% (6835/7075 lines)
+- **Function Coverage**: 94.9% (2777/2925 functions)
 - **Coverage Scope**: Main library modules only (src/ and include/ directories)
 
 ## Detailed Test Results by Module
@@ -26,92 +26,92 @@ This report provides comprehensive validation and verification results for the F
 - Passed: 81
 - Failed: 0
 - Success Rate: 100.0%
-- Total Time: 0.880s
+- Total Time: 1.270s
 
 **Detailed Test Results:**
 
 | Test ID | Test Name | Outcome | Execution Time |
 |---------|-----------|---------|----------------|
-| 1 | FreeRTOSTaskTest.StaticTaskAllocatorConstruction | ✅ PASS | 0.010s |
-| 2 | FreeRTOSTaskTest.StaticTaskAllocatorCreate | ✅ PASS | 0.010s |
-| 3 | FreeRTOSTaskTest.StaticTaskAllocatorCreateNullReturn | ✅ PASS | 0.010s |
-| 4 | FreeRTOSTaskTest.DynamicTaskAllocatorConstruction | ✅ PASS | 0.010s |
-| 5 | FreeRTOSTaskTest.DynamicTaskAllocatorCreateSuccess | ✅ PASS | 0.010s |
-| 6 | FreeRTOSTaskTest.DynamicTaskAllocatorCreateFailure | ✅ PASS | 0.010s |
-| 7 | FreeRTOSTaskTest.StaticTaskConstruction | ✅ PASS | 0.010s |
-| 8 | FreeRTOSTaskTest.StaticTaskConstructionWithString | ✅ PASS | 0.010s |
-| 9 | FreeRTOSTaskTest.StaticTaskDestruction | ✅ PASS | 0.010s |
-| 10 | FreeRTOSTaskTest.StaticTaskDestructionNullHandle | ✅ PASS | 0.010s |
-| 11 | FreeRTOSTaskTest.StaticTaskSuspendResume | ✅ PASS | 0.010s |
-| 12 | FreeRTOSTaskTest.StaticTaskTerminate | ✅ PASS | 0.010s |
-| 13 | FreeRTOSTaskTest.StaticTaskPriority | ✅ PASS | 0.010s |
-| 14 | FreeRTOSTaskTest.StaticTaskName | ✅ PASS | 0.010s |
-| 15 | FreeRTOSTaskTest.StaticTaskState | ✅ PASS | 0.010s |
-| 16 | FreeRTOSTaskTest.TaskApplicationTag | ✅ PASS | 0.010s |
+| 1 | FreeRTOSTaskTest.StaticTaskAllocatorConstruction | ✅ PASS | 0.020s |
+| 2 | FreeRTOSTaskTest.StaticTaskAllocatorCreate | ✅ PASS | 0.020s |
+| 3 | FreeRTOSTaskTest.StaticTaskAllocatorCreateNullReturn | ✅ PASS | 0.030s |
+| 4 | FreeRTOSTaskTest.DynamicTaskAllocatorConstruction | ✅ PASS | 0.020s |
+| 5 | FreeRTOSTaskTest.DynamicTaskAllocatorCreateSuccess | ✅ PASS | 0.020s |
+| 6 | FreeRTOSTaskTest.DynamicTaskAllocatorCreateFailure | ✅ PASS | 0.020s |
+| 7 | FreeRTOSTaskTest.StaticTaskConstruction | ✅ PASS | 0.020s |
+| 8 | FreeRTOSTaskTest.StaticTaskConstructionWithString | ✅ PASS | 0.020s |
+| 9 | FreeRTOSTaskTest.StaticTaskDestruction | ✅ PASS | 0.020s |
+| 10 | FreeRTOSTaskTest.StaticTaskDestructionNullHandle | ✅ PASS | 0.020s |
+| 11 | FreeRTOSTaskTest.StaticTaskSuspendResume | ✅ PASS | 0.020s |
+| 12 | FreeRTOSTaskTest.StaticTaskTerminate | ✅ PASS | 0.020s |
+| 13 | FreeRTOSTaskTest.StaticTaskPriority | ✅ PASS | 0.020s |
+| 14 | FreeRTOSTaskTest.StaticTaskName | ✅ PASS | 0.020s |
+| 15 | FreeRTOSTaskTest.StaticTaskState | ✅ PASS | 0.020s |
+| 16 | FreeRTOSTaskTest.TaskApplicationTag | ✅ PASS | 0.020s |
 | 17 | FreeRTOSTaskTest.TaskStackWatermark | ✅ PASS | 0.010s |
 | 18 | FreeRTOSTaskTest.TaskTraceStatus | ✅ PASS | 0.010s |
-| 19 | FreeRTOSTaskTest.StaticTaskAbortDelay | ✅ PASS | 0.010s |
-| 20 | FreeRTOSTaskTest.StaticTaskAbortDelayNullHandle | ✅ PASS | 0.010s |
-| 21 | FreeRTOSTaskTest.TaskSuspendedOnStart | ✅ PASS | 0.010s |
-| 22 | FreeRTOSTaskTest.TaskNotSuspendedOnStart | ✅ PASS | 0.010s |
-| 23 | FreeRTOSTaskTest.DynamicTaskConstruction | ✅ PASS | 0.010s |
-| 24 | FreeRTOSTaskTest.DynamicTaskConstructionFailure | ✅ PASS | 0.010s |
+| 19 | FreeRTOSTaskTest.StaticTaskAbortDelay | ✅ PASS | 0.020s |
+| 20 | FreeRTOSTaskTest.StaticTaskAbortDelayNullHandle | ✅ PASS | 0.020s |
+| 21 | FreeRTOSTaskTest.TaskSuspendedOnStart | ✅ PASS | 0.020s |
+| 22 | FreeRTOSTaskTest.TaskNotSuspendedOnStart | ✅ PASS | 0.020s |
+| 23 | FreeRTOSTaskTest.DynamicTaskConstruction | ✅ PASS | 0.020s |
+| 24 | FreeRTOSTaskTest.DynamicTaskConstructionFailure | ✅ PASS | 0.020s |
 | 25 | FreeRTOSTaskTest.TaskNotifications | ✅ PASS | 0.010s |
-| 26 | FreeRTOSTaskTest.TaskNotificationsExtended | ✅ PASS | 0.010s |
-| 27 | FreeRTOSTaskTest.PeriodicTaskConstruction | ✅ PASS | 0.010s |
-| 28 | FreeRTOSTaskTest.PeriodicTaskWithString | ✅ PASS | 0.010s |
-| 29 | FreeRTOSTaskTest.PeriodicTaskZeroPeriod | ✅ PASS | 0.010s |
-| 30 | FreeRTOSTaskTest.PeriodicTaskNoPeriod | ✅ PASS | 0.010s |
-| 31 | FreeRTOSTaskTest.PeriodicTaskIsRunning | ✅ PASS | 0.010s |
-| 32 | FreeRTOSTaskTest.PeriodicTaskTerminate | ✅ PASS | 0.010s |
+| 26 | FreeRTOSTaskTest.TaskNotificationsExtended | ✅ PASS | 0.020s |
+| 27 | FreeRTOSTaskTest.PeriodicTaskConstruction | ✅ PASS | 0.020s |
+| 28 | FreeRTOSTaskTest.PeriodicTaskWithString | ✅ PASS | 0.020s |
+| 29 | FreeRTOSTaskTest.PeriodicTaskZeroPeriod | ✅ PASS | 0.020s |
+| 30 | FreeRTOSTaskTest.PeriodicTaskNoPeriod | ✅ PASS | 0.020s |
+| 31 | FreeRTOSTaskTest.PeriodicTaskIsRunning | ✅ PASS | 0.020s |
+| 32 | FreeRTOSTaskTest.PeriodicTaskTerminate | ✅ PASS | 0.020s |
 | 33 | FreeRTOSTaskTest.PeriodicTaskDestructorAbortDelay | ✅ PASS | 0.010s |
 | 34 | FreeRTOSTaskTest.PeriodicTaskNotificationExtensions | ✅ PASS | 0.010s |
 | 35 | FreeRTOSTaskTest.DelayFunction | ✅ PASS | 0.010s |
-| 36 | FreeRTOSTaskTest.DelayUntilFunction | ✅ PASS | 0.010s |
-| 37 | FreeRTOSTaskTest.SleepForFunction | ✅ PASS | 0.010s |
+| 36 | FreeRTOSTaskTest.DelayUntilFunction | ✅ PASS | 0.020s |
+| 37 | FreeRTOSTaskTest.SleepForFunction | ✅ PASS | 0.020s |
 | 38 | FreeRTOSTaskTest.CurrentTaskHandle | ✅ PASS | 0.010s |
-| 39 | FreeRTOSTaskTest.IdleTaskHandle | ✅ PASS | 0.010s |
+| 39 | FreeRTOSTaskTest.IdleTaskHandle | ✅ PASS | 0.020s |
 | 40 | FreeRTOSTaskTest.TickCount | ✅ PASS | 0.010s |
-| 41 | FreeRTOSTaskTest.TaskCount | ✅ PASS | 0.010s |
+| 41 | FreeRTOSTaskTest.TaskCount | ✅ PASS | 0.020s |
 | 42 | FreeRTOSTaskTest.SchedulerState | ✅ PASS | 0.010s |
 | 43 | FreeRTOSTaskTest.TimeSinceSchedulerStarted | ✅ PASS | 0.010s |
-| 44 | FreeRTOSTaskTest.CriticalSection | ✅ PASS | 0.010s |
+| 44 | FreeRTOSTaskTest.CriticalSection | ✅ PASS | 0.020s |
 | 45 | FreeRTOSTaskTest.CriticalSectionISR | ✅ PASS | 0.010s |
 | 46 | FreeRTOSTaskTest.InterruptBarrier | ✅ PASS | 0.010s |
 | 47 | FreeRTOSTaskTest.SchedulerBarrier | ✅ PASS | 0.010s |
 | 48 | FreeRTOSTaskTest.StackAllocationLimitation | ✅ PASS | 0.010s |
 | 49 | FreeRTOSTaskTest.InvalidParameters | ✅ PASS | 0.010s |
 | 50 | FreeRTOSTaskTest.ZeroStackSize | ✅ PASS | 0.010s |
-| 51 | FreeRTOSTaskTest.VeryHighPriority | ✅ PASS | 0.010s |
-| 52 | FreeRTOSTaskTest.TaskSystemStatus | ✅ PASS | 0.010s |
-| 53 | FreeRTOSTaskTest.TaskChronoCompatibility | ✅ PASS | 0.010s |
-| 54 | FreeRTOSTaskTest.DelayUntilTimePoint | ✅ PASS | 0.010s |
-| 55 | FreeRTOSTaskTest.TaskMoveConstruction | ✅ PASS | 0.010s |
+| 51 | FreeRTOSTaskTest.VeryHighPriority | ✅ PASS | 0.020s |
+| 52 | FreeRTOSTaskTest.TaskSystemStatus | ✅ PASS | 0.020s |
+| 53 | FreeRTOSTaskTest.TaskChronoCompatibility | ✅ PASS | 0.020s |
+| 54 | FreeRTOSTaskTest.DelayUntilTimePoint | ✅ PASS | 0.020s |
+| 55 | FreeRTOSTaskTest.TaskMoveConstruction | ✅ PASS | 0.020s |
 | 56 | FreeRTOSTaskTest.PeriodicTaskMoveConstruction | ✅ PASS | 0.010s |
 | 57 | FreeRTOSTaskTest.TaskExecutionDirectCall | ✅ PASS | 0.010s |
 | 58 | FreeRTOSTaskTest.PeriodicTaskTypo | ✅ PASS | 0.010s |
-| 59 | FreeRTOSTaskTest.TaskTemplateInstantiation | ✅ PASS | 0.010s |
-| 60 | FreeRTOSTaskTest.DynamicTaskDifferentSizes | ✅ PASS | 0.010s |
-| 61 | FreeRTOSTaskTest.TaskNotificationEdgeCases | ✅ PASS | 0.010s |
+| 59 | FreeRTOSTaskTest.TaskTemplateInstantiation | ✅ PASS | 0.020s |
+| 60 | FreeRTOSTaskTest.DynamicTaskDifferentSizes | ✅ PASS | 0.020s |
+| 61 | FreeRTOSTaskTest.TaskNotificationEdgeCases | ✅ PASS | 0.020s |
 | 62 | FreeRTOSTaskTest.TaskSystemStatusTemplate | ✅ PASS | 0.010s |
-| 63 | FreeRTOSTaskTest.DelayFunctionsWithDifferentDurations | ✅ PASS | 0.010s |
+| 63 | FreeRTOSTaskTest.DelayFunctionsWithDifferentDurations | ✅ PASS | 0.020s |
 | 64 | FreeRTOSTaskTest.DelayUntilWithPeriodReference | ✅ PASS | 0.010s |
 | 65 | FreeRTOSTaskTest.RacingConditionTaskConstructorInitialization | ✅ PASS | 0.010s |
 | 66 | FreeRTOSTaskTest.ConcurrentTaskCreationAndDestruction | ✅ PASS | 0.010s |
 | 67 | FreeRTOSTaskTest.MoveSemanticsRacingConditions | ✅ PASS | 0.010s |
-| 68 | FreeRTOSTaskTest.PeriodicTaskLifecycleRacingConditions | ✅ PASS | 0.020s |
-| 69 | FreeRTOSTaskTest.NotificationRacingConditions | ✅ PASS | 0.020s |
+| 68 | FreeRTOSTaskTest.PeriodicTaskLifecycleRacingConditions | ✅ PASS | 0.010s |
+| 69 | FreeRTOSTaskTest.NotificationRacingConditions | ✅ PASS | 0.010s |
 | 70 | FreeRTOSTaskTest.ComplexMultitaskingScenario | ✅ PASS | 0.020s |
-| 71 | FreeRTOSTaskTest.TaskSystemStatusUnderLoad | ✅ PASS | 0.010s |
-| 72 | FreeRTOSTaskTest.ConstructorInitializationOrderRaceCondition | ✅ PASS | 0.020s |
-| 73 | FreeRTOSTaskTest.TaskExecutionInternalFunction | ✅ PASS | 0.020s |
-| 74 | FreeRTOSTaskTest.PeriodicTaskRunMethodExecution | ✅ PASS | 0.020s |
+| 71 | FreeRTOSTaskTest.TaskSystemStatusUnderLoad | ✅ PASS | 0.020s |
+| 72 | FreeRTOSTaskTest.ConstructorInitializationOrderRaceCondition | ✅ PASS | 0.010s |
+| 73 | FreeRTOSTaskTest.TaskExecutionInternalFunction | ✅ PASS | 0.010s |
+| 74 | FreeRTOSTaskTest.PeriodicTaskRunMethodExecution | ✅ PASS | 0.010s |
 | 75 | FreeRTOSTaskTest.YieldFunctionExecution | ✅ PASS | 0.010s |
 | 76 | FreeRTOSTaskTest.CriticalSectionAndBarrierUtilities | ✅ PASS | 0.010s |
 | 77 | FreeRTOSTaskTest.TaskSystemStatusCoverage | ✅ PASS | 0.010s |
 | 78 | FreeRTOSTaskTest.AdvancedRacingConditionScenarios | ✅ PASS | 0.010s |
 | 79 | FreeRTOSTaskTest.EdgeCaseErrorHandling | ✅ PASS | 0.010s |
-| 80 | FreeRTOSTaskTest.AdvancedChronoCompatibility | ✅ PASS | 0.020s |
+| 80 | FreeRTOSTaskTest.AdvancedChronoCompatibility | ✅ PASS | 0.010s |
 | 81 | FreeRTOSTaskTest.PriorityInheritanceScenario | ✅ PASS | 0.010s |
 
 ### Semaphore Module Tests
@@ -121,7 +121,7 @@ This report provides comprehensive validation and verification results for the F
 - Passed: 96
 - Failed: 0
 - Success Rate: 100.0%
-- Total Time: 2.060s
+- Total Time: 2.080s
 
 **Detailed Test Results:**
 
@@ -220,7 +220,7 @@ This report provides comprehensive validation and verification results for the F
 | 392 | STLSemaphoreTest.STLRecursiveMutexBasicOperations | ✅ PASS | 0.000s |
 | 393 | STLSemaphoreTest.STLRecursiveMutexNestedLocking | ✅ PASS | 0.000s |
 | 394 | STLSemaphoreTest.STLProducerConsumerWithBuffering | ✅ PASS | 0.100s |
-| 395 | STLSemaphoreTest.STLReaderWriterPattern | ✅ PASS | 0.380s |
+| 395 | STLSemaphoreTest.STLReaderWriterPattern | ✅ PASS | 0.400s |
 | 396 | STLSemaphoreTest.STLSemaphoreStressTest | ✅ PASS | 0.090s |
 | 397 | STLSemaphoreTest.STLTimeoutAccuracy | ✅ PASS | 0.350s |
 
@@ -531,11 +531,11 @@ This report provides comprehensive validation and verification results for the F
 ## Code Coverage Analysis
 
 ### Coverage Overview
-The project achieves excellent code coverage with **96.7% line coverage** and **95.8% function coverage**.
+The project achieves excellent code coverage with **96.6% line coverage** and **94.9% function coverage**.
 
 ### Coverage Breakdown
-- **Lines Covered**: 6536 out of 6758 total lines
-- **Functions Covered**: 2653 out of 2768 total functions
+- **Lines Covered**: 6835 out of 7075 total lines
+- **Functions Covered**: 2777 out of 2925 total functions
 - **Coverage Target**: Main library modules only (excludes test infrastructure and system headers)
 
 
@@ -563,35 +563,35 @@ The high coverage percentage indicates:
 ## Test Quality Metrics
 
 ### Test Distribution by Category
-- **Task Module**: 81 tests (20.4%)
-- **Semaphore Module**: 96 tests (24.2%)
-- **Queue Module**: 49 tests (12.3%)
-- **EventGroup Module**: 30 tests (7.6%)
-- **StreamBuffer Module**: 47 tests (11.8%)
-- **MessageBuffer Module**: 32 tests (8.1%)
-- **Timer Module**: 50 tests (12.6%)
-- **Enhanced Module**: 12 tests (3.0%)
+- **Task Module**: 81 tests (19.2%)
+- **Semaphore Module**: 96 tests (22.8%)
+- **Queue Module**: 49 tests (11.6%)
+- **EventGroup Module**: 30 tests (7.1%)
+- **StreamBuffer Module**: 47 tests (11.2%)
+- **MessageBuffer Module**: 32 tests (7.6%)
+- **Timer Module**: 50 tests (11.9%)
+- **Enhanced Module**: 12 tests (2.9%)
 
 
 ### Performance Characteristics
 - **Fastest Test**: 0.000 seconds
-- **Slowest Test**: 0.380 seconds
+- **Slowest Test**: 0.400 seconds
 - **Performance Distribution**:
   - Very Fast (< 0.01s): 6 tests
-  - Fast (0.01-0.05s): 377 tests
+  - Fast (0.01-0.05s): 401 tests
   - Normal (0.05-0.1s): 7 tests
   - Slow (> 0.1s): 7 tests
 
 ## Validation Conclusions
 
 ### ✅ Test Suite Maturity
-- **Comprehensive Coverage**: 397 test cases across all FreeRTOS wrapper modules
+- **Comprehensive Coverage**: 421 test cases across all FreeRTOS wrapper modules
 - **Perfect Success Rate**: All tests passing indicates stable and robust implementation
 - **Good Module Distribution**: Balanced testing across tasks, synchronization primitives, and communication mechanisms
 
 ### ✅ Code Quality Validation
-- **High Coverage**: 96.7% line coverage demonstrates thorough validation
-- **API Completeness**: 95.8% function coverage shows comprehensive API testing
+- **High Coverage**: 96.6% line coverage demonstrates thorough validation
+- **API Completeness**: 94.9% function coverage shows comprehensive API testing
 - **Production Ready**: Test results indicate code is ready for production use
 
 ### 🔄 Continuous Validation
@@ -609,8 +609,8 @@ This report is automatically generated with each test execution to ensure:
 
 ---
 
-*Report Generated*: July 22, 2025 at 14:10:45  
+*Report Generated*: July 22, 2025 at 14:32:34  
 *Test Framework*: GoogleTest/GoogleMock  
 *Coverage Tool*: LCOV/GCOV  
-*Total Test Execution Time*: 5.89 seconds  
+*Total Test Execution Time*: 6.23 seconds  
 *Validation Status*: ✅ **All tests passing - System validated for production use**
