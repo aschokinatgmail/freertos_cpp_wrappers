@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FreeRTOS C++ Wrappers<span id="projectnumber">&#160;v0.1.0-c86d68e</span>
+   <div id="projectname">FreeRTOS C++ Wrappers<span id="projectnumber">&#160;v0.1.0-4919236</span>
    </div>
    <div id="projectbrief">Modern C++17 RAII wrappers for FreeRTOS APIs</div>
   </td>
@@ -153,6 +153,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a50a8c8b3aaeff40407e15d3eb597e8d8" id="r_a50a8c8b3aaeff40407e15d3eb597e8d8"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classfreertos_1_1recursive__mutex.html#a50a8c8b3aaeff40407e15d3eb597e8d8">locked</a> (void) const</td></tr>
 <tr class="memdesc:a50a8c8b3aaeff40407e15d3eb597e8d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the lock status of the recursive mutex.  <br /></td></tr>
 <tr class="separator:a50a8c8b3aaeff40407e15d3eb597e8d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a34374156091a4e09c8432b525b86e24f" id="r_a34374156091a4e09c8432b525b86e24f"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classfreertos_1_1recursive__mutex.html#a34374156091a4e09c8432b525b86e24f">recursions_count</a> (void) const</td></tr>
+<tr class="memdesc:a34374156091a4e09c8432b525b86e24f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the number of recursions of the recursive mutex.  <br /></td></tr>
+<tr class="separator:a34374156091a4e09c8432b525b86e24f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;typename SemaphoreAllocator&gt;<br />
@@ -339,6 +342,37 @@ template&lt;typename SemaphoreAllocator &gt; </div>
 
 </div>
 </div>
+<a id="a34374156091a4e09c8432b525b86e24f" name="a34374156091a4e09c8432b525b86e24f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a34374156091a4e09c8432b525b86e24f">&#9670;&#160;</a></span>recursions_count()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename SemaphoreAllocator &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t <a class="el" href="classfreertos_1_1recursive__mutex.html">freertos::recursive_mutex</a>&lt; SemaphoreAllocator &gt;::recursions_count </td>
+          <td>(</td>
+          <td class="paramtype">void&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the number of recursions of the recursive mutex. </p>
+<dl class="section return"><dt>Returns</dt><dd>uint8_t number of recursions of the recursive mutex. </dd></dl>
+
+</div>
+</div>
 <a id="ab6a508d720641f15c1fe2b293e96ae50" name="ab6a508d720641f15c1fe2b293e96ae50"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ab6a508d720641f15c1fe2b293e96ae50">&#9670;&#160;</a></span>try_lock()</h2>
 
@@ -395,7 +429,7 @@ template&lt;typename SemaphoreAllocator &gt; </div>
 </div><div class="memdoc">
 
 <p>Unlock the recursive mutex. <a href="https://www.freertos.org/a00123.html">https://www.freertos.org/a00123.html</a>. </p>
-<dl class="section return"><dt>Returns</dt><dd>BaseType_t pdTRUE if the recursive mutex was successfully unlocked, </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>BaseType_t pdTRUE if the recursive mutex was successfully unlocked, otherwise pdFALSE. </dd></dl>
 
 </div>
 </div>

@@ -1513,6 +1513,209 @@ TEST_F(FreeRTOSSemaphoreTest, NamespaceAliasRecursiveMutex) {
     EXPECT_EQ(unlock_result, pdTRUE);
 }
 
+TEST_F(FreeRTOSSemaphoreTest, RecursiveMutexRecursionsCountBasic) {
+    /*
+     * Basic Recursions Count Test:
+     * Tests that the recursions_count() method correctly tracks the number
+     * of nested locks on a recursive mutex.
+     */
+    EXPECT_CALL(*mock, xSemaphoreCreateRecursiveMutex())
+        .WillOnce(Return(mock_recursive_mutex_handle));
+    EXPECT_CALL(*mock, xSemaphoreTakeRecursive(mock_recursive_mutex_handle, portMAX_DELAY))
+        .Times(3)
+        .WillRepeatedly(Return(pdTRUE));
+    EXPECT_CALL(*mock, xSemaphoreGiveRecursive(mock_recursive_mutex_handle))
+        .Times(3)
+        .WillRepeatedly(Return(pdTRUE));
+    EXPECT_CALL(*mock, vSemaphoreDelete(mock_recursive_mutex_handle));
+
+    freertos::recursive_mutex<freertos::dynamic_semaphore_allocator> recursive_mutex;
+    
+    // Initially no locks - count should be 0
+    EXPECT_EQ(recursive_mutex.recursions_count(), 0);
+    EXPECT_FALSE(recursive_mutex.locked());
+    
+    // First lock - count should be 1
+    auto lock1 = recursive_mutex.lock();
+    EXPECT_EQ(lock1, pdTRUE);
+    EXPECT_EQ(recursive_mutex.recursions_count(), 1);
+    EXPECT_TRUE(recursive_mutex.locked());
+    
+    // Second lock (recursive) - count should be 2
+    auto lock2 = recursive_mutex.lock();
+    EXPECT_EQ(lock2, pdTRUE);
+    EXPECT_EQ(recursive_mutex.recursions_count(), 2);
+    EXPECT_TRUE(recursive_mutex.locked());
+    
+    // Third lock (recursive) - count should be 3
+    auto lock3 = recursive_mutex.lock();
+    EXPECT_EQ(lock3, pdTRUE);
+    EXPECT_EQ(recursive_mutex.recursions_count(), 3);
+    EXPECT_TRUE(recursive_mutex.locked());
+    
+    // First unlock - count should be 2
+    auto unlock1 = recursive_mutex.unlock();
+    EXPECT_EQ(unlock1, pdTRUE);
+    EXPECT_EQ(recursive_mutex.recursions_count(), 2);
+    EXPECT_TRUE(recursive_mutex.locked());
+    
+    // Second unlock - count should be 1
+    auto unlock2 = recursive_mutex.unlock();
+    EXPECT_EQ(unlock2, pdTRUE);
+    EXPECT_EQ(recursive_mutex.recursions_count(), 1);
+    EXPECT_TRUE(recursive_mutex.locked());
+    
+    // Third unlock - count should be 0
+    auto unlock3 = recursive_mutex.unlock();
+    EXPECT_EQ(unlock3, pdTRUE);
+    EXPECT_EQ(recursive_mutex.recursions_count(), 0);
+    EXPECT_FALSE(recursive_mutex.locked());
+}
+
+TEST_F(FreeRTOSSemaphoreTest, RecursiveMutexRecursionsCountTryLock) {
+    /*
+     * Recursions Count with try_lock Test:
+     * Tests that the recursions_count() method correctly tracks nested
+     * locks when using try_lock() method.
+     */
+    EXPECT_CALL(*mock, xSemaphoreCreateRecursiveMutex())
+        .WillOnce(Return(mock_recursive_mutex_handle));
+    EXPECT_CALL(*mock, xSemaphoreTakeRecursive(mock_recursive_mutex_handle, 0))
+        .Times(2)
+        .WillRepeatedly(Return(pdTRUE));
+    EXPECT_CALL(*mock, xSemaphoreGiveRecursive(mock_recursive_mutex_handle))
+        .Times(2)
+        .WillRepeatedly(Return(pdTRUE));
+    EXPECT_CALL(*mock, vSemaphoreDelete(mock_recursive_mutex_handle));
+
+    freertos::recursive_mutex<freertos::dynamic_semaphore_allocator> recursive_mutex;
+    
+    // Initially no locks
+    EXPECT_EQ(recursive_mutex.recursions_count(), 0);
+    
+    // First try_lock - count should be 1
+    auto try_lock1 = recursive_mutex.try_lock();
+    EXPECT_EQ(try_lock1, pdTRUE);
+    EXPECT_EQ(recursive_mutex.recursions_count(), 1);
+    
+    // Second try_lock (recursive) - count should be 2
+    auto try_lock2 = recursive_mutex.try_lock();
+    EXPECT_EQ(try_lock2, pdTRUE);
+    EXPECT_EQ(recursive_mutex.recursions_count(), 2);
+    
+    // Unlock once - count should be 1
+    auto unlock1 = recursive_mutex.unlock();
+    EXPECT_EQ(unlock1, pdTRUE);
+    EXPECT_EQ(recursive_mutex.recursions_count(), 1);
+    
+    // Unlock again - count should be 0
+    auto unlock2 = recursive_mutex.unlock();
+    EXPECT_EQ(unlock2, pdTRUE);
+    EXPECT_EQ(recursive_mutex.recursions_count(), 0);
+}
+
+TEST_F(FreeRTOSSemaphoreTest, RecursiveMutexRecursionsCountISR) {
+    /*
+     * Recursions Count with ISR methods Test:
+     * Tests that the recursions_count() method correctly tracks nested
+     * locks when using ISR methods (lock_isr/unlock_isr).
+     */
+    EXPECT_CALL(*mock, xSemaphoreCreateRecursiveMutex())
+        .WillOnce(Return(mock_recursive_mutex_handle));
+    EXPECT_CALL(*mock, xSemaphoreTakeFromISR(mock_recursive_mutex_handle, _))
+        .Times(2)
+        .WillRepeatedly(Return(pdTRUE));
+    EXPECT_CALL(*mock, xSemaphoreGiveFromISR(mock_recursive_mutex_handle, _))
+        .Times(2)
+        .WillRepeatedly(Return(pdTRUE));
+    EXPECT_CALL(*mock, vSemaphoreDelete(mock_recursive_mutex_handle));
+
+    freertos::recursive_mutex<freertos::dynamic_semaphore_allocator> recursive_mutex;
+    
+    // Initially no locks
+    EXPECT_EQ(recursive_mutex.recursions_count(), 0);
+    
+    // First lock_isr - count should be 1
+    BaseType_t task_woken = pdFALSE;
+    auto lock_isr1 = recursive_mutex.lock_isr(task_woken);
+    EXPECT_EQ(lock_isr1, pdTRUE);
+    EXPECT_EQ(recursive_mutex.recursions_count(), 1);
+    
+    // Second lock_isr (recursive) - count should be 2
+    auto lock_isr2 = recursive_mutex.lock_isr();
+    EXPECT_EQ(lock_isr2, pdTRUE);
+    EXPECT_EQ(recursive_mutex.recursions_count(), 2);
+    
+    // Unlock from ISR once - count should be 1
+    auto unlock_isr1 = recursive_mutex.unlock_isr(task_woken);
+    EXPECT_EQ(unlock_isr1, pdTRUE);
+    EXPECT_EQ(recursive_mutex.recursions_count(), 1);
+    
+    // Unlock from ISR again - count should be 0
+    auto unlock_isr2 = recursive_mutex.unlock_isr();
+    EXPECT_EQ(unlock_isr2, pdTRUE);
+    EXPECT_EQ(recursive_mutex.recursions_count(), 0);
+}
+
+TEST_F(FreeRTOSSemaphoreTest, RecursiveMutexRecursionsCountFailureScenarios) {
+    /*
+     * Recursions Count Failure Scenarios Test:
+     * Tests that the recursions_count() behaves correctly when lock operations fail.
+     */
+    EXPECT_CALL(*mock, xSemaphoreCreateRecursiveMutex())
+        .WillOnce(Return(mock_recursive_mutex_handle));
+    EXPECT_CALL(*mock, xSemaphoreTakeRecursive(mock_recursive_mutex_handle, portMAX_DELAY))
+        .WillOnce(Return(pdTRUE))
+        .WillOnce(Return(pdFALSE)); // Second lock fails
+    EXPECT_CALL(*mock, xSemaphoreGiveRecursive(mock_recursive_mutex_handle))
+        .WillOnce(Return(pdTRUE));
+    EXPECT_CALL(*mock, vSemaphoreDelete(mock_recursive_mutex_handle));
+
+    freertos::recursive_mutex<freertos::dynamic_semaphore_allocator> recursive_mutex;
+    
+    // Initially no locks
+    EXPECT_EQ(recursive_mutex.recursions_count(), 0);
+    
+    // First lock succeeds - count should be 1
+    auto lock1 = recursive_mutex.lock();
+    EXPECT_EQ(lock1, pdTRUE);
+    EXPECT_EQ(recursive_mutex.recursions_count(), 1);
+    
+    // Second lock fails - count should remain 1
+    auto lock2 = recursive_mutex.lock();
+    EXPECT_EQ(lock2, pdFALSE);
+    EXPECT_EQ(recursive_mutex.recursions_count(), 1); // Should not increment on failure
+    
+    // Unlock - count should be 0
+    auto unlock1 = recursive_mutex.unlock();
+    EXPECT_EQ(unlock1, pdTRUE);
+    EXPECT_EQ(recursive_mutex.recursions_count(), 0);
+}
+
+TEST_F(FreeRTOSSemaphoreTest, RecursiveMutexRecursionsCountEdgeCases) {
+    /*
+     * Recursions Count Edge Cases Test:
+     * Tests edge cases like unlocking when count is already 0.
+     */
+    EXPECT_CALL(*mock, xSemaphoreCreateRecursiveMutex())
+        .WillOnce(Return(mock_recursive_mutex_handle));
+    EXPECT_CALL(*mock, xSemaphoreGiveRecursive(mock_recursive_mutex_handle))
+        .WillOnce(Return(pdFALSE)); // Unlock fails when not locked
+    EXPECT_CALL(*mock, vSemaphoreDelete(mock_recursive_mutex_handle));
+
+    freertos::recursive_mutex<freertos::dynamic_semaphore_allocator> recursive_mutex;
+    
+    // Initially no locks
+    EXPECT_EQ(recursive_mutex.recursions_count(), 0);
+    EXPECT_FALSE(recursive_mutex.locked());
+    
+    // Try to unlock when not locked - should fail but count should remain 0
+    auto unlock_fail = recursive_mutex.unlock();
+    EXPECT_EQ(unlock_fail, pdFALSE);
+    EXPECT_EQ(recursive_mutex.recursions_count(), 0); // Should not underflow
+    EXPECT_FALSE(recursive_mutex.locked());
+}
+
 // =============================================================================
 // Additional Edge Cases and Comprehensive Tests
 // =============================================================================

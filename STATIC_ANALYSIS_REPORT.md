@@ -65,12 +65,12 @@
 627143 warnings generated.
 [9/9] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp.
 705523 warnings generated.
-/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_semaphore.hpp:361:3: warning: overloaded 'operator++' returns a reference instead of a constant object type [cert-dcl21-cpp]
-  361 |   counting_semaphore &
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_semaphore.hpp:421:3: warning: overloaded 'operator++' returns a reference instead of a constant object type [cert-dcl21-cpp]
+  421 |   counting_semaphore &
       |   ^~~~~~~~~~~~~~~~~~~~
       |   const counting_semaphore<SemaphoreAllocator> 
-/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_semaphore.hpp:372:3: warning: overloaded 'operator--' returns a reference instead of a constant object type [cert-dcl21-cpp]
-  372 |   counting_semaphore &
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_semaphore.hpp:432:3: warning: overloaded 'operator--' returns a reference instead of a constant object type [cert-dcl21-cpp]
+  432 |   counting_semaphore &
       |   ^~~~~~~~~~~~~~~~~~~~
       |   const counting_semaphore<SemaphoreAllocator> 
 /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_sw_timer.hpp:131:5: warning: 'm_timer' should be initialized in a member initializer of the constructor [cppcoreguidelines-prefer-member-initializer]
