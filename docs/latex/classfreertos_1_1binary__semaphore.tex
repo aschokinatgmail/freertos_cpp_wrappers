@@ -1,0 +1,258 @@
+\doxysection{freertos\+::binary\+\_\+semaphore\texorpdfstring{$<$}{<} Semaphore\+Allocator \texorpdfstring{$>$}{>} Class Template Reference}
+\hypertarget{classfreertos_1_1binary__semaphore}{}\label{classfreertos_1_1binary__semaphore}\index{freertos::binary\_semaphore$<$ SemaphoreAllocator $>$@{freertos::binary\_semaphore$<$ SemaphoreAllocator $>$}}
+
+
+A modern C++ wrapper for Free\+RTOS binary semaphores.  
+
+
+
+
+{\ttfamily \#include $<$freertos\+\_\+semaphore.\+hpp$>$}
+
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{classfreertos_1_1binary__semaphore_a189b6bee4f0abb59109cd0e110c3d56f}\label{classfreertos_1_1binary__semaphore_a189b6bee4f0abb59109cd0e110c3d56f} 
+{\bfseries binary\+\_\+semaphore} ()
+\begin{DoxyCompactList}\small\item\em Construct a new binary semaphore object. \end{DoxyCompactList}\item 
+\Hypertarget{classfreertos_1_1binary__semaphore_a0f4b97107be6c740356b61a6b9b9edd6}\label{classfreertos_1_1binary__semaphore_a0f4b97107be6c740356b61a6b9b9edd6} 
+{\bfseries binary\+\_\+semaphore} (const \mbox{\hyperlink{classfreertos_1_1binary__semaphore}{binary\+\_\+semaphore}} \&)=delete
+\item 
+\Hypertarget{classfreertos_1_1binary__semaphore_a283b334356bf757093fbc4012f718513}\label{classfreertos_1_1binary__semaphore_a283b334356bf757093fbc4012f718513} 
+{\bfseries binary\+\_\+semaphore} (\mbox{\hyperlink{classfreertos_1_1binary__semaphore}{binary\+\_\+semaphore}} \&\&src)=delete
+\item 
+\Hypertarget{classfreertos_1_1binary__semaphore_a07f06fa64b66a2118ddfd252d3cdb2c6}\label{classfreertos_1_1binary__semaphore_a07f06fa64b66a2118ddfd252d3cdb2c6} 
+{\bfseries \texorpdfstring{$\sim$}{\string~}binary\+\_\+semaphore} (void)
+\begin{DoxyCompactList}\small\item\em Destruct the binary semaphore object and delete the binary semaphore instance if it was created. \end{DoxyCompactList}\item 
+\Hypertarget{classfreertos_1_1binary__semaphore_af036228c667459f712626d33c5fd173c}\label{classfreertos_1_1binary__semaphore_af036228c667459f712626d33c5fd173c} 
+\mbox{\hyperlink{classfreertos_1_1binary__semaphore}{binary\+\_\+semaphore}} \& {\bfseries operator=} (const \mbox{\hyperlink{classfreertos_1_1binary__semaphore}{binary\+\_\+semaphore}} \&)=delete
+\item 
+\Hypertarget{classfreertos_1_1binary__semaphore_ab851183e47686c50a5e14078e9537093}\label{classfreertos_1_1binary__semaphore_ab851183e47686c50a5e14078e9537093} 
+\mbox{\hyperlink{classfreertos_1_1binary__semaphore}{binary\+\_\+semaphore}} \& {\bfseries operator=} (\mbox{\hyperlink{classfreertos_1_1binary__semaphore}{binary\+\_\+semaphore}} \&\&src)=delete
+\item 
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1binary__semaphore_a36fd71685f5c119bccc9e03fe52a70fc}{give}} ()
+\begin{DoxyCompactList}\small\item\em Give the binary semaphore. \href{https://www.freertos.org/a00123.html}{\texttt{ https\+://www.\+freertos.\+org/a00123.\+html}}. \end{DoxyCompactList}\item 
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1binary__semaphore_a139c85ca3cb7439696734efbcad91786}{give\+\_\+isr}} (Base\+Type\+\_\+t \&high\+\_\+priority\+\_\+task\+\_\+woken)
+\begin{DoxyCompactList}\small\item\em Give the binary semaphore from an ISR. \href{https://www.freertos.org/a00124.html}{\texttt{ https\+://www.\+freertos.\+org/a00124.\+html}}. \end{DoxyCompactList}\item 
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1binary__semaphore_acbee9cb6f8621c7ffe2b179559169b7d}{give\+\_\+isr}} (void)
+\begin{DoxyCompactList}\small\item\em Give the binary semaphore from an ISR. \href{https://www.freertos.org/a00124.html}{\texttt{ https\+://www.\+freertos.\+org/a00124.\+html}}. \end{DoxyCompactList}\item 
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1binary__semaphore_a9c157a3f25082aaa4e5fa1a606d9efd0}{take}} (const Tick\+Type\+\_\+t ticks\+\_\+to\+\_\+wait=port\+MAX\+\_\+\+DELAY)
+\begin{DoxyCompactList}\small\item\em Take the binary semaphore. \href{https://www.freertos.org/a00122.html}{\texttt{ https\+://www.\+freertos.\+org/a00122.\+html}}. \end{DoxyCompactList}\item 
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1binary__semaphore_a14d8aea4fbb3baba51c9d9ea7e82120b}{take\+\_\+isr}} (Base\+Type\+\_\+t \&high\+\_\+priority\+\_\+task\+\_\+woken)
+\begin{DoxyCompactList}\small\item\em Take the binary semaphore from an ISR. \href{https://www.freertos.org/xSemaphoreTakeFromISR.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Semaphore\+Take\+From\+ISR.\+html}}. \end{DoxyCompactList}\item 
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1binary__semaphore_a7c0a56528e51347c31fd40b269b9b78b}{take\+\_\+isr}} (void)
+\begin{DoxyCompactList}\small\item\em Take the binary semaphore from an ISR. \href{https://www.freertos.org/xSemaphoreTakeFromISR.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Semaphore\+Take\+From\+ISR.\+html}}. \end{DoxyCompactList}\item 
+{\footnotesize template$<$typename Rep , typename Period $>$ }\\Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1binary__semaphore_a56c8efb4ba1bc09fc04a1e3493f7c0ad}{take}} (const std\+::chrono\+::duration$<$ Rep, Period $>$ \&timeout)
+\begin{DoxyCompactList}\small\item\em Take the binary semaphore. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\subsubsection*{template$<$typename Semaphore\+Allocator$>$\newline
+class freertos\+::binary\+\_\+semaphore$<$ Semaphore\+Allocator $>$}
+A modern C++ wrapper for Free\+RTOS binary semaphores. 
+
+Binary semaphores are used for both mutual exclusion and task synchronization. Unlike mutexes, binary semaphores do not implement priority inheritance.
+
+
+\begin{DoxyTemplParams}{Template Parameters}
+{\em Semaphore\+Allocator} & Type of allocator (static or dynamic)\\
+\hline
+\end{DoxyTemplParams}
+\hypertarget{classfreertos_1_1binary__semaphore_autotoc_md6}{}\doxysubsubsection{\texorpdfstring{Features\+:}{Features:}}\label{classfreertos_1_1binary__semaphore_autotoc_md6}
+
+\begin{DoxyItemize}
+\item RAII automatic cleanup
+\item std\+::chrono timeout support ~\newline
+
+\item ISR-\/safe operations
+\item Exception-\/safe design
+\item No copy/move to prevent accidental resource duplication
+\end{DoxyItemize}\hypertarget{classfreertos_1_1binary__semaphore_autotoc_md7}{}\doxysubsubsection{\texorpdfstring{Usage Examples\+:}{Usage Examples:}}\label{classfreertos_1_1binary__semaphore_autotoc_md7}
+\hypertarget{classfreertos_1_1binary__semaphore_autotoc_md8}{}\doxysubsubsubsection{\texorpdfstring{Basic Signaling\+:}{Basic Signaling:}}\label{classfreertos_1_1binary__semaphore_autotoc_md8}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\mbox{\hyperlink{classfreertos_1_1binary__semaphore}{freertos::binary\_semaphore}}\ signal\_sem;}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{//\ Producer\ task}}
+\DoxyCodeLine{\mbox{\hyperlink{classfreertos_1_1task}{freertos::task<512>}}\ producer(\textcolor{stringliteral}{"{}Producer"{}},\ 3,\ [\&]()\ \{}
+\DoxyCodeLine{\ \ \ \ \textcolor{keywordflow}{while}\ (\textcolor{keyword}{true})\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ produce\_data();}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ signal\_sem.\mbox{\hyperlink{classfreertos_1_1binary__semaphore_a36fd71685f5c119bccc9e03fe52a70fc}{give}}();\ \ \textcolor{comment}{//\ Signal\ consumer}}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ vTaskDelay(pdMS\_TO\_TICKS(1000));}
+\DoxyCodeLine{\ \ \ \ \}}
+\DoxyCodeLine{\});}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{//\ Consumer\ task\ \ }}
+\DoxyCodeLine{\mbox{\hyperlink{classfreertos_1_1task}{freertos::task<512>}}\ consumer(\textcolor{stringliteral}{"{}Consumer"{}},\ 2,\ [\&]()\ \{}
+\DoxyCodeLine{\ \ \ \ \textcolor{keywordflow}{while}\ (\textcolor{keyword}{true})\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (signal\_sem.\mbox{\hyperlink{classfreertos_1_1binary__semaphore_a9c157a3f25082aaa4e5fa1a606d9efd0}{take}}(std::chrono::seconds(5)))\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ consume\_data();}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}Timeout\ waiting\ for\ signal\(\backslash\)\(\backslash\)n"{}});}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\ \ \ \ \}}
+\DoxyCodeLine{\});}
+
+\end{DoxyCode}
+\hypertarget{classfreertos_1_1binary__semaphore_autotoc_md9}{}\doxysubsubsubsection{\texorpdfstring{ISR Communication\+:}{ISR Communication:}}\label{classfreertos_1_1binary__semaphore_autotoc_md9}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\mbox{\hyperlink{classfreertos_1_1binary__semaphore}{freertos::binary\_semaphore}}\ isr\_sem;}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{keywordtype}{void}\ timer\_interrupt\_handler()\ \{}
+\DoxyCodeLine{\ \ \ \ BaseType\_t\ task\_woken\ =\ pdFALSE;}
+\DoxyCodeLine{\ \ \ \ isr\_sem.\mbox{\hyperlink{classfreertos_1_1binary__semaphore_a139c85ca3cb7439696734efbcad91786}{give\_isr}}(task\_woken);}
+\DoxyCodeLine{\ \ \ \ portYIELD\_FROM\_ISR(task\_woken);}
+\DoxyCodeLine{\}}
+\DoxyCodeLine{}
+\DoxyCodeLine{\mbox{\hyperlink{classfreertos_1_1task}{freertos::task<1024>}}\ handler\_task(\textcolor{stringliteral}{"{}Handler"{}},\ 5,\ [\&]()\ \{}
+\DoxyCodeLine{\ \ \ \ \textcolor{keywordflow}{while}\ (\textcolor{keyword}{true})\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (isr\_sem.\mbox{\hyperlink{classfreertos_1_1binary__semaphore_a9c157a3f25082aaa4e5fa1a606d9efd0}{take}}())\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ handle\_timer\_event();}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\ \ \ \ \}}
+\DoxyCodeLine{\});}
+
+\end{DoxyCode}
+\hypertarget{classfreertos_1_1binary__semaphore_autotoc_md10}{}\doxysubsubsubsection{\texorpdfstring{Static Allocation\+:}{Static Allocation:}}\label{classfreertos_1_1binary__semaphore_autotoc_md10}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\mbox{\hyperlink{classfreertos_1_1binary__semaphore}{freertos::binary\_semaphore<freertos::static\_semaphore\_allocator>}}\ static\_sem;}
+
+\end{DoxyCode}
+ \begin{Desc}
+\item[Examples]\par
+\mbox{\hyperlink{static_allocation_example_8cpp-example}{static\+\_\+allocation\+\_\+example.\+cpp}}, and \mbox{\hyperlink{synchronization_example_8cpp-example}{synchronization\+\_\+example.\+cpp}}.\end{Desc}
+
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classfreertos_1_1binary__semaphore_a36fd71685f5c119bccc9e03fe52a70fc}\label{classfreertos_1_1binary__semaphore_a36fd71685f5c119bccc9e03fe52a70fc} 
+\index{freertos::binary\_semaphore$<$ SemaphoreAllocator $>$@{freertos::binary\_semaphore$<$ SemaphoreAllocator $>$}!give@{give}}
+\index{give@{give}!freertos::binary\_semaphore$<$ SemaphoreAllocator $>$@{freertos::binary\_semaphore$<$ SemaphoreAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{give()}{give()}}
+{\footnotesize\ttfamily template$<$typename Semaphore\+Allocator $>$ \\
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1binary__semaphore}{freertos\+::binary\+\_\+semaphore}}$<$ Semaphore\+Allocator $>$\+::give (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Give the binary semaphore. \href{https://www.freertos.org/a00123.html}{\texttt{ https\+://www.\+freertos.\+org/a00123.\+html}}. 
+
+\begin{DoxyReturn}{Returns}
+Base\+Type\+\_\+t pd\+TRUE if the semaphore was successfully given, otherwise pd\+FALSE. 
+\end{DoxyReturn}
+\begin{Desc}
+\item[Examples]\par
+\mbox{\hyperlink{synchronization_example_8cpp-example}{synchronization\+\_\+example.\+cpp}}.\end{Desc}
+\Hypertarget{classfreertos_1_1binary__semaphore_a139c85ca3cb7439696734efbcad91786}\label{classfreertos_1_1binary__semaphore_a139c85ca3cb7439696734efbcad91786} 
+\index{freertos::binary\_semaphore$<$ SemaphoreAllocator $>$@{freertos::binary\_semaphore$<$ SemaphoreAllocator $>$}!give\_isr@{give\_isr}}
+\index{give\_isr@{give\_isr}!freertos::binary\_semaphore$<$ SemaphoreAllocator $>$@{freertos::binary\_semaphore$<$ SemaphoreAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{give\_isr()}{give\_isr()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily template$<$typename Semaphore\+Allocator $>$ \\
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1binary__semaphore}{freertos\+::binary\+\_\+semaphore}}$<$ Semaphore\+Allocator $>$\+::give\+\_\+isr (\begin{DoxyParamCaption}\item[{Base\+Type\+\_\+t \&}]{high\+\_\+priority\+\_\+task\+\_\+woken }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Give the binary semaphore from an ISR. \href{https://www.freertos.org/a00124.html}{\texttt{ https\+://www.\+freertos.\+org/a00124.\+html}}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em high\+\_\+priority\+\_\+task\+\_\+woken} & pd\+TRUE if the high priority task was woken by the semaphore give. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Base\+Type\+\_\+t pd\+TRUE if the semaphore was successfully given, 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1binary__semaphore_acbee9cb6f8621c7ffe2b179559169b7d}\label{classfreertos_1_1binary__semaphore_acbee9cb6f8621c7ffe2b179559169b7d} 
+\index{freertos::binary\_semaphore$<$ SemaphoreAllocator $>$@{freertos::binary\_semaphore$<$ SemaphoreAllocator $>$}!give\_isr@{give\_isr}}
+\index{give\_isr@{give\_isr}!freertos::binary\_semaphore$<$ SemaphoreAllocator $>$@{freertos::binary\_semaphore$<$ SemaphoreAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{give\_isr()}{give\_isr()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily template$<$typename Semaphore\+Allocator $>$ \\
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1binary__semaphore}{freertos\+::binary\+\_\+semaphore}}$<$ Semaphore\+Allocator $>$\+::give\+\_\+isr (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Give the binary semaphore from an ISR. \href{https://www.freertos.org/a00124.html}{\texttt{ https\+://www.\+freertos.\+org/a00124.\+html}}. 
+
+\begin{DoxyReturn}{Returns}
+Base\+Type\+\_\+t pd\+TRUE if the semaphore was successfully given, 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1binary__semaphore_a56c8efb4ba1bc09fc04a1e3493f7c0ad}\label{classfreertos_1_1binary__semaphore_a56c8efb4ba1bc09fc04a1e3493f7c0ad} 
+\index{freertos::binary\_semaphore$<$ SemaphoreAllocator $>$@{freertos::binary\_semaphore$<$ SemaphoreAllocator $>$}!take@{take}}
+\index{take@{take}!freertos::binary\_semaphore$<$ SemaphoreAllocator $>$@{freertos::binary\_semaphore$<$ SemaphoreAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{take()}{take()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily template$<$typename Semaphore\+Allocator $>$ \\
+template$<$typename Rep , typename Period $>$ \\
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1binary__semaphore}{freertos\+::binary\+\_\+semaphore}}$<$ Semaphore\+Allocator $>$\+::take (\begin{DoxyParamCaption}\item[{const std\+::chrono\+::duration$<$ Rep, Period $>$ \&}]{timeout }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Take the binary semaphore. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em timeout} & timeout to wait for the semaphore. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Base\+Type\+\_\+t pd\+TRUE if the semaphore was successfully taken, otherwise pd\+FALSE. 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1binary__semaphore_a9c157a3f25082aaa4e5fa1a606d9efd0}\label{classfreertos_1_1binary__semaphore_a9c157a3f25082aaa4e5fa1a606d9efd0} 
+\index{freertos::binary\_semaphore$<$ SemaphoreAllocator $>$@{freertos::binary\_semaphore$<$ SemaphoreAllocator $>$}!take@{take}}
+\index{take@{take}!freertos::binary\_semaphore$<$ SemaphoreAllocator $>$@{freertos::binary\_semaphore$<$ SemaphoreAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{take()}{take()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily template$<$typename Semaphore\+Allocator $>$ \\
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1binary__semaphore}{freertos\+::binary\+\_\+semaphore}}$<$ Semaphore\+Allocator $>$\+::take (\begin{DoxyParamCaption}\item[{const Tick\+Type\+\_\+t}]{ticks\+\_\+to\+\_\+wait = {\ttfamily portMAX\+\_\+DELAY} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Take the binary semaphore. \href{https://www.freertos.org/a00122.html}{\texttt{ https\+://www.\+freertos.\+org/a00122.\+html}}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em ticks\+\_\+to\+\_\+wait} & timeout in ticks to wait for the semaphore. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Base\+Type\+\_\+t pd\+TRUE if the semaphore was successfully taken, otherwise pd\+FALSE. 
+\end{DoxyReturn}
+\begin{Desc}
+\item[Examples]\par
+\mbox{\hyperlink{synchronization_example_8cpp-example}{synchronization\+\_\+example.\+cpp}}.\end{Desc}
+\Hypertarget{classfreertos_1_1binary__semaphore_a14d8aea4fbb3baba51c9d9ea7e82120b}\label{classfreertos_1_1binary__semaphore_a14d8aea4fbb3baba51c9d9ea7e82120b} 
+\index{freertos::binary\_semaphore$<$ SemaphoreAllocator $>$@{freertos::binary\_semaphore$<$ SemaphoreAllocator $>$}!take\_isr@{take\_isr}}
+\index{take\_isr@{take\_isr}!freertos::binary\_semaphore$<$ SemaphoreAllocator $>$@{freertos::binary\_semaphore$<$ SemaphoreAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{take\_isr()}{take\_isr()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily template$<$typename Semaphore\+Allocator $>$ \\
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1binary__semaphore}{freertos\+::binary\+\_\+semaphore}}$<$ Semaphore\+Allocator $>$\+::take\+\_\+isr (\begin{DoxyParamCaption}\item[{Base\+Type\+\_\+t \&}]{high\+\_\+priority\+\_\+task\+\_\+woken }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Take the binary semaphore from an ISR. \href{https://www.freertos.org/xSemaphoreTakeFromISR.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Semaphore\+Take\+From\+ISR.\+html}}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em high\+\_\+priority\+\_\+task\+\_\+woken} & pd\+TRUE if the high priority task was woken by the semaphore take.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Base\+Type\+\_\+t pd\+TRUE if the semaphore was successfully taken, otherwise pd\+FALSE. 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1binary__semaphore_a7c0a56528e51347c31fd40b269b9b78b}\label{classfreertos_1_1binary__semaphore_a7c0a56528e51347c31fd40b269b9b78b} 
+\index{freertos::binary\_semaphore$<$ SemaphoreAllocator $>$@{freertos::binary\_semaphore$<$ SemaphoreAllocator $>$}!take\_isr@{take\_isr}}
+\index{take\_isr@{take\_isr}!freertos::binary\_semaphore$<$ SemaphoreAllocator $>$@{freertos::binary\_semaphore$<$ SemaphoreAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{take\_isr()}{take\_isr()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily template$<$typename Semaphore\+Allocator $>$ \\
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1binary__semaphore}{freertos\+::binary\+\_\+semaphore}}$<$ Semaphore\+Allocator $>$\+::take\+\_\+isr (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Take the binary semaphore from an ISR. \href{https://www.freertos.org/xSemaphoreTakeFromISR.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Semaphore\+Take\+From\+ISR.\+html}}. 
+
+\begin{DoxyReturn}{Returns}
+Base\+Type\+\_\+t pd\+TRUE if the semaphore was successfully taken, otherwise pd\+FALSE. 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+include/freertos\+\_\+semaphore.\+hpp\end{DoxyCompactItemize}

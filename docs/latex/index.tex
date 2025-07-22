@@ -1,0 +1,360 @@
+\chapter{Free\+RTOS C++ Wrappers Documentation}
+\hypertarget{index}{}\label{index}\index{FreeRTOS C++ Wrappers Documentation@{FreeRTOS C++ Wrappers Documentation}}
+\hypertarget{index_intro_sec}{}\doxysection{\texorpdfstring{Introduction}{Introduction}}\label{index_intro_sec}
+Welcome to the {\bfseries{Free\+RTOS C++ Wrappers}} library documentation! This modern C++17 library provides lightweight, RAII-\/compliant wrappers for Free\+RTOS APIs, making it easier and safer to use Free\+RTOS in C++ applications.
+
+  🛡️ Type Safety Modern C++17 RAII wrappers ensure proper resource management and type safety   ⚡ High Performance Zero-\/overhead abstractions that don\textquotesingle{}t compromise on performance   🔧 Easy to Use Intuitive API design that leverages modern C++ features   🧪 Well Tested 377+ comprehensive tests covering all functionality   📱 Flexible Allocation Support for both static and dynamic memory allocation strategies   ⏱️ Chrono Support Full std\+::chrono compatibility for timeout handling  \hypertarget{index_features_sec}{}\doxysection{\texorpdfstring{Key Features}{Key Features}}\label{index_features_sec}
+
+\begin{DoxyItemize}
+\item {\bfseries{Modern C++17 RAII wrappers}} for all major Free\+RTOS APIs
+\item {\bfseries{Comprehensive test coverage}} with 377+ automated tests
+\item {\bfseries{Static analysis integration}} with clang-\/tidy
+\item {\bfseries{Dual allocation support}} for both static and dynamic strategies
+\item {\bfseries{std\+::chrono compatibility}} for intuitive timeout handling
+\item {\bfseries{Move semantics support}} for efficient resource management
+\item {\bfseries{Thread-\/safe operations}} with proper synchronization
+\end{DoxyItemize}\hypertarget{index_quick_start}{}\doxysection{\texorpdfstring{Quick Start Guide}{Quick Start Guide}}\label{index_quick_start}
+ \doxysubsubsection*{Getting Started in 3 Steps}
+
+
+
+{\bfseries{1. Include the library header\+:}} 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{preprocessor}{\#include\ "{}freertos.hpp"{}}}
+
+\end{DoxyCode}
+
+
+{\bfseries{2. Create and use Free\+RTOS objects\+:}} 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{comment}{//\ Create\ a\ task\ with\ dynamic\ allocation}}
+\DoxyCodeLine{\mbox{\hyperlink{classfreertos_1_1task}{freertos::task<1024>}}\ my\_task(\textcolor{stringliteral}{"{}MyTask"{}},\ 5,\ []()\ \{}
+\DoxyCodeLine{\ \ \ \ \textcolor{keywordflow}{while}\ (\textcolor{keyword}{true})\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \textcolor{comment}{//\ Your\ task\ code\ here}}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ vTaskDelay(pdMS\_TO\_TICKS(1000));}
+\DoxyCodeLine{\ \ \ \ \}}
+\DoxyCodeLine{\});}
+
+\end{DoxyCode}
+
+
+{\bfseries{3. Start the scheduler\+:}} 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{vTaskStartScheduler();}
+
+\end{DoxyCode}
+ \hypertarget{index_examples_sec}{}\doxysection{\texorpdfstring{Usage Examples}{Usage Examples}}\label{index_examples_sec}
+\hypertarget{index_autotoc_md17}{}\doxysubsubsection{\texorpdfstring{Task Management}{Task Management}}\label{index_autotoc_md17}
+ Creating and Managing Tasks
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{preprocessor}{\#include\ "{}freertos\_task.hpp"{}}}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{//\ Create\ a\ task\ with\ dynamic\ allocation\ (1024\ bytes\ stack)}}
+\DoxyCodeLine{\mbox{\hyperlink{classfreertos_1_1task}{freertos::task<1024>}}\ worker\_task(\textcolor{stringliteral}{"{}WorkerTask"{}},\ 3,\ []()\ \{}
+\DoxyCodeLine{\ \ \ \ \textcolor{keywordflow}{while}\ (\textcolor{keyword}{true})\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \textcolor{comment}{//\ Perform\ work}}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}Worker\ task\ running\(\backslash\)\(\backslash\)n"{}});}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ std::this\_thread::sleep\_for(std::chrono::seconds(1));}
+\DoxyCodeLine{\ \ \ \ \}}
+\DoxyCodeLine{\});}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{//\ Create\ a\ periodic\ task\ that\ runs\ every\ 100ms}}
+\DoxyCodeLine{\mbox{\hyperlink{classfreertos_1_1periodic__task}{freertos::periodic\_task<512>}}\ timer\_task(\textcolor{stringliteral}{"{}TimerTask"{}},\ 2,\ 100ms,\ []()\ \{}
+\DoxyCodeLine{\ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{int}\ counter\ =\ 0;}
+\DoxyCodeLine{\ \ \ \ printf(\textcolor{stringliteral}{"{}Periodic\ task\ execution\ \#\%d\(\backslash\)\(\backslash\)n"{}},\ ++counter);}
+\DoxyCodeLine{\});}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{//\ Tasks\ are\ automatically\ cleaned\ up\ when\ they\ go\ out\ of\ scope}}
+
+\end{DoxyCode}
+ \hypertarget{index_autotoc_md18}{}\doxysubsubsection{\texorpdfstring{Synchronization with Semaphores}{Synchronization with Semaphores}}\label{index_autotoc_md18}
+ Binary and Counting Semaphores
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{preprocessor}{\#include\ "{}freertos\_semaphore.hpp"{}}}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{//\ Binary\ semaphore\ for\ signaling}}
+\DoxyCodeLine{\mbox{\hyperlink{classfreertos_1_1binary__semaphore}{freertos::binary\_semaphore}}\ signal\_sem;}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{//\ Producer\ task}}
+\DoxyCodeLine{\mbox{\hyperlink{classfreertos_1_1task}{freertos::task<512>}}\ producer(\textcolor{stringliteral}{"{}Producer"{}},\ 4,\ [\&]()\ \{}
+\DoxyCodeLine{\ \ \ \ \textcolor{keywordflow}{while}\ (\textcolor{keyword}{true})\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \textcolor{comment}{//\ Produce\ data}}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ produce\_data();}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \textcolor{comment}{//\ Signal\ consumer}}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ signal\_sem.\mbox{\hyperlink{classfreertos_1_1binary__semaphore_a36fd71685f5c119bccc9e03fe52a70fc}{give}}();}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\ \ \ \ \ \ \ \ std::this\_thread::sleep\_for(std::chrono::milliseconds(500));}
+\DoxyCodeLine{\ \ \ \ \}}
+\DoxyCodeLine{\});}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{//\ Consumer\ task}}
+\DoxyCodeLine{\mbox{\hyperlink{classfreertos_1_1task}{freertos::task<512>}}\ consumer(\textcolor{stringliteral}{"{}Consumer"{}},\ 3,\ [\&]()\ \{}
+\DoxyCodeLine{\ \ \ \ \textcolor{keywordflow}{while}\ (\textcolor{keyword}{true})\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \textcolor{comment}{//\ Wait\ for\ signal\ with\ timeout}}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (signal\_sem.\mbox{\hyperlink{classfreertos_1_1binary__semaphore_a9c157a3f25082aaa4e5fa1a606d9efd0}{take}}(std::chrono::seconds(1)))\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ consume\_data();}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}Timeout\ waiting\ for\ data\(\backslash\)\(\backslash\)n"{}});}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\ \ \ \ \}}
+\DoxyCodeLine{\});}
+
+\end{DoxyCode}
+ \hypertarget{index_autotoc_md19}{}\doxysubsubsection{\texorpdfstring{Thread-\/\+Safe Queues}{Thread-Safe Queues}}\label{index_autotoc_md19}
+ Type-\/\+Safe Message Passing
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{preprocessor}{\#include\ "{}freertos\_queue.hpp"{}}}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{keyword}{struct\ }Message\ \{}
+\DoxyCodeLine{\ \ \ \ \textcolor{keywordtype}{int}\ id;}
+\DoxyCodeLine{\ \ \ \ std::string\ data;}
+\DoxyCodeLine{\};}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{//\ Create\ a\ queue\ for\ 10\ messages}}
+\DoxyCodeLine{\mbox{\hyperlink{classfreertos_1_1queue}{freertos::queue<Message,\ 10>}}\ msg\_queue;}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{//\ Sender\ task}}
+\DoxyCodeLine{\mbox{\hyperlink{classfreertos_1_1task}{freertos::task<1024>}}\ sender(\textcolor{stringliteral}{"{}Sender"{}},\ 3,\ [\&]()\ \{}
+\DoxyCodeLine{\ \ \ \ \textcolor{keywordtype}{int}\ \textcolor{keywordtype}{id}\ =\ 0;}
+\DoxyCodeLine{\ \ \ \ \textcolor{keywordflow}{while}\ (\textcolor{keyword}{true})\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ Message\ msg\{\textcolor{keywordtype}{id}++,\ \textcolor{stringliteral}{"{}Hello\ from\ sender"{}}\};}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \textcolor{comment}{//\ Send\ with\ timeout}}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (msg\_queue.\mbox{\hyperlink{classfreertos_1_1queue_a603f78c5925a6faa1866371acddcb321}{send}}(msg,\ std::chrono::milliseconds(100)))\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}Message\ \%d\ sent\(\backslash\)\(\backslash\)n"{}},\ msg.id);}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}Failed\ to\ send\ message\ \%d\(\backslash\)\(\backslash\)n"{}},\ msg.id);}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\ \ \ \ \ \ \ \ std::this\_thread::sleep\_for(std::chrono::seconds(1));}
+\DoxyCodeLine{\ \ \ \ \}}
+\DoxyCodeLine{\});}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{//\ Receiver\ task}}
+\DoxyCodeLine{\mbox{\hyperlink{classfreertos_1_1task}{freertos::task<1024>}}\ receiver(\textcolor{stringliteral}{"{}Receiver"{}},\ 3,\ [\&]()\ \{}
+\DoxyCodeLine{\ \ \ \ \textcolor{keywordflow}{while}\ (\textcolor{keyword}{true})\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ Message\ msg;}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \textcolor{comment}{//\ Receive\ with\ timeout}}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (msg\_queue.\mbox{\hyperlink{classfreertos_1_1queue_a25fa1fd799780bcfb82731bf2a16e5fc}{receive}}(msg,\ std::chrono::seconds(2)))\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}Received:\ ID=\%d,\ Data=\%s\(\backslash\)\(\backslash\)n"{}},\ msg.id,\ msg.data.c\_str());}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}No\ message\ received\(\backslash\)\(\backslash\)n"{}});}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\ \ \ \ \}}
+\DoxyCodeLine{\});}
+
+\end{DoxyCode}
+ \hypertarget{index_autotoc_md20}{}\doxysubsubsection{\texorpdfstring{Mutex and Lock Guards}{Mutex and Lock Guards}}\label{index_autotoc_md20}
+ Thread-\/\+Safe Resource Access
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{preprocessor}{\#include\ "{}freertos\_semaphore.hpp"{}}}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{keyword}{class\ }SharedResource\ \{}
+\DoxyCodeLine{\textcolor{keyword}{private}:}
+\DoxyCodeLine{\ \ \ \ \mbox{\hyperlink{classfreertos_1_1mutex}{freertos::mutex}}\ mtx;}
+\DoxyCodeLine{\ \ \ \ \textcolor{keywordtype}{int}\ counter\ =\ 0;}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{keyword}{public}:}
+\DoxyCodeLine{\ \ \ \ \textcolor{keywordtype}{void}\ increment()\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \textcolor{comment}{//\ RAII\ lock\ guard\ automatically\ unlocks\ when\ leaving\ scope}}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \mbox{\hyperlink{classfreertos_1_1lock__guard}{freertos::lock\_guard<freertos::mutex>}}\ lock(mtx);}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ ++counter;}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}Counter:\ \%d\(\backslash\)\(\backslash\)n"{}},\ counter);}
+\DoxyCodeLine{\ \ \ \ \}}
+\DoxyCodeLine{\ \ \ \ }
+\DoxyCodeLine{\ \ \ \ \textcolor{keywordtype}{bool}\ try\_increment()\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \textcolor{comment}{//\ Try\ to\ acquire\ lock\ without\ blocking}}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \mbox{\hyperlink{classfreertos_1_1try__lock__guard}{freertos::try\_lock\_guard<freertos::mutex>}}\ lock(mtx);}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (lock.owns\_lock())\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ ++counter;}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}Counter:\ \%d\(\backslash\)\(\backslash\)n"{}},\ counter);}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\ \ \ \ \}}
+\DoxyCodeLine{\ \ \ \ }
+\DoxyCodeLine{\ \ \ \ \textcolor{keywordtype}{bool}\ timed\_increment()\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \textcolor{comment}{//\ Try\ to\ acquire\ lock\ with\ timeout}}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \mbox{\hyperlink{classfreertos_1_1timeout__lock__guard}{freertos::timeout\_lock\_guard<freertos::mutex>}}\ lock(mtx,\ 100ms);}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (lock.owns\_lock())\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ ++counter;}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}Counter:\ \%d\(\backslash\)\(\backslash\)n"{}},\ counter);}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\ \ \ \ \}}
+\DoxyCodeLine{\};}
+
+\end{DoxyCode}
+ \hypertarget{index_autotoc_md21}{}\doxysubsubsection{\texorpdfstring{Event Groups for Complex Synchronization}{Event Groups for Complex Synchronization}}\label{index_autotoc_md21}
+ Multi-\/\+Event Synchronization
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{preprocessor}{\#include\ "{}freertos\_event\_group.hpp"{}}}
+\DoxyCodeLine{}
+\DoxyCodeLine{\mbox{\hyperlink{classfreertos_1_1event__group}{freertos::event\_group}}\ system\_events;}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{keyword}{constexpr}\ EventBits\_t\ NETWORK\_READY\ =\ BIT0;}
+\DoxyCodeLine{\textcolor{keyword}{constexpr}\ EventBits\_t\ SENSOR\_READY\ =\ BIT1;}
+\DoxyCodeLine{\textcolor{keyword}{constexpr}\ EventBits\_t\ STORAGE\_READY\ =\ BIT2;}
+\DoxyCodeLine{\textcolor{keyword}{constexpr}\ EventBits\_t\ ALL\_READY\ =\ NETWORK\_READY\ |\ SENSOR\_READY\ |\ STORAGE\_READY;}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{//\ Initialization\ task}}
+\DoxyCodeLine{\mbox{\hyperlink{classfreertos_1_1task}{freertos::task<1024>}}\ init\_task(\textcolor{stringliteral}{"{}Init"{}},\ 5,\ [\&]()\ \{}
+\DoxyCodeLine{\ \ \ \ \textcolor{comment}{//\ Initialize\ network}}
+\DoxyCodeLine{\ \ \ \ init\_network();}
+\DoxyCodeLine{\ \ \ \ system\_events.\mbox{\hyperlink{classfreertos_1_1event__group_a0b2b00c1160e0d9e3499545ee750a219}{set\_bits}}(NETWORK\_READY);}
+\DoxyCodeLine{\ \ \ \ }
+\DoxyCodeLine{\ \ \ \ \textcolor{comment}{//\ Initialize\ sensors}}
+\DoxyCodeLine{\ \ \ \ init\_sensors();}
+\DoxyCodeLine{\ \ \ \ system\_events.\mbox{\hyperlink{classfreertos_1_1event__group_a0b2b00c1160e0d9e3499545ee750a219}{set\_bits}}(SENSOR\_READY);}
+\DoxyCodeLine{\ \ \ \ }
+\DoxyCodeLine{\ \ \ \ \textcolor{comment}{//\ Initialize\ storage}}
+\DoxyCodeLine{\ \ \ \ init\_storage();}
+\DoxyCodeLine{\ \ \ \ system\_events.\mbox{\hyperlink{classfreertos_1_1event__group_a0b2b00c1160e0d9e3499545ee750a219}{set\_bits}}(STORAGE\_READY);}
+\DoxyCodeLine{\});}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{//\ Main\ application\ task}}
+\DoxyCodeLine{\mbox{\hyperlink{classfreertos_1_1task}{freertos::task<2048>}}\ app\_task(\textcolor{stringliteral}{"{}App"{}},\ 3,\ [\&]()\ \{}
+\DoxyCodeLine{\ \ \ \ \textcolor{comment}{//\ Wait\ for\ all\ subsystems\ to\ be\ ready}}
+\DoxyCodeLine{\ \ \ \ \textcolor{keywordflow}{if}\ (system\_events.\mbox{\hyperlink{classfreertos_1_1event__group_a7e5f4d035c7f0acb49bbe1f3d8a3306f}{wait\_bits}}(ALL\_READY,\ \textcolor{keyword}{true},\ \textcolor{keyword}{true},\ std::chrono::seconds(10)))\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}All\ systems\ ready,\ starting\ application\(\backslash\)\(\backslash\)n"{}});}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ run\_application();}
+\DoxyCodeLine{\ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}Timeout\ waiting\ for\ system\ initialization\(\backslash\)\(\backslash\)n"{}});}
+\DoxyCodeLine{\ \ \ \ \}}
+\DoxyCodeLine{\});}
+
+\end{DoxyCode}
+ \hypertarget{index_allocation_sec}{}\doxysection{\texorpdfstring{Memory Allocation Strategies}{Memory Allocation Strategies}}\label{index_allocation_sec}
+The library supports both static and dynamic memory allocation strategies\+:\hypertarget{index_autotoc_md22}{}\doxysubsubsection{\texorpdfstring{Dynamic Allocation (\+Default)}{Dynamic Allocation (Default)}}\label{index_autotoc_md22}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{comment}{//\ Uses\ FreeRTOS\ heap}}
+\DoxyCodeLine{\mbox{\hyperlink{classfreertos_1_1task}{freertos::task<1024>}}\ dynamic\_task(\textcolor{stringliteral}{"{}Task"{}},\ 3,\ task\_function);}
+\DoxyCodeLine{\mbox{\hyperlink{classfreertos_1_1binary__semaphore}{freertos::binary\_semaphore}}\ dynamic\_sem;}
+\DoxyCodeLine{\mbox{\hyperlink{classfreertos_1_1queue}{freertos::queue<int,\ 10>}}\ dynamic\_queue;}
+
+\end{DoxyCode}
+\hypertarget{index_autotoc_md23}{}\doxysubsubsection{\texorpdfstring{Static Allocation}{Static Allocation}}\label{index_autotoc_md23}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{comment}{//\ Uses\ stack-\/allocated\ memory}}
+\DoxyCodeLine{\mbox{\hyperlink{classfreertos_1_1task}{freertos::task<1024,\ freertos::static\_task\_allocator<1024>}}>\ static\_task(\textcolor{stringliteral}{"{}Task"{}},\ 3,\ task\_function);}
+\DoxyCodeLine{\mbox{\hyperlink{classfreertos_1_1binary__semaphore}{freertos::binary\_semaphore<freertos::static\_semaphore\_allocator>}}\ static\_sem;}
+\DoxyCodeLine{\mbox{\hyperlink{classfreertos_1_1queue}{freertos::queue<int,\ 10,\ freertos::static\_queue\_allocator<int,\ 10>}}>\ static\_queue;}
+
+\end{DoxyCode}
+\hypertarget{index_testing_sec}{}\doxysection{\texorpdfstring{Testing and Quality Assurance}{Testing and Quality Assurance}}\label{index_testing_sec}
+The library includes comprehensive testing with\+:
+
+
+\begin{DoxyItemize}
+\item {\bfseries{377+ automated tests}} covering all functionality
+\item {\bfseries{96.\+8\% line coverage}} and {\bfseries{95.\+7\% function coverage}}
+\item {\bfseries{Static analysis}} with clang-\/tidy integration
+\item {\bfseries{Continuous integration}} with automated validation
+\end{DoxyItemize}\hypertarget{index_autotoc_md24}{}\doxysubsubsection{\texorpdfstring{Running Tests}{Running Tests}}\label{index_autotoc_md24}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{mkdir\ build\ \&\&\ cd\ build}
+\DoxyCodeLine{cmake\ -\/DENABLE\_COVERAGE=ON\ ..}
+\DoxyCodeLine{make\ -\/j\$(nproc)}
+\DoxyCodeLine{ctest\ -\/-\/verbose}
+
+\end{DoxyCode}
+\hypertarget{index_building_sec}{}\doxysection{\texorpdfstring{Building the Library}{Building the Library}}\label{index_building_sec}
+\hypertarget{index_autotoc_md25}{}\doxysubsubsection{\texorpdfstring{Prerequisites}{Prerequisites}}\label{index_autotoc_md25}
+
+\begin{DoxyItemize}
+\item C++17 compatible compiler
+\item CMake 3.\+12+
+\item Free\+RTOS source code
+\end{DoxyItemize}\hypertarget{index_autotoc_md26}{}\doxysubsubsection{\texorpdfstring{Build Configuration}{Build Configuration}}\label{index_autotoc_md26}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{git\ clone\ <repository>}
+\DoxyCodeLine{cd\ freertos\_cpp\_wrappers}
+\DoxyCodeLine{mkdir\ build\ \&\&\ cd\ build}
+\DoxyCodeLine{cmake\ -\/DENABLE\_COVERAGE=ON\ -\/DENABLE\_CLANG\_TIDY=ON\ ..}
+\DoxyCodeLine{make\ -\/j\$(nproc)}
+
+\end{DoxyCode}
+\hypertarget{index_autotoc_md27}{}\doxysubsubsection{\texorpdfstring{CMake Options}{CMake Options}}\label{index_autotoc_md27}
+
+\begin{DoxyItemize}
+\item {\ttfamily ENABLE\+\_\+\+CLANG\+\_\+\+TIDY} (default\+: ON) -\/ Enable static analysis
+\item {\ttfamily CLANG\+\_\+\+TIDY\+\_\+\+WARNINGS\+\_\+\+AS\+\_\+\+ERRORS} (default\+: OFF) -\/ Treat warnings as errors ~\newline
+
+\item {\ttfamily GENERATE\+\_\+\+CLANG\+\_\+\+TIDY\+\_\+\+REPORT} (default\+: ON) -\/ Generate static analysis report
+\item {\ttfamily ENABLE\+\_\+\+COVERAGE} (default\+: OFF) -\/ Enable code coverage collection
+\end{DoxyItemize}\hypertarget{index_best_practices}{}\doxysection{\texorpdfstring{Best Practices}{Best Practices}}\label{index_best_practices}
+\hypertarget{index_autotoc_md28}{}\doxysubsubsection{\texorpdfstring{Resource Management}{Resource Management}}\label{index_autotoc_md28}
+
+\begin{DoxyItemize}
+\item Always use RAII wrappers instead of raw Free\+RTOS handles
+\item Prefer stack allocation for short-\/lived objects
+\item Use move semantics for transferring ownership
+\end{DoxyItemize}\hypertarget{index_autotoc_md29}{}\doxysubsubsection{\texorpdfstring{Task Design}{Task Design}}\label{index_autotoc_md29}
+
+\begin{DoxyItemize}
+\item Keep tasks focused on single responsibilities ~\newline
+
+\item Use appropriate stack sizes based on actual usage
+\item Implement proper error handling and recovery
+\end{DoxyItemize}\hypertarget{index_autotoc_md30}{}\doxysubsubsection{\texorpdfstring{Synchronization}{Synchronization}}\label{index_autotoc_md30}
+
+\begin{DoxyItemize}
+\item Prefer higher-\/level synchronization primitives (mutexes, semaphores)
+\item Use timeouts to avoid indefinite blocking
+\item Design for deadlock-\/free operation
+\end{DoxyItemize}\hypertarget{index_autotoc_md31}{}\doxysubsubsection{\texorpdfstring{Performance}{Performance}}\label{index_autotoc_md31}
+
+\begin{DoxyItemize}
+\item Profile actual memory and CPU usage
+\item Use static allocation for deterministic behavior
+\item Minimize dynamic memory allocation in time-\/critical paths
+\end{DoxyItemize}\hypertarget{index_api_reference}{}\doxysection{\texorpdfstring{API Reference}{API Reference}}\label{index_api_reference}
+Explore the detailed API documentation\+:
+
+
+\begin{DoxyItemize}
+\item \doxylink{classfreertos_1_1task}{Task Management} -\/ Create and manage Free\+RTOS tasks
+\item \doxylink{classfreertos_1_1binary__semaphore}{Semaphores} -\/ Binary, counting, and mutex semaphores ~\newline
+
+\item \doxylink{classfreertos_1_1queue}{Queues} -\/ Type-\/safe message passing
+\item \doxylink{classfreertos_1_1event__group}{Event Groups} -\/ Multi-\/event synchronization
+\item \doxylink{classfreertos_1_1stream__buffer}{Stream Buffers} -\/ Byte stream communication
+\item \doxylink{classfreertos_1_1message__buffer}{Message Buffers} -\/ Variable-\/length message passing
+\end{DoxyItemize}\hypertarget{index_contributing_sec}{}\doxysection{\texorpdfstring{Contributing}{Contributing}}\label{index_contributing_sec}
+We welcome contributions! Please see our \href{https://github.com/aschokinatgmail/freertos_cpp_wrappers}{\texttt{ Git\+Hub repository}} for guidelines on\+:
+
+
+\begin{DoxyItemize}
+\item Reporting issues and requesting features
+\item Submitting pull requests
+\item Code style and testing requirements
+\item Documentation improvements
+\end{DoxyItemize}\hypertarget{index_license_sec}{}\doxysection{\texorpdfstring{License}{License}}\label{index_license_sec}
+This library is licensed under the MIT License. See the LICENSE file for details.
+
+\begin{DoxyAuthor}{Author}
+Andrey V. Shchekin \href{mailto:aschokin@gmail.com}{\texttt{ aschokin@gmail.\+com}} 
+\end{DoxyAuthor}
+\begin{DoxyVersion}{Version}
+1.\+0.\+0 
+\end{DoxyVersion}
+\begin{DoxyDate}{Date}
+2024 
+\end{DoxyDate}

@@ -1,0 +1,66 @@
+\doxysection{static\+\_\+allocation\+\_\+example.\+cpp}
+\hypertarget{static_allocation_example_8cpp-example}{}\label{static_allocation_example_8cpp-example}\hypertarget{examples.dox_autotoc_md35}{}\doxysubsubsection{\texorpdfstring{Static Memory Allocation Example}{Static Memory Allocation Example}}\label{examples.dox_autotoc_md35}
+This example shows how to use static memory allocation for deterministic memory usage, which is important in safety-\/critical applications.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{preprocessor}{\#include\ "{}freertos.hpp"{}}}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{keywordtype}{int}\ main()\ \{}
+\DoxyCodeLine{\ \ \ \ \textcolor{comment}{//\ Static\ task\ allocation\ -\/\ no\ heap\ usage}}
+\DoxyCodeLine{\ \ \ \ \mbox{\hyperlink{classfreertos_1_1task}{freertos::task<1024,\ freertos::static\_task\_allocator<1024>}}>\ }
+\DoxyCodeLine{\ \ \ \ \ \ \ \ static\_task(\textcolor{stringliteral}{"{}StaticTask"{}},\ 3,\ []()\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (\textcolor{keyword}{true})\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}Static\ task\ running\(\backslash\)n"{}});}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ vTaskDelay(pdMS\_TO\_TICKS(1000));}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \});}
+\DoxyCodeLine{}
+\DoxyCodeLine{\ \ \ \ \textcolor{comment}{//\ Static\ semaphore\ allocation}}
+\DoxyCodeLine{\ \ \ \ \mbox{\hyperlink{classfreertos_1_1binary__semaphore}{freertos::binary\_semaphore<freertos::static\_semaphore\_allocator>}}\ }
+\DoxyCodeLine{\ \ \ \ \ \ \ \ static\_semaphore;}
+\DoxyCodeLine{}
+\DoxyCodeLine{\ \ \ \ \textcolor{comment}{//\ Static\ queue\ allocation}}
+\DoxyCodeLine{\ \ \ \ \mbox{\hyperlink{classfreertos_1_1queue}{freertos::queue<8,\ int,\ freertos::static\_queue\_allocator<8,\ int>}}>\ }
+\DoxyCodeLine{\ \ \ \ \ \ \ \ static\_queue;}
+\DoxyCodeLine{}
+\DoxyCodeLine{\ \ \ \ \textcolor{comment}{//\ Use\ the\ static\ objects\ normally}}
+\DoxyCodeLine{\ \ \ \ \mbox{\hyperlink{classfreertos_1_1task}{freertos::task<512,\ freertos::static\_task\_allocator<512>}}>\ }
+\DoxyCodeLine{\ \ \ \ \ \ \ \ producer(\textcolor{stringliteral}{"{}Producer"{}},\ 2,\ [\&]()\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i\ =\ 0;\ i\ <\ 16;\ ++i)\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (static\_queue.\mbox{\hyperlink{classfreertos_1_1queue_a603f78c5925a6faa1866371acddcb321}{send}}(i,\ 1000ms))\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}Sent:\ \%d\(\backslash\)n"{}},\ i);}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ vTaskDelay(pdMS\_TO\_TICKS(500));}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ static\_semaphore.give();\ \textcolor{comment}{//\ Signal\ completion}}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \});}
+\DoxyCodeLine{}
+\DoxyCodeLine{\ \ \ \ \mbox{\hyperlink{classfreertos_1_1task}{freertos::task<512,\ freertos::static\_task\_allocator<512>}}>\ }
+\DoxyCodeLine{\ \ \ \ \ \ \ \ consumer(\textcolor{stringliteral}{"{}Consumer"{}},\ 2,\ [\&]()\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (\textcolor{keyword}{true})\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ value;}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (static\_queue.\mbox{\hyperlink{classfreertos_1_1queue_a25fa1fd799780bcfb82731bf2a16e5fc}{receive}}(value,\ 2000ms))\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}Received:\ \%d\(\backslash\)n"{}},\ value);}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Check\ if\ producer\ is\ done}}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ if\ (static\_semaphore.take(0ms))\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}Producer\ finished,\ consumer\ exiting\(\backslash\)n"{}});}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ break;}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \});}
+\DoxyCodeLine{}
+\DoxyCodeLine{\ \ \ \ vTaskStartScheduler();}
+\DoxyCodeLine{\ \ \ \ \textcolor{keywordflow}{return}\ 0;}
+\DoxyCodeLine{\}}
+
+\end{DoxyCode}
+
+
+
+\begin{DoxyCodeInclude}{0}
+
+\end{DoxyCodeInclude}
+ 
