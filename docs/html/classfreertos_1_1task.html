@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FreeRTOS C++ Wrappers<span id="projectnumber">&#160;v0.1.0-4919236</span>
+   <div id="projectname">FreeRTOS C++ Wrappers<span id="projectnumber">&#160;v0.1.0-d00d257</span>
    </div>
    <div id="projectbrief">Modern C++17 RAII wrappers for FreeRTOS APIs</div>
   </td>
@@ -130,6 +130,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a8dcf1f87c6ff7f6fd22028b816975cf0" id="r_a8dcf1f87c6ff7f6fd22028b816975cf0"><td class="memItemLeft" align="right" valign="top">TaskHandle_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classfreertos_1_1task.html#a8dcf1f87c6ff7f6fd22028b816975cf0">handle</a> (void) const</td></tr>
 <tr class="memdesc:a8dcf1f87c6ff7f6fd22028b816975cf0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the handle of the task.  <br /></td></tr>
 <tr class="separator:a8dcf1f87c6ff7f6fd22028b816975cf0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a27571468356b9515b6867ac8f680d126" id="r_a27571468356b9515b6867ac8f680d126"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classfreertos_1_1task.html#a27571468356b9515b6867ac8f680d126">is_running</a> (void) const</td></tr>
+<tr class="memdesc:a27571468356b9515b6867ac8f680d126"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if the task is running.  <br /></td></tr>
+<tr class="separator:a27571468356b9515b6867ac8f680d126"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a507100d53fbe90a1ae00c05e443f2f81" id="r_a507100d53fbe90a1ae00c05e443f2f81"><td class="memItemLeft" align="right" valign="top"><a id="a507100d53fbe90a1ae00c05e443f2f81" name="a507100d53fbe90a1ae00c05e443f2f81"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>terminate</b> (void)</td></tr>
 <tr class="memdesc:a507100d53fbe90a1ae00c05e443f2f81"><td class="mdescLeft">&#160;</td><td class="mdescRight">Terminates the task. <br /></td></tr>
@@ -153,8 +156,7 @@ Features:</h2>
 <ul>
 <li>RAII automatic resource management</li>
 <li>Move semantics support</li>
-<li>Type-safe task function binding <br  />
-</li>
+<li>Type-safe task function binding</li>
 <li>Configurable stack size at compile time</li>
 <li>Support for suspended task creation</li>
 <li>std::chrono timeout support</li>
@@ -339,6 +341,37 @@ template&lt;typename TaskAllocator &gt; </div>
 
 <p>Return the handle of the task. </p>
 <dl class="section return"><dt>Returns</dt><dd>TaskHandle_t task handle </dd></dl>
+
+</div>
+</div>
+<a id="a27571468356b9515b6867ac8f680d126" name="a27571468356b9515b6867ac8f680d126"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a27571468356b9515b6867ac8f680d126">&#9670;&#160;</a></span>is_running()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename TaskAllocator &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="classfreertos_1_1task.html">freertos::task</a>&lt; TaskAllocator &gt;::is_running </td>
+          <td>(</td>
+          <td class="paramtype">void&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Check if the task is running. </p>
+<dl class="section return"><dt>Returns</dt><dd>bool true if the task is running, false otherwise </dd></dl>
 
 </div>
 </div>

@@ -25,15 +25,16 @@ doxygen Doxyfile
 ## Features
 
 - Modern C++17 RAII wrappers for FreeRTOS APIs
-- Comprehensive test coverage (377+ tests)
+- Comprehensive test coverage (421+ tests)
 - Static analysis integration with clang-tidy
 - Support for both static and dynamic allocation strategies
 - chrono compatibility for timeout handling
+- Enhanced C++17 features testing
 - Automated validation and verification reporting
 
 ## Testing
 
-The project includes comprehensive test coverage with 377 automated tests covering all major functionality:
+The project includes comprehensive test coverage with 421 automated tests covering all major functionality:
 
 - **Task Module**: 81 tests (lifecycle, periodic tasks, move semantics)
 - **Semaphore Module**: 68 tests (binary, counting, mutexes, lock guards)  
@@ -43,6 +44,9 @@ The project includes comprehensive test coverage with 377 automated tests coveri
 - **Message Buffer Module**: 32 tests (variable-length messages, allocators)
 - **Timer Module**: 50 tests (duration types, callback functionality, move semantics)
 - **Enhanced Multitasking**: 12 tests (advanced scenarios, racing conditions)
+- **STL Integration**: 10 tests (STL compatibility, performance analysis)
+- **Timeout Precision**: 11 tests (chrono support, sub-millisecond delays)
+- **C++17 Features**: 13 tests (move semantics, template metaprogramming, RAII)
 
 ### Running Tests
 
@@ -84,7 +88,7 @@ make validation-verification-report
 
 # This command will:
 # 1. Build the project with coverage enabled
-# 2. Run all 377 tests
+# 2. Run all 421 tests
 # 3. Generate coverage data
 # 4. Run static analysis
 # 5. Generate both reports with current results
@@ -124,7 +128,7 @@ cat ../VALIDATION_VERIFICATION_REPORT.md
 
 ## Project Status
 
-- ✅ **All 377 tests passing** (100% success rate)
-- ✅ **96.8% line coverage** and **95.7% function coverage**
+- ✅ **All 421 tests passing** (100% success rate)
+- ✅ **96.6% line coverage** and **94.9% function coverage**
 - ✅ **Clean static analysis** (library modules only)
 - ✅ **Production ready** with comprehensive validation
