@@ -25,6 +25,7 @@
 var NAVTREE =
 [
   [ "FreeRTOS C++ Wrappers", "index.html", [
+    [ "FreeRTOS C++ Wrappers Documentation", "index.html", "index" ],
     [ "Classes", "annotated.html", [
       [ "Class List", "annotated.html", "annotated_dup" ],
       [ "Class Index", "classes.html", null ],
@@ -35,7 +36,8 @@ var NAVTREE =
     ] ],
     [ "Files", "files.html", [
       [ "File List", "files.html", "files_dup" ]
-    ] ]
+    ] ],
+    [ "Examples", "examples.html", "examples" ]
   ] ]
 ];
 

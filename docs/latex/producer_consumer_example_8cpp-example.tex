@@ -1,0 +1,68 @@
+\doxysection{producer\+\_\+consumer\+\_\+example.\+cpp}
+\hypertarget{producer_consumer_example_8cpp-example}{}\label{producer_consumer_example_8cpp-example}\hypertarget{examples.dox_autotoc_md33}{}\doxysubsubsection{\texorpdfstring{Producer-\/\+Consumer Pattern with Queues}{Producer-Consumer Pattern with Queues}}\label{examples.dox_autotoc_md33}
+This example shows how to implement a producer-\/consumer pattern using type-\/safe queues for inter-\/task communication.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{preprocessor}{\#include\ "{}freertos.hpp"{}}}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{keyword}{struct\ }WorkItem\ \{}
+\DoxyCodeLine{\ \ \ \ \textcolor{keywordtype}{int}\ id;}
+\DoxyCodeLine{\ \ \ \ std::string\ description;}
+\DoxyCodeLine{\ \ \ \ \textcolor{keywordtype}{float}\ priority;}
+\DoxyCodeLine{\};}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{keywordtype}{int}\ main()\ \{}
+\DoxyCodeLine{\ \ \ \ \textcolor{comment}{//\ Create\ a\ queue\ for\ work\ items}}
+\DoxyCodeLine{\ \ \ \ \mbox{\hyperlink{classfreertos_1_1queue}{freertos::queue<10,\ WorkItem>}}\ work\_queue(\textcolor{stringliteral}{"{}WorkQueue"{}});}
+\DoxyCodeLine{}
+\DoxyCodeLine{\ \ \ \ \textcolor{comment}{//\ Producer\ task}}
+\DoxyCodeLine{\ \ \ \ \mbox{\hyperlink{classfreertos_1_1task}{freertos::task<1024>}}\ producer(\textcolor{stringliteral}{"{}Producer"{}},\ 4,\ [\&]()\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ item\_id\ =\ 0;}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (\textcolor{keyword}{true})\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ WorkItem\ item\{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ++item\_id,}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}Task\ "{}}\ +\ std::to\_string(item\_id),}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{static\_cast<}\textcolor{keywordtype}{float}\textcolor{keyword}{>}(item\_id)\ *\ 0.1f}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (work\_queue.send(item,\ std::chrono::seconds(1)))\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}Produced\ item\ \%d\(\backslash\)n"{}},\ item.id);}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}Failed\ to\ produce\ item\ \%d\ -\/\ queue\ full\(\backslash\)n"{}},\ item.id);}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ std::this\_thread::sleep\_for(std::chrono::milliseconds(800));}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\ \ \ \ \});}
+\DoxyCodeLine{}
+\DoxyCodeLine{\ \ \ \ \textcolor{comment}{//\ Consumer\ task}}
+\DoxyCodeLine{\ \ \ \ \mbox{\hyperlink{classfreertos_1_1task}{freertos::task<1024>}}\ consumer(\textcolor{stringliteral}{"{}Consumer"{}},\ 3,\ [\&]()\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (\textcolor{keyword}{true})\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ WorkItem\ item;}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (work\_queue.receive(item,\ std::chrono::seconds(2)))\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}Consumed\ item\ \%d:\ \%s\ (priority:\ \%.1f)\(\backslash\)n"{}},}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ item.id,\ item.description.c\_str(),\ item.priority);}
+\DoxyCodeLine{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Simulate\ work\ processing\ time}}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::this\_thread::sleep\_for(}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::chrono::milliseconds(static\_cast<int>(500\ /\ item.priority))}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ );}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}Consumer\ timeout\ -\/\ no\ work\ available\(\backslash\)n"{}});}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\ \ \ \ \});}
+\DoxyCodeLine{}
+\DoxyCodeLine{\ \ \ \ vTaskStartScheduler();}
+\DoxyCodeLine{\ \ \ \ \textcolor{keywordflow}{return}\ 0;}
+\DoxyCodeLine{\}}
+
+\end{DoxyCode}
+
+
+
+\begin{DoxyCodeInclude}{0}
+
+\end{DoxyCodeInclude}
+ 

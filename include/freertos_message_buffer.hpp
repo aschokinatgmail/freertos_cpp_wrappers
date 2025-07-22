@@ -37,6 +37,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #endif
 
 #include <FreeRTOS.h>
+#include <array>
 #include <chrono>
 #include <message_buffer.h>
 
@@ -49,11 +50,12 @@ namespace freertos {
  *
  */
 template <size_t MessageBufferSize> class static_message_buffer_allocator {
-  StaticMessageBuffer_t m_message_buffer_placeholder;
-  uint8_t m_storage[MessageBufferSize];
+  StaticMessageBuffer_t m_message_buffer_placeholder{};
+  std::array<uint8_t, MessageBufferSize> m_storage;
 
 public:
   static_message_buffer_allocator() = default;
+  ~static_message_buffer_allocator() = default;
   static_message_buffer_allocator(const static_message_buffer_allocator &) =
       delete;
   static_message_buffer_allocator(static_message_buffer_allocator &&) = delete;
@@ -64,7 +66,7 @@ public:
   operator=(static_message_buffer_allocator &&) = delete;
 
   MessageBufferHandle_t create() {
-    return xMessageBufferCreateStatic(MessageBufferSize, m_storage,
+    return xMessageBufferCreateStatic(MessageBufferSize, m_storage.data(),
                                       &m_message_buffer_placeholder);
   }
 };
@@ -91,16 +93,15 @@ public:
  */
 template <size_t MessageBufferSize, typename MessageBufferAllocator>
 class message_buffer {
-  MessageBufferAllocator m_allocator;
-  MessageBufferHandle_t m_message_buffer;
+  MessageBufferAllocator m_allocator{};
+  MessageBufferHandle_t m_message_buffer{nullptr};
 
 public:
   /**
    * @brief Construct a new message buffer object
    *
    */
-  explicit message_buffer() : m_allocator{}, m_message_buffer{nullptr} {
-    m_message_buffer = m_allocator.create();
+  explicit message_buffer() : m_message_buffer{m_allocator.create()} {
     configASSERT(m_message_buffer);
   }
   message_buffer(const message_buffer &) = delete;

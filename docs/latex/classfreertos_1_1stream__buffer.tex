@@ -39,13 +39,19 @@ Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1stream__buffer_a67e154c0d216
 \begin{DoxyCompactList}\small\item\em Send data to the stream buffer. \href{https://www.freertos.org/xStreamBufferSend.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Stream\+Buffer\+Send.\+html}}. \end{DoxyCompactList}\item 
 Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1stream__buffer_adb0ee0731da5bf303ca50e9097f181eb}{send\+\_\+isr}} (const void \texorpdfstring{$\ast$}{*}data, size\+\_\+t data\+\_\+size, Base\+Type\+\_\+t \&higher\+\_\+priority\+\_\+task\+\_\+woken)
 \begin{DoxyCompactList}\small\item\em Send data to the stream buffer from an ISR. \href{https://www.freertos.org/xStreamBufferSendFromISR.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Stream\+Buffer\+Send\+From\+ISR.\+html}}. \end{DoxyCompactList}\item 
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1stream__buffer_ae094f91df0ad5fa35cda9ef231263e46}{send\+\_\+isr}} (const void \texorpdfstring{$\ast$}{*}data, size\+\_\+t data\+\_\+size)
+\begin{DoxyCompactList}\small\item\em Send data to the stream buffer from an ISR. \href{https://www.freertos.org/xStreamBufferSendFromISR.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Stream\+Buffer\+Send\+From\+ISR.\+html}}. \end{DoxyCompactList}\item 
 {\footnotesize template$<$typename Iterator $>$ }\\Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1stream__buffer_a962d1c3c962d78c57946221331630e5f}{send\+\_\+isr}} (Iterator begin, Iterator end, Base\+Type\+\_\+t \&higher\+\_\+priority\+\_\+task\+\_\+woken)
+\begin{DoxyCompactList}\small\item\em Send data to the stream buffer from an ISR. \href{https://www.freertos.org/xStreamBufferSendFromISR.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Stream\+Buffer\+Send\+From\+ISR.\+html}}. \end{DoxyCompactList}\item 
+{\footnotesize template$<$typename Iterator $>$ }\\Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1stream__buffer_a4daaf8f6e35ae142d88ed86e7b9dbcc1}{send\+\_\+isr}} (Iterator begin, Iterator end)
 \begin{DoxyCompactList}\small\item\em Send data to the stream buffer from an ISR. \href{https://www.freertos.org/xStreamBufferSendFromISR.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Stream\+Buffer\+Send\+From\+ISR.\+html}}. \end{DoxyCompactList}\item 
 size\+\_\+t \mbox{\hyperlink{classfreertos_1_1stream__buffer_a5f3bd934e44033f47565ba8c63a6247a}{receive}} (void \texorpdfstring{$\ast$}{*}data, size\+\_\+t data\+\_\+size, Tick\+Type\+\_\+t timeout=port\+MAX\+\_\+\+DELAY)
 \begin{DoxyCompactList}\small\item\em Receive data from the stream buffer. \href{https://www.freertos.org/xStreamBufferReceive.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Stream\+Buffer\+Receive.\+html}}. \end{DoxyCompactList}\item 
 {\footnotesize template$<$typename Rep , typename Period $>$ }\\size\+\_\+t \mbox{\hyperlink{classfreertos_1_1stream__buffer_a6b3c2399d1709450cf140f6a5406db3f}{receive}} (void \texorpdfstring{$\ast$}{*}data, size\+\_\+t data\+\_\+size, const std\+::chrono\+::duration$<$ Rep, Period $>$ \&timeout)
 \begin{DoxyCompactList}\small\item\em Receive data from the stream buffer. \href{https://www.freertos.org/xStreamBufferReceive.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Stream\+Buffer\+Receive.\+html}}. \end{DoxyCompactList}\item 
 size\+\_\+t \mbox{\hyperlink{classfreertos_1_1stream__buffer_a1391c52f149b9ed5a002df84be29b525}{receive\+\_\+isr}} (void \texorpdfstring{$\ast$}{*}data, size\+\_\+t data\+\_\+size, Base\+Type\+\_\+t \&higher\+\_\+priority\+\_\+task\+\_\+woken)
+\begin{DoxyCompactList}\small\item\em Receive data from the stream buffer from an ISR. \href{https://www.freertos.org/xStreamBufferReceiveFromISR.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Stream\+Buffer\+Receive\+From\+ISR.\+html}}. \end{DoxyCompactList}\item 
+size\+\_\+t \mbox{\hyperlink{classfreertos_1_1stream__buffer_aea3ed178363f7837a866c667a4b78afe}{receive\+\_\+isr}} (void \texorpdfstring{$\ast$}{*}data, size\+\_\+t data\+\_\+size)
 \begin{DoxyCompactList}\small\item\em Receive data from the stream buffer from an ISR. \href{https://www.freertos.org/xStreamBufferReceiveFromISR.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Stream\+Buffer\+Receive\+From\+ISR.\+html}}. \end{DoxyCompactList}\item 
 size\+\_\+t \mbox{\hyperlink{classfreertos_1_1stream__buffer_adede97d89ea4a5f0b7591824aad90223}{available}} (void)
 \begin{DoxyCompactList}\small\item\em Number of bytes available in the stream buffer. \href{https://www.freertos.org/xStreamBufferBytesAvailable.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Stream\+Buffer\+Bytes\+Available.\+html}}. \end{DoxyCompactList}\item 
@@ -214,10 +220,31 @@ Receive data from the stream buffer. \href{https://www.freertos.org/xStreamBuffe
 \begin{DoxyReturn}{Returns}
 size\+\_\+t Number of bytes received. 
 \end{DoxyReturn}
+\Hypertarget{classfreertos_1_1stream__buffer_aea3ed178363f7837a866c667a4b78afe}\label{classfreertos_1_1stream__buffer_aea3ed178363f7837a866c667a4b78afe} 
+\index{freertos::stream\_buffer$<$ StreamBufferSize, StreamBufferAllocator $>$@{freertos::stream\_buffer$<$ StreamBufferSize, StreamBufferAllocator $>$}!receive\_isr@{receive\_isr}}
+\index{receive\_isr@{receive\_isr}!freertos::stream\_buffer$<$ StreamBufferSize, StreamBufferAllocator $>$@{freertos::stream\_buffer$<$ StreamBufferSize, StreamBufferAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{receive\_isr()}{receive\_isr()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily template$<$size\+\_\+t Stream\+Buffer\+Size, typename Stream\+Buffer\+Allocator $>$ \\
+size\+\_\+t \mbox{\hyperlink{classfreertos_1_1stream__buffer}{freertos\+::stream\+\_\+buffer}}$<$ Stream\+Buffer\+Size, Stream\+Buffer\+Allocator $>$\+::receive\+\_\+isr (\begin{DoxyParamCaption}\item[{void \texorpdfstring{$\ast$}{*}}]{data,  }\item[{size\+\_\+t}]{data\+\_\+size }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Receive data from the stream buffer from an ISR. \href{https://www.freertos.org/xStreamBufferReceiveFromISR.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Stream\+Buffer\+Receive\+From\+ISR.\+html}}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em data} & A pointer to the buffer into which the received data will be copied. \\
+\hline
+{\em data\+\_\+size} & Maximum number of bytes to copy into the buffer. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+size\+\_\+t Number of bytes received. 
+\end{DoxyReturn}
 \Hypertarget{classfreertos_1_1stream__buffer_a1391c52f149b9ed5a002df84be29b525}\label{classfreertos_1_1stream__buffer_a1391c52f149b9ed5a002df84be29b525} 
 \index{freertos::stream\_buffer$<$ StreamBufferSize, StreamBufferAllocator $>$@{freertos::stream\_buffer$<$ StreamBufferSize, StreamBufferAllocator $>$}!receive\_isr@{receive\_isr}}
 \index{receive\_isr@{receive\_isr}!freertos::stream\_buffer$<$ StreamBufferSize, StreamBufferAllocator $>$@{freertos::stream\_buffer$<$ StreamBufferSize, StreamBufferAllocator $>$}}
-\doxysubsubsection{\texorpdfstring{receive\_isr()}{receive\_isr()}}
+\doxysubsubsection{\texorpdfstring{receive\_isr()}{receive\_isr()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
 {\footnotesize\ttfamily template$<$size\+\_\+t Stream\+Buffer\+Size, typename Stream\+Buffer\+Allocator $>$ \\
 size\+\_\+t \mbox{\hyperlink{classfreertos_1_1stream__buffer}{freertos\+::stream\+\_\+buffer}}$<$ Stream\+Buffer\+Size, Stream\+Buffer\+Allocator $>$\+::receive\+\_\+isr (\begin{DoxyParamCaption}\item[{void \texorpdfstring{$\ast$}{*}}]{data,  }\item[{size\+\_\+t}]{data\+\_\+size,  }\item[{Base\+Type\+\_\+t \&}]{higher\+\_\+priority\+\_\+task\+\_\+woken }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
 
@@ -356,10 +383,31 @@ Send data to the stream buffer. \href{https://www.freertos.org/xStreamBufferSend
 \begin{DoxyReturn}{Returns}
 Base\+Type\+\_\+t pd\+PASS if the data was successfully copied into the stream buffer, otherwise err\+COULD\+\_\+\+NOT\+\_\+\+ALLOCATE\+\_\+\+REQUIRED\+\_\+\+MEMORY if there was insufficient memory available to copy the data into the stream buffer. 
 \end{DoxyReturn}
+\Hypertarget{classfreertos_1_1stream__buffer_ae094f91df0ad5fa35cda9ef231263e46}\label{classfreertos_1_1stream__buffer_ae094f91df0ad5fa35cda9ef231263e46} 
+\index{freertos::stream\_buffer$<$ StreamBufferSize, StreamBufferAllocator $>$@{freertos::stream\_buffer$<$ StreamBufferSize, StreamBufferAllocator $>$}!send\_isr@{send\_isr}}
+\index{send\_isr@{send\_isr}!freertos::stream\_buffer$<$ StreamBufferSize, StreamBufferAllocator $>$@{freertos::stream\_buffer$<$ StreamBufferSize, StreamBufferAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{send\_isr()}{send\_isr()}\hspace{0.1cm}{\footnotesize\ttfamily [1/4]}}
+{\footnotesize\ttfamily template$<$size\+\_\+t Stream\+Buffer\+Size, typename Stream\+Buffer\+Allocator $>$ \\
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1stream__buffer}{freertos\+::stream\+\_\+buffer}}$<$ Stream\+Buffer\+Size, Stream\+Buffer\+Allocator $>$\+::send\+\_\+isr (\begin{DoxyParamCaption}\item[{const void \texorpdfstring{$\ast$}{*}}]{data,  }\item[{size\+\_\+t}]{data\+\_\+size }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Send data to the stream buffer from an ISR. \href{https://www.freertos.org/xStreamBufferSendFromISR.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Stream\+Buffer\+Send\+From\+ISR.\+html}}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em data} & A pointer to the data to be copied into the stream buffer. \\
+\hline
+{\em data\+\_\+size} & Maximum number of bytes to copy into the stream buffer. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Base\+Type\+\_\+t pd\+PASS if the data was successfully copied into the stream buffer, otherwise err\+COULD\+\_\+\+NOT\+\_\+\+ALLOCATE\+\_\+\+REQUIRED\+\_\+\+MEMORY if there was insufficient memory available to copy the data into the stream buffer. 
+\end{DoxyReturn}
 \Hypertarget{classfreertos_1_1stream__buffer_adb0ee0731da5bf303ca50e9097f181eb}\label{classfreertos_1_1stream__buffer_adb0ee0731da5bf303ca50e9097f181eb} 
 \index{freertos::stream\_buffer$<$ StreamBufferSize, StreamBufferAllocator $>$@{freertos::stream\_buffer$<$ StreamBufferSize, StreamBufferAllocator $>$}!send\_isr@{send\_isr}}
 \index{send\_isr@{send\_isr}!freertos::stream\_buffer$<$ StreamBufferSize, StreamBufferAllocator $>$@{freertos::stream\_buffer$<$ StreamBufferSize, StreamBufferAllocator $>$}}
-\doxysubsubsection{\texorpdfstring{send\_isr()}{send\_isr()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+\doxysubsubsection{\texorpdfstring{send\_isr()}{send\_isr()}\hspace{0.1cm}{\footnotesize\ttfamily [2/4]}}
 {\footnotesize\ttfamily template$<$size\+\_\+t Stream\+Buffer\+Size, typename Stream\+Buffer\+Allocator $>$ \\
 Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1stream__buffer}{freertos\+::stream\+\_\+buffer}}$<$ Stream\+Buffer\+Size, Stream\+Buffer\+Allocator $>$\+::send\+\_\+isr (\begin{DoxyParamCaption}\item[{const void \texorpdfstring{$\ast$}{*}}]{data,  }\item[{size\+\_\+t}]{data\+\_\+size,  }\item[{Base\+Type\+\_\+t \&}]{higher\+\_\+priority\+\_\+task\+\_\+woken }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
 
@@ -379,10 +427,37 @@ Send data to the stream buffer from an ISR. \href{https://www.freertos.org/xStre
 \begin{DoxyReturn}{Returns}
 Base\+Type\+\_\+t pd\+PASS if the data was successfully copied into the stream buffer, otherwise err\+COULD\+\_\+\+NOT\+\_\+\+ALLOCATE\+\_\+\+REQUIRED\+\_\+\+MEMORY if there was insufficient memory available to copy the data into the stream buffer. 
 \end{DoxyReturn}
+\Hypertarget{classfreertos_1_1stream__buffer_a4daaf8f6e35ae142d88ed86e7b9dbcc1}\label{classfreertos_1_1stream__buffer_a4daaf8f6e35ae142d88ed86e7b9dbcc1} 
+\index{freertos::stream\_buffer$<$ StreamBufferSize, StreamBufferAllocator $>$@{freertos::stream\_buffer$<$ StreamBufferSize, StreamBufferAllocator $>$}!send\_isr@{send\_isr}}
+\index{send\_isr@{send\_isr}!freertos::stream\_buffer$<$ StreamBufferSize, StreamBufferAllocator $>$@{freertos::stream\_buffer$<$ StreamBufferSize, StreamBufferAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{send\_isr()}{send\_isr()}\hspace{0.1cm}{\footnotesize\ttfamily [3/4]}}
+{\footnotesize\ttfamily template$<$size\+\_\+t Stream\+Buffer\+Size, typename Stream\+Buffer\+Allocator $>$ \\
+template$<$typename Iterator $>$ \\
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1stream__buffer}{freertos\+::stream\+\_\+buffer}}$<$ Stream\+Buffer\+Size, Stream\+Buffer\+Allocator $>$\+::send\+\_\+isr (\begin{DoxyParamCaption}\item[{Iterator}]{begin,  }\item[{Iterator}]{end }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Send data to the stream buffer from an ISR. \href{https://www.freertos.org/xStreamBufferSendFromISR.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Stream\+Buffer\+Send\+From\+ISR.\+html}}. 
+
+
+\begin{DoxyTemplParams}{Template Parameters}
+{\em Iterator} & Const iterator type \\
+\hline
+\end{DoxyTemplParams}
+
+\begin{DoxyParams}{Parameters}
+{\em begin} & Iterator to the beginning of the data \\
+\hline
+{\em end} & Iterator to the end of the data \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Base\+Type\+\_\+t pd\+PASS if the data was successfully copied into the stream buffer, otherwise err\+COULD\+\_\+\+NOT\+\_\+\+ALLOCATE\+\_\+\+REQUIRED\+\_\+\+MEMORY if there was insufficient memory available to copy the data into the stream buffer. 
+\end{DoxyReturn}
 \Hypertarget{classfreertos_1_1stream__buffer_a962d1c3c962d78c57946221331630e5f}\label{classfreertos_1_1stream__buffer_a962d1c3c962d78c57946221331630e5f} 
 \index{freertos::stream\_buffer$<$ StreamBufferSize, StreamBufferAllocator $>$@{freertos::stream\_buffer$<$ StreamBufferSize, StreamBufferAllocator $>$}!send\_isr@{send\_isr}}
 \index{send\_isr@{send\_isr}!freertos::stream\_buffer$<$ StreamBufferSize, StreamBufferAllocator $>$@{freertos::stream\_buffer$<$ StreamBufferSize, StreamBufferAllocator $>$}}
-\doxysubsubsection{\texorpdfstring{send\_isr()}{send\_isr()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+\doxysubsubsection{\texorpdfstring{send\_isr()}{send\_isr()}\hspace{0.1cm}{\footnotesize\ttfamily [4/4]}}
 {\footnotesize\ttfamily template$<$size\+\_\+t Stream\+Buffer\+Size, typename Stream\+Buffer\+Allocator $>$ \\
 template$<$typename Iterator $>$ \\
 Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1stream__buffer}{freertos\+::stream\+\_\+buffer}}$<$ Stream\+Buffer\+Size, Stream\+Buffer\+Allocator $>$\+::send\+\_\+isr (\begin{DoxyParamCaption}\item[{Iterator}]{begin,  }\item[{Iterator}]{end,  }\item[{Base\+Type\+\_\+t \&}]{higher\+\_\+priority\+\_\+task\+\_\+woken }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}

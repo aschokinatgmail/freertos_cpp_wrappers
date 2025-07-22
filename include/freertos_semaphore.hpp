@@ -38,9 +38,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <FreeRTOS.h>
 #include <chrono>
+#include <ctime>
 #include <semphr.h>
 #include <task.h>
-#include <time.h>
 
 namespace freertos {
 
@@ -50,10 +50,11 @@ namespace freertos {
  *
  */
 class static_semaphore_allocator {
-  StaticSemaphore_t m_semaphore_placeholder;
+  StaticSemaphore_t m_semaphore_placeholder{};
 
 public:
   static_semaphore_allocator() = default;
+  ~static_semaphore_allocator() = default;
   static_semaphore_allocator(const static_semaphore_allocator &) = delete;
   static_semaphore_allocator(static_semaphore_allocator &&) = delete;
 
@@ -95,22 +96,81 @@ public:
 #endif
 
 /**
- * @brief A wrapper for the FreeRTOS binary semaphore.
- *
- * @tparam SemaphoreAllocator type of the semaphore allocator to use for memory
- * allocation.
+ * @brief A modern C++ wrapper for FreeRTOS binary semaphores.
+ * 
+ * Binary semaphores are used for both mutual exclusion and task synchronization.
+ * Unlike mutexes, binary semaphores do not implement priority inheritance.
+ * 
+ * @tparam SemaphoreAllocator Type of allocator (static or dynamic)
+ * 
+ * ## Features:
+ * - RAII automatic cleanup
+ * - std::chrono timeout support  
+ * - ISR-safe operations
+ * - Exception-safe design
+ * - No copy/move to prevent accidental resource duplication
+ * 
+ * ## Usage Examples:
+ * 
+ * ### Basic Signaling:
+ * ```cpp
+ * freertos::binary_semaphore signal_sem;
+ * 
+ * // Producer task
+ * freertos::task<512> producer("Producer", 3, [&]() {
+ *     while (true) {
+ *         produce_data();
+ *         signal_sem.give();  // Signal consumer
+ *         vTaskDelay(pdMS_TO_TICKS(1000));
+ *     }
+ * });
+ * 
+ * // Consumer task  
+ * freertos::task<512> consumer("Consumer", 2, [&]() {
+ *     while (true) {
+ *         if (signal_sem.take(std::chrono::seconds(5))) {
+ *             consume_data();
+ *         } else {
+ *             printf("Timeout waiting for signal\\n");
+ *         }
+ *     }
+ * });
+ * ```
+ * 
+ * ### ISR Communication:
+ * ```cpp
+ * freertos::binary_semaphore isr_sem;
+ * 
+ * void timer_interrupt_handler() {
+ *     BaseType_t task_woken = pdFALSE;
+ *     isr_sem.give_isr(task_woken);
+ *     portYIELD_FROM_ISR(task_woken);
+ * }
+ * 
+ * freertos::task<1024> handler_task("Handler", 5, [&]() {
+ *     while (true) {
+ *         if (isr_sem.take()) {
+ *             handle_timer_event();
+ *         }
+ *     }
+ * });
+ * ```
+ * 
+ * ### Static Allocation:
+ * ```cpp
+ * freertos::binary_semaphore<freertos::static_semaphore_allocator> static_sem;
+ * ```
  */
 template <typename SemaphoreAllocator> class binary_semaphore {
-  SemaphoreAllocator m_allocator;
-  SemaphoreHandle_t m_semaphore;
+  SemaphoreAllocator m_allocator{};
+  SemaphoreHandle_t m_semaphore{nullptr};
 
 public:
   /**
    * @brief Construct a new binary semaphore object
    *
    */
-  binary_semaphore() : m_allocator{}, m_semaphore{nullptr} {
-    m_semaphore = m_allocator.create_binary();
+  binary_semaphore() : m_semaphore{m_allocator.create_binary()} {
     configASSERT(m_semaphore);
   }
   binary_semaphore(const binary_semaphore &) = delete;
@@ -221,8 +281,8 @@ public:
  * allocation.
  */
 template <typename SemaphoreAllocator> class counting_semaphore {
-  SemaphoreAllocator m_allocator;
-  SemaphoreHandle_t m_semaphore;
+  SemaphoreAllocator m_allocator{};
+  SemaphoreHandle_t m_semaphore{nullptr};
 
 public:
   /**
@@ -232,8 +292,7 @@ public:
    *
    */
   explicit counting_semaphore(UBaseType_t max_count = 1)
-      : m_allocator{}, m_semaphore{nullptr} {
-    m_semaphore = m_allocator.create_counting(max_count, max_count);
+      : m_semaphore{m_allocator.create_counting(max_count)} {
     configASSERT(m_semaphore);
   }
   counting_semaphore(const counting_semaphore &) = delete;
@@ -355,19 +414,23 @@ public:
   }
   /**
    * @brief Give the counting semaphore.
+   * Note: Post-increment returns reference instead of copy for RAII safety
    *
    * @return counting_semaphore& reference to the counting semaphore.
    */
-  counting_semaphore &operator++(int) {
+  counting_semaphore &
+  operator++(int) { // NOLINT(cert-dcl21-cpp): RAII class, copy is deleted
     give();
     return *this;
   }
   /**
    * @brief Take the counting semaphore.
+   * Note: Post-decrement returns reference instead of copy for RAII safety
    *
    * @return counting_semaphore& reference to the counting semaphore.
    */
-  counting_semaphore &operator--(int) {
+  counting_semaphore &
+  operator--(int) { // NOLINT(cert-dcl21-cpp): RAII class, copy is deleted
     take();
     return *this;
   }
@@ -398,8 +461,8 @@ public:
  * allocation.
  */
 template <typename SemaphoreAllocator> class mutex {
-  SemaphoreAllocator m_allocator;
-  SemaphoreHandle_t m_semaphore;
+  SemaphoreAllocator m_allocator{};
+  SemaphoreHandle_t m_semaphore{nullptr};
   uint8_t m_locked : 1;
 
 public:
@@ -407,8 +470,7 @@ public:
    * @brief Construct a new mutex object
    *
    */
-  mutex() : m_allocator{}, m_semaphore{nullptr}, m_locked{false} {
-    m_semaphore = m_allocator.create_mutex();
+  mutex() : m_semaphore{m_allocator.create_mutex()}, m_locked{false} {
     configASSERT(m_semaphore);
   }
   mutex(const mutex &) = delete;
@@ -551,17 +613,16 @@ public:
  * allocation.
  */
 template <typename SemaphoreAllocator> class recursive_mutex {
-  SemaphoreAllocator m_allocator;
-  SemaphoreHandle_t m_semaphore;
-  uint8_t m_locked : 1;
+  SemaphoreAllocator m_allocator{};
+  SemaphoreHandle_t m_semaphore{nullptr};
+  uint8_t m_recursions_count{0};
 
 public:
   /**
    * @brief Construct a new recursive mutex object
    *
    */
-  recursive_mutex() : m_allocator{}, m_semaphore{nullptr}, m_locked{false} {
-    m_semaphore = m_allocator.create_recursive_mutex();
+  recursive_mutex() : m_semaphore{m_allocator.create_recursive_mutex()} {
     configASSERT(m_semaphore);
   }
   recursive_mutex(const recursive_mutex &) = delete;
@@ -585,11 +646,12 @@ public:
    * @ref https://www.freertos.org/a00123.html
    *
    * @return BaseType_t pdTRUE if the recursive mutex was successfully unlocked,
+   * otherwise pdFALSE.
    */
   BaseType_t unlock() {
-    auto rc = xSemaphoreGive(m_semaphore);
-    if (rc) {
-      m_locked = false;
+    auto rc = xSemaphoreGiveRecursive(m_semaphore);
+    if (rc && m_recursions_count > 0) {
+      m_recursions_count--;
     }
     return rc;
   }
@@ -603,8 +665,8 @@ public:
    */
   BaseType_t unlock_isr(BaseType_t &high_priority_task_woken) {
     auto rc = xSemaphoreGiveFromISR(m_semaphore, &high_priority_task_woken);
-    if (rc) {
-      m_locked = false;
+    if (rc && m_recursions_count > 0) {
+      m_recursions_count--;
     }
     return rc;
   }
@@ -617,8 +679,8 @@ public:
   BaseType_t unlock_isr(void) {
     BaseType_t high_priority_task_woken = pdFALSE;
     auto rc = xSemaphoreGiveFromISR(m_semaphore, &high_priority_task_woken);
-    if (rc) {
-      m_locked = false;
+    if (rc && m_recursions_count > 0) {
+      m_recursions_count--;
     }
     return rc;
   }
@@ -630,9 +692,9 @@ public:
    * @return BaseType_t pdTRUE if the recursive mutex was successfully locked,
    */
   BaseType_t lock(const TickType_t ticks_to_wait = portMAX_DELAY) {
-    auto rc = xSemaphoreTake(m_semaphore, ticks_to_wait);
+    auto rc = xSemaphoreTakeRecursive(m_semaphore, ticks_to_wait);
     if (rc) {
-      m_locked = true;
+      m_recursions_count++;
     }
     return rc;
   }
@@ -647,7 +709,7 @@ public:
   BaseType_t lock_isr(BaseType_t &high_priority_task_woken) {
     auto rc = xSemaphoreTakeFromISR(m_semaphore, &high_priority_task_woken);
     if (rc) {
-      m_locked = true;
+      m_recursions_count++;
     }
     return rc;
   }
@@ -661,7 +723,7 @@ public:
     BaseType_t high_priority_task_woken = pdFALSE;
     auto rc = xSemaphoreTakeFromISR(m_semaphore, &high_priority_task_woken);
     if (rc) {
-      m_locked = true;
+      m_recursions_count++;
     }
     return rc;
   }
@@ -683,9 +745,9 @@ public:
    * @return BaseType_t pdTRUE if the recursive mutex was successfully locked,
    */
   BaseType_t try_lock() {
-    auto rc = xSemaphoreTake(m_semaphore, 0);
+    auto rc = xSemaphoreTakeRecursive(m_semaphore, 0);
     if (rc) {
-      m_locked = true;
+      m_recursions_count++;
     }
     return rc;
   }
@@ -694,7 +756,13 @@ public:
    *
    * @return bool true if the recursive mutex is locked, otherwise false.
    */
-  bool locked(void) const { return m_locked; }
+  bool locked(void) const { return m_recursions_count > 0; }
+  /**
+   * @brief Get the number of recursions of the recursive mutex.
+   *
+   * @return uint8_t number of recursions of the recursive mutex.
+   */
+  uint8_t recursions_count(void) const { return m_recursions_count; }
 };
 
 /**
@@ -704,7 +772,8 @@ public:
  * @tparam Mutex type of the mutex to guard.
  */
 template <typename Mutex> class lock_guard {
-  Mutex &m_mutex;
+  Mutex &m_mutex; // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members):
+                  // RAII design requires reference
 
 public:
   /**
@@ -713,11 +782,18 @@ public:
    * @param mutex mutex to guard
    */
   explicit lock_guard(Mutex &mutex) : m_mutex{mutex} { m_mutex.lock(); }
+
   /**
    * @brief Destruct the lock guard object and unlock the mutex.
    *
    */
   ~lock_guard(void) { m_mutex.unlock(); }
+
+  // Delete copy and move operations for RAII safety
+  lock_guard(const lock_guard &) = delete;
+  lock_guard(lock_guard &&) = delete;
+  lock_guard &operator=(const lock_guard &) = delete;
+  lock_guard &operator=(lock_guard &&) = delete;
 
   /**
    * @brief Checks if the mutex is locked.
@@ -734,7 +810,9 @@ public:
  * @tparam Mutex type of the mutex to guard.
  */
 template <typename Mutex> class try_lock_guard {
-  Mutex &m_mutex;
+  Mutex &m_mutex; // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members):
+                  // RAII design requires reference
+  bool m_lock_acquired{false};
 
 public:
   /**
@@ -742,19 +820,31 @@ public:
    *
    * @param mutex mutex to guard
    */
-  explicit try_lock_guard(Mutex &mutex) : m_mutex{mutex} { m_mutex.try_lock(); }
+  explicit try_lock_guard(Mutex &mutex)
+      : m_mutex{mutex}, m_lock_acquired{static_cast<bool>(m_mutex.try_lock())} {
+  }
   /**
    * @brief Destruct the try lock guard object and unlock the mutex.
    *
    */
-  ~try_lock_guard(void) { m_mutex.unlock(); }
+  ~try_lock_guard(void) {
+    if (m_lock_acquired) {
+      m_mutex.unlock();
+    }
+  }
+
+  // Delete copy and move operations for RAII safety
+  try_lock_guard(const try_lock_guard &) = delete;
+  try_lock_guard(try_lock_guard &&) = delete;
+  try_lock_guard &operator=(const try_lock_guard &) = delete;
+  try_lock_guard &operator=(try_lock_guard &&) = delete;
 
   /**
    * @brief Checks if the mutex is locked.
    *
    * @return  true if the mutex is locked, otherwise false.
    */
-  bool locked(void) const { return m_mutex.locked(); }
+  bool locked(void) const { return m_lock_acquired && m_mutex.locked(); }
 };
 
 /**
@@ -764,8 +854,9 @@ public:
  * @tparam Mutex type of the mutex to guard.
  */
 template <typename Mutex> class lock_guard_isr {
-  Mutex &m_mutex;
-  BaseType_t m_high_priority_task_woken;
+  Mutex &m_mutex; // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members):
+                  // RAII design requires reference
+  BaseType_t m_high_priority_task_woken{pdFALSE};
 
 public:
   /**
@@ -773,8 +864,7 @@ public:
    *
    * @param mutex mutex to guard
    */
-  explicit lock_guard_isr(Mutex &mutex)
-      : m_mutex{mutex}, m_high_priority_task_woken{pdFALSE} {
+  explicit lock_guard_isr(Mutex &mutex) : m_mutex{mutex} {
     m_mutex.lock_isr(m_high_priority_task_woken);
   }
   /**
@@ -782,6 +872,12 @@ public:
    *
    */
   ~lock_guard_isr(void) { m_mutex.unlock_isr(m_high_priority_task_woken); }
+
+  // Delete copy and move operations for RAII safety
+  lock_guard_isr(const lock_guard_isr &) = delete;
+  lock_guard_isr(lock_guard_isr &&) = delete;
+  lock_guard_isr &operator=(const lock_guard_isr &) = delete;
+  lock_guard_isr &operator=(lock_guard_isr &&) = delete;
 
   /**
    * @brief Checks if high priority task was woken.
@@ -807,7 +903,9 @@ public:
  * @tparam Mutex type of the mutex to guard.
  */
 template <typename Mutex> class timeout_lock_guard {
-  Mutex &m_mutex;
+  Mutex &m_mutex; // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members):
+                  // RAII design requires reference
+  bool m_lock_acquired{false};
 
 public:
   /**
@@ -816,9 +914,9 @@ public:
    * @param mutex mutex to guard
    * @param ticks_to_wait timeout in ticks to wait for the mutex.
    */
-  timeout_lock_guard(Mutex &mutex, TickType_t ticks_to_wait) : m_mutex{mutex} {
-    m_mutex.lock(ticks_to_wait);
-  }
+  timeout_lock_guard(Mutex &mutex, TickType_t ticks_to_wait)
+      : m_mutex{mutex},
+        m_lock_acquired{static_cast<bool>(m_mutex.lock(ticks_to_wait))} {}
   /**
    * @brief Construct a new timeout lock guard object
    *
@@ -828,22 +926,32 @@ public:
   template <typename Rep, typename Period>
   timeout_lock_guard(Mutex &mutex,
                      const std::chrono::duration<Rep, Period> &timeout)
-      : m_mutex{mutex} {
-    m_mutex.lock(
-        std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count());
-  }
+      : m_mutex{mutex},
+        m_lock_acquired{static_cast<bool>(m_mutex.lock(
+            std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
+                .count()))} {}
   /**
    * @brief Destruct the timeout lock guard object and unlock the mutex.
    *
    */
-  ~timeout_lock_guard(void) { m_mutex.unlock(); }
+  ~timeout_lock_guard(void) {
+    if (m_lock_acquired) {
+      m_mutex.unlock();
+    }
+  }
+
+  // Delete copy and move operations for RAII safety
+  timeout_lock_guard(const timeout_lock_guard &) = delete;
+  timeout_lock_guard(timeout_lock_guard &&) = delete;
+  timeout_lock_guard &operator=(const timeout_lock_guard &) = delete;
+  timeout_lock_guard &operator=(timeout_lock_guard &&) = delete;
 
   /**
    * @brief Checks if the mutex is locked.
    *
    * @return  true if the mutex is locked, otherwise false.
    */
-  bool locked(void) const { return m_mutex.locked(); }
+  bool locked(void) const { return m_lock_acquired && m_mutex.locked(); }
 };
 
 #if configSUPPORT_STATIC_ALLOCATION

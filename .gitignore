@@ -1,28 +1,47 @@
 # Build directories
 build/
 build_*/
+out/
+.vscode/
+.vs/
 
-# CMake generated files
+# Note: Generated documentation is now included in repository
+
+# CMake
 CMakeCache.txt
 CMakeFiles/
 cmake_install.cmake
 Makefile
 *.cmake
 
-# Compiled objects and executables
+# Compiled object files
 *.o
+*.obj
+
+# Compiled library files
 *.a
+*.lib
 *.so
+*.dll
+
+# Executables
 *.exe
+test_freertos_task
+test_freertos_semaphore
+test_freertos_queue
+test_freertos_event_group
+
+# Test results
+*.xml
+test_results.xml
 
 # IDE files
-.vscode/
 .idea/
 *.swp
 *.swo
 *~
 
-# OS generated files
+# OS files
 .DS_Store
 .DS_Store?
 ._*

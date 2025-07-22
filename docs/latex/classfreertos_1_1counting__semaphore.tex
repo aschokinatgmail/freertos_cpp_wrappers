@@ -33,9 +33,13 @@ Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1counting__semaphore_a6407b3c
 \begin{DoxyCompactList}\small\item\em Give the counting semaphore. \href{https://www.freertos.org/a00123.html}{\texttt{ https\+://www.\+freertos.\+org/a00123.\+html}}. \end{DoxyCompactList}\item 
 Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1counting__semaphore_a8d2d7eb7c84eff0fa2705fd6e1e14f88}{give\+\_\+isr}} (Base\+Type\+\_\+t \&high\+\_\+priority\+\_\+task\+\_\+woken)
 \begin{DoxyCompactList}\small\item\em Give the counting semaphore from an ISR. \href{https://www.freertos.org/a00124.html}{\texttt{ https\+://www.\+freertos.\+org/a00124.\+html}}. \end{DoxyCompactList}\item 
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1counting__semaphore_a7e4965d714cfeed587ce3ccc2aa5db67}{give\+\_\+isr}} (void)
+\begin{DoxyCompactList}\small\item\em Give the counting semaphore from an ISR. \href{https://www.freertos.org/a00124.html}{\texttt{ https\+://www.\+freertos.\+org/a00124.\+html}}. \end{DoxyCompactList}\item 
 Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1counting__semaphore_a47ef131ae9b50fbcbc3db1aa7eb2aa5d}{take}} (const Tick\+Type\+\_\+t ticks\+\_\+to\+\_\+wait=port\+MAX\+\_\+\+DELAY)
 \begin{DoxyCompactList}\small\item\em Take the counting semaphore. \href{https://www.freertos.org/a00122.html}{\texttt{ https\+://www.\+freertos.\+org/a00122.\+html}}. \end{DoxyCompactList}\item 
 Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1counting__semaphore_a346dae83ff7201eb62e9b94fedc0d2de}{take\+\_\+isr}} (Base\+Type\+\_\+t \&high\+\_\+priority\+\_\+task\+\_\+woken)
+\begin{DoxyCompactList}\small\item\em Take the counting semaphore from an ISR. \href{https://www.freertos.org/xSemaphoreTakeFromISR.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Semaphore\+Take\+From\+ISR.\+html}}. \end{DoxyCompactList}\item 
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1counting__semaphore_a66948f9f30c590a07e78e5f1eb2a9f09}{take\+\_\+isr}} (void)
 \begin{DoxyCompactList}\small\item\em Take the counting semaphore from an ISR. \href{https://www.freertos.org/xSemaphoreTakeFromISR.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Semaphore\+Take\+From\+ISR.\+html}}. \end{DoxyCompactList}\item 
 {\footnotesize template$<$typename Rep , typename Period $>$ }\\Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1counting__semaphore_ab844536d406d6d303ef0df8f0e43a6ad}{take}} (const std\+::chrono\+::duration$<$ Rep, Period $>$ \&timeout)
 \begin{DoxyCompactList}\small\item\em Take the counting semaphore. \end{DoxyCompactList}\item 
@@ -44,9 +48,9 @@ Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1counting__semaphore_a346dae8
 \mbox{\hyperlink{classfreertos_1_1counting__semaphore}{counting\+\_\+semaphore}} \& \mbox{\hyperlink{classfreertos_1_1counting__semaphore_aa1f738a641c3532b03907c89b157fbd7}{operator-\/-\/}} ()
 \begin{DoxyCompactList}\small\item\em Take the counting semaphore. \end{DoxyCompactList}\item 
 \mbox{\hyperlink{classfreertos_1_1counting__semaphore}{counting\+\_\+semaphore}} \& \mbox{\hyperlink{classfreertos_1_1counting__semaphore_a057a0916be711f3814d2a79e7ee954ec}{operator++}} (int)
-\begin{DoxyCompactList}\small\item\em Give the counting semaphore. \end{DoxyCompactList}\item 
+\begin{DoxyCompactList}\small\item\em Give the counting semaphore. Note\+: Post-\/increment returns reference instead of copy for RAII safety. \end{DoxyCompactList}\item 
 \mbox{\hyperlink{classfreertos_1_1counting__semaphore}{counting\+\_\+semaphore}} \& \mbox{\hyperlink{classfreertos_1_1counting__semaphore_aaa3590f1722ea0a4a764580911b2c2a0}{operator-\/-\/}} (int)
-\begin{DoxyCompactList}\small\item\em Take the counting semaphore. \end{DoxyCompactList}\item 
+\begin{DoxyCompactList}\small\item\em Take the counting semaphore. Note\+: Post-\/decrement returns reference instead of copy for RAII safety. \end{DoxyCompactList}\item 
 UBase\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1counting__semaphore_a9c485144e9aa39623e887d5b1cf3d1e8}{count}} ()
 \begin{DoxyCompactList}\small\item\em Get the count of the counting semaphore. \end{DoxyCompactList}\item 
 \mbox{\hyperlink{classfreertos_1_1counting__semaphore}{counting\+\_\+semaphore}} \& \mbox{\hyperlink{classfreertos_1_1counting__semaphore_a97b87512097d920ac945d1d7488a9632}{operator+=}} (UBase\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1counting__semaphore_a9c485144e9aa39623e887d5b1cf3d1e8}{count}})
@@ -116,7 +120,7 @@ Base\+Type\+\_\+t pd\+TRUE if the semaphore was successfully given, otherwise pd
 \Hypertarget{classfreertos_1_1counting__semaphore_a8d2d7eb7c84eff0fa2705fd6e1e14f88}\label{classfreertos_1_1counting__semaphore_a8d2d7eb7c84eff0fa2705fd6e1e14f88} 
 \index{freertos::counting\_semaphore$<$ SemaphoreAllocator $>$@{freertos::counting\_semaphore$<$ SemaphoreAllocator $>$}!give\_isr@{give\_isr}}
 \index{give\_isr@{give\_isr}!freertos::counting\_semaphore$<$ SemaphoreAllocator $>$@{freertos::counting\_semaphore$<$ SemaphoreAllocator $>$}}
-\doxysubsubsection{\texorpdfstring{give\_isr()}{give\_isr()}}
+\doxysubsubsection{\texorpdfstring{give\_isr()}{give\_isr()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
 {\footnotesize\ttfamily template$<$typename Semaphore\+Allocator $>$ \\
 Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1counting__semaphore}{freertos\+::counting\+\_\+semaphore}}$<$ Semaphore\+Allocator $>$\+::give\+\_\+isr (\begin{DoxyParamCaption}\item[{Base\+Type\+\_\+t \&}]{high\+\_\+priority\+\_\+task\+\_\+woken }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
 
@@ -129,6 +133,20 @@ Give the counting semaphore from an ISR. \href{https://www.freertos.org/a00124.h
 {\em high\+\_\+priority\+\_\+task\+\_\+woken} & pd\+TRUE if the high priority task was woken by the semaphore give. \\
 \hline
 \end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Base\+Type\+\_\+t pd\+TRUE if the semaphore was successfully given, 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1counting__semaphore_a7e4965d714cfeed587ce3ccc2aa5db67}\label{classfreertos_1_1counting__semaphore_a7e4965d714cfeed587ce3ccc2aa5db67} 
+\index{freertos::counting\_semaphore$<$ SemaphoreAllocator $>$@{freertos::counting\_semaphore$<$ SemaphoreAllocator $>$}!give\_isr@{give\_isr}}
+\index{give\_isr@{give\_isr}!freertos::counting\_semaphore$<$ SemaphoreAllocator $>$@{freertos::counting\_semaphore$<$ SemaphoreAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{give\_isr()}{give\_isr()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily template$<$typename Semaphore\+Allocator $>$ \\
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1counting__semaphore}{freertos\+::counting\+\_\+semaphore}}$<$ Semaphore\+Allocator $>$\+::give\+\_\+isr (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Give the counting semaphore from an ISR. \href{https://www.freertos.org/a00124.html}{\texttt{ https\+://www.\+freertos.\+org/a00124.\+html}}. 
+
 \begin{DoxyReturn}{Returns}
 Base\+Type\+\_\+t pd\+TRUE if the semaphore was successfully given, 
 \end{DoxyReturn}
@@ -155,7 +173,7 @@ Give the counting semaphore.
 
 
 
-Give the counting semaphore. 
+Give the counting semaphore. Note\+: Post-\/increment returns reference instead of copy for RAII safety. 
 
 \begin{DoxyReturn}{Returns}
 \doxylink{classfreertos_1_1counting__semaphore}{counting\+\_\+semaphore}\& reference to the counting semaphore. 
@@ -202,7 +220,7 @@ Take the counting semaphore.
 
 
 
-Take the counting semaphore. 
+Take the counting semaphore. Note\+: Post-\/decrement returns reference instead of copy for RAII safety. 
 
 \begin{DoxyReturn}{Returns}
 \doxylink{classfreertos_1_1counting__semaphore}{counting\+\_\+semaphore}\& reference to the counting semaphore. 
@@ -249,7 +267,7 @@ Base\+Type\+\_\+t pd\+TRUE if the semaphore was successfully taken, otherwise pd
 \Hypertarget{classfreertos_1_1counting__semaphore_a346dae83ff7201eb62e9b94fedc0d2de}\label{classfreertos_1_1counting__semaphore_a346dae83ff7201eb62e9b94fedc0d2de} 
 \index{freertos::counting\_semaphore$<$ SemaphoreAllocator $>$@{freertos::counting\_semaphore$<$ SemaphoreAllocator $>$}!take\_isr@{take\_isr}}
 \index{take\_isr@{take\_isr}!freertos::counting\_semaphore$<$ SemaphoreAllocator $>$@{freertos::counting\_semaphore$<$ SemaphoreAllocator $>$}}
-\doxysubsubsection{\texorpdfstring{take\_isr()}{take\_isr()}}
+\doxysubsubsection{\texorpdfstring{take\_isr()}{take\_isr()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
 {\footnotesize\ttfamily template$<$typename Semaphore\+Allocator $>$ \\
 Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1counting__semaphore}{freertos\+::counting\+\_\+semaphore}}$<$ Semaphore\+Allocator $>$\+::take\+\_\+isr (\begin{DoxyParamCaption}\item[{Base\+Type\+\_\+t \&}]{high\+\_\+priority\+\_\+task\+\_\+woken }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
 
@@ -262,6 +280,20 @@ Take the counting semaphore from an ISR. \href{https://www.freertos.org/xSemapho
 {\em high\+\_\+priority\+\_\+task\+\_\+woken} & pd\+TRUE if the high priority task was woken by the semaphore take.\\
 \hline
 \end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Base\+Type\+\_\+t pd\+TRUE if the semaphore was successfully taken, otherwise pd\+FALSE. 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1counting__semaphore_a66948f9f30c590a07e78e5f1eb2a9f09}\label{classfreertos_1_1counting__semaphore_a66948f9f30c590a07e78e5f1eb2a9f09} 
+\index{freertos::counting\_semaphore$<$ SemaphoreAllocator $>$@{freertos::counting\_semaphore$<$ SemaphoreAllocator $>$}!take\_isr@{take\_isr}}
+\index{take\_isr@{take\_isr}!freertos::counting\_semaphore$<$ SemaphoreAllocator $>$@{freertos::counting\_semaphore$<$ SemaphoreAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{take\_isr()}{take\_isr()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily template$<$typename Semaphore\+Allocator $>$ \\
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1counting__semaphore}{freertos\+::counting\+\_\+semaphore}}$<$ Semaphore\+Allocator $>$\+::take\+\_\+isr (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Take the counting semaphore from an ISR. \href{https://www.freertos.org/xSemaphoreTakeFromISR.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Semaphore\+Take\+From\+ISR.\+html}}. 
+
 \begin{DoxyReturn}{Returns}
 Base\+Type\+\_\+t pd\+TRUE if the semaphore was successfully taken, otherwise pd\+FALSE. 
 \end{DoxyReturn}

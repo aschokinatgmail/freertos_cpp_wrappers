@@ -37,6 +37,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #endif
 
 #include <FreeRTOS.h>
+#include <array>
 #include <chrono>
 #include <optional>
 #include <stream_buffer.h>
@@ -50,11 +51,12 @@ namespace freertos {
  *
  */
 template <size_t StreamBufferSize> class static_stream_buffer_allocator {
-  StaticStreamBuffer_t m_stream_buffer_placeholder;
-  uint8_t m_storage[StreamBufferSize];
+  StaticStreamBuffer_t m_stream_buffer_placeholder{};
+  std::array<uint8_t, StreamBufferSize> m_storage;
 
 public:
   static_stream_buffer_allocator() = default;
+  ~static_stream_buffer_allocator() = default;
   static_stream_buffer_allocator(const static_stream_buffer_allocator &) =
       delete;
   static_stream_buffer_allocator(static_stream_buffer_allocator &&) = delete;
@@ -66,7 +68,7 @@ public:
 
   StreamBufferHandle_t create(size_t trigger_level_bytes = 1) {
     return xStreamBufferCreateStatic(StreamBufferSize, trigger_level_bytes,
-                                     m_storage, &m_stream_buffer_placeholder);
+                                     m_storage.data(), &m_stream_buffer_placeholder);
   }
 };
 #endif
@@ -92,8 +94,8 @@ public:
  */
 template <size_t StreamBufferSize, typename StreamBufferAllocator>
 class stream_buffer {
-  StreamBufferAllocator m_allocator;
-  StreamBufferHandle_t m_stream_buffer;
+  StreamBufferAllocator m_allocator{};
+  StreamBufferHandle_t m_stream_buffer{nullptr};
 
 public:
   /**
@@ -103,8 +105,7 @@ public:
    * buffer before a task that is blocked on a read operation will be unblocked
    */
   explicit stream_buffer(size_t trigger_level_bytes = 1)
-      : m_allocator{}, m_stream_buffer{nullptr} {
-    m_stream_buffer = m_allocator.create(trigger_level_bytes);
+      : m_stream_buffer{m_allocator.create(trigger_level_bytes)} {
     configASSERT(m_stream_buffer);
   }
   stream_buffer(const stream_buffer &) = delete;

@@ -1,79 +1,174 @@
-cmake_minimum_required(VERSION 3.14)
+# Test CMakeLists.txt
 
-# GoogleTest setup
-include(FetchContent)
-FetchContent_Declare(
-  googletest
-  GIT_REPOSITORY https://github.com/google/googletest.git
-  GIT_TAG release-1.12.1
+# Create FreeRTOS mock library first
+add_library(freertos_mocks
+    mocks/freertos_mocks.cpp
+)
+target_include_directories(freertos_mocks PUBLIC mocks)
+
+# Find system GoogleTest libraries
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(GTEST REQUIRED gtest_main)
+pkg_check_modules(GMOCK REQUIRED gmock_main)
+
+# Link GoogleTest to mock library
+target_link_libraries(freertos_mocks PUBLIC ${GMOCK_LIBRARIES})
+target_compile_options(freertos_mocks PUBLIC ${GMOCK_CFLAGS_OTHER})
+
+# Add the main test executables
+add_executable(
+    test_freertos_task
+    test_freertos_task.cpp
 )
 
-# For Windows: Prevent overriding the parent project's compiler/linker settings
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(googletest)
+add_executable(
+    test_freertos_semaphore
+    test_freertos_semaphore.cpp
+)
 
-# Add freertos stub headers directory
-add_library(freertos_stubs STATIC freertos_stubs/freertos_stubs.cpp)
-target_include_directories(freertos_stubs PUBLIC freertos_stubs)
+add_executable(
+    test_freertos_queue
+    test_freertos_queue.cpp
+)
 
-# Test executable for each module
-add_executable(test_freertos test_freertos.cpp)
-target_link_libraries(test_freertos 
-    gtest_main 
-    freertos_stubs)
-target_include_directories(test_freertos PRIVATE ../include)
-target_compile_options(test_freertos PRIVATE -fpermissive)
+add_executable(
+    test_freertos_event_group
+    test_freertos_event_group.cpp
+)
 
-add_executable(test_freertos_event_group test_freertos_event_group.cpp)
-target_link_libraries(test_freertos_event_group 
-    gtest_main 
-    freertos_stubs)
-target_include_directories(test_freertos_event_group PRIVATE ../include)
+add_executable(
+    test_freertos_stream_buffer
+    test_freertos_stream_buffer.cpp
+)
 
-add_executable(test_freertos_message_buffer test_freertos_message_buffer.cpp)
-target_link_libraries(test_freertos_message_buffer 
-    gtest_main 
-    freertos_stubs)
-target_include_directories(test_freertos_message_buffer PRIVATE ../include)
+add_executable(
+    test_freertos_message_buffer
+    test_freertos_message_buffer.cpp
+)
 
-add_executable(test_freertos_queue test_freertos_queue.cpp)
-target_link_libraries(test_freertos_queue 
-    gtest_main 
-    freertos_stubs)
-target_include_directories(test_freertos_queue PRIVATE ../include)
+add_executable(
+    test_freertos_sw_timer
+    test_freertos_sw_timer.cpp
+)
 
-add_executable(test_freertos_semaphore test_freertos_semaphore.cpp)
-target_link_libraries(test_freertos_semaphore 
-    gtest_main 
-    freertos_stubs)
-target_include_directories(test_freertos_semaphore PRIVATE ../include)
+add_executable(
+    test_enhanced_multitasking
+    test_enhanced_multitasking.cpp
+)
 
-add_executable(test_freertos_stream_buffer test_freertos_stream_buffer.cpp)
-target_link_libraries(test_freertos_stream_buffer 
-    gtest_main 
-    freertos_stubs)
-target_include_directories(test_freertos_stream_buffer PRIVATE ../include)
+add_executable(
+    test_freertos_semaphore_stl
+    test_freertos_semaphore_stl.cpp
+)
 
-add_executable(test_freertos_sw_timer test_freertos_sw_timer.cpp)
-target_link_libraries(test_freertos_sw_timer 
-    gtest_main 
-    freertos_stubs)
-target_include_directories(test_freertos_sw_timer PRIVATE ../include)
+target_link_libraries(
+    test_freertos_task
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    ${GMOCK_LIBRARIES}
+    gtest_main
+    pthread
+)
 
-add_executable(test_freertos_task test_freertos_task.cpp)
-target_link_libraries(test_freertos_task 
-    gtest_main 
-    freertos_stubs)
-target_include_directories(test_freertos_task PRIVATE ../include)
-target_compile_options(test_freertos_task PRIVATE -fpermissive)
+target_link_libraries(
+    test_freertos_semaphore
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    ${GMOCK_LIBRARIES}
+    gtest_main
+    pthread
+)
 
-# Add all tests to CTest
+target_link_libraries(
+    test_freertos_queue
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    ${GMOCK_LIBRARIES}
+    gtest_main
+    pthread
+)
+
+target_link_libraries(
+    test_freertos_event_group
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    ${GMOCK_LIBRARIES}
+    gtest_main
+    pthread
+)
+
+target_link_libraries(
+    test_freertos_stream_buffer
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    ${GMOCK_LIBRARIES}
+    gtest_main
+    pthread
+)
+
+target_link_libraries(
+    test_freertos_message_buffer
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    ${GMOCK_LIBRARIES}
+    gtest_main
+    pthread
+)
+
+target_link_libraries(
+    test_freertos_sw_timer
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    ${GMOCK_LIBRARIES}
+    gtest_main
+    pthread
+)
+
+target_link_libraries(
+    test_enhanced_multitasking
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    ${GMOCK_LIBRARIES}
+    gtest_main
+    pthread
+)
+
+target_link_libraries(
+    test_freertos_semaphore_stl
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    ${GMOCK_LIBRARIES}
+    gtest_main
+    pthread
+)
+
+target_compile_options(test_freertos_task PRIVATE ${GTEST_CFLAGS_OTHER} ${GMOCK_CFLAGS_OTHER})
+target_compile_options(test_freertos_semaphore PRIVATE ${GTEST_CFLAGS_OTHER} ${GMOCK_CFLAGS_OTHER})
+target_compile_options(test_freertos_queue PRIVATE ${GTEST_CFLAGS_OTHER} ${GMOCK_CFLAGS_OTHER})
+target_compile_options(test_freertos_event_group PRIVATE ${GTEST_CFLAGS_OTHER} ${GMOCK_CFLAGS_OTHER})
+target_compile_options(test_freertos_stream_buffer PRIVATE ${GTEST_CFLAGS_OTHER} ${GMOCK_CFLAGS_OTHER})
+target_compile_options(test_freertos_message_buffer PRIVATE ${GTEST_CFLAGS_OTHER} ${GMOCK_CFLAGS_OTHER})
+target_compile_options(test_freertos_sw_timer PRIVATE ${GTEST_CFLAGS_OTHER} ${GMOCK_CFLAGS_OTHER})
+target_compile_options(test_enhanced_multitasking PRIVATE ${GTEST_CFLAGS_OTHER} ${GMOCK_CFLAGS_OTHER})
+target_compile_options(test_freertos_semaphore_stl PRIVATE ${GTEST_CFLAGS_OTHER} ${GMOCK_CFLAGS_OTHER})
+
+# Discover tests
 include(GoogleTest)
-gtest_discover_tests(test_freertos)
-gtest_discover_tests(test_freertos_event_group)
-gtest_discover_tests(test_freertos_message_buffer)
-gtest_discover_tests(test_freertos_queue)
-gtest_discover_tests(test_freertos_semaphore)
-gtest_discover_tests(test_freertos_stream_buffer)
-gtest_discover_tests(test_freertos_sw_timer)
 gtest_discover_tests(test_freertos_task)
+gtest_discover_tests(test_freertos_semaphore)
+gtest_discover_tests(test_freertos_queue)
+gtest_discover_tests(test_freertos_event_group)
+gtest_discover_tests(test_freertos_stream_buffer)
+gtest_discover_tests(test_freertos_message_buffer)
+gtest_discover_tests(test_freertos_sw_timer)
+gtest_discover_tests(test_enhanced_multitasking)
+gtest_discover_tests(test_freertos_semaphore_stl)

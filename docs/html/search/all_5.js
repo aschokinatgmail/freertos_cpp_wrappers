@@ -1,7 +1,10 @@
 var searchData=
 [
-  ['get_5fbits_0',['get_bits',['../classfreertos_1_1event__group.html#a9ac310e75fb7181b746688750e2e6b0a',1,'freertos::event_group']]],
-  ['get_5fbits_5fisr_1',['get_bits_isr',['../classfreertos_1_1event__group.html#a272afb801b31060db8ee3d58ff1554d3',1,'freertos::event_group']]],
-  ['give_2',['give',['../classfreertos_1_1binary__semaphore.html#a36fd71685f5c119bccc9e03fe52a70fc',1,'freertos::binary_semaphore::give()'],['../classfreertos_1_1counting__semaphore.html#a6407b3c89aa245c9976afee2456df085',1,'freertos::counting_semaphore::give()']]],
-  ['give_5fisr_3',['give_isr',['../classfreertos_1_1binary__semaphore.html#a139c85ca3cb7439696734efbcad91786',1,'freertos::binary_semaphore::give_isr()'],['../classfreertos_1_1counting__semaphore.html#a8d2d7eb7c84eff0fa2705fd6e1e14f88',1,'freertos::counting_semaphore::give_isr()']]]
+  ['features_0',['Key Features',['../index.html#features_sec',1,'']]],
+  ['features_3a_1',['features:',['../classfreertos_1_1queue.html#autotoc_md0',1,'Features:'],['../classfreertos_1_1binary__semaphore.html#autotoc_md6',1,'Features:'],['../classfreertos_1_1task.html#autotoc_md11',1,'Features:']]],
+  ['for_20complex_20synchronization_2',['Event Groups for Complex Synchronization',['../index.html#autotoc_md21',1,'']]],
+  ['free_3',['free',['../classfreertos_1_1stream__buffer.html#a04ed52bcc53148e0a7ed3ca707930c57',1,'freertos::stream_buffer']]],
+  ['freertos_20c_20wrappers_20documentation_4',['FreeRTOS C++ Wrappers Documentation',['../index.html',1,'']]],
+  ['full_5',['full',['../classfreertos_1_1message__buffer.html#ab0dc8268ac5a4081c3541e89c749a846',1,'freertos::message_buffer::full()'],['../classfreertos_1_1stream__buffer.html#a6aca3c4e666f9aa65a9b08a91db650b5',1,'freertos::stream_buffer::full()']]],
+  ['full_5fisr_6',['full_isr',['../classfreertos_1_1queue.html#a12164212be7d0ce39a2b91525c6ac1d5',1,'freertos::queue']]]
 ];

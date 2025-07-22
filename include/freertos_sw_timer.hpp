@@ -41,7 +41,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <cstdbool>
 #include <functional>
 #include <task.h>
-#include <time.h>
+#include <ctime>
 #include <timers.h>
 
 namespace freertos {
@@ -57,10 +57,11 @@ using std::function;
  *
  */
 class static_sw_timer_allocator {
-  StaticTimer_t m_timer_placeholder;
+  StaticTimer_t m_timer_placeholder{};
 
 public:
   static_sw_timer_allocator() = default;
+  ~static_sw_timer_allocator() = default;
   static_sw_timer_allocator(const static_sw_timer_allocator &) = delete;
   static_sw_timer_allocator(static_sw_timer_allocator &&) = default;
 
@@ -126,7 +127,7 @@ public:
    */
   explicit timer(const char *name, const TickType_t period_ticks,
                  UBaseType_t auto_reload, timer_callback_t &&callback)
-      : m_timer{nullptr}, m_callback{callback}, m_started{false} {
+      : m_timer{nullptr}, m_callback{std::move(callback)}, m_started{false} {
     m_timer = m_allocator.create(name, period_ticks, auto_reload, this,
                                  callback_wrapper);
     configASSERT(m_timer);
@@ -151,7 +152,26 @@ public:
                       .count()),
               auto_reload, std::move(callback)} {}
   timer(const timer &) = delete;
-  timer(timer &&src) = default;
+  /**
+   * @brief Move constructor that properly transfers timer ownership.
+   * 
+   * This constructor ensures that when a timer is moved, the source timer's
+   * handle is set to nullptr to prevent double deletion. Previously, the
+   * default move constructor would perform a shallow copy, causing both
+   * source and destination timers to share the same handle, leading to
+   * premature timer deletion when the source was destroyed.
+   * 
+   * @param src The source timer to move from (will be invalidated)
+   */
+  timer(timer &&src) noexcept 
+      : m_allocator(std::move(src.m_allocator)), 
+        m_timer(src.m_timer), 
+        m_callback(std::move(src.m_callback)), 
+        m_started(src.m_started) {
+    // Transfer ownership: clear the source timer handle to prevent double deletion
+    src.m_timer = nullptr;
+    src.m_started = false;
+  }
   /**
    * @brief Destruct the timer object and delete the software timer kernel
    * object instance if it was created.
@@ -169,7 +189,7 @@ public:
   }
 
   timer &operator=(const timer &) = delete;
-  timer &operator=(timer &&src) {
+  timer &operator=(timer &&src) noexcept {
     if (this != &src) {
       if (m_timer) {
         xTimerDelete(m_timer, portMAX_DELAY);
@@ -395,16 +415,18 @@ public:
    * @brief Method to change the period of the timer.
    * @ref https://www.freertos.org/xTimerChangePeriod.html
    *
-   * @tparam Rep duration representation type
-   * @tparam Period duration period type
+   * @tparam RepPeriod duration representation type for new period
+   * @tparam PeriodPeriod duration period type for new period
+   * @tparam RepTimeout duration representation type for timeout
+   * @tparam PeriodTimeout duration period type for timeout
    * @param new_period new period of the timer
    * @param timeout timeout to wait for the timer to change the period
    * @return BaseType_t pdPASS if the timer period was changed successfully else
    * pdFAIL
    */
-  template <typename Rep, typename Period>
-  BaseType_t period(const std::chrono::duration<Rep, Period> &new_period,
-                    const std::chrono::duration<Rep, Period> &timeout) {
+  template <typename RepPeriod, typename PeriodPeriod, typename RepTimeout, typename PeriodTimeout>
+  BaseType_t period(const std::chrono::duration<RepPeriod, PeriodPeriod> &new_period,
+                    const std::chrono::duration<RepTimeout, PeriodTimeout> &timeout) {
     return period(
         std::chrono::duration_cast<std::chrono::milliseconds>(new_period)
             .count(),
