@@ -100,23 +100,23 @@ using task_routine_t = std::function<void(void)>;
 
 /**
  * @brief A modern C++ wrapper for FreeRTOS tasks with RAII semantics.
- * 
- * This class provides a type-safe, exception-safe wrapper around FreeRTOS tasks.
- * It automatically manages task lifecycle and supports both static and dynamic 
- * memory allocation strategies.
- * 
+ *
+ * This class provides a type-safe, exception-safe wrapper around FreeRTOS
+ * tasks. It automatically manages task lifecycle and supports both static and
+ * dynamic memory allocation strategies.
+ *
  * @tparam TaskAllocator Type of the task allocator (static or dynamic)
- * 
+ *
  * ## Features:
  * - RAII automatic resource management
  * - Move semantics support
- * - Type-safe task function binding  
+ * - Type-safe task function binding
  * - Configurable stack size at compile time
  * - Support for suspended task creation
  * - std::chrono timeout support
- * 
+ *
  * ## Usage Examples:
- * 
+ *
  * ### Basic Task Creation:
  * ```cpp
  * // Create a simple task with dynamic allocation
@@ -128,7 +128,7 @@ using task_routine_t = std::function<void(void)>;
  *     }
  * });
  * ```
- * 
+ *
  * ### Static Allocation:
  * ```cpp
  * // Create task with static memory allocation
@@ -138,7 +138,7 @@ using task_routine_t = std::function<void(void)>;
  *     }
  * );
  * ```
- * 
+ *
  * ### Task with Capture:
  * ```cpp
  * int shared_data = 42;
@@ -146,16 +146,16 @@ using task_routine_t = std::function<void(void)>;
  *     printf("Shared data: %d\\n", shared_data);
  * });
  * ```
- * 
+ *
  * ### Task Control:
  * ```cpp
  * freertos::task<1024> controlled_task("ControlTask", 3, task_function);
- * 
+ *
  * // Suspend and resume
  * controlled_task.suspend();
  * vTaskDelay(pdMS_TO_TICKS(1000));
  * controlled_task.resume();
- * 
+ *
  * // Check task state
  * if (controlled_task.is_suspended()) {
  *     printf("Task is suspended\\n");
@@ -283,6 +283,22 @@ public:
    */
   BaseType_t resume_isr(void) { return xTaskResumeFromISR(m_hTask); }
 #endif
+  /**
+   * @brief Check if the task is running.
+   *
+   * @return bool true if the task is running, false otherwise
+   */
+  bool is_running(void) const {
+    switch (state()) {
+    case eRunning:
+    case eReady:
+    case eBlocked:
+    case eSuspended:
+      return true;
+    default:
+      return false;
+    }
+  }
   /**
    * @brief Terminates the task.
    *
