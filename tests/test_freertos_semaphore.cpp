@@ -947,7 +947,7 @@ TEST_F(FreeRTOSSemaphoreTest, RecursiveMutexTimeoutLockGuardFailure) {
     EXPECT_FALSE(recursive_mutex.locked());
 }
 
-TEST_F(FreeRTOSSemaphoreTest, RecursiveMutexTryLockGuardFailure) {
+TEST_F(FreeRTOSSemaphoreTest, RecursiveMutexTryLockGuardAcquiredStateTrackingFailure) {
     /*
      * Recursive Mutex Try Lock Guard Failure Test:
      * Tests try_lock_guard behavior when lock acquisition fails,
@@ -1126,6 +1126,203 @@ TEST_F(FreeRTOSSemaphoreTest, TimeoutLockGuardFailure) {
     } // Timeout lock guard destructor should NOT call unlock (since lock was never acquired)
     
     EXPECT_FALSE(mutex.locked());
+}
+
+// =============================================================================
+// Lock Acquired State Tracking Tests
+// =============================================================================
+
+TEST_F(FreeRTOSSemaphoreTest, TryLockGuardAcquiredStateTrackingSuccess) {
+    /*
+     * Test that try_lock_guard properly tracks when it successfully acquires a lock.
+     * This test validates that m_lock_acquired is set correctly when try_lock succeeds.
+     */
+    EXPECT_CALL(*mock, xSemaphoreCreateMutex())
+        .WillOnce(Return(mock_mutex_handle));
+    EXPECT_CALL(*mock, xSemaphoreTake(mock_mutex_handle, 0))
+        .WillOnce(Return(pdTRUE)); // try_lock succeeds
+    EXPECT_CALL(*mock, xSemaphoreGive(mock_mutex_handle))
+        .WillOnce(Return(pdTRUE)); // unlock should be called since we acquired the lock
+    EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex_handle));
+    
+    freertos::mutex<freertos::dynamic_semaphore_allocator> mutex;
+    
+    {
+        freertos::try_lock_guard<freertos::mutex<freertos::dynamic_semaphore_allocator>> guard(mutex);
+        // Both the guard and mutex should report as locked
+        EXPECT_TRUE(guard.locked());
+        EXPECT_TRUE(mutex.locked());
+    } // Destructor should call unlock because the guard acquired the lock
+    
+    EXPECT_FALSE(mutex.locked());
+}
+
+TEST_F(FreeRTOSSemaphoreTest, TryLockGuardAcquiredStateTrackingFailure) {
+    /*
+     * Test that try_lock_guard properly tracks when it fails to acquire a lock.
+     * This test validates that m_lock_acquired is NOT set when try_lock fails.
+     */
+    EXPECT_CALL(*mock, xSemaphoreCreateMutex())
+        .WillOnce(Return(mock_mutex_handle));
+    EXPECT_CALL(*mock, xSemaphoreTake(mock_mutex_handle, 0))
+        .WillOnce(Return(pdFALSE)); // try_lock fails
+    // Note: xSemaphoreGive should NOT be called since lock failed
+    EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex_handle));
+    
+    freertos::mutex<freertos::dynamic_semaphore_allocator> mutex;
+    
+    {
+        freertos::try_lock_guard<freertos::mutex<freertos::dynamic_semaphore_allocator>> guard(mutex);
+        // Guard should report NOT locked since it didn't acquire the lock
+        EXPECT_FALSE(guard.locked());
+        EXPECT_FALSE(mutex.locked());
+    } // Destructor should NOT call unlock because the guard didn't acquire the lock
+    
+    EXPECT_FALSE(mutex.locked());
+}
+
+TEST_F(FreeRTOSSemaphoreTest, TimeoutLockGuardAcquiredStateTrackingSuccess) {
+    /*
+     * Test that timeout_lock_guard properly tracks when it successfully acquires a lock.
+     * This test validates that m_lock_acquired is set correctly when lock succeeds.
+     */
+    EXPECT_CALL(*mock, xSemaphoreCreateMutex())
+        .WillOnce(Return(mock_mutex_handle));
+    EXPECT_CALL(*mock, xSemaphoreTake(mock_mutex_handle, 200))
+        .WillOnce(Return(pdTRUE)); // lock succeeds
+    EXPECT_CALL(*mock, xSemaphoreGive(mock_mutex_handle))
+        .WillOnce(Return(pdTRUE)); // unlock should be called since we acquired the lock
+    EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex_handle));
+    
+    freertos::mutex<freertos::dynamic_semaphore_allocator> mutex;
+    
+    {
+        freertos::timeout_lock_guard<freertos::mutex<freertos::dynamic_semaphore_allocator>> guard(mutex, 200);
+        // Both the guard and mutex should report as locked
+        EXPECT_TRUE(guard.locked());
+        EXPECT_TRUE(mutex.locked());
+    } // Destructor should call unlock because the guard acquired the lock
+    
+    EXPECT_FALSE(mutex.locked());
+}
+
+TEST_F(FreeRTOSSemaphoreTest, TimeoutLockGuardAcquiredStateTrackingFailure) {
+    /*
+     * Test that timeout_lock_guard properly tracks when it fails to acquire a lock.
+     * This test validates that m_lock_acquired is NOT set when lock times out.
+     */
+    EXPECT_CALL(*mock, xSemaphoreCreateMutex())
+        .WillOnce(Return(mock_mutex_handle));
+    EXPECT_CALL(*mock, xSemaphoreTake(mock_mutex_handle, 150))
+        .WillOnce(Return(pdFALSE)); // lock times out
+    // Note: xSemaphoreGive should NOT be called since lock failed
+    EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex_handle));
+    
+    freertos::mutex<freertos::dynamic_semaphore_allocator> mutex;
+    
+    {
+        freertos::timeout_lock_guard<freertos::mutex<freertos::dynamic_semaphore_allocator>> guard(mutex, 150);
+        // Guard should report NOT locked since it didn't acquire the lock
+        EXPECT_FALSE(guard.locked());
+        EXPECT_FALSE(mutex.locked());
+    } // Destructor should NOT call unlock because the guard didn't acquire the lock
+    
+    EXPECT_FALSE(mutex.locked());
+}
+
+TEST_F(FreeRTOSSemaphoreTest, LockGuardStateTrackingRaceConditionProtection) {
+    /*
+     * Critical Race Condition Test:
+     * This test demonstrates why m_lock_acquired is essential for proper RAII behavior.
+     * Without m_lock_acquired, a guard could incorrectly unlock a mutex that was locked
+     * by another thread after the guard's lock attempt failed.
+     * 
+     * Scenario:
+     * 1. Guard tries to lock mutex -> FAILS
+     * 2. Another thread locks the same mutex 
+     * 3. Guard destructor runs
+     * 4. Without m_lock_acquired: Guard would check mutex.locked() (true) and incorrectly unlock it
+     * 5. With m_lock_acquired: Guard knows it never acquired the lock and won't unlock it
+     */
+    EXPECT_CALL(*mock, xSemaphoreCreateMutex())
+        .WillOnce(Return(mock_mutex_handle));
+    
+    // First try_lock attempt fails
+    EXPECT_CALL(*mock, xSemaphoreTake(mock_mutex_handle, 0))
+        .WillOnce(Return(pdFALSE));
+    
+    // Simulate another thread acquiring the lock after our guard's attempt failed
+    EXPECT_CALL(*mock, xSemaphoreTake(mock_mutex_handle, portMAX_DELAY))
+        .WillOnce(Return(pdTRUE));
+    EXPECT_CALL(*mock, xSemaphoreGive(mock_mutex_handle))
+        .WillOnce(Return(pdTRUE));
+    
+    // Note: No xSemaphoreGive call expected from the guard destructor
+    EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex_handle));
+    
+    freertos::mutex<freertos::dynamic_semaphore_allocator> mutex;
+    
+    {
+        // Guard attempts to lock but fails
+        freertos::try_lock_guard<freertos::mutex<freertos::dynamic_semaphore_allocator>> guard(mutex);
+        EXPECT_FALSE(guard.locked());
+        EXPECT_FALSE(mutex.locked());
+        
+        // Simulate another thread acquiring the lock
+        EXPECT_TRUE(mutex.lock());
+        EXPECT_TRUE(mutex.locked());
+        
+        // At this point, the mutex is locked but NOT by our guard
+        // The guard should still report false because IT didn't acquire the lock
+        EXPECT_FALSE(guard.locked()); // This would fail without m_lock_acquired
+        
+        // Clean up the lock acquired by "another thread"
+        EXPECT_TRUE(mutex.unlock());
+    } // Guard destructor should NOT unlock because it never acquired the lock
+    
+    EXPECT_FALSE(mutex.locked());
+}
+
+TEST_F(FreeRTOSSemaphoreTest, RecursiveMutexLockGuardAcquiredStateTracking) {
+    /*
+     * Test lock acquired state tracking with recursive mutexes for both
+     * try_lock_guard and timeout_lock_guard.
+     */
+    EXPECT_CALL(*mock, xSemaphoreCreateRecursiveMutex())
+        .WillOnce(Return(mock_recursive_mutex_handle));
+    
+    // try_lock succeeds
+    EXPECT_CALL(*mock, xSemaphoreTake(mock_recursive_mutex_handle, 0))
+        .WillOnce(Return(pdTRUE));
+    // timeout lock fails
+    EXPECT_CALL(*mock, xSemaphoreTake(mock_recursive_mutex_handle, 300))
+        .WillOnce(Return(pdFALSE));
+    
+    // Only one unlock should be called (from the successful try_lock_guard)
+    EXPECT_CALL(*mock, xSemaphoreGive(mock_recursive_mutex_handle))
+        .WillOnce(Return(pdTRUE));
+    
+    EXPECT_CALL(*mock, vSemaphoreDelete(mock_recursive_mutex_handle));
+    
+    freertos::recursive_mutex<freertos::dynamic_semaphore_allocator> recursive_mutex;
+    
+    {
+        // First guard succeeds
+        freertos::try_lock_guard<freertos::recursive_mutex<freertos::dynamic_semaphore_allocator>> try_guard(recursive_mutex);
+        EXPECT_TRUE(try_guard.locked());
+        EXPECT_TRUE(recursive_mutex.locked());
+        
+        {
+            // Second guard fails (would conflict in real scenario)
+            freertos::timeout_lock_guard<freertos::recursive_mutex<freertos::dynamic_semaphore_allocator>> timeout_guard(recursive_mutex, 300);
+            EXPECT_FALSE(timeout_guard.locked()); // Failed to acquire
+            EXPECT_TRUE(recursive_mutex.locked());  // Still locked by try_guard
+        } // timeout_guard destructor - should NOT unlock (didn't acquire)
+        
+        EXPECT_TRUE(recursive_mutex.locked()); // Still locked by try_guard
+    } // try_guard destructor - SHOULD unlock (did acquire)
+    
+    EXPECT_FALSE(recursive_mutex.locked());
 }
 
 // =============================================================================

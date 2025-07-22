@@ -755,6 +755,7 @@ public:
  */
 template <typename Mutex> class try_lock_guard {
   Mutex &m_mutex; // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members): RAII design requires reference
+  bool m_lock_acquired{false};
 
 public:
   /**
@@ -762,15 +763,14 @@ public:
    *
    * @param mutex mutex to guard
    */
-  explicit try_lock_guard(Mutex &mutex) : m_mutex{mutex} {
-    m_mutex.try_lock();
+  explicit try_lock_guard(Mutex &mutex) : m_mutex{mutex}, m_lock_acquired{static_cast<bool>(m_mutex.try_lock())} {
   }
   /**
    * @brief Destruct the try lock guard object and unlock the mutex.
    *
    */
   ~try_lock_guard(void) { 
-    if (m_mutex.locked()) {
+    if (m_lock_acquired) {
       m_mutex.unlock(); 
     }
   }
@@ -786,7 +786,7 @@ public:
    *
    * @return  true if the mutex is locked, otherwise false.
    */
-  bool locked(void) const { return m_mutex.locked(); }
+  bool locked(void) const { return m_lock_acquired && m_mutex.locked(); }
 };
 
 /**
@@ -846,6 +846,7 @@ public:
  */
 template <typename Mutex> class timeout_lock_guard {
   Mutex &m_mutex; // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members): RAII design requires reference
+  bool m_lock_acquired{false};
 
 public:
   /**
@@ -854,8 +855,7 @@ public:
    * @param mutex mutex to guard
    * @param ticks_to_wait timeout in ticks to wait for the mutex.
    */
-  timeout_lock_guard(Mutex &mutex, TickType_t ticks_to_wait) : m_mutex{mutex} {
-    m_mutex.lock(ticks_to_wait);
+  timeout_lock_guard(Mutex &mutex, TickType_t ticks_to_wait) : m_mutex{mutex}, m_lock_acquired{static_cast<bool>(m_mutex.lock(ticks_to_wait))} {
   }
   /**
    * @brief Construct a new timeout lock guard object
@@ -866,16 +866,15 @@ public:
   template <typename Rep, typename Period>
   timeout_lock_guard(Mutex &mutex,
                      const std::chrono::duration<Rep, Period> &timeout)
-      : m_mutex{mutex} {
-    m_mutex.lock(
-        std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count());
+      : m_mutex{mutex}, m_lock_acquired{static_cast<bool>(m_mutex.lock(
+        std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count()))} {
   }
   /**
    * @brief Destruct the timeout lock guard object and unlock the mutex.
    *
    */
   ~timeout_lock_guard(void) { 
-    if (m_mutex.locked()) {
+    if (m_lock_acquired) {
       m_mutex.unlock(); 
     }
   }
@@ -891,7 +890,7 @@ public:
    *
    * @return  true if the mutex is locked, otherwise false.
    */
-  bool locked(void) const { return m_mutex.locked(); }
+  bool locked(void) const { return m_lock_acquired && m_mutex.locked(); }
 };
 
 #if configSUPPORT_STATIC_ALLOCATION
