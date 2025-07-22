@@ -51,6 +51,10 @@ lcov --summary coverage_filtered.info
 echo "Generating static analysis report..."
 make static-analysis-report
 
+# Generate documentation after successful tests
+echo "Generating project documentation..."
+make docs
+
 # Generate validation and verification report
 echo "Generating validation and verification report..."
 python3 "$SCRIPT_DIR/generate_validation_verification_report.py" "$BUILD_DIR" "$PROJECT_ROOT/VALIDATION_VERIFICATION_REPORT.md"
@@ -60,6 +64,7 @@ echo "=== Report Generation Complete ==="
 echo "Generated reports:"
 echo "  1. STATIC_ANALYSIS_REPORT.md - Static code analysis for main modules"
 echo "  2. VALIDATION_VERIFICATION_REPORT.md - Test execution and coverage analysis"
+echo "  3. docs/html/index.html - Updated project documentation"
 echo
 echo "Test summary:"
 ctest | grep -E "(tests passed|Total Test time)" || true
@@ -69,3 +74,4 @@ echo "Reports are located in: $PROJECT_ROOT"
 echo "To view reports:"
 echo "  Static Analysis: cat $PROJECT_ROOT/STATIC_ANALYSIS_REPORT.md"
 echo "  Validation & Verification: cat $PROJECT_ROOT/VALIDATION_VERIFICATION_REPORT.md"
+echo "  Documentation: open $PROJECT_ROOT/docs/html/index.html"

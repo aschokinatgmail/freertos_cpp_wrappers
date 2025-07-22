@@ -4,6 +4,10 @@ out/
 .vscode/
 .vs/
 
+# Documentation generated files
+docs/html/
+html/
+
 # CMake
 CMakeCache.txt
 CMakeFiles/
