@@ -17,6 +17,18 @@ Lock guard for the mutex. The mutex is locked in the constructor and unlocked in
 \Hypertarget{classfreertos_1_1lock__guard__isr_a9008d32cb43029a2ccd29242ac713cec}\label{classfreertos_1_1lock__guard__isr_a9008d32cb43029a2ccd29242ac713cec} 
 {\bfseries \texorpdfstring{$\sim$}{\string~}lock\+\_\+guard\+\_\+isr} (void)
 \begin{DoxyCompactList}\small\item\em Destruct the lock guard object and unlock the mutex. \end{DoxyCompactList}\item 
+\Hypertarget{classfreertos_1_1lock__guard__isr_ab9170243b21e1a5d765aa4ce6bf4ffea}\label{classfreertos_1_1lock__guard__isr_ab9170243b21e1a5d765aa4ce6bf4ffea} 
+{\bfseries lock\+\_\+guard\+\_\+isr} (const \mbox{\hyperlink{classfreertos_1_1lock__guard__isr}{lock\+\_\+guard\+\_\+isr}} \&)=delete
+\item 
+\Hypertarget{classfreertos_1_1lock__guard__isr_a0d930dfca4ce063f56ba8006e2f7ed5f}\label{classfreertos_1_1lock__guard__isr_a0d930dfca4ce063f56ba8006e2f7ed5f} 
+{\bfseries lock\+\_\+guard\+\_\+isr} (\mbox{\hyperlink{classfreertos_1_1lock__guard__isr}{lock\+\_\+guard\+\_\+isr}} \&\&)=delete
+\item 
+\Hypertarget{classfreertos_1_1lock__guard__isr_a778a1cf48497807cc6acb0995a62d103}\label{classfreertos_1_1lock__guard__isr_a778a1cf48497807cc6acb0995a62d103} 
+\mbox{\hyperlink{classfreertos_1_1lock__guard__isr}{lock\+\_\+guard\+\_\+isr}} \& {\bfseries operator=} (const \mbox{\hyperlink{classfreertos_1_1lock__guard__isr}{lock\+\_\+guard\+\_\+isr}} \&)=delete
+\item 
+\Hypertarget{classfreertos_1_1lock__guard__isr_a7f7e1a58e08103d08cac8b2ea4e2e3ec}\label{classfreertos_1_1lock__guard__isr_a7f7e1a58e08103d08cac8b2ea4e2e3ec} 
+\mbox{\hyperlink{classfreertos_1_1lock__guard__isr}{lock\+\_\+guard\+\_\+isr}} \& {\bfseries operator=} (\mbox{\hyperlink{classfreertos_1_1lock__guard__isr}{lock\+\_\+guard\+\_\+isr}} \&\&)=delete
+\item 
 Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1lock__guard__isr_a1852af1aab57024fbe24e79a3fb31fd0}{high\+\_\+priority\+\_\+task\+\_\+woken}} (void) const
 \begin{DoxyCompactList}\small\item\em Checks if high priority task was woken. \end{DoxyCompactList}\item 
 bool \mbox{\hyperlink{classfreertos_1_1lock__guard__isr_a24efba54d6b36741d788345b71d5eb8e}{locked}} (void) const

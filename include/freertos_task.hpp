@@ -99,9 +99,68 @@ public:
 using task_routine_t = std::function<void(void)>;
 
 /**
- * @brief A wrapper for the FreeRTOS task.
- *
- * @tparam TaskAllocator type of the task allocator
+ * @brief A modern C++ wrapper for FreeRTOS tasks with RAII semantics.
+ * 
+ * This class provides a type-safe, exception-safe wrapper around FreeRTOS tasks.
+ * It automatically manages task lifecycle and supports both static and dynamic 
+ * memory allocation strategies.
+ * 
+ * @tparam TaskAllocator Type of the task allocator (static or dynamic)
+ * 
+ * ## Features:
+ * - RAII automatic resource management
+ * - Move semantics support
+ * - Type-safe task function binding  
+ * - Configurable stack size at compile time
+ * - Support for suspended task creation
+ * - std::chrono timeout support
+ * 
+ * ## Usage Examples:
+ * 
+ * ### Basic Task Creation:
+ * ```cpp
+ * // Create a simple task with dynamic allocation
+ * freertos::task<1024> worker_task("WorkerTask", 3, []() {
+ *     while (true) {
+ *         // Task work here
+ *         printf("Task running\\n");
+ *         vTaskDelay(pdMS_TO_TICKS(1000));
+ *     }
+ * });
+ * ```
+ * 
+ * ### Static Allocation:
+ * ```cpp
+ * // Create task with static memory allocation
+ * freertos::task<1024, freertos::static_task_allocator<1024>> static_task(
+ *     "StaticTask", 2, []() {
+ *         // Task implementation
+ *     }
+ * );
+ * ```
+ * 
+ * ### Task with Capture:
+ * ```cpp
+ * int shared_data = 42;
+ * freertos::task<512> capture_task("CaptureTask", 1, [&shared_data]() {
+ *     printf("Shared data: %d\\n", shared_data);
+ * });
+ * ```
+ * 
+ * ### Task Control:
+ * ```cpp
+ * freertos::task<1024> controlled_task("ControlTask", 3, task_function);
+ * 
+ * // Suspend and resume
+ * controlled_task.suspend();
+ * vTaskDelay(pdMS_TO_TICKS(1000));
+ * controlled_task.resume();
+ * 
+ * // Check task state
+ * if (controlled_task.is_suspended()) {
+ *     printf("Task is suspended\\n");
+ * }
+ * ```
  */
 template <typename TaskAllocator> class task {
   TaskAllocator m_allocator;

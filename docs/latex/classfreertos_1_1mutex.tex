@@ -34,9 +34,13 @@ Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1mutex_ab574313e4a5c41a11e10c
 \begin{DoxyCompactList}\small\item\em Unlock the mutex. \href{https://www.freertos.org/a00123.html}{\texttt{ https\+://www.\+freertos.\+org/a00123.\+html}}. \end{DoxyCompactList}\item 
 Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1mutex_a1c464217282db088a058756eec1827ab}{unlock\+\_\+isr}} (Base\+Type\+\_\+t \&high\+\_\+priority\+\_\+task\+\_\+woken)
 \begin{DoxyCompactList}\small\item\em Unlock the mutex from an ISR. \href{https://www.freertos.org/a00124.html}{\texttt{ https\+://www.\+freertos.\+org/a00124.\+html}}. \end{DoxyCompactList}\item 
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1mutex_a95f57c23a03edd90798962cdbb9c275c}{unlock\+\_\+isr}} (void)
+\begin{DoxyCompactList}\small\item\em Unlock the mutex from an ISR. \href{https://www.freertos.org/a00124.html}{\texttt{ https\+://www.\+freertos.\+org/a00124.\+html}}. \end{DoxyCompactList}\item 
 Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1mutex_af1a6122cc4563cc4aaac5a6c38eca973}{lock}} (const Tick\+Type\+\_\+t ticks\+\_\+to\+\_\+wait=port\+MAX\+\_\+\+DELAY)
 \begin{DoxyCompactList}\small\item\em Lock the mutex. \href{https://www.freertos.org/a00122.html}{\texttt{ https\+://www.\+freertos.\+org/a00122.\+html}}. \end{DoxyCompactList}\item 
 Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1mutex_acbb1833541559e923fd673540a9e2181}{lock\+\_\+isr}} (Base\+Type\+\_\+t \&high\+\_\+priority\+\_\+task\+\_\+woken)
+\begin{DoxyCompactList}\small\item\em Lock the mutex from an ISR. \href{https://www.freertos.org/xSemaphoreTakeFromISR.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Semaphore\+Take\+From\+ISR.\+html}}. \end{DoxyCompactList}\item 
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1mutex_a757ff2deb21e085d412990a7915abf73}{lock\+\_\+isr}} (void)
 \begin{DoxyCompactList}\small\item\em Lock the mutex from an ISR. \href{https://www.freertos.org/xSemaphoreTakeFromISR.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Semaphore\+Take\+From\+ISR.\+html}}. \end{DoxyCompactList}\item 
 {\footnotesize template$<$typename Rep , typename Period $>$ }\\Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1mutex_a2d32f868c9d02f94bb236e263b672f8b}{lock}} (const std\+::chrono\+::duration$<$ Rep, Period $>$ \&timeout)
 \begin{DoxyCompactList}\small\item\em Lock the mutex. \end{DoxyCompactList}\item 
@@ -101,7 +105,7 @@ Base\+Type\+\_\+t pd\+TRUE if the mutex was successfully locked,
 \Hypertarget{classfreertos_1_1mutex_acbb1833541559e923fd673540a9e2181}\label{classfreertos_1_1mutex_acbb1833541559e923fd673540a9e2181} 
 \index{freertos::mutex$<$ SemaphoreAllocator $>$@{freertos::mutex$<$ SemaphoreAllocator $>$}!lock\_isr@{lock\_isr}}
 \index{lock\_isr@{lock\_isr}!freertos::mutex$<$ SemaphoreAllocator $>$@{freertos::mutex$<$ SemaphoreAllocator $>$}}
-\doxysubsubsection{\texorpdfstring{lock\_isr()}{lock\_isr()}}
+\doxysubsubsection{\texorpdfstring{lock\_isr()}{lock\_isr()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
 {\footnotesize\ttfamily template$<$typename Semaphore\+Allocator $>$ \\
 Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1mutex}{freertos\+::mutex}}$<$ Semaphore\+Allocator $>$\+::lock\+\_\+isr (\begin{DoxyParamCaption}\item[{Base\+Type\+\_\+t \&}]{high\+\_\+priority\+\_\+task\+\_\+woken }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
 
@@ -114,6 +118,20 @@ Lock the mutex from an ISR. \href{https://www.freertos.org/xSemaphoreTakeFromISR
 {\em high\+\_\+priority\+\_\+task\+\_\+woken} & pd\+TRUE if the high priority task was woken by the mutex lock. \\
 \hline
 \end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Base\+Type\+\_\+t pd\+TRUE if the mutex was successfully locked, 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1mutex_a757ff2deb21e085d412990a7915abf73}\label{classfreertos_1_1mutex_a757ff2deb21e085d412990a7915abf73} 
+\index{freertos::mutex$<$ SemaphoreAllocator $>$@{freertos::mutex$<$ SemaphoreAllocator $>$}!lock\_isr@{lock\_isr}}
+\index{lock\_isr@{lock\_isr}!freertos::mutex$<$ SemaphoreAllocator $>$@{freertos::mutex$<$ SemaphoreAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{lock\_isr()}{lock\_isr()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily template$<$typename Semaphore\+Allocator $>$ \\
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1mutex}{freertos\+::mutex}}$<$ Semaphore\+Allocator $>$\+::lock\+\_\+isr (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Lock the mutex from an ISR. \href{https://www.freertos.org/xSemaphoreTakeFromISR.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Semaphore\+Take\+From\+ISR.\+html}}. 
+
 \begin{DoxyReturn}{Returns}
 Base\+Type\+\_\+t pd\+TRUE if the mutex was successfully locked, 
 \end{DoxyReturn}
@@ -162,7 +180,7 @@ Base\+Type\+\_\+t pd\+TRUE if the mutex was successfully unlocked,
 \Hypertarget{classfreertos_1_1mutex_a1c464217282db088a058756eec1827ab}\label{classfreertos_1_1mutex_a1c464217282db088a058756eec1827ab} 
 \index{freertos::mutex$<$ SemaphoreAllocator $>$@{freertos::mutex$<$ SemaphoreAllocator $>$}!unlock\_isr@{unlock\_isr}}
 \index{unlock\_isr@{unlock\_isr}!freertos::mutex$<$ SemaphoreAllocator $>$@{freertos::mutex$<$ SemaphoreAllocator $>$}}
-\doxysubsubsection{\texorpdfstring{unlock\_isr()}{unlock\_isr()}}
+\doxysubsubsection{\texorpdfstring{unlock\_isr()}{unlock\_isr()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
 {\footnotesize\ttfamily template$<$typename Semaphore\+Allocator $>$ \\
 Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1mutex}{freertos\+::mutex}}$<$ Semaphore\+Allocator $>$\+::unlock\+\_\+isr (\begin{DoxyParamCaption}\item[{Base\+Type\+\_\+t \&}]{high\+\_\+priority\+\_\+task\+\_\+woken }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
 
@@ -175,6 +193,20 @@ Unlock the mutex from an ISR. \href{https://www.freertos.org/a00124.html}{\textt
 {\em high\+\_\+priority\+\_\+task\+\_\+woken} & pd\+TRUE if the high priority task was woken by the mutex unlock. \\
 \hline
 \end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Base\+Type\+\_\+t pd\+TRUE if the mutex was successfully unlocked, 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1mutex_a95f57c23a03edd90798962cdbb9c275c}\label{classfreertos_1_1mutex_a95f57c23a03edd90798962cdbb9c275c} 
+\index{freertos::mutex$<$ SemaphoreAllocator $>$@{freertos::mutex$<$ SemaphoreAllocator $>$}!unlock\_isr@{unlock\_isr}}
+\index{unlock\_isr@{unlock\_isr}!freertos::mutex$<$ SemaphoreAllocator $>$@{freertos::mutex$<$ SemaphoreAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{unlock\_isr()}{unlock\_isr()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily template$<$typename Semaphore\+Allocator $>$ \\
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1mutex}{freertos\+::mutex}}$<$ Semaphore\+Allocator $>$\+::unlock\+\_\+isr (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Unlock the mutex from an ISR. \href{https://www.freertos.org/a00124.html}{\texttt{ https\+://www.\+freertos.\+org/a00124.\+html}}. 
+
 \begin{DoxyReturn}{Returns}
 Base\+Type\+\_\+t pd\+TRUE if the mutex was successfully unlocked, 
 \end{DoxyReturn}

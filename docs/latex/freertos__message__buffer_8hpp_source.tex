@@ -41,88 +41,88 @@
 \DoxyCodeLine{00037\ \textcolor{preprocessor}{\#endif}}
 \DoxyCodeLine{00038\ }
 \DoxyCodeLine{00039\ \textcolor{preprocessor}{\#include\ <FreeRTOS.h>}}
-\DoxyCodeLine{00040\ \textcolor{preprocessor}{\#include\ <chrono>}}
-\DoxyCodeLine{00041\ \textcolor{preprocessor}{\#include\ <message\_buffer.h>}}
-\DoxyCodeLine{00042\ }
-\DoxyCodeLine{00043\ \textcolor{keyword}{namespace\ }freertos\ \{}
-\DoxyCodeLine{00044\ }
-\DoxyCodeLine{00045\ \textcolor{preprocessor}{\#if\ configSUPPORT\_STATIC\_ALLOCATION}}
-\DoxyCodeLine{00051\ \textcolor{keyword}{template}\ <\textcolor{keywordtype}{size\_t}\ MessageBufferSize>\ \textcolor{keyword}{class\ }static\_message\_buffer\_allocator\ \{}
-\DoxyCodeLine{00052\ \ \ StaticMessageBuffer\_t\ m\_message\_buffer\_placeholder;}
-\DoxyCodeLine{00053\ \ \ uint8\_t\ m\_storage[MessageBufferSize];}
-\DoxyCodeLine{00054\ }
-\DoxyCodeLine{00055\ \textcolor{keyword}{public}:}
-\DoxyCodeLine{00056\ \ \ static\_message\_buffer\_allocator()\ =\ \textcolor{keywordflow}{default};}
-\DoxyCodeLine{00057\ \ \ static\_message\_buffer\_allocator(\textcolor{keyword}{const}\ static\_message\_buffer\_allocator\ \&)\ =}
-\DoxyCodeLine{00058\ \ \ \ \ \ \ \textcolor{keyword}{delete};}
-\DoxyCodeLine{00059\ \ \ static\_message\_buffer\_allocator(static\_message\_buffer\_allocator\ \&\&)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{00060\ }
-\DoxyCodeLine{00061\ \ \ static\_message\_buffer\_allocator\ \&}
-\DoxyCodeLine{00062\ \ \ operator=(\textcolor{keyword}{const}\ static\_message\_buffer\_allocator\ \&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00040\ \textcolor{preprocessor}{\#include\ <array>}}
+\DoxyCodeLine{00041\ \textcolor{preprocessor}{\#include\ <chrono>}}
+\DoxyCodeLine{00042\ \textcolor{preprocessor}{\#include\ <message\_buffer.h>}}
+\DoxyCodeLine{00043\ }
+\DoxyCodeLine{00044\ \textcolor{keyword}{namespace\ }freertos\ \{}
+\DoxyCodeLine{00045\ }
+\DoxyCodeLine{00046\ \textcolor{preprocessor}{\#if\ configSUPPORT\_STATIC\_ALLOCATION}}
+\DoxyCodeLine{00052\ \textcolor{keyword}{template}\ <\textcolor{keywordtype}{size\_t}\ MessageBufferSize>\ \textcolor{keyword}{class\ }static\_message\_buffer\_allocator\ \{}
+\DoxyCodeLine{00053\ \ \ StaticMessageBuffer\_t\ m\_message\_buffer\_placeholder\{\};}
+\DoxyCodeLine{00054\ \ \ std::array<uint8\_t,\ MessageBufferSize>\ m\_storage;}
+\DoxyCodeLine{00055\ }
+\DoxyCodeLine{00056\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00057\ \ \ static\_message\_buffer\_allocator()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00058\ \ \ \string~static\_message\_buffer\_allocator()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00059\ \ \ static\_message\_buffer\_allocator(\textcolor{keyword}{const}\ static\_message\_buffer\_allocator\ \&)\ =}
+\DoxyCodeLine{00060\ \ \ \ \ \ \ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00061\ \ \ static\_message\_buffer\_allocator(static\_message\_buffer\_allocator\ \&\&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00062\ }
 \DoxyCodeLine{00063\ \ \ static\_message\_buffer\_allocator\ \&}
-\DoxyCodeLine{00064\ \ \ operator=(static\_message\_buffer\_allocator\ \&\&)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{00065\ }
-\DoxyCodeLine{00066\ \ \ MessageBufferHandle\_t\ create()\ \{}
-\DoxyCodeLine{00067\ \ \ \ \ \textcolor{keywordflow}{return}\ xMessageBufferCreateStatic(MessageBufferSize,\ m\_storage,}
-\DoxyCodeLine{00068\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \&m\_message\_buffer\_placeholder);}
-\DoxyCodeLine{00069\ \ \ \}}
-\DoxyCodeLine{00070\ \};}
-\DoxyCodeLine{00071\ \textcolor{preprocessor}{\#endif}}
-\DoxyCodeLine{00072\ \textcolor{preprocessor}{\#if\ configSUPPORT\_DYNAMIC\_ALLOCATION}}
-\DoxyCodeLine{00078\ \textcolor{keyword}{template}\ <\textcolor{keywordtype}{size\_t}\ MessageBufferSize>\ \textcolor{keyword}{class\ }dynamic\_message\_buffer\_allocator\ \{}
-\DoxyCodeLine{00079\ \textcolor{keyword}{public}:}
-\DoxyCodeLine{00080\ \ \ MessageBufferHandle\_t\ create()\ \{}
-\DoxyCodeLine{00081\ \ \ \ \ \textcolor{keywordflow}{return}\ xMessageBufferCreate(MessageBufferSize);}
-\DoxyCodeLine{00082\ \ \ \}}
-\DoxyCodeLine{00083\ \};}
-\DoxyCodeLine{00084\ \textcolor{preprocessor}{\#endif}}
-\DoxyCodeLine{00085\ }
-\DoxyCodeLine{00092\ \textcolor{keyword}{template}\ <\textcolor{keywordtype}{size\_t}\ MessageBufferSize,\ \textcolor{keyword}{typename}\ MessageBufferAllocator>}
-\DoxyCodeLine{00093\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classfreertos_1_1message__buffer}{message\_buffer}}\ \{}
-\DoxyCodeLine{00094\ \ \ MessageBufferAllocator\ m\_allocator;}
-\DoxyCodeLine{00095\ \ \ MessageBufferHandle\_t\ m\_message\_buffer;}
-\DoxyCodeLine{00096\ }
-\DoxyCodeLine{00097\ \textcolor{keyword}{public}:}
-\DoxyCodeLine{00102\ \ \ \textcolor{keyword}{explicit}\ \mbox{\hyperlink{classfreertos_1_1message__buffer_a83b811597a637b1fa86b3d42dc92b001}{message\_buffer}}()\ :\ m\_allocator\{\},\ m\_message\_buffer\{nullptr\}\ \{}
-\DoxyCodeLine{00103\ \ \ \ \ m\_message\_buffer\ =\ m\_allocator.create();}
-\DoxyCodeLine{00104\ \ \ \ \ configASSERT(m\_message\_buffer);}
-\DoxyCodeLine{00105\ \ \ \}}
-\DoxyCodeLine{00106\ \ \ \mbox{\hyperlink{classfreertos_1_1message__buffer_a83b811597a637b1fa86b3d42dc92b001}{message\_buffer}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1message__buffer}{message\_buffer}}\ \&)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{00107\ \ \ \mbox{\hyperlink{classfreertos_1_1message__buffer_a83b811597a637b1fa86b3d42dc92b001}{message\_buffer}}(\mbox{\hyperlink{classfreertos_1_1message__buffer}{message\_buffer}}\ \&\&src)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{00113\ \ \ \mbox{\hyperlink{classfreertos_1_1message__buffer_a753bcad0484e4f15f4d3fe826d572065}{\string~message\_buffer}}(\textcolor{keywordtype}{void})\ \{}
-\DoxyCodeLine{00114\ \ \ \ \ \textcolor{keywordflow}{if}\ (m\_message\_buffer)\ \{}
-\DoxyCodeLine{00115\ \ \ \ \ \ \ vMessageBufferDelete(m\_message\_buffer);}
-\DoxyCodeLine{00116\ \ \ \ \ \}}
-\DoxyCodeLine{00117\ \ \ \}}
-\DoxyCodeLine{00118\ }
-\DoxyCodeLine{00119\ \ \ \mbox{\hyperlink{classfreertos_1_1message__buffer}{message\_buffer}}\ \&operator=(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1message__buffer}{message\_buffer}}\ \&)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{00120\ \ \ \mbox{\hyperlink{classfreertos_1_1message__buffer}{message\_buffer}}\ \&operator=(\mbox{\hyperlink{classfreertos_1_1message__buffer}{message\_buffer}}\ \&\&src)\ =\ \textcolor{keyword}{delete};}
-\DoxyCodeLine{00121\ }
-\DoxyCodeLine{00132\ \ \ \textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{classfreertos_1_1message__buffer_a530cca3bbcb0645b81ddb26450e57556}{send}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{void}\ *pvTxData,\ \textcolor{keywordtype}{size\_t}\ xDataLengthBytes,}
-\DoxyCodeLine{00133\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ TickType\_t\ xTicksToWait)\ \{}
-\DoxyCodeLine{00134\ \ \ \ \ \textcolor{keywordflow}{return}\ xMessageBufferSend(m\_message\_buffer,\ pvTxData,\ xDataLengthBytes,}
-\DoxyCodeLine{00135\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ xTicksToWait);}
-\DoxyCodeLine{00136\ \ \ \}}
-\DoxyCodeLine{00146\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Rep,\ \textcolor{keyword}{typename}\ Period>}
-\DoxyCodeLine{00147\ \ \ \textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{classfreertos_1_1message__buffer_abde882826aa3acc53d81635871cecc4f}{send}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{void}\ *pvTxData,\ \textcolor{keywordtype}{size\_t}\ xDataLengthBytes,}
-\DoxyCodeLine{00148\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::chrono::duration<Rep,\ Period>\ \&xTicksToWait)\ \{}
-\DoxyCodeLine{00149\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classfreertos_1_1message__buffer_a530cca3bbcb0645b81ddb26450e57556}{send}}(}
-\DoxyCodeLine{00150\ \ \ \ \ \ \ \ \ pvTxData,\ xDataLengthBytes,}
-\DoxyCodeLine{00151\ \ \ \ \ \ \ \ \ std::chrono::duration\_cast<std::chrono::milliseconds>(xTicksToWait)}
-\DoxyCodeLine{00152\ \ \ \ \ \ \ \ \ \ \ \ \ .count());}
-\DoxyCodeLine{00153\ \ \ \}}
-\DoxyCodeLine{00164\ \ \ \textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{classfreertos_1_1message__buffer_ab37be0d840cb8b59bd43c9d4800d0f6f}{receive}}(\textcolor{keywordtype}{void}\ *pvRxData,\ \textcolor{keywordtype}{size\_t}\ xBufferLengthBytes,}
-\DoxyCodeLine{00165\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ TickType\_t\ xTicksToWait)\ \{}
-\DoxyCodeLine{00166\ \ \ \ \ \textcolor{keywordflow}{return}\ xMessageBufferReceive(m\_message\_buffer,\ pvRxData,\ xBufferLengthBytes,}
-\DoxyCodeLine{00167\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ xTicksToWait);}
-\DoxyCodeLine{00168\ \ \ \}}
-\DoxyCodeLine{00179\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Rep,\ \textcolor{keyword}{typename}\ Period>}
-\DoxyCodeLine{00180\ \ \ \textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{classfreertos_1_1message__buffer_aa187c1676a9eb6ee7ea528096184dd73}{receive}}(\textcolor{keywordtype}{void}\ *pvRxData,\ \textcolor{keywordtype}{size\_t}\ xBufferLengthBytes,}
-\DoxyCodeLine{00181\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::chrono::duration<Rep,\ Period>\ \&timeout)\ \{}
-\DoxyCodeLine{00182\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classfreertos_1_1message__buffer_ab37be0d840cb8b59bd43c9d4800d0f6f}{receive}}(}
-\DoxyCodeLine{00183\ \ \ \ \ \ \ \ \ pvRxData,\ xBufferLengthBytes,}
-\DoxyCodeLine{00184\ \ \ \ \ \ \ \ \ std::chrono::duration\_cast<std::chrono::milliseconds>(xTicksToWait)}
-\DoxyCodeLine{00185\ \ \ \ \ \ \ \ \ \ \ \ \ .count());}
+\DoxyCodeLine{00064\ \ \ operator=(\textcolor{keyword}{const}\ static\_message\_buffer\_allocator\ \&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00065\ \ \ static\_message\_buffer\_allocator\ \&}
+\DoxyCodeLine{00066\ \ \ operator=(static\_message\_buffer\_allocator\ \&\&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00067\ }
+\DoxyCodeLine{00068\ \ \ MessageBufferHandle\_t\ create()\ \{}
+\DoxyCodeLine{00069\ \ \ \ \ \textcolor{keywordflow}{return}\ xMessageBufferCreateStatic(MessageBufferSize,\ m\_storage.data(),}
+\DoxyCodeLine{00070\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \&m\_message\_buffer\_placeholder);}
+\DoxyCodeLine{00071\ \ \ \}}
+\DoxyCodeLine{00072\ \};}
+\DoxyCodeLine{00073\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00074\ \textcolor{preprocessor}{\#if\ configSUPPORT\_DYNAMIC\_ALLOCATION}}
+\DoxyCodeLine{00080\ \textcolor{keyword}{template}\ <\textcolor{keywordtype}{size\_t}\ MessageBufferSize>\ \textcolor{keyword}{class\ }dynamic\_message\_buffer\_allocator\ \{}
+\DoxyCodeLine{00081\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00082\ \ \ MessageBufferHandle\_t\ create()\ \{}
+\DoxyCodeLine{00083\ \ \ \ \ \textcolor{keywordflow}{return}\ xMessageBufferCreate(MessageBufferSize);}
+\DoxyCodeLine{00084\ \ \ \}}
+\DoxyCodeLine{00085\ \};}
+\DoxyCodeLine{00086\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00087\ }
+\DoxyCodeLine{00094\ \textcolor{keyword}{template}\ <\textcolor{keywordtype}{size\_t}\ MessageBufferSize,\ \textcolor{keyword}{typename}\ MessageBufferAllocator>}
+\DoxyCodeLine{00095\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classfreertos_1_1message__buffer}{message\_buffer}}\ \{}
+\DoxyCodeLine{00096\ \ \ MessageBufferAllocator\ m\_allocator\{\};}
+\DoxyCodeLine{00097\ \ \ MessageBufferHandle\_t\ m\_message\_buffer\{\textcolor{keyword}{nullptr}\};}
+\DoxyCodeLine{00098\ }
+\DoxyCodeLine{00099\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00104\ \ \ \textcolor{keyword}{explicit}\ \mbox{\hyperlink{classfreertos_1_1message__buffer_a83b811597a637b1fa86b3d42dc92b001}{message\_buffer}}()\ :\ m\_message\_buffer\{m\_allocator.create()\}\ \{}
+\DoxyCodeLine{00105\ \ \ \ \ configASSERT(m\_message\_buffer);}
+\DoxyCodeLine{00106\ \ \ \}}
+\DoxyCodeLine{00107\ \ \ \mbox{\hyperlink{classfreertos_1_1message__buffer_a83b811597a637b1fa86b3d42dc92b001}{message\_buffer}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1message__buffer}{message\_buffer}}\ \&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00108\ \ \ \mbox{\hyperlink{classfreertos_1_1message__buffer_a83b811597a637b1fa86b3d42dc92b001}{message\_buffer}}(\mbox{\hyperlink{classfreertos_1_1message__buffer}{message\_buffer}}\ \&\&src)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00114\ \ \ \mbox{\hyperlink{classfreertos_1_1message__buffer_a753bcad0484e4f15f4d3fe826d572065}{\string~message\_buffer}}(\textcolor{keywordtype}{void})\ \{}
+\DoxyCodeLine{00115\ \ \ \ \ \textcolor{keywordflow}{if}\ (m\_message\_buffer)\ \{}
+\DoxyCodeLine{00116\ \ \ \ \ \ \ vMessageBufferDelete(m\_message\_buffer);}
+\DoxyCodeLine{00117\ \ \ \ \ \}}
+\DoxyCodeLine{00118\ \ \ \}}
+\DoxyCodeLine{00119\ }
+\DoxyCodeLine{00120\ \ \ \mbox{\hyperlink{classfreertos_1_1message__buffer}{message\_buffer}}\ \&operator=(\textcolor{keyword}{const}\ \mbox{\hyperlink{classfreertos_1_1message__buffer}{message\_buffer}}\ \&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00121\ \ \ \mbox{\hyperlink{classfreertos_1_1message__buffer}{message\_buffer}}\ \&operator=(\mbox{\hyperlink{classfreertos_1_1message__buffer}{message\_buffer}}\ \&\&src)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00122\ }
+\DoxyCodeLine{00133\ \ \ \textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{classfreertos_1_1message__buffer_a530cca3bbcb0645b81ddb26450e57556}{send}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{void}\ *pvTxData,\ \textcolor{keywordtype}{size\_t}\ xDataLengthBytes,}
+\DoxyCodeLine{00134\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ TickType\_t\ xTicksToWait)\ \{}
+\DoxyCodeLine{00135\ \ \ \ \ \textcolor{keywordflow}{return}\ xMessageBufferSend(m\_message\_buffer,\ pvTxData,\ xDataLengthBytes,}
+\DoxyCodeLine{00136\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ xTicksToWait);}
+\DoxyCodeLine{00137\ \ \ \}}
+\DoxyCodeLine{00147\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Rep,\ \textcolor{keyword}{typename}\ Period>}
+\DoxyCodeLine{00148\ \ \ \textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{classfreertos_1_1message__buffer_abde882826aa3acc53d81635871cecc4f}{send}}(\textcolor{keyword}{const}\ \textcolor{keywordtype}{void}\ *pvTxData,\ \textcolor{keywordtype}{size\_t}\ xDataLengthBytes,}
+\DoxyCodeLine{00149\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::chrono::duration<Rep,\ Period>\ \&xTicksToWait)\ \{}
+\DoxyCodeLine{00150\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classfreertos_1_1message__buffer_a530cca3bbcb0645b81ddb26450e57556}{send}}(}
+\DoxyCodeLine{00151\ \ \ \ \ \ \ \ \ pvTxData,\ xDataLengthBytes,}
+\DoxyCodeLine{00152\ \ \ \ \ \ \ \ \ std::chrono::duration\_cast<std::chrono::milliseconds>(xTicksToWait)}
+\DoxyCodeLine{00153\ \ \ \ \ \ \ \ \ \ \ \ \ .count());}
+\DoxyCodeLine{00154\ \ \ \}}
+\DoxyCodeLine{00165\ \ \ \textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{classfreertos_1_1message__buffer_ab37be0d840cb8b59bd43c9d4800d0f6f}{receive}}(\textcolor{keywordtype}{void}\ *pvRxData,\ \textcolor{keywordtype}{size\_t}\ xBufferLengthBytes,}
+\DoxyCodeLine{00166\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ TickType\_t\ xTicksToWait)\ \{}
+\DoxyCodeLine{00167\ \ \ \ \ \textcolor{keywordflow}{return}\ xMessageBufferReceive(m\_message\_buffer,\ pvRxData,\ xBufferLengthBytes,}
+\DoxyCodeLine{00168\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ xTicksToWait);}
+\DoxyCodeLine{00169\ \ \ \}}
+\DoxyCodeLine{00180\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Rep,\ \textcolor{keyword}{typename}\ Period>}
+\DoxyCodeLine{00181\ \ \ \textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{classfreertos_1_1message__buffer_aa187c1676a9eb6ee7ea528096184dd73}{receive}}(\textcolor{keywordtype}{void}\ *pvRxData,\ \textcolor{keywordtype}{size\_t}\ xBufferLengthBytes,}
+\DoxyCodeLine{00182\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::chrono::duration<Rep,\ Period>\ \&timeout)\ \{}
+\DoxyCodeLine{00183\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classfreertos_1_1message__buffer_ab37be0d840cb8b59bd43c9d4800d0f6f}{receive}}(}
+\DoxyCodeLine{00184\ \ \ \ \ \ \ \ \ pvRxData,\ xBufferLengthBytes,}
+\DoxyCodeLine{00185\ \ \ \ \ \ \ \ \ std::chrono::duration\_cast<std::chrono::milliseconds>(timeout).count());}
 \DoxyCodeLine{00186\ \ \ \}}
 \DoxyCodeLine{00193\ \ \ \textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{classfreertos_1_1message__buffer_a14adfabd008e28ac2a834327e1e27462}{available}}(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{}
 \DoxyCodeLine{00194\ \ \ \ \ \textcolor{keywordflow}{return}\ xMessageBufferSpaceAvailable(m\_message\_buffer);}

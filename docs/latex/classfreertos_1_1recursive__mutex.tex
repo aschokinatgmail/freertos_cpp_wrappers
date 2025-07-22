@@ -34,9 +34,13 @@ Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1recursive__mutex_a47fd10b3cb
 \begin{DoxyCompactList}\small\item\em Unlock the recursive mutex. \href{https://www.freertos.org/a00123.html}{\texttt{ https\+://www.\+freertos.\+org/a00123.\+html}}. \end{DoxyCompactList}\item 
 Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1recursive__mutex_ac052f05534988d032bf5505bd6be5bd1}{unlock\+\_\+isr}} (Base\+Type\+\_\+t \&high\+\_\+priority\+\_\+task\+\_\+woken)
 \begin{DoxyCompactList}\small\item\em Unlock the recursive mutex from an ISR. \href{https://www.freertos.org/a00124.html}{\texttt{ https\+://www.\+freertos.\+org/a00124.\+html}}. \end{DoxyCompactList}\item 
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1recursive__mutex_a3b7db3999f3ce6fd4275e4b9c0410e12}{unlock\+\_\+isr}} (void)
+\begin{DoxyCompactList}\small\item\em Unlock the recursive mutex from an ISR. \href{https://www.freertos.org/a00124.html}{\texttt{ https\+://www.\+freertos.\+org/a00124.\+html}}. \end{DoxyCompactList}\item 
 Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1recursive__mutex_acb1c0619ac4ca0e62173a8ebeef12e69}{lock}} (const Tick\+Type\+\_\+t ticks\+\_\+to\+\_\+wait=port\+MAX\+\_\+\+DELAY)
 \begin{DoxyCompactList}\small\item\em Lock the recursive mutex. \href{https://www.freertos.org/a00122.html}{\texttt{ https\+://www.\+freertos.\+org/a00122.\+html}}. \end{DoxyCompactList}\item 
 Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1recursive__mutex_ad1002ee47642a565fa898e194f3604b4}{lock\+\_\+isr}} (Base\+Type\+\_\+t \&high\+\_\+priority\+\_\+task\+\_\+woken)
+\begin{DoxyCompactList}\small\item\em Lock the recursive mutex from an ISR. \href{https://www.freertos.org/xSemaphoreTakeFromISR.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Semaphore\+Take\+From\+ISR.\+html}}. \end{DoxyCompactList}\item 
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1recursive__mutex_a1d2d36ec832730964edc4bdb5d2fb6b4}{lock\+\_\+isr}} (void)
 \begin{DoxyCompactList}\small\item\em Lock the recursive mutex from an ISR. \href{https://www.freertos.org/xSemaphoreTakeFromISR.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Semaphore\+Take\+From\+ISR.\+html}}. \end{DoxyCompactList}\item 
 {\footnotesize template$<$typename Rep , typename Period $>$ }\\Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1recursive__mutex_ab3e95b964f62311ea06e33542507fb89}{lock}} (const std\+::chrono\+::duration$<$ Rep, Period $>$ \&timeout)
 \begin{DoxyCompactList}\small\item\em Lock the recursive mutex. \end{DoxyCompactList}\item 
@@ -101,7 +105,7 @@ Base\+Type\+\_\+t pd\+TRUE if the recursive mutex was successfully locked,
 \Hypertarget{classfreertos_1_1recursive__mutex_ad1002ee47642a565fa898e194f3604b4}\label{classfreertos_1_1recursive__mutex_ad1002ee47642a565fa898e194f3604b4} 
 \index{freertos::recursive\_mutex$<$ SemaphoreAllocator $>$@{freertos::recursive\_mutex$<$ SemaphoreAllocator $>$}!lock\_isr@{lock\_isr}}
 \index{lock\_isr@{lock\_isr}!freertos::recursive\_mutex$<$ SemaphoreAllocator $>$@{freertos::recursive\_mutex$<$ SemaphoreAllocator $>$}}
-\doxysubsubsection{\texorpdfstring{lock\_isr()}{lock\_isr()}}
+\doxysubsubsection{\texorpdfstring{lock\_isr()}{lock\_isr()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
 {\footnotesize\ttfamily template$<$typename Semaphore\+Allocator $>$ \\
 Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1recursive__mutex}{freertos\+::recursive\+\_\+mutex}}$<$ Semaphore\+Allocator $>$\+::lock\+\_\+isr (\begin{DoxyParamCaption}\item[{Base\+Type\+\_\+t \&}]{high\+\_\+priority\+\_\+task\+\_\+woken }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
 
@@ -114,6 +118,20 @@ Lock the recursive mutex from an ISR. \href{https://www.freertos.org/xSemaphoreT
 {\em high\+\_\+priority\+\_\+task\+\_\+woken} & pd\+TRUE if the high priority task was woken by the recursive mutex lock. \\
 \hline
 \end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Base\+Type\+\_\+t pd\+TRUE if the recursive mutex was successfully locked, 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1recursive__mutex_a1d2d36ec832730964edc4bdb5d2fb6b4}\label{classfreertos_1_1recursive__mutex_a1d2d36ec832730964edc4bdb5d2fb6b4} 
+\index{freertos::recursive\_mutex$<$ SemaphoreAllocator $>$@{freertos::recursive\_mutex$<$ SemaphoreAllocator $>$}!lock\_isr@{lock\_isr}}
+\index{lock\_isr@{lock\_isr}!freertos::recursive\_mutex$<$ SemaphoreAllocator $>$@{freertos::recursive\_mutex$<$ SemaphoreAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{lock\_isr()}{lock\_isr()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily template$<$typename Semaphore\+Allocator $>$ \\
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1recursive__mutex}{freertos\+::recursive\+\_\+mutex}}$<$ Semaphore\+Allocator $>$\+::lock\+\_\+isr (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Lock the recursive mutex from an ISR. \href{https://www.freertos.org/xSemaphoreTakeFromISR.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Semaphore\+Take\+From\+ISR.\+html}}. 
+
 \begin{DoxyReturn}{Returns}
 Base\+Type\+\_\+t pd\+TRUE if the recursive mutex was successfully locked, 
 \end{DoxyReturn}
@@ -162,7 +180,7 @@ Base\+Type\+\_\+t pd\+TRUE if the recursive mutex was successfully unlocked,
 \Hypertarget{classfreertos_1_1recursive__mutex_ac052f05534988d032bf5505bd6be5bd1}\label{classfreertos_1_1recursive__mutex_ac052f05534988d032bf5505bd6be5bd1} 
 \index{freertos::recursive\_mutex$<$ SemaphoreAllocator $>$@{freertos::recursive\_mutex$<$ SemaphoreAllocator $>$}!unlock\_isr@{unlock\_isr}}
 \index{unlock\_isr@{unlock\_isr}!freertos::recursive\_mutex$<$ SemaphoreAllocator $>$@{freertos::recursive\_mutex$<$ SemaphoreAllocator $>$}}
-\doxysubsubsection{\texorpdfstring{unlock\_isr()}{unlock\_isr()}}
+\doxysubsubsection{\texorpdfstring{unlock\_isr()}{unlock\_isr()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
 {\footnotesize\ttfamily template$<$typename Semaphore\+Allocator $>$ \\
 Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1recursive__mutex}{freertos\+::recursive\+\_\+mutex}}$<$ Semaphore\+Allocator $>$\+::unlock\+\_\+isr (\begin{DoxyParamCaption}\item[{Base\+Type\+\_\+t \&}]{high\+\_\+priority\+\_\+task\+\_\+woken }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
 
@@ -175,6 +193,20 @@ Unlock the recursive mutex from an ISR. \href{https://www.freertos.org/a00124.ht
 {\em high\+\_\+priority\+\_\+task\+\_\+woken} & pd\+TRUE if the high priority task was woken by the recursive mutex unlock. \\
 \hline
 \end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Base\+Type\+\_\+t pd\+TRUE if the recursive mutex was successfully unlocked, 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1recursive__mutex_a3b7db3999f3ce6fd4275e4b9c0410e12}\label{classfreertos_1_1recursive__mutex_a3b7db3999f3ce6fd4275e4b9c0410e12} 
+\index{freertos::recursive\_mutex$<$ SemaphoreAllocator $>$@{freertos::recursive\_mutex$<$ SemaphoreAllocator $>$}!unlock\_isr@{unlock\_isr}}
+\index{unlock\_isr@{unlock\_isr}!freertos::recursive\_mutex$<$ SemaphoreAllocator $>$@{freertos::recursive\_mutex$<$ SemaphoreAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{unlock\_isr()}{unlock\_isr()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily template$<$typename Semaphore\+Allocator $>$ \\
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1recursive__mutex}{freertos\+::recursive\+\_\+mutex}}$<$ Semaphore\+Allocator $>$\+::unlock\+\_\+isr (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Unlock the recursive mutex from an ISR. \href{https://www.freertos.org/a00124.html}{\texttt{ https\+://www.\+freertos.\+org/a00124.\+html}}. 
+
 \begin{DoxyReturn}{Returns}
 Base\+Type\+\_\+t pd\+TRUE if the recursive mutex was successfully unlocked, 
 \end{DoxyReturn}

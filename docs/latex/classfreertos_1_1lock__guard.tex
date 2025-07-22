@@ -17,6 +17,18 @@ Lock guard for the mutex. The mutex is locked in the constructor and unlocked in
 \Hypertarget{classfreertos_1_1lock__guard_af46d4af2d983d17c333f0265c941cad4}\label{classfreertos_1_1lock__guard_af46d4af2d983d17c333f0265c941cad4} 
 {\bfseries \texorpdfstring{$\sim$}{\string~}lock\+\_\+guard} (void)
 \begin{DoxyCompactList}\small\item\em Destruct the lock guard object and unlock the mutex. \end{DoxyCompactList}\item 
+\Hypertarget{classfreertos_1_1lock__guard_a704d0a3fde3f496ce1bc640098d81edf}\label{classfreertos_1_1lock__guard_a704d0a3fde3f496ce1bc640098d81edf} 
+{\bfseries lock\+\_\+guard} (const \mbox{\hyperlink{classfreertos_1_1lock__guard}{lock\+\_\+guard}} \&)=delete
+\item 
+\Hypertarget{classfreertos_1_1lock__guard_a51c470518be18b0781d55168c903ca94}\label{classfreertos_1_1lock__guard_a51c470518be18b0781d55168c903ca94} 
+{\bfseries lock\+\_\+guard} (\mbox{\hyperlink{classfreertos_1_1lock__guard}{lock\+\_\+guard}} \&\&)=delete
+\item 
+\Hypertarget{classfreertos_1_1lock__guard_a072272a3ae886ac55193e0b3f1d88a20}\label{classfreertos_1_1lock__guard_a072272a3ae886ac55193e0b3f1d88a20} 
+\mbox{\hyperlink{classfreertos_1_1lock__guard}{lock\+\_\+guard}} \& {\bfseries operator=} (const \mbox{\hyperlink{classfreertos_1_1lock__guard}{lock\+\_\+guard}} \&)=delete
+\item 
+\Hypertarget{classfreertos_1_1lock__guard_ab3c85a3c2291aaa96dcafdcdd65a029f}\label{classfreertos_1_1lock__guard_ab3c85a3c2291aaa96dcafdcdd65a029f} 
+\mbox{\hyperlink{classfreertos_1_1lock__guard}{lock\+\_\+guard}} \& {\bfseries operator=} (\mbox{\hyperlink{classfreertos_1_1lock__guard}{lock\+\_\+guard}} \&\&)=delete
+\item 
 bool \mbox{\hyperlink{classfreertos_1_1lock__guard_aab62d6459ed0be2ee1211fe2b3c0b4d1}{locked}} (void) const
 \begin{DoxyCompactList}\small\item\em Checks if the mutex is locked. \end{DoxyCompactList}\end{DoxyCompactItemize}
 
