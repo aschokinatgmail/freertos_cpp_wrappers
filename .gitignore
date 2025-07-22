@@ -4,9 +4,7 @@ out/
 .vscode/
 .vs/
 
-# Documentation generated files
-docs/html/
-html/
+# Note: Generated documentation is now included in repository
 
 # CMake
 CMakeCache.txt
