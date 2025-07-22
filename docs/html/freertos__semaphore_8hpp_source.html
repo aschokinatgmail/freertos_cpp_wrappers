@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FreeRTOS C++ Wrappers<span id="projectnumber">&#160;v0.1.0-56a641b</span>
+   <div id="projectname">FreeRTOS C++ Wrappers<span id="projectnumber">&#160;v0.1.0-4919236</span>
    </div>
    <div id="projectbrief">Modern C++17 RAII wrappers for FreeRTOS APIs</div>
   </td>
@@ -453,7 +453,7 @@ $(document).ready(function(){initNavTree('freertos__semaphore_8hpp_source.html',
 <div class="line"><a id="l00615" name="l00615"></a><span class="lineno"><a class="line" href="classfreertos_1_1recursive__mutex.html">  615</a></span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> SemaphoreAllocator&gt; <span class="keyword">class </span><a class="code hl_class" href="classfreertos_1_1recursive__mutex.html">recursive_mutex</a> {</div>
 <div class="line"><a id="l00616" name="l00616"></a><span class="lineno">  616</span>  SemaphoreAllocator m_allocator{};</div>
 <div class="line"><a id="l00617" name="l00617"></a><span class="lineno">  617</span>  SemaphoreHandle_t m_semaphore{<span class="keyword">nullptr</span>};</div>
-<div class="line"><a id="l00618" name="l00618"></a><span class="lineno">  618</span>  uint8_t m_recustions_count{0};</div>
+<div class="line"><a id="l00618" name="l00618"></a><span class="lineno">  618</span>  uint8_t m_recursions_count{0};</div>
 <div class="line"><a id="l00619" name="l00619"></a><span class="lineno">  619</span> </div>
 <div class="line"><a id="l00620" name="l00620"></a><span class="lineno">  620</span><span class="keyword">public</span>:</div>
 <div class="foldopen" id="foldopen00625" data-start="{" data-end="}">
@@ -477,8 +477,8 @@ $(document).ready(function(){initNavTree('freertos__semaphore_8hpp_source.html',
 <div class="foldopen" id="foldopen00651" data-start="{" data-end="}">
 <div class="line"><a id="l00651" name="l00651"></a><span class="lineno"><a class="line" href="classfreertos_1_1recursive__mutex.html#a47fd10b3cb192ef884366130178c240a">  651</a></span>  BaseType_t <a class="code hl_function" href="classfreertos_1_1recursive__mutex.html#a47fd10b3cb192ef884366130178c240a">unlock</a>() {</div>
 <div class="line"><a id="l00652" name="l00652"></a><span class="lineno">  652</span>    <span class="keyword">auto</span> rc = xSemaphoreGiveRecursive(m_semaphore);</div>
-<div class="line"><a id="l00653" name="l00653"></a><span class="lineno">  653</span>    <span class="keywordflow">if</span> (rc &amp;&amp; m_recustions_count &gt; 0) {</div>
-<div class="line"><a id="l00654" name="l00654"></a><span class="lineno">  654</span>      m_recustions_count--;</div>
+<div class="line"><a id="l00653" name="l00653"></a><span class="lineno">  653</span>    <span class="keywordflow">if</span> (rc &amp;&amp; m_recursions_count &gt; 0) {</div>
+<div class="line"><a id="l00654" name="l00654"></a><span class="lineno">  654</span>      m_recursions_count--;</div>
 <div class="line"><a id="l00655" name="l00655"></a><span class="lineno">  655</span>    }</div>
 <div class="line"><a id="l00656" name="l00656"></a><span class="lineno">  656</span>    <span class="keywordflow">return</span> rc;</div>
 <div class="line"><a id="l00657" name="l00657"></a><span class="lineno">  657</span>  }</div>
@@ -486,8 +486,8 @@ $(document).ready(function(){initNavTree('freertos__semaphore_8hpp_source.html',
 <div class="foldopen" id="foldopen00666" data-start="{" data-end="}">
 <div class="line"><a id="l00666" name="l00666"></a><span class="lineno"><a class="line" href="classfreertos_1_1recursive__mutex.html#ac052f05534988d032bf5505bd6be5bd1">  666</a></span>  BaseType_t <a class="code hl_function" href="classfreertos_1_1recursive__mutex.html#ac052f05534988d032bf5505bd6be5bd1">unlock_isr</a>(BaseType_t &amp;high_priority_task_woken) {</div>
 <div class="line"><a id="l00667" name="l00667"></a><span class="lineno">  667</span>    <span class="keyword">auto</span> rc = xSemaphoreGiveFromISR(m_semaphore, &amp;high_priority_task_woken);</div>
-<div class="line"><a id="l00668" name="l00668"></a><span class="lineno">  668</span>    <span class="keywordflow">if</span> (rc &amp;&amp; m_recustions_count &gt; 0) {</div>
-<div class="line"><a id="l00669" name="l00669"></a><span class="lineno">  669</span>      m_recustions_count--;</div>
+<div class="line"><a id="l00668" name="l00668"></a><span class="lineno">  668</span>    <span class="keywordflow">if</span> (rc &amp;&amp; m_recursions_count &gt; 0) {</div>
+<div class="line"><a id="l00669" name="l00669"></a><span class="lineno">  669</span>      m_recursions_count--;</div>
 <div class="line"><a id="l00670" name="l00670"></a><span class="lineno">  670</span>    }</div>
 <div class="line"><a id="l00671" name="l00671"></a><span class="lineno">  671</span>    <span class="keywordflow">return</span> rc;</div>
 <div class="line"><a id="l00672" name="l00672"></a><span class="lineno">  672</span>  }</div>
@@ -496,8 +496,8 @@ $(document).ready(function(){initNavTree('freertos__semaphore_8hpp_source.html',
 <div class="line"><a id="l00679" name="l00679"></a><span class="lineno"><a class="line" href="classfreertos_1_1recursive__mutex.html#a3b7db3999f3ce6fd4275e4b9c0410e12">  679</a></span>  BaseType_t <a class="code hl_function" href="classfreertos_1_1recursive__mutex.html#a3b7db3999f3ce6fd4275e4b9c0410e12">unlock_isr</a>(<span class="keywordtype">void</span>) {</div>
 <div class="line"><a id="l00680" name="l00680"></a><span class="lineno">  680</span>    BaseType_t high_priority_task_woken = pdFALSE;</div>
 <div class="line"><a id="l00681" name="l00681"></a><span class="lineno">  681</span>    <span class="keyword">auto</span> rc = xSemaphoreGiveFromISR(m_semaphore, &amp;high_priority_task_woken);</div>
-<div class="line"><a id="l00682" name="l00682"></a><span class="lineno">  682</span>    <span class="keywordflow">if</span> (rc &amp;&amp; m_recustions_count &gt; 0) {</div>
-<div class="line"><a id="l00683" name="l00683"></a><span class="lineno">  683</span>      m_recustions_count--;</div>
+<div class="line"><a id="l00682" name="l00682"></a><span class="lineno">  682</span>    <span class="keywordflow">if</span> (rc &amp;&amp; m_recursions_count &gt; 0) {</div>
+<div class="line"><a id="l00683" name="l00683"></a><span class="lineno">  683</span>      m_recursions_count--;</div>
 <div class="line"><a id="l00684" name="l00684"></a><span class="lineno">  684</span>    }</div>
 <div class="line"><a id="l00685" name="l00685"></a><span class="lineno">  685</span>    <span class="keywordflow">return</span> rc;</div>
 <div class="line"><a id="l00686" name="l00686"></a><span class="lineno">  686</span>  }</div>
@@ -506,7 +506,7 @@ $(document).ready(function(){initNavTree('freertos__semaphore_8hpp_source.html',
 <div class="line"><a id="l00694" name="l00694"></a><span class="lineno"><a class="line" href="classfreertos_1_1recursive__mutex.html#acb1c0619ac4ca0e62173a8ebeef12e69">  694</a></span>  BaseType_t <a class="code hl_function" href="classfreertos_1_1recursive__mutex.html#acb1c0619ac4ca0e62173a8ebeef12e69">lock</a>(<span class="keyword">const</span> TickType_t ticks_to_wait = portMAX_DELAY) {</div>
 <div class="line"><a id="l00695" name="l00695"></a><span class="lineno">  695</span>    <span class="keyword">auto</span> rc = xSemaphoreTakeRecursive(m_semaphore, ticks_to_wait);</div>
 <div class="line"><a id="l00696" name="l00696"></a><span class="lineno">  696</span>    <span class="keywordflow">if</span> (rc) {</div>
-<div class="line"><a id="l00697" name="l00697"></a><span class="lineno">  697</span>      m_recustions_count++;</div>
+<div class="line"><a id="l00697" name="l00697"></a><span class="lineno">  697</span>      m_recursions_count++;</div>
 <div class="line"><a id="l00698" name="l00698"></a><span class="lineno">  698</span>    }</div>
 <div class="line"><a id="l00699" name="l00699"></a><span class="lineno">  699</span>    <span class="keywordflow">return</span> rc;</div>
 <div class="line"><a id="l00700" name="l00700"></a><span class="lineno">  700</span>  }</div>
@@ -515,7 +515,7 @@ $(document).ready(function(){initNavTree('freertos__semaphore_8hpp_source.html',
 <div class="line"><a id="l00709" name="l00709"></a><span class="lineno"><a class="line" href="classfreertos_1_1recursive__mutex.html#ad1002ee47642a565fa898e194f3604b4">  709</a></span>  BaseType_t <a class="code hl_function" href="classfreertos_1_1recursive__mutex.html#ad1002ee47642a565fa898e194f3604b4">lock_isr</a>(BaseType_t &amp;high_priority_task_woken) {</div>
 <div class="line"><a id="l00710" name="l00710"></a><span class="lineno">  710</span>    <span class="keyword">auto</span> rc = xSemaphoreTakeFromISR(m_semaphore, &amp;high_priority_task_woken);</div>
 <div class="line"><a id="l00711" name="l00711"></a><span class="lineno">  711</span>    <span class="keywordflow">if</span> (rc) {</div>
-<div class="line"><a id="l00712" name="l00712"></a><span class="lineno">  712</span>      m_recustions_count++;</div>
+<div class="line"><a id="l00712" name="l00712"></a><span class="lineno">  712</span>      m_recursions_count++;</div>
 <div class="line"><a id="l00713" name="l00713"></a><span class="lineno">  713</span>    }</div>
 <div class="line"><a id="l00714" name="l00714"></a><span class="lineno">  714</span>    <span class="keywordflow">return</span> rc;</div>
 <div class="line"><a id="l00715" name="l00715"></a><span class="lineno">  715</span>  }</div>
@@ -525,7 +525,7 @@ $(document).ready(function(){initNavTree('freertos__semaphore_8hpp_source.html',
 <div class="line"><a id="l00723" name="l00723"></a><span class="lineno">  723</span>    BaseType_t high_priority_task_woken = pdFALSE;</div>
 <div class="line"><a id="l00724" name="l00724"></a><span class="lineno">  724</span>    <span class="keyword">auto</span> rc = xSemaphoreTakeFromISR(m_semaphore, &amp;high_priority_task_woken);</div>
 <div class="line"><a id="l00725" name="l00725"></a><span class="lineno">  725</span>    <span class="keywordflow">if</span> (rc) {</div>
-<div class="line"><a id="l00726" name="l00726"></a><span class="lineno">  726</span>      m_recustions_count++;</div>
+<div class="line"><a id="l00726" name="l00726"></a><span class="lineno">  726</span>      m_recursions_count++;</div>
 <div class="line"><a id="l00727" name="l00727"></a><span class="lineno">  727</span>    }</div>
 <div class="line"><a id="l00728" name="l00728"></a><span class="lineno">  728</span>    <span class="keywordflow">return</span> rc;</div>
 <div class="line"><a id="l00729" name="l00729"></a><span class="lineno">  729</span>  }</div>
@@ -541,13 +541,13 @@ $(document).ready(function(){initNavTree('freertos__semaphore_8hpp_source.html',
 <div class="line"><a id="l00747" name="l00747"></a><span class="lineno"><a class="line" href="classfreertos_1_1recursive__mutex.html#ab6a508d720641f15c1fe2b293e96ae50">  747</a></span>  BaseType_t <a class="code hl_function" href="classfreertos_1_1recursive__mutex.html#ab6a508d720641f15c1fe2b293e96ae50">try_lock</a>() {</div>
 <div class="line"><a id="l00748" name="l00748"></a><span class="lineno">  748</span>    <span class="keyword">auto</span> rc = xSemaphoreTakeRecursive(m_semaphore, 0);</div>
 <div class="line"><a id="l00749" name="l00749"></a><span class="lineno">  749</span>    <span class="keywordflow">if</span> (rc) {</div>
-<div class="line"><a id="l00750" name="l00750"></a><span class="lineno">  750</span>      m_recustions_count++;</div>
+<div class="line"><a id="l00750" name="l00750"></a><span class="lineno">  750</span>      m_recursions_count++;</div>
 <div class="line"><a id="l00751" name="l00751"></a><span class="lineno">  751</span>    }</div>
 <div class="line"><a id="l00752" name="l00752"></a><span class="lineno">  752</span>    <span class="keywordflow">return</span> rc;</div>
 <div class="line"><a id="l00753" name="l00753"></a><span class="lineno">  753</span>  }</div>
 </div>
-<div class="line"><a id="l00759" name="l00759"></a><span class="lineno"><a class="line" href="classfreertos_1_1recursive__mutex.html#a50a8c8b3aaeff40407e15d3eb597e8d8">  759</a></span>  <span class="keywordtype">bool</span> <a class="code hl_function" href="classfreertos_1_1recursive__mutex.html#a50a8c8b3aaeff40407e15d3eb597e8d8">locked</a>(<span class="keywordtype">void</span>)<span class="keyword"> const </span>{ <span class="keywordflow">return</span> m_recustions_count &gt; 0; }</div>
-<div class="line"><a id="l00765" name="l00765"></a><span class="lineno"><a class="line" href="classfreertos_1_1recursive__mutex.html#a34374156091a4e09c8432b525b86e24f">  765</a></span>  uint8_t <a class="code hl_function" href="classfreertos_1_1recursive__mutex.html#a34374156091a4e09c8432b525b86e24f">recursions_count</a>(<span class="keywordtype">void</span>)<span class="keyword"> const </span>{ <span class="keywordflow">return</span> m_recustions_count; }</div>
+<div class="line"><a id="l00759" name="l00759"></a><span class="lineno"><a class="line" href="classfreertos_1_1recursive__mutex.html#a50a8c8b3aaeff40407e15d3eb597e8d8">  759</a></span>  <span class="keywordtype">bool</span> <a class="code hl_function" href="classfreertos_1_1recursive__mutex.html#a50a8c8b3aaeff40407e15d3eb597e8d8">locked</a>(<span class="keywordtype">void</span>)<span class="keyword"> const </span>{ <span class="keywordflow">return</span> m_recursions_count &gt; 0; }</div>
+<div class="line"><a id="l00765" name="l00765"></a><span class="lineno"><a class="line" href="classfreertos_1_1recursive__mutex.html#a34374156091a4e09c8432b525b86e24f">  765</a></span>  uint8_t <a class="code hl_function" href="classfreertos_1_1recursive__mutex.html#a34374156091a4e09c8432b525b86e24f">recursions_count</a>(<span class="keywordtype">void</span>)<span class="keyword"> const </span>{ <span class="keywordflow">return</span> m_recursions_count; }</div>
 <div class="line"><a id="l00766" name="l00766"></a><span class="lineno">  766</span>};</div>
 </div>
 <div class="line"><a id="l00767" name="l00767"></a><span class="lineno">  767</span> </div>

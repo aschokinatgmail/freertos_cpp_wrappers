@@ -287,7 +287,7 @@
 \DoxyCodeLine{00615\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ SemaphoreAllocator>\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classfreertos_1_1recursive__mutex}{recursive\_mutex}}\ \{}
 \DoxyCodeLine{00616\ \ \ SemaphoreAllocator\ m\_allocator\{\};}
 \DoxyCodeLine{00617\ \ \ SemaphoreHandle\_t\ m\_semaphore\{\textcolor{keyword}{nullptr}\};}
-\DoxyCodeLine{00618\ \ \ uint8\_t\ m\_recustions\_count\{0\};}
+\DoxyCodeLine{00618\ \ \ uint8\_t\ m\_recursions\_count\{0\};}
 \DoxyCodeLine{00619\ }
 \DoxyCodeLine{00620\ \textcolor{keyword}{public}:}
 \DoxyCodeLine{00625\ \ \ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_ab9a7a225d849f32dcb429fd92669ef06}{recursive\_mutex}}()\ :\ m\_semaphore\{m\_allocator.create\_recursive\_mutex()\}\ \{}
@@ -306,37 +306,37 @@
 \DoxyCodeLine{00643\ }
 \DoxyCodeLine{00651\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_a47fd10b3cb192ef884366130178c240a}{unlock}}()\ \{}
 \DoxyCodeLine{00652\ \ \ \ \ \textcolor{keyword}{auto}\ rc\ =\ xSemaphoreGiveRecursive(m\_semaphore);}
-\DoxyCodeLine{00653\ \ \ \ \ \textcolor{keywordflow}{if}\ (rc\ \&\&\ m\_recustions\_count\ >\ 0)\ \{}
-\DoxyCodeLine{00654\ \ \ \ \ \ \ m\_recustions\_count-\/-\/;}
+\DoxyCodeLine{00653\ \ \ \ \ \textcolor{keywordflow}{if}\ (rc\ \&\&\ m\_recursions\_count\ >\ 0)\ \{}
+\DoxyCodeLine{00654\ \ \ \ \ \ \ m\_recursions\_count-\/-\/;}
 \DoxyCodeLine{00655\ \ \ \ \ \}}
 \DoxyCodeLine{00656\ \ \ \ \ \textcolor{keywordflow}{return}\ rc;}
 \DoxyCodeLine{00657\ \ \ \}}
 \DoxyCodeLine{00666\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_ac052f05534988d032bf5505bd6be5bd1}{unlock\_isr}}(BaseType\_t\ \&high\_priority\_task\_woken)\ \{}
 \DoxyCodeLine{00667\ \ \ \ \ \textcolor{keyword}{auto}\ rc\ =\ xSemaphoreGiveFromISR(m\_semaphore,\ \&high\_priority\_task\_woken);}
-\DoxyCodeLine{00668\ \ \ \ \ \textcolor{keywordflow}{if}\ (rc\ \&\&\ m\_recustions\_count\ >\ 0)\ \{}
-\DoxyCodeLine{00669\ \ \ \ \ \ \ m\_recustions\_count-\/-\/;}
+\DoxyCodeLine{00668\ \ \ \ \ \textcolor{keywordflow}{if}\ (rc\ \&\&\ m\_recursions\_count\ >\ 0)\ \{}
+\DoxyCodeLine{00669\ \ \ \ \ \ \ m\_recursions\_count-\/-\/;}
 \DoxyCodeLine{00670\ \ \ \ \ \}}
 \DoxyCodeLine{00671\ \ \ \ \ \textcolor{keywordflow}{return}\ rc;}
 \DoxyCodeLine{00672\ \ \ \}}
 \DoxyCodeLine{00679\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_a3b7db3999f3ce6fd4275e4b9c0410e12}{unlock\_isr}}(\textcolor{keywordtype}{void})\ \{}
 \DoxyCodeLine{00680\ \ \ \ \ BaseType\_t\ high\_priority\_task\_woken\ =\ pdFALSE;}
 \DoxyCodeLine{00681\ \ \ \ \ \textcolor{keyword}{auto}\ rc\ =\ xSemaphoreGiveFromISR(m\_semaphore,\ \&high\_priority\_task\_woken);}
-\DoxyCodeLine{00682\ \ \ \ \ \textcolor{keywordflow}{if}\ (rc\ \&\&\ m\_recustions\_count\ >\ 0)\ \{}
-\DoxyCodeLine{00683\ \ \ \ \ \ \ m\_recustions\_count-\/-\/;}
+\DoxyCodeLine{00682\ \ \ \ \ \textcolor{keywordflow}{if}\ (rc\ \&\&\ m\_recursions\_count\ >\ 0)\ \{}
+\DoxyCodeLine{00683\ \ \ \ \ \ \ m\_recursions\_count-\/-\/;}
 \DoxyCodeLine{00684\ \ \ \ \ \}}
 \DoxyCodeLine{00685\ \ \ \ \ \textcolor{keywordflow}{return}\ rc;}
 \DoxyCodeLine{00686\ \ \ \}}
 \DoxyCodeLine{00694\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_acb1c0619ac4ca0e62173a8ebeef12e69}{lock}}(\textcolor{keyword}{const}\ TickType\_t\ ticks\_to\_wait\ =\ portMAX\_DELAY)\ \{}
 \DoxyCodeLine{00695\ \ \ \ \ \textcolor{keyword}{auto}\ rc\ =\ xSemaphoreTakeRecursive(m\_semaphore,\ ticks\_to\_wait);}
 \DoxyCodeLine{00696\ \ \ \ \ \textcolor{keywordflow}{if}\ (rc)\ \{}
-\DoxyCodeLine{00697\ \ \ \ \ \ \ m\_recustions\_count++;}
+\DoxyCodeLine{00697\ \ \ \ \ \ \ m\_recursions\_count++;}
 \DoxyCodeLine{00698\ \ \ \ \ \}}
 \DoxyCodeLine{00699\ \ \ \ \ \textcolor{keywordflow}{return}\ rc;}
 \DoxyCodeLine{00700\ \ \ \}}
 \DoxyCodeLine{00709\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_ad1002ee47642a565fa898e194f3604b4}{lock\_isr}}(BaseType\_t\ \&high\_priority\_task\_woken)\ \{}
 \DoxyCodeLine{00710\ \ \ \ \ \textcolor{keyword}{auto}\ rc\ =\ xSemaphoreTakeFromISR(m\_semaphore,\ \&high\_priority\_task\_woken);}
 \DoxyCodeLine{00711\ \ \ \ \ \textcolor{keywordflow}{if}\ (rc)\ \{}
-\DoxyCodeLine{00712\ \ \ \ \ \ \ m\_recustions\_count++;}
+\DoxyCodeLine{00712\ \ \ \ \ \ \ m\_recursions\_count++;}
 \DoxyCodeLine{00713\ \ \ \ \ \}}
 \DoxyCodeLine{00714\ \ \ \ \ \textcolor{keywordflow}{return}\ rc;}
 \DoxyCodeLine{00715\ \ \ \}}
@@ -344,7 +344,7 @@
 \DoxyCodeLine{00723\ \ \ \ \ BaseType\_t\ high\_priority\_task\_woken\ =\ pdFALSE;}
 \DoxyCodeLine{00724\ \ \ \ \ \textcolor{keyword}{auto}\ rc\ =\ xSemaphoreTakeFromISR(m\_semaphore,\ \&high\_priority\_task\_woken);}
 \DoxyCodeLine{00725\ \ \ \ \ \textcolor{keywordflow}{if}\ (rc)\ \{}
-\DoxyCodeLine{00726\ \ \ \ \ \ \ m\_recustions\_count++;}
+\DoxyCodeLine{00726\ \ \ \ \ \ \ m\_recursions\_count++;}
 \DoxyCodeLine{00727\ \ \ \ \ \}}
 \DoxyCodeLine{00728\ \ \ \ \ \textcolor{keywordflow}{return}\ rc;}
 \DoxyCodeLine{00729\ \ \ \}}
@@ -356,12 +356,12 @@
 \DoxyCodeLine{00747\ \ \ BaseType\_t\ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_ab6a508d720641f15c1fe2b293e96ae50}{try\_lock}}()\ \{}
 \DoxyCodeLine{00748\ \ \ \ \ \textcolor{keyword}{auto}\ rc\ =\ xSemaphoreTakeRecursive(m\_semaphore,\ 0);}
 \DoxyCodeLine{00749\ \ \ \ \ \textcolor{keywordflow}{if}\ (rc)\ \{}
-\DoxyCodeLine{00750\ \ \ \ \ \ \ m\_recustions\_count++;}
+\DoxyCodeLine{00750\ \ \ \ \ \ \ m\_recursions\_count++;}
 \DoxyCodeLine{00751\ \ \ \ \ \}}
 \DoxyCodeLine{00752\ \ \ \ \ \textcolor{keywordflow}{return}\ rc;}
 \DoxyCodeLine{00753\ \ \ \}}
-\DoxyCodeLine{00759\ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_a50a8c8b3aaeff40407e15d3eb597e8d8}{locked}}(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ m\_recustions\_count\ >\ 0;\ \}}
-\DoxyCodeLine{00765\ \ \ uint8\_t\ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_a34374156091a4e09c8432b525b86e24f}{recursions\_count}}(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ m\_recustions\_count;\ \}}
+\DoxyCodeLine{00759\ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_a50a8c8b3aaeff40407e15d3eb597e8d8}{locked}}(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ m\_recursions\_count\ >\ 0;\ \}}
+\DoxyCodeLine{00765\ \ \ uint8\_t\ \mbox{\hyperlink{classfreertos_1_1recursive__mutex_a34374156091a4e09c8432b525b86e24f}{recursions\_count}}(\textcolor{keywordtype}{void})\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ m\_recursions\_count;\ \}}
 \DoxyCodeLine{00766\ \};}
 \DoxyCodeLine{00767\ }
 \DoxyCodeLine{00774\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Mutex>\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classfreertos_1_1lock__guard}{lock\_guard}}\ \{}

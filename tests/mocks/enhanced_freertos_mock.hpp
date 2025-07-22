@@ -251,118 +251,40 @@ private:
     }
 };
 
-// Static instance
-TaskSimulator* TaskSimulator::instance_ = nullptr;
-
-/**
- * @brief Enhanced FreeRTOS mock class that uses TaskSimulator
- * 
- * This class extends the basic FreeRTOS mock to provide realistic
- * task execution simulation using std::thread.
- */
-class EnhancedFreeRTOSMock : public FreeRTOSMock {
-private:
-    TaskSimulator& simulator_;
-    
-public:
-    EnhancedFreeRTOSMock() : simulator_(TaskSimulator::getInstance()) {}
-    
-    ~EnhancedFreeRTOSMock() {
-        simulator_.terminateAllTasks();
-    }
-    
-    // Enhanced task creation that actually executes tasks
-    MOCK_METHOD(TaskHandle_t, xTaskCreateStatic, 
-                (TaskFunction_t pxTaskCode, const char* pcName, uint32_t ulStackDepth,
-                 void* pvParameters, UBaseType_t uxPriority, StackType_t* puxStackBuffer,
-                 StaticTask_t* pxTaskBuffer));
-    
-    MOCK_METHOD(BaseType_t, xTaskCreate,
-                (TaskFunction_t pxTaskCode, const char* pcName, uint16_t usStackDepth,
-                 void* pvParameters, UBaseType_t uxPriority, TaskHandle_t* pxCreatedTask));
-    
-    MOCK_METHOD(void, vTaskDelete, (TaskHandle_t xTaskToDelete));
-    MOCK_METHOD(void, vTaskSuspend, (TaskHandle_t xTaskToSuspend));
-    MOCK_METHOD(void, vTaskResume, (TaskHandle_t xTaskToResume));
-    MOCK_METHOD(eTaskState, eTaskGetState, (TaskHandle_t xTask));
-    MOCK_METHOD(const char*, pcTaskGetName, (TaskHandle_t xTaskToQuery));
-    MOCK_METHOD(UBaseType_t, uxTaskGetNumberOfTasks, ());
-    
-    // Actual task creation with simulation
-    TaskHandle_t createTaskWithSimulation(TaskFunction_t pxTaskCode, const char* pcName, uint32_t ulStackDepth,
-                                         void* pvParameters, UBaseType_t uxPriority, StackType_t* puxStackBuffer,
-                                         StaticTask_t* pxTaskBuffer) {
-        return simulator_.createTask(pxTaskCode, pcName, pvParameters, uxPriority);
-    }
-    
-    BaseType_t createDynamicTaskWithSimulation(TaskFunction_t pxTaskCode, const char* pcName, uint16_t usStackDepth,
-                                              void* pvParameters, UBaseType_t uxPriority, TaskHandle_t* pxCreatedTask) {
-        if (pxCreatedTask) {
-            *pxCreatedTask = simulator_.createTask(pxTaskCode, pcName, pvParameters, uxPriority);
-            return pdPASS;
-        }
-        return pdFAIL;
-    }
-    
-    void deleteTaskWithSimulation(TaskHandle_t xTaskToDelete) {
-        simulator_.deleteTask(xTaskToDelete);
-    }
-    
-    void suspendTaskWithSimulation(TaskHandle_t xTaskToSuspend) {
-        simulator_.suspendTask(xTaskToSuspend);
-    }
-    
-    void resumeTaskWithSimulation(TaskHandle_t xTaskToResume) {
-        simulator_.resumeTask(xTaskToResume);
-    }
-    
-    eTaskState getTaskStateWithSimulation(TaskHandle_t xTask) {
-        return simulator_.getTaskState(xTask);
-    }
-    
-    const char* getTaskNameWithSimulation(TaskHandle_t xTaskToQuery) {
-        return simulator_.getTaskName(xTaskToQuery);
-    }
-    
-    UBaseType_t getNumberOfTasksWithSimulation() {
-        return static_cast<UBaseType_t>(simulator_.getTaskCount());
-    }
-    
-    // Utility methods for testing
-    void waitForTask(TaskHandle_t handle, std::chrono::milliseconds timeout = std::chrono::milliseconds(1000)) {
-        simulator_.waitForTask(handle, timeout);
-    }
-    
-    size_t getActiveTaskCount() {
-        return simulator_.getTaskCount();
-    }
-};
-
-/**
- * @brief Enhanced mock instance manager that uses existing global mock
- */
-class EnhancedMockInstance {
-public:
-    static std::shared_ptr<EnhancedFreeRTOSMock> getInstance() {
-        if (!instance_) {
-            instance_ = std::make_shared<EnhancedFreeRTOSMock>();
-            extern FreeRTOSMock* g_freertos_mock;
-            g_freertos_mock = instance_.get();
-        }
-        return instance_;
-    }
-    
-    static void resetInstance() {
-        TaskSimulator::resetInstance();
-        extern FreeRTOSMock* g_freertos_mock;
-        g_freertos_mock = nullptr;
-        instance_.reset();
-    }
-    
-private:
-    static std::shared_ptr<EnhancedFreeRTOSMock> instance_;
-};
-
-std::shared_ptr<EnhancedFreeRTOSMock> EnhancedMockInstance::instance_;
-
 } // namespace enhanced_mock
+
+// STL-based semaphore testing extensions
+namespace freertos_test {
+
+/**
+ * @brief Enable or disable STL implementations for enhanced testing
+ * @param enable true to use STL implementations, false to use normal mocks
+ */
+void enable_stl_implementations(bool enable);
+
+/**
+ * @brief Check if STL implementations are enabled
+ * @return bool true if STL implementations are enabled
+ */
+bool is_stl_implementations_enabled();
+
+/**
+ * @brief Clear all STL implementation registries
+ */
+void clear_stl_registries();
+
+// Enhanced semaphore creation functions
+SemaphoreHandle_t create_stl_binary_semaphore();
+SemaphoreHandle_t create_stl_counting_semaphore(UBaseType_t max_count, UBaseType_t initial_count);
+SemaphoreHandle_t create_stl_mutex();
+SemaphoreHandle_t create_stl_recursive_mutex();
+
+// Enhanced semaphore operation functions
+BaseType_t stl_semaphore_give(SemaphoreHandle_t handle);
+BaseType_t stl_semaphore_take(SemaphoreHandle_t handle, TickType_t timeout);
+BaseType_t stl_semaphore_take_recursive(SemaphoreHandle_t handle, TickType_t timeout);
+BaseType_t stl_semaphore_give_recursive(SemaphoreHandle_t handle);
+UBaseType_t stl_semaphore_get_count(SemaphoreHandle_t handle);
+void stl_semaphore_delete(SemaphoreHandle_t handle);
+
+} // namespace freertos_test
