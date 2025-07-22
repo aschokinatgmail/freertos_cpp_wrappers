@@ -7,7 +7,7 @@ This report provides line-by-line analysis of uncovered code in the FreeRTOS tas
 ### Coverage Statistics
 - **Task Module Overall**: 91.8% line coverage (178/194 lines)
 - **Function Coverage**: 91.8% (101/110 functions)
-- **Total Test Cases**: 357 tests executed
+- **Total Test Cases**: 369 tests executed (360 passing ✅, 9 failing ❌)
 - **Task-Specific Tests**: 81 test cases
 
 ## Detailed Uncovered Code Analysis
