@@ -237,7 +237,61 @@
     <div class="container">
         <div class="summary-cards"></div><h1 id="validation-and-verification-report">Validation and Verification Report</h1>
 <div class="section"><h2 id="executive-summary">Executive Summary</h2>
-<p>This report provides comprehensive validation and verification results for the FreeRTOS C++ Wrappers project, including detailed test execution outcomes and code coverage analysis.</p>
+<p>This report provides comprehensive validation and verification results for the FreeRTOS C++ Wrappers project, including static code analysis, detailed test execution outcomes, and code coverage analysis.</p>
+<h3 id="code-coverage-summary">Code Coverage Summary</h3>
+<ul>
+<li><strong>Line Coverage</strong>: 96.6% (6842/7082 lines)</li>
+<li><strong>Function Coverage</strong>: 94.9% (2777/2925 functions)</li>
+<li><strong>Coverage Scope</strong>: Main library modules only (src/ and include/ directories)</li>
+</ul>
+</div><div class="section"><h2 id="static-code-analysis">Static Code Analysis</h2>
+<h3 id="overview">Overview</h3>
+<p><strong>Static Analysis Tools</strong>: clang-tidy + Enhanced cppcheck (all rules) + MISRA C++ (cppcheck)
+<strong>Analysis Scope</strong>: Library modules only - src/ include/
+<strong>Check Sets</strong>: cppcoreguidelines-<em>, cert-</em>, google-<em>, hicpp-</em> + All cppcheck rules (style, performance, portability, security, etc.) + MISRA C 2012 (applicable to C++)</p>
+<h3 id="clang-tidy-analysis">clang-tidy Analysis</h3>
+<h4 id="statistics">Statistics</h4>
+<h5 id="summary">Summary</h5>
+<ul>
+<li><strong>Total Issues Found</strong>: 34438</li>
+<li><strong>Warnings</strong>: 34437</li>
+<li><strong>Errors</strong>: 1</li>
+<li><strong>Files Analyzed</strong>: 18</li>
+<li><strong>Unique Check Types</strong>: 2</li>
+</ul>
+<h5 id="issues-by-check-category">Issues by Check Category</h5>
+<ul>
+<li><strong>cppcoreguidelines</strong>: 16 issues</li>
+<li><strong>cert</strong>: 2 issues</li>
+</ul>
+<h5 id="files-with-issues">Files with Issues</h5>
+<ul>
+<li><strong>freertos_task.hpp</strong>: 14 issues</li>
+<li><strong>freertos_semaphore.hpp</strong>: 2 issues</li>
+<li><strong>freertos_sw_timer.hpp</strong>: 2 issues</li>
+</ul>
+<h3 id="misra-c-analysis">MISRA C++ Analysis</h3>
+<h4 id="summary">Summary</h4>
+<ul>
+<li><strong>Total MISRA Violations</strong>: 259</li>
+<li><strong>Unique Rules Violated</strong>: 17</li>
+<li><strong>Files Analyzed</strong>: 10</li>
+<li><strong>Analysis Errors</strong>: 3</li>
+<li><strong>Other Issues</strong>: 109</li>
+</ul>
+<h4 id="violations-by-severity">Violations by Severity</h4>
+<ul>
+<li><strong>Style</strong>: 259</li>
+</ul>
+<h4 id="analysis-notes">Analysis Notes</h4>
+<ul>
+<li><strong>Tool</strong>: cppcheck with all rules enabled (--enable=all)</li>
+<li><strong>Checks</strong>: All available cppcheck checks including MISRA C 2012, style, performance, portability, security</li>
+<li><strong>Scope</strong>: Library modules only (src/, include/)</li>
+<li><strong>Integration</strong>: This analysis complements the existing clang-tidy static analysis</li>
+<li><strong>MISRA Compliance</strong>: MISRA rule texts cannot be displayed due to licensing restrictions</li>
+</ul>
+</div><div class="section"><h2 id="test-execution-results">Test Execution Results</h2>
 <h3 id="test-execution-summary">Test Execution Summary</h3>
 <ul>
 <li><strong>Total Tests Executed</strong>: 421</li>
@@ -247,14 +301,8 @@
 <li><strong>Total Execution Time</strong>: 5.25 seconds</li>
 <li><strong>Average Test Time</strong>: 0.0125 seconds per test</li>
 </ul>
-<h3 id="code-coverage-summary">Code Coverage Summary</h3>
-<ul>
-<li><strong>Line Coverage</strong>: 96.6% (6842/7082 lines)</li>
-<li><strong>Function Coverage</strong>: 94.9% (2777/2925 functions)</li>
-<li><strong>Coverage Scope</strong>: Main library modules only (src/ and include/ directories)</li>
-</ul>
-</div><div class="section"><h2 id="detailed-test-results-by-module">Detailed Test Results by Module</h2>
-<h3 id="task-module-tests">Task Module Tests</h3>
+<h3 id="detailed-test-results-by-module">Detailed Test Results by Module</h3>
+<h4 id="task-module-tests">Task Module Tests</h4>
 <p><strong>Module Statistics:</strong>
 - Tests: 81
 - Passed: 81
@@ -760,7 +808,7 @@
 </tr>
 </tbody>
 </table>
-<h3 id="semaphore-module-tests">Semaphore Module Tests</h3>
+<h4 id="semaphore-module-tests">Semaphore Module Tests</h4>
 <p><strong>Module Statistics:</strong>
 - Tests: 96
 - Passed: 96
@@ -1356,7 +1404,7 @@
 </tr>
 </tbody>
 </table>
-<h3 id="queue-module-tests">Queue Module Tests</h3>
+<h4 id="queue-module-tests">Queue Module Tests</h4>
 <p><strong>Module Statistics:</strong>
 - Tests: 49
 - Passed: 49
@@ -1670,7 +1718,7 @@
 </tr>
 </tbody>
 </table>
-<h3 id="eventgroup-module-tests">EventGroup Module Tests</h3>
+<h4 id="eventgroup-module-tests">EventGroup Module Tests</h4>
 <p><strong>Module Statistics:</strong>
 - Tests: 30
 - Passed: 30
@@ -1870,7 +1918,7 @@
 </tr>
 </tbody>
 </table>
-<h3 id="streambuffer-module-tests">StreamBuffer Module Tests</h3>
+<h4 id="streambuffer-module-tests">StreamBuffer Module Tests</h4>
 <p><strong>Module Statistics:</strong>
 - Tests: 47
 - Passed: 47
@@ -2172,7 +2220,7 @@
 </tr>
 </tbody>
 </table>
-<h3 id="messagebuffer-module-tests">MessageBuffer Module Tests</h3>
+<h4 id="messagebuffer-module-tests">MessageBuffer Module Tests</h4>
 <p><strong>Module Statistics:</strong>
 - Tests: 32
 - Passed: 32
@@ -2384,7 +2432,7 @@
 </tr>
 </tbody>
 </table>
-<h3 id="timer-module-tests">Timer Module Tests</h3>
+<h4 id="timer-module-tests">Timer Module Tests</h4>
 <p><strong>Module Statistics:</strong>
 - Tests: 50
 - Passed: 50
@@ -2704,7 +2752,7 @@
 </tr>
 </tbody>
 </table>
-<h3 id="enhanced-module-tests">Enhanced Module Tests</h3>
+<h4 id="enhanced-module-tests">Enhanced Module Tests</h4>
 <p><strong>Module Statistics:</strong>
 - Tests: 12
 - Passed: 12

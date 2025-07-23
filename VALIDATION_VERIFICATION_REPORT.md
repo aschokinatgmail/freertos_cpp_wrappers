@@ -2,9 +2,111 @@
 
 ## Executive Summary
 
-This report provides comprehensive validation and verification results for the FreeRTOS C++ Wrappers project, including detailed test execution outcomes and code coverage analysis.
+This report provides comprehensive validation and verification results for the FreeRTOS C++ Wrappers project, including static code analysis, detailed test execution outcomes, and code coverage analysis.
+
+### Code Coverage Summary
+- **Line Coverage**: 96.6% (6842/7082 lines)
+- **Function Coverage**: 94.9% (2777/2925 functions)
+- **Coverage Scope**: Main library modules only (src/ and include/ directories)
+
+## Static Code Analysis
+
+### Overview
+
+**Static Analysis Tools**: clang-tidy + Enhanced cppcheck (all rules) + MISRA C++ (cppcheck)
+**Analysis Scope**: Library modules only - src/ include/
+**Check Sets**: cppcoreguidelines-*, cert-*, google-*, hicpp-* + All cppcheck rules (style, performance, portability, security, etc.) + MISRA C 2012 (applicable to C++)
+
+### clang-tidy Analysis
+
+#### Statistics
+
+##### Summary
+
+- **Total Issues Found**: 34438
+- **Warnings**: 34437
+- **Errors**: 1
+- **Files Analyzed**: 18
+- **Unique Check Types**: 2
+
+##### Issues by Check Category
+
+- **cppcoreguidelines**: 16 issues
+- **cert**: 2 issues
+
+##### Files with Issues
+
+- **freertos_task.hpp**: 14 issues
+- **freertos_semaphore.hpp**: 2 issues
+- **freertos_sw_timer.hpp**: 2 issues
+
+##### Analyzed Files
+
+- freertos.hpp
+- freertos.hpp.
+- freertos_event_group.hpp
+- freertos_event_group.hpp.
+- freertos_message_buffer.hpp
+- freertos_message_buffer.hpp.
+- freertos_queue.hpp
+- freertos_queue.hpp.
+- freertos_semaphore.hpp
+- freertos_semaphore.hpp.
+- freertos_stream_buffer.hpp
+- freertos_stream_buffer.hpp.
+- freertos_sw_timer.hpp
+- freertos_sw_timer.hpp.
+- freertos_task.cc
+- freertos_task.cc.
+- freertos_task.hpp
+- freertos_task.hpp.
+
+### MISRA C++ Analysis
+
+#### Summary
+
+- **Total MISRA Violations**: 259
+- **Unique Rules Violated**: 17
+- **Files Analyzed**: 10
+- **Analysis Errors**: 3
+- **Other Issues**: 109
+
+#### Violations by Severity
+
+- **Style**: 259
+
+#### Violations by Rule
+
+- **MISRA C 2012 Rule 10.4**: 4 violation(s) - Both operands of an operator in which the usual arithmetic conversions are performed shall have the same essential type
+- **MISRA C 2012 Rule 12.3**: 36 violation(s) - The comma operator should not be used
+- **MISRA C 2012 Rule 13.4**: 1 violation(s) - The result of an assignment operator should not be used
+- **MISRA C 2012 Rule 15.5**: 17 violation(s) - A function should have a single point of exit at the end
+- **MISRA C 2012 Rule 16.3**: 13 violation(s) - An unconditional break statement shall terminate every switch-clause
+- **MISRA C 2012 Rule 17.3**: 7 violation(s) - A function shall not be declared implicitly
+- **MISRA C 2012 Rule 17.8**: 14 violation(s) - A function parameter should not be modified
+- **MISRA C 2012 Rule 2.3**: 2 violation(s) - A project should not contain unused type declarations
+- **MISRA C 2012 Rule 2.7**: 15 violation(s) - There should be no unused parameters in functions
+- **MISRA C 2012 Rule 20.9**: 25 violation(s) - All identifiers used in the controlling expression of #if or #elif preprocessing directives shall be #define'd before evaluation
+- **MISRA C 2012 Rule 21.2**: 1 violation(s) - A reserved identifier or reserved macro name shall not be declared
+- **MISRA C 2012 Rule 3.1**: 2 violation(s) - The character sequences /* and // shall not appear in /* comment */
+- **MISRA C 2012 Rule 5.8**: 16 violation(s) - Identifiers that define objects or functions with external linkage shall be unique
+- **MISRA C 2012 Rule 8.2**: 45 violation(s) - Function types shall be in prototype form with named parameters
+- **MISRA C 2012 Rule 8.5**: 6 violation(s) - An external object or function shall be declared once in one and only one file
+- **MISRA C 2012 Rule 8.6**: 40 violation(s) - An identifier with external linkage shall have exactly one external definition
+- **MISRA C 2012 Rule 8.7**: 15 violation(s) - Functions and objects should not be defined with external linkage if they are referenced from only one translation unit
+
+#### Analysis Notes
+
+- **Tool**: cppcheck with all rules enabled (--enable=all)
+- **Checks**: All available cppcheck checks including MISRA C 2012, style, performance, portability, security
+- **Scope**: Library modules only (src/, include/)
+- **Integration**: This analysis complements the existing clang-tidy static analysis
+- **MISRA Compliance**: MISRA rule texts cannot be displayed due to licensing restrictions
+
+## Test Execution Results
 
 ### Test Execution Summary
+
 - **Total Tests Executed**: 421
 - **✅ Passed**: 421 tests
 - **❌ Failed**: 0 tests
@@ -12,14 +114,9 @@ This report provides comprehensive validation and verification results for the F
 - **Total Execution Time**: 5.25 seconds
 - **Average Test Time**: 0.0125 seconds per test
 
-### Code Coverage Summary
-- **Line Coverage**: 96.6% (6842/7082 lines)
-- **Function Coverage**: 94.9% (2777/2925 functions)
-- **Coverage Scope**: Main library modules only (src/ and include/ directories)
+### Detailed Test Results by Module
 
-## Detailed Test Results by Module
-
-### Task Module Tests
+#### Task Module Tests
 
 **Module Statistics:**
 - Tests: 81
@@ -114,7 +211,7 @@ This report provides comprehensive validation and verification results for the F
 | 80 | FreeRTOSTaskTest.AdvancedChronoCompatibility | ✅ PASS | 0.010s |
 | 81 | FreeRTOSTaskTest.PriorityInheritanceScenario | ✅ PASS | 0.010s |
 
-### Semaphore Module Tests
+#### Semaphore Module Tests
 
 **Module Statistics:**
 - Tests: 96
@@ -224,7 +321,7 @@ This report provides comprehensive validation and verification results for the F
 | 396 | STLSemaphoreTest.STLSemaphoreStressTest | ✅ PASS | 0.080s |
 | 397 | STLSemaphoreTest.STLTimeoutAccuracy | ✅ PASS | 0.350s |
 
-### Queue Module Tests
+#### Queue Module Tests
 
 **Module Statistics:**
 - Tests: 49
@@ -287,7 +384,7 @@ This report provides comprehensive validation and verification results for the F
 | 210 | FreeRTOSQueueTest.QueueSendFrontISROperations | ✅ PASS | 0.010s |
 | 211 | FreeRTOSQueueTest.QueueMessagesWaitingISR | ✅ PASS | 0.010s |
 
-### EventGroup Module Tests
+#### EventGroup Module Tests
 
 **Module Statistics:**
 - Tests: 30
@@ -331,7 +428,7 @@ This report provides comprehensive validation and verification results for the F
 | 240 | FreeRTOSEventGroupTest.StaticVsDynamicBehavior | ✅ PASS | 0.010s |
 | 241 | FreeRTOSEventGroupTest.EventGroupAPICompleteness | ✅ PASS | 0.010s |
 
-### StreamBuffer Module Tests
+#### StreamBuffer Module Tests
 
 **Module Statistics:**
 - Tests: 47
@@ -392,7 +489,7 @@ This report provides comprehensive validation and verification results for the F
 | 287 | FreeRTOSStreamBufferTest.StreamBufferChronoSecondsTimeout | ✅ PASS | 0.010s |
 | 288 | FreeRTOSStreamBufferTest.StreamBufferAPICompleteness | ✅ PASS | 0.010s |
 
-### MessageBuffer Module Tests
+#### MessageBuffer Module Tests
 
 **Module Statistics:**
 - Tests: 32
@@ -438,7 +535,7 @@ This report provides comprehensive validation and verification results for the F
 | 319 | FreeRTOSMessageBufferTest.MessageBufferComplexSendReceiveScenario | ✅ PASS | 0.010s |
 | 320 | FreeRTOSMessageBufferTest.MessageBufferAPICompleteness | ✅ PASS | 0.010s |
 
-### Timer Module Tests
+#### Timer Module Tests
 
 **Module Statistics:**
 - Tests: 50
@@ -502,7 +599,7 @@ This report provides comprehensive validation and verification results for the F
 | 369 | FreeRTOSSwTimerTest.DestructorComplexScenarios | ✅ PASS | 0.010s |
 | 370 | FreeRTOSSwTimerTest.DestructorWithActiveTimer | ✅ PASS | 0.010s |
 
-### Enhanced Module Tests
+#### Enhanced Module Tests
 
 **Module Statistics:**
 - Tests: 12
