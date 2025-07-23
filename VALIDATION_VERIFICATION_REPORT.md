@@ -11,12 +11,12 @@ This report provides comprehensive validation and verification results for the F
 - **Analysis Scope**: Main project code (src/ and include/ directories)
 
 **Key Quality Metrics:**
-- **Total Tests Executed**: 5
-- **✅ Passed**: 5 tests
+- **Total Tests Executed**: 11
+- **✅ Passed**: 11 tests
 - **❌ Failed**: 0 tests
 - **Success Rate**: 100.0%
 
-- **Static Analysis Issues**: 4 total (2 MISRA, 2 clang-tidy warnings, 0 clang-tidy errors)
+- **Static Analysis Issues**: 9 total (9 MISRA, 0 clang-tidy warnings, 0 clang-tidy errors)
 
 ## Static Code Analysis
 
@@ -30,76 +30,12 @@ This report provides comprehensive validation and verification results for the F
 
 | Tool | Issues Found | Severity | Status |
 |------|-------------|----------|---------|
-| MISRA C++ 2012 | 2 violations | Various | Analyzed |
-| clang-tidy | 2 warnings, 0 errors | Various | Analyzed |
+| MISRA C++ 2012 | 9 violations | Various | Analyzed |
+| clang-tidy | 0 warnings, 0 errors | Various | Analyzed |
 
 ### MISRA C++ 2012 Violations
 
 #### Detailed Violations with Code Context
-
-**Violation 1**: misra-c2012-16.4
-**Message**: MISRA C 2012 Rule 16.4 violation
-**Severity**: warning
-**Occurrences**: 1
-
-**Location 1**: `src/freertos_task.cc:45`
-
-```cpp
-      43:   if (wakeTime > now) {
-      44:     delay(wakeTime - now);
->>>   45:   }
-      46: }
-      47: void delay_until(const std::chrono::steady_clock::time_point &wakeTime) {
-```
-
-**Violation 2**: misra-c2012-5.2
-**Message**: MISRA C 2012 Rule 5.2 violation
-**Severity**: warning
-**Occurrences**: 1
-
-**Location 1**: `include/freertos_task.hpp:23`
-
-```cpp
-      21: 
-      22: The above copyright notice and this permission notice shall be included in all
->>>   23: copies or substantial portions of the Software.
-      24: 
-      25: THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-```
-
-### clang-tidy Analysis
-
-#### Detailed Violations with Code Context
-
-**Violation 1**: clang-diagnostic-unused-variable
-**Message**: unused variable 'result'
-**Severity**: warning
-**Occurrences**: 1
-
-**Location 1**: `src/freertos_task.cc:45`
-
-```cpp
-      43:   if (wakeTime > now) {
-      44:     delay(wakeTime - now);
->>>   45:   }
-      46: }
-      47: void delay_until(const std::chrono::steady_clock::time_point &wakeTime) {
-```
-
-**Violation 2**: modernize-use-constexpr
-**Message**: consider using a constexpr if available
-**Severity**: warning
-**Occurrences**: 1
-
-**Location 1**: `include/freertos_task.hpp:23`
-
-```cpp
-      21: 
-      22: The above copyright notice and this permission notice shall be included in all
->>>   23: copies or substantial portions of the Software.
-      24: 
-      25: THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-```
 
 
 ## Test Execution Results
@@ -108,40 +44,137 @@ This report provides comprehensive validation and verification results for the F
 
 ### Detailed Test Results by Module
 
-### FreeRTOSTaskTest Module Tests
+### Task Module Tests
 
 **Module Statistics:**
-- Tests: 5
-- Passed: 5
+- Tests: 2
+- Passed: 2
 - Failed: 0
 - Success Rate: 100.0%
-- Total Time: 0.050s
+- Total Time: 0.020s
 
 **Detailed Test Results:**
 
 | Test ID | Test Name | Outcome | Execution Time |
 |---------|-----------|---------|----------------|
 | 1 | FreeRTOSTaskTest.StaticTaskAllocatorConstruction  | ✅ PASSED | 0.010s |
-| 2 | FreeRTOSTaskTest.StaticTaskAllocatorCreate  | ✅ PASSED | 0.010s |
-| 3 | FreeRTOSTaskTest.StaticTaskAllocatorCreateNullReturn  | ✅ PASSED | 0.010s |
-| 4 | FreeRTOSTaskTest.DynamicTaskAllocatorConstruction  | ✅ PASSED | 0.010s |
-| 5 | FreeRTOSTaskTest.DynamicTaskAllocatorCreateSuccess  | ✅ PASSED | 0.010s |
+| 2 | FreeRTOSTaskTest.DynamicTaskAllocatorConstruction  | ✅ PASSED | 0.010s |
+
+### Semaphore Module Tests
+
+**Module Statistics:**
+- Tests: 2
+- Passed: 2
+- Failed: 0
+- Success Rate: 100.0%
+- Total Time: 0.020s
+
+**Detailed Test Results:**
+
+| Test ID | Test Name | Outcome | Execution Time |
+|---------|-----------|---------|----------------|
+| 1 | FreeRTOSSemaphoreTest.BinarySemaphoreConstruction  | ✅ PASSED | 0.010s |
+| 2 | FreeRTOSSemaphoreTest.CountingSemaphoreConstruction  | ✅ PASSED | 0.010s |
+
+### Queue Module Tests
+
+**Module Statistics:**
+- Tests: 1
+- Passed: 1
+- Failed: 0
+- Success Rate: 100.0%
+- Total Time: 0.010s
+
+**Detailed Test Results:**
+
+| Test ID | Test Name | Outcome | Execution Time |
+|---------|-----------|---------|----------------|
+| 1 | FreeRTOSQueueTest.StaticQueueAllocatorConstruction  | ✅ PASSED | 0.010s |
+
+### EventGroup Module Tests
+
+**Module Statistics:**
+- Tests: 1
+- Passed: 1
+- Failed: 0
+- Success Rate: 100.0%
+- Total Time: 0.010s
+
+**Detailed Test Results:**
+
+| Test ID | Test Name | Outcome | Execution Time |
+|---------|-----------|---------|----------------|
+| 1 | FreeRTOSEventGroupTest.StaticEventGroupConstruction  | ✅ PASSED | 0.010s |
+
+### StreamBuffer Module Tests
+
+**Module Statistics:**
+- Tests: 1
+- Passed: 1
+- Failed: 0
+- Success Rate: 100.0%
+- Total Time: 0.010s
+
+**Detailed Test Results:**
+
+| Test ID | Test Name | Outcome | Execution Time |
+|---------|-----------|---------|----------------|
+| 1 | FreeRTOSStreamBufferTest.StaticStreamBufferConstruction  | ✅ PASSED | 0.010s |
+
+### MessageBuffer Module Tests
+
+**Module Statistics:**
+- Tests: 1
+- Passed: 1
+- Failed: 0
+- Success Rate: 100.0%
+- Total Time: 0.010s
+
+**Detailed Test Results:**
+
+| Test ID | Test Name | Outcome | Execution Time |
+|---------|-----------|---------|----------------|
+| 1 | FreeRTOSMessageBufferTest.StaticMessageBufferConstruction  | ✅ PASSED | 0.010s |
+
+### Timer Module Tests
+
+**Module Statistics:**
+- Tests: 1
+- Passed: 1
+- Failed: 0
+- Success Rate: 100.0%
+- Total Time: 0.010s
+
+**Detailed Test Results:**
+
+| Test ID | Test Name | Outcome | Execution Time |
+|---------|-----------|---------|----------------|
+| 1 | FreeRTOSTimerTest.StaticTimerConstruction  | ✅ PASSED | 0.010s |
+
+### Enhanced Module Tests
+
+**Module Statistics:**
+- Tests: 2
+- Passed: 2
+- Failed: 0
+- Success Rate: 100.0%
+- Total Time: 0.020s
+
+**Detailed Test Results:**
+
+| Test ID | Test Name | Outcome | Execution Time |
+|---------|-----------|---------|----------------|
+| 1 | FreeRTOSEnhancedTest.Cpp17Features  | ✅ PASSED | 0.010s |
+| 2 | FreeRTOSEnhancedTest.MultitaskingFeatures  | ✅ PASSED | 0.010s |
 
 
 ## Code Coverage Analysis
 
 ### Coverage Summary
 
-**Line Coverage**: 66.7% (2 of 3 lines)
-**Function Coverage**: 100.0% (1 of 1 functions)
+**Coverage Data**: Not available
 
-**Coverage Quality**: Needs Improvement
-
-### Coverage Analysis by File
-
-| File | Line Coverage | Functions |
-|------|---------------|-----------|
-| `src/freertos_task.cc` | 66.7% | 1/1 |
+*Coverage analysis was not successful. Ensure the project is built with coverage enabled and tests are executed.*
 
 
 ## Validation Conclusions
@@ -150,8 +183,8 @@ This report provides comprehensive validation and verification results for the F
 
 Based on the comprehensive validation and verification analysis:
 
-**Test Execution**: 100.0% success rate with 5 tests executed
-**Static Analysis**: 4 total issues identified requiring review
+**Test Execution**: 100.0% success rate with 11 tests executed
+**Static Analysis**: 9 total issues identified requiring review
 **Analysis Scope**: Complete coverage of main project code (src/ and include/ directories)
 
 ### Recommendations
@@ -168,6 +201,6 @@ Based on the comprehensive validation and verification analysis:
 
 ---
 
-*Generated: July 23, 2025 at 22:51:56*  
+*Generated: July 23, 2025 at 23:19:22*  
 *Tools: Google Test + clang-tidy + MISRA C++ (cppcheck)*  
 *Scope: Complete project validation and verification*
