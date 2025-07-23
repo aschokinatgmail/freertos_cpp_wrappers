@@ -177,7 +177,7 @@ This class provides a type-\/safe, RAII wrapper around Free\+RTOS queues for int
 \DoxyCodeLine{\textcolor{comment}{//\ Receive\ sensor\ data}}
 \DoxyCodeLine{SensorData\ received;}
 \DoxyCodeLine{\textcolor{keywordflow}{if}\ (sensor\_queue.receive(received,\ 1s))\ \{}
-\DoxyCodeLine{\ \ \ \ printf(\textcolor{stringliteral}{"{}Temperature:\ \%.1f°C,\ Humidity:\ \%.1f\%\%\(\backslash\)\(\backslash\)n"{}},\ }
+\DoxyCodeLine{\ \ \ \ printf(\textcolor{stringliteral}{"{}Temperature:\ \%.1f°C,\ Humidity:\ \%.1f\%\%\(\backslash\)\(\backslash\)n"{}},}
 \DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ received.temperature,\ received.humidity);}
 \DoxyCodeLine{\}}
 
@@ -190,7 +190,7 @@ This class provides a type-\/safe, RAII wrapper around Free\+RTOS queues for int
 \DoxyCodeLine{\textcolor{keywordtype}{void}\ uart\_interrupt\_handler()\ \{}
 \DoxyCodeLine{\ \ \ \ uint8\_t\ received\_byte\ =\ read\_uart\_register();}
 \DoxyCodeLine{\ \ \ \ BaseType\_t\ task\_woken\ =\ pdFALSE;}
-\DoxyCodeLine{\ \ \ \ }
+\DoxyCodeLine{}
 \DoxyCodeLine{\ \ \ \ \textcolor{keywordflow}{if}\ (isr\_queue.\mbox{\hyperlink{classfreertos_1_1queue_a34d5c5b86b9fc81a728f7dfea968d7b5}{send\_isr}}(received\_byte,\ task\_woken))\ \{}
 \DoxyCodeLine{\ \ \ \ \ \ \ \ portYIELD\_FROM\_ISR(task\_woken);}
 \DoxyCodeLine{\ \ \ \ \}}
@@ -209,7 +209,8 @@ This class provides a type-\/safe, RAII wrapper around Free\+RTOS queues for int
 \hypertarget{classfreertos_1_1queue_autotoc_md5}{}\doxysubsubsubsection{\texorpdfstring{Static Allocation\+:}{Static Allocation:}}\label{classfreertos_1_1queue_autotoc_md5}
 
 \begin{DoxyCode}{0}
-\DoxyCodeLine{\mbox{\hyperlink{classfreertos_1_1queue}{freertos::queue<16,\ float,\ freertos::static\_queue\_allocator<16,\ float>}}>\ static\_queue;}
+\DoxyCodeLine{\mbox{\hyperlink{classfreertos_1_1queue}{freertos::queue<16,\ float,\ freertos::static\_queue\_allocator<16,\ float>}}>}
+\DoxyCodeLine{static\_queue;}
 
 \end{DoxyCode}
  \begin{Desc}
