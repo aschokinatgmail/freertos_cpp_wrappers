@@ -68,7 +68,8 @@ public:
 
   StreamBufferHandle_t create(size_t trigger_level_bytes = 1) {
     return xStreamBufferCreateStatic(StreamBufferSize, trigger_level_bytes,
-                                     m_storage.data(), &m_stream_buffer_placeholder);
+                                     m_storage.data(),
+                                     &m_stream_buffer_placeholder);
   }
 };
 #endif

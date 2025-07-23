@@ -59,6 +59,28 @@ add_library(freertos_cpp_wrappers
 target_include_directories(freertos_cpp_wrappers PRIVATE tests/mocks)
 
 # =============================================================================
+# CODE FORMATTING CONFIGURATION (clang-format)
+# =============================================================================
+
+# Find clang-format executable
+find_program(CLANG_FORMAT_EXE NAMES clang-format)
+
+if(CLANG_FORMAT_EXE)
+    message(STATUS "clang-format found: ${CLANG_FORMAT_EXE}")
+    
+    # Add custom target for code formatting
+    add_custom_target(format
+        COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/scripts/format_code.sh
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        COMMENT "Formatting C++ source files according to coding standard"
+    )
+    
+    message(STATUS "Run 'make format' to format all C++ source files")
+else()
+    message(WARNING "clang-format not found! Code formatting will be skipped. Install clang-format to enable code formatting.")
+endif()
+
+# =============================================================================
 # APPLY STATIC ANALYSIS TO LIBRARY MODULES ONLY
 # =============================================================================
 
