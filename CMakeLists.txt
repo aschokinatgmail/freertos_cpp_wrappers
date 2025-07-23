@@ -176,12 +176,18 @@ if(ENABLE_CLANG_TIDY)
                     -DUNIT_TESTING=1
                     > ${CMAKE_BINARY_DIR}/clang-tidy-report.txt 2>&1 || true
                 
-                # Generate report using shell script
+                # Generate combined static analysis report (clang-tidy + MISRA)
+                COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/scripts/run_misra_analysis.sh
+                    ${CMAKE_CURRENT_SOURCE_DIR}
+                    ${CMAKE_BINARY_DIR}/misra_analysis_output.txt
+                
+                # Generate integrated report using shell script
                 COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/scripts/generate_static_analysis_report.sh
                     ${CMAKE_BINARY_DIR}/clang-tidy-report.txt
                     ${CMAKE_BINARY_DIR}/clang-tidy-stats.md
                     ${CLANG_TIDY_REPORT_FILE}
                     ${CMAKE_CURRENT_SOURCE_DIR}
+                    ${CMAKE_BINARY_DIR}/misra_analysis_output.txt
                 
                 # Status messages
                 COMMAND ${CMAKE_COMMAND} -E echo "Fixes exported to: ${CMAKE_BINARY_DIR}/clang-tidy-fixes.yaml"
@@ -213,24 +219,7 @@ if(ENABLE_MISRA_ANALYSIS)
     
     if(CPPCHECK_EXE)
         message(STATUS "cppcheck found: ${CPPCHECK_EXE}")
-        
-        # Add custom target for MISRA C++ analysis
-        add_custom_target(misra-analysis
-            # Run MISRA analysis on library modules
-            COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/scripts/run_misra_analysis.sh
-                ${CMAKE_CURRENT_SOURCE_DIR}
-                ${CMAKE_BINARY_DIR}/misra_analysis_output.txt
-            
-            # Generate formatted MISRA report
-            COMMAND python3 ${CMAKE_CURRENT_SOURCE_DIR}/scripts/parse_misra_report.py
-                ${CMAKE_BINARY_DIR}/misra_analysis_output.txt
-                ${CMAKE_SOURCE_DIR}/MISRA_ANALYSIS_REPORT.md
-            
-            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-            COMMENT "Running MISRA C++ static analysis on library modules"
-        )
-        
-        message(STATUS "Run 'make misra-analysis' to generate MISRA C++ static analysis report")
+        message(STATUS "MISRA C++ analysis will be integrated into static analysis report")
         message(STATUS "MISRA C++ analysis enabled - uses MISRA C 2012 rules applicable to C++")
     else()
         message(WARNING "cppcheck not found! MISRA C++ analysis will be skipped. Install cppcheck to enable MISRA analysis.")
@@ -264,11 +253,8 @@ add_custom_target(validation-verification-report
     COMMAND lcov --capture --directory . --output-file coverage.info --ignore-errors mismatch,negative,gcov
     COMMAND lcov --remove coverage.info '/usr/*' --output-file coverage_filtered.info
     
-    # Generate static analysis report
+    # Generate static analysis report (includes MISRA if enabled)
     COMMAND ${CMAKE_COMMAND} --build . --target static-analysis-report
-    
-    # Generate MISRA C++ analysis report  
-    COMMAND ${CMAKE_COMMAND} --build . --target misra-analysis
     
     # Generate documentation (after successful tests)
     COMMAND ${CMAKE_COMMAND} --build . --target docs
@@ -281,10 +267,9 @@ add_custom_target(validation-verification-report
     # Status messages
     COMMAND ${CMAKE_COMMAND} -E echo ""
     COMMAND ${CMAKE_COMMAND} -E echo "=== Reports Generated ==="
-    COMMAND ${CMAKE_COMMAND} -E echo "1. STATIC_ANALYSIS_REPORT.md - Static code analysis for main modules"
-    COMMAND ${CMAKE_COMMAND} -E echo "2. MISRA_ANALYSIS_REPORT.md - MISRA C++ compliance analysis"
-    COMMAND ${CMAKE_COMMAND} -E echo "3. VALIDATION_VERIFICATION_REPORT.md - Test execution and coverage analysis"
-    COMMAND ${CMAKE_COMMAND} -E echo "4. docs/html/index.html - Updated project documentation"
+    COMMAND ${CMAKE_COMMAND} -E echo "1. STATIC_ANALYSIS_REPORT.md - Integrated static analysis (clang-tidy + MISRA C++)"
+    COMMAND ${CMAKE_COMMAND} -E echo "2. VALIDATION_VERIFICATION_REPORT.md - Test execution and coverage analysis"
+    COMMAND ${CMAKE_COMMAND} -E echo "3. docs/html/index.html - Updated project documentation"
     COMMAND ${CMAKE_COMMAND} -E echo ""
     
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
