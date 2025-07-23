@@ -1,0 +1,3059 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validation and Verification Report - FreeRTOS C++ Wrappers</title>
+    <style>
+        /* Apple Developer-inspired report styling */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=SF+Mono:wght@400;500;600&display=swap');
+        
+        :root {
+            --apple-blue: #0A84FF;
+            --apple-blue-dark: #0071E3;
+            --apple-gray: #8E8E93;
+            --apple-gray-light: #2C2C2E;
+            --background: #1C1C1E;
+            --surface: #2C2C2E;
+            --surface-elevated: #3A3A3C;
+            --text-primary: #FFFFFF;
+            --text-secondary: #EBEBF5CC;
+            --text-tertiary: #EBEBF599;
+            --border: #48484A;
+            --separator: #38383A;
+            --success: #30D158;
+            --warning: #FF9F0A;
+            --error: #FF453A;
+            --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+            --radius: 8px;
+            --radius-lg: 12px;
+            --space-sm: 0.5rem;
+            --space-md: 0.75rem;
+            --space-lg: 1rem;
+            --space-xl: 1.5rem;
+            --space-2xl: 2rem;
+            --space-3xl: 3rem;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', sans-serif;
+            font-size: 17px;
+            line-height: 1.47059;
+            color: var(--text-primary);
+            background: var(--background);
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--apple-blue) 0%, var(--apple-blue-dark) 100%);
+            color: white;
+            padding: var(--space-2xl);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin: 0;
+            letter-spacing: -0.015em;
+        }
+        
+        .header p {
+            font-size: 19px;
+            margin-top: var(--space-sm);
+            opacity: 0.92;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: var(--space-3xl) var(--space-2xl);
+        }
+        
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--space-xl);
+            margin: var(--space-2xl) 0;
+        }
+        
+        .card {
+            background: var(--surface-elevated);
+            border: 1px solid var(--separator);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            box-shadow: var(--shadow-sm);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--apple-blue), var(--success));
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        }
+        
+        .card h3 {
+            font-size: 21px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0 0 var(--space-md) 0;
+        }
+        
+        .metric {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--apple-blue);
+            margin: var(--space-sm) 0;
+        }
+        
+        .metric.success { color: var(--success); }
+        .metric.warning { color: var(--warning); }
+        .metric.error { color: var(--error); }
+        
+        .section {
+            background: var(--surface-elevated);
+            border: 1px solid var(--separator);
+            border-radius: var(--radius-lg);
+            padding: var(--space-2xl);
+            margin: var(--space-2xl) 0;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .section h2 {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0 0 var(--space-xl) 0;
+            border-bottom: 2px solid var(--separator);
+            padding-bottom: var(--space-md);
+        }
+        
+        .code-block {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: var(--space-xl);
+            margin: var(--space-lg) 0;
+            overflow-x: auto;
+            font-family: 'SF Mono', 'Menlo', monospace;
+            font-size: 14px;
+            line-height: 1.45;
+        }
+        
+        .timestamp {
+            color: var(--text-tertiary);
+            font-size: 15px;
+            text-align: center;
+            margin-top: var(--space-2xl);
+            padding-top: var(--space-xl);
+            border-top: 1px solid var(--separator);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: var(--space-lg) 0;
+            background: var(--surface-elevated);
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        table th {
+            background: var(--surface);
+            color: var(--text-primary);
+            font-weight: 600;
+            padding: var(--space-lg);
+            text-align: left;
+            border-bottom: 2px solid var(--separator);
+        }
+        
+        table td {
+            padding: var(--space-lg);
+            border-bottom: 1px solid var(--separator);
+            color: var(--text-secondary);
+        }
+        
+        table tr:hover {
+            background: var(--surface);
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: var(--space-sm) var(--space-md);
+            border-radius: var(--radius);
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .badge.success {
+            background: rgba(52, 199, 89, 0.1);
+            color: var(--success);
+        }
+        
+        .badge.warning {
+            background: rgba(255, 149, 0, 0.1);
+            color: var(--warning);
+        }
+        
+        .badge.error {
+            background: rgba(255, 59, 48, 0.1);
+            color: var(--error);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: var(--space-xl);
+            }
+            
+            .header h1 {
+                font-size: 28px;
+            }
+            
+            .summary-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Validation and Verification Report</h1>
+        <p>Comprehensive test execution and coverage analysis</p>
+    </div>
+    
+    <div class="container">
+        <div class="summary-cards"></div><h1 id="validation-and-verification-report">Validation and Verification Report</h1>
+<div class="section"><h2 id="executive-summary">Executive Summary</h2>
+<p>This report provides comprehensive validation and verification results for the FreeRTOS C++ Wrappers project, including detailed test execution outcomes and code coverage analysis.</p>
+<h3 id="test-execution-summary">Test Execution Summary</h3>
+<ul>
+<li><strong>Total Tests Executed</strong>: 421</li>
+<li><strong>✅ Passed</strong>: 421 tests</li>
+<li><strong>❌ Failed</strong>: 0 tests</li>
+<li><strong>Success Rate</strong>: 100.0% (All tests passed!)</li>
+<li><strong>Total Execution Time</strong>: 5.02 seconds</li>
+<li><strong>Average Test Time</strong>: 0.0119 seconds per test</li>
+</ul>
+<h3 id="code-coverage-summary">Code Coverage Summary</h3>
+<ul>
+<li><strong>Line Coverage</strong>: 96.6% (6837/7076 lines)</li>
+<li><strong>Function Coverage</strong>: 94.9% (2777/2925 functions)</li>
+<li><strong>Coverage Scope</strong>: Main library modules only (src/ and include/ directories)</li>
+</ul>
+</div><div class="section"><h2 id="detailed-test-results-by-module">Detailed Test Results by Module</h2>
+<h3 id="task-module-tests">Task Module Tests</h3>
+<p><strong>Module Statistics:</strong>
+- Tests: 81
+- Passed: 81
+- Failed: 0
+- Success Rate: 100.0%
+- Total Time: 0.810s</p>
+<p><strong>Detailed Test Results:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Test ID</th>
+<th>Test Name</th>
+<th>Outcome</th>
+<th>Execution Time</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>FreeRTOSTaskTest.StaticTaskAllocatorConstruction</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>2</td>
+<td>FreeRTOSTaskTest.StaticTaskAllocatorCreate</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>3</td>
+<td>FreeRTOSTaskTest.StaticTaskAllocatorCreateNullReturn</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>4</td>
+<td>FreeRTOSTaskTest.DynamicTaskAllocatorConstruction</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>5</td>
+<td>FreeRTOSTaskTest.DynamicTaskAllocatorCreateSuccess</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>6</td>
+<td>FreeRTOSTaskTest.DynamicTaskAllocatorCreateFailure</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>7</td>
+<td>FreeRTOSTaskTest.StaticTaskConstruction</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>8</td>
+<td>FreeRTOSTaskTest.StaticTaskConstructionWithString</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>9</td>
+<td>FreeRTOSTaskTest.StaticTaskDestruction</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>10</td>
+<td>FreeRTOSTaskTest.StaticTaskDestructionNullHandle</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>11</td>
+<td>FreeRTOSTaskTest.StaticTaskSuspendResume</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>12</td>
+<td>FreeRTOSTaskTest.StaticTaskTerminate</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>13</td>
+<td>FreeRTOSTaskTest.StaticTaskPriority</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>14</td>
+<td>FreeRTOSTaskTest.StaticTaskName</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>15</td>
+<td>FreeRTOSTaskTest.StaticTaskState</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>16</td>
+<td>FreeRTOSTaskTest.TaskApplicationTag</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>17</td>
+<td>FreeRTOSTaskTest.TaskStackWatermark</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>18</td>
+<td>FreeRTOSTaskTest.TaskTraceStatus</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>19</td>
+<td>FreeRTOSTaskTest.StaticTaskAbortDelay</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>20</td>
+<td>FreeRTOSTaskTest.StaticTaskAbortDelayNullHandle</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>21</td>
+<td>FreeRTOSTaskTest.TaskSuspendedOnStart</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>22</td>
+<td>FreeRTOSTaskTest.TaskNotSuspendedOnStart</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>23</td>
+<td>FreeRTOSTaskTest.DynamicTaskConstruction</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>24</td>
+<td>FreeRTOSTaskTest.DynamicTaskConstructionFailure</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>25</td>
+<td>FreeRTOSTaskTest.TaskNotifications</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>26</td>
+<td>FreeRTOSTaskTest.TaskNotificationsExtended</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>27</td>
+<td>FreeRTOSTaskTest.PeriodicTaskConstruction</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>28</td>
+<td>FreeRTOSTaskTest.PeriodicTaskWithString</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>29</td>
+<td>FreeRTOSTaskTest.PeriodicTaskZeroPeriod</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>30</td>
+<td>FreeRTOSTaskTest.PeriodicTaskNoPeriod</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>31</td>
+<td>FreeRTOSTaskTest.PeriodicTaskIsRunning</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>32</td>
+<td>FreeRTOSTaskTest.PeriodicTaskTerminate</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>33</td>
+<td>FreeRTOSTaskTest.PeriodicTaskDestructorAbortDelay</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>34</td>
+<td>FreeRTOSTaskTest.PeriodicTaskNotificationExtensions</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>35</td>
+<td>FreeRTOSTaskTest.DelayFunction</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>36</td>
+<td>FreeRTOSTaskTest.DelayUntilFunction</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>37</td>
+<td>FreeRTOSTaskTest.SleepForFunction</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>38</td>
+<td>FreeRTOSTaskTest.CurrentTaskHandle</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>39</td>
+<td>FreeRTOSTaskTest.IdleTaskHandle</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>40</td>
+<td>FreeRTOSTaskTest.TickCount</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>41</td>
+<td>FreeRTOSTaskTest.TaskCount</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>42</td>
+<td>FreeRTOSTaskTest.SchedulerState</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>43</td>
+<td>FreeRTOSTaskTest.TimeSinceSchedulerStarted</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>44</td>
+<td>FreeRTOSTaskTest.CriticalSection</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>45</td>
+<td>FreeRTOSTaskTest.CriticalSectionISR</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>46</td>
+<td>FreeRTOSTaskTest.InterruptBarrier</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>47</td>
+<td>FreeRTOSTaskTest.SchedulerBarrier</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>48</td>
+<td>FreeRTOSTaskTest.StackAllocationLimitation</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>49</td>
+<td>FreeRTOSTaskTest.InvalidParameters</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>50</td>
+<td>FreeRTOSTaskTest.ZeroStackSize</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>51</td>
+<td>FreeRTOSTaskTest.VeryHighPriority</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>52</td>
+<td>FreeRTOSTaskTest.TaskSystemStatus</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>53</td>
+<td>FreeRTOSTaskTest.TaskChronoCompatibility</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>54</td>
+<td>FreeRTOSTaskTest.DelayUntilTimePoint</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>55</td>
+<td>FreeRTOSTaskTest.TaskMoveConstruction</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>56</td>
+<td>FreeRTOSTaskTest.PeriodicTaskMoveConstruction</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>57</td>
+<td>FreeRTOSTaskTest.TaskExecutionDirectCall</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>58</td>
+<td>FreeRTOSTaskTest.PeriodicTaskTypo</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>59</td>
+<td>FreeRTOSTaskTest.TaskTemplateInstantiation</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>60</td>
+<td>FreeRTOSTaskTest.DynamicTaskDifferentSizes</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>61</td>
+<td>FreeRTOSTaskTest.TaskNotificationEdgeCases</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>62</td>
+<td>FreeRTOSTaskTest.TaskSystemStatusTemplate</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>63</td>
+<td>FreeRTOSTaskTest.DelayFunctionsWithDifferentDurations</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>64</td>
+<td>FreeRTOSTaskTest.DelayUntilWithPeriodReference</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>65</td>
+<td>FreeRTOSTaskTest.RacingConditionTaskConstructorInitialization</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>66</td>
+<td>FreeRTOSTaskTest.ConcurrentTaskCreationAndDestruction</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>67</td>
+<td>FreeRTOSTaskTest.MoveSemanticsRacingConditions</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>68</td>
+<td>FreeRTOSTaskTest.PeriodicTaskLifecycleRacingConditions</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>69</td>
+<td>FreeRTOSTaskTest.NotificationRacingConditions</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>70</td>
+<td>FreeRTOSTaskTest.ComplexMultitaskingScenario</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>71</td>
+<td>FreeRTOSTaskTest.TaskSystemStatusUnderLoad</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>72</td>
+<td>FreeRTOSTaskTest.ConstructorInitializationOrderRaceCondition</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>73</td>
+<td>FreeRTOSTaskTest.TaskExecutionInternalFunction</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>74</td>
+<td>FreeRTOSTaskTest.PeriodicTaskRunMethodExecution</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>75</td>
+<td>FreeRTOSTaskTest.YieldFunctionExecution</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>76</td>
+<td>FreeRTOSTaskTest.CriticalSectionAndBarrierUtilities</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>77</td>
+<td>FreeRTOSTaskTest.TaskSystemStatusCoverage</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>78</td>
+<td>FreeRTOSTaskTest.AdvancedRacingConditionScenarios</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>79</td>
+<td>FreeRTOSTaskTest.EdgeCaseErrorHandling</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>80</td>
+<td>FreeRTOSTaskTest.AdvancedChronoCompatibility</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>81</td>
+<td>FreeRTOSTaskTest.PriorityInheritanceScenario</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+</tbody>
+</table>
+<h3 id="semaphore-module-tests">Semaphore Module Tests</h3>
+<p><strong>Module Statistics:</strong>
+- Tests: 96
+- Passed: 96
+- Failed: 0
+- Success Rate: 100.0%
+- Total Time: 2.060s</p>
+<p><strong>Detailed Test Results:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Test ID</th>
+<th>Test Name</th>
+<th>Outcome</th>
+<th>Execution Time</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>82</td>
+<td>FreeRTOSSemaphoreTest.StaticSemaphoreAllocatorConstruction</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>83</td>
+<td>FreeRTOSSemaphoreTest.StaticSemaphoreAllocatorCreateBinary</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>84</td>
+<td>FreeRTOSSemaphoreTest.StaticSemaphoreAllocatorCreateCounting</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>85</td>
+<td>FreeRTOSSemaphoreTest.StaticSemaphoreAllocatorCreateMutex</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>86</td>
+<td>FreeRTOSSemaphoreTest.StaticSemaphoreAllocatorCreateRecursiveMutex</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>87</td>
+<td>FreeRTOSSemaphoreTest.DynamicSemaphoreAllocatorConstruction</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>88</td>
+<td>FreeRTOSSemaphoreTest.DynamicSemaphoreAllocatorCreateBinary</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>89</td>
+<td>FreeRTOSSemaphoreTest.DynamicSemaphoreAllocatorCreateCounting</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>90</td>
+<td>FreeRTOSSemaphoreTest.DynamicSemaphoreAllocatorCreateMutex</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>91</td>
+<td>FreeRTOSSemaphoreTest.DynamicSemaphoreAllocatorCreateRecursiveMutex</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>92</td>
+<td>FreeRTOSSemaphoreTest.BinarySemaphoreConstruction</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>93</td>
+<td>FreeRTOSSemaphoreTest.BinarySemaphoreDestruction</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>94</td>
+<td>FreeRTOSSemaphoreTest.BinarySemaphoreDestructionNullHandle</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>95</td>
+<td>FreeRTOSSemaphoreTest.BinarySemaphoreGive</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>96</td>
+<td>FreeRTOSSemaphoreTest.BinarySemaphoreTake</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>97</td>
+<td>FreeRTOSSemaphoreTest.BinarySemaphoreTakeWithTimeout</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>98</td>
+<td>FreeRTOSSemaphoreTest.BinarySemaphoreISROperations</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>99</td>
+<td>FreeRTOSSemaphoreTest.BinarySemaphoreChronoTimeout</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>100</td>
+<td>FreeRTOSSemaphoreTest.CountingSemaphoreConstruction</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>101</td>
+<td>FreeRTOSSemaphoreTest.CountingSemaphoreDefaultConstruction</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>102</td>
+<td>FreeRTOSSemaphoreTest.CountingSemaphoreOperators</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>103</td>
+<td>FreeRTOSSemaphoreTest.CountingSemaphoreGetCount</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>104</td>
+<td>FreeRTOSSemaphoreTest.MutexConstruction</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>105</td>
+<td>FreeRTOSSemaphoreTest.MutexLockUnlock</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>106</td>
+<td>FreeRTOSSemaphoreTest.MutexTryLock</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>107</td>
+<td>FreeRTOSSemaphoreTest.MutexLockWithTimeout</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>108</td>
+<td>FreeRTOSSemaphoreTest.MutexISROperations</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>109</td>
+<td>FreeRTOSSemaphoreTest.RecursiveMutexConstruction</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>110</td>
+<td>FreeRTOSSemaphoreTest.RecursiveMutexLockUnlock</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>111</td>
+<td>FreeRTOSSemaphoreTest.RecursiveMutexTryLock</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>112</td>
+<td>FreeRTOSSemaphoreTest.RecursiveMutexNestedLocks</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>113</td>
+<td>FreeRTOSSemaphoreTest.RecursiveMutexNestedFunction</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>114</td>
+<td>FreeRTOSSemaphoreTest.RecursiveMutexLockGuardRAII</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>115</td>
+<td>FreeRTOSSemaphoreTest.RecursiveMutexNestedLockGuards</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>116</td>
+<td>FreeRTOSSemaphoreTest.RecursiveMutexTryLockGuardRAII</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>117</td>
+<td>FreeRTOSSemaphoreTest.RecursiveMutexTryLockGuardFailure</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>118</td>
+<td>FreeRTOSSemaphoreTest.RecursiveMutexNestedTryLockGuards</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>119</td>
+<td>FreeRTOSSemaphoreTest.RecursiveMutexLockGuardISRRAII</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>120</td>
+<td>FreeRTOSSemaphoreTest.RecursiveMutexNestedLockGuardISR</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>121</td>
+<td>FreeRTOSSemaphoreTest.RecursiveMutexTimeoutLockGuardRAII</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>122</td>
+<td>FreeRTOSSemaphoreTest.RecursiveMutexTimeoutLockGuardChrono</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>123</td>
+<td>FreeRTOSSemaphoreTest.RecursiveMutexNestedTimeoutLockGuards</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>124</td>
+<td>FreeRTOSSemaphoreTest.RecursiveMutexMixedLockGuardTypes</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>125</td>
+<td>FreeRTOSSemaphoreTest.RecursiveMutexTimeoutLockGuardFailure</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>126</td>
+<td>FreeRTOSSemaphoreTest.RecursiveMutexTryLockGuardAcquiredStateTrackingFailure</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>127</td>
+<td>FreeRTOSSemaphoreTest.LockGuardRAII</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>128</td>
+<td>FreeRTOSSemaphoreTest.TryLockGuardRAII</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>129</td>
+<td>FreeRTOSSemaphoreTest.TryLockGuardFailure</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>130</td>
+<td>FreeRTOSSemaphoreTest.LockGuardISRRAII</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>131</td>
+<td>FreeRTOSSemaphoreTest.TimeoutLockGuardRAII</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>132</td>
+<td>FreeRTOSSemaphoreTest.TimeoutLockGuardChronoRAII</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>133</td>
+<td>FreeRTOSSemaphoreTest.TimeoutLockGuardFailure</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>134</td>
+<td>FreeRTOSSemaphoreTest.TryLockGuardAcquiredStateTrackingSuccess</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>135</td>
+<td>FreeRTOSSemaphoreTest.TryLockGuardAcquiredStateTrackingFailure</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>136</td>
+<td>FreeRTOSSemaphoreTest.TimeoutLockGuardAcquiredStateTrackingSuccess</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>137</td>
+<td>FreeRTOSSemaphoreTest.TimeoutLockGuardAcquiredStateTrackingFailure</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>138</td>
+<td>FreeRTOSSemaphoreTest.LockGuardStateTrackingRaceConditionProtection</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>139</td>
+<td>FreeRTOSSemaphoreTest.RecursiveMutexLockGuardAcquiredStateTracking</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>140</td>
+<td>FreeRTOSSemaphoreTest.SemaphoreCreationFailure</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>141</td>
+<td>FreeRTOSSemaphoreTest.StaticAllocationLimitation</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>142</td>
+<td>FreeRTOSSemaphoreTest.MutexLockFailure</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>143</td>
+<td>FreeRTOSSemaphoreTest.LargeCountingSemaphore</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>144</td>
+<td>FreeRTOSSemaphoreTest.ZeroCountingSemaphore</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>145</td>
+<td>FreeRTOSSemaphoreTest.StaticVsDynamicBehavior</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>146</td>
+<td>FreeRTOSSemaphoreTest.StaticAliasNamespace</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>147</td>
+<td>FreeRTOSSemaphoreTest.DynamicAliasNamespace</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>148</td>
+<td>FreeRTOSSemaphoreTest.NamespaceAliasCountingSemaphore</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>149</td>
+<td>FreeRTOSSemaphoreTest.NamespaceAliasMutex</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>150</td>
+<td>FreeRTOSSemaphoreTest.NamespaceAliasRecursiveMutex</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>151</td>
+<td>FreeRTOSSemaphoreTest.RecursiveMutexRecursionsCountBasic</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>152</td>
+<td>FreeRTOSSemaphoreTest.RecursiveMutexRecursionsCountTryLock</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>153</td>
+<td>FreeRTOSSemaphoreTest.RecursiveMutexRecursionsCountISR</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>154</td>
+<td>FreeRTOSSemaphoreTest.RecursiveMutexRecursionsCountFailureScenarios</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>155</td>
+<td>FreeRTOSSemaphoreTest.RecursiveMutexRecursionsCountEdgeCases</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>156</td>
+<td>FreeRTOSSemaphoreTest.CountingSemaphoreMultipleOperators</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>157</td>
+<td>FreeRTOSSemaphoreTest.MutexUnlockWithoutLock</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>158</td>
+<td>FreeRTOSSemaphoreTest.BinarySemaphoreMultipleGive</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>159</td>
+<td>FreeRTOSSemaphoreTest.BinarySemaphoreTakeUntaken</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>160</td>
+<td>FreeRTOSSemaphoreTest.CountingSemaphoreEdgeCounts</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>161</td>
+<td>FreeRTOSSemaphoreTest.ChronoTimeoutCompatibility</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>162</td>
+<td>FreeRTOSSemaphoreTest.SemaphoreAPICompleteness</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>383</td>
+<td>STLSemaphoreTest.STLBinarySemaphoreBasicOperations</td>
+<td>✅ PASS</td>
+<td>0.000s</td>
+</tr>
+<tr>
+<td>384</td>
+<td>STLSemaphoreTest.STLBinarySemaphoreTimeout</td>
+<td>✅ PASS</td>
+<td>0.100s</td>
+</tr>
+<tr>
+<td>385</td>
+<td>STLSemaphoreTest.STLBinarySemaphoreProducerConsumer</td>
+<td>✅ PASS</td>
+<td>0.050s</td>
+</tr>
+<tr>
+<td>386</td>
+<td>STLSemaphoreTest.STLBinarySemaphoreMultipleProducers</td>
+<td>✅ PASS</td>
+<td>0.040s</td>
+</tr>
+<tr>
+<td>387</td>
+<td>STLSemaphoreTest.STLCountingSemaphoreBasicOperations</td>
+<td>✅ PASS</td>
+<td>0.000s</td>
+</tr>
+<tr>
+<td>388</td>
+<td>STLSemaphoreTest.STLCountingSemaphoreMaxLimit</td>
+<td>✅ PASS</td>
+<td>0.000s</td>
+</tr>
+<tr>
+<td>389</td>
+<td>STLSemaphoreTest.STLCountingSemaphoreResourcePool</td>
+<td>✅ PASS</td>
+<td>0.100s</td>
+</tr>
+<tr>
+<td>390</td>
+<td>STLSemaphoreTest.STLMutexBasicOperations</td>
+<td>✅ PASS</td>
+<td>0.000s</td>
+</tr>
+<tr>
+<td>391</td>
+<td>STLSemaphoreTest.STLMutexCriticalSection</td>
+<td>✅ PASS</td>
+<td>0.030s</td>
+</tr>
+<tr>
+<td>392</td>
+<td>STLSemaphoreTest.STLRecursiveMutexBasicOperations</td>
+<td>✅ PASS</td>
+<td>0.000s</td>
+</tr>
+<tr>
+<td>393</td>
+<td>STLSemaphoreTest.STLRecursiveMutexNestedLocking</td>
+<td>✅ PASS</td>
+<td>0.000s</td>
+</tr>
+<tr>
+<td>394</td>
+<td>STLSemaphoreTest.STLProducerConsumerWithBuffering</td>
+<td>✅ PASS</td>
+<td>0.100s</td>
+</tr>
+<tr>
+<td>395</td>
+<td>STLSemaphoreTest.STLReaderWriterPattern</td>
+<td>✅ PASS</td>
+<td>0.400s</td>
+</tr>
+<tr>
+<td>396</td>
+<td>STLSemaphoreTest.STLSemaphoreStressTest</td>
+<td>✅ PASS</td>
+<td>0.080s</td>
+</tr>
+<tr>
+<td>397</td>
+<td>STLSemaphoreTest.STLTimeoutAccuracy</td>
+<td>✅ PASS</td>
+<td>0.350s</td>
+</tr>
+</tbody>
+</table>
+<h3 id="queue-module-tests">Queue Module Tests</h3>
+<p><strong>Module Statistics:</strong>
+- Tests: 49
+- Passed: 49
+- Failed: 0
+- Success Rate: 100.0%
+- Total Time: 0.490s</p>
+<p><strong>Detailed Test Results:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Test ID</th>
+<th>Test Name</th>
+<th>Outcome</th>
+<th>Execution Time</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>163</td>
+<td>FreeRTOSQueueTest.StaticQueueAllocatorConstruction</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>164</td>
+<td>FreeRTOSQueueTest.StaticQueueAllocatorCreate</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>165</td>
+<td>FreeRTOSQueueTest.StaticQueueAllocatorDifferentTypes</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>166</td>
+<td>FreeRTOSQueueTest.DynamicQueueAllocatorConstruction</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>167</td>
+<td>FreeRTOSQueueTest.DynamicQueueAllocatorCreate</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>168</td>
+<td>FreeRTOSQueueTest.QueueConstructionWithoutRegistry</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>169</td>
+<td>FreeRTOSQueueTest.QueueConstructionWithRegistry</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>170</td>
+<td>FreeRTOSQueueTest.QueueDestructionNullHandle</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>171</td>
+<td>FreeRTOSQueueTest.QueueSendBasic</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>172</td>
+<td>FreeRTOSQueueTest.QueueSendBack</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>173</td>
+<td>FreeRTOSQueueTest.QueueSendFront</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>174</td>
+<td>FreeRTOSQueueTest.QueueSendTimeout</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>175</td>
+<td>FreeRTOSQueueTest.QueueSendISR</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>176</td>
+<td>FreeRTOSQueueTest.QueueSendChronoTimeout</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>177</td>
+<td>FreeRTOSQueueTest.QueueReceiveReference</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>178</td>
+<td>FreeRTOSQueueTest.QueueReceiveOptional</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>179</td>
+<td>FreeRTOSQueueTest.QueueReceiveOptionalEmpty</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>180</td>
+<td>FreeRTOSQueueTest.QueueReceiveISR</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>181</td>
+<td>FreeRTOSQueueTest.QueueReceiveChronoTimeout</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>182</td>
+<td>FreeRTOSQueueTest.QueuePeekReference</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>183</td>
+<td>FreeRTOSQueueTest.QueuePeekOptional</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>184</td>
+<td>FreeRTOSQueueTest.QueuePeekISR</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>185</td>
+<td>FreeRTOSQueueTest.QueueMessagesWaiting</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>186</td>
+<td>FreeRTOSQueueTest.QueueSpacesAvailable</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>187</td>
+<td>FreeRTOSQueueTest.QueueIsEmpty</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>188</td>
+<td>FreeRTOSQueueTest.QueueIsFull</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>189</td>
+<td>FreeRTOSQueueTest.QueueGetName</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>190</td>
+<td>FreeRTOSQueueTest.QueueReset</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>191</td>
+<td>FreeRTOSQueueTest.QueueOverwrite</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>192</td>
+<td>FreeRTOSQueueTest.QueueOverwriteISR</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>193</td>
+<td>FreeRTOSQueueTest.StaticQueueAliasUsage</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>194</td>
+<td>FreeRTOSQueueTest.DynamicQueueAliasUsage</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>195</td>
+<td>FreeRTOSQueueTest.QueueCreationFailure</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>196</td>
+<td>FreeRTOSQueueTest.LargeQueueSize</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>197</td>
+<td>FreeRTOSQueueTest.ZeroSizeQueue</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>198</td>
+<td>FreeRTOSQueueTest.ComplexDataTypeQueue</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>199</td>
+<td>FreeRTOSQueueTest.QueueAPICompleteness</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>200</td>
+<td>FreeRTOSQueueTest.QueueWithVariousDataTypes</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>201</td>
+<td>FreeRTOSQueueTest.QueueWithEnumTypes</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>202</td>
+<td>FreeRTOSQueueTest.QueueWithPointerTypes</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>203</td>
+<td>FreeRTOSQueueTest.QueueChronoMicrosecondsTimeout</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>204</td>
+<td>FreeRTOSQueueTest.QueueChronoMinutesTimeout</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>205</td>
+<td>FreeRTOSQueueTest.QueueChronoNanosecondsTimeout</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>206</td>
+<td>FreeRTOSQueueTest.QueueChronoOptionalReceiveVariousDurations</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>207</td>
+<td>FreeRTOSQueueTest.StaticQueueAllocatorWithVariousTypes</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>208</td>
+<td>FreeRTOSQueueTest.QueueISROperationsWithDifferentTypes</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>209</td>
+<td>FreeRTOSQueueTest.QueueSendBackISROperations</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>210</td>
+<td>FreeRTOSQueueTest.QueueSendFrontISROperations</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>211</td>
+<td>FreeRTOSQueueTest.QueueMessagesWaitingISR</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+</tbody>
+</table>
+<h3 id="eventgroup-module-tests">EventGroup Module Tests</h3>
+<p><strong>Module Statistics:</strong>
+- Tests: 30
+- Passed: 30
+- Failed: 0
+- Success Rate: 100.0%
+- Total Time: 0.300s</p>
+<p><strong>Detailed Test Results:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Test ID</th>
+<th>Test Name</th>
+<th>Outcome</th>
+<th>Execution Time</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>212</td>
+<td>FreeRTOSEventGroupTest.StaticEventGroupAllocatorConstruction</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>213</td>
+<td>FreeRTOSEventGroupTest.StaticEventGroupAllocatorCreate</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>214</td>
+<td>FreeRTOSEventGroupTest.StaticEventGroupAllocatorCreateFailure</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>215</td>
+<td>FreeRTOSEventGroupTest.DynamicEventGroupAllocatorConstruction</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>216</td>
+<td>FreeRTOSEventGroupTest.DynamicEventGroupAllocatorCreate</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>217</td>
+<td>FreeRTOSEventGroupTest.DynamicEventGroupAllocatorCreateFailure</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>218</td>
+<td>FreeRTOSEventGroupTest.EventGroupConstruction</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>219</td>
+<td>FreeRTOSEventGroupTest.EventGroupDestructionNullHandle</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>220</td>
+<td>FreeRTOSEventGroupTest.StaticEventGroupConstruction</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>221</td>
+<td>FreeRTOSEventGroupTest.EventGroupSetBits</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>222</td>
+<td>FreeRTOSEventGroupTest.EventGroupSetBitsISR</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>223</td>
+<td>FreeRTOSEventGroupTest.EventGroupClearBits</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>224</td>
+<td>FreeRTOSEventGroupTest.EventGroupGetBits</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>225</td>
+<td>FreeRTOSEventGroupTest.EventGroupGetBitsISR</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>226</td>
+<td>FreeRTOSEventGroupTest.EventGroupWaitBitsAnyBits</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>227</td>
+<td>FreeRTOSEventGroupTest.EventGroupWaitBitsAllBits</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>228</td>
+<td>FreeRTOSEventGroupTest.EventGroupWaitBitsTimeout</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>229</td>
+<td>FreeRTOSEventGroupTest.EventGroupWaitBitsChronoTimeout</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>230</td>
+<td>FreeRTOSEventGroupTest.EventGroupSync</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>231</td>
+<td>FreeRTOSEventGroupTest.EventGroupSyncChronoTimeout</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>232</td>
+<td>FreeRTOSEventGroupTest.EventGroupSyncTimeout</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>233</td>
+<td>FreeRTOSEventGroupTest.EventGroupChronoMicrosecondsTimeout</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>234</td>
+<td>FreeRTOSEventGroupTest.EventGroupChronoNanosecondsTimeout</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>235</td>
+<td>FreeRTOSEventGroupTest.EventGroupChronoMinutesTimeout</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>236</td>
+<td>FreeRTOSEventGroupTest.EventGroupComplexScenario</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>237</td>
+<td>FreeRTOSEventGroupTest.EventGroupCreationFailure</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>238</td>
+<td>FreeRTOSEventGroupTest.EventGroupAllBitsPattern</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>239</td>
+<td>FreeRTOSEventGroupTest.EventGroupZeroBitsPattern</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>240</td>
+<td>FreeRTOSEventGroupTest.StaticVsDynamicBehavior</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>241</td>
+<td>FreeRTOSEventGroupTest.EventGroupAPICompleteness</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+</tbody>
+</table>
+<h3 id="streambuffer-module-tests">StreamBuffer Module Tests</h3>
+<p><strong>Module Statistics:</strong>
+- Tests: 47
+- Passed: 47
+- Failed: 0
+- Success Rate: 100.0%
+- Total Time: 0.470s</p>
+<p><strong>Detailed Test Results:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Test ID</th>
+<th>Test Name</th>
+<th>Outcome</th>
+<th>Execution Time</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>242</td>
+<td>FreeRTOSStreamBufferTest.StaticStreamBufferAllocatorConstruction</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>243</td>
+<td>FreeRTOSStreamBufferTest.StaticStreamBufferAllocatorCreate</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>244</td>
+<td>FreeRTOSStreamBufferTest.StaticStreamBufferAllocatorCreateWithTriggerLevel</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>245</td>
+<td>FreeRTOSStreamBufferTest.StaticStreamBufferAllocatorCreateFailure</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>246</td>
+<td>FreeRTOSStreamBufferTest.DynamicStreamBufferAllocatorConstruction</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>247</td>
+<td>FreeRTOSStreamBufferTest.DynamicStreamBufferAllocatorCreate</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>248</td>
+<td>FreeRTOSStreamBufferTest.DynamicStreamBufferAllocatorCreateWithTriggerLevel</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>249</td>
+<td>FreeRTOSStreamBufferTest.DynamicStreamBufferAllocatorCreateFailure</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>250</td>
+<td>FreeRTOSStreamBufferTest.StaticStreamBufferConstruction</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>251</td>
+<td>FreeRTOSStreamBufferTest.DynamicStreamBufferConstruction</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>252</td>
+<td>FreeRTOSStreamBufferTest.StreamBufferConstructionWithTriggerLevel</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>253</td>
+<td>FreeRTOSStreamBufferTest.StreamBufferDestructionNullHandle</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>254</td>
+<td>FreeRTOSStreamBufferTest.StreamBufferSendBasic</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>255</td>
+<td>FreeRTOSStreamBufferTest.StreamBufferSendWithTimeout</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>256</td>
+<td>FreeRTOSStreamBufferTest.StreamBufferSendChronoTimeout</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>257</td>
+<td>FreeRTOSStreamBufferTest.StreamBufferSendIterators</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>258</td>
+<td>FreeRTOSStreamBufferTest.StreamBufferSendIteratorsWithTimeout</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>259</td>
+<td>FreeRTOSStreamBufferTest.StreamBufferSendPartial</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>260</td>
+<td>FreeRTOSStreamBufferTest.StreamBufferSendISR</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>261</td>
+<td>FreeRTOSStreamBufferTest.StreamBufferSendISRWithoutWoken</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>262</td>
+<td>FreeRTOSStreamBufferTest.StreamBufferSendISRIterators</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>263</td>
+<td>FreeRTOSStreamBufferTest.StreamBufferReceiveBasic</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>264</td>
+<td>FreeRTOSStreamBufferTest.StreamBufferReceiveWithTimeout</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>265</td>
+<td>FreeRTOSStreamBufferTest.StreamBufferReceiveChronoTimeout</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>266</td>
+<td>FreeRTOSStreamBufferTest.StreamBufferReceiveTimeout</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>267</td>
+<td>FreeRTOSStreamBufferTest.StreamBufferReceiveISR</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>268</td>
+<td>FreeRTOSStreamBufferTest.StreamBufferReceiveISRWithoutWoken</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>269</td>
+<td>FreeRTOSStreamBufferTest.StreamBufferBytesAvailable</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>270</td>
+<td>FreeRTOSStreamBufferTest.StreamBufferSpacesAvailable</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>271</td>
+<td>FreeRTOSStreamBufferTest.StreamBufferIsEmpty</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>272</td>
+<td>FreeRTOSStreamBufferTest.StreamBufferIsNotEmpty</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>273</td>
+<td>FreeRTOSStreamBufferTest.StreamBufferIsFull</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>274</td>
+<td>FreeRTOSStreamBufferTest.StreamBufferIsNotFull</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>275</td>
+<td>FreeRTOSStreamBufferTest.StreamBufferReset</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>276</td>
+<td>FreeRTOSStreamBufferTest.StreamBufferResetFailure</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>277</td>
+<td>FreeRTOSStreamBufferTest.StreamBufferSetTriggerLevel</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>278</td>
+<td>FreeRTOSStreamBufferTest.StreamBufferSetTriggerLevelFailure</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>279</td>
+<td>FreeRTOSStreamBufferTest.StreamBufferGetHandle</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>280</td>
+<td>FreeRTOSStreamBufferTest.StreamBufferCreationFailure</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>281</td>
+<td>FreeRTOSStreamBufferTest.StreamBufferSendZeroBytes</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>282</td>
+<td>FreeRTOSStreamBufferTest.StreamBufferReceiveZeroBytes</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>283</td>
+<td>FreeRTOSStreamBufferTest.StreamBufferComplexScenario</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>284</td>
+<td>FreeRTOSStreamBufferTest.StaticVsDynamicBehavior</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>285</td>
+<td>FreeRTOSStreamBufferTest.StreamBufferChronoMicrosecondsTimeout</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>286</td>
+<td>FreeRTOSStreamBufferTest.StreamBufferChronoNanosecondsTimeout</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>287</td>
+<td>FreeRTOSStreamBufferTest.StreamBufferChronoSecondsTimeout</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>288</td>
+<td>FreeRTOSStreamBufferTest.StreamBufferAPICompleteness</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+</tbody>
+</table>
+<h3 id="messagebuffer-module-tests">MessageBuffer Module Tests</h3>
+<p><strong>Module Statistics:</strong>
+- Tests: 32
+- Passed: 32
+- Failed: 0
+- Success Rate: 100.0%
+- Total Time: 0.320s</p>
+<p><strong>Detailed Test Results:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Test ID</th>
+<th>Test Name</th>
+<th>Outcome</th>
+<th>Execution Time</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>289</td>
+<td>FreeRTOSMessageBufferTest.StaticMessageBufferAllocatorConstruction</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>290</td>
+<td>FreeRTOSMessageBufferTest.StaticMessageBufferAllocatorCreate</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>291</td>
+<td>FreeRTOSMessageBufferTest.StaticMessageBufferAllocatorCreateFailure</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>292</td>
+<td>FreeRTOSMessageBufferTest.DynamicMessageBufferAllocatorConstruction</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>293</td>
+<td>FreeRTOSMessageBufferTest.DynamicMessageBufferAllocatorCreateSuccess</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>294</td>
+<td>FreeRTOSMessageBufferTest.DynamicMessageBufferAllocatorCreateFailure</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>295</td>
+<td>FreeRTOSMessageBufferTest.StaticMessageBufferConstruction</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>296</td>
+<td>FreeRTOSMessageBufferTest.StaticMessageBufferDestruction</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>297</td>
+<td>FreeRTOSMessageBufferTest.StaticMessageBufferDestructionNullHandle</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>298</td>
+<td>FreeRTOSMessageBufferTest.DynamicMessageBufferConstruction</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>299</td>
+<td>FreeRTOSMessageBufferTest.DynamicMessageBufferConstructionFailure</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>300</td>
+<td>FreeRTOSMessageBufferTest.MessageBufferSendSuccess</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>301</td>
+<td>FreeRTOSMessageBufferTest.MessageBufferSendTimeout</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>302</td>
+<td>FreeRTOSMessageBufferTest.MessageBufferSendWithChrono</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>303</td>
+<td>FreeRTOSMessageBufferTest.MessageBufferSendZeroLengthMessage</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>304</td>
+<td>FreeRTOSMessageBufferTest.MessageBufferSendMaxSizeMessage</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>305</td>
+<td>FreeRTOSMessageBufferTest.MessageBufferReceiveSuccess</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>306</td>
+<td>FreeRTOSMessageBufferTest.MessageBufferReceiveTimeout</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>307</td>
+<td>FreeRTOSMessageBufferTest.MessageBufferReceiveWithChrono</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>308</td>
+<td>FreeRTOSMessageBufferTest.MessageBufferReceiveBufferTooSmall</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>309</td>
+<td>FreeRTOSMessageBufferTest.MessageBufferAvailableSpace</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>310</td>
+<td>FreeRTOSMessageBufferTest.MessageBufferIsEmpty</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>311</td>
+<td>FreeRTOSMessageBufferTest.MessageBufferIsFull</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>312</td>
+<td>FreeRTOSMessageBufferTest.MessageBufferReset</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>313</td>
+<td>FreeRTOSMessageBufferTest.MessageBufferCreationFailure</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>314</td>
+<td>FreeRTOSMessageBufferTest.MessageBufferZeroSizeBuffer</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>315</td>
+<td>FreeRTOSMessageBufferTest.MessageBufferVeryLargeBuffer</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>316</td>
+<td>FreeRTOSMessageBufferTest.MessageBufferChronoMicrosecondsTimeout</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>317</td>
+<td>FreeRTOSMessageBufferTest.MessageBufferChronoSecondsTimeout</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>318</td>
+<td>FreeRTOSMessageBufferTest.StaticVsDynamicBehaviorComparison</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>319</td>
+<td>FreeRTOSMessageBufferTest.MessageBufferComplexSendReceiveScenario</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>320</td>
+<td>FreeRTOSMessageBufferTest.MessageBufferAPICompleteness</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+</tbody>
+</table>
+<h3 id="timer-module-tests">Timer Module Tests</h3>
+<p><strong>Module Statistics:</strong>
+- Tests: 50
+- Passed: 50
+- Failed: 0
+- Success Rate: 100.0%
+- Total Time: 0.500s</p>
+<p><strong>Detailed Test Results:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Test ID</th>
+<th>Test Name</th>
+<th>Outcome</th>
+<th>Execution Time</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>321</td>
+<td>FreeRTOSSwTimerTest.StaticTimerAllocatorConstruction</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>322</td>
+<td>FreeRTOSSwTimerTest.StaticTimerAllocatorCreate</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>323</td>
+<td>FreeRTOSSwTimerTest.StaticTimerAllocatorCreateNullReturn</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>324</td>
+<td>FreeRTOSSwTimerTest.DynamicTimerAllocatorConstruction</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>325</td>
+<td>FreeRTOSSwTimerTest.DynamicTimerAllocatorCreate</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>326</td>
+<td>FreeRTOSSwTimerTest.DynamicTimerAllocatorCreateNullReturn</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>327</td>
+<td>FreeRTOSSwTimerTest.StaticTimerConstruction</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>328</td>
+<td>FreeRTOSSwTimerTest.StaticTimerConstructionWithChrono</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>329</td>
+<td>FreeRTOSSwTimerTest.StaticTimerDestruction</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>330</td>
+<td>FreeRTOSSwTimerTest.StaticTimerDestructionNullHandle</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>331</td>
+<td>FreeRTOSSwTimerTest.StaticTimerStart</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>332</td>
+<td>FreeRTOSSwTimerTest.StaticTimerStartWithTimeout</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>333</td>
+<td>FreeRTOSSwTimerTest.StaticTimerStartWithChrono</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>334</td>
+<td>FreeRTOSSwTimerTest.StaticTimerStop</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>335</td>
+<td>FreeRTOSSwTimerTest.StaticTimerReset</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>336</td>
+<td>FreeRTOSSwTimerTest.StaticTimerPeriodChange</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>337</td>
+<td>FreeRTOSSwTimerTest.StaticTimerIsRunning</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>338</td>
+<td>FreeRTOSSwTimerTest.StaticTimerGetPeriod</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>339</td>
+<td>FreeRTOSSwTimerTest.StaticTimerGetName</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>340</td>
+<td>FreeRTOSSwTimerTest.StaticTimerReloadMode</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>341</td>
+<td>FreeRTOSSwTimerTest.DynamicTimerConstruction</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>342</td>
+<td>FreeRTOSSwTimerTest.DynamicTimerConstructionFailure</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>343</td>
+<td>FreeRTOSSwTimerTest.StaticTimerStartFromISR</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>344</td>
+<td>FreeRTOSSwTimerTest.StaticTimerStartFromISRNoParam</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>345</td>
+<td>FreeRTOSSwTimerTest.StaticTimerStopFromISR</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>346</td>
+<td>FreeRTOSSwTimerTest.StaticTimerResetFromISR</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>347</td>
+<td>FreeRTOSSwTimerTest.StaticTimerPeriodFromISR</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>348</td>
+<td>FreeRTOSSwTimerTest.StaticTimerRemainingTime</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>349</td>
+<td>FreeRTOSSwTimerTest.StaticTimerRemainingTimeNullHandle</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>350</td>
+<td>FreeRTOSSwTimerTest.TimerOperationsWithNullHandle</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>351</td>
+<td>FreeRTOSSwTimerTest.TimerFailureConditions</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>352</td>
+<td>FreeRTOSSwTimerTest.TimerMoveConstructionIssueScenario</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>353</td>
+<td>FreeRTOSSwTimerTest.TimerMoveConstruction</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>354</td>
+<td>FreeRTOSSwTimerTest.MovedFromTimerIsInvalidated</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>355</td>
+<td>FreeRTOSSwTimerTest.TimerMoveAssignment</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>356</td>
+<td>FreeRTOSSwTimerTest.ChronoCompatibility</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>357</td>
+<td>FreeRTOSSwTimerTest.PeriodChangeWithMixedDurationTypes</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>358</td>
+<td>FreeRTOSSwTimerTest.PeriodChangeWithVariousDurationCombinations</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>359</td>
+<td>FreeRTOSSwTimerTest.PeriodChangeWithMicrosecondPrecision</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>360</td>
+<td>FreeRTOSSwTimerTest.PeriodChangeWithMinutePrecision</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>361</td>
+<td>FreeRTOSSwTimerTest.PeriodChangeWithFloatingPointDurations</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>362</td>
+<td>FreeRTOSSwTimerTest.PeriodChangeEdgeCaseDurations</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>363</td>
+<td>FreeRTOSSwTimerTest.ConstructorWithVariousDurationTypes</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>364</td>
+<td>FreeRTOSSwTimerTest.StartStopResetWithMixedDurationTypes</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>365</td>
+<td>FreeRTOSSwTimerTest.ISRFunctionsWithMixedDurationTypes</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>366</td>
+<td>FreeRTOSSwTimerTest.SingleShotTimerBehavior</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>367</td>
+<td>FreeRTOSSwTimerTest.AutoReloadTimerBehavior</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>368</td>
+<td>FreeRTOSSwTimerTest.CallbackFunctionality</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>369</td>
+<td>FreeRTOSSwTimerTest.DestructorComplexScenarios</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+<tr>
+<td>370</td>
+<td>FreeRTOSSwTimerTest.DestructorWithActiveTimer</td>
+<td>✅ PASS</td>
+<td>0.010s</td>
+</tr>
+</tbody>
+</table>
+<h3 id="enhanced-module-tests">Enhanced Module Tests</h3>
+<p><strong>Module Statistics:</strong>
+- Tests: 12
+- Passed: 12
+- Failed: 0
+- Success Rate: 100.0%
+- Total Time: 0.680s</p>
+<p><strong>Detailed Test Results:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Test ID</th>
+<th>Test Name</th>
+<th>Outcome</th>
+<th>Execution Time</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>371</td>
+<td>EnhancedMultitaskingTest.TaskActuallyExecutes</td>
+<td>✅ PASS</td>
+<td>0.060s</td>
+</tr>
+<tr>
+<td>372</td>
+<td>EnhancedMultitaskingTest.TaskExecutionWithSuspendResume</td>
+<td>✅ PASS</td>
+<td>0.070s</td>
+</tr>
+<tr>
+<td>373</td>
+<td>EnhancedMultitaskingTest.MultipleTasksConcurrentExecution</td>
+<td>✅ PASS</td>
+<td>0.110s</td>
+</tr>
+<tr>
+<td>374</td>
+<td>EnhancedMultitaskingTest.TaskSynchronizationWithNotifications</td>
+<td>✅ PASS</td>
+<td>0.060s</td>
+</tr>
+<tr>
+<td>375</td>
+<td>EnhancedMultitaskingTest.TaskLifecycleRacingConditions</td>
+<td>✅ PASS</td>
+<td>0.040s</td>
+</tr>
+<tr>
+<td>376</td>
+<td>EnhancedMultitaskingTest.TaskMoveSemanticsConcurrency</td>
+<td>✅ PASS</td>
+<td>0.040s</td>
+</tr>
+<tr>
+<td>377</td>
+<td>EnhancedMultitaskingTest.PeriodicTaskExecution</td>
+<td>✅ PASS</td>
+<td>0.050s</td>
+</tr>
+<tr>
+<td>378</td>
+<td>EnhancedMultitaskingTest.MultiplePeriodicTasksCoordination</td>
+<td>✅ PASS</td>
+<td>0.070s</td>
+</tr>
+<tr>
+<td>379</td>
+<td>EnhancedMultitaskingTest.TaskExceptionHandling</td>
+<td>✅ PASS</td>
+<td>0.030s</td>
+</tr>
+<tr>
+<td>380</td>
+<td>EnhancedMultitaskingTest.TaskDeleteDuringExecution</td>
+<td>✅ PASS</td>
+<td>0.110s</td>
+</tr>
+<tr>
+<td>381</td>
+<td>EnhancedMultitaskingTest.TaskExecFunctionCoverage</td>
+<td>✅ PASS</td>
+<td>0.020s</td>
+</tr>
+<tr>
+<td>382</td>
+<td>EnhancedMultitaskingTest.SuspendedTaskStartupCoverage</td>
+<td>✅ PASS</td>
+<td>0.020s</td>
+</tr>
+</tbody>
+</table>
+</div><div class="section"><h2 id="code-coverage-analysis">Code Coverage Analysis</h2>
+<h3 id="coverage-overview">Coverage Overview</h3>
+<p>The project achieves excellent code coverage with <strong>96.6% line coverage</strong> and <strong>94.9% function coverage</strong>.</p>
+<h3 id="coverage-breakdown">Coverage Breakdown</h3>
+<ul>
+<li><strong>Lines Covered</strong>: 6837 out of 7076 total lines</li>
+<li><strong>Functions Covered</strong>: 2777 out of 2925 total functions</li>
+<li><strong>Coverage Target</strong>: Main library modules only (excludes test infrastructure and system headers)</li>
+</ul>
+<p><strong>Detailed Uncovered Areas Analysis:</strong></p>
+<p>The following sections provide specific references to uncovered code areas and explanations for why they cannot be covered by unit tests.</p>
+<h3 id="internal-task-execution-functions-called-by-freertos-kernel">Internal task execution functions called by FreeRTOS kernel</h3>
+<p><strong>Reason for exclusion:</strong> These functions are called internally by the FreeRTOS kernel during task execution and cannot be directly invoked in unit tests</p>
+<p><strong>Specific code references:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Location</th>
+<th>Type</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>freertos_sw_timer.hpp:freertos::timer<freertos::static_sw_timer_allocator>::callback_wrapper(void*)()</td>
+<td>Function</td>
+<td>Function: <code>freertos::timer&lt;freertos::static_sw_timer_allocator&gt;::callback_wrapper(void*)</code></td>
+</tr>
+<tr>
+<td>freertos_sw_timer.hpp:freertos::timer<freertos::dynamic_sw_timer_allocator>::callback_wrapper(void*)()</td>
+<td>Function</td>
+<td>Function: <code>freertos::timer&lt;freertos::dynamic_sw_timer_allocator&gt;::callback_wrapper(void*)</code></td>
+</tr>
+<tr>
+<td>freertos_task.hpp:freertos::task&lt;freertos::static_task_allocator&lt;0ul&gt; &gt;::task_exec(void*)()</td>
+<td>Function</td>
+<td>Function: <code>freertos::task&lt;freertos::static_task_allocator&lt;0ul&gt; &gt;::task_exec(void*)</code></td>
+</tr>
+<tr>
+<td>freertos_task.hpp:freertos::task&lt;freertos::dynamic_task_allocator&lt;2048ul&gt; &gt;::task_exec(void*)()</td>
+<td>Function</td>
+<td>Function: <code>freertos::task&lt;freertos::dynamic_task_allocator&lt;2048ul&gt; &gt;::task_exec(void*)</code></td>
+</tr>
+<tr>
+<td>freertos_task.hpp:freertos::task&lt;freertos::static_task_allocator&lt;0ul&gt; &gt;::suspend()()</td>
+<td>Function</td>
+<td>Function: <code>freertos::task&lt;freertos::static_task_allocator&lt;0ul&gt; &gt;::suspend()</code></td>
+</tr>
+<tr>
+<td>freertos_task.hpp:freertos::task&lt;freertos::dynamic_task_allocator&lt;2048ul&gt; &gt;::suspend()()</td>
+<td>Function</td>
+<td>Function: <code>freertos::task&lt;freertos::dynamic_task_allocator&lt;2048ul&gt; &gt;::suspend()</code></td>
+</tr>
+<tr>
+<td>freertos_task.hpp:freertos::task&lt;freertos::static_task_allocator&lt;256ul&gt; &gt;::notify_wait(unsigned int, unsigned int, unsigned int&amp;, unsigned int)()</td>
+<td>Function</td>
+<td>Function: <code>freertos::task&lt;freertos::static_task_allocator&lt;256ul&gt; &gt;::notify_wait(unsigned int, unsigned int, unsigned int&amp;, unsigned int)</code></td>
+</tr>
+<tr>
+<td>freertos_task.hpp:freertos::task&lt;freertos::static_task_allocator&lt;512ul&gt; &gt;::notify_wait(unsigned int, unsigned int, unsigned int&amp;, unsigned int)()</td>
+<td>Function</td>
+<td>Function: <code>freertos::task&lt;freertos::static_task_allocator&lt;512ul&gt; &gt;::notify_wait(unsigned int, unsigned int, unsigned int&amp;, unsigned int)</code></td>
+</tr>
+<tr>
+<td>freertos_task.hpp:int freertos::task&lt;freertos::static_task_allocator&lt;256ul&gt; &gt;::notify_wait&lt;long, std::ratio&lt;1l, 1000l&gt; &gt;(unsigned int, unsigned int, unsigned int&amp;, std::chrono::duration&lt;long, std::ratio&lt;1l, 1000l&gt; &gt;)()</td>
+<td>Function</td>
+<td>Function: <code>int freertos::task&lt;freertos::static_task_allocator&lt;256ul&gt; &gt;::notify_wait&lt;long, std::ratio&lt;1l, 1000l&gt; &gt;(unsigned int, unsigned int, unsigned int&amp;, std::chrono::duration&lt;long, std::ratio&lt;1l, 1000l&gt; &gt;)</code></td>
+</tr>
+<tr>
+<td>freertos_task.hpp:int freertos::task&lt;freertos::static_task_allocator&lt;512ul&gt; &gt;::notify_wait&lt;long, std::ratio&lt;1l, 1000l&gt; &gt;(unsigned int, unsigned int, unsigned int&amp;, std::chrono::duration&lt;long, std::ratio&lt;1l, 1000l&gt; &gt;)()</td>
+<td>Function</td>
+<td>Function: <code>int freertos::task&lt;freertos::static_task_allocator&lt;512ul&gt; &gt;::notify_wait&lt;long, std::ratio&lt;1l, 1000l&gt; &gt;(unsigned int, unsigned int, unsigned int&amp;, std::chrono::duration&lt;long, std::ratio&lt;1l, 1000l&gt; &gt;)</code></td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td><em>(and 18 more items)</em></td>
+</tr>
+</tbody>
+</table>
+<h3 id="error-handling-and-edge-case-scenarios">Error handling and edge case scenarios</h3>
+<p><strong>Reason for exclusion:</strong> These code paths handle rare error conditions or require specific FreeRTOS kernel states that are difficult to reproduce in unit tests</p>
+<p><strong>Specific code references:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Location</th>
+<th>Type</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>test_enhanced_cpp17_features.cpp:Cpp17FeaturesTest_RAIIExceptionSafety_Test::TestBody()::{lambda()#1}::operator()() const()</td>
+<td>Function</td>
+<td>Function: <code>Cpp17FeaturesTest_RAIIExceptionSafety_Test::TestBody()::{lambda()#1}::operator()() const</code></td>
+</tr>
+<tr>
+<td>test_freertos_task.cpp:FreeRTOSTaskTest_DynamicTaskAllocatorCreateFailure_Test::TestBody()::{lambda(void<em>)#1}::operator()(void</em>) const()</td>
+<td>Function</td>
+<td>Function: <code>FreeRTOSTaskTest_DynamicTaskAllocatorCreateFailure_Test::TestBody()::{lambda(void*)#1}::operator()(void*) const</code></td>
+</tr>
+<tr>
+<td>test_freertos_task.cpp:FreeRTOSTaskTest_EdgeCaseErrorHandling_Test::TestBody()::{lambda()#1}::operator()() const()</td>
+<td>Function</td>
+<td>Function: <code>FreeRTOSTaskTest_EdgeCaseErrorHandling_Test::TestBody()::{lambda()#1}::operator()() const</code></td>
+</tr>
+<tr>
+<td>test_freertos_task.cpp:FreeRTOSTaskTest_StaticTaskAbortDelay_Test::TestBody()::{lambda()#1}::operator()() const()</td>
+<td>Function</td>
+<td>Function: <code>FreeRTOSTaskTest_StaticTaskAbortDelay_Test::TestBody()::{lambda()#1}::operator()() const</code></td>
+</tr>
+<tr>
+<td>test_freertos_task.cpp:FreeRTOSTaskTest_StaticTaskAbortDelayNullHandle_Test::TestBody()::{lambda()#1}::operator()() const()</td>
+<td>Function</td>
+<td>Function: <code>FreeRTOSTaskTest_StaticTaskAbortDelayNullHandle_Test::TestBody()::{lambda()#1}::operator()() const</code></td>
+</tr>
+<tr>
+<td>test_freertos_task.cpp:FreeRTOSTaskTest_DynamicTaskConstructionFailure_Test::TestBody()::{lambda()#1}::operator()() const()</td>
+<td>Function</td>
+<td>Function: <code>FreeRTOSTaskTest_DynamicTaskConstructionFailure_Test::TestBody()::{lambda()#1}::operator()() const</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="defensive-programming-and-robustness-checks">Defensive programming and robustness checks</h3>
+<p><strong>Reason for exclusion:</strong> These are safety checks and defensive programming patterns that are difficult to trigger in controlled test conditions</p>
+<p><strong>Specific code references:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Location</th>
+<th>Type</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>freertos_task.hpp:freertos::periodic_task&lt;freertos::static_task_allocator&lt;1024ul&gt; &gt;::periodic_task&lt;double, std::ratio&lt;1l, 1000l&gt; &gt;(char const*, unsigned int, std::function<void ()>&amp;&amp;, std::function<void ()>&amp;&amp;, std::function<void ()>&amp;&amp;, std::chrono::duration&lt;double, std::ratio&lt;1l, 1000l&gt; &gt; const&amp;, bool)::{lambda()#1}::operator()() const()</td>
+<td>Function</td>
+<td>Function: <code>freertos::periodic_task&lt;freertos::static_task_allocator&lt;1024ul&gt; &gt;::periodic_task&lt;double, std::ratio&lt;1l, 1000l&gt; &gt;(char const*, unsigned int, std::function&lt;void ()&gt;&amp;&amp;, std::function&lt;void ()&gt;&amp;&amp;, std::function&lt;void ()&gt;&amp;&amp;, std::chrono::duration&lt;double, std::ratio&lt;1l, 1000l&gt; &gt; const&amp;, bool)::{lambda()#1}::operator()() const</code></td>
+</tr>
+<tr>
+<td>freertos_task.hpp:freertos::periodic_task&lt;freertos::static_task_allocator&lt;1024ul&gt; &gt;::periodic_task&lt;long, std::ratio&lt;1l, 1000l&gt; &gt;(char const*, unsigned int, std::function<void ()>&amp;&amp;, std::function<void ()>&amp;&amp;, std::function<void ()>&amp;&amp;, std::chrono::duration&lt;long, std::ratio&lt;1l, 1000l&gt; &gt; const&amp;, bool)::{lambda()#1}::operator()() const()</td>
+<td>Function</td>
+<td>Function: <code>freertos::periodic_task&lt;freertos::static_task_allocator&lt;1024ul&gt; &gt;::periodic_task&lt;long, std::ratio&lt;1l, 1000l&gt; &gt;(char const*, unsigned int, std::function&lt;void ()&gt;&amp;&amp;, std::function&lt;void ()&gt;&amp;&amp;, std::function&lt;void ()&gt;&amp;&amp;, std::chrono::duration&lt;long, std::ratio&lt;1l, 1000l&gt; &gt; const&amp;, bool)::{lambda()#1}::operator()() const</code></td>
+</tr>
+<tr>
+<td>freertos_mocks.cpp:xMessageBufferSendFromISR()</td>
+<td>Function</td>
+<td>Function: <code>xMessageBufferSendFromISR</code></td>
+</tr>
+<tr>
+<td>freertos_mocks.cpp:xMessageBufferReceiveFromISR()</td>
+<td>Function</td>
+<td>Function: <code>xMessageBufferReceiveFromISR</code></td>
+</tr>
+<tr>
+<td>stl_semaphore_mocks.hpp:freertos_test::stl_counting_semaphore::take(unsigned int)::{lambda()#1}::operator()() const()</td>
+<td>Function</td>
+<td>Function: <code>freertos_test::stl_counting_semaphore::take(unsigned int)::{lambda()#1}::operator()() const</code></td>
+</tr>
+<tr>
+<td>stl_semaphore_mocks.hpp:freertos_test::stl_binary_semaphore::take(unsigned int)::{lambda()#1}::operator()() const()</td>
+<td>Function</td>
+<td>Function: <code>freertos_test::stl_binary_semaphore::take(unsigned int)::{lambda()#1}::operator()() const</code></td>
+</tr>
+<tr>
+<td>test_enhanced_cpp17_features.cpp:Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test::TestBody()::{lambda()#1}::operator()() const()</td>
+<td>Function</td>
+<td>Function: <code>Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test::TestBody()::{lambda()#1}::operator()() const</code></td>
+</tr>
+<tr>
+<td>test_enhanced_cpp17_features.cpp:Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test::TestBody()::{lambda()#2}::operator()() const()</td>
+<td>Function</td>
+<td>Function: <code>Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test::TestBody()::{lambda()#2}::operator()() const</code></td>
+</tr>
+<tr>
+<td>test_enhanced_cpp17_features.cpp:Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test::TestBody()::{lambda()#3}::operator()() const()</td>
+<td>Function</td>
+<td>Function: <code>Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test::TestBody()::{lambda()#3}::operator()() const</code></td>
+</tr>
+<tr>
+<td>test_enhanced_cpp17_features.cpp:Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test::TestBody()::{lambda()#4}::operator()() const()</td>
+<td>Function</td>
+<td>Function: <code>Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test::TestBody()::{lambda()#4}::operator()() const</code></td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td><em>(and 104 more items)</em></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Summary:</strong> 148 uncovered code areas identified across 3 categories.</p>
+<p><strong>Note:</strong> These uncovered areas represent code that by design cannot be easily tested in a unit test environment. They require either integration testing with the actual FreeRTOS kernel, specific hardware configurations, or are defensive programming measures for edge cases that are difficult to reproduce.</p>
+<h3 id="coverage-quality-assessment">Coverage Quality Assessment</h3>
+<p>The high coverage percentage indicates:
+- <strong>Comprehensive test coverage</strong> across all FreeRTOS wrapper modules
+- <strong>Good API validation</strong> with both positive and negative test cases
+- <strong>Robust error handling verification</strong> where applicable in unit test context
+- <strong>Thorough edge case testing</strong> for boundary conditions</p>
+</div><div class="section"><h2 id="test-quality-metrics">Test Quality Metrics</h2>
+<h3 id="test-distribution-by-category">Test Distribution by Category</h3>
+<ul>
+<li><strong>Task Module</strong>: 81 tests (19.2%)</li>
+<li><strong>Semaphore Module</strong>: 96 tests (22.8%)</li>
+<li><strong>Queue Module</strong>: 49 tests (11.6%)</li>
+<li><strong>EventGroup Module</strong>: 30 tests (7.1%)</li>
+<li><strong>StreamBuffer Module</strong>: 47 tests (11.2%)</li>
+<li><strong>MessageBuffer Module</strong>: 32 tests (7.6%)</li>
+<li><strong>Timer Module</strong>: 50 tests (11.9%)</li>
+<li><strong>Enhanced Module</strong>: 12 tests (2.9%)</li>
+</ul>
+<h3 id="performance-characteristics">Performance Characteristics</h3>
+<ul>
+<li><strong>Fastest Test</strong>: 0.000 seconds</li>
+<li><strong>Slowest Test</strong>: 0.400 seconds</li>
+<li><strong>Performance Distribution</strong>:</li>
+<li>Very Fast (&lt; 0.01s): 6 tests</li>
+<li>Fast (0.01-0.05s): 401 tests</li>
+<li>Normal (0.05-0.1s): 7 tests</li>
+<li>Slow (&gt; 0.1s): 7 tests</li>
+</ul>
+</div><div class="section"><h2 id="validation-conclusions">Validation Conclusions</h2>
+<h3 id="test-suite-maturity">✅ Test Suite Maturity</h3>
+<ul>
+<li><strong>Comprehensive Coverage</strong>: 421 test cases across all FreeRTOS wrapper modules</li>
+<li><strong>Perfect Success Rate</strong>: All tests passing indicates stable and robust implementation</li>
+<li><strong>Good Module Distribution</strong>: Balanced testing across tasks, synchronization primitives, and communication mechanisms</li>
+</ul>
+<h3 id="code-quality-validation">✅ Code Quality Validation</h3>
+<ul>
+<li><strong>High Coverage</strong>: 96.6% line coverage demonstrates thorough validation</li>
+<li><strong>API Completeness</strong>: 94.9% function coverage shows comprehensive API testing</li>
+<li><strong>Production Ready</strong>: Test results indicate code is ready for production use</li>
+</ul>
+<h3 id="continuous-validation">🔄 Continuous Validation</h3>
+<p>This report is automatically generated with each test execution to ensure:
+- <strong>Current State Reflection</strong>: Results always match the latest code changes
+- <strong>Regression Detection</strong>: Any new failures are immediately identified
+- <strong>Quality Maintenance</strong>: Coverage and test metrics are continuously monitored</p>
+</div><div class="section"><h2 id="recommendations">Recommendations</h2>
+<ol>
+<li><strong>Maintain Test Coverage</strong>: Continue to add tests for new features to maintain high coverage</li>
+<li><strong>Integration Testing</strong>: Consider adding integration tests with actual FreeRTOS kernel for uncovered areas</li>
+<li><strong>Performance Monitoring</strong>: Monitor test execution times to detect performance regressions</li>
+<li><strong>Failure Analysis</strong>: When failures occur, this report will provide detailed failure information</li>
+</ol>
+<hr />
+<p><em>Report Generated</em>: July 23, 2025 at 03:07:54<br />
+<em>Test Framework</em>: GoogleTest/GoogleMock<br />
+<em>Coverage Tool</em>: LCOV/GCOV<br />
+<em>Total Test Execution Time</em>: 5.02 seconds<br />
+<em>Validation Status</em>: ✅ <strong>All tests passing - System validated for production use</strong></p></div>
+        
+        <div class="timestamp">
+            Generated on July 23, 2025 at 09:42 AM by FreeRTOS C++ Wrappers build system
+        </div>
+    </div>
+</body>
+</html>

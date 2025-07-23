@@ -48,5 +48,10 @@ date +"*Generated: %B %d, %Y*" >> "$CLANG_TIDY_REPORT_MD"
 echo "*Tool: clang-tidy*" >> "$CLANG_TIDY_REPORT_MD"
 echo "*Scope: Library modules only*" >> "$CLANG_TIDY_REPORT_MD"
 
+# Also generate an HTML version with Apple Developer styling
+CLANG_TIDY_REPORT_HTML="${CLANG_TIDY_REPORT_MD%.md}.html"
+python3 "${SOURCE_DIR}/scripts/generate_html_report.py" "Static Analysis Report" "$CLANG_TIDY_REPORT_MD" "$CLANG_TIDY_REPORT_HTML" "${SOURCE_DIR}/scripts/report_template.html"
+
 echo "Static analysis report generated: $CLANG_TIDY_REPORT_MD"
+echo "Static analysis HTML report generated: $CLANG_TIDY_REPORT_HTML"
 echo "Statistics generated: $CLANG_TIDY_STATS_MD"

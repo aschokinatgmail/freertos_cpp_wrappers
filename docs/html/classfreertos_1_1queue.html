@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FreeRTOS C++ Wrappers<span id="projectnumber">&#160;v0.1.0-2509042</span>
+   <div id="projectname">FreeRTOS C++ Wrappers<span id="projectnumber">&#160;v0.1.0-0d37caf</span>
    </div>
    <div id="projectbrief">Modern C++17 RAII wrappers for FreeRTOS APIs</div>
   </td>
@@ -288,9 +288,9 @@ Basic Message Passing:</h3>
 <div class="line">        }</div>
 <div class="line">    }</div>
 <div class="line">});</div>
-<div class="ttc" id="aclassfreertos_1_1queue_html"><div class="ttname"><a href="classfreertos_1_1queue.html">freertos::queue</a></div><div class="ttdoc">A modern C++ wrapper for FreeRTOS queues with type safety.</div><div class="ttdef"><b>Definition</b> freertos_queue.hpp:187</div></div>
-<div class="ttc" id="aclassfreertos_1_1queue_html_a25fa1fd799780bcfb82731bf2a16e5fc"><div class="ttname"><a href="classfreertos_1_1queue.html#a25fa1fd799780bcfb82731bf2a16e5fc">freertos::queue::receive</a></div><div class="ttdeci">BaseType_t receive(T &amp;item, TickType_t ticks_to_wait)</div><div class="ttdoc">Receive an item from a queue. https://www.freertos.org/a00118.html.</div><div class="ttdef"><b>Definition</b> freertos_queue.hpp:390</div></div>
-<div class="ttc" id="aclassfreertos_1_1queue_html_a603f78c5925a6faa1866371acddcb321"><div class="ttname"><a href="classfreertos_1_1queue.html#a603f78c5925a6faa1866371acddcb321">freertos::queue::send</a></div><div class="ttdeci">BaseType_t send(const T &amp;item, TickType_t ticks_to_wait)</div><div class="ttdoc">Posts an item to the back of a queue. https://www.freertos.org/a00117.html.</div><div class="ttdef"><b>Definition</b> freertos_queue.hpp:230</div></div>
+<div class="ttc" id="aclassfreertos_1_1queue_html"><div class="ttname"><a href="classfreertos_1_1queue.html">freertos::queue</a></div><div class="ttdoc">A modern C++ wrapper for FreeRTOS queues with type safety.</div><div class="ttdef"><b>Definition</b> freertos_queue.hpp:188</div></div>
+<div class="ttc" id="aclassfreertos_1_1queue_html_a25fa1fd799780bcfb82731bf2a16e5fc"><div class="ttname"><a href="classfreertos_1_1queue.html#a25fa1fd799780bcfb82731bf2a16e5fc">freertos::queue::receive</a></div><div class="ttdeci">BaseType_t receive(T &amp;item, TickType_t ticks_to_wait)</div><div class="ttdoc">Receive an item from a queue. https://www.freertos.org/a00118.html.</div><div class="ttdef"><b>Definition</b> freertos_queue.hpp:400</div></div>
+<div class="ttc" id="aclassfreertos_1_1queue_html_a603f78c5925a6faa1866371acddcb321"><div class="ttname"><a href="classfreertos_1_1queue.html#a603f78c5925a6faa1866371acddcb321">freertos::queue::send</a></div><div class="ttdeci">BaseType_t send(const T &amp;item, TickType_t ticks_to_wait)</div><div class="ttdoc">Posts an item to the back of a queue. https://www.freertos.org/a00117.html.</div><div class="ttdef"><b>Definition</b> freertos_queue.hpp:231</div></div>
 <div class="ttc" id="aclassfreertos_1_1task_html"><div class="ttname"><a href="classfreertos_1_1task.html">freertos::task</a></div><div class="ttdoc">A modern C++ wrapper for FreeRTOS tasks with RAII semantics.</div><div class="ttdef"><b>Definition</b> freertos_task.hpp:165</div></div>
 </div><!-- fragment --><h3><a class="anchor" id="autotoc_md3"></a>
 Complex Data Types:</h3>
@@ -311,7 +311,7 @@ Complex Data Types:</h3>
 <div class="line"><span class="comment">// Receive sensor data</span></div>
 <div class="line">SensorData received;</div>
 <div class="line"><span class="keywordflow">if</span> (sensor_queue.receive(received, 1s)) {</div>
-<div class="line">    printf(<span class="stringliteral">&quot;Temperature: %.1f°C, Humidity: %.1f%%\\n&quot;</span>, </div>
+<div class="line">    printf(<span class="stringliteral">&quot;Temperature: %.1f°C, Humidity: %.1f%%\\n&quot;</span>,</div>
 <div class="line">           received.temperature, received.humidity);</div>
 <div class="line">}</div>
 </div><!-- fragment --><h3><a class="anchor" id="autotoc_md4"></a>
@@ -321,7 +321,7 @@ ISR Communication:</h3>
 <div class="line"><span class="keywordtype">void</span> uart_interrupt_handler() {</div>
 <div class="line">    uint8_t received_byte = read_uart_register();</div>
 <div class="line">    BaseType_t task_woken = pdFALSE;</div>
-<div class="line">    </div>
+<div class="line"> </div>
 <div class="line">    <span class="keywordflow">if</span> (isr_queue.<a class="code hl_function" href="classfreertos_1_1queue.html#a34d5c5b86b9fc81a728f7dfea968d7b5">send_isr</a>(received_byte, task_woken)) {</div>
 <div class="line">        portYIELD_FROM_ISR(task_woken);</div>
 <div class="line">    }</div>
@@ -335,10 +335,11 @@ ISR Communication:</h3>
 <div class="line">        }</div>
 <div class="line">    }</div>
 <div class="line">});</div>
-<div class="ttc" id="aclassfreertos_1_1queue_html_a34d5c5b86b9fc81a728f7dfea968d7b5"><div class="ttname"><a href="classfreertos_1_1queue.html#a34d5c5b86b9fc81a728f7dfea968d7b5">freertos::queue::send_isr</a></div><div class="ttdeci">BaseType_t send_isr(const T &amp;item, BaseType_t &amp;higher_priority_task_woken)</div><div class="ttdoc">Posts an item to the back of a queue from an ISR. https://www.freertos.org/a00119....</div><div class="ttdef"><b>Definition</b> freertos_queue.hpp:257</div></div>
+<div class="ttc" id="aclassfreertos_1_1queue_html_a34d5c5b86b9fc81a728f7dfea968d7b5"><div class="ttname"><a href="classfreertos_1_1queue.html#a34d5c5b86b9fc81a728f7dfea968d7b5">freertos::queue::send_isr</a></div><div class="ttdeci">BaseType_t send_isr(const T &amp;item, BaseType_t &amp;higher_priority_task_woken)</div><div class="ttdoc">Posts an item to the back of a queue from an ISR. https://www.freertos.org/a00119....</div><div class="ttdef"><b>Definition</b> freertos_queue.hpp:261</div></div>
 </div><!-- fragment --><h3><a class="anchor" id="autotoc_md5"></a>
 Static Allocation:</h3>
-<div class="fragment"><div class="line"><a class="code hl_class" href="classfreertos_1_1queue.html">freertos::queue&lt;16, float, freertos::static_queue_allocator&lt;16, float&gt;</a>&gt; static_queue;</div>
+<div class="fragment"><div class="line"><a class="code hl_class" href="classfreertos_1_1queue.html">freertos::queue&lt;16, float, freertos::static_queue_allocator&lt;16, float&gt;</a>&gt;</div>
+<div class="line">static_queue;</div>
 </div><!-- fragment --> <dl class="section examples"><dt>Examples</dt><dd><a class="el" href="producer_consumer_example_8cpp-example.html#_a0">producer_consumer_example.cpp</a>, and <a class="el" href="static_allocation_example_8cpp-example.html#_a2">static_allocation_example.cpp</a>.</dd>
 </dl>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>

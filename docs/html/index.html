@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FreeRTOS C++ Wrappers<span id="projectnumber">&#160;v0.1.0-2509042</span>
+   <div id="projectname">FreeRTOS C++ Wrappers<span id="projectnumber">&#160;v0.1.0-0d37caf</span>
    </div>
    <div id="projectbrief">Modern C++17 RAII wrappers for FreeRTOS APIs</div>
   </td>
@@ -175,9 +175,9 @@ Synchronization with Semaphores</h3>
 <div class="line">        }</div>
 <div class="line">    }</div>
 <div class="line">});</div>
-<div class="ttc" id="aclassfreertos_1_1binary__semaphore_html"><div class="ttname"><a href="classfreertos_1_1binary__semaphore.html">freertos::binary_semaphore</a></div><div class="ttdoc">A modern C++ wrapper for FreeRTOS binary semaphores.</div><div class="ttdef"><b>Definition</b> freertos_semaphore.hpp:164</div></div>
-<div class="ttc" id="aclassfreertos_1_1binary__semaphore_html_a36fd71685f5c119bccc9e03fe52a70fc"><div class="ttname"><a href="classfreertos_1_1binary__semaphore.html#a36fd71685f5c119bccc9e03fe52a70fc">freertos::binary_semaphore::give</a></div><div class="ttdeci">BaseType_t give()</div><div class="ttdoc">Give the binary semaphore. https://www.freertos.org/a00123.html.</div><div class="ttdef"><b>Definition</b> freertos_semaphore.hpp:200</div></div>
-<div class="ttc" id="aclassfreertos_1_1binary__semaphore_html_a9c157a3f25082aaa4e5fa1a606d9efd0"><div class="ttname"><a href="classfreertos_1_1binary__semaphore.html#a9c157a3f25082aaa4e5fa1a606d9efd0">freertos::binary_semaphore::take</a></div><div class="ttdeci">BaseType_t take(const TickType_t ticks_to_wait=portMAX_DELAY)</div><div class="ttdoc">Take the binary semaphore. https://www.freertos.org/a00122.html.</div><div class="ttdef"><b>Definition</b> freertos_semaphore.hpp:233</div></div>
+<div class="ttc" id="aclassfreertos_1_1binary__semaphore_html"><div class="ttname"><a href="classfreertos_1_1binary__semaphore.html">freertos::binary_semaphore</a></div><div class="ttdoc">A modern C++ wrapper for FreeRTOS binary semaphores.</div><div class="ttdef"><b>Definition</b> freertos_semaphore.hpp:165</div></div>
+<div class="ttc" id="aclassfreertos_1_1binary__semaphore_html_a36fd71685f5c119bccc9e03fe52a70fc"><div class="ttname"><a href="classfreertos_1_1binary__semaphore.html#a36fd71685f5c119bccc9e03fe52a70fc">freertos::binary_semaphore::give</a></div><div class="ttdeci">BaseType_t give()</div><div class="ttdoc">Give the binary semaphore. https://www.freertos.org/a00123.html.</div><div class="ttdef"><b>Definition</b> freertos_semaphore.hpp:201</div></div>
+<div class="ttc" id="aclassfreertos_1_1binary__semaphore_html_a9c157a3f25082aaa4e5fa1a606d9efd0"><div class="ttname"><a href="classfreertos_1_1binary__semaphore.html#a9c157a3f25082aaa4e5fa1a606d9efd0">freertos::binary_semaphore::take</a></div><div class="ttdeci">BaseType_t take(const TickType_t ticks_to_wait=portMAX_DELAY)</div><div class="ttdoc">Take the binary semaphore. https://www.freertos.org/a00122.html.</div><div class="ttdef"><b>Definition</b> freertos_semaphore.hpp:234</div></div>
 </div><!-- fragment --> </div><h3><a class="anchor" id="autotoc_md19"></a>
 Thread-Safe Queues</h3>
 <div class="example"> <div class="example-title">Type-Safe Message Passing</div></div><div class="example"><div class="fragment"><div class="line"><span class="preprocessor">#include &quot;freertos_queue.hpp&quot;</span></div>
@@ -220,9 +220,9 @@ Thread-Safe Queues</h3>
 <div class="line">        }</div>
 <div class="line">    }</div>
 <div class="line">});</div>
-<div class="ttc" id="aclassfreertos_1_1queue_html"><div class="ttname"><a href="classfreertos_1_1queue.html">freertos::queue</a></div><div class="ttdoc">A modern C++ wrapper for FreeRTOS queues with type safety.</div><div class="ttdef"><b>Definition</b> freertos_queue.hpp:187</div></div>
-<div class="ttc" id="aclassfreertos_1_1queue_html_a25fa1fd799780bcfb82731bf2a16e5fc"><div class="ttname"><a href="classfreertos_1_1queue.html#a25fa1fd799780bcfb82731bf2a16e5fc">freertos::queue::receive</a></div><div class="ttdeci">BaseType_t receive(T &amp;item, TickType_t ticks_to_wait)</div><div class="ttdoc">Receive an item from a queue. https://www.freertos.org/a00118.html.</div><div class="ttdef"><b>Definition</b> freertos_queue.hpp:390</div></div>
-<div class="ttc" id="aclassfreertos_1_1queue_html_a603f78c5925a6faa1866371acddcb321"><div class="ttname"><a href="classfreertos_1_1queue.html#a603f78c5925a6faa1866371acddcb321">freertos::queue::send</a></div><div class="ttdeci">BaseType_t send(const T &amp;item, TickType_t ticks_to_wait)</div><div class="ttdoc">Posts an item to the back of a queue. https://www.freertos.org/a00117.html.</div><div class="ttdef"><b>Definition</b> freertos_queue.hpp:230</div></div>
+<div class="ttc" id="aclassfreertos_1_1queue_html"><div class="ttname"><a href="classfreertos_1_1queue.html">freertos::queue</a></div><div class="ttdoc">A modern C++ wrapper for FreeRTOS queues with type safety.</div><div class="ttdef"><b>Definition</b> freertos_queue.hpp:188</div></div>
+<div class="ttc" id="aclassfreertos_1_1queue_html_a25fa1fd799780bcfb82731bf2a16e5fc"><div class="ttname"><a href="classfreertos_1_1queue.html#a25fa1fd799780bcfb82731bf2a16e5fc">freertos::queue::receive</a></div><div class="ttdeci">BaseType_t receive(T &amp;item, TickType_t ticks_to_wait)</div><div class="ttdoc">Receive an item from a queue. https://www.freertos.org/a00118.html.</div><div class="ttdef"><b>Definition</b> freertos_queue.hpp:400</div></div>
+<div class="ttc" id="aclassfreertos_1_1queue_html_a603f78c5925a6faa1866371acddcb321"><div class="ttname"><a href="classfreertos_1_1queue.html#a603f78c5925a6faa1866371acddcb321">freertos::queue::send</a></div><div class="ttdeci">BaseType_t send(const T &amp;item, TickType_t ticks_to_wait)</div><div class="ttdoc">Posts an item to the back of a queue. https://www.freertos.org/a00117.html.</div><div class="ttdef"><b>Definition</b> freertos_queue.hpp:231</div></div>
 </div><!-- fragment --> </div><h3><a class="anchor" id="autotoc_md20"></a>
 Mutex and Lock Guards</h3>
 <div class="example"> <div class="example-title">Thread-Safe Resource Access</div></div><div class="example"><div class="fragment"><div class="line"><span class="preprocessor">#include &quot;freertos_semaphore.hpp&quot;</span></div>
@@ -262,10 +262,10 @@ Mutex and Lock Guards</h3>
 <div class="line">        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
 <div class="line">    }</div>
 <div class="line">};</div>
-<div class="ttc" id="aclassfreertos_1_1lock__guard_html"><div class="ttname"><a href="classfreertos_1_1lock__guard.html">freertos::lock_guard</a></div><div class="ttdoc">Lock guard for the mutex. The mutex is locked in the constructor and unlocked in the destructor (RAII...</div><div class="ttdef"><b>Definition</b> freertos_semaphore.hpp:776</div></div>
-<div class="ttc" id="aclassfreertos_1_1mutex_html"><div class="ttname"><a href="classfreertos_1_1mutex.html">freertos::mutex</a></div><div class="ttdoc">A wrapper for the FreeRTOS mutex.</div><div class="ttdef"><b>Definition</b> freertos_semaphore.hpp:465</div></div>
-<div class="ttc" id="aclassfreertos_1_1timeout__lock__guard_html"><div class="ttname"><a href="classfreertos_1_1timeout__lock__guard.html">freertos::timeout_lock_guard</a></div><div class="ttdoc">Lock guard for the mutex with timeout. The mutex is locked in the constructor and unlocked in the des...</div><div class="ttdef"><b>Definition</b> freertos_semaphore.hpp:907</div></div>
-<div class="ttc" id="aclassfreertos_1_1try__lock__guard_html"><div class="ttname"><a href="classfreertos_1_1try__lock__guard.html">freertos::try_lock_guard</a></div><div class="ttdoc">Lock guard for the mutex. The mutex is locked in the constructor and unlocked in the destructor (RAII...</div><div class="ttdef"><b>Definition</b> freertos_semaphore.hpp:814</div></div>
+<div class="ttc" id="aclassfreertos_1_1lock__guard_html"><div class="ttname"><a href="classfreertos_1_1lock__guard.html">freertos::lock_guard</a></div><div class="ttdoc">Lock guard for the mutex. The mutex is locked in the constructor and unlocked in the destructor (RAII...</div><div class="ttdef"><b>Definition</b> freertos_semaphore.hpp:777</div></div>
+<div class="ttc" id="aclassfreertos_1_1mutex_html"><div class="ttname"><a href="classfreertos_1_1mutex.html">freertos::mutex</a></div><div class="ttdoc">A wrapper for the FreeRTOS mutex.</div><div class="ttdef"><b>Definition</b> freertos_semaphore.hpp:466</div></div>
+<div class="ttc" id="aclassfreertos_1_1timeout__lock__guard_html"><div class="ttname"><a href="classfreertos_1_1timeout__lock__guard.html">freertos::timeout_lock_guard</a></div><div class="ttdoc">Lock guard for the mutex with timeout. The mutex is locked in the constructor and unlocked in the des...</div><div class="ttdef"><b>Definition</b> freertos_semaphore.hpp:908</div></div>
+<div class="ttc" id="aclassfreertos_1_1try__lock__guard_html"><div class="ttname"><a href="classfreertos_1_1try__lock__guard.html">freertos::try_lock_guard</a></div><div class="ttdoc">Lock guard for the mutex. The mutex is locked in the constructor and unlocked in the destructor (RAII...</div><div class="ttdef"><b>Definition</b> freertos_semaphore.hpp:815</div></div>
 </div><!-- fragment --> </div><h3><a class="anchor" id="autotoc_md21"></a>
 Event Groups for Complex Synchronization</h3>
 <div class="example"> <div class="example-title">Multi-Event Synchronization</div></div><div class="example"><div class="fragment"><div class="line"><span class="preprocessor">#include &quot;freertos_event_group.hpp&quot;</span></div>

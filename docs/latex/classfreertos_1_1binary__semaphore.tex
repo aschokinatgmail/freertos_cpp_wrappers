@@ -62,8 +62,7 @@ Binary semaphores are used for both mutual exclusion and task synchronization. U
 
 \begin{DoxyItemize}
 \item RAII automatic cleanup
-\item std\+::chrono timeout support ~\newline
-
+\item std\+::chrono timeout support
 \item ISR-\/safe operations
 \item Exception-\/safe design
 \item No copy/move to prevent accidental resource duplication
@@ -82,7 +81,7 @@ Binary semaphores are used for both mutual exclusion and task synchronization. U
 \DoxyCodeLine{\ \ \ \ \}}
 \DoxyCodeLine{\});}
 \DoxyCodeLine{}
-\DoxyCodeLine{\textcolor{comment}{//\ Consumer\ task\ \ }}
+\DoxyCodeLine{\textcolor{comment}{//\ Consumer\ task}}
 \DoxyCodeLine{\mbox{\hyperlink{classfreertos_1_1task}{freertos::task<512>}}\ consumer(\textcolor{stringliteral}{"{}Consumer"{}},\ 2,\ [\&]()\ \{}
 \DoxyCodeLine{\ \ \ \ \textcolor{keywordflow}{while}\ (\textcolor{keyword}{true})\ \{}
 \DoxyCodeLine{\ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (signal\_sem.\mbox{\hyperlink{classfreertos_1_1binary__semaphore_a9c157a3f25082aaa4e5fa1a606d9efd0}{take}}(std::chrono::seconds(5)))\ \{}

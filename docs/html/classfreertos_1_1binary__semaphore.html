@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FreeRTOS C++ Wrappers<span id="projectnumber">&#160;v0.1.0-2509042</span>
+   <div id="projectname">FreeRTOS C++ Wrappers<span id="projectnumber">&#160;v0.1.0-0d37caf</span>
    </div>
    <div id="projectbrief">Modern C++17 RAII wrappers for FreeRTOS APIs</div>
   </td>
@@ -162,8 +162,7 @@ class freertos::binary_semaphore&lt; SemaphoreAllocator &gt;</div><p>A modern C+
 Features:</h2>
 <ul>
 <li>RAII automatic cleanup</li>
-<li>std::chrono timeout support <br  />
-</li>
+<li>std::chrono timeout support</li>
 <li>ISR-safe operations</li>
 <li>Exception-safe design</li>
 <li>No copy/move to prevent accidental resource duplication</li>
@@ -183,7 +182,7 @@ Basic Signaling:</h3>
 <div class="line">    }</div>
 <div class="line">});</div>
 <div class="line"> </div>
-<div class="line"><span class="comment">// Consumer task  </span></div>
+<div class="line"><span class="comment">// Consumer task</span></div>
 <div class="line"><a class="code hl_class" href="classfreertos_1_1task.html">freertos::task&lt;512&gt;</a> consumer(<span class="stringliteral">&quot;Consumer&quot;</span>, 2, [&amp;]() {</div>
 <div class="line">    <span class="keywordflow">while</span> (<span class="keyword">true</span>) {</div>
 <div class="line">        <span class="keywordflow">if</span> (signal_sem.<a class="code hl_function" href="classfreertos_1_1binary__semaphore.html#a9c157a3f25082aaa4e5fa1a606d9efd0">take</a>(std::chrono::seconds(5))) {</div>
@@ -193,9 +192,9 @@ Basic Signaling:</h3>
 <div class="line">        }</div>
 <div class="line">    }</div>
 <div class="line">});</div>
-<div class="ttc" id="aclassfreertos_1_1binary__semaphore_html"><div class="ttname"><a href="classfreertos_1_1binary__semaphore.html">freertos::binary_semaphore</a></div><div class="ttdoc">A modern C++ wrapper for FreeRTOS binary semaphores.</div><div class="ttdef"><b>Definition</b> freertos_semaphore.hpp:164</div></div>
-<div class="ttc" id="aclassfreertos_1_1binary__semaphore_html_a36fd71685f5c119bccc9e03fe52a70fc"><div class="ttname"><a href="classfreertos_1_1binary__semaphore.html#a36fd71685f5c119bccc9e03fe52a70fc">freertos::binary_semaphore::give</a></div><div class="ttdeci">BaseType_t give()</div><div class="ttdoc">Give the binary semaphore. https://www.freertos.org/a00123.html.</div><div class="ttdef"><b>Definition</b> freertos_semaphore.hpp:200</div></div>
-<div class="ttc" id="aclassfreertos_1_1binary__semaphore_html_a9c157a3f25082aaa4e5fa1a606d9efd0"><div class="ttname"><a href="classfreertos_1_1binary__semaphore.html#a9c157a3f25082aaa4e5fa1a606d9efd0">freertos::binary_semaphore::take</a></div><div class="ttdeci">BaseType_t take(const TickType_t ticks_to_wait=portMAX_DELAY)</div><div class="ttdoc">Take the binary semaphore. https://www.freertos.org/a00122.html.</div><div class="ttdef"><b>Definition</b> freertos_semaphore.hpp:233</div></div>
+<div class="ttc" id="aclassfreertos_1_1binary__semaphore_html"><div class="ttname"><a href="classfreertos_1_1binary__semaphore.html">freertos::binary_semaphore</a></div><div class="ttdoc">A modern C++ wrapper for FreeRTOS binary semaphores.</div><div class="ttdef"><b>Definition</b> freertos_semaphore.hpp:165</div></div>
+<div class="ttc" id="aclassfreertos_1_1binary__semaphore_html_a36fd71685f5c119bccc9e03fe52a70fc"><div class="ttname"><a href="classfreertos_1_1binary__semaphore.html#a36fd71685f5c119bccc9e03fe52a70fc">freertos::binary_semaphore::give</a></div><div class="ttdeci">BaseType_t give()</div><div class="ttdoc">Give the binary semaphore. https://www.freertos.org/a00123.html.</div><div class="ttdef"><b>Definition</b> freertos_semaphore.hpp:201</div></div>
+<div class="ttc" id="aclassfreertos_1_1binary__semaphore_html_a9c157a3f25082aaa4e5fa1a606d9efd0"><div class="ttname"><a href="classfreertos_1_1binary__semaphore.html#a9c157a3f25082aaa4e5fa1a606d9efd0">freertos::binary_semaphore::take</a></div><div class="ttdeci">BaseType_t take(const TickType_t ticks_to_wait=portMAX_DELAY)</div><div class="ttdoc">Take the binary semaphore. https://www.freertos.org/a00122.html.</div><div class="ttdef"><b>Definition</b> freertos_semaphore.hpp:234</div></div>
 <div class="ttc" id="aclassfreertos_1_1task_html"><div class="ttname"><a href="classfreertos_1_1task.html">freertos::task</a></div><div class="ttdoc">A modern C++ wrapper for FreeRTOS tasks with RAII semantics.</div><div class="ttdef"><b>Definition</b> freertos_task.hpp:165</div></div>
 </div><!-- fragment --><h3><a class="anchor" id="autotoc_md9"></a>
 ISR Communication:</h3>
@@ -214,7 +213,7 @@ ISR Communication:</h3>
 <div class="line">        }</div>
 <div class="line">    }</div>
 <div class="line">});</div>
-<div class="ttc" id="aclassfreertos_1_1binary__semaphore_html_a139c85ca3cb7439696734efbcad91786"><div class="ttname"><a href="classfreertos_1_1binary__semaphore.html#a139c85ca3cb7439696734efbcad91786">freertos::binary_semaphore::give_isr</a></div><div class="ttdeci">BaseType_t give_isr(BaseType_t &amp;high_priority_task_woken)</div><div class="ttdoc">Give the binary semaphore from an ISR. https://www.freertos.org/a00124.html.</div><div class="ttdef"><b>Definition</b> freertos_semaphore.hpp:210</div></div>
+<div class="ttc" id="aclassfreertos_1_1binary__semaphore_html_a139c85ca3cb7439696734efbcad91786"><div class="ttname"><a href="classfreertos_1_1binary__semaphore.html#a139c85ca3cb7439696734efbcad91786">freertos::binary_semaphore::give_isr</a></div><div class="ttdeci">BaseType_t give_isr(BaseType_t &amp;high_priority_task_woken)</div><div class="ttdoc">Give the binary semaphore from an ISR. https://www.freertos.org/a00124.html.</div><div class="ttdef"><b>Definition</b> freertos_semaphore.hpp:211</div></div>
 </div><!-- fragment --><h3><a class="anchor" id="autotoc_md10"></a>
 Static Allocation:</h3>
 <div class="fragment"><div class="line"><a class="code hl_class" href="classfreertos_1_1binary__semaphore.html">freertos::binary_semaphore&lt;freertos::static_semaphore_allocator&gt;</a> static_sem;</div>

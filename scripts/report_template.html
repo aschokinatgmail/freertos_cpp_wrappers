@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{TITLE}} - FreeRTOS C++ Wrappers</title>
+    <style>
+        /* Apple Developer-inspired report styling */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=SF+Mono:wght@400;500;600&display=swap');
+        
+        :root {
+            --apple-blue: #0A84FF;
+            --apple-blue-dark: #0071E3;
+            --apple-gray: #8E8E93;
+            --apple-gray-light: #2C2C2E;
+            --background: #1C1C1E;
+            --surface: #2C2C2E;
+            --surface-elevated: #3A3A3C;
+            --text-primary: #FFFFFF;
+            --text-secondary: #EBEBF5CC;
+            --text-tertiary: #EBEBF599;
+            --border: #48484A;
+            --separator: #38383A;
+            --success: #30D158;
+            --warning: #FF9F0A;
+            --error: #FF453A;
+            --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+            --radius: 8px;
+            --radius-lg: 12px;
+            --space-sm: 0.5rem;
+            --space-md: 0.75rem;
+            --space-lg: 1rem;
+            --space-xl: 1.5rem;
+            --space-2xl: 2rem;
+            --space-3xl: 3rem;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', sans-serif;
+            font-size: 17px;
+            line-height: 1.47059;
+            color: var(--text-primary);
+            background: var(--background);
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--apple-blue) 0%, var(--apple-blue-dark) 100%);
+            color: white;
+            padding: var(--space-2xl);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin: 0;
+            letter-spacing: -0.015em;
+        }
+        
+        .header p {
+            font-size: 19px;
+            margin-top: var(--space-sm);
+            opacity: 0.92;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: var(--space-3xl) var(--space-2xl);
+        }
+        
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--space-xl);
+            margin: var(--space-2xl) 0;
+        }
+        
+        .card {
+            background: var(--surface-elevated);
+            border: 1px solid var(--separator);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            box-shadow: var(--shadow-sm);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--apple-blue), var(--success));
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        }
+        
+        .card h3 {
+            font-size: 21px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0 0 var(--space-md) 0;
+        }
+        
+        .metric {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--apple-blue);
+            margin: var(--space-sm) 0;
+        }
+        
+        .metric.success { color: var(--success); }
+        .metric.warning { color: var(--warning); }
+        .metric.error { color: var(--error); }
+        
+        .section {
+            background: var(--surface-elevated);
+            border: 1px solid var(--separator);
+            border-radius: var(--radius-lg);
+            padding: var(--space-2xl);
+            margin: var(--space-2xl) 0;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .section h2 {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0 0 var(--space-xl) 0;
+            border-bottom: 2px solid var(--separator);
+            padding-bottom: var(--space-md);
+        }
+        
+        .code-block {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: var(--space-xl);
+            margin: var(--space-lg) 0;
+            overflow-x: auto;
+            font-family: 'SF Mono', 'Menlo', monospace;
+            font-size: 14px;
+            line-height: 1.45;
+        }
+        
+        .timestamp {
+            color: var(--text-tertiary);
+            font-size: 15px;
+            text-align: center;
+            margin-top: var(--space-2xl);
+            padding-top: var(--space-xl);
+            border-top: 1px solid var(--separator);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: var(--space-lg) 0;
+            background: var(--surface-elevated);
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        table th {
+            background: var(--surface);
+            color: var(--text-primary);
+            font-weight: 600;
+            padding: var(--space-lg);
+            text-align: left;
+            border-bottom: 2px solid var(--separator);
+        }
+        
+        table td {
+            padding: var(--space-lg);
+            border-bottom: 1px solid var(--separator);
+            color: var(--text-secondary);
+        }
+        
+        table tr:hover {
+            background: var(--surface);
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: var(--space-sm) var(--space-md);
+            border-radius: var(--radius);
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .badge.success {
+            background: rgba(52, 199, 89, 0.1);
+            color: var(--success);
+        }
+        
+        .badge.warning {
+            background: rgba(255, 149, 0, 0.1);
+            color: var(--warning);
+        }
+        
+        .badge.error {
+            background: rgba(255, 59, 48, 0.1);
+            color: var(--error);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: var(--space-xl);
+            }
+            
+            .header h1 {
+                font-size: 28px;
+            }
+            
+            .summary-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>{{TITLE}}</h1>
+        <p>{{SUBTITLE}}</p>
+    </div>
+    
+    <div class="container">
+        {{CONTENT}}
+        
+        <div class="timestamp">
+            Generated on {{TIMESTAMP}} by FreeRTOS C++ Wrappers build system
+        </div>
+    </div>
+</body>
+</html>
