@@ -91,9 +91,9 @@
 \DoxyCodeLine{00101\ }
 \DoxyCodeLine{00107\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ SwTimerAllocator>\ \textcolor{keyword}{class\ }timer\ \{}
 \DoxyCodeLine{00108\ \ \ SwTimerAllocator\ m\_allocator;}
-\DoxyCodeLine{00109\ \ \ TimerHandle\_t\ m\_timer;}
-\DoxyCodeLine{00110\ \ \ timer\_callback\_t\ m\_callback;}
-\DoxyCodeLine{00111\ \ \ uint8\_t\ m\_started\ :\ 1;}
+\DoxyCodeLine{00109\ \ \ timer\_callback\_t\ m\_callback;}
+\DoxyCodeLine{00110\ \ \ uint8\_t\ m\_started\ :\ 1;}
+\DoxyCodeLine{00111\ \ \ TimerHandle\_t\ m\_timer;}
 \DoxyCodeLine{00112\ }
 \DoxyCodeLine{00113\ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}\ callback\_wrapper(TimerHandle\_t\ t)\ \{}
 \DoxyCodeLine{00114\ \ \ \ \ \textcolor{keyword}{auto}\ *\textcolor{keyword}{const}\ self\ =\ \textcolor{keyword}{static\_cast<}timer\ *\textcolor{keyword}{>}(pvTimerGetTimerID(t));}
@@ -104,9 +104,9 @@
 \DoxyCodeLine{00119\ \textcolor{keyword}{public}:}
 \DoxyCodeLine{00128\ \ \ \textcolor{keyword}{explicit}\ timer(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ *name,\ \textcolor{keyword}{const}\ TickType\_t\ period\_ticks,}
 \DoxyCodeLine{00129\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ UBaseType\_t\ auto\_reload,\ timer\_callback\_t\ \&\&callback)}
-\DoxyCodeLine{00130\ \ \ \ \ \ \ :\ m\_timer\{nullptr\},\ m\_callback\{std::move(callback)\},\ m\_started\{false\}\ \{}
-\DoxyCodeLine{00131\ \ \ \ \ m\_timer\ =\ m\_allocator.create(name,\ period\_ticks,\ auto\_reload,\ \textcolor{keyword}{this},}
-\DoxyCodeLine{00132\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ callback\_wrapper);}
+\DoxyCodeLine{00130\ \ \ \ \ \ \ :\ m\_callback\{std::move(callback)\},\ m\_started\{false\},\ }
+\DoxyCodeLine{00131\ \ \ \ \ \ \ \ \ m\_timer\{m\_allocator.create(name,\ period\_ticks,\ auto\_reload,\ this,}
+\DoxyCodeLine{00132\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ callback\_wrapper)\}\ \{}
 \DoxyCodeLine{00133\ \ \ \ \ configASSERT(m\_timer);}
 \DoxyCodeLine{00134\ \ \ \}}
 \DoxyCodeLine{00145\ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Rep,\ \textcolor{keyword}{typename}\ Period>}
@@ -121,9 +121,9 @@
 \DoxyCodeLine{00154\ \ \ timer(\textcolor{keyword}{const}\ timer\ \&)\ =\ \textcolor{keyword}{delete};}
 \DoxyCodeLine{00166\ \ \ timer(timer\ \&\&src)\ noexcept\ }
 \DoxyCodeLine{00167\ \ \ \ \ \ \ :\ m\_allocator(std::move(src.m\_allocator)),\ }
-\DoxyCodeLine{00168\ \ \ \ \ \ \ \ \ m\_timer(src.m\_timer),\ }
-\DoxyCodeLine{00169\ \ \ \ \ \ \ \ \ m\_callback(std::move(src.m\_callback)),\ }
-\DoxyCodeLine{00170\ \ \ \ \ \ \ \ \ m\_started(src.m\_started)\ \{}
+\DoxyCodeLine{00168\ \ \ \ \ \ \ \ \ m\_callback(std::move(src.m\_callback)),\ }
+\DoxyCodeLine{00169\ \ \ \ \ \ \ \ \ m\_started(src.m\_started),}
+\DoxyCodeLine{00170\ \ \ \ \ \ \ \ \ m\_timer(src.m\_timer)\ \{}
 \DoxyCodeLine{00171\ \ \ \ \ \textcolor{comment}{//\ Transfer\ ownership:\ clear\ the\ source\ timer\ handle\ to\ prevent\ double\ deletion}}
 \DoxyCodeLine{00172\ \ \ \ \ src.m\_timer\ =\ \textcolor{keyword}{nullptr};}
 \DoxyCodeLine{00173\ \ \ \ \ src.m\_started\ =\ \textcolor{keyword}{false};}

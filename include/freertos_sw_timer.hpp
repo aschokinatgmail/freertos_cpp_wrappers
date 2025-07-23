@@ -106,9 +106,9 @@ using timer_callback_t = function<void()>;
  */
 template <typename SwTimerAllocator> class timer {
   SwTimerAllocator m_allocator;
-  TimerHandle_t m_timer;
   timer_callback_t m_callback;
   uint8_t m_started : 1;
+  TimerHandle_t m_timer;
 
   static void callback_wrapper(TimerHandle_t t) {
     auto *const self = static_cast<timer *>(pvTimerGetTimerID(t));
@@ -127,9 +127,9 @@ public:
    */
   explicit timer(const char *name, const TickType_t period_ticks,
                  UBaseType_t auto_reload, timer_callback_t &&callback)
-      : m_timer{nullptr}, m_callback{std::move(callback)}, m_started{false} {
-    m_timer = m_allocator.create(name, period_ticks, auto_reload, this,
-                                 callback_wrapper);
+      : m_callback{std::move(callback)}, m_started{false}, 
+        m_timer{m_allocator.create(name, period_ticks, auto_reload, this,
+                                 callback_wrapper)} {
     configASSERT(m_timer);
   }
   /**
@@ -163,11 +163,12 @@ public:
    *
    * @param src The source timer to move from (will be invalidated)
    */
-  timer(timer &&src) noexcept
-      : m_allocator(std::move(src.m_allocator)), m_timer(src.m_timer),
-        m_callback(std::move(src.m_callback)), m_started(src.m_started) {
-    // Transfer ownership: clear the source timer handle to prevent double
-    // deletion
+  timer(timer &&src) noexcept 
+      : m_allocator(std::move(src.m_allocator)), 
+        m_callback(std::move(src.m_callback)), 
+        m_started(src.m_started),
+        m_timer(src.m_timer) {
+    // Transfer ownership: clear the source timer handle to prevent double deletion
     src.m_timer = nullptr;
     src.m_started = false;
   }
