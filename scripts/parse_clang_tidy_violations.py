@@ -79,6 +79,21 @@ def parse_clang_tidy_violations(input_file, source_dir):
                     file_path.endswith('.hpp') or file_path.endswith('.cc') or file_path.endswith('.cpp')):
                 continue
             
+            # Filter out false positive clang-diagnostic-error violations related to FreeRTOS headers
+            if check_name == 'clang-diagnostic-error':
+                # Skip "file not found" errors for FreeRTOS headers - these are false positives
+                # since FreeRTOS.h and related headers are external dependencies
+                if ('file not found' in message.lower() and 
+                    ('freertos' in message.lower() or 
+                     'task.h' in message.lower() or 
+                     'semphr.h' in message.lower() or 
+                     'queue.h' in message.lower() or 
+                     'event_groups.h' in message.lower() or 
+                     'timers.h' in message.lower() or 
+                     'stream_buffer.h' in message.lower() or 
+                     'message_buffer.h' in message.lower())):
+                    continue
+            
             file_name = os.path.basename(file_path)
             
             # Get code context

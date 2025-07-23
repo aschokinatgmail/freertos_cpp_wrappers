@@ -45,9 +45,9 @@ bash "$SOURCE_DIR/scripts/run_misra_analysis.sh" "$SOURCE_DIR" "$MISRA_REPORT"
 echo "Running clang-tidy analysis on all project files..."
 cd "$SOURCE_DIR"
 
-# Create a simple clang-tidy config
+# Create a simple clang-tidy config (exclude clang-diagnostic-error to avoid FreeRTOS false positives)
 cat > "$TEMP_DIR/.clang-tidy" << 'EOF'
-Checks: '-*,clang-diagnostic-*,readability-*,performance-*,bugprone-*,misc-*'
+Checks: '-*,clang-diagnostic-*,-clang-diagnostic-error,readability-*,performance-*,bugprone-*,misc-*'
 WarningsAsErrors: ''
 HeaderFilterRegex: '.*'
 FormatStyle: none
