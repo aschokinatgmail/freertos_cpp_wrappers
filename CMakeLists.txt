@@ -201,6 +201,49 @@ else()
 endif()
 
 # =============================================================================
+# MISRA C++ STATIC ANALYSIS CONFIGURATION (cppcheck)
+# =============================================================================
+
+# Option to enable/disable MISRA C++ static analysis
+option(ENABLE_MISRA_ANALYSIS "Enable MISRA C++ static analysis using cppcheck" ON)
+
+if(ENABLE_MISRA_ANALYSIS)
+    # Find cppcheck executable
+    find_program(CPPCHECK_EXE NAMES cppcheck)
+    
+    if(CPPCHECK_EXE)
+        message(STATUS "cppcheck found: ${CPPCHECK_EXE}")
+        
+        # Add custom target for MISRA C++ analysis
+        add_custom_target(misra-analysis
+            # Run MISRA analysis on library modules
+            COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/scripts/run_misra_analysis.sh
+                ${CMAKE_CURRENT_SOURCE_DIR}
+                ${CMAKE_BINARY_DIR}/misra_analysis_output.txt
+            
+            # Generate formatted MISRA report
+            COMMAND python3 ${CMAKE_CURRENT_SOURCE_DIR}/scripts/parse_misra_report.py
+                ${CMAKE_BINARY_DIR}/misra_analysis_output.txt
+                ${CMAKE_SOURCE_DIR}/MISRA_ANALYSIS_REPORT.md
+            
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            COMMENT "Running MISRA C++ static analysis on library modules"
+        )
+        
+        message(STATUS "Run 'make misra-analysis' to generate MISRA C++ static analysis report")
+        message(STATUS "MISRA C++ analysis enabled - uses MISRA C 2012 rules applicable to C++")
+    else()
+        message(WARNING "cppcheck not found! MISRA C++ analysis will be skipped. Install cppcheck to enable MISRA analysis.")
+    endif()
+else()
+    message(STATUS "MISRA C++ analysis disabled via ENABLE_MISRA_ANALYSIS=OFF")
+endif()
+
+# =============================================================================
+# END MISRA C++ STATIC ANALYSIS CONFIGURATION
+# =============================================================================
+
+# =============================================================================
 # VALIDATION AND VERIFICATION REPORT GENERATION
 # =============================================================================
 
@@ -224,6 +267,9 @@ add_custom_target(validation-verification-report
     # Generate static analysis report
     COMMAND ${CMAKE_COMMAND} --build . --target static-analysis-report
     
+    # Generate MISRA C++ analysis report  
+    COMMAND ${CMAKE_COMMAND} --build . --target misra-analysis
+    
     # Generate documentation (after successful tests)
     COMMAND ${CMAKE_COMMAND} --build . --target docs
     
@@ -236,8 +282,9 @@ add_custom_target(validation-verification-report
     COMMAND ${CMAKE_COMMAND} -E echo ""
     COMMAND ${CMAKE_COMMAND} -E echo "=== Reports Generated ==="
     COMMAND ${CMAKE_COMMAND} -E echo "1. STATIC_ANALYSIS_REPORT.md - Static code analysis for main modules"
-    COMMAND ${CMAKE_COMMAND} -E echo "2. VALIDATION_VERIFICATION_REPORT.md - Test execution and coverage analysis"
-    COMMAND ${CMAKE_COMMAND} -E echo "3. docs/html/index.html - Updated project documentation"
+    COMMAND ${CMAKE_COMMAND} -E echo "2. MISRA_ANALYSIS_REPORT.md - MISRA C++ compliance analysis"
+    COMMAND ${CMAKE_COMMAND} -E echo "3. VALIDATION_VERIFICATION_REPORT.md - Test execution and coverage analysis"
+    COMMAND ${CMAKE_COMMAND} -E echo "4. docs/html/index.html - Updated project documentation"
     COMMAND ${CMAKE_COMMAND} -E echo ""
     
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}

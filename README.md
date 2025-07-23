@@ -27,6 +27,7 @@ doxygen Doxyfile
 - Modern C++17 RAII wrappers for FreeRTOS APIs
 - Comprehensive test coverage (421+ tests)
 - Static analysis integration with clang-tidy
+- MISRA C++ compliance analysis with cppcheck
 - Automated code formatting with clang-format (LLVM-based style)
 - Support for both static and dynamic allocation strategies
 - chrono compatibility for timeout handling
@@ -60,7 +61,7 @@ ctest --verbose
 
 ## Quality Assurance Reports
 
-The project automatically generates two comprehensive quality reports that are updated with each test execution:
+The project automatically generates three comprehensive quality reports that are updated with each test execution:
 
 ### 1. Static Analysis Report
 - **File**: `STATIC_ANALYSIS_REPORT.md`
@@ -69,7 +70,14 @@ The project automatically generates two comprehensive quality reports that are u
 - **Checks**: cppcoreguidelines-*, cert-*, google-*, hicpp-*
 - **Purpose**: Identifies code quality issues, style violations, and potential bugs
 
-### 2. Validation and Verification Report
+### 2. MISRA C++ Analysis Report
+- **File**: `MISRA_ANALYSIS_REPORT.md`
+- **Content**: MISRA C++ compliance analysis using cppcheck with MISRA addon
+- **Scope**: Library modules only (src/, include/) - test harness excluded
+- **Standard**: MISRA C 2012 rules applicable to C++ (overlaps with MISRA C++ 2008)
+- **Purpose**: Ensures compliance with MISRA C++ coding standards for safety-critical applications
+
+### 3. Validation and Verification Report
 - **File**: `VALIDATION_VERIFICATION_REPORT.md`
 - **Content**: 
   - Complete test execution results with pass/fail status
@@ -81,18 +89,19 @@ The project automatically generates two comprehensive quality reports that are u
 
 ### Automated Report Generation
 
-Both reports are automatically regenerated to reflect the current state of development:
+All reports are automatically regenerated to reflect the current state of development:
 
 ```bash
-# Generate both reports with single command
+# Generate all reports with single command
 make validation-verification-report
 
 # This command will:
 # 1. Build the project with coverage enabled
 # 2. Run all 421 tests
 # 3. Generate coverage data
-# 4. Run static analysis
-# 5. Generate both reports with current results
+# 4. Run static analysis (clang-tidy)
+# 5. Run MISRA C++ analysis (cppcheck)
+# 6. Generate all three reports with current results
 ```
 
 ### Manual Report Generation
@@ -100,6 +109,9 @@ make validation-verification-report
 ```bash
 # Generate static analysis report only
 make static-analysis-report
+
+# Generate MISRA C++ analysis report only
+make misra-analysis
 
 # Generate validation report manually
 ./scripts/run_tests_and_generate_reports.sh
@@ -110,6 +122,7 @@ make static-analysis-report
 - `ENABLE_CLANG_TIDY` (default: ON) - Enable static analysis
 - `CLANG_TIDY_WARNINGS_AS_ERRORS` (default: OFF) - Treat warnings as errors
 - `GENERATE_CLANG_TIDY_REPORT` (default: ON) - Generate static analysis report
+- `ENABLE_MISRA_ANALYSIS` (default: ON) - Enable MISRA C++ compliance analysis
 - `ENABLE_COVERAGE` (default: OFF) - Enable code coverage collection
 
 ## Code Formatting
@@ -157,6 +170,7 @@ make validation-verification-report
 
 # View results
 cat ../STATIC_ANALYSIS_REPORT.md
+cat ../MISRA_ANALYSIS_REPORT.md
 cat ../VALIDATION_VERIFICATION_REPORT.md
 ```
 
@@ -165,4 +179,5 @@ cat ../VALIDATION_VERIFICATION_REPORT.md
 - ✅ **All 421 tests passing** (100% success rate)
 - ✅ **96.6% line coverage** and **94.9% function coverage**
 - ✅ **Clean static analysis** (library modules only)
+- ✅ **MISRA C++ compliance analysis** (safety-critical standards)
 - ✅ **Production ready** with comprehensive validation

@@ -50,4 +50,10 @@ __pycache__/
 
 # OS files
 .DS_Store
-Thumbs.dbSTATIC_ANALYSIS_REPORT.md
+Thumbs.db
+
+# cppcheck dump files
+*.dump
+
+# Static analysis reports (optional - generated automatically)
+# STATIC_ANALYSIS_REPORT.md
