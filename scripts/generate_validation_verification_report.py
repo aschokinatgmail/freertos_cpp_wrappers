@@ -214,33 +214,73 @@ def get_source_context(file_path, line_num, context_lines=2):
         return f"Unable to read source context for line {line_num}"
 
 def demangle_function_name(mangled_name):
-    """Convert mangled C++ function names to more readable format"""
-    # Simple demangling for common patterns
-    if mangled_name.startswith('_ZN'):
-        # Try to extract meaningful parts from common patterns
-        if 'Task' in mangled_name:
-            if 'taskFunc' in mangled_name or '8taskFunc' in mangled_name:
-                return 'Task::taskFunc'
-            elif 'C1' in mangled_name or 'C2' in mangled_name:
-                return 'Task::Task (constructor)'
-            elif 'D1' in mangled_name or 'D2' in mangled_name:
-                return 'Task::~Task (destructor)'
-            elif 'suspend' in mangled_name:
-                return 'Task::suspend'
-            elif 'resume' in mangled_name:
-                return 'Task::resume'
-            elif 'notify' in mangled_name:
-                return 'Task::notify'
-        
-        if 'Semaphore' in mangled_name:
-            if 'lock' in mangled_name:
-                return 'Semaphore::lock'
-            elif 'unlock' in mangled_name:
-                return 'Semaphore::unlock'
-        
-        # Generic fallback
-        return f"C++ function ({mangled_name[:30]}...)" if len(mangled_name) > 30 else f"C++ function ({mangled_name})"
+    """Convert mangled C++ function names to more readable format using c++filt"""
+    # First try to use c++filt for proper demangling
+    try:
+        ret_code, stdout, stderr = run_command(f"echo '{mangled_name}' | c++filt")
+        if ret_code == 0 and stdout.strip() and stdout.strip() != mangled_name:
+            demangled = stdout.strip()
+            # Clean up the demangled name for better readability
+            if demangled.startswith('freertos::'):
+                return demangled
+            elif '::' in demangled:
+                return demangled
+            else:
+                return demangled
+    except Exception:
+        pass
     
+    # Fallback to pattern-based demangling for common FreeRTOS patterns
+    if mangled_name.startswith('_ZN'):
+        # Enhanced pattern matching for FreeRTOS C++ wrappers
+        if 'freertos' in mangled_name.lower():
+            # Extract namespace and class information
+            if 'Task' in mangled_name:
+                if 'taskFunc' in mangled_name or '8taskFunc' in mangled_name:
+                    return 'freertos::Task::taskFunc'
+                elif 'C1' in mangled_name or 'C2' in mangled_name:
+                    return 'freertos::Task::Task (constructor)'
+                elif 'D1' in mangled_name or 'D2' in mangled_name:
+                    return 'freertos::Task::~Task (destructor)'
+                elif 'suspend' in mangled_name:
+                    return 'freertos::Task::suspend'
+                elif 'resume' in mangled_name:
+                    return 'freertos::Task::resume'
+                elif 'notify' in mangled_name:
+                    return 'freertos::Task::notify'
+                else:
+                    return 'freertos::Task::<method>'
+            
+            if 'Semaphore' in mangled_name or 'semaphore' in mangled_name:
+                if 'lock' in mangled_name:
+                    return 'freertos::Semaphore::lock'
+                elif 'unlock' in mangled_name:
+                    return 'freertos::Semaphore::unlock'
+                elif 'C1' in mangled_name or 'C2' in mangled_name:
+                    return 'freertos::Semaphore::Semaphore (constructor)'
+                else:
+                    return 'freertos::Semaphore::<method>'
+                    
+            if 'Queue' in mangled_name or 'queue' in mangled_name:
+                if 'send' in mangled_name:
+                    return 'freertos::Queue::send'
+                elif 'receive' in mangled_name:
+                    return 'freertos::Queue::receive'
+                else:
+                    return 'freertos::Queue::<method>'
+                    
+            if 'Mutex' in mangled_name or 'mutex' in mangled_name:
+                if 'lock' in mangled_name:
+                    return 'freertos::Mutex::lock'
+                elif 'unlock' in mangled_name:
+                    return 'freertos::Mutex::unlock'
+                else:
+                    return 'freertos::Mutex::<method>'
+        
+        # Generic C++ function fallback
+        return f"C++ function ({mangled_name[:40]}...)" if len(mangled_name) > 40 else f"C++ function ({mangled_name})"
+    
+    # Return original if not a mangled name
     return mangled_name
 def categorize_uncovered_code(uncovered_data, project_root):
     """Categorize uncovered code by type and provide explanations"""
