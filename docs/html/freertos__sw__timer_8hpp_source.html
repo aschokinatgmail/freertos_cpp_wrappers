@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FreeRTOS C++ Wrappers<span id="projectnumber">&#160;v0.1.0-0ad558b</span>
+   <div id="projectname">FreeRTOS C++ Wrappers<span id="projectnumber">&#160;v0.1.0-031510a</span>
    </div>
    <div id="projectbrief">Modern C++17 RAII wrappers for FreeRTOS APIs</div>
   </td>
@@ -188,9 +188,9 @@ $(document).ready(function(){initNavTree('freertos__sw__timer_8hpp_source.html',
 <div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span> </div>
 <div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> SwTimerAllocator&gt; <span class="keyword">class </span>timer {</div>
 <div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>  SwTimerAllocator m_allocator;</div>
-<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>  TimerHandle_t m_timer;</div>
-<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>  timer_callback_t m_callback;</div>
-<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>  uint8_t m_started : 1;</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>  timer_callback_t m_callback;</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>  uint8_t m_started : 1;</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>  TimerHandle_t m_timer;</div>
 <div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span> </div>
 <div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>  <span class="keyword">static</span> <span class="keywordtype">void</span> callback_wrapper(TimerHandle_t t) {</div>
 <div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>    <span class="keyword">auto</span> *<span class="keyword">const</span> self = <span class="keyword">static_cast&lt;</span>timer *<span class="keyword">&gt;</span>(pvTimerGetTimerID(t));</div>
@@ -201,9 +201,9 @@ $(document).ready(function(){initNavTree('freertos__sw__timer_8hpp_source.html',
 <div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span><span class="keyword">public</span>:</div>
 <div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>  <span class="keyword">explicit</span> timer(<span class="keyword">const</span> <span class="keywordtype">char</span> *name, <span class="keyword">const</span> TickType_t period_ticks,</div>
 <div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>                 UBaseType_t auto_reload, timer_callback_t &amp;&amp;callback)</div>
-<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>      : m_timer{nullptr}, m_callback{std::move(callback)}, m_started{false} {</div>
-<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>    m_timer = m_allocator.create(name, period_ticks, auto_reload, <span class="keyword">this</span>,</div>
-<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>                                 callback_wrapper);</div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>      : m_callback{std::move(callback)}, m_started{false}, </div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>        m_timer{m_allocator.create(name, period_ticks, auto_reload, this,</div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>                                 callback_wrapper)} {</div>
 <div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>    configASSERT(m_timer);</div>
 <div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>  }</div>
 <div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>  <span class="keyword">template</span> &lt;<span class="keyword">typename</span> Rep, <span class="keyword">typename</span> Period&gt;</div>
@@ -218,9 +218,9 @@ $(document).ready(function(){initNavTree('freertos__sw__timer_8hpp_source.html',
 <div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>  timer(<span class="keyword">const</span> timer &amp;) = <span class="keyword">delete</span>;</div>
 <div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>  timer(timer &amp;&amp;src) noexcept </div>
 <div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>      : m_allocator(std::move(src.m_allocator)), </div>
-<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>        m_timer(src.m_timer), </div>
-<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>        m_callback(std::move(src.m_callback)), </div>
-<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span>        m_started(src.m_started) {</div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>        m_callback(std::move(src.m_callback)), </div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>        m_started(src.m_started),</div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span>        m_timer(src.m_timer) {</div>
 <div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span>    <span class="comment">// Transfer ownership: clear the source timer handle to prevent double deletion</span></div>
 <div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span>    src.m_timer = <span class="keyword">nullptr</span>;</div>
 <div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span>    src.m_started = <span class="keyword">false</span>;</div>
