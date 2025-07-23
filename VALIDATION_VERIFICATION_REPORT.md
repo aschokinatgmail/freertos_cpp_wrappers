@@ -9,11 +9,11 @@ This report provides comprehensive validation and verification results for the F
 - **✅ Passed**: 421 tests
 - **❌ Failed**: 0 tests
 - **Success Rate**: 100.0% (All tests passed!)
-- **Total Execution Time**: 6.23 seconds
-- **Average Test Time**: 0.0148 seconds per test
+- **Total Execution Time**: 5.25 seconds
+- **Average Test Time**: 0.0125 seconds per test
 
 ### Code Coverage Summary
-- **Line Coverage**: 96.6% (6835/7075 lines)
+- **Line Coverage**: 96.6% (6836/7075 lines)
 - **Function Coverage**: 94.9% (2777/2925 functions)
 - **Coverage Scope**: Main library modules only (src/ and include/ directories)
 
@@ -26,83 +26,83 @@ This report provides comprehensive validation and verification results for the F
 - Passed: 81
 - Failed: 0
 - Success Rate: 100.0%
-- Total Time: 1.270s
+- Total Time: 0.810s
 
 **Detailed Test Results:**
 
 | Test ID | Test Name | Outcome | Execution Time |
 |---------|-----------|---------|----------------|
-| 1 | FreeRTOSTaskTest.StaticTaskAllocatorConstruction | ✅ PASS | 0.020s |
-| 2 | FreeRTOSTaskTest.StaticTaskAllocatorCreate | ✅ PASS | 0.020s |
-| 3 | FreeRTOSTaskTest.StaticTaskAllocatorCreateNullReturn | ✅ PASS | 0.030s |
-| 4 | FreeRTOSTaskTest.DynamicTaskAllocatorConstruction | ✅ PASS | 0.020s |
-| 5 | FreeRTOSTaskTest.DynamicTaskAllocatorCreateSuccess | ✅ PASS | 0.020s |
-| 6 | FreeRTOSTaskTest.DynamicTaskAllocatorCreateFailure | ✅ PASS | 0.020s |
-| 7 | FreeRTOSTaskTest.StaticTaskConstruction | ✅ PASS | 0.020s |
-| 8 | FreeRTOSTaskTest.StaticTaskConstructionWithString | ✅ PASS | 0.020s |
-| 9 | FreeRTOSTaskTest.StaticTaskDestruction | ✅ PASS | 0.020s |
-| 10 | FreeRTOSTaskTest.StaticTaskDestructionNullHandle | ✅ PASS | 0.020s |
-| 11 | FreeRTOSTaskTest.StaticTaskSuspendResume | ✅ PASS | 0.020s |
-| 12 | FreeRTOSTaskTest.StaticTaskTerminate | ✅ PASS | 0.020s |
-| 13 | FreeRTOSTaskTest.StaticTaskPriority | ✅ PASS | 0.020s |
-| 14 | FreeRTOSTaskTest.StaticTaskName | ✅ PASS | 0.020s |
-| 15 | FreeRTOSTaskTest.StaticTaskState | ✅ PASS | 0.020s |
-| 16 | FreeRTOSTaskTest.TaskApplicationTag | ✅ PASS | 0.020s |
+| 1 | FreeRTOSTaskTest.StaticTaskAllocatorConstruction | ✅ PASS | 0.010s |
+| 2 | FreeRTOSTaskTest.StaticTaskAllocatorCreate | ✅ PASS | 0.010s |
+| 3 | FreeRTOSTaskTest.StaticTaskAllocatorCreateNullReturn | ✅ PASS | 0.010s |
+| 4 | FreeRTOSTaskTest.DynamicTaskAllocatorConstruction | ✅ PASS | 0.010s |
+| 5 | FreeRTOSTaskTest.DynamicTaskAllocatorCreateSuccess | ✅ PASS | 0.010s |
+| 6 | FreeRTOSTaskTest.DynamicTaskAllocatorCreateFailure | ✅ PASS | 0.010s |
+| 7 | FreeRTOSTaskTest.StaticTaskConstruction | ✅ PASS | 0.010s |
+| 8 | FreeRTOSTaskTest.StaticTaskConstructionWithString | ✅ PASS | 0.010s |
+| 9 | FreeRTOSTaskTest.StaticTaskDestruction | ✅ PASS | 0.010s |
+| 10 | FreeRTOSTaskTest.StaticTaskDestructionNullHandle | ✅ PASS | 0.010s |
+| 11 | FreeRTOSTaskTest.StaticTaskSuspendResume | ✅ PASS | 0.010s |
+| 12 | FreeRTOSTaskTest.StaticTaskTerminate | ✅ PASS | 0.010s |
+| 13 | FreeRTOSTaskTest.StaticTaskPriority | ✅ PASS | 0.010s |
+| 14 | FreeRTOSTaskTest.StaticTaskName | ✅ PASS | 0.010s |
+| 15 | FreeRTOSTaskTest.StaticTaskState | ✅ PASS | 0.010s |
+| 16 | FreeRTOSTaskTest.TaskApplicationTag | ✅ PASS | 0.010s |
 | 17 | FreeRTOSTaskTest.TaskStackWatermark | ✅ PASS | 0.010s |
 | 18 | FreeRTOSTaskTest.TaskTraceStatus | ✅ PASS | 0.010s |
-| 19 | FreeRTOSTaskTest.StaticTaskAbortDelay | ✅ PASS | 0.020s |
-| 20 | FreeRTOSTaskTest.StaticTaskAbortDelayNullHandle | ✅ PASS | 0.020s |
-| 21 | FreeRTOSTaskTest.TaskSuspendedOnStart | ✅ PASS | 0.020s |
-| 22 | FreeRTOSTaskTest.TaskNotSuspendedOnStart | ✅ PASS | 0.020s |
-| 23 | FreeRTOSTaskTest.DynamicTaskConstruction | ✅ PASS | 0.020s |
-| 24 | FreeRTOSTaskTest.DynamicTaskConstructionFailure | ✅ PASS | 0.020s |
+| 19 | FreeRTOSTaskTest.StaticTaskAbortDelay | ✅ PASS | 0.010s |
+| 20 | FreeRTOSTaskTest.StaticTaskAbortDelayNullHandle | ✅ PASS | 0.010s |
+| 21 | FreeRTOSTaskTest.TaskSuspendedOnStart | ✅ PASS | 0.010s |
+| 22 | FreeRTOSTaskTest.TaskNotSuspendedOnStart | ✅ PASS | 0.010s |
+| 23 | FreeRTOSTaskTest.DynamicTaskConstruction | ✅ PASS | 0.010s |
+| 24 | FreeRTOSTaskTest.DynamicTaskConstructionFailure | ✅ PASS | 0.010s |
 | 25 | FreeRTOSTaskTest.TaskNotifications | ✅ PASS | 0.010s |
-| 26 | FreeRTOSTaskTest.TaskNotificationsExtended | ✅ PASS | 0.020s |
-| 27 | FreeRTOSTaskTest.PeriodicTaskConstruction | ✅ PASS | 0.020s |
-| 28 | FreeRTOSTaskTest.PeriodicTaskWithString | ✅ PASS | 0.020s |
-| 29 | FreeRTOSTaskTest.PeriodicTaskZeroPeriod | ✅ PASS | 0.020s |
-| 30 | FreeRTOSTaskTest.PeriodicTaskNoPeriod | ✅ PASS | 0.020s |
-| 31 | FreeRTOSTaskTest.PeriodicTaskIsRunning | ✅ PASS | 0.020s |
-| 32 | FreeRTOSTaskTest.PeriodicTaskTerminate | ✅ PASS | 0.020s |
+| 26 | FreeRTOSTaskTest.TaskNotificationsExtended | ✅ PASS | 0.010s |
+| 27 | FreeRTOSTaskTest.PeriodicTaskConstruction | ✅ PASS | 0.010s |
+| 28 | FreeRTOSTaskTest.PeriodicTaskWithString | ✅ PASS | 0.010s |
+| 29 | FreeRTOSTaskTest.PeriodicTaskZeroPeriod | ✅ PASS | 0.010s |
+| 30 | FreeRTOSTaskTest.PeriodicTaskNoPeriod | ✅ PASS | 0.010s |
+| 31 | FreeRTOSTaskTest.PeriodicTaskIsRunning | ✅ PASS | 0.010s |
+| 32 | FreeRTOSTaskTest.PeriodicTaskTerminate | ✅ PASS | 0.010s |
 | 33 | FreeRTOSTaskTest.PeriodicTaskDestructorAbortDelay | ✅ PASS | 0.010s |
 | 34 | FreeRTOSTaskTest.PeriodicTaskNotificationExtensions | ✅ PASS | 0.010s |
 | 35 | FreeRTOSTaskTest.DelayFunction | ✅ PASS | 0.010s |
-| 36 | FreeRTOSTaskTest.DelayUntilFunction | ✅ PASS | 0.020s |
-| 37 | FreeRTOSTaskTest.SleepForFunction | ✅ PASS | 0.020s |
+| 36 | FreeRTOSTaskTest.DelayUntilFunction | ✅ PASS | 0.010s |
+| 37 | FreeRTOSTaskTest.SleepForFunction | ✅ PASS | 0.010s |
 | 38 | FreeRTOSTaskTest.CurrentTaskHandle | ✅ PASS | 0.010s |
-| 39 | FreeRTOSTaskTest.IdleTaskHandle | ✅ PASS | 0.020s |
+| 39 | FreeRTOSTaskTest.IdleTaskHandle | ✅ PASS | 0.010s |
 | 40 | FreeRTOSTaskTest.TickCount | ✅ PASS | 0.010s |
-| 41 | FreeRTOSTaskTest.TaskCount | ✅ PASS | 0.020s |
+| 41 | FreeRTOSTaskTest.TaskCount | ✅ PASS | 0.010s |
 | 42 | FreeRTOSTaskTest.SchedulerState | ✅ PASS | 0.010s |
 | 43 | FreeRTOSTaskTest.TimeSinceSchedulerStarted | ✅ PASS | 0.010s |
-| 44 | FreeRTOSTaskTest.CriticalSection | ✅ PASS | 0.020s |
+| 44 | FreeRTOSTaskTest.CriticalSection | ✅ PASS | 0.010s |
 | 45 | FreeRTOSTaskTest.CriticalSectionISR | ✅ PASS | 0.010s |
 | 46 | FreeRTOSTaskTest.InterruptBarrier | ✅ PASS | 0.010s |
 | 47 | FreeRTOSTaskTest.SchedulerBarrier | ✅ PASS | 0.010s |
 | 48 | FreeRTOSTaskTest.StackAllocationLimitation | ✅ PASS | 0.010s |
 | 49 | FreeRTOSTaskTest.InvalidParameters | ✅ PASS | 0.010s |
 | 50 | FreeRTOSTaskTest.ZeroStackSize | ✅ PASS | 0.010s |
-| 51 | FreeRTOSTaskTest.VeryHighPriority | ✅ PASS | 0.020s |
-| 52 | FreeRTOSTaskTest.TaskSystemStatus | ✅ PASS | 0.020s |
-| 53 | FreeRTOSTaskTest.TaskChronoCompatibility | ✅ PASS | 0.020s |
-| 54 | FreeRTOSTaskTest.DelayUntilTimePoint | ✅ PASS | 0.020s |
-| 55 | FreeRTOSTaskTest.TaskMoveConstruction | ✅ PASS | 0.020s |
+| 51 | FreeRTOSTaskTest.VeryHighPriority | ✅ PASS | 0.010s |
+| 52 | FreeRTOSTaskTest.TaskSystemStatus | ✅ PASS | 0.010s |
+| 53 | FreeRTOSTaskTest.TaskChronoCompatibility | ✅ PASS | 0.010s |
+| 54 | FreeRTOSTaskTest.DelayUntilTimePoint | ✅ PASS | 0.010s |
+| 55 | FreeRTOSTaskTest.TaskMoveConstruction | ✅ PASS | 0.010s |
 | 56 | FreeRTOSTaskTest.PeriodicTaskMoveConstruction | ✅ PASS | 0.010s |
 | 57 | FreeRTOSTaskTest.TaskExecutionDirectCall | ✅ PASS | 0.010s |
 | 58 | FreeRTOSTaskTest.PeriodicTaskTypo | ✅ PASS | 0.010s |
-| 59 | FreeRTOSTaskTest.TaskTemplateInstantiation | ✅ PASS | 0.020s |
-| 60 | FreeRTOSTaskTest.DynamicTaskDifferentSizes | ✅ PASS | 0.020s |
-| 61 | FreeRTOSTaskTest.TaskNotificationEdgeCases | ✅ PASS | 0.020s |
+| 59 | FreeRTOSTaskTest.TaskTemplateInstantiation | ✅ PASS | 0.010s |
+| 60 | FreeRTOSTaskTest.DynamicTaskDifferentSizes | ✅ PASS | 0.010s |
+| 61 | FreeRTOSTaskTest.TaskNotificationEdgeCases | ✅ PASS | 0.010s |
 | 62 | FreeRTOSTaskTest.TaskSystemStatusTemplate | ✅ PASS | 0.010s |
-| 63 | FreeRTOSTaskTest.DelayFunctionsWithDifferentDurations | ✅ PASS | 0.020s |
+| 63 | FreeRTOSTaskTest.DelayFunctionsWithDifferentDurations | ✅ PASS | 0.010s |
 | 64 | FreeRTOSTaskTest.DelayUntilWithPeriodReference | ✅ PASS | 0.010s |
 | 65 | FreeRTOSTaskTest.RacingConditionTaskConstructorInitialization | ✅ PASS | 0.010s |
 | 66 | FreeRTOSTaskTest.ConcurrentTaskCreationAndDestruction | ✅ PASS | 0.010s |
 | 67 | FreeRTOSTaskTest.MoveSemanticsRacingConditions | ✅ PASS | 0.010s |
 | 68 | FreeRTOSTaskTest.PeriodicTaskLifecycleRacingConditions | ✅ PASS | 0.010s |
 | 69 | FreeRTOSTaskTest.NotificationRacingConditions | ✅ PASS | 0.010s |
-| 70 | FreeRTOSTaskTest.ComplexMultitaskingScenario | ✅ PASS | 0.020s |
-| 71 | FreeRTOSTaskTest.TaskSystemStatusUnderLoad | ✅ PASS | 0.020s |
+| 70 | FreeRTOSTaskTest.ComplexMultitaskingScenario | ✅ PASS | 0.010s |
+| 71 | FreeRTOSTaskTest.TaskSystemStatusUnderLoad | ✅ PASS | 0.010s |
 | 72 | FreeRTOSTaskTest.ConstructorInitializationOrderRaceCondition | ✅ PASS | 0.010s |
 | 73 | FreeRTOSTaskTest.TaskExecutionInternalFunction | ✅ PASS | 0.010s |
 | 74 | FreeRTOSTaskTest.PeriodicTaskRunMethodExecution | ✅ PASS | 0.010s |
@@ -121,7 +121,7 @@ This report provides comprehensive validation and verification results for the F
 - Passed: 96
 - Failed: 0
 - Success Rate: 100.0%
-- Total Time: 2.080s
+- Total Time: 2.050s
 
 **Detailed Test Results:**
 
@@ -216,12 +216,12 @@ This report provides comprehensive validation and verification results for the F
 | 388 | STLSemaphoreTest.STLCountingSemaphoreMaxLimit | ✅ PASS | 0.000s |
 | 389 | STLSemaphoreTest.STLCountingSemaphoreResourcePool | ✅ PASS | 0.100s |
 | 390 | STLSemaphoreTest.STLMutexBasicOperations | ✅ PASS | 0.000s |
-| 391 | STLSemaphoreTest.STLMutexCriticalSection | ✅ PASS | 0.040s |
+| 391 | STLSemaphoreTest.STLMutexCriticalSection | ✅ PASS | 0.030s |
 | 392 | STLSemaphoreTest.STLRecursiveMutexBasicOperations | ✅ PASS | 0.000s |
 | 393 | STLSemaphoreTest.STLRecursiveMutexNestedLocking | ✅ PASS | 0.000s |
 | 394 | STLSemaphoreTest.STLProducerConsumerWithBuffering | ✅ PASS | 0.100s |
-| 395 | STLSemaphoreTest.STLReaderWriterPattern | ✅ PASS | 0.400s |
-| 396 | STLSemaphoreTest.STLSemaphoreStressTest | ✅ PASS | 0.090s |
+| 395 | STLSemaphoreTest.STLReaderWriterPattern | ✅ PASS | 0.390s |
+| 396 | STLSemaphoreTest.STLSemaphoreStressTest | ✅ PASS | 0.080s |
 | 397 | STLSemaphoreTest.STLTimeoutAccuracy | ✅ PASS | 0.350s |
 
 ### Queue Module Tests
@@ -509,7 +509,7 @@ This report provides comprehensive validation and verification results for the F
 - Passed: 12
 - Failed: 0
 - Success Rate: 100.0%
-- Total Time: 0.690s
+- Total Time: 0.680s
 
 **Detailed Test Results:**
 
@@ -524,7 +524,7 @@ This report provides comprehensive validation and verification results for the F
 | 377 | EnhancedMultitaskingTest.PeriodicTaskExecution | ✅ PASS | 0.050s |
 | 378 | EnhancedMultitaskingTest.MultiplePeriodicTasksCoordination | ✅ PASS | 0.070s |
 | 379 | EnhancedMultitaskingTest.TaskExceptionHandling | ✅ PASS | 0.030s |
-| 380 | EnhancedMultitaskingTest.TaskDeleteDuringExecution | ✅ PASS | 0.120s |
+| 380 | EnhancedMultitaskingTest.TaskDeleteDuringExecution | ✅ PASS | 0.110s |
 | 381 | EnhancedMultitaskingTest.TaskExecFunctionCoverage | ✅ PASS | 0.020s |
 | 382 | EnhancedMultitaskingTest.SuspendedTaskStartupCoverage | ✅ PASS | 0.020s |
 
@@ -534,23 +534,73 @@ This report provides comprehensive validation and verification results for the F
 The project achieves excellent code coverage with **96.6% line coverage** and **94.9% function coverage**.
 
 ### Coverage Breakdown
-- **Lines Covered**: 6835 out of 7075 total lines
+- **Lines Covered**: 6836 out of 7075 total lines
 - **Functions Covered**: 2777 out of 2925 total functions
 - **Coverage Target**: Main library modules only (excludes test infrastructure and system headers)
 
+**Detailed Uncovered Areas Analysis:**
 
-**Uncovered Areas Analysis:**
+The following sections provide specific references to uncovered code areas and explanations for why they cannot be covered by unit tests.
 
-The uncovered code primarily consists of:
-1. **Internal task execution functions** - Called by FreeRTOS kernel, not directly testable in unit tests
-2. **Error handling paths** - Some error conditions that require specific FreeRTOS kernel states
-3. **Platform-specific code** - Code paths that depend on specific hardware configurations
-4. **Edge case scenarios** - Rare conditions that are difficult to reproduce in unit test environment
+### Internal task execution functions called by FreeRTOS kernel
 
-These uncovered areas are intentional and represent code that:
-- Requires integration testing with actual FreeRTOS kernel
-- Involves kernel-level functionality not suitable for unit testing
-- Represents defensive programming patterns for robustness
+**Reason for exclusion:** These functions are called internally by the FreeRTOS kernel during task execution and cannot be directly invoked in unit tests
+
+**Specific code references:**
+
+| Location | Type | Details |
+|----------|------|----------|
+| freertos_sw_timer.hpp:C++ function (_ZN8freertos5timerINS_25static...)() | Function | Function: `C++ function (_ZN8freertos5timerINS_25static...)` |
+| freertos_sw_timer.hpp:C++ function (_ZN8freertos5timerINS_26dynami...)() | Function | Function: `C++ function (_ZN8freertos5timerINS_26dynami...)` |
+| freertos_task.hpp:C++ function (_ZN8freertos4taskINS_21static_...)() | Function | Function: `C++ function (_ZN8freertos4taskINS_21static_...)` |
+| freertos_task.hpp:C++ function (_ZN8freertos4taskINS_22dynamic...)() | Function | Function: `C++ function (_ZN8freertos4taskINS_22dynamic...)` |
+| freertos_task.hpp:C++ function (_ZN8freertos4taskINS_21static_...)() | Function | Function: `C++ function (_ZN8freertos4taskINS_21static_...)` |
+| freertos_task.hpp:C++ function (_ZN8freertos4taskINS_22dynamic...)() | Function | Function: `C++ function (_ZN8freertos4taskINS_22dynamic...)` |
+| freertos_task.hpp:C++ function (_ZN8freertos4taskINS_21static_...)() | Function | Function: `C++ function (_ZN8freertos4taskINS_21static_...)` |
+| freertos_task.hpp:C++ function (_ZN8freertos4taskINS_21static_...)() | Function | Function: `C++ function (_ZN8freertos4taskINS_21static_...)` |
+| freertos_task.hpp:C++ function (_ZN8freertos4taskINS_21static_...)() | Function | Function: `C++ function (_ZN8freertos4taskINS_21static_...)` |
+| freertos_task.hpp:C++ function (_ZN8freertos4taskINS_21static_...)() | Function | Function: `C++ function (_ZN8freertos4taskINS_21static_...)` |
+| ... | ... | *(and 18 more items)* |
+
+### Error handling and edge case scenarios
+
+**Reason for exclusion:** These code paths handle rare error conditions or require specific FreeRTOS kernel states that are difficult to reproduce in unit tests
+
+**Specific code references:**
+
+| Location | Type | Details |
+|----------|------|----------|
+| test_enhanced_cpp17_features.cpp:_ZZN42Cpp17FeaturesTest_RAIIExceptionSafety_Test8TestBodyEvENKUlvE_clEv() | Function | Function: `_ZZN42Cpp17FeaturesTest_RAIIExceptionSafety_Test8TestBodyEvENKUlvE_clEv` |
+| test_freertos_task.cpp:_ZZN55FreeRTOSTaskTest_DynamicTaskAllocatorCreateFailure_Test8TestBodyEvENKUlPvE_clES0_() | Function | Function: `_ZZN55FreeRTOSTaskTest_DynamicTaskAllocatorCreateFailure_Test8TestBodyEvENKUlPvE_clES0_` |
+| test_freertos_task.cpp:_ZZN43FreeRTOSTaskTest_EdgeCaseErrorHandling_Test8TestBodyEvENKUlvE_clEv() | Function | Function: `_ZZN43FreeRTOSTaskTest_EdgeCaseErrorHandling_Test8TestBodyEvENKUlvE_clEv` |
+| test_freertos_task.cpp:_ZZN42FreeRTOSTaskTest_StaticTaskAbortDelay_Test8TestBodyEvENKUlvE_clEv() | Function | Function: `_ZZN42FreeRTOSTaskTest_StaticTaskAbortDelay_Test8TestBodyEvENKUlvE_clEv` |
+| test_freertos_task.cpp:_ZZN52FreeRTOSTaskTest_StaticTaskAbortDelayNullHandle_Test8TestBodyEvENKUlvE_clEv() | Function | Function: `_ZZN52FreeRTOSTaskTest_StaticTaskAbortDelayNullHandle_Test8TestBodyEvENKUlvE_clEv` |
+| test_freertos_task.cpp:_ZZN52FreeRTOSTaskTest_DynamicTaskConstructionFailure_Test8TestBodyEvENKUlvE_clEv() | Function | Function: `_ZZN52FreeRTOSTaskTest_DynamicTaskConstructionFailure_Test8TestBodyEvENKUlvE_clEv` |
+
+### Defensive programming and robustness checks
+
+**Reason for exclusion:** These are safety checks and defensive programming patterns that are difficult to trigger in controlled test conditions
+
+**Specific code references:**
+
+| Location | Type | Details |
+|----------|------|----------|
+| freertos_task.hpp:_ZZN8freertos13periodic_taskINS_21static_task_allocatorILm1024EEEEC4IdSt5ratioILl1ELl1000EEEEPKcjOSt8functionIFvvEESC_SC_RKNSt6chrono8durationIT_T0_EEbENKUlvE_clEv() | Function | Function: `_ZZN8freertos13periodic_taskINS_21static_task_allocatorILm1024EEEEC4IdSt5ratioILl1ELl1000EEEEPKcjOSt8functionIFvvEESC_SC_RKNSt6chrono8durationIT_T0_EEbENKUlvE_clEv` |
+| freertos_task.hpp:_ZZN8freertos13periodic_taskINS_21static_task_allocatorILm1024EEEEC4IlSt5ratioILl1ELl1000EEEEPKcjOSt8functionIFvvEESC_SC_RKNSt6chrono8durationIT_T0_EEbENKUlvE_clEv() | Function | Function: `_ZZN8freertos13periodic_taskINS_21static_task_allocatorILm1024EEEEC4IlSt5ratioILl1ELl1000EEEEPKcjOSt8functionIFvvEESC_SC_RKNSt6chrono8durationIT_T0_EEbENKUlvE_clEv` |
+| freertos_mocks.cpp:xMessageBufferSendFromISR() | Function | Function: `xMessageBufferSendFromISR` |
+| freertos_mocks.cpp:xMessageBufferReceiveFromISR() | Function | Function: `xMessageBufferReceiveFromISR` |
+| stl_semaphore_mocks.hpp:_ZZN13freertos_test22stl_counting_semaphore4takeEjENKUlvE_clEv() | Function | Function: `_ZZN13freertos_test22stl_counting_semaphore4takeEjENKUlvE_clEv` |
+| stl_semaphore_mocks.hpp:_ZZN13freertos_test20stl_binary_semaphore4takeEjENKUlvE_clEv() | Function | Function: `_ZZN13freertos_test20stl_binary_semaphore4takeEjENKUlvE_clEv` |
+| test_enhanced_cpp17_features.cpp:_ZZN54Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test8TestBodyEvENKUlvE_clEv() | Function | Function: `_ZZN54Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test8TestBodyEvENKUlvE_clEv` |
+| test_enhanced_cpp17_features.cpp:_ZZN54Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test8TestBodyEvENKUlvE0_clEv() | Function | Function: `_ZZN54Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test8TestBodyEvENKUlvE0_clEv` |
+| test_enhanced_cpp17_features.cpp:_ZZN54Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test8TestBodyEvENKUlvE1_clEv() | Function | Function: `_ZZN54Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test8TestBodyEvENKUlvE1_clEv` |
+| test_enhanced_cpp17_features.cpp:_ZZN54Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test8TestBodyEvENKUlvE2_clEv() | Function | Function: `_ZZN54Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test8TestBodyEvENKUlvE2_clEv` |
+| ... | ... | *(and 104 more items)* |
+
+**Summary:** 148 uncovered code areas identified across 3 categories.
+
+**Note:** These uncovered areas represent code that by design cannot be easily tested in a unit test environment. They require either integration testing with the actual FreeRTOS kernel, specific hardware configurations, or are defensive programming measures for edge cases that are difficult to reproduce.
+
 
 
 ### Coverage Quality Assessment
@@ -575,7 +625,7 @@ The high coverage percentage indicates:
 
 ### Performance Characteristics
 - **Fastest Test**: 0.000 seconds
-- **Slowest Test**: 0.400 seconds
+- **Slowest Test**: 0.390 seconds
 - **Performance Distribution**:
   - Very Fast (< 0.01s): 6 tests
   - Fast (0.01-0.05s): 401 tests
@@ -607,10 +657,11 @@ This report is automatically generated with each test execution to ensure:
 3. **Performance Monitoring**: Monitor test execution times to detect performance regressions
 4. **Failure Analysis**: When failures occur, this report will provide detailed failure information
 
+
 ---
 
-*Report Generated*: July 22, 2025 at 14:32:34  
+*Report Generated*: July 23, 2025 at 02:08:28  
 *Test Framework*: GoogleTest/GoogleMock  
 *Coverage Tool*: LCOV/GCOV  
-*Total Test Execution Time*: 6.23 seconds  
+*Total Test Execution Time*: 5.25 seconds  
 *Validation Status*: ✅ **All tests passing - System validated for production use**
