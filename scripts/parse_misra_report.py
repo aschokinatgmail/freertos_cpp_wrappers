@@ -9,6 +9,17 @@ import os
 from collections import defaultdict
 from datetime import datetime
 
+# Import MISRA rule descriptions
+try:
+    from misra_rule_descriptions import get_rule_description, format_rule_description
+except ImportError:
+    # Fallback if module is not available
+    def get_rule_description(rule_id):
+        return None
+    
+    def format_rule_description(rule_id, include_rationale=True):
+        return "Rule description not available"
+
 def get_code_context(file_path, line_number, context_lines=3):
     """Get code context around a specific line."""
     try:
@@ -130,7 +141,11 @@ def print_misra_report(stats):
         print()
         for rule, count in sorted(stats['violations_by_rule'].items()):
             rule_num = rule.replace('misra-c2012-', '')
-            print(f"- **MISRA C 2012 Rule {rule_num}**: {count} violation(s)")
+            rule_desc = get_rule_description(rule_num)
+            if rule_desc:
+                print(f"- **MISRA C 2012 Rule {rule_num}**: {count} violation(s) - {rule_desc['title']}")
+            else:
+                print(f"- **MISRA C 2012 Rule {rule_num}**: {count} violation(s)")
         print()
     
     if stats['violations_by_file']:
@@ -155,9 +170,20 @@ def print_misra_report(stats):
             print(f"#### MISRA C 2012 Rule {rule_num} ({len(violations)} violation(s))")
             print()
             
+            # Add rule description if available
+            rule_desc = get_rule_description(rule_num)
+            if rule_desc:
+                print(f"**{rule_desc['title']}**")
+                print()
+                print(rule_desc['description'])
+                print()
+                if 'rationale' in rule_desc:
+                    print(f"*Rationale: {rule_desc['rationale']}*")
+                    print()
+            
             for i, violation in enumerate(violations, 1):
                 print(f"**Violation {i}**: {violation['file']}:{violation['line']}:{violation['column']}")
-                print(f"*{violation['severity'].title()}*: {violation['message']}")
+                print(f"*{violation['severity'].title()}*: misra violation")
                 print()
                 print("```cpp")
                 print(violation['context'])
