@@ -20,6 +20,15 @@ echo
 # Ensure we're in the right directory
 cd "$PROJECT_ROOT"
 
+# Format code according to coding standard
+echo "Formatting code according to coding standard..."
+if [ -f ".clang-format" ]; then
+    find include src -name "*.hpp" -o -name "*.cc" -o -name "*.cpp" -o -name "*.h" | xargs clang-format -i
+    echo "Code formatting completed."
+else
+    echo "Warning: .clang-format file not found. Skipping code formatting."
+fi
+
 # Check if build directory exists, create if needed
 if [ ! -d "$BUILD_DIR" ]; then
     echo "Creating build directory..."

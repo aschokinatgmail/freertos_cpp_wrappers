@@ -39,9 +39,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <FreeRTOS.h>
 #include <chrono>
 #include <cstdbool>
+#include <ctime>
 #include <functional>
 #include <task.h>
-#include <ctime>
 #include <timers.h>
 
 namespace freertos {
@@ -154,21 +154,20 @@ public:
   timer(const timer &) = delete;
   /**
    * @brief Move constructor that properly transfers timer ownership.
-   * 
+   *
    * This constructor ensures that when a timer is moved, the source timer's
    * handle is set to nullptr to prevent double deletion. Previously, the
    * default move constructor would perform a shallow copy, causing both
    * source and destination timers to share the same handle, leading to
    * premature timer deletion when the source was destroyed.
-   * 
+   *
    * @param src The source timer to move from (will be invalidated)
    */
-  timer(timer &&src) noexcept 
-      : m_allocator(std::move(src.m_allocator)), 
-        m_timer(src.m_timer), 
-        m_callback(std::move(src.m_callback)), 
-        m_started(src.m_started) {
-    // Transfer ownership: clear the source timer handle to prevent double deletion
+  timer(timer &&src) noexcept
+      : m_allocator(std::move(src.m_allocator)), m_timer(src.m_timer),
+        m_callback(std::move(src.m_callback)), m_started(src.m_started) {
+    // Transfer ownership: clear the source timer handle to prevent double
+    // deletion
     src.m_timer = nullptr;
     src.m_started = false;
   }
@@ -424,9 +423,11 @@ public:
    * @return BaseType_t pdPASS if the timer period was changed successfully else
    * pdFAIL
    */
-  template <typename RepPeriod, typename PeriodPeriod, typename RepTimeout, typename PeriodTimeout>
-  BaseType_t period(const std::chrono::duration<RepPeriod, PeriodPeriod> &new_period,
-                    const std::chrono::duration<RepTimeout, PeriodTimeout> &timeout) {
+  template <typename RepPeriod, typename PeriodPeriod, typename RepTimeout,
+            typename PeriodTimeout>
+  BaseType_t
+  period(const std::chrono::duration<RepPeriod, PeriodPeriod> &new_period,
+         const std::chrono::duration<RepTimeout, PeriodTimeout> &timeout) {
     return period(
         std::chrono::duration_cast<std::chrono::milliseconds>(new_period)
             .count(),
