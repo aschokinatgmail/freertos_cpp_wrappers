@@ -34,6 +34,14 @@ test_freertos_event_group
 *.xml
 test_results.xml
 
+# CMake/CTest temporary files
+Testing/Temporary/
+
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+
 # IDE files
 .idea/
 *.swp

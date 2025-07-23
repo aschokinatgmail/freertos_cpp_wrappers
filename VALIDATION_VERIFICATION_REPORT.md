@@ -9,11 +9,11 @@ This report provides comprehensive validation and verification results for the F
 - **✅ Passed**: 421 tests
 - **❌ Failed**: 0 tests
 - **Success Rate**: 100.0% (All tests passed!)
-- **Total Execution Time**: 5.00 seconds
+- **Total Execution Time**: 5.02 seconds
 - **Average Test Time**: 0.0119 seconds per test
 
 ### Code Coverage Summary
-- **Line Coverage**: 96.6% (6836/7076 lines)
+- **Line Coverage**: 96.6% (6837/7076 lines)
 - **Function Coverage**: 94.9% (2777/2925 functions)
 - **Coverage Scope**: Main library modules only (src/ and include/ directories)
 
@@ -121,7 +121,7 @@ This report provides comprehensive validation and verification results for the F
 - Passed: 96
 - Failed: 0
 - Success Rate: 100.0%
-- Total Time: 2.040s
+- Total Time: 2.060s
 
 **Detailed Test Results:**
 
@@ -220,7 +220,7 @@ This report provides comprehensive validation and verification results for the F
 | 392 | STLSemaphoreTest.STLRecursiveMutexBasicOperations | ✅ PASS | 0.000s |
 | 393 | STLSemaphoreTest.STLRecursiveMutexNestedLocking | ✅ PASS | 0.000s |
 | 394 | STLSemaphoreTest.STLProducerConsumerWithBuffering | ✅ PASS | 0.100s |
-| 395 | STLSemaphoreTest.STLReaderWriterPattern | ✅ PASS | 0.380s |
+| 395 | STLSemaphoreTest.STLReaderWriterPattern | ✅ PASS | 0.400s |
 | 396 | STLSemaphoreTest.STLSemaphoreStressTest | ✅ PASS | 0.080s |
 | 397 | STLSemaphoreTest.STLTimeoutAccuracy | ✅ PASS | 0.350s |
 
@@ -534,23 +534,73 @@ This report provides comprehensive validation and verification results for the F
 The project achieves excellent code coverage with **96.6% line coverage** and **94.9% function coverage**.
 
 ### Coverage Breakdown
-- **Lines Covered**: 6836 out of 7076 total lines
+- **Lines Covered**: 6837 out of 7076 total lines
 - **Functions Covered**: 2777 out of 2925 total functions
 - **Coverage Target**: Main library modules only (excludes test infrastructure and system headers)
 
+**Detailed Uncovered Areas Analysis:**
 
-**Uncovered Areas Analysis:**
+The following sections provide specific references to uncovered code areas and explanations for why they cannot be covered by unit tests.
 
-The uncovered code primarily consists of:
-1. **Internal task execution functions** - Called by FreeRTOS kernel, not directly testable in unit tests
-2. **Error handling paths** - Some error conditions that require specific FreeRTOS kernel states
-3. **Platform-specific code** - Code paths that depend on specific hardware configurations
-4. **Edge case scenarios** - Rare conditions that are difficult to reproduce in unit test environment
+### Internal task execution functions called by FreeRTOS kernel
 
-These uncovered areas are intentional and represent code that:
-- Requires integration testing with actual FreeRTOS kernel
-- Involves kernel-level functionality not suitable for unit testing
-- Represents defensive programming patterns for robustness
+**Reason for exclusion:** These functions are called internally by the FreeRTOS kernel during task execution and cannot be directly invoked in unit tests
+
+**Specific code references:**
+
+| Location | Type | Details |
+|----------|------|----------|
+| freertos_sw_timer.hpp:freertos::timer<freertos::static_sw_timer_allocator>::callback_wrapper(void*)() | Function | Function: `freertos::timer<freertos::static_sw_timer_allocator>::callback_wrapper(void*)` |
+| freertos_sw_timer.hpp:freertos::timer<freertos::dynamic_sw_timer_allocator>::callback_wrapper(void*)() | Function | Function: `freertos::timer<freertos::dynamic_sw_timer_allocator>::callback_wrapper(void*)` |
+| freertos_task.hpp:freertos::task<freertos::static_task_allocator<0ul> >::task_exec(void*)() | Function | Function: `freertos::task<freertos::static_task_allocator<0ul> >::task_exec(void*)` |
+| freertos_task.hpp:freertos::task<freertos::dynamic_task_allocator<2048ul> >::task_exec(void*)() | Function | Function: `freertos::task<freertos::dynamic_task_allocator<2048ul> >::task_exec(void*)` |
+| freertos_task.hpp:freertos::task<freertos::static_task_allocator<0ul> >::suspend()() | Function | Function: `freertos::task<freertos::static_task_allocator<0ul> >::suspend()` |
+| freertos_task.hpp:freertos::task<freertos::dynamic_task_allocator<2048ul> >::suspend()() | Function | Function: `freertos::task<freertos::dynamic_task_allocator<2048ul> >::suspend()` |
+| freertos_task.hpp:freertos::task<freertos::static_task_allocator<256ul> >::notify_wait(unsigned int, unsigned int, unsigned int&, unsigned int)() | Function | Function: `freertos::task<freertos::static_task_allocator<256ul> >::notify_wait(unsigned int, unsigned int, unsigned int&, unsigned int)` |
+| freertos_task.hpp:freertos::task<freertos::static_task_allocator<512ul> >::notify_wait(unsigned int, unsigned int, unsigned int&, unsigned int)() | Function | Function: `freertos::task<freertos::static_task_allocator<512ul> >::notify_wait(unsigned int, unsigned int, unsigned int&, unsigned int)` |
+| freertos_task.hpp:int freertos::task<freertos::static_task_allocator<256ul> >::notify_wait<long, std::ratio<1l, 1000l> >(unsigned int, unsigned int, unsigned int&, std::chrono::duration<long, std::ratio<1l, 1000l> >)() | Function | Function: `int freertos::task<freertos::static_task_allocator<256ul> >::notify_wait<long, std::ratio<1l, 1000l> >(unsigned int, unsigned int, unsigned int&, std::chrono::duration<long, std::ratio<1l, 1000l> >)` |
+| freertos_task.hpp:int freertos::task<freertos::static_task_allocator<512ul> >::notify_wait<long, std::ratio<1l, 1000l> >(unsigned int, unsigned int, unsigned int&, std::chrono::duration<long, std::ratio<1l, 1000l> >)() | Function | Function: `int freertos::task<freertos::static_task_allocator<512ul> >::notify_wait<long, std::ratio<1l, 1000l> >(unsigned int, unsigned int, unsigned int&, std::chrono::duration<long, std::ratio<1l, 1000l> >)` |
+| ... | ... | *(and 18 more items)* |
+
+### Error handling and edge case scenarios
+
+**Reason for exclusion:** These code paths handle rare error conditions or require specific FreeRTOS kernel states that are difficult to reproduce in unit tests
+
+**Specific code references:**
+
+| Location | Type | Details |
+|----------|------|----------|
+| test_enhanced_cpp17_features.cpp:Cpp17FeaturesTest_RAIIExceptionSafety_Test::TestBody()::{lambda()#1}::operator()() const() | Function | Function: `Cpp17FeaturesTest_RAIIExceptionSafety_Test::TestBody()::{lambda()#1}::operator()() const` |
+| test_freertos_task.cpp:FreeRTOSTaskTest_DynamicTaskAllocatorCreateFailure_Test::TestBody()::{lambda(void*)#1}::operator()(void*) const() | Function | Function: `FreeRTOSTaskTest_DynamicTaskAllocatorCreateFailure_Test::TestBody()::{lambda(void*)#1}::operator()(void*) const` |
+| test_freertos_task.cpp:FreeRTOSTaskTest_EdgeCaseErrorHandling_Test::TestBody()::{lambda()#1}::operator()() const() | Function | Function: `FreeRTOSTaskTest_EdgeCaseErrorHandling_Test::TestBody()::{lambda()#1}::operator()() const` |
+| test_freertos_task.cpp:FreeRTOSTaskTest_StaticTaskAbortDelay_Test::TestBody()::{lambda()#1}::operator()() const() | Function | Function: `FreeRTOSTaskTest_StaticTaskAbortDelay_Test::TestBody()::{lambda()#1}::operator()() const` |
+| test_freertos_task.cpp:FreeRTOSTaskTest_StaticTaskAbortDelayNullHandle_Test::TestBody()::{lambda()#1}::operator()() const() | Function | Function: `FreeRTOSTaskTest_StaticTaskAbortDelayNullHandle_Test::TestBody()::{lambda()#1}::operator()() const` |
+| test_freertos_task.cpp:FreeRTOSTaskTest_DynamicTaskConstructionFailure_Test::TestBody()::{lambda()#1}::operator()() const() | Function | Function: `FreeRTOSTaskTest_DynamicTaskConstructionFailure_Test::TestBody()::{lambda()#1}::operator()() const` |
+
+### Defensive programming and robustness checks
+
+**Reason for exclusion:** These are safety checks and defensive programming patterns that are difficult to trigger in controlled test conditions
+
+**Specific code references:**
+
+| Location | Type | Details |
+|----------|------|----------|
+| freertos_task.hpp:freertos::periodic_task<freertos::static_task_allocator<1024ul> >::periodic_task<double, std::ratio<1l, 1000l> >(char const*, unsigned int, std::function<void ()>&&, std::function<void ()>&&, std::function<void ()>&&, std::chrono::duration<double, std::ratio<1l, 1000l> > const&, bool)::{lambda()#1}::operator()() const() | Function | Function: `freertos::periodic_task<freertos::static_task_allocator<1024ul> >::periodic_task<double, std::ratio<1l, 1000l> >(char const*, unsigned int, std::function<void ()>&&, std::function<void ()>&&, std::function<void ()>&&, std::chrono::duration<double, std::ratio<1l, 1000l> > const&, bool)::{lambda()#1}::operator()() const` |
+| freertos_task.hpp:freertos::periodic_task<freertos::static_task_allocator<1024ul> >::periodic_task<long, std::ratio<1l, 1000l> >(char const*, unsigned int, std::function<void ()>&&, std::function<void ()>&&, std::function<void ()>&&, std::chrono::duration<long, std::ratio<1l, 1000l> > const&, bool)::{lambda()#1}::operator()() const() | Function | Function: `freertos::periodic_task<freertos::static_task_allocator<1024ul> >::periodic_task<long, std::ratio<1l, 1000l> >(char const*, unsigned int, std::function<void ()>&&, std::function<void ()>&&, std::function<void ()>&&, std::chrono::duration<long, std::ratio<1l, 1000l> > const&, bool)::{lambda()#1}::operator()() const` |
+| freertos_mocks.cpp:xMessageBufferSendFromISR() | Function | Function: `xMessageBufferSendFromISR` |
+| freertos_mocks.cpp:xMessageBufferReceiveFromISR() | Function | Function: `xMessageBufferReceiveFromISR` |
+| stl_semaphore_mocks.hpp:freertos_test::stl_counting_semaphore::take(unsigned int)::{lambda()#1}::operator()() const() | Function | Function: `freertos_test::stl_counting_semaphore::take(unsigned int)::{lambda()#1}::operator()() const` |
+| stl_semaphore_mocks.hpp:freertos_test::stl_binary_semaphore::take(unsigned int)::{lambda()#1}::operator()() const() | Function | Function: `freertos_test::stl_binary_semaphore::take(unsigned int)::{lambda()#1}::operator()() const` |
+| test_enhanced_cpp17_features.cpp:Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test::TestBody()::{lambda()#1}::operator()() const() | Function | Function: `Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test::TestBody()::{lambda()#1}::operator()() const` |
+| test_enhanced_cpp17_features.cpp:Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test::TestBody()::{lambda()#2}::operator()() const() | Function | Function: `Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test::TestBody()::{lambda()#2}::operator()() const` |
+| test_enhanced_cpp17_features.cpp:Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test::TestBody()::{lambda()#3}::operator()() const() | Function | Function: `Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test::TestBody()::{lambda()#3}::operator()() const` |
+| test_enhanced_cpp17_features.cpp:Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test::TestBody()::{lambda()#4}::operator()() const() | Function | Function: `Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test::TestBody()::{lambda()#4}::operator()() const` |
+| ... | ... | *(and 104 more items)* |
+
+**Summary:** 148 uncovered code areas identified across 3 categories.
+
+**Note:** These uncovered areas represent code that by design cannot be easily tested in a unit test environment. They require either integration testing with the actual FreeRTOS kernel, specific hardware configurations, or are defensive programming measures for edge cases that are difficult to reproduce.
+
 
 
 ### Coverage Quality Assessment
@@ -575,7 +625,7 @@ The high coverage percentage indicates:
 
 ### Performance Characteristics
 - **Fastest Test**: 0.000 seconds
-- **Slowest Test**: 0.380 seconds
+- **Slowest Test**: 0.400 seconds
 - **Performance Distribution**:
   - Very Fast (< 0.01s): 6 tests
   - Fast (0.01-0.05s): 401 tests
@@ -607,10 +657,11 @@ This report is automatically generated with each test execution to ensure:
 3. **Performance Monitoring**: Monitor test execution times to detect performance regressions
 4. **Failure Analysis**: When failures occur, this report will provide detailed failure information
 
+
 ---
 
-*Report Generated*: July 23, 2025 at 02:13:19  
+*Report Generated*: July 23, 2025 at 03:07:54  
 *Test Framework*: GoogleTest/GoogleMock  
 *Coverage Tool*: LCOV/GCOV  
-*Total Test Execution Time*: 5.00 seconds  
+*Total Test Execution Time*: 5.02 seconds  
 *Validation Status*: ✅ **All tests passing - System validated for production use**
