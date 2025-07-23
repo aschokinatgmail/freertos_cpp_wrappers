@@ -1,47 +1,52 @@
 # Report Generation Scripts
 
-This directory contains scripts for generating various reports for the FreeRTOS C++ Wrappers project.
+This directory contains scripts for generating validation and verification reports for the FreeRTOS C++ Wrappers project.
 
-## Combined Validation and Verification Report
+## Single Comprehensive Report Generator
 
-### `generate_combined_validation_report.sh`
+### `generate_validation_verification_report.sh`
 
-Generates a comprehensive validation and verification report that combines static analysis results with test execution and coverage data.
+**NEW: Single comprehensive script** that consolidates all validation and verification activities into one streamlined process. This script replaces multiple separate scripts and eliminates intermediate files for simplified report generation.
+
+**Complete Process:**
+- Project build and test execution
+- Code coverage analysis  
+- Static code analysis (clang-tidy + MISRA C++)
+- Comprehensive report generation (markdown + HTML)
 
 **Usage:**
 ```bash
-./scripts/generate_combined_validation_report.sh <build_dir> <output_md> <output_html> <source_dir>
+./scripts/generate_validation_verification_report.sh <build_dir> <output_md> <output_html> <source_dir>
 ```
 
 **Parameters:**
-- `build_dir`: Directory containing build artifacts and test results
+- `build_dir`: Directory for build artifacts and test results
 - `output_md`: Output markdown file path
 - `output_html`: Output HTML file path  
 - `source_dir`: Source code directory (usually `.`)
 
 **Example:**
 ```bash
-./scripts/generate_combined_validation_report.sh build VALIDATION_VERIFICATION_REPORT.md VALIDATION_VERIFICATION_REPORT.html .
+./scripts/generate_validation_verification_report.sh build VALIDATION_VERIFICATION_REPORT.md VALIDATION_VERIFICATION_REPORT.html .
 ```
 
-**Required build artifacts:**
-- `coverage_filtered.info`: LCOV coverage data
-- `clang_tidy_report.txt`: clang-tidy analysis results (optional)
-- `misra_report.txt`: MISRA analysis results (optional)
-- `enhanced_cppcheck_report.txt`: Enhanced cppcheck results (optional)
+**Features:**
+- **All-in-one execution**: No intermediate files or multiple script coordination
+- **Robust error handling**: Continues with existing data if build fails
+- **Comprehensive analysis**: Test execution + static analysis + coverage
+- **Professional reporting**: Detailed violations with code context
+- **Main project focus**: Analyzes src/ and include/ directories only
 
-**Output includes:**
-- Executive summary with key metrics
-- **Static Code Analysis** section with:
-  - clang-tidy analysis statistics
-  - MISRA C++ compliance analysis with detailed violations
-  - Code context for each violation
-  - Rule descriptions and rationales
-- **Test Execution Results** by module
-- **Code Coverage Analysis** with detailed uncovered area explanations
-- **Validation Conclusions** and recommendations
+**Generated Report Sections:**
+- Executive summary with key quality metrics
+- Static code analysis (MISRA C++ 2012 + clang-tidy) with detailed violations
+- Test execution results by module with performance metrics
+- Code coverage analysis with line-by-line context
+- Validation conclusions and actionable recommendations
 
-## Individual Report Scripts
+## Legacy Scripts (Deprecated)
+
+The following scripts are maintained for compatibility but the single comprehensive script above is recommended:
 
 ### `generate_static_analysis_report.sh`
 Generates standalone static analysis report with detailed violations.
