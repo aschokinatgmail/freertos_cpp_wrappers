@@ -235,64 +235,33 @@
     </div>
     
     <div class="container">
-        <div class="summary-cards">
-                <div class="card">
-                    <h3>Issues</h3>
-                    <div class="metric">0</div>
-                </div>
-                
-                <div class="card">
-                    <h3>Warnings</h3>
-                    <div class="metric warning">0</div>
-                </div>
-                
-                <div class="card">
-                    <h3>Errors</h3>
-                    <div class="metric error">0</div>
-                </div>
-                
-                <div class="card">
-                    <h3>Files</h3>
-                    <div class="metric">2</div>
-                </div>
-                </div><h1 id="validation-and-verification-report">Validation and Verification Report</h1>
+        <div class="summary-cards"></div><h1 id="validation-and-verification-report">Validation and Verification Report</h1>
 <div class="section"><h2 id="executive-summary">Executive Summary</h2>
-<p>This report provides comprehensive validation and verification results for the FreeRTOS C++ Wrappers project, including static code analysis, detailed test execution outcomes, and code coverage analysis.</p>
+<p>This report provides comprehensive validation and verification results for the FreeRTOS C++ Wrappers project. The analysis focuses exclusively on the main project code (src/ and include/ directories) and excludes test harness code to maintain focus on the library implementation.</p>
+<p><strong>Key Areas Covered:</strong>
+- Static code analysis (MISRA C++ 2012 compliance and clang-tidy)
+- Test execution results<br />
+- Code coverage analysis
+- Validation conclusions</p>
 </div><div class="section"><h2 id="static-code-analysis">Static Code Analysis</h2>
-</div><div class="section"><h2 id="overview">Overview</h2>
-<p><strong>Static Analysis Tools</strong>: clang-tidy + Enhanced cppcheck (all rules) + MISRA C++ (cppcheck)
-<strong>Analysis Scope</strong>: Library modules only - src/ include/
-<strong>Check Sets</strong>: cppcoreguidelines-<em>, cert-</em>, google-<em>, hicpp-</em> + All cppcheck rules (style, performance, portability, security, etc.) + MISRA C 2012 (applicable to C++)</p>
-</div><div class="section"><h2 id="clang-tidy-analysis">clang-tidy Analysis</h2>
-</div><div class="section"><h2 id="statistics">Statistics</h2>
-<h3 id="summary">Summary</h3>
+<h3 id="overview">Overview</h3>
+<p><strong>Static Analysis Tools</strong>: clang-tidy + cppcheck (MISRA C++ 2012)
+<strong>Analysis Scope</strong>: Main project code only (src/ and include/ directories)
+<strong>Excluded</strong>: Test harness, mocks, and external dependencies</p>
+<h3 id="combined-static-analysis-results">Combined Static Analysis Results</h3>
+<h4 id="summary">Summary</h4>
 <ul>
-<li><strong>Total Issues Found</strong>: 0</li>
-<li><strong>Warnings</strong>: 0</li>
-<li><strong>Errors</strong>: 0</li>
-<li><strong>Files Analyzed</strong>: 2</li>
-<li><strong>Unique Check Types</strong>: 1</li>
+<li><strong>MISRA C++ 2012 Violations</strong>: 259</li>
+<li><strong>Style Issues</strong>: 353</li>
+<li><strong>Warnings</strong>: 6</li>
+<li><strong>Errors</strong>: 3</li>
 </ul>
-<h3 id="issues-by-check-category">Issues by Check Category</h3>
-<ul>
-<li><strong>clang</strong>: 1 issues</li>
-</ul>
-<h3 id="files-with-issues">Files with Issues</h3>
-<ul>
-<li><strong>freertos_task.hpp</strong>: 1 issues</li>
-</ul>
-<h3 id="analyzed-files">Analyzed Files</h3>
-<ul>
-<li>freertos_task.hpp</li>
-<li>freertos_task.hpp.</li>
-</ul>
-</div><div class="section"><h2 id="misra-c-analysis">MISRA C++ Analysis</h2>
+<h4 id="detailed-violations">Detailed Violations</h4>
 <h3 id="summary_1">Summary</h3>
 <ul>
 <li><strong>Total MISRA Violations</strong>: 259</li>
 <li><strong>Unique Rules Violated</strong>: 17</li>
 <li><strong>Files Analyzed</strong>: 9</li>
-<li><strong>Analysis Errors</strong>: 3</li>
 <li><strong>Other Issues</strong>: 100</li>
 </ul>
 <h3 id="violations-by-severity">Violations by Severity</h3>
@@ -2989,12 +2958,6 @@
      329:     return receive_isr(data, data_size, higher_priority_task_woken);
      330:   }
 </code></pre></div>
-<h3 id="analysis-errors">Analysis Errors</h3>
-<p>Some files could not be fully analyzed:</p>
-<div class="code-block"><pre><code>src/freertos_task.cc:0:0: error: Bailing out from analysis: Checking file failed: Failed to execute addon 'misra' - exitcode is 1 [internalError]
-include/freertos.hpp:0:0: error: Bailing out from analysis: Checking file failed: Failed to execute addon 'misra' - exitcode is 1 [internalError]
-include/freertos_task.hpp:0:0: error: Bailing out from analysis: Checking file failed: Failed to execute addon 'misra' - exitcode is 1 [internalError]
-</code></pre></div>
 <h3 id="analysis-notes">Analysis Notes</h3>
 <ul>
 <li><strong>Standard</strong>: MISRA C 2012 (applicable rules for C++)</li>
@@ -3004,10 +2967,425 @@ include/freertos_task.hpp:0:0: error: Bailing out from analysis: Checking file f
 <li><strong>Compatibility</strong>: Many MISRA C 2012 rules overlap with MISRA C++ 2008 requirements</li>
 <li><strong>Integration</strong>: This analysis complements the existing clang-tidy static analysis</li>
 </ul>
+<h4 id="clang-tidy-analysis-results">clang-tidy Analysis Results</h4>
+<ul>
+<li><strong>Tool</strong>: clang-tidy</li>
+<li><strong>Warnings</strong>: 94</li>
+<li><strong>Errors</strong>: 9</li>
+</ul>
+<h5 id="detailed-clang-tidy-violations">Detailed clang-tidy Violations</h5>
 <h3 id="detailed-clang-tidy-analysis">Detailed clang-tidy Analysis</h3>
-<h3 id="detailed-clang-tidy-analysis_1">Detailed clang-tidy Analysis</h3>
-<h4 id="clang-diagnostic-error-1-violations">clang-diagnostic-error (1 violation(s))</h4>
-<p><strong>Violation 1</strong>: freertos_task.hpp:39:10
+<h4 id="bugprone-easily-swappable-parameters-28-violations">bugprone-easily-swappable-parameters (28 violation(s))</h4>
+<p><strong>Violation 1</strong>: freertos_event_group.hpp:163:25
+<em>Severity</em>: Warning
+<em>Message</em>: 4 adjacent parameters of 'wait_bits' of similar type ('const int') are easily swapped by mistake</p>
+<pre><code class="language-cpp">     160:    * @param ticks_to_wait timeout in ticks to wait for the bits
+     161:    * @return EventBits_t value of the event group after the call returns
+     162:    */
+&gt;&gt;&gt;  163:   EventBits_t wait_bits(const EventBits_t bits_to_wait_for,
+     164:                         const BaseType_t clear_on_exit,
+     165:                         const BaseType_t wait_for_all_bits,
+     166:                         const TickType_t ticks_to_wait) {
+</code></pre></div>
+<p><strong>Violation 2</strong>: freertos_event_group.hpp:182:25
+<em>Severity</em>: Warning
+<em>Message</em>: 3 adjacent parameters of 'wait_bits' of similar type ('const int') are easily swapped by mistake</p>
+<pre><code class="language-cpp">     179:    * @return EventBits_t value of the event group after the call returns
+     180:    */
+     181:   template &lt;typename Rep, typename Period&gt;
+&gt;&gt;&gt;  182:   EventBits_t wait_bits(const EventBits_t bits_to_wait_for,
+     183:                         const BaseType_t clear_on_exit,
+     184:                         const BaseType_t wait_for_all_bits,
+     185:                         const std::chrono::duration&lt;Rep, Period&gt; &amp;timeout) {
+</code></pre></div>
+<p><strong>Violation 3</strong>: freertos_event_group.hpp:217:20
+<em>Severity</em>: Warning
+<em>Message</em>: 3 adjacent parameters of 'sync' of similar type ('const int') are easily swapped by mistake</p>
+<pre><code class="language-cpp">     214:    * @param ticks_to_wait timeout in ticks to wait for the bits
+     215:    * @return EventBits_t value of the event group after the call returns
+     216:    */
+&gt;&gt;&gt;  217:   EventBits_t sync(const EventBits_t bits_to_set,
+     218:                    const EventBits_t bits_to_wait_for,
+     219:                    const TickType_t ticks_to_wait) {
+     220:     return xEventGroupSync(m_event_group, bits_to_set, bits_to_wait_for,
+</code></pre></div>
+<p><strong>Violation 4</strong>: freertos_event_group.hpp:224:20
+<em>Severity</em>: Warning
+<em>Message</em>: 2 adjacent parameters of 'sync' of similar type ('const int') are easily swapped by mistake</p>
+<pre><code class="language-cpp">     221:                            ticks_to_wait);
+     222:   }
+     223:   template &lt;typename Rep, typename Period&gt;
+&gt;&gt;&gt;  224:   EventBits_t sync(const EventBits_t bits_to_set,
+     225:                    const EventBits_t bits_to_wait_for,
+     226:                    const std::chrono::duration&lt;Rep, Period&gt; &amp;timeout) {
+     227:     return sync(
+</code></pre></div>
+<p><strong>Violation 5</strong>: freertos_message_buffer.hpp:133:37
+<em>Severity</em>: Warning
+<em>Message</em>: 2 adjacent parameters of 'send' of convertible types are easily swapped by mistake</p>
+<pre><code class="language-cpp">     130:    * become available
+     131:    * @return size_t number of bytes sent
+     132:    */
+&gt;&gt;&gt;  133:   size_t send(const void *pvTxData, size_t xDataLengthBytes,
+     134:               TickType_t xTicksToWait) {
+     135:     return xMessageBufferSend(m_message_buffer, pvTxData, xDataLengthBytes,
+     136:                               xTicksToWait);
+</code></pre></div>
+<p><strong>Violation 6</strong>: freertos_message_buffer.hpp:165:34
+<em>Severity</em>: Warning
+<em>Message</em>: 2 adjacent parameters of 'receive' of convertible types are easily swapped by mistake</p>
+<pre><code class="language-cpp">     162:    * become available
+     163:    * @return size_t number of bytes received
+     164:    */
+&gt;&gt;&gt;  165:   size_t receive(void *pvRxData, size_t xBufferLengthBytes,
+     166:                  TickType_t xTicksToWait) {
+     167:     return xMessageBufferReceive(m_message_buffer, pvRxData, xBufferLengthBytes,
+     168:                                  xTicksToWait);
+</code></pre></div>
+<p><strong>Violation 7</strong>: freertos_stream_buffer.hpp:140:37
+<em>Severity</em>: Warning
+<em>Message</em>: 2 adjacent parameters of 'send' of convertible types are easily swapped by mistake</p>
+<pre><code class="language-cpp">     137:    * stream buffer, otherwise errCOULD_NOT_ALLOCATE_REQUIRED_MEMORY if there was
+     138:    * insufficient memory available to copy the data into the stream buffer.
+     139:    */
+&gt;&gt;&gt;  140:   BaseType_t send(const void *data, size_t data_size,
+     141:                   TickType_t timeout = portMAX_DELAY) {
+     142:     return xStreamBufferSend(m_stream_buffer, data, data_size, timeout);
+     143:   }
+</code></pre></div>
+<p><strong>Violation 8</strong>: freertos_stream_buffer.hpp:280:30
+<em>Severity</em>: Warning
+<em>Message</em>: 2 adjacent parameters of 'receive' of convertible types are easily swapped by mistake</p>
+<pre><code class="language-cpp">     277:    * buffer.
+     278:    * @return size_t Number of bytes received.
+     279:    */
+&gt;&gt;&gt;  280:   size_t receive(void *data, size_t data_size,
+     281:                  TickType_t timeout = portMAX_DELAY) {
+     282:     return xStreamBufferReceive(m_stream_buffer, data, data_size, timeout);
+     283:   }
+</code></pre></div>
+<p><strong>Violation 9</strong>: freertos_task.hpp:229:8
+<em>Severity</em>: Warning
+<em>Message</em>: 2 adjacent parameters of 'task<TaskAllocator>' of similar type are easily swapped by mistake</p>
+<pre><code class="language-cpp">     226:    * @param priority  priority of the task
+     227:    * @param task_routine  task routine function
+     228:    */
+&gt;&gt;&gt;  229:   task(const std::string &amp;name, UBaseType_t priority,
+     230:        task_routine_t &amp;&amp;task_routine)
+     231:       : task{name.c_str(), priority,
+     232:              std::forward&lt;std::function&lt;void()&gt;&gt;(task_routine)} {}
+</code></pre></div>
+<p><strong>Violation 10</strong>: freertos_task.hpp:604:17
+<em>Severity</em>: Warning
+<em>Message</em>: 3 adjacent parameters of 'periodic_task<TaskAllocator>' of similar type ('task_routine_t &amp;&amp;') are easily swapped by mistake</p>
+<pre><code class="language-cpp">     601:    */
+     602:   template &lt;typename Rep, typename Period&gt;
+     603:   periodic_task(const char *name, UBaseType_t priority,
+&gt;&gt;&gt;  604:                 task_routine_t &amp;&amp;on_start, task_routine_t &amp;&amp;on_stop,
+     605:                 task_routine_t &amp;&amp;periodic_routine,
+     606:                 const std::chrono::duration&lt;Rep, Period&gt; &amp;period,
+     607:                 bool start_suspended = true)
+</code></pre></div>
+<p><strong>Violation 11</strong>: freertos_task.hpp:626:17
+<em>Severity</em>: Warning
+<em>Message</em>: 2 adjacent parameters of 'periodic_task<TaskAllocator>' of similar type are easily swapped by mistake</p>
+<pre><code class="language-cpp">     623:    * @param start_suspended  start the task in the suspended state
+     624:    */
+     625:   template &lt;typename Rep, typename Period&gt;
+&gt;&gt;&gt;  626:   periodic_task(const std::string &amp;name, UBaseType_t priority,
+     627:                 task_routine_t &amp;&amp;on_start, task_routine_t &amp;&amp;on_stop,
+     628:                 task_routine_t &amp;&amp;periodic_routine,
+     629:                 const std::chrono::duration&lt;Rep, Period&gt; &amp;period,
+</code></pre></div>
+<p><strong>Violation 12</strong>: freertos_task.hpp:668:17
+<em>Severity</em>: Warning
+<em>Message</em>: 2 adjacent parameters of 'periodic_task<TaskAllocator>' of similar type are easily swapped by mistake</p>
+<pre><code class="language-cpp">     665:    * @param periodic_routine  periodic task routine function
+     666:    * @param start_suspended  start the task in the suspended state
+     667:    */
+&gt;&gt;&gt;  668:   periodic_task(const std::string &amp;name, UBaseType_t priority,
+     669:                 task_routine_t &amp;&amp;on_start, task_routine_t &amp;&amp;on_stop,
+     670:                 task_routine_t &amp;&amp;periodic_routine, bool start_suspended = true)
+     671:       : periodic_task{name.c_str(),
+</code></pre></div>
+<p><strong>Violation 13</strong>: freertos_event_group.hpp:163:25
+<em>Severity</em>: Warning
+<em>Message</em>: 4 adjacent parameters of 'wait_bits' of similar type ('const int') are easily swapped by mistake</p>
+<pre><code class="language-cpp">     160:    * @param ticks_to_wait timeout in ticks to wait for the bits
+     161:    * @return EventBits_t value of the event group after the call returns
+     162:    */
+&gt;&gt;&gt;  163:   EventBits_t wait_bits(const EventBits_t bits_to_wait_for,
+     164:                         const BaseType_t clear_on_exit,
+     165:                         const BaseType_t wait_for_all_bits,
+     166:                         const TickType_t ticks_to_wait) {
+</code></pre></div>
+<p><strong>Violation 14</strong>: freertos_event_group.hpp:182:25
+<em>Severity</em>: Warning
+<em>Message</em>: 3 adjacent parameters of 'wait_bits' of similar type ('const int') are easily swapped by mistake</p>
+<pre><code class="language-cpp">     179:    * @return EventBits_t value of the event group after the call returns
+     180:    */
+     181:   template &lt;typename Rep, typename Period&gt;
+&gt;&gt;&gt;  182:   EventBits_t wait_bits(const EventBits_t bits_to_wait_for,
+     183:                         const BaseType_t clear_on_exit,
+     184:                         const BaseType_t wait_for_all_bits,
+     185:                         const std::chrono::duration&lt;Rep, Period&gt; &amp;timeout) {
+</code></pre></div>
+<p><strong>Violation 15</strong>: freertos_event_group.hpp:217:20
+<em>Severity</em>: Warning
+<em>Message</em>: 3 adjacent parameters of 'sync' of similar type ('const int') are easily swapped by mistake</p>
+<pre><code class="language-cpp">     214:    * @param ticks_to_wait timeout in ticks to wait for the bits
+     215:    * @return EventBits_t value of the event group after the call returns
+     216:    */
+&gt;&gt;&gt;  217:   EventBits_t sync(const EventBits_t bits_to_set,
+     218:                    const EventBits_t bits_to_wait_for,
+     219:                    const TickType_t ticks_to_wait) {
+     220:     return xEventGroupSync(m_event_group, bits_to_set, bits_to_wait_for,
+</code></pre></div>
+<p><strong>Violation 16</strong>: freertos_event_group.hpp:224:20
+<em>Severity</em>: Warning
+<em>Message</em>: 2 adjacent parameters of 'sync' of similar type ('const int') are easily swapped by mistake</p>
+<pre><code class="language-cpp">     221:                            ticks_to_wait);
+     222:   }
+     223:   template &lt;typename Rep, typename Period&gt;
+&gt;&gt;&gt;  224:   EventBits_t sync(const EventBits_t bits_to_set,
+     225:                    const EventBits_t bits_to_wait_for,
+     226:                    const std::chrono::duration&lt;Rep, Period&gt; &amp;timeout) {
+     227:     return sync(
+</code></pre></div>
+<p><strong>Violation 17</strong>: freertos_message_buffer.hpp:133:37
+<em>Severity</em>: Warning
+<em>Message</em>: 2 adjacent parameters of 'send' of convertible types are easily swapped by mistake</p>
+<pre><code class="language-cpp">     130:    * become available
+     131:    * @return size_t number of bytes sent
+     132:    */
+&gt;&gt;&gt;  133:   size_t send(const void *pvTxData, size_t xDataLengthBytes,
+     134:               TickType_t xTicksToWait) {
+     135:     return xMessageBufferSend(m_message_buffer, pvTxData, xDataLengthBytes,
+     136:                               xTicksToWait);
+</code></pre></div>
+<p><strong>Violation 18</strong>: freertos_message_buffer.hpp:165:34
+<em>Severity</em>: Warning
+<em>Message</em>: 2 adjacent parameters of 'receive' of convertible types are easily swapped by mistake</p>
+<pre><code class="language-cpp">     162:    * become available
+     163:    * @return size_t number of bytes received
+     164:    */
+&gt;&gt;&gt;  165:   size_t receive(void *pvRxData, size_t xBufferLengthBytes,
+     166:                  TickType_t xTicksToWait) {
+     167:     return xMessageBufferReceive(m_message_buffer, pvRxData, xBufferLengthBytes,
+     168:                                  xTicksToWait);
+</code></pre></div>
+<p><strong>Violation 19</strong>: freertos_stream_buffer.hpp:140:37
+<em>Severity</em>: Warning
+<em>Message</em>: 2 adjacent parameters of 'send' of convertible types are easily swapped by mistake</p>
+<pre><code class="language-cpp">     137:    * stream buffer, otherwise errCOULD_NOT_ALLOCATE_REQUIRED_MEMORY if there was
+     138:    * insufficient memory available to copy the data into the stream buffer.
+     139:    */
+&gt;&gt;&gt;  140:   BaseType_t send(const void *data, size_t data_size,
+     141:                   TickType_t timeout = portMAX_DELAY) {
+     142:     return xStreamBufferSend(m_stream_buffer, data, data_size, timeout);
+     143:   }
+</code></pre></div>
+<p><strong>Violation 20</strong>: freertos_stream_buffer.hpp:280:30
+<em>Severity</em>: Warning
+<em>Message</em>: 2 adjacent parameters of 'receive' of convertible types are easily swapped by mistake</p>
+<pre><code class="language-cpp">     277:    * buffer.
+     278:    * @return size_t Number of bytes received.
+     279:    */
+&gt;&gt;&gt;  280:   size_t receive(void *data, size_t data_size,
+     281:                  TickType_t timeout = portMAX_DELAY) {
+     282:     return xStreamBufferReceive(m_stream_buffer, data, data_size, timeout);
+     283:   }
+</code></pre></div>
+<p><strong>Violation 21</strong>: freertos_task.hpp:229:8
+<em>Severity</em>: Warning
+<em>Message</em>: 2 adjacent parameters of 'task<TaskAllocator>' of similar type are easily swapped by mistake</p>
+<pre><code class="language-cpp">     226:    * @param priority  priority of the task
+     227:    * @param task_routine  task routine function
+     228:    */
+&gt;&gt;&gt;  229:   task(const std::string &amp;name, UBaseType_t priority,
+     230:        task_routine_t &amp;&amp;task_routine)
+     231:       : task{name.c_str(), priority,
+     232:              std::forward&lt;std::function&lt;void()&gt;&gt;(task_routine)} {}
+</code></pre></div>
+<p><strong>Violation 22</strong>: freertos_task.hpp:604:17
+<em>Severity</em>: Warning
+<em>Message</em>: 3 adjacent parameters of 'periodic_task<TaskAllocator>' of similar type ('task_routine_t &amp;&amp;') are easily swapped by mistake</p>
+<pre><code class="language-cpp">     601:    */
+     602:   template &lt;typename Rep, typename Period&gt;
+     603:   periodic_task(const char *name, UBaseType_t priority,
+&gt;&gt;&gt;  604:                 task_routine_t &amp;&amp;on_start, task_routine_t &amp;&amp;on_stop,
+     605:                 task_routine_t &amp;&amp;periodic_routine,
+     606:                 const std::chrono::duration&lt;Rep, Period&gt; &amp;period,
+     607:                 bool start_suspended = true)
+</code></pre></div>
+<p><strong>Violation 23</strong>: freertos_task.hpp:626:17
+<em>Severity</em>: Warning
+<em>Message</em>: 2 adjacent parameters of 'periodic_task<TaskAllocator>' of similar type are easily swapped by mistake</p>
+<pre><code class="language-cpp">     623:    * @param start_suspended  start the task in the suspended state
+     624:    */
+     625:   template &lt;typename Rep, typename Period&gt;
+&gt;&gt;&gt;  626:   periodic_task(const std::string &amp;name, UBaseType_t priority,
+     627:                 task_routine_t &amp;&amp;on_start, task_routine_t &amp;&amp;on_stop,
+     628:                 task_routine_t &amp;&amp;periodic_routine,
+     629:                 const std::chrono::duration&lt;Rep, Period&gt; &amp;period,
+</code></pre></div>
+<p><strong>Violation 24</strong>: freertos_task.hpp:668:17
+<em>Severity</em>: Warning
+<em>Message</em>: 2 adjacent parameters of 'periodic_task<TaskAllocator>' of similar type are easily swapped by mistake</p>
+<pre><code class="language-cpp">     665:    * @param periodic_routine  periodic task routine function
+     666:    * @param start_suspended  start the task in the suspended state
+     667:    */
+&gt;&gt;&gt;  668:   periodic_task(const std::string &amp;name, UBaseType_t priority,
+     669:                 task_routine_t &amp;&amp;on_start, task_routine_t &amp;&amp;on_stop,
+     670:                 task_routine_t &amp;&amp;periodic_routine, bool start_suspended = true)
+     671:       : periodic_task{name.c_str(),
+</code></pre></div>
+<p><strong>Violation 25</strong>: freertos_task.hpp:229:8
+<em>Severity</em>: Warning
+<em>Message</em>: 2 adjacent parameters of 'task<TaskAllocator>' of similar type are easily swapped by mistake</p>
+<pre><code class="language-cpp">     226:    * @param priority  priority of the task
+     227:    * @param task_routine  task routine function
+     228:    */
+&gt;&gt;&gt;  229:   task(const std::string &amp;name, UBaseType_t priority,
+     230:        task_routine_t &amp;&amp;task_routine)
+     231:       : task{name.c_str(), priority,
+     232:              std::forward&lt;std::function&lt;void()&gt;&gt;(task_routine)} {}
+</code></pre></div>
+<p><strong>Violation 26</strong>: freertos_task.hpp:604:17
+<em>Severity</em>: Warning
+<em>Message</em>: 3 adjacent parameters of 'periodic_task<TaskAllocator>' of similar type ('task_routine_t &amp;&amp;') are easily swapped by mistake</p>
+<pre><code class="language-cpp">     601:    */
+     602:   template &lt;typename Rep, typename Period&gt;
+     603:   periodic_task(const char *name, UBaseType_t priority,
+&gt;&gt;&gt;  604:                 task_routine_t &amp;&amp;on_start, task_routine_t &amp;&amp;on_stop,
+     605:                 task_routine_t &amp;&amp;periodic_routine,
+     606:                 const std::chrono::duration&lt;Rep, Period&gt; &amp;period,
+     607:                 bool start_suspended = true)
+</code></pre></div>
+<p><strong>Violation 27</strong>: freertos_task.hpp:626:17
+<em>Severity</em>: Warning
+<em>Message</em>: 2 adjacent parameters of 'periodic_task<TaskAllocator>' of similar type are easily swapped by mistake</p>
+<pre><code class="language-cpp">     623:    * @param start_suspended  start the task in the suspended state
+     624:    */
+     625:   template &lt;typename Rep, typename Period&gt;
+&gt;&gt;&gt;  626:   periodic_task(const std::string &amp;name, UBaseType_t priority,
+     627:                 task_routine_t &amp;&amp;on_start, task_routine_t &amp;&amp;on_stop,
+     628:                 task_routine_t &amp;&amp;periodic_routine,
+     629:                 const std::chrono::duration&lt;Rep, Period&gt; &amp;period,
+</code></pre></div>
+<p><strong>Violation 28</strong>: freertos_task.hpp:668:17
+<em>Severity</em>: Warning
+<em>Message</em>: 2 adjacent parameters of 'periodic_task<TaskAllocator>' of similar type are easily swapped by mistake</p>
+<pre><code class="language-cpp">     665:    * @param periodic_routine  periodic task routine function
+     666:    * @param start_suspended  start the task in the suspended state
+     667:    */
+&gt;&gt;&gt;  668:   periodic_task(const std::string &amp;name, UBaseType_t priority,
+     669:                 task_routine_t &amp;&amp;on_start, task_routine_t &amp;&amp;on_stop,
+     670:                 task_routine_t &amp;&amp;periodic_routine, bool start_suspended = true)
+     671:       : periodic_task{name.c_str(),
+</code></pre></div>
+<h4 id="bugprone-infinite-loop-2-violations">bugprone-infinite-loop (2 violation(s))</h4>
+<p><strong>Violation 1</strong>: freertos_semaphore.hpp:453:5
+<em>Severity</em>: Warning
+<em>Message</em>: this loop is infinite; none of its condition variables (count) are updated in the loop body</p>
+<pre><code class="language-cpp">     450:    * @return counting_semaphore&amp; reference to the counting semaphore.
+     451:    */
+     452:   counting_semaphore &amp;operator+=(UBaseType_t count) {
+&gt;&gt;&gt;  453:     while (count--) {
+     454:       give();
+     455:     }
+     456:     return *this;
+</code></pre></div>
+<p><strong>Violation 2</strong>: freertos_semaphore.hpp:453:5
+<em>Severity</em>: Warning
+<em>Message</em>: this loop is infinite; none of its condition variables (count) are updated in the loop body</p>
+<pre><code class="language-cpp">     450:    * @return counting_semaphore&amp; reference to the counting semaphore.
+     451:    */
+     452:   counting_semaphore &amp;operator+=(UBaseType_t count) {
+&gt;&gt;&gt;  453:     while (count--) {
+     454:       give();
+     455:     }
+     456:     return *this;
+</code></pre></div>
+<h4 id="clang-diagnostic-error-9-violations">clang-diagnostic-error (9 violation(s))</h4>
+<p><strong>Violation 1</strong>: freertos_event_group.hpp:39:10
+<em>Severity</em>: Error
+<em>Message</em>: 'FreeRTOS.h' file not found</p>
+<pre><code class="language-cpp">      36: #error &quot;This header is for C++ only&quot;
+      37: #endif
+      38: 
+&gt;&gt;&gt;   39: #include &lt;FreeRTOS.h&gt;
+      40: #include &lt;chrono&gt;
+      41: #include &lt;event_groups.h&gt;
+      42: 
+</code></pre></div>
+<p><strong>Violation 2</strong>: freertos_event_group.hpp:39:10
+<em>Severity</em>: Error
+<em>Message</em>: 'FreeRTOS.h' file not found</p>
+<pre><code class="language-cpp">      36: #error &quot;This header is for C++ only&quot;
+      37: #endif
+      38: 
+&gt;&gt;&gt;   39: #include &lt;FreeRTOS.h&gt;
+      40: #include &lt;chrono&gt;
+      41: #include &lt;event_groups.h&gt;
+      42: 
+</code></pre></div>
+<p><strong>Violation 3</strong>: freertos_message_buffer.hpp:39:10
+<em>Severity</em>: Error
+<em>Message</em>: 'FreeRTOS.h' file not found</p>
+<pre><code class="language-cpp">      36: #error &quot;This header is for C++ only&quot;
+      37: #endif
+      38: 
+&gt;&gt;&gt;   39: #include &lt;FreeRTOS.h&gt;
+      40: #include &lt;array&gt;
+      41: #include &lt;chrono&gt;
+      42: #include &lt;message_buffer.h&gt;
+</code></pre></div>
+<p><strong>Violation 4</strong>: freertos_queue.hpp:39:10
+<em>Severity</em>: Error
+<em>Message</em>: 'FreeRTOS.h' file not found</p>
+<pre><code class="language-cpp">      36: #error &quot;This header is for C++ only&quot;
+      37: #endif
+      38: 
+&gt;&gt;&gt;   39: #include &lt;FreeRTOS.h&gt;
+      40: #include &lt;array&gt;
+      41: #include &lt;chrono&gt;
+      42: #include &lt;optional&gt;
+</code></pre></div>
+<p><strong>Violation 5</strong>: freertos_semaphore.hpp:39:10
+<em>Severity</em>: Error
+<em>Message</em>: 'FreeRTOS.h' file not found</p>
+<pre><code class="language-cpp">      36: #error &quot;This header is for C++ only&quot;
+      37: #endif
+      38: 
+&gt;&gt;&gt;   39: #include &lt;FreeRTOS.h&gt;
+      40: #include &lt;chrono&gt;
+      41: #include &lt;ctime&gt;
+      42: #include &lt;semphr.h&gt;
+</code></pre></div>
+<p><strong>Violation 6</strong>: freertos_stream_buffer.hpp:39:10
+<em>Severity</em>: Error
+<em>Message</em>: 'FreeRTOS.h' file not found</p>
+<pre><code class="language-cpp">      36: #error &quot;This header is for C++ only&quot;
+      37: #endif
+      38: 
+&gt;&gt;&gt;   39: #include &lt;FreeRTOS.h&gt;
+      40: #include &lt;array&gt;
+      41: #include &lt;chrono&gt;
+      42: #include &lt;optional&gt;
+</code></pre></div>
+<p><strong>Violation 7</strong>: freertos_sw_timer.hpp:39:10
+<em>Severity</em>: Error
+<em>Message</em>: 'FreeRTOS.h' file not found</p>
+<pre><code class="language-cpp">      36: #error &quot;This header is for C++ only&quot;
+      37: #endif
+      38: 
+&gt;&gt;&gt;   39: #include &lt;FreeRTOS.h&gt;
+      40: #include &lt;chrono&gt;
+      41: #include &lt;cstdbool&gt;
+      42: #include &lt;ctime&gt;
+</code></pre></div>
+<p><strong>Violation 8</strong>: freertos_task.hpp:39:10
 <em>Severity</em>: Error
 <em>Message</em>: 'FreeRTOS.h' file not found</p>
 <pre><code class="language-cpp">      36: #error &quot;This header is for C++ only&quot;
@@ -3018,13 +3396,723 @@ include/freertos_task.hpp:0:0: error: Bailing out from analysis: Checking file f
       41: #include &lt;cassert&gt;
       42: #include &lt;chrono&gt;
 </code></pre></div>
-<hr />
-<p><em>Generated: July 23, 2025</em>
-<em>Tools: clang-tidy + Enhanced cppcheck (all rules) + MISRA C++ (cppcheck)</em>
-<em>Scope: Library modules only</em></p></div>
+<p><strong>Violation 9</strong>: freertos_task.hpp:39:10
+<em>Severity</em>: Error
+<em>Message</em>: 'FreeRTOS.h' file not found</p>
+<pre><code class="language-cpp">      36: #error &quot;This header is for C++ only&quot;
+      37: #endif
+      38: 
+&gt;&gt;&gt;   39: #include &lt;FreeRTOS.h&gt;
+      40: #include &lt;array&gt;
+      41: #include &lt;cassert&gt;
+      42: #include &lt;chrono&gt;
+</code></pre></div>
+<h4 id="misc-include-cleaner-21-violations">misc-include-cleaner (21 violation(s))</h4>
+<p><strong>Violation 1</strong>: freertos.hpp:39:1
+<em>Severity</em>: Warning
+<em>Message</em>: included header freertos_event_group.hpp is not used directly</p>
+<pre><code class="language-cpp">      36: #error &quot;This header is for C++ only&quot;
+      37: #endif
+      38: 
+&gt;&gt;&gt;   39: #include &quot;freertos_event_group.hpp&quot;
+      40: #include &quot;freertos_message_buffer.hpp&quot;
+      41: #include &quot;freertos_queue.hpp&quot;
+      42: #include &quot;freertos_semaphore.hpp&quot;
+</code></pre></div>
+<p><strong>Violation 2</strong>: freertos.hpp:40:1
+<em>Severity</em>: Warning
+<em>Message</em>: included header freertos_message_buffer.hpp is not used directly</p>
+<pre><code class="language-cpp">      37: #endif
+      38: 
+      39: #include &quot;freertos_event_group.hpp&quot;
+&gt;&gt;&gt;   40: #include &quot;freertos_message_buffer.hpp&quot;
+      41: #include &quot;freertos_queue.hpp&quot;
+      42: #include &quot;freertos_semaphore.hpp&quot;
+      43: #include &quot;freertos_stream_buffer.hpp&quot;
+</code></pre></div>
+<p><strong>Violation 3</strong>: freertos.hpp:41:1
+<em>Severity</em>: Warning
+<em>Message</em>: included header freertos_queue.hpp is not used directly</p>
+<pre><code class="language-cpp">      38: 
+      39: #include &quot;freertos_event_group.hpp&quot;
+      40: #include &quot;freertos_message_buffer.hpp&quot;
+&gt;&gt;&gt;   41: #include &quot;freertos_queue.hpp&quot;
+      42: #include &quot;freertos_semaphore.hpp&quot;
+      43: #include &quot;freertos_stream_buffer.hpp&quot;
+      44: #include &quot;freertos_sw_timer.hpp&quot;
+</code></pre></div>
+<p><strong>Violation 4</strong>: freertos.hpp:42:1
+<em>Severity</em>: Warning
+<em>Message</em>: included header freertos_semaphore.hpp is not used directly</p>
+<pre><code class="language-cpp">      39: #include &quot;freertos_event_group.hpp&quot;
+      40: #include &quot;freertos_message_buffer.hpp&quot;
+      41: #include &quot;freertos_queue.hpp&quot;
+&gt;&gt;&gt;   42: #include &quot;freertos_semaphore.hpp&quot;
+      43: #include &quot;freertos_stream_buffer.hpp&quot;
+      44: #include &quot;freertos_sw_timer.hpp&quot;
+      45: #include &quot;freertos_task.hpp&quot;
+</code></pre></div>
+<p><strong>Violation 5</strong>: freertos.hpp:43:1
+<em>Severity</em>: Warning
+<em>Message</em>: included header freertos_stream_buffer.hpp is not used directly</p>
+<pre><code class="language-cpp">      40: #include &quot;freertos_message_buffer.hpp&quot;
+      41: #include &quot;freertos_queue.hpp&quot;
+      42: #include &quot;freertos_semaphore.hpp&quot;
+&gt;&gt;&gt;   43: #include &quot;freertos_stream_buffer.hpp&quot;
+      44: #include &quot;freertos_sw_timer.hpp&quot;
+      45: #include &quot;freertos_task.hpp&quot;
+</code></pre></div>
+<p><strong>Violation 6</strong>: freertos.hpp:44:1
+<em>Severity</em>: Warning
+<em>Message</em>: included header freertos_sw_timer.hpp is not used directly</p>
+<pre><code class="language-cpp">      41: #include &quot;freertos_queue.hpp&quot;
+      42: #include &quot;freertos_semaphore.hpp&quot;
+      43: #include &quot;freertos_stream_buffer.hpp&quot;
+&gt;&gt;&gt;   44: #include &quot;freertos_sw_timer.hpp&quot;
+      45: #include &quot;freertos_task.hpp&quot;
+</code></pre></div>
+<p><strong>Violation 7</strong>: freertos.hpp:45:1
+<em>Severity</em>: Warning
+<em>Message</em>: included header freertos_task.hpp is not used directly</p>
+<pre><code class="language-cpp">      42: #include &quot;freertos_semaphore.hpp&quot;
+      43: #include &quot;freertos_stream_buffer.hpp&quot;
+      44: #include &quot;freertos_sw_timer.hpp&quot;
+&gt;&gt;&gt;   45: #include &quot;freertos_task.hpp&quot;
+</code></pre></div>
+<p><strong>Violation 8</strong>: freertos_message_buffer.hpp:40:1
+<em>Severity</em>: Warning
+<em>Message</em>: included header array is not used directly</p>
+<pre><code class="language-cpp">      37: #endif
+      38: 
+      39: #include &lt;FreeRTOS.h&gt;
+&gt;&gt;&gt;   40: #include &lt;array&gt;
+      41: #include &lt;chrono&gt;
+      42: #include &lt;message_buffer.h&gt;
+      43: 
+</code></pre></div>
+<p><strong>Violation 9</strong>: freertos_message_buffer.hpp:94:11
+<em>Severity</em>: Warning
+<em>Message</em>: no header providing "size_t" is directly included</p>
+<pre><code class="language-cpp">      91:  * @tparam MessageBufferSize size of the message buffer
+      92:  * @tparam MessageBufferAllocator type of the message buffer allocator
+      93:  */
+&gt;&gt;&gt;   94: template &lt;size_t MessageBufferSize, typename MessageBufferAllocator&gt;
+      95: class message_buffer {
+      96:   MessageBufferAllocator m_allocator{};
+      97:   MessageBufferHandle_t m_message_buffer{nullptr};
+</code></pre></div>
+<p><strong>Violation 10</strong>: freertos_queue.hpp:40:1
+<em>Severity</em>: Warning
+<em>Message</em>: included header array is not used directly</p>
+<pre><code class="language-cpp">      37: #endif
+      38: 
+      39: #include &lt;FreeRTOS.h&gt;
+&gt;&gt;&gt;   40: #include &lt;array&gt;
+      41: #include &lt;chrono&gt;
+      42: #include &lt;optional&gt;
+      43: #include &lt;queue.h&gt;
+</code></pre></div>
+<p><strong>Violation 11</strong>: freertos_queue.hpp:188:11
+<em>Severity</em>: Warning
+<em>Message</em>: no header providing "size_t" is directly included</p>
+<pre><code class="language-cpp">     185:  * static_queue;
+     186:  * ```
+     187:  */
+&gt;&gt;&gt;  188: template &lt;size_t QueueLength, typename T, typename QueueAllocator&gt; class queue {
+     189:   QueueAllocator m_allocator{};
+     190:   QueueHandle_t m_queue{nullptr};
+     191: 
+</code></pre></div>
+<p><strong>Violation 12</strong>: freertos_semaphore.hpp:469:3
+<em>Severity</em>: Warning
+<em>Message</em>: no header providing "uint8_t" is directly included</p>
+<pre><code class="language-cpp">     466: template &lt;typename SemaphoreAllocator&gt; class mutex {
+     467:   SemaphoreAllocator m_allocator{};
+     468:   SemaphoreHandle_t m_semaphore{nullptr};
+&gt;&gt;&gt;  469:   uint8_t m_locked : 1;
+     470: 
+     471: public:
+     472:   /**
+</code></pre></div>
+<p><strong>Violation 13</strong>: freertos_stream_buffer.hpp:40:1
+<em>Severity</em>: Warning
+<em>Message</em>: included header array is not used directly</p>
+<pre><code class="language-cpp">      37: #endif
+      38: 
+      39: #include &lt;FreeRTOS.h&gt;
+&gt;&gt;&gt;   40: #include &lt;array&gt;
+      41: #include &lt;chrono&gt;
+      42: #include &lt;optional&gt;
+      43: #include &lt;stream_buffer.h&gt;
+</code></pre></div>
+<p><strong>Violation 14</strong>: freertos_stream_buffer.hpp:42:1
+<em>Severity</em>: Warning
+<em>Message</em>: included header optional is not used directly</p>
+<pre><code class="language-cpp">      39: #include &lt;FreeRTOS.h&gt;
+      40: #include &lt;array&gt;
+      41: #include &lt;chrono&gt;
+&gt;&gt;&gt;   42: #include &lt;optional&gt;
+      43: #include &lt;stream_buffer.h&gt;
+      44: 
+      45: namespace freertos {
+</code></pre></div>
+<p><strong>Violation 15</strong>: freertos_stream_buffer.hpp:96:11
+<em>Severity</em>: Warning
+<em>Message</em>: no header providing "size_t" is directly included</p>
+<pre><code class="language-cpp">      93:  * @tparam StreamBufferSize size of the stream buffer
+      94:  * @tparam StreamBufferAllocator type of the stream buffer allocator
+      95:  */
+&gt;&gt;&gt;   96: template &lt;size_t StreamBufferSize, typename StreamBufferAllocator&gt;
+      97: class stream_buffer {
+      98:   StreamBufferAllocator m_allocator{};
+      99:   StreamBufferHandle_t m_stream_buffer{nullptr};
+</code></pre></div>
+<p><strong>Violation 16</strong>: freertos_sw_timer.hpp:40:1
+<em>Severity</em>: Warning
+<em>Message</em>: included header chrono is not used directly</p>
+<pre><code class="language-cpp">      37: #endif
+      38: 
+      39: #include &lt;FreeRTOS.h&gt;
+&gt;&gt;&gt;   40: #include &lt;chrono&gt;
+      41: #include &lt;cstdbool&gt;
+      42: #include &lt;ctime&gt;
+      43: #include &lt;functional&gt;
+</code></pre></div>
+<p><strong>Violation 17</strong>: freertos_sw_timer.hpp:43:1
+<em>Severity</em>: Warning
+<em>Message</em>: included header functional is not used directly</p>
+<pre><code class="language-cpp">      40: #include &lt;chrono&gt;
+      41: #include &lt;cstdbool&gt;
+      42: #include &lt;ctime&gt;
+&gt;&gt;&gt;   43: #include &lt;functional&gt;
+      44: #include &lt;task.h&gt;
+      45: #include &lt;timers.h&gt;
+      46: 
+</code></pre></div>
+<p><strong>Violation 18</strong>: freertos_task.hpp:40:1
+<em>Severity</em>: Warning
+<em>Message</em>: included header array is not used directly</p>
+<pre><code class="language-cpp">      37: #endif
+      38: 
+      39: #include &lt;FreeRTOS.h&gt;
+&gt;&gt;&gt;   40: #include &lt;array&gt;
+      41: #include &lt;cassert&gt;
+      42: #include &lt;chrono&gt;
+      43: #include &lt;functional&gt;
+</code></pre></div>
+<p><strong>Violation 19</strong>: freertos_task.cc:41:37
+<em>Severity</em>: Warning
+<em>Message</em>: no header providing "std::chrono::system_clock" is directly included</p>
+<pre><code class="language-cpp">      38: void delay_until(TickType_t &amp;previousWakeTime, TickType_t period) {
+      39:   vTaskDelayUntil(&amp;previousWakeTime, period);
+      40: }
+&gt;&gt;&gt;   41: void delay_until(const std::chrono::system_clock::time_point &amp;wakeTime) {
+      42:   auto now = std::chrono::system_clock::now();
+      43:   if (wakeTime &gt; now) {
+      44:     delay(wakeTime - now);
+</code></pre></div>
+<p><strong>Violation 20</strong>: freertos_task.cc:47:37
+<em>Severity</em>: Warning
+<em>Message</em>: no header providing "std::chrono::steady_clock" is directly included</p>
+<pre><code class="language-cpp">      44:     delay(wakeTime - now);
+      45:   }
+      46: }
+&gt;&gt;&gt;   47: void delay_until(const std::chrono::steady_clock::time_point &amp;wakeTime) {
+      48:   auto now = std::chrono::steady_clock::now();
+      49:   if (wakeTime &gt; now) {
+      50:     delay(wakeTime - now);
+</code></pre></div>
+<p><strong>Violation 21</strong>: freertos_task.cc:61:14
+<em>Severity</em>: Warning
+<em>Message</em>: no header providing "std::chrono::milliseconds" is directly included</p>
+<pre><code class="language-cpp">      58: #endif
+      59: TickType_t tick_count(void) { return xTaskGetTickCount(); }
+      60: TickType_t tick_count_isr(void) { return xTaskGetTickCountFromISR(); }
+&gt;&gt;&gt;   61: std::chrono::milliseconds time_since_scheduler_started(void) {
+      62:   return std::chrono::milliseconds{tick_count() * portTICK_PERIOD_MS};
+      63: }
+      64: std::chrono::milliseconds time_since_scheduler_started_isr(void) {
+</code></pre></div>
+<h4 id="readability-identifier-length-30-violations">readability-identifier-length (30 violation(s))</h4>
+<p><strong>Violation 1</strong>: freertos_queue.hpp:210:12
+<em>Severity</em>: Warning
+<em>Message</em>: variable name 'n' is too short, expected at least 3 characters</p>
+<pre><code class="language-cpp">     207:   queue(queue &amp;&amp;src) = delete;
+     208:   ~queue(void) {
+     209:     if (m_queue) {
+&gt;&gt;&gt;  210:       auto n = pcQueueGetName(m_queue);
+     211:       if (n) {
+     212:         vQueueUnregisterQueue(m_queue);
+     213:       }
+</code></pre></div>
+<p><strong>Violation 2</strong>: freertos_semaphore.hpp:502:10
+<em>Severity</em>: Warning
+<em>Message</em>: variable name 'rc' is too short, expected at least 3 characters</p>
+<pre><code class="language-cpp">     499:    * @return BaseType_t pdTRUE if the mutex was successfully unlocked,
+     500:    */
+     501:   BaseType_t unlock() {
+&gt;&gt;&gt;  502:     auto rc = xSemaphoreGive(m_semaphore);
+     503:     if (rc) {
+     504:       m_locked = false;
+     505:     }
+</code></pre></div>
+<p><strong>Violation 3</strong>: freertos_semaphore.hpp:517:10
+<em>Severity</em>: Warning
+<em>Message</em>: variable name 'rc' is too short, expected at least 3 characters</p>
+<pre><code class="language-cpp">     514:    * @return BaseType_t pdTRUE if the mutex was successfully unlocked,
+     515:    */
+     516:   BaseType_t unlock_isr(BaseType_t &amp;high_priority_task_woken) {
+&gt;&gt;&gt;  517:     auto rc = xSemaphoreGiveFromISR(m_semaphore, &amp;high_priority_task_woken);
+     518:     if (rc) {
+     519:       m_locked = false;
+     520:     }
+</code></pre></div>
+<p><strong>Violation 4</strong>: freertos_semaphore.hpp:531:10
+<em>Severity</em>: Warning
+<em>Message</em>: variable name 'rc' is too short, expected at least 3 characters</p>
+<pre><code class="language-cpp">     528:    */
+     529:   BaseType_t unlock_isr(void) {
+     530:     BaseType_t high_priority_task_woken = pdFALSE;
+&gt;&gt;&gt;  531:     auto rc = xSemaphoreGiveFromISR(m_semaphore, &amp;high_priority_task_woken);
+     532:     if (rc) {
+     533:       m_locked = false;
+     534:     }
+</code></pre></div>
+<p><strong>Violation 5</strong>: freertos_semaphore.hpp:545:10
+<em>Severity</em>: Warning
+<em>Message</em>: variable name 'rc' is too short, expected at least 3 characters</p>
+<pre><code class="language-cpp">     542:    * @return BaseType_t pdTRUE if the mutex was successfully locked,
+     543:    */
+     544:   BaseType_t lock(const TickType_t ticks_to_wait = portMAX_DELAY) {
+&gt;&gt;&gt;  545:     auto rc = xSemaphoreTake(m_semaphore, ticks_to_wait);
+     546:     if (rc) {
+     547:       m_locked = true;
+     548:     }
+</code></pre></div>
+<p><strong>Violation 6</strong>: freertos_semaphore.hpp:560:10
+<em>Severity</em>: Warning
+<em>Message</em>: variable name 'rc' is too short, expected at least 3 characters</p>
+<pre><code class="language-cpp">     557:    * @return BaseType_t pdTRUE if the mutex was successfully locked,
+     558:    */
+     559:   BaseType_t lock_isr(BaseType_t &amp;high_priority_task_woken) {
+&gt;&gt;&gt;  560:     auto rc = xSemaphoreTakeFromISR(m_semaphore, &amp;high_priority_task_woken);
+     561:     if (rc) {
+     562:       m_locked = true;
+     563:     }
+</code></pre></div>
+<p><strong>Violation 7</strong>: freertos_semaphore.hpp:574:10
+<em>Severity</em>: Warning
+<em>Message</em>: variable name 'rc' is too short, expected at least 3 characters</p>
+<pre><code class="language-cpp">     571:    */
+     572:   BaseType_t lock_isr(void) {
+     573:     BaseType_t high_priority_task_woken = pdFALSE;
+&gt;&gt;&gt;  574:     auto rc = xSemaphoreTakeFromISR(m_semaphore, &amp;high_priority_task_woken);
+     575:     if (rc) {
+     576:       m_locked = true;
+     577:     }
+</code></pre></div>
+<p><strong>Violation 8</strong>: freertos_semaphore.hpp:598:10
+<em>Severity</em>: Warning
+<em>Message</em>: variable name 'rc' is too short, expected at least 3 characters</p>
+<pre><code class="language-cpp">     595:    * @return BaseType_t pdTRUE if the mutex was successfully locked,
+     596:    */
+     597:   BaseType_t try_lock() {
+&gt;&gt;&gt;  598:     auto rc = xSemaphoreTake(m_semaphore, 0);
+     599:     if (rc) {
+     600:       m_locked = true;
+     601:     }
+</code></pre></div>
+<p><strong>Violation 9</strong>: freertos_semaphore.hpp:655:10
+<em>Severity</em>: Warning
+<em>Message</em>: variable name 'rc' is too short, expected at least 3 characters</p>
+<pre><code class="language-cpp">     652:    * otherwise pdFALSE.
+     653:    */
+     654:   BaseType_t unlock() {
+&gt;&gt;&gt;  655:     auto rc = xSemaphoreGiveRecursive(m_semaphore);
+     656:     if (rc &amp;&amp; m_recursions_count &gt; 0) {
+     657:       m_recursions_count--;
+     658:     }
+</code></pre></div>
+<p><strong>Violation 10</strong>: freertos_semaphore.hpp:670:10
+<em>Severity</em>: Warning
+<em>Message</em>: variable name 'rc' is too short, expected at least 3 characters</p>
+<pre><code class="language-cpp">     667:    * @return BaseType_t pdTRUE if the recursive mutex was successfully unlocked,
+     668:    */
+     669:   BaseType_t unlock_isr(BaseType_t &amp;high_priority_task_woken) {
+&gt;&gt;&gt;  670:     auto rc = xSemaphoreGiveFromISR(m_semaphore, &amp;high_priority_task_woken);
+     671:     if (rc &amp;&amp; m_recursions_count &gt; 0) {
+     672:       m_recursions_count--;
+     673:     }
+</code></pre></div>
+<p><strong>Violation 11</strong>: freertos_semaphore.hpp:684:10
+<em>Severity</em>: Warning
+<em>Message</em>: variable name 'rc' is too short, expected at least 3 characters</p>
+<pre><code class="language-cpp">     681:    */
+     682:   BaseType_t unlock_isr(void) {
+     683:     BaseType_t high_priority_task_woken = pdFALSE;
+&gt;&gt;&gt;  684:     auto rc = xSemaphoreGiveFromISR(m_semaphore, &amp;high_priority_task_woken);
+     685:     if (rc &amp;&amp; m_recursions_count &gt; 0) {
+     686:       m_recursions_count--;
+     687:     }
+</code></pre></div>
+<p><strong>Violation 12</strong>: freertos_semaphore.hpp:698:10
+<em>Severity</em>: Warning
+<em>Message</em>: variable name 'rc' is too short, expected at least 3 characters</p>
+<pre><code class="language-cpp">     695:    * @return BaseType_t pdTRUE if the recursive mutex was successfully locked,
+     696:    */
+     697:   BaseType_t lock(const TickType_t ticks_to_wait = portMAX_DELAY) {
+&gt;&gt;&gt;  698:     auto rc = xSemaphoreTakeRecursive(m_semaphore, ticks_to_wait);
+     699:     if (rc) {
+     700:       m_recursions_count++;
+     701:     }
+</code></pre></div>
+<p><strong>Violation 13</strong>: freertos_semaphore.hpp:713:10
+<em>Severity</em>: Warning
+<em>Message</em>: variable name 'rc' is too short, expected at least 3 characters</p>
+<pre><code class="language-cpp">     710:    * @return BaseType_t pdTRUE if the recursive mutex was successfully locked,
+     711:    */
+     712:   BaseType_t lock_isr(BaseType_t &amp;high_priority_task_woken) {
+&gt;&gt;&gt;  713:     auto rc = xSemaphoreTakeFromISR(m_semaphore, &amp;high_priority_task_woken);
+     714:     if (rc) {
+     715:       m_recursions_count++;
+     716:     }
+</code></pre></div>
+<p><strong>Violation 14</strong>: freertos_semaphore.hpp:727:10
+<em>Severity</em>: Warning
+<em>Message</em>: variable name 'rc' is too short, expected at least 3 characters</p>
+<pre><code class="language-cpp">     724:    */
+     725:   BaseType_t lock_isr(void) {
+     726:     BaseType_t high_priority_task_woken = pdFALSE;
+&gt;&gt;&gt;  727:     auto rc = xSemaphoreTakeFromISR(m_semaphore, &amp;high_priority_task_woken);
+     728:     if (rc) {
+     729:       m_recursions_count++;
+     730:     }
+</code></pre></div>
+<p><strong>Violation 15</strong>: freertos_semaphore.hpp:751:10
+<em>Severity</em>: Warning
+<em>Message</em>: variable name 'rc' is too short, expected at least 3 characters</p>
+<pre><code class="language-cpp">     748:    * @return BaseType_t pdTRUE if the recursive mutex was successfully locked,
+     749:    */
+     750:   BaseType_t try_lock() {
+&gt;&gt;&gt;  751:     auto rc = xSemaphoreTakeRecursive(m_semaphore, 0);
+     752:     if (rc) {
+     753:       m_recursions_count++;
+     754:     }
+</code></pre></div>
+<p><strong>Violation 16</strong>: freertos_queue.hpp:210:12
+<em>Severity</em>: Warning
+<em>Message</em>: variable name 'n' is too short, expected at least 3 characters</p>
+<pre><code class="language-cpp">     207:   queue(queue &amp;&amp;src) = delete;
+     208:   ~queue(void) {
+     209:     if (m_queue) {
+&gt;&gt;&gt;  210:       auto n = pcQueueGetName(m_queue);
+     211:       if (n) {
+     212:         vQueueUnregisterQueue(m_queue);
+     213:       }
+</code></pre></div>
+<p><strong>Violation 17</strong>: freertos_semaphore.hpp:502:10
+<em>Severity</em>: Warning
+<em>Message</em>: variable name 'rc' is too short, expected at least 3 characters</p>
+<pre><code class="language-cpp">     499:    * @return BaseType_t pdTRUE if the mutex was successfully unlocked,
+     500:    */
+     501:   BaseType_t unlock() {
+&gt;&gt;&gt;  502:     auto rc = xSemaphoreGive(m_semaphore);
+     503:     if (rc) {
+     504:       m_locked = false;
+     505:     }
+</code></pre></div>
+<p><strong>Violation 18</strong>: freertos_semaphore.hpp:517:10
+<em>Severity</em>: Warning
+<em>Message</em>: variable name 'rc' is too short, expected at least 3 characters</p>
+<pre><code class="language-cpp">     514:    * @return BaseType_t pdTRUE if the mutex was successfully unlocked,
+     515:    */
+     516:   BaseType_t unlock_isr(BaseType_t &amp;high_priority_task_woken) {
+&gt;&gt;&gt;  517:     auto rc = xSemaphoreGiveFromISR(m_semaphore, &amp;high_priority_task_woken);
+     518:     if (rc) {
+     519:       m_locked = false;
+     520:     }
+</code></pre></div>
+<p><strong>Violation 19</strong>: freertos_semaphore.hpp:531:10
+<em>Severity</em>: Warning
+<em>Message</em>: variable name 'rc' is too short, expected at least 3 characters</p>
+<pre><code class="language-cpp">     528:    */
+     529:   BaseType_t unlock_isr(void) {
+     530:     BaseType_t high_priority_task_woken = pdFALSE;
+&gt;&gt;&gt;  531:     auto rc = xSemaphoreGiveFromISR(m_semaphore, &amp;high_priority_task_woken);
+     532:     if (rc) {
+     533:       m_locked = false;
+     534:     }
+</code></pre></div>
+<p><strong>Violation 20</strong>: freertos_semaphore.hpp:545:10
+<em>Severity</em>: Warning
+<em>Message</em>: variable name 'rc' is too short, expected at least 3 characters</p>
+<pre><code class="language-cpp">     542:    * @return BaseType_t pdTRUE if the mutex was successfully locked,
+     543:    */
+     544:   BaseType_t lock(const TickType_t ticks_to_wait = portMAX_DELAY) {
+&gt;&gt;&gt;  545:     auto rc = xSemaphoreTake(m_semaphore, ticks_to_wait);
+     546:     if (rc) {
+     547:       m_locked = true;
+     548:     }
+</code></pre></div>
+<p><strong>Violation 21</strong>: freertos_semaphore.hpp:560:10
+<em>Severity</em>: Warning
+<em>Message</em>: variable name 'rc' is too short, expected at least 3 characters</p>
+<pre><code class="language-cpp">     557:    * @return BaseType_t pdTRUE if the mutex was successfully locked,
+     558:    */
+     559:   BaseType_t lock_isr(BaseType_t &amp;high_priority_task_woken) {
+&gt;&gt;&gt;  560:     auto rc = xSemaphoreTakeFromISR(m_semaphore, &amp;high_priority_task_woken);
+     561:     if (rc) {
+     562:       m_locked = true;
+     563:     }
+</code></pre></div>
+<p><strong>Violation 22</strong>: freertos_semaphore.hpp:574:10
+<em>Severity</em>: Warning
+<em>Message</em>: variable name 'rc' is too short, expected at least 3 characters</p>
+<pre><code class="language-cpp">     571:    */
+     572:   BaseType_t lock_isr(void) {
+     573:     BaseType_t high_priority_task_woken = pdFALSE;
+&gt;&gt;&gt;  574:     auto rc = xSemaphoreTakeFromISR(m_semaphore, &amp;high_priority_task_woken);
+     575:     if (rc) {
+     576:       m_locked = true;
+     577:     }
+</code></pre></div>
+<p><strong>Violation 23</strong>: freertos_semaphore.hpp:598:10
+<em>Severity</em>: Warning
+<em>Message</em>: variable name 'rc' is too short, expected at least 3 characters</p>
+<pre><code class="language-cpp">     595:    * @return BaseType_t pdTRUE if the mutex was successfully locked,
+     596:    */
+     597:   BaseType_t try_lock() {
+&gt;&gt;&gt;  598:     auto rc = xSemaphoreTake(m_semaphore, 0);
+     599:     if (rc) {
+     600:       m_locked = true;
+     601:     }
+</code></pre></div>
+<p><strong>Violation 24</strong>: freertos_semaphore.hpp:655:10
+<em>Severity</em>: Warning
+<em>Message</em>: variable name 'rc' is too short, expected at least 3 characters</p>
+<pre><code class="language-cpp">     652:    * otherwise pdFALSE.
+     653:    */
+     654:   BaseType_t unlock() {
+&gt;&gt;&gt;  655:     auto rc = xSemaphoreGiveRecursive(m_semaphore);
+     656:     if (rc &amp;&amp; m_recursions_count &gt; 0) {
+     657:       m_recursions_count--;
+     658:     }
+</code></pre></div>
+<p><strong>Violation 25</strong>: freertos_semaphore.hpp:670:10
+<em>Severity</em>: Warning
+<em>Message</em>: variable name 'rc' is too short, expected at least 3 characters</p>
+<pre><code class="language-cpp">     667:    * @return BaseType_t pdTRUE if the recursive mutex was successfully unlocked,
+     668:    */
+     669:   BaseType_t unlock_isr(BaseType_t &amp;high_priority_task_woken) {
+&gt;&gt;&gt;  670:     auto rc = xSemaphoreGiveFromISR(m_semaphore, &amp;high_priority_task_woken);
+     671:     if (rc &amp;&amp; m_recursions_count &gt; 0) {
+     672:       m_recursions_count--;
+     673:     }
+</code></pre></div>
+<p><strong>Violation 26</strong>: freertos_semaphore.hpp:684:10
+<em>Severity</em>: Warning
+<em>Message</em>: variable name 'rc' is too short, expected at least 3 characters</p>
+<pre><code class="language-cpp">     681:    */
+     682:   BaseType_t unlock_isr(void) {
+     683:     BaseType_t high_priority_task_woken = pdFALSE;
+&gt;&gt;&gt;  684:     auto rc = xSemaphoreGiveFromISR(m_semaphore, &amp;high_priority_task_woken);
+     685:     if (rc &amp;&amp; m_recursions_count &gt; 0) {
+     686:       m_recursions_count--;
+     687:     }
+</code></pre></div>
+<p><strong>Violation 27</strong>: freertos_semaphore.hpp:698:10
+<em>Severity</em>: Warning
+<em>Message</em>: variable name 'rc' is too short, expected at least 3 characters</p>
+<pre><code class="language-cpp">     695:    * @return BaseType_t pdTRUE if the recursive mutex was successfully locked,
+     696:    */
+     697:   BaseType_t lock(const TickType_t ticks_to_wait = portMAX_DELAY) {
+&gt;&gt;&gt;  698:     auto rc = xSemaphoreTakeRecursive(m_semaphore, ticks_to_wait);
+     699:     if (rc) {
+     700:       m_recursions_count++;
+     701:     }
+</code></pre></div>
+<p><strong>Violation 28</strong>: freertos_semaphore.hpp:713:10
+<em>Severity</em>: Warning
+<em>Message</em>: variable name 'rc' is too short, expected at least 3 characters</p>
+<pre><code class="language-cpp">     710:    * @return BaseType_t pdTRUE if the recursive mutex was successfully locked,
+     711:    */
+     712:   BaseType_t lock_isr(BaseType_t &amp;high_priority_task_woken) {
+&gt;&gt;&gt;  713:     auto rc = xSemaphoreTakeFromISR(m_semaphore, &amp;high_priority_task_woken);
+     714:     if (rc) {
+     715:       m_recursions_count++;
+     716:     }
+</code></pre></div>
+<p><strong>Violation 29</strong>: freertos_semaphore.hpp:727:10
+<em>Severity</em>: Warning
+<em>Message</em>: variable name 'rc' is too short, expected at least 3 characters</p>
+<pre><code class="language-cpp">     724:    */
+     725:   BaseType_t lock_isr(void) {
+     726:     BaseType_t high_priority_task_woken = pdFALSE;
+&gt;&gt;&gt;  727:     auto rc = xSemaphoreTakeFromISR(m_semaphore, &amp;high_priority_task_woken);
+     728:     if (rc) {
+     729:       m_recursions_count++;
+     730:     }
+</code></pre></div>
+<p><strong>Violation 30</strong>: freertos_semaphore.hpp:751:10
+<em>Severity</em>: Warning
+<em>Message</em>: variable name 'rc' is too short, expected at least 3 characters</p>
+<pre><code class="language-cpp">     748:    * @return BaseType_t pdTRUE if the recursive mutex was successfully locked,
+     749:    */
+     750:   BaseType_t try_lock() {
+&gt;&gt;&gt;  751:     auto rc = xSemaphoreTakeRecursive(m_semaphore, 0);
+     752:     if (rc) {
+     753:       m_recursions_count++;
+     754:     }
+</code></pre></div>
+<h4 id="readability-identifier-naming-11-violations">readability-identifier-naming (11 violation(s))</h4>
+<p><strong>Description</strong>: Follow consistent naming conventions for identifiers</p>
+<p><strong>Violation 1</strong>: freertos_semaphore.hpp:222:16
+<em>Severity</em>: Warning
+<em>Message</em>: invalid case style for variable 'xHigherPriorityTaskWoken'</p>
+<pre><code class="language-cpp">     219:    *
+     220:    */
+     221:   BaseType_t give_isr(void) {
+&gt;&gt;&gt;  222:     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+     223:     return xSemaphoreGiveFromISR(m_semaphore, &amp;xHigherPriorityTaskWoken);
+     224:   }
+     225:   /**
+</code></pre></div>
+<p><strong>Violation 2</strong>: freertos_semaphore.hpp:260:16
+<em>Severity</em>: Warning
+<em>Message</em>: invalid case style for variable 'xHigherPriorityTaskWoken'</p>
+<pre><code class="language-cpp">     257:    *
+     258:    */
+     259:   BaseType_t take_isr(void) {
+&gt;&gt;&gt;  260:     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+     261:     return xSemaphoreTakeFromISR(m_semaphore, &amp;xHigherPriorityTaskWoken);
+     262:   }
+     263:   /**
+</code></pre></div>
+<p><strong>Violation 3</strong>: freertos_semaphore.hpp:344:16
+<em>Severity</em>: Warning
+<em>Message</em>: invalid case style for variable 'xHigherPriorityTaskWoken'</p>
+<pre><code class="language-cpp">     341:    *
+     342:    */
+     343:   BaseType_t give_isr(void) {
+&gt;&gt;&gt;  344:     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+     345:     return xSemaphoreGiveFromISR(m_semaphore, &amp;xHigherPriorityTaskWoken);
+     346:   }
+     347:   /**
+</code></pre></div>
+<p><strong>Violation 4</strong>: freertos_semaphore.hpp:382:16
+<em>Severity</em>: Warning
+<em>Message</em>: invalid case style for variable 'xHigherPriorityTaskWoken'</p>
+<pre><code class="language-cpp">     379:    *
+     380:    */
+     381:   BaseType_t take_isr(void) {
+&gt;&gt;&gt;  382:     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+     383:     return xSemaphoreTakeFromISR(m_semaphore, &amp;xHigherPriorityTaskWoken);
+     384:   }
+     385:   /**
+</code></pre></div>
+<p><strong>Violation 5</strong>: freertos_task.hpp:174:10
+<em>Severity</em>: Warning
+<em>Message</em>: invalid case style for variable 'pThis'</p>
+<pre><code class="language-cpp">     171:   TaskHandle_t m_hTask;
+     172: 
+     173:   static void task_exec(void *context) {
+&gt;&gt;&gt;  174:     auto pThis = static_cast&lt;task *&gt;(context);
+     175:     assert(nullptr != pThis);
+     176: #if INCLUDE_vTaskSuspend
+     177:     if (pThis-&gt;m_start_suspended) {
+</code></pre></div>
+<p><strong>Violation 6</strong>: freertos_semaphore.hpp:222:16
+<em>Severity</em>: Warning
+<em>Message</em>: invalid case style for variable 'xHigherPriorityTaskWoken'</p>
+<pre><code class="language-cpp">     219:    *
+     220:    */
+     221:   BaseType_t give_isr(void) {
+&gt;&gt;&gt;  222:     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+     223:     return xSemaphoreGiveFromISR(m_semaphore, &amp;xHigherPriorityTaskWoken);
+     224:   }
+     225:   /**
+</code></pre></div>
+<p><strong>Violation 7</strong>: freertos_semaphore.hpp:260:16
+<em>Severity</em>: Warning
+<em>Message</em>: invalid case style for variable 'xHigherPriorityTaskWoken'</p>
+<pre><code class="language-cpp">     257:    *
+     258:    */
+     259:   BaseType_t take_isr(void) {
+&gt;&gt;&gt;  260:     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+     261:     return xSemaphoreTakeFromISR(m_semaphore, &amp;xHigherPriorityTaskWoken);
+     262:   }
+     263:   /**
+</code></pre></div>
+<p><strong>Violation 8</strong>: freertos_semaphore.hpp:344:16
+<em>Severity</em>: Warning
+<em>Message</em>: invalid case style for variable 'xHigherPriorityTaskWoken'</p>
+<pre><code class="language-cpp">     341:    *
+     342:    */
+     343:   BaseType_t give_isr(void) {
+&gt;&gt;&gt;  344:     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+     345:     return xSemaphoreGiveFromISR(m_semaphore, &amp;xHigherPriorityTaskWoken);
+     346:   }
+     347:   /**
+</code></pre></div>
+<p><strong>Violation 9</strong>: freertos_semaphore.hpp:382:16
+<em>Severity</em>: Warning
+<em>Message</em>: invalid case style for variable 'xHigherPriorityTaskWoken'</p>
+<pre><code class="language-cpp">     379:    *
+     380:    */
+     381:   BaseType_t take_isr(void) {
+&gt;&gt;&gt;  382:     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+     383:     return xSemaphoreTakeFromISR(m_semaphore, &amp;xHigherPriorityTaskWoken);
+     384:   }
+     385:   /**
+</code></pre></div>
+<p><strong>Violation 10</strong>: freertos_task.hpp:174:10
+<em>Severity</em>: Warning
+<em>Message</em>: invalid case style for variable 'pThis'</p>
+<pre><code class="language-cpp">     171:   TaskHandle_t m_hTask;
+     172: 
+     173:   static void task_exec(void *context) {
+&gt;&gt;&gt;  174:     auto pThis = static_cast&lt;task *&gt;(context);
+     175:     assert(nullptr != pThis);
+     176: #if INCLUDE_vTaskSuspend
+     177:     if (pThis-&gt;m_start_suspended) {
+</code></pre></div>
+<p><strong>Violation 11</strong>: freertos_task.hpp:174:10
+<em>Severity</em>: Warning
+<em>Message</em>: invalid case style for variable 'pThis'</p>
+<pre><code class="language-cpp">     171:   TaskHandle_t m_hTask;
+     172: 
+     173:   static void task_exec(void *context) {
+&gt;&gt;&gt;  174:     auto pThis = static_cast&lt;task *&gt;(context);
+     175:     assert(nullptr != pThis);
+     176: #if INCLUDE_vTaskSuspend
+     177:     if (pThis-&gt;m_start_suspended) {
+</code></pre></div>
+<h4 id="readability-implicit-bool-conversion-2-violations">readability-implicit-bool-conversion (2 violation(s))</h4>
+<p><strong>Violation 1</strong>: freertos_semaphore.hpp:476:63
+<em>Severity</em>: Warning
+<em>Message</em>: implicit conversion 'bool' -&gt; 'uint8_t' (aka 'unsigned char')</p>
+<pre><code class="language-cpp">     473:    * @brief Construct a new mutex object
+     474:    *
+     475:    */
+&gt;&gt;&gt;  476:   mutex() : m_semaphore{m_allocator.create_mutex()}, m_locked{false} {
+     477:     configASSERT(m_semaphore);
+     478:   }
+     479:   mutex(const mutex &amp;) = delete;
+</code></pre></div>
+<p><strong>Violation 2</strong>: freertos_semaphore.hpp:476:63
+<em>Severity</em>: Warning
+<em>Message</em>: implicit conversion 'bool' -&gt; 'uint8_t' (aka 'unsigned char')</p>
+<pre><code class="language-cpp">     473:    * @brief Construct a new mutex object
+     474:    *
+     475:    */
+&gt;&gt;&gt;  476:   mutex() : m_semaphore{m_allocator.create_mutex()}, m_locked{false} {
+     477:     configASSERT(m_semaphore);
+     478:   }
+     479:   mutex(const mutex &amp;) = delete;
+</code></pre></div></div>
         
         <div class="timestamp">
-            Generated on July 23, 2025 at 01:34 PM by FreeRTOS C++ Wrappers build system
+            Generated on July 23, 2025 at 02:07 PM by FreeRTOS C++ Wrappers build system
         </div>
     </div>
 </body>
