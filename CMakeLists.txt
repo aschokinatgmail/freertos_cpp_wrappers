@@ -176,12 +176,18 @@ if(ENABLE_CLANG_TIDY)
                     -DUNIT_TESTING=1
                     > ${CMAKE_BINARY_DIR}/clang-tidy-report.txt 2>&1 || true
                 
-                # Generate report using shell script
+                # Generate combined static analysis report (clang-tidy + MISRA)
+                COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/scripts/run_misra_analysis.sh
+                    ${CMAKE_CURRENT_SOURCE_DIR}
+                    ${CMAKE_BINARY_DIR}/misra_analysis_output.txt
+                
+                # Generate integrated report using shell script
                 COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/scripts/generate_static_analysis_report.sh
                     ${CMAKE_BINARY_DIR}/clang-tidy-report.txt
                     ${CMAKE_BINARY_DIR}/clang-tidy-stats.md
                     ${CLANG_TIDY_REPORT_FILE}
                     ${CMAKE_CURRENT_SOURCE_DIR}
+                    ${CMAKE_BINARY_DIR}/misra_analysis_output.txt
                 
                 # Status messages
                 COMMAND ${CMAKE_COMMAND} -E echo "Fixes exported to: ${CMAKE_BINARY_DIR}/clang-tidy-fixes.yaml"
@@ -199,6 +205,32 @@ if(ENABLE_CLANG_TIDY)
 else()
     message(STATUS "clang-tidy disabled via ENABLE_CLANG_TIDY=OFF")
 endif()
+
+# =============================================================================
+# MISRA C++ STATIC ANALYSIS CONFIGURATION (cppcheck)
+# =============================================================================
+
+# Option to enable/disable MISRA C++ static analysis
+option(ENABLE_MISRA_ANALYSIS "Enable MISRA C++ static analysis using cppcheck" ON)
+
+if(ENABLE_MISRA_ANALYSIS)
+    # Find cppcheck executable
+    find_program(CPPCHECK_EXE NAMES cppcheck)
+    
+    if(CPPCHECK_EXE)
+        message(STATUS "cppcheck found: ${CPPCHECK_EXE}")
+        message(STATUS "MISRA C++ analysis will be integrated into static analysis report")
+        message(STATUS "MISRA C++ analysis enabled - uses MISRA C 2012 rules applicable to C++")
+    else()
+        message(WARNING "cppcheck not found! MISRA C++ analysis will be skipped. Install cppcheck to enable MISRA analysis.")
+    endif()
+else()
+    message(STATUS "MISRA C++ analysis disabled via ENABLE_MISRA_ANALYSIS=OFF")
+endif()
+
+# =============================================================================
+# END MISRA C++ STATIC ANALYSIS CONFIGURATION
+# =============================================================================
 
 # =============================================================================
 # VALIDATION AND VERIFICATION REPORT GENERATION
@@ -221,7 +253,7 @@ add_custom_target(validation-verification-report
     COMMAND lcov --capture --directory . --output-file coverage.info --ignore-errors mismatch,negative,gcov
     COMMAND lcov --remove coverage.info '/usr/*' --output-file coverage_filtered.info
     
-    # Generate static analysis report
+    # Generate static analysis report (includes MISRA if enabled)
     COMMAND ${CMAKE_COMMAND} --build . --target static-analysis-report
     
     # Generate documentation (after successful tests)
@@ -235,7 +267,7 @@ add_custom_target(validation-verification-report
     # Status messages
     COMMAND ${CMAKE_COMMAND} -E echo ""
     COMMAND ${CMAKE_COMMAND} -E echo "=== Reports Generated ==="
-    COMMAND ${CMAKE_COMMAND} -E echo "1. STATIC_ANALYSIS_REPORT.md - Static code analysis for main modules"
+    COMMAND ${CMAKE_COMMAND} -E echo "1. STATIC_ANALYSIS_REPORT.md - Integrated static analysis (clang-tidy + MISRA C++)"
     COMMAND ${CMAKE_COMMAND} -E echo "2. VALIDATION_VERIFICATION_REPORT.md - Test execution and coverage analysis"
     COMMAND ${CMAKE_COMMAND} -E echo "3. docs/html/index.html - Updated project documentation"
     COMMAND ${CMAKE_COMMAND} -E echo ""

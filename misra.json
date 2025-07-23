@@ -1,0 +1,7 @@
+{
+  "script": "misra",
+  "args": [
+    "--cli",
+    "--no-summary"
+  ]
+}
