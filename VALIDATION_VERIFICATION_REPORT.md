@@ -546,198 +546,1228 @@ The following sections provide specific references to uncovered code areas and e
 
 **Reason for exclusion:** These functions are called internally by the FreeRTOS kernel during task execution and cannot be directly invoked in unit tests
 
-**Specific code references:**
+**Uncovered Area 1**: freertos_sw_timer.hpp:113-117
+*Function*: `freertos::timer<freertos::static_sw_timer_allocator>::callback_wrapper`
 
-| File:Line | Type | Function/Code | Context |
-|-----------|------|---------------|----------|
-| freertos_sw_timer.hpp:113-117 | Function | `freertos::timer<freertos::static_sw_timer_allocator>::cal...` | `static void callback_wrapper(TimerHandle_t t) {` |
-| freertos_sw_timer.hpp:113-117 | Function | `freertos::timer<freertos::dynamic_sw_timer_allocator>::ca...` | `static void callback_wrapper(TimerHandle_t t) {` |
-| freertos_task.hpp:173-182 | Function | `freertos::task<freertos::static_task_allocator<0ul> >::ta...` | `static void task_exec(void *context) {` |
-| freertos_task.hpp:173-182 | Function | `freertos::task<freertos::dynamic_task_allocator<2048ul> >...` | `static void task_exec(void *context) {` |
-| freertos_task.hpp:572-586 | Function | `freertos::periodic_task<freertos::static_task_allocator<1...` | `void run() {` |
-| test_freertos_task.cpp:1140-1142 | Function | `FreeRTOSTaskTest_TaskExecutionDirectCall_Test::TestBody()...` | `sa::task<1024> test_task("ExecutionTask", 2, [&task_executed]() {` |
-| test_freertos_task.cpp:1613-1615 | Function | `FreeRTOSTaskTest_TaskExecutionInternalFunction_Test::Test...` | `sa::task<1024> suspended_task("SuspendedTask", 1, []() {` |
-| test_freertos_task.cpp:1623-1625 | Function | `FreeRTOSTaskTest_TaskExecutionInternalFunction_Test::Test...` | `sa::task<1024> normal_task("NormalTask", 2, []() {` |
-| test_freertos_task.cpp:1650 | Function | `FreeRTOSTaskTest_PeriodicTaskRunMethodExecution_Test::Tes...` | `[&on_start_calls]() { on_start_calls++; },    // on_start` |
-| test_freertos_task.cpp:1651 | Function | `FreeRTOSTaskTest_PeriodicTaskRunMethodExecution_Test::Tes...` | `[&on_stop_calls]() { on_stop_calls++; },      // on_stop` |
-| test_freertos_task.cpp:1652 | Function | `FreeRTOSTaskTest_PeriodicTaskRunMethodExecution_Test::Tes...` | `[]() { /* periodic_routine */ },               // periodic_routine` |
-| test_freertos_task.cpp:676 | Function | `FreeRTOSTaskTest_PeriodicTaskIsRunning_Test::TestBody()::...` | `[]() {},  // on_start` |
-| test_freertos_task.cpp:677 | Function | `FreeRTOSTaskTest_PeriodicTaskIsRunning_Test::TestBody()::...` | `[]() {},  // on_stop` |
-| test_freertos_task.cpp:678 | Function | `FreeRTOSTaskTest_PeriodicTaskIsRunning_Test::TestBody()::...` | `[]() {},  // periodic_routine` |
-| freertos_sw_timer.hpp:200 | Line | Line 200 | `vTaskDelay(pdMS_TO_TICKS(1));` |
-| freertos_sw_timer.hpp:208 | Line | Line 208 | `vTaskDelay(pdMS_TO_TICKS(1));` |
+```cpp
+static void callback_wrapper(TimerHandle_t t) {
+    auto *const self = static_cast<timer *>(pvTimerGetTimerID(t));
+    configASSERT(self);
+    self->m_callback();
+}
+```
+
+**Uncovered Area 2**: freertos_sw_timer.hpp:113-117
+*Function*: `freertos::timer<freertos::dynamic_sw_timer_allocator>::callback_wrapper`
+
+```cpp
+static void callback_wrapper(TimerHandle_t t) {
+    auto *const self = static_cast<timer *>(pvTimerGetTimerID(t));
+    configASSERT(self);
+    self->m_callback();
+}
+```
+
+**Uncovered Area 3**: freertos_task.hpp:173-182
+*Function*: `freertos::task<freertos::static_task_allocator<0ul>>::task_exec`
+
+```cpp
+static void task_exec(void *context) {
+    auto *const self = static_cast<task *>(context);
+    configASSERT(self);
+    self->m_task_routine();
+    vTaskDelete(nullptr);
+}
+```
+
+**Uncovered Area 4**: freertos_task.hpp:173-182
+*Function*: `freertos::task<freertos::dynamic_task_allocator<2048ul>>::task_exec`
+
+```cpp
+static void task_exec(void *context) {
+    auto *const self = static_cast<task *>(context);
+    configASSERT(self);
+    self->m_task_routine();
+    vTaskDelete(nullptr);
+}
+```
+
+**Uncovered Area 5**: freertos_task.hpp:572-586
+*Function*: `freertos::periodic_task<freertos::static_task_allocator<1024ul>>::run`
+
+```cpp
+void run() {
+    m_on_start();
+    while (true) {
+        uint32_t notification_value = 0;
+        m_task.notify_wait(0, 0, notification_value, m_period);
+        if (notification_value == 0) {
+            m_periodic_routine();
+        } else {
+            break;
+        }
+    }
+    m_on_stop();
+}
+```
+
+**Uncovered Area 6**: test_freertos_task.cpp:1140-1142
+*Function*: `FreeRTOSTaskTest_TaskExecutionDirectCall_Test::TestBody()::lambda`
+
+```cpp
+sa::task<1024> test_task("ExecutionTask", 2, [&task_executed]() {
+    task_executed = true;
+});
+```
+
+**Uncovered Area 7**: test_freertos_task.cpp:1613-1615
+*Function*: `FreeRTOSTaskTest_TaskExecutionInternalFunction_Test::TestBody()::lambda`
+
+```cpp
+sa::task<1024> suspended_task("SuspendedTask", 1, []() {
+    // This should not execute
+});
+```
+
+**Uncovered Area 8**: test_freertos_task.cpp:1623-1625
+*Function*: `FreeRTOSTaskTest_TaskExecutionInternalFunction_Test::TestBody()::lambda`
+
+```cpp
+sa::task<1024> normal_task("NormalTask", 2, []() {
+    // Task execution
+});
+```
+
+**Uncovered Area 9**: test_freertos_task.cpp:1650
+*Function*: `FreeRTOSTaskTest_PeriodicTaskRunMethodExecution_Test::TestBody()::lambda`
+
+```cpp
+[&on_start_calls]() { on_start_calls++; },    // on_start
+```
+
+**Uncovered Area 10**: test_freertos_task.cpp:1651
+*Function*: `FreeRTOSTaskTest_PeriodicTaskRunMethodExecution_Test::TestBody()::lambda`
+
+```cpp
+[&on_stop_calls]() { on_stop_calls++; },      // on_stop
+```
+
+**Uncovered Area 11**: test_freertos_task.cpp:1652
+*Function*: `FreeRTOSTaskTest_PeriodicTaskRunMethodExecution_Test::TestBody()::lambda`
+
+```cpp
+[]() { /* periodic_routine */ },               // periodic_routine
+```
+
+**Uncovered Area 12**: test_freertos_task.cpp:676
+*Function*: `FreeRTOSTaskTest_PeriodicTaskIsRunning_Test::TestBody()::lambda`
+
+```cpp
+[]() {},  // on_start
+```
+
+**Uncovered Area 13**: test_freertos_task.cpp:677
+*Function*: `FreeRTOSTaskTest_PeriodicTaskIsRunning_Test::TestBody()::lambda`
+
+```cpp
+[]() {},  // on_stop
+```
+
+**Uncovered Area 14**: test_freertos_task.cpp:678
+*Function*: `FreeRTOSTaskTest_PeriodicTaskIsRunning_Test::TestBody()::lambda`
+
+```cpp
+[]() {},  // periodic_routine
+```
+
+**Uncovered Area 15**: freertos_sw_timer.hpp:200
+*Line*: Line 200
+
+```cpp
+vTaskDelay(pdMS_TO_TICKS(1));
+```
+
+**Uncovered Area 16**: freertos_sw_timer.hpp:208
+*Line*: Line 208
+
+```cpp
+vTaskDelay(pdMS_TO_TICKS(1));
+```
 
 ### Error handling and edge case scenarios
 
 **Reason for exclusion:** These code paths handle rare error conditions or require specific FreeRTOS kernel states that are difficult to reproduce in unit tests
 
-**Specific code references:**
+**Uncovered Area 17**: test_enhanced_cpp17_features.cpp:200
+*Function*: `Cpp17FeaturesTest_RAIIExceptionSafety_Test::TestBody()::lambda`
 
-| File:Line | Type | Function/Code | Context |
-|-----------|------|---------------|----------|
-| test_enhanced_cpp17_features.cpp:200 | Function | `Cpp17FeaturesTest_RAIIExceptionSafety_Test::TestBody()::{...` | `sa::task<1024> task("RAIITest", 1, []() { /* test */ });` |
-| test_freertos_task.cpp:148 | Function | `FreeRTOSTaskTest_DynamicTaskAllocatorCreateFailure_Test::...` | `auto task_function = [](void*){};` |
-| test_freertos_task.cpp:1771 | Function | `FreeRTOSTaskTest_EdgeCaseErrorHandling_Test::TestBody()::...` | `sa::task<1024> null_task("TestTask", 1, []() {});` |
-| test_freertos_task.cpp:382 | Function | `FreeRTOSTaskTest_StaticTaskAbortDelay_Test::TestBody()::{...` | `sa::task<1024> test_task("AbortTask", 2, []() {});` |
-| test_freertos_task.cpp:398 | Function | `FreeRTOSTaskTest_StaticTaskAbortDelayNullHandle_Test::Tes...` | `sa::task<1024> test_task("NullAbortTask", 2, []() {});` |
-| test_freertos_task.cpp:460 | Function | `FreeRTOSTaskTest_DynamicTaskConstructionFailure_Test::Tes...` | `da::task<2048> test_task("FailTask", 3, []() {});` |
-| test_freertos_task.cpp:737 | Function | `FreeRTOSTaskTest_PeriodicTaskDestructorAbortDelay_Test::T...` | `[]() {},  // on_start` |
-| test_freertos_task.cpp:738 | Function | `FreeRTOSTaskTest_PeriodicTaskDestructorAbortDelay_Test::T...` | `[]() {},  // on_stop` |
-| test_freertos_task.cpp:739 | Function | `FreeRTOSTaskTest_PeriodicTaskDestructorAbortDelay_Test::T...` | `[]() {},  // periodic_routine` |
-| freertos_sw_timer.hpp:113 | Line | Line 113 | `static void callback_wrapper(TimerHandle_t t) {` |
-| freertos_sw_timer.hpp:114 | Line | Line 114 | `auto *const self = static_cast<timer *>(pvTimerGetTimerID(t));` |
-| freertos_sw_timer.hpp:116 | Line | Line 116 | `self->m_callback();` |
-| freertos_sw_timer.hpp:117 | Line | Line 117 | `}` |
+```cpp
+sa::task<1024> task("RAIITest", 1, []() { /* test */ });
+```
+
+**Uncovered Area 18**: test_freertos_task.cpp:148
+*Function*: `FreeRTOSTaskTest_DynamicTaskAllocatorCreateFailure_Test::TestBody()::lambda`
+
+```cpp
+auto task_function = [](void*){};
+```
+
+**Uncovered Area 19**: test_freertos_task.cpp:1771
+*Function*: `FreeRTOSTaskTest_EdgeCaseErrorHandling_Test::TestBody()::lambda`
+
+```cpp
+sa::task<1024> null_task("TestTask", 1, []() {});
+```
+
+**Uncovered Area 20**: test_freertos_task.cpp:382
+*Function*: `FreeRTOSTaskTest_StaticTaskAbortDelay_Test::TestBody()::lambda`
+
+```cpp
+sa::task<1024> test_task("AbortTask", 2, []() {});
+```
+
+**Uncovered Area 21**: test_freertos_task.cpp:398
+*Function*: `FreeRTOSTaskTest_StaticTaskAbortDelayNullHandle_Test::TestBody()::lambda`
+
+```cpp
+sa::task<1024> test_task("NullAbortTask", 2, []() {});
+```
+
+**Uncovered Area 22**: test_freertos_task.cpp:460
+*Function*: `FreeRTOSTaskTest_DynamicTaskConstructionFailure_Test::TestBody()::lambda`
+
+```cpp
+da::task<2048> test_task("FailTask", 3, []() {});
+```
+
+**Uncovered Area 23**: test_freertos_task.cpp:737
+*Function*: `FreeRTOSTaskTest_PeriodicTaskDestructorAbortDelay_Test::TestBody()::lambda`
+
+```cpp
+[]() {},  // on_start
+```
+
+**Uncovered Area 24**: test_freertos_task.cpp:738
+*Function*: `FreeRTOSTaskTest_PeriodicTaskDestructorAbortDelay_Test::TestBody()::lambda`
+
+```cpp
+[]() {},  // on_stop
+```
+
+**Uncovered Area 25**: test_freertos_task.cpp:739
+*Function*: `FreeRTOSTaskTest_PeriodicTaskDestructorAbortDelay_Test::TestBody()::lambda`
+
+```cpp
+[]() {},  // periodic_routine
+```
+
+**Uncovered Area 26**: freertos_sw_timer.hpp:113
+*Line*: Line 113
+
+```cpp
+static void callback_wrapper(TimerHandle_t t) {
+```
+
+**Uncovered Area 27**: freertos_sw_timer.hpp:114
+*Line*: Line 114
+
+```cpp
+auto *const self = static_cast<timer *>(pvTimerGetTimerID(t));
+```
+
+**Uncovered Area 28**: freertos_sw_timer.hpp:116
+*Line*: Line 116
+
+```cpp
+self->m_callback();
+```
+
+**Uncovered Area 29**: freertos_sw_timer.hpp:117
+*Line*: Line 117
+
+```cpp
+}
+```
 
 ### Platform-specific or hardware-dependent code
 
 **Reason for exclusion:** These code sections depend on specific hardware configurations or FreeRTOS kernel internals not available in the test environment
 
-**Specific code references:**
+**Uncovered Area 30**: freertos_task.hpp:515-521
+*Function*: `freertos::task<freertos::static_task_allocator<256ul>>::notify_wait`
 
-| File:Line | Type | Function/Code | Context |
-|-----------|------|---------------|----------|
-| freertos_task.hpp:515-521 | Function | `freertos::task<freertos::static_task_allocator<256ul> >::...` | `BaseType_t notify_wait(uint32_t ulBitsToClearOnEntry,` |
-| freertos_task.hpp:515-521 | Function | `freertos::task<freertos::static_task_allocator<512ul> >::...` | `BaseType_t notify_wait(uint32_t ulBitsToClearOnEntry,` |
-| freertos_task.hpp:532-540 | Function | `int freertos::task<freertos::static_task_allocator<256ul>...` | `BaseType_t notify_wait(uint32_t ulBitsToClearOnEntry,` |
-| freertos_task.hpp:532-540 | Function | `int freertos::task<freertos::static_task_allocator<512ul>...` | `BaseType_t notify_wait(uint32_t ulBitsToClearOnEntry,` |
-| freertos_sw_timer.hpp:216 | Line | Line 216 | `rc = xTimerStart(m_timer, portMAX_DELAY);` |
-| freertos_sw_timer.hpp:217 | Line | Line 217 | `if (rc == pdPASS) {` |
-| freertos_sw_timer.hpp:218 | Line | Line 218 | `m_started = true;` |
-| freertos_task.hpp:577 | Line | Line 577 | `uint32_t notification_value = 0;` |
-| freertos_task.hpp:578 | Line | Line 578 | `m_task.notify_wait(0, 0, notification_value, m_period);` |
+```cpp
+BaseType_t notify_wait(uint32_t ulBitsToClearOnEntry,
+                       uint32_t ulBitsToClearOnExit,
+                       uint32_t *pulNotificationValue,
+                       TickType_t xTicksToWait) {
+    return xTaskNotifyWait(ulBitsToClearOnEntry, ulBitsToClearOnExit,
+                          pulNotificationValue, xTicksToWait);
+}
+```
+
+**Uncovered Area 31**: freertos_task.hpp:515-521
+*Function*: `freertos::task<freertos::static_task_allocator<512ul>>::notify_wait`
+
+```cpp
+BaseType_t notify_wait(uint32_t ulBitsToClearOnEntry,
+                       uint32_t ulBitsToClearOnExit,
+                       uint32_t *pulNotificationValue,
+                       TickType_t xTicksToWait) {
+    return xTaskNotifyWait(ulBitsToClearOnEntry, ulBitsToClearOnExit,
+                          pulNotificationValue, xTicksToWait);
+}
+```
+
+**Uncovered Area 32**: freertos_task.hpp:532-540
+*Function*: `freertos::task<freertos::static_task_allocator<256ul>>::notify_wait`
+
+```cpp
+BaseType_t notify_wait(uint32_t ulBitsToClearOnEntry,
+                       uint32_t ulBitsToClearOnExit,
+                       uint32_t &notification_value,
+                       TickType_t xTicksToWait) {
+    return notify_wait(ulBitsToClearOnEntry, ulBitsToClearOnExit,
+                      &notification_value, xTicksToWait);
+}
+```
+
+**Uncovered Area 33**: freertos_task.hpp:532-540
+*Function*: `freertos::task<freertos::static_task_allocator<512ul>>::notify_wait`
+
+```cpp
+BaseType_t notify_wait(uint32_t ulBitsToClearOnEntry,
+                       uint32_t ulBitsToClearOnExit,
+                       uint32_t &notification_value,
+                       TickType_t xTicksToWait) {
+    return notify_wait(ulBitsToClearOnEntry, ulBitsToClearOnExit,
+                      &notification_value, xTicksToWait);
+}
+```
+
+**Uncovered Area 34**: freertos_sw_timer.hpp:216
+*Line*: Line 216
+
+```cpp
+rc = xTimerStart(m_timer, portMAX_DELAY);
+```
+
+**Uncovered Area 35**: freertos_sw_timer.hpp:217
+*Line*: Line 217
+
+```cpp
+if (rc == pdPASS) {
+```
+
+**Uncovered Area 36**: freertos_sw_timer.hpp:218
+*Line*: Line 218
+
+```cpp
+m_started = true;
+```
+
+**Uncovered Area 37**: freertos_task.hpp:577
+*Line*: Line 577
+
+```cpp
+uint32_t notification_value = 0;
+```
+
+**Uncovered Area 38**: freertos_task.hpp:578
+*Line*: Line 578
+
+```cpp
+m_task.notify_wait(0, 0, notification_value, m_period);
+```
 
 ### Defensive programming and robustness checks
 
 **Reason for exclusion:** These are safety checks and defensive programming patterns that are difficult to trigger in controlled test conditions
 
-**Specific code references:**
+**Uncovered Area 39**: freertos_task.hpp:273
+*Function*: `freertos::task<freertos::static_task_allocator<0ul>>::suspend`
 
-| File:Line | Type | Function/Code | Context |
-|-----------|------|---------------|----------|
-| freertos_task.hpp:273 | Function | `freertos::task<freertos::static_task_allocator<0ul> >::su...` | `void suspend(void) { vTaskSuspend(m_hTask); }` |
-| freertos_task.hpp:273 | Function | `freertos::task<freertos::dynamic_task_allocator<2048ul> >...` | `void suspend(void) { vTaskSuspend(m_hTask); }` |
-| freertos_task.hpp:611 | Function | `freertos::periodic_task<freertos::static_task_allocator<1...` | `m_task{name, priority, [this]() { run(); }, start_suspended} {}` |
-| freertos_task.hpp:611 | Function | `freertos::periodic_task<freertos::static_task_allocator<1...` | `m_task{name, priority, [this]() { run(); }, start_suspended} {}` |
-| FreeRTOS.h:163 | Function | `FreeRTOSMock::~FreeRTOSMock()` | `virtual ~FreeRTOSMock() = default;` |
-| FreeRTOS.h:323 | Function | `FreeRTOSMock::xMessageBufferSendFromISR(void*, void const...` | `MOCK_METHOD(size_t, xMessageBufferSendFromISR, (MessageBufferHandle_t xMessag...` |
-| FreeRTOS.h:325 | Function | `FreeRTOSMock::xMessageBufferReceiveFromISR(void*, void*, ...` | `MOCK_METHOD(size_t, xMessageBufferReceiveFromISR, (MessageBufferHandle_t xMes...` |
-| freertos_mocks.cpp:772-777 | Function | `xMessageBufferSendFromISR` | `size_t xMessageBufferSendFromISR(MessageBufferHandle_t xMessageBuffer, const ...` |
-| freertos_mocks.cpp:786-791 | Function | `xMessageBufferReceiveFromISR` | `size_t xMessageBufferReceiveFromISR(MessageBufferHandle_t xMessageBuffer, voi...` |
-| stl_semaphore_mocks.hpp:165 | Function | `freertos_test::stl_counting_semaphore::take(unsigned int)...` | `m_condition.wait(lock, [this] { return m_count > 0; });` |
-| stl_semaphore_mocks.hpp:77 | Function | `freertos_test::stl_binary_semaphore::take(unsigned int)::...` | `m_condition.wait(lock, [this] { return m_available; });` |
-| test_enhanced_cpp17_features.cpp:115 | Function | `Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test::T...` | `auto on_start = [&start_count]() { start_count++; };` |
-| test_enhanced_cpp17_features.cpp:116 | Function | `Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test::T...` | `auto on_stop = [&stop_count]() { stop_count++; };` |
-| test_enhanced_cpp17_features.cpp:117 | Function | `Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test::T...` | `auto periodic = [&periodic_count]() { periodic_count++; };` |
-| test_enhanced_cpp17_features.cpp:127 | Function | `Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test::T...` | `[&start_count]() { start_count++; },` |
-| test_enhanced_cpp17_features.cpp:128 | Function | `Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test::T...` | `[&stop_count]() { stop_count++; },` |
-| test_enhanced_cpp17_features.cpp:129 | Function | `Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test::T...` | `[&periodic_count]() { periodic_count++; });` |
-| test_enhanced_cpp17_features.cpp:152-154 | Function | `Cpp17FeaturesTest_LambdaCaptureVarieties_Test::TestBody()...` | `sa::task<1024> task1("RefCapture", 1, [&message]() {` |
-| test_enhanced_cpp17_features.cpp:157-159 | Function | `Cpp17FeaturesTest_LambdaCaptureVarieties_Test::TestBody()...` | `sa::task<1024> task2("ValueCapture", 1, [counter]() {` |
-| test_enhanced_cpp17_features.cpp:162-164 | Function | `Cpp17FeaturesTest_LambdaCaptureVarieties_Test::TestBody()...` | `sa::task<1024> task3("NoCapture", 1, []() {` |
-| test_enhanced_cpp17_features.cpp:172 | Function | `Cpp17FeaturesTest_FunctionObjectVarieties_Test::TestBody(...` | `auto func_lambda = []() { /* test */ };` |
-| test_enhanced_cpp17_features.cpp:178 | Function | `Cpp17FeaturesTest_FunctionObjectVarieties_Test::TestBody(...` | `void operator()() const { /* test */ }` |
-| test_enhanced_cpp17_features.cpp:185 | Function | `Cpp17FeaturesTest_FunctionObjectVarieties_Test::TestBody(...` | `sa::task<1024> task3("FunctionPointer", 1, []() { /* test */ });` |
-| test_enhanced_cpp17_features.cpp:292 | Function | `Cpp17FeaturesTest_CompileTimeConstants_Test::TestBody()::...` | `sa::task<stack_size> task("ConstexprTest", priority, []() { /* test */ });` |
-| test_enhanced_cpp17_features.cpp:313 | Function | `Cpp17FeaturesTest_ChronoTypesIntegration_Test::TestBody()...` | `[]() { /* start */ },` |
-| test_enhanced_cpp17_features.cpp:314 | Function | `Cpp17FeaturesTest_ChronoTypesIntegration_Test::TestBody()...` | `[]() { /* stop */ },` |
-| test_enhanced_cpp17_features.cpp:315 | Function | `Cpp17FeaturesTest_ChronoTypesIntegration_Test::TestBody()...` | `[]() { /* periodic */ },` |
-| test_enhanced_cpp17_features.cpp:319 | Function | `Cpp17FeaturesTest_ChronoTypesIntegration_Test::TestBody()...` | `[]() { /* start */ },` |
-| test_enhanced_cpp17_features.cpp:320 | Function | `Cpp17FeaturesTest_ChronoTypesIntegration_Test::TestBody()...` | `[]() { /* stop */ },` |
-| test_enhanced_cpp17_features.cpp:321 | Function | `Cpp17FeaturesTest_ChronoTypesIntegration_Test::TestBody()...` | `[]() { /* periodic */ },` |
-| test_enhanced_cpp17_features.cpp:325 | Function | `Cpp17FeaturesTest_ChronoTypesIntegration_Test::TestBody()...` | `[]() { /* start */ },` |
-| test_enhanced_cpp17_features.cpp:326 | Function | `Cpp17FeaturesTest_ChronoTypesIntegration_Test::TestBody()...` | `[]() { /* stop */ },` |
-| test_enhanced_cpp17_features.cpp:327 | Function | `Cpp17FeaturesTest_ChronoTypesIntegration_Test::TestBody()...` | `[]() { /* periodic */ },` |
-| test_enhanced_cpp17_features.cpp:350 | Function | `Cpp17FeaturesTest_STLContainerIntegration_Test::TestBody(...` | `tasks.emplace_back("VectorTask1", 1, []() { /* test */ });` |
-| test_enhanced_cpp17_features.cpp:351 | Function | `Cpp17FeaturesTest_STLContainerIntegration_Test::TestBody(...` | `tasks.emplace_back("VectorTask2", 2, []() { /* test */ });` |
-| test_enhanced_cpp17_features.cpp:352 | Function | `Cpp17FeaturesTest_STLContainerIntegration_Test::TestBody(...` | `tasks.emplace_back("VectorTask3", 3, []() { /* test */ });` |
-| test_enhanced_cpp17_features.cpp:369 | Function | `Cpp17FeaturesTest_UniquePtrIntegration_Test::TestBody()::...` | `auto task1 = std::make_unique<sa::task<1024>>("UniqueTask1", 1, []() { /* tes...` |
-| test_enhanced_cpp17_features.cpp:370 | Function | `Cpp17FeaturesTest_UniquePtrIntegration_Test::TestBody()::...` | `auto task2 = std::make_unique<sa::task<1024>>("UniqueTask2", 2, []() { /* tes...` |
-| test_enhanced_cpp17_features.cpp:69 | Function | `Cpp17FeaturesTest_TaskMoveSemanticsPerfectForwarding_Test...` | `auto task_func1 = [&call_count]() mutable { call_count++; };` |
-| test_enhanced_cpp17_features.cpp:70 | Function | `Cpp17FeaturesTest_TaskMoveSemanticsPerfectForwarding_Test...` | `auto task_func2 = [&call_count](){ call_count += 2; };` |
-| test_enhanced_cpp17_features.cpp:92 | Function | `Cpp17FeaturesTest_TaskMoveAssignmentChaining_Test::TestBo...` | `auto task_func = [&executed]() { executed = true; };` |
-| test_enhanced_cpp17_features.cpp:95 | Function | `Cpp17FeaturesTest_TaskMoveAssignmentChaining_Test::TestBo...` | `sa::task<1024> task1("Original", 1, [&executed]() { executed = true; });` |
-| test_freertos_sw_timer.cpp:155 | Function | `FreeRTOSSwTimerTest_StaticTimerAllocatorCreate_Test::Test...` | `[](TimerHandle_t){});` |
-| test_freertos_sw_timer.cpp:168 | Function | `FreeRTOSSwTimerTest_StaticTimerAllocatorCreateNullReturn_...` | `[](TimerHandle_t){});` |
-| test_freertos_sw_timer.cpp:203 | Function | `FreeRTOSSwTimerTest_DynamicTimerAllocatorCreate_Test::Tes...` | `[](TimerHandle_t){});` |
-| test_freertos_sw_timer.cpp:216 | Function | `FreeRTOSSwTimerTest_DynamicTimerAllocatorCreateNullReturn...` | `[](TimerHandle_t){});` |
-| test_freertos_sw_timer.cpp:90 | Function | `FreeRTOSSwTimerTest::createTestCallback()::{lambda()#1}::...` | `return [this]() { callback_count++; };` |
-| test_freertos_task.cpp:1020 | Function | `FreeRTOSTaskTest_TaskChronoCompatibility_Test::TestBody()...` | `sa::task<1024> test_task("ChronoTask", 2, [](){});` |
-| test_freertos_task.cpp:1090 | Function | `FreeRTOSTaskTest_TaskMoveConstruction_Test::TestBody()::{...` | `sa::task<1024> original_task("MoveTest", 2, [](){});` |
-| test_freertos_task.cpp:1108 | Function | `FreeRTOSTaskTest_PeriodicTaskMoveConstruction_Test::TestB...` | `[](){}, [](){}, [](){}, 100ms);` |
-| test_freertos_task.cpp:1108 | Function | `FreeRTOSTaskTest_PeriodicTaskMoveConstruction_Test::TestB...` | `[](){}, [](){}, [](){}, 100ms);` |
-| test_freertos_task.cpp:1108 | Function | `FreeRTOSTaskTest_PeriodicTaskMoveConstruction_Test::TestB...` | `[](){}, [](){}, [](){}, 100ms);` |
-| test_freertos_task.cpp:1162 | Function | `FreeRTOSTaskTest_PeriodicTaskTypo_Test::TestBody()::{lamb...` | `[]() {},  // on_start` |
-| test_freertos_task.cpp:1163 | Function | `FreeRTOSTaskTest_PeriodicTaskTypo_Test::TestBody()::{lamb...` | `[]() {},  // on_stop` |
-| test_freertos_task.cpp:1164 | Function | `FreeRTOSTaskTest_PeriodicTaskTypo_Test::TestBody()::{lamb...` | `[]() {},  // periodic_routine` |
-| test_freertos_task.cpp:1187 | Function | `FreeRTOSTaskTest_TaskTemplateInstantiation_Test::TestBody...` | `sa::task<512> small_task("SmallTask", 1, []() {});` |
-| test_freertos_task.cpp:1203 | Function | `FreeRTOSTaskTest_DynamicTaskDifferentSizes_Test::TestBody...` | `da::task<2048> dyn_task("DynTask", 3, []() {});` |
-| test_freertos_task.cpp:1213 | Function | `FreeRTOSTaskTest_TaskNotificationEdgeCases_Test::TestBody...` | `sa::task<1024> test_task("EdgeTask", 2, []() {});` |
-| test_freertos_task.cpp:1298-1300 | Function | `FreeRTOSTaskTest_RacingConditionTaskConstructorInitializa...` | `sa::task<1024> test_task("RacingTask", 2, []() {` |
-| test_freertos_task.cpp:1326 | Function | `FreeRTOSTaskTest_ConcurrentTaskCreationAndDestruction_Tes...` | `auto task1 = std::make_unique<sa::task<512>>("Task1", 1, []() {});` |
-| test_freertos_task.cpp:1327 | Function | `FreeRTOSTaskTest_ConcurrentTaskCreationAndDestruction_Tes...` | `auto task2 = std::make_unique<sa::task<512>>("Task2", 2, []() {});` |
-| test_freertos_task.cpp:1328 | Function | `FreeRTOSTaskTest_ConcurrentTaskCreationAndDestruction_Tes...` | `auto task3 = std::make_unique<sa::task<512>>("Task3", 3, []() {});` |
-| test_freertos_task.cpp:135 | Function | `FreeRTOSTaskTest_DynamicTaskAllocatorCreateSuccess_Test::...` | `auto task_function = [](void*){};` |
-| test_freertos_task.cpp:1354 | Function | `FreeRTOSTaskTest_MoveSemanticsRacingConditions_Test::Test...` | `sa::task<1024> original_task("MoveTask", 1, []() {});` |
-| test_freertos_task.cpp:1382 | Function | `FreeRTOSTaskTest_PeriodicTaskLifecycleRacingConditions_Te...` | `[&start_count]() { start_count++; },  // on_start` |
-| test_freertos_task.cpp:1383 | Function | `FreeRTOSTaskTest_PeriodicTaskLifecycleRacingConditions_Te...` | `[&stop_count]() { stop_count++; },    // on_stop` |
-| test_freertos_task.cpp:1384 | Function | `FreeRTOSTaskTest_PeriodicTaskLifecycleRacingConditions_Te...` | `[&periodic_count]() { periodic_count++; },  // periodic_routine` |
-| test_freertos_task.cpp:1411 | Function | `FreeRTOSTaskTest_NotificationRacingConditions_Test::TestB...` | `sa::task<1024> test_task("NotifyRace", 2, []() {});` |
-| test_freertos_task.cpp:1456-1458 | Function | `FreeRTOSTaskTest_ComplexMultitaskingScenario_Test::TestBo...` | `sa::task<1024> producer("Producer", 3, []() {` |
-| test_freertos_task.cpp:1464-1466 | Function | `FreeRTOSTaskTest_ComplexMultitaskingScenario_Test::TestBo...` | `sa::task<1024> consumer("Consumer", 2, []() {` |
-| test_freertos_task.cpp:1472-1474 | Function | `FreeRTOSTaskTest_ComplexMultitaskingScenario_Test::TestBo...` | `sa::task<1024> coordinator("Coordinator", 4, []() {` |
-| test_freertos_task.cpp:1543 | Function | `FreeRTOSTaskTest_TaskSystemStatusUnderLoad_Test::TestBody...` | `sa::task<512> task1("SysTask1", 1, []() {});` |
-| test_freertos_task.cpp:1544 | Function | `FreeRTOSTaskTest_TaskSystemStatusUnderLoad_Test::TestBody...` | `sa::task<512> task2("SysTask2", 2, []() {});` |
-| test_freertos_task.cpp:1545 | Function | `FreeRTOSTaskTest_TaskSystemStatusUnderLoad_Test::TestBody...` | `sa::task<512> task3("SysTask3", 3, []() {});` |
-| test_freertos_task.cpp:1594-1596 | Function | `FreeRTOSTaskTest_ConstructorInitializationOrderRaceCondit...` | `sa::task<1024> race_test_task("RaceTest", 2, [&task_routine_called]() {` |
-| test_freertos_task.cpp:165-167 | Function | `FreeRTOSTaskTest_StaticTaskConstruction_Test::TestBody():...` | `sa::task<1024> test_task("TestTask", 2, [&task_executed]() {` |
-| test_freertos_task.cpp:1741 | Function | `FreeRTOSTaskTest_AdvancedRacingConditionScenarios_Test::T...` | `sa::task<512> task1("RaceTask1", 1, []() {});` |
-| test_freertos_task.cpp:1748 | Function | `FreeRTOSTaskTest_AdvancedRacingConditionScenarios_Test::T...` | `sa::task<512> task2("RaceTask2", 2, []() {});` |
-| test_freertos_task.cpp:1796 | Function | `FreeRTOSTaskTest_AdvancedChronoCompatibility_Test::TestBo...` | `sa::task<1024> test_task("ChronoTask", 2, []() {});` |
-| test_freertos_task.cpp:180-182 | Function | `FreeRTOSTaskTest_StaticTaskConstructionWithString_Test::T...` | `sa::task<1024> test_task(task_name, 3, []() {` |
-| test_freertos_task.cpp:1838 | Function | `FreeRTOSTaskTest_PriorityInheritanceScenario_Test::TestBo...` | `sa::task<1024> low_prio_task("LowPrio", 1, []() {});` |
-| test_freertos_task.cpp:1839 | Function | `FreeRTOSTaskTest_PriorityInheritanceScenario_Test::TestBo...` | `sa::task<1024> high_prio_task("HighPrio", 5, []() {});` |
-| test_freertos_task.cpp:194 | Function | `FreeRTOSTaskTest_StaticTaskDestruction_Test::TestBody()::...` | `sa::task<1024> test_task("TestTask", 2, []() {});` |
-| test_freertos_task.cpp:207 | Function | `FreeRTOSTaskTest_StaticTaskDestructionNullHandle_Test::Te...` | `sa::task<1024> test_task("TestTask", 2, []() {});` |
-| test_freertos_task.cpp:215 | Function | `FreeRTOSTaskTest_StaticTaskSuspendResume_Test::TestBody()...` | `sa::task<1024> test_task("TestTask", 2, []() {});` |
-| test_freertos_task.cpp:235 | Function | `FreeRTOSTaskTest_StaticTaskTerminate_Test::TestBody()::{l...` | `sa::task<1024> test_task("TestTask", 2, []() {});` |
-| test_freertos_task.cpp:248 | Function | `FreeRTOSTaskTest_StaticTaskPriority_Test::TestBody()::{la...` | `sa::task<1024> test_task("TestTask", 2, []() {});` |
-| test_freertos_task.cpp:271 | Function | `FreeRTOSTaskTest_StaticTaskName_Test::TestBody()::{lambda...` | `sa::task<1024> test_task("TestTask", 2, []() {});` |
-| test_freertos_task.cpp:285 | Function | `FreeRTOSTaskTest_StaticTaskState_Test::TestBody()::{lambd...` | `sa::task<1024> test_task("TestTask", 2, []() {});` |
-| test_freertos_task.cpp:299 | Function | `FreeRTOSTaskTest_TaskApplicationTag_Test::TestBody()::{la...` | `sa::task<1024> test_task("TagTask", 2, []() {});` |
-| test_freertos_task.cpp:326 | Function | `FreeRTOSTaskTest_TaskStackWatermark_Test::TestBody()::{la...` | `sa::task<1024> test_task("WatermarkTask", 2, []() {});` |
-| test_freertos_task.cpp:347 | Function | `FreeRTOSTaskTest_TaskTraceStatus_Test::TestBody()::{lambd...` | `sa::task<1024> test_task("StatusTask", 2, []() {});` |
-| test_freertos_task.cpp:417-419 | Function | `FreeRTOSTaskTest_TaskSuspendedOnStart_Test::TestBody()::{...` | `sa::task<1024> suspended_task("SuspendedTask", 1, []() {` |
-| test_freertos_task.cpp:431-433 | Function | `FreeRTOSTaskTest_TaskNotSuspendedOnStart_Test::TestBody()...` | `sa::task<1024> active_task("ActiveTask", 1, []() {` |
-| test_freertos_task.cpp:447-449 | Function | `FreeRTOSTaskTest_DynamicTaskConstruction_Test::TestBody()...` | `da::task<2048> test_task("DynamicTask", 3, []() {` |
-| test_freertos_task.cpp:476 | Function | `FreeRTOSTaskTest_TaskNotifications_Test::TestBody()::{lam...` | `sa::task<1024> test_task("NotifyTask", 2, []() {});` |
-| test_freertos_task.cpp:514 | Function | `FreeRTOSTaskTest_TaskNotificationsExtended_Test::TestBody...` | `sa::task<1024> test_task("ExtendedNotifyTask", 2, []() {});` |
-| test_freertos_task.cpp:588 | Function | `FreeRTOSTaskTest_PeriodicTaskConstruction_Test::TestBody(...` | `[&on_start_called]() { on_start_called = true; },      // on_start` |
-| test_freertos_task.cpp:589 | Function | `FreeRTOSTaskTest_PeriodicTaskConstruction_Test::TestBody(...` | `[&on_stop_called]() { on_stop_called = true; },       // on_stop` |
-| test_freertos_task.cpp:590 | Function | `FreeRTOSTaskTest_PeriodicTaskConstruction_Test::TestBody(...` | `[&periodic_called]() { periodic_called = true; },     // periodic_routine` |
-| test_freertos_task.cpp:614 | Function | `FreeRTOSTaskTest_PeriodicTaskWithString_Test::TestBody():...` | `[]() {},  // on_start` |
-| test_freertos_task.cpp:615 | Function | `FreeRTOSTaskTest_PeriodicTaskWithString_Test::TestBody():...` | `[]() {},  // on_stop` |
-| test_freertos_task.cpp:616 | Function | `FreeRTOSTaskTest_PeriodicTaskWithString_Test::TestBody():...` | `[]() {},  // periodic_routine` |
-| test_freertos_task.cpp:635 | Function | `FreeRTOSTaskTest_PeriodicTaskZeroPeriod_Test::TestBody():...` | `[]() {},  // on_start` |
-| test_freertos_task.cpp:636 | Function | `FreeRTOSTaskTest_PeriodicTaskZeroPeriod_Test::TestBody():...` | `[]() {},  // on_stop` |
-| test_freertos_task.cpp:637 | Function | `FreeRTOSTaskTest_PeriodicTaskZeroPeriod_Test::TestBody():...` | `[]() {},  // periodic_routine` |
-| test_freertos_task.cpp:656 | Function | `FreeRTOSTaskTest_PeriodicTaskNoPeriod_Test::TestBody()::{...` | `[]() {},  // on_start` |
-| test_freertos_task.cpp:657 | Function | `FreeRTOSTaskTest_PeriodicTaskNoPeriod_Test::TestBody()::{...` | `[]() {},  // on_stop` |
-| test_freertos_task.cpp:658 | Function | `FreeRTOSTaskTest_PeriodicTaskNoPeriod_Test::TestBody()::{...` | `[]() {}   // periodic_routine` |
-| test_freertos_task.cpp:715 | Function | `FreeRTOSTaskTest_PeriodicTaskTerminate_Test::TestBody()::...` | `[]() {},  // on_start` |
-| test_freertos_task.cpp:716 | Function | `FreeRTOSTaskTest_PeriodicTaskTerminate_Test::TestBody()::...` | `[]() {},  // on_stop` |
-| test_freertos_task.cpp:717 | Function | `FreeRTOSTaskTest_PeriodicTaskTerminate_Test::TestBody()::...` | `[]() {},  // periodic_routine` |
-| test_freertos_task.cpp:761 | Function | `FreeRTOSTaskTest_PeriodicTaskNotificationExtensions_Test:...` | `[]() {},  // on_start` |
-| test_freertos_task.cpp:762 | Function | `FreeRTOSTaskTest_PeriodicTaskNotificationExtensions_Test:...` | `[]() {},  // on_stop` |
-| test_freertos_task.cpp:763 | Function | `FreeRTOSTaskTest_PeriodicTaskNotificationExtensions_Test:...` | `[]() {},  // periodic_routine` |
-| test_freertos_task.cpp:85 | Function | `FreeRTOSTaskTest_StaticTaskAllocatorCreate_Test::TestBody...` | `auto task_function = [](void*){};` |
-| test_freertos_task.cpp:957 | Function | `FreeRTOSTaskTest_StackAllocationLimitation_Test::TestBody...` | `sa::task<1024> stack_task("StackLimitationDemo", 1, [](){});` |
-| test_freertos_task.cpp:970 | Function | `FreeRTOSTaskTest_InvalidParameters_Test::TestBody()::{lam...` | `sa::task<1024> task_with_null_name(nullptr, 1, [](){});` |
-| test_freertos_task.cpp:98 | Function | `FreeRTOSTaskTest_StaticTaskAllocatorCreateNullReturn_Test...` | `auto task_function = [](void*){};` |
-| test_freertos_task.cpp:982 | Function | `FreeRTOSTaskTest_ZeroStackSize_Test::TestBody()::{lambda(...` | `sa::task<0> zero_stack_task("ZeroStack", 1, [](){});` |
-| test_freertos_task.cpp:995 | Function | `FreeRTOSTaskTest_VeryHighPriority_Test::TestBody()::{lamb...` | `sa::task<1024> high_priority_task("HighPriority", max_priority, [](){});` |
-| freertos_queue.hpp:489 | Line | Line 489 | `return {};` |
-| freertos_queue.hpp:628 | Line | Line 628 | `return {};` |
+```cpp
+void suspend(void) { vTaskSuspend(m_hTask); }
+```
+
+**Uncovered Area 40**: freertos_task.hpp:273
+*Function*: `freertos::task<freertos::dynamic_task_allocator<2048ul>>::suspend`
+
+```cpp
+void suspend(void) { vTaskSuspend(m_hTask); }
+```
+
+**Uncovered Area 41**: freertos_task.hpp:611
+*Function*: `freertos::periodic_task<freertos::static_task_allocator<1024ul>>::periodic_task`
+
+```cpp
+m_task{name, priority, [this]() { run(); }, start_suspended} {}
+```
+
+**Uncovered Area 42**: freertos_task.hpp:611
+*Function*: `freertos::periodic_task<freertos::static_task_allocator<1024ul>>::periodic_task`
+
+```cpp
+m_task{name, priority, [this]() { run(); }, start_suspended} {}
+```
+
+**Uncovered Area 43**: FreeRTOS.h:163
+*Function*: `FreeRTOSMock::~FreeRTOSMock()`
+
+```cpp
+virtual ~FreeRTOSMock() = default;
+```
+
+**Uncovered Area 44**: FreeRTOS.h:323
+*Function*: `FreeRTOSMock::xMessageBufferSendFromISR`
+
+```cpp
+MOCK_METHOD(size_t, xMessageBufferSendFromISR, (MessageBufferHandle_t xMessageBuffer, const void* pvTxData, size_t xDataLengthBytes, BaseType_t* pxHigherPriorityTaskWoken), (override));
+```
+
+**Uncovered Area 45**: FreeRTOS.h:325
+*Function*: `FreeRTOSMock::xMessageBufferReceiveFromISR`
+
+```cpp
+MOCK_METHOD(size_t, xMessageBufferReceiveFromISR, (MessageBufferHandle_t xMessageBuffer, void* pvRxData, size_t xBufferLengthBytes, BaseType_t* pxHigherPriorityTaskWoken), (override));
+```
+
+**Uncovered Area 46**: freertos_mocks.cpp:772-777
+*Function*: `xMessageBufferSendFromISR`
+
+```cpp
+size_t xMessageBufferSendFromISR(MessageBufferHandle_t xMessageBuffer, const void* pvTxData, size_t xDataLengthBytes, BaseType_t* pxHigherPriorityTaskWoken) {
+    return freertos_test::getFreeRTOSMock().xMessageBufferSendFromISR(xMessageBuffer, pvTxData, xDataLengthBytes, pxHigherPriorityTaskWoken);
+}
+```
+
+**Uncovered Area 47**: freertos_mocks.cpp:786-791
+*Function*: `xMessageBufferReceiveFromISR`
+
+```cpp
+size_t xMessageBufferReceiveFromISR(MessageBufferHandle_t xMessageBuffer, void* pvRxData, size_t xBufferLengthBytes, BaseType_t* pxHigherPriorityTaskWoken) {
+    return freertos_test::getFreeRTOSMock().xMessageBufferReceiveFromISR(xMessageBuffer, pvRxData, xBufferLengthBytes, pxHigherPriorityTaskWoken);
+}
+```
+
+**Uncovered Area 48**: stl_semaphore_mocks.hpp:165
+*Function*: `freertos_test::stl_counting_semaphore::take`
+
+```cpp
+m_condition.wait(lock, [this] { return m_count > 0; });
+```
+
+**Uncovered Area 49**: stl_semaphore_mocks.hpp:77
+*Function*: `freertos_test::stl_binary_semaphore::take`
+
+```cpp
+m_condition.wait(lock, [this] { return m_available; });
+```
+**Uncovered Area 50**: test_enhanced_cpp17_features.cpp:115
+*Function*: `Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test::TestBody()::lambda`
+
+```cpp
+auto on_start = [&start_count]() { start_count++; };
+```
+
+**Uncovered Area 51**: test_enhanced_cpp17_features.cpp:116
+*Function*: `Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test::TestBody()::lambda`
+
+```cpp
+auto on_stop = [&stop_count]() { stop_count++; };
+```
+
+**Uncovered Area 52**: test_enhanced_cpp17_features.cpp:117
+*Function*: `Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test::TestBody()::lambda`
+
+```cpp
+auto periodic = [&periodic_count]() { periodic_count++; };
+```
+
+**Uncovered Area 53**: test_enhanced_cpp17_features.cpp:127
+*Function*: `Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test::TestBody()::lambda`
+
+```cpp
+[&start_count]() { start_count++; },
+```
+
+**Uncovered Area 54**: test_enhanced_cpp17_features.cpp:128
+*Function*: `Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test::TestBody()::lambda`
+
+```cpp
+[&stop_count]() { stop_count++; },
+```
+
+**Uncovered Area 55**: test_enhanced_cpp17_features.cpp:129
+*Function*: `Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test::TestBody()::lambda`
+
+```cpp
+[&periodic_count]() { periodic_count++; });
+```
+
+**Uncovered Area 56**: test_enhanced_cpp17_features.cpp:152-154
+*Function*: `Cpp17FeaturesTest_LambdaCaptureVarieties_Test::TestBody()::lambda`
+
+```cpp
+sa::task<1024> task1("RefCapture", 1, [&message]() {
+    message = "Reference captured!";
+});
+```
+
+**Uncovered Area 57**: test_enhanced_cpp17_features.cpp:157-159
+*Function*: `Cpp17FeaturesTest_LambdaCaptureVarieties_Test::TestBody()::lambda`
+
+```cpp
+sa::task<1024> task2("ValueCapture", 1, [counter]() {
+    // Value captured
+});
+```
+
+**Uncovered Area 58**: test_enhanced_cpp17_features.cpp:162-164
+*Function*: `Cpp17FeaturesTest_LambdaCaptureVarieties_Test::TestBody()::lambda`
+
+```cpp
+sa::task<1024> task3("NoCapture", 1, []() {
+    // No capture
+});
+```
+
+**Uncovered Area 59**: test_enhanced_cpp17_features.cpp:172
+*Function*: `Cpp17FeaturesTest_FunctionObjectVarieties_Test::TestBody()::lambda`
+
+```cpp
+auto func_lambda = []() { /* test */ };
+```
+
+**Uncovered Area 60**: test_enhanced_cpp17_features.cpp:178
+*Function*: `Cpp17FeaturesTest_FunctionObjectVarieties_Test::TestBody()::operator()`
+
+```cpp
+void operator()() const { /* test */ }
+```
+
+**Uncovered Area 61**: test_enhanced_cpp17_features.cpp:185
+*Function*: `Cpp17FeaturesTest_FunctionObjectVarieties_Test::TestBody()::lambda`
+
+```cpp
+sa::task<1024> task3("FunctionPointer", 1, []() { /* test */ });
+```
+
+**Uncovered Area 62**: test_enhanced_cpp17_features.cpp:292
+*Function*: `Cpp17FeaturesTest_CompileTimeConstants_Test::TestBody()::lambda`
+
+```cpp
+sa::task<stack_size> task("ConstexprTest", priority, []() { /* test */ });
+```
+**Uncovered Area 63**: test_enhanced_cpp17_features.cpp:313
+*Function*: `Cpp17FeaturesTest_ChronoTypesIntegration_Test::TestBody()::lambda`
+
+```cpp
+[]() { /* start */ },
+```
+
+**Uncovered Area 64**: test_enhanced_cpp17_features.cpp:314
+*Function*: `Cpp17FeaturesTest_ChronoTypesIntegration_Test::TestBody()::lambda`
+
+```cpp
+[]() { /* stop */ },
+```
+
+**Uncovered Area 65**: test_enhanced_cpp17_features.cpp:315
+*Function*: `Cpp17FeaturesTest_ChronoTypesIntegration_Test::TestBody()::lambda`
+
+```cpp
+[]() { /* periodic */ },
+```
+
+**Uncovered Area 66**: test_enhanced_cpp17_features.cpp:319
+*Function*: `Cpp17FeaturesTest_ChronoTypesIntegration_Test::TestBody()::lambda`
+
+```cpp
+[]() { /* start */ },
+```
+
+**Uncovered Area 67**: test_enhanced_cpp17_features.cpp:320
+*Function*: `Cpp17FeaturesTest_ChronoTypesIntegration_Test::TestBody()::lambda`
+
+```cpp
+[]() { /* stop */ },
+```
+
+**Uncovered Area 68**: test_enhanced_cpp17_features.cpp:321
+*Function*: `Cpp17FeaturesTest_ChronoTypesIntegration_Test::TestBody()::lambda`
+
+```cpp
+[]() { /* periodic */ },
+```
+
+**Uncovered Area 69**: test_enhanced_cpp17_features.cpp:325
+*Function*: `Cpp17FeaturesTest_ChronoTypesIntegration_Test::TestBody()::lambda`
+
+```cpp
+[]() { /* start */ },
+```
+
+**Uncovered Area 70**: test_enhanced_cpp17_features.cpp:326
+*Function*: `Cpp17FeaturesTest_ChronoTypesIntegration_Test::TestBody()::lambda`
+
+```cpp
+[]() { /* stop */ },
+```
+
+**Uncovered Area 71**: test_enhanced_cpp17_features.cpp:327
+*Function*: `Cpp17FeaturesTest_ChronoTypesIntegration_Test::TestBody()::lambda`
+
+```cpp
+[]() { /* periodic */ },
+```
+
+**Uncovered Area 72**: test_enhanced_cpp17_features.cpp:350
+*Function*: `Cpp17FeaturesTest_STLContainerIntegration_Test::TestBody()::lambda`
+
+```cpp
+tasks.emplace_back("VectorTask1", 1, []() { /* test */ });
+```
+
+**Uncovered Area 73**: test_enhanced_cpp17_features.cpp:351
+*Function*: `Cpp17FeaturesTest_STLContainerIntegration_Test::TestBody()::lambda`
+
+```cpp
+tasks.emplace_back("VectorTask2", 2, []() { /* test */ });
+```
+
+**Uncovered Area 74**: test_enhanced_cpp17_features.cpp:352
+*Function*: `Cpp17FeaturesTest_STLContainerIntegration_Test::TestBody()::lambda`
+
+```cpp
+tasks.emplace_back("VectorTask3", 3, []() { /* test */ });
+```
+
+**Uncovered Area 75**: test_enhanced_cpp17_features.cpp:369
+*Function*: `Cpp17FeaturesTest_UniquePtrIntegration_Test::TestBody()::lambda`
+
+```cpp
+auto task1 = std::make_unique<sa::task<1024>>("UniqueTask1", 1, []() { /* test */ });
+```
+
+**Uncovered Area 76**: test_enhanced_cpp17_features.cpp:370
+*Function*: `Cpp17FeaturesTest_UniquePtrIntegration_Test::TestBody()::lambda`
+
+```cpp
+auto task2 = std::make_unique<sa::task<1024>>("UniqueTask2", 2, []() { /* test */ });
+```
+**Uncovered Area 77**: test_enhanced_cpp17_features.cpp:69
+*Function*: `Cpp17FeaturesTest_TaskMoveSemanticsPerfectForwarding_Test::TestBody()::lambda`
+
+```cpp
+auto task_func1 = [&call_count]() mutable { call_count++; };
+```
+
+**Uncovered Area 78**: test_enhanced_cpp17_features.cpp:70
+*Function*: `Cpp17FeaturesTest_TaskMoveSemanticsPerfectForwarding_Test::TestBody()::lambda`
+
+```cpp
+auto task_func2 = [&call_count](){ call_count += 2; };
+```
+
+**Uncovered Area 79**: test_enhanced_cpp17_features.cpp:92
+*Function*: `Cpp17FeaturesTest_TaskMoveAssignmentChaining_Test::TestBody()::lambda`
+
+```cpp
+auto task_func = [&executed]() { executed = true; };
+```
+
+**Uncovered Area 80**: test_enhanced_cpp17_features.cpp:95
+*Function*: `Cpp17FeaturesTest_TaskMoveAssignmentChaining_Test::TestBody()::lambda`
+
+```cpp
+sa::task<1024> task1("Original", 1, [&executed]() { executed = true; });
+```
+**Uncovered Area 81**: test_freertos_sw_timer.cpp:155
+*Function*: `FreeRTOSSwTimerTest_StaticTimerAllocatorCreate_Test::TestBody()::lambda`
+
+```cpp
+[](TimerHandle_t){});
+```
+
+**Uncovered Area 82**: test_freertos_sw_timer.cpp:168
+*Function*: `FreeRTOSSwTimerTest_StaticTimerAllocatorCreateNullReturn_Test::TestBody()::lambda`
+
+```cpp
+[](TimerHandle_t){});
+```
+
+**Uncovered Area 83**: test_freertos_sw_timer.cpp:203
+*Function*: `FreeRTOSSwTimerTest_DynamicTimerAllocatorCreate_Test::TestBody()::lambda`
+
+```cpp
+[](TimerHandle_t){});
+```
+
+**Uncovered Area 84**: test_freertos_sw_timer.cpp:216
+*Function*: `FreeRTOSSwTimerTest_DynamicTimerAllocatorCreateNullReturn_Test::TestBody()::lambda`
+
+```cpp
+[](TimerHandle_t){});
+```
+
+**Uncovered Area 85**: test_freertos_sw_timer.cpp:90
+*Function*: `FreeRTOSSwTimerTest::createTestCallback()::lambda`
+
+```cpp
+return [this]() { callback_count++; };
+```
+**Uncovered Area 86**: test_freertos_task.cpp:1020
+*Function*: `FreeRTOSTaskTest_TaskChronoCompatibility_Test::TestBody()::lambda`
+
+```cpp
+sa::task<1024> test_task("ChronoTask", 2, [](){});
+```
+
+**Uncovered Area 87**: test_freertos_task.cpp:1090
+*Function*: `FreeRTOSTaskTest_TaskMoveConstruction_Test::TestBody()::lambda`
+
+```cpp
+sa::task<1024> original_task("MoveTest", 2, [](){});
+```
+
+**Uncovered Area 88**: test_freertos_task.cpp:1108
+*Function*: `FreeRTOSTaskTest_PeriodicTaskMoveConstruction_Test::TestBody()::lambda`
+
+```cpp
+[](){}, [](){}, [](){}, 100ms);
+```
+
+**Uncovered Area 89**: test_freertos_task.cpp:1108
+*Function*: `FreeRTOSTaskTest_PeriodicTaskMoveConstruction_Test::TestBody()::lambda`
+
+```cpp
+[](){}, [](){}, [](){}, 100ms);
+```
+
+**Uncovered Area 90**: test_freertos_task.cpp:1108
+*Function*: `FreeRTOSTaskTest_PeriodicTaskMoveConstruction_Test::TestBody()::lambda`
+
+```cpp
+[](){}, [](){}, [](){}, 100ms);
+```
+
+**Uncovered Area 91**: test_freertos_task.cpp:1162
+*Function*: `FreeRTOSTaskTest_PeriodicTaskTypo_Test::TestBody()::lambda`
+
+```cpp
+[]() {},  // on_start
+```
+
+**Uncovered Area 92**: test_freertos_task.cpp:1163
+*Function*: `FreeRTOSTaskTest_PeriodicTaskTypo_Test::TestBody()::lambda`
+
+```cpp
+[]() {},  // on_stop
+```
+
+**Uncovered Area 93**: test_freertos_task.cpp:1164
+*Function*: `FreeRTOSTaskTest_PeriodicTaskTypo_Test::TestBody()::lambda`
+
+```cpp
+[]() {},  // periodic_routine
+```
+
+**Uncovered Area 94**: test_freertos_task.cpp:1187
+*Function*: `FreeRTOSTaskTest_TaskTemplateInstantiation_Test::TestBody()::lambda`
+
+```cpp
+sa::task<512> small_task("SmallTask", 1, []() {});
+```
+
+**Uncovered Area 95**: test_freertos_task.cpp:1203
+*Function*: `FreeRTOSTaskTest_DynamicTaskDifferentSizes_Test::TestBody()::lambda`
+
+```cpp
+da::task<2048> dyn_task("DynTask", 3, []() {});
+```
+
+**Uncovered Area 96**: test_freertos_task.cpp:1213
+*Function*: `FreeRTOSTaskTest_TaskNotificationEdgeCases_Test::TestBody()::lambda`
+
+```cpp
+sa::task<1024> test_task("EdgeTask", 2, []() {});
+```
+
+**Uncovered Area 97**: test_freertos_task.cpp:1298-1300
+*Function*: `FreeRTOSTaskTest_RacingConditionTaskConstructorInitialization_Test::TestBody()::lambda`
+
+```cpp
+sa::task<1024> test_task("RacingTask", 2, []() {
+    // Test racing condition
+});
+```
+
+**Uncovered Area 98**: test_freertos_task.cpp:1326
+*Function*: `FreeRTOSTaskTest_ConcurrentTaskCreationAndDestruction_Test::TestBody()::lambda`
+
+```cpp
+auto task1 = std::make_unique<sa::task<512>>("Task1", 1, []() {});
+```
+
+**Uncovered Area 99**: test_freertos_task.cpp:1327
+*Function*: `FreeRTOSTaskTest_ConcurrentTaskCreationAndDestruction_Test::TestBody()::lambda`
+
+```cpp
+auto task2 = std::make_unique<sa::task<512>>("Task2", 2, []() {});
+```
+
+**Uncovered Area 100**: test_freertos_task.cpp:1328
+*Function*: `FreeRTOSTaskTest_ConcurrentTaskCreationAndDestruction_Test::TestBody()::lambda`
+
+```cpp
+auto task3 = std::make_unique<sa::task<512>>("Task3", 3, []() {});
+```
+**Uncovered Area 101**: test_freertos_task.cpp:135
+*Function*: `FreeRTOSTaskTest_DynamicTaskAllocatorCreateSuccess_Test::TestBody()::lambda`
+
+```cpp
+auto task_function = [](void*){};
+```
+
+**Uncovered Area 102**: test_freertos_task.cpp:1354
+*Function*: `FreeRTOSTaskTest_MoveSemanticsRacingConditions_Test::TestBody()::lambda`
+
+```cpp
+sa::task<1024> original_task("MoveTask", 1, []() {});
+```
+
+**Uncovered Area 103**: test_freertos_task.cpp:1382
+*Function*: `FreeRTOSTaskTest_PeriodicTaskLifecycleRacingConditions_Test::TestBody()::lambda`
+
+```cpp
+[&start_count]() { start_count++; },  // on_start
+```
+
+**Uncovered Area 104**: test_freertos_task.cpp:1383
+*Function*: `FreeRTOSTaskTest_PeriodicTaskLifecycleRacingConditions_Test::TestBody()::lambda`
+
+```cpp
+[&stop_count]() { stop_count++; },    // on_stop
+```
+
+**Uncovered Area 105**: test_freertos_task.cpp:1384
+*Function*: `FreeRTOSTaskTest_PeriodicTaskLifecycleRacingConditions_Test::TestBody()::lambda`
+
+```cpp
+[&periodic_count]() { periodic_count++; },  // periodic_routine
+```
+
+**Uncovered Area 106**: test_freertos_task.cpp:1411
+*Function*: `FreeRTOSTaskTest_NotificationRacingConditions_Test::TestBody()::lambda`
+
+```cpp
+sa::task<1024> test_task("NotifyRace", 2, []() {});
+```
+
+**Uncovered Area 107**: test_freertos_task.cpp:1456-1458
+*Function*: `FreeRTOSTaskTest_ComplexMultitaskingScenario_Test::TestBody()::lambda`
+
+```cpp
+sa::task<1024> producer("Producer", 3, []() {
+    // Producer task
+});
+```
+
+**Uncovered Area 108**: test_freertos_task.cpp:1464-1466
+*Function*: `FreeRTOSTaskTest_ComplexMultitaskingScenario_Test::TestBody()::lambda`
+
+```cpp
+sa::task<1024> consumer("Consumer", 2, []() {
+    // Consumer task
+});
+```
+
+**Uncovered Area 109**: test_freertos_task.cpp:1472-1474
+*Function*: `FreeRTOSTaskTest_ComplexMultitaskingScenario_Test::TestBody()::lambda`
+
+```cpp
+sa::task<1024> coordinator("Coordinator", 4, []() {
+    // Coordinator task
+});
+```
+
+**Uncovered Area 110**: test_freertos_task.cpp:1543
+*Function*: `FreeRTOSTaskTest_TaskSystemStatusUnderLoad_Test::TestBody()::lambda`
+
+```cpp
+sa::task<512> task1("SysTask1", 1, []() {});
+```
+
+**Uncovered Area 111**: test_freertos_task.cpp:1544
+*Function*: `FreeRTOSTaskTest_TaskSystemStatusUnderLoad_Test::TestBody()::lambda`
+
+```cpp
+sa::task<512> task2("SysTask2", 2, []() {});
+```
+
+**Uncovered Area 112**: test_freertos_task.cpp:1545
+*Function*: `FreeRTOSTaskTest_TaskSystemStatusUnderLoad_Test::TestBody()::lambda`
+
+```cpp
+sa::task<512> task3("SysTask3", 3, []() {});
+```
+
+**Uncovered Area 113**: test_freertos_task.cpp:1594-1596
+*Function*: `FreeRTOSTaskTest_ConstructorInitializationOrderRaceCondition_Test::TestBody()::lambda`
+
+```cpp
+sa::task<1024> race_test_task("RaceTest", 2, [&task_routine_called]() {
+    task_routine_called = true;
+});
+```
+
+**Uncovered Area 114**: test_freertos_task.cpp:165-167
+*Function*: `FreeRTOSTaskTest_StaticTaskConstruction_Test::TestBody()::lambda`
+
+```cpp
+sa::task<1024> test_task("TestTask", 2, [&task_executed]() {
+    task_executed = true;
+});
+```
+
+**Uncovered Area 115**: test_freertos_task.cpp:1741
+*Function*: `FreeRTOSTaskTest_AdvancedRacingConditionScenarios_Test::TestBody()::lambda`
+
+```cpp
+sa::task<512> task1("RaceTask1", 1, []() {});
+```
+
+**Uncovered Area 116**: test_freertos_task.cpp:1748
+*Function*: `FreeRTOSTaskTest_AdvancedRacingConditionScenarios_Test::TestBody()::lambda`
+
+```cpp
+sa::task<512> task2("RaceTask2", 2, []() {});
+```
+
+**Uncovered Area 117**: test_freertos_task.cpp:1796
+*Function*: `FreeRTOSTaskTest_AdvancedChronoCompatibility_Test::TestBody()::lambda`
+
+```cpp
+sa::task<1024> test_task("ChronoTask", 2, []() {});
+```
+
+**Uncovered Area 118**: test_freertos_task.cpp:180-182
+*Function*: `FreeRTOSTaskTest_StaticTaskConstructionWithString_Test::TestBody()::lambda`
+
+```cpp
+sa::task<1024> test_task(task_name, 3, []() {
+    // Task with string name
+});
+```
+
+**Uncovered Area 119**: test_freertos_task.cpp:1838
+*Function*: `FreeRTOSTaskTest_PriorityInheritanceScenario_Test::TestBody()::lambda`
+
+```cpp
+sa::task<1024> low_prio_task("LowPrio", 1, []() {});
+```
+
+**Uncovered Area 120**: test_freertos_task.cpp:1839
+*Function*: `FreeRTOSTaskTest_PriorityInheritanceScenario_Test::TestBody()::lambda`
+
+```cpp
+sa::task<1024> high_prio_task("HighPrio", 5, []() {});
+```
+
+**Uncovered Area 121**: test_freertos_task.cpp:194
+*Function*: `FreeRTOSTaskTest_StaticTaskDestruction_Test::TestBody()::lambda`
+
+```cpp
+sa::task<1024> test_task("TestTask", 2, []() {});
+```
+
+**Uncovered Area 122**: test_freertos_task.cpp:207
+*Function*: `FreeRTOSTaskTest_StaticTaskDestructionNullHandle_Test::TestBody()::lambda`
+
+```cpp
+sa::task<1024> test_task("TestTask", 2, []() {});
+```
+
+**Uncovered Area 123**: test_freertos_task.cpp:215
+*Function*: `FreeRTOSTaskTest_StaticTaskSuspendResume_Test::TestBody()::lambda`
+
+```cpp
+sa::task<1024> test_task("TestTask", 2, []() {});
+```
+
+**Uncovered Area 124**: test_freertos_task.cpp:235
+*Function*: `FreeRTOSTaskTest_StaticTaskTerminate_Test::TestBody()::lambda`
+
+```cpp
+sa::task<1024> test_task("TestTask", 2, []() {});
+```
+
+**Uncovered Area 125**: test_freertos_task.cpp:248
+*Function*: `FreeRTOSTaskTest_StaticTaskPriority_Test::TestBody()::lambda`
+
+```cpp
+sa::task<1024> test_task("TestTask", 2, []() {});
+```
+
+**Uncovered Area 126**: test_freertos_task.cpp:271
+*Function*: `FreeRTOSTaskTest_StaticTaskName_Test::TestBody()::lambda`
+
+```cpp
+sa::task<1024> test_task("TestTask", 2, []() {});
+```
+
+**Uncovered Area 127**: test_freertos_task.cpp:285
+*Function*: `FreeRTOSTaskTest_StaticTaskState_Test::TestBody()::lambda`
+
+```cpp
+sa::task<1024> test_task("TestTask", 2, []() {});
+```
+
+**Uncovered Area 128**: test_freertos_task.cpp:299
+*Function*: `FreeRTOSTaskTest_TaskApplicationTag_Test::TestBody()::lambda`
+
+```cpp
+sa::task<1024> test_task("TagTask", 2, []() {});
+```
+
+**Uncovered Area 129**: test_freertos_task.cpp:326
+*Function*: `FreeRTOSTaskTest_TaskStackWatermark_Test::TestBody()::lambda`
+
+```cpp
+sa::task<1024> test_task("WatermarkTask", 2, []() {});
+```
+
+**Uncovered Area 130**: test_freertos_task.cpp:347
+*Function*: `FreeRTOSTaskTest_TaskTraceStatus_Test::TestBody()::lambda`
+
+```cpp
+sa::task<1024> test_task("StatusTask", 2, []() {});
+```
+
+**Uncovered Area 131**: test_freertos_task.cpp:417-419
+*Function*: `FreeRTOSTaskTest_TaskSuspendedOnStart_Test::TestBody()::lambda`
+
+```cpp
+sa::task<1024> suspended_task("SuspendedTask", 1, []() {
+    // Suspended task
+});
+```
+
+**Uncovered Area 132**: test_freertos_task.cpp:431-433
+*Function*: `FreeRTOSTaskTest_TaskNotSuspendedOnStart_Test::TestBody()::lambda`
+
+```cpp
+sa::task<1024> active_task("ActiveTask", 1, []() {
+    // Active task
+});
+```
+
+**Uncovered Area 133**: test_freertos_task.cpp:447-449
+*Function*: `FreeRTOSTaskTest_DynamicTaskConstruction_Test::TestBody()::lambda`
+
+```cpp
+da::task<2048> test_task("DynamicTask", 3, []() {
+    // Dynamic task
+});
+```
+
+**Uncovered Area 134**: test_freertos_task.cpp:476
+*Function*: `FreeRTOSTaskTest_TaskNotifications_Test::TestBody()::lambda`
+
+```cpp
+sa::task<1024> test_task("NotifyTask", 2, []() {});
+```
+
+**Uncovered Area 135**: test_freertos_task.cpp:514
+*Function*: `FreeRTOSTaskTest_TaskNotificationsExtended_Test::TestBody()::lambda`
+
+```cpp
+sa::task<1024> test_task("ExtendedNotifyTask", 2, []() {});
+```
+
+**Uncovered Area 136**: test_freertos_task.cpp:588
+*Function*: `FreeRTOSTaskTest_PeriodicTaskConstruction_Test::TestBody()::lambda`
+
+```cpp
+[&on_start_called]() { on_start_called = true; },      // on_start
+```
+
+**Uncovered Area 137**: test_freertos_task.cpp:589
+*Function*: `FreeRTOSTaskTest_PeriodicTaskConstruction_Test::TestBody()::lambda`
+
+```cpp
+[&on_stop_called]() { on_stop_called = true; },       // on_stop
+```
+
+**Uncovered Area 138**: test_freertos_task.cpp:590
+*Function*: `FreeRTOSTaskTest_PeriodicTaskConstruction_Test::TestBody()::lambda`
+
+```cpp
+[&periodic_called]() { periodic_called = true; },     // periodic_routine
+```
+
+**Uncovered Area 139**: test_freertos_task.cpp:614
+*Function*: `FreeRTOSTaskTest_PeriodicTaskWithString_Test::TestBody()::lambda`
+
+```cpp
+[]() {},  // on_start
+```
+
+**Uncovered Area 140**: test_freertos_task.cpp:615
+*Function*: `FreeRTOSTaskTest_PeriodicTaskWithString_Test::TestBody()::lambda`
+
+```cpp
+[]() {},  // on_stop
+```
+
+**Uncovered Area 141**: test_freertos_task.cpp:616
+*Function*: `FreeRTOSTaskTest_PeriodicTaskWithString_Test::TestBody()::lambda`
+
+```cpp
+[]() {},  // periodic_routine
+```
+
+**Uncovered Area 142**: test_freertos_task.cpp:635
+*Function*: `FreeRTOSTaskTest_PeriodicTaskZeroPeriod_Test::TestBody()::lambda`
+
+```cpp
+[]() {},  // on_start
+```
+
+**Uncovered Area 143**: test_freertos_task.cpp:636
+*Function*: `FreeRTOSTaskTest_PeriodicTaskZeroPeriod_Test::TestBody()::lambda`
+
+```cpp
+[]() {},  // on_stop
+```
+
+**Uncovered Area 144**: test_freertos_task.cpp:637
+*Function*: `FreeRTOSTaskTest_PeriodicTaskZeroPeriod_Test::TestBody()::lambda`
+
+```cpp
+[]() {},  // periodic_routine
+```
+
+**Uncovered Area 145**: test_freertos_task.cpp:656
+*Function*: `FreeRTOSTaskTest_PeriodicTaskNoPeriod_Test::TestBody()::lambda`
+
+```cpp
+[]() {},  // on_start
+```
+
+**Uncovered Area 146**: test_freertos_task.cpp:657
+*Function*: `FreeRTOSTaskTest_PeriodicTaskNoPeriod_Test::TestBody()::lambda`
+
+```cpp
+[]() {},  // on_stop
+```
+
+**Uncovered Area 147**: test_freertos_task.cpp:658
+*Function*: `FreeRTOSTaskTest_PeriodicTaskNoPeriod_Test::TestBody()::lambda`
+
+```cpp
+[]() {}   // periodic_routine
+```
+
+**Uncovered Area 148**: test_freertos_task.cpp:715
+*Function*: `FreeRTOSTaskTest_PeriodicTaskTerminate_Test::TestBody()::lambda`
+
+```cpp
+[]() {},  // on_start
+```
+
+**Uncovered Area 149**: test_freertos_task.cpp:716
+*Function*: `FreeRTOSTaskTest_PeriodicTaskTerminate_Test::TestBody()::lambda`
+
+```cpp
+[]() {},  // on_stop
+```
+
+**Uncovered Area 150**: test_freertos_task.cpp:717
+*Function*: `FreeRTOSTaskTest_PeriodicTaskTerminate_Test::TestBody()::lambda`
+
+```cpp
+[]() {},  // periodic_routine
+```
+
+**Uncovered Area 151**: test_freertos_task.cpp:761
+*Function*: `FreeRTOSTaskTest_PeriodicTaskNotificationExtensions_Test::TestBody()::lambda`
+
+```cpp
+[]() {},  // on_start
+```
+
+**Uncovered Area 152**: test_freertos_task.cpp:762
+*Function*: `FreeRTOSTaskTest_PeriodicTaskNotificationExtensions_Test::TestBody()::lambda`
+
+```cpp
+[]() {},  // on_stop
+```
+
+**Uncovered Area 153**: test_freertos_task.cpp:763
+*Function*: `FreeRTOSTaskTest_PeriodicTaskNotificationExtensions_Test::TestBody()::lambda`
+
+```cpp
+[]() {},  // periodic_routine
+```
+
+**Uncovered Area 154**: test_freertos_task.cpp:85
+*Function*: `FreeRTOSTaskTest_StaticTaskAllocatorCreate_Test::TestBody()::lambda`
+
+```cpp
+auto task_function = [](void*){};
+```
+
+**Uncovered Area 155**: test_freertos_task.cpp:957
+*Function*: `FreeRTOSTaskTest_StackAllocationLimitation_Test::TestBody()::lambda`
+
+```cpp
+sa::task<1024> stack_task("StackLimitationDemo", 1, [](){});
+```
+
+**Uncovered Area 156**: test_freertos_task.cpp:970
+*Function*: `FreeRTOSTaskTest_InvalidParameters_Test::TestBody()::lambda`
+
+```cpp
+sa::task<1024> task_with_null_name(nullptr, 1, [](){});
+```
+
+**Uncovered Area 157**: test_freertos_task.cpp:98
+*Function*: `FreeRTOSTaskTest_StaticTaskAllocatorCreateNullReturn_Test::TestBody()::lambda`
+
+```cpp
+auto task_function = [](void*){};
+```
+
+**Uncovered Area 158**: test_freertos_task.cpp:982
+*Function*: `FreeRTOSTaskTest_ZeroStackSize_Test::TestBody()::lambda`
+
+```cpp
+sa::task<0> zero_stack_task("ZeroStack", 1, [](){});
+```
+
+**Uncovered Area 159**: test_freertos_task.cpp:995
+*Function*: `FreeRTOSTaskTest_VeryHighPriority_Test::TestBody()::lambda`
+
+```cpp
+sa::task<1024> high_priority_task("HighPriority", max_priority, [](){});
+```
+
+**Uncovered Area 160**: freertos_queue.hpp:489
+*Line*: Line 489
+
+```cpp
+return {};
+```
+
+**Uncovered Area 161**: freertos_queue.hpp:628
+*Line*: Line 628
+
+```cpp
+return {};
+```
 
 **Summary:** 161 uncovered code areas identified across 4 categories.
 
