@@ -144,6 +144,7 @@ def parse_lcov_file_details(coverage_file):
             lines = f.readlines()
         
         current_file = None
+        function_info = {}  # Store function name to line number mapping
         
         for line in lines:
             line = line.strip()
@@ -151,12 +152,25 @@ def parse_lcov_file_details(coverage_file):
             # Source file marker
             if line.startswith('SF:'):
                 current_file = line[3:]  # Remove 'SF:'
+                function_info = {}  # Reset for new file
                 coverage_details['files'][current_file] = {
                     'uncovered_lines': [],
                     'uncovered_functions': [],
                     'total_lines': 0,
                     'covered_lines': 0
                 }
+            
+            # Function definition data (includes line numbers)
+            elif line.startswith('FN:') and current_file:
+                parts = line[3:].split(',')  # Remove 'FN:'
+                if len(parts) >= 3:
+                    start_line = int(parts[0])
+                    end_line = int(parts[1])
+                    func_name = parts[2]
+                    function_info[func_name] = {
+                        'start_line': start_line,
+                        'end_line': end_line
+                    }
             
             # Line coverage data
             elif line.startswith('DA:') and current_file:
@@ -178,11 +192,17 @@ def parse_lcov_file_details(coverage_file):
                     hit_count = int(parts[0])
                     func_name = parts[1]
                     if hit_count == 0:
-                        coverage_details['files'][current_file]['uncovered_functions'].append(func_name)
-                        coverage_details['uncovered_functions'].append({
+                        # Get line number info if available
+                        func_details = {
                             'file': current_file,
                             'function': func_name
-                        })
+                        }
+                        if func_name in function_info:
+                            func_details['start_line'] = function_info[func_name]['start_line']
+                            func_details['end_line'] = function_info[func_name]['end_line']
+                        
+                        coverage_details['files'][current_file]['uncovered_functions'].append(func_name)
+                        coverage_details['uncovered_functions'].append(func_details)
             
             # Line summary
             elif line.startswith('LH:') and current_file:
@@ -311,43 +331,50 @@ def categorize_uncovered_code(uncovered_data, project_root):
     for func_info in uncovered_data.get('uncovered_functions', []):
         func_name = func_info.get('function', '')
         file_path = func_info.get('file', '')
+        start_line = func_info.get('start_line', 0)
+        end_line = func_info.get('end_line', 0)
         readable_name = demangle_function_name(func_name)
+        
+        # Get source context if line numbers are available
+        context = ""
+        if start_line > 0:
+            full_path = file_path  # File path is already absolute in coverage data
+            if os.path.exists(full_path):
+                context = get_source_context(full_path, start_line, 2)
+        
+        # Create location string with line numbers
+        if start_line > 0 and end_line > start_line:
+            location = f"{os.path.basename(file_path)}:{start_line}-{end_line}"
+        elif start_line > 0:
+            location = f"{os.path.basename(file_path)}:{start_line}"
+        else:
+            location = f"{os.path.basename(file_path)}:{readable_name}()"
         
         # Categorize based on function name patterns
         func_lower = func_name.lower()
         readable_lower = readable_name.lower()
         
-        if any(pattern in func_lower for pattern in ['taskfunc', 'run', 'exec', 'internal', '_zn']) or \
-           any(pattern in readable_lower for pattern in ['taskfunc', 'constructor', 'destructor']):
-            categories['internal_kernel_functions']['items'].append({
-                'type': 'function',
-                'name': readable_name,
-                'file': os.path.basename(file_path),
-                'location': f"{os.path.basename(file_path)}:{readable_name}()"
-            })
+        item = {
+            'type': 'function',
+            'name': readable_name,
+            'file': os.path.basename(file_path),
+            'location': location,
+            'start_line': start_line,
+            'end_line': end_line,
+            'context': context
+        }
+        
+        if any(pattern in func_lower for pattern in ['task_exec', 'callback_wrapper', 'run', 'exec', 'internal']) or \
+           any(pattern in readable_lower for pattern in ['task_exec', 'callback_wrapper']):
+            categories['internal_kernel_functions']['items'].append(item)
         elif any(pattern in func_lower for pattern in ['error', 'fail', 'exception', 'abort']) or \
              any(pattern in readable_lower for pattern in ['error', 'fail', 'exception']):
-            categories['error_handling_paths']['items'].append({
-                'type': 'function',
-                'name': readable_name,
-                'file': os.path.basename(file_path),
-                'location': f"{os.path.basename(file_path)}:{readable_name}()"
-            })
+            categories['error_handling_paths']['items'].append(item)
         elif any(pattern in func_lower for pattern in ['platform', 'special', 'config']) or \
              any(pattern in readable_lower for pattern in ['notify', 'platform', 'special']):
-            categories['platform_specific_code']['items'].append({
-                'type': 'function',
-                'name': readable_name,
-                'file': os.path.basename(file_path),
-                'location': f"{os.path.basename(file_path)}:{readable_name}()"
-            })
+            categories['platform_specific_code']['items'].append(item)
         else:
-            categories['defensive_programming']['items'].append({
-                'type': 'function',
-                'name': readable_name,
-                'file': os.path.basename(file_path),
-                'location': f"{os.path.basename(file_path)}:{readable_name}()"
-            })
+            categories['defensive_programming']['items'].append(item)
     
     # Analyze uncovered lines with context
     for line_info in uncovered_data.get('uncovered_lines', []):
@@ -359,44 +386,29 @@ def categorize_uncovered_code(uncovered_data, project_root):
             continue
         
         # Try to get source context to categorize
-        full_path = os.path.join(project_root, file_path.lstrip('/'))
+        full_path = file_path  # File path is already absolute in coverage data
+        context = ""
         if os.path.exists(full_path):
-            context = get_source_context(full_path, line_num, 1)
+            context = get_source_context(full_path, line_num, 2)
             
-            # Simple categorization based on content patterns
-            context_lower = context.lower()
-            if any(pattern in context_lower for pattern in ['freertos', 'xqueue', 'xtask', 'vtask', 'taskfunc', 'kernel']):
-                categories['internal_kernel_functions']['items'].append({
-                    'type': 'line',
-                    'line': line_num,
-                    'file': os.path.basename(file_path),
-                    'location': f"{os.path.basename(file_path)}:{line_num}",
-                    'context': context
-                })
-            elif any(pattern in context_lower for pattern in ['nullptr', 'null', 'error', 'fail', 'assert', 'throw', 'exception']):
-                categories['error_handling_paths']['items'].append({
-                    'type': 'line',
-                    'line': line_num,
-                    'file': os.path.basename(file_path),
-                    'location': f"{os.path.basename(file_path)}:{line_num}",
-                    'context': context
-                })
-            elif any(pattern in context_lower for pattern in ['portmax', 'config', '#ifdef', '#ifndef', 'platform', 'special']):
-                categories['platform_specific_code']['items'].append({
-                    'type': 'line',
-                    'line': line_num,
-                    'file': os.path.basename(file_path),
-                    'location': f"{os.path.basename(file_path)}:{line_num}",
-                    'context': context
-                })
-            else:
-                categories['defensive_programming']['items'].append({
-                    'type': 'line',
-                    'line': line_num,
-                    'file': os.path.basename(file_path),
-                    'location': f"{os.path.basename(file_path)}:{line_num}",
-                    'context': context
-                })
+        item = {
+            'type': 'line',
+            'line': line_num,
+            'file': os.path.basename(file_path),
+            'location': f"{os.path.basename(file_path)}:{line_num}",
+            'context': context
+        }
+        
+        # Simple categorization based on content patterns
+        context_lower = context.lower()
+        if any(pattern in context_lower for pattern in ['freertos', 'xqueue', 'xtask', 'vtask', 'taskfunc', 'kernel']):
+            categories['internal_kernel_functions']['items'].append(item)
+        elif any(pattern in context_lower for pattern in ['nullptr', 'null', 'error', 'fail', 'assert', 'throw', 'exception']):
+            categories['error_handling_paths']['items'].append(item)
+        elif any(pattern in context_lower for pattern in ['portmax', 'config', '#ifdef', '#ifndef', 'platform', 'special']):
+            categories['platform_specific_code']['items'].append(item)
+        else:
+            categories['defensive_programming']['items'].append(item)
     
     return categories
 
@@ -447,31 +459,68 @@ These uncovered areas are intentional and represent code that:
         
         if category_data['items']:
             detailed_analysis += "**Specific code references:**\n\n"
-            detailed_analysis += "| Location | Type | Details |\n"
-            detailed_analysis += "|----------|------|----------|\n"
+            detailed_analysis += "| File:Line | Type | Function/Code | Context |\n"
+            detailed_analysis += "|-----------|------|---------------|----------|\n"
             
-            for item in category_data['items'][:10]:  # Limit to first 10 items per category
+            # Show ALL items, not just first 10
+            for item in category_data['items']:
                 location = item.get('location', 'Unknown')
                 item_type = item.get('type', 'Unknown')
                 
                 if item_type == 'function':
-                    details = f"Function: `{item.get('name', 'Unknown')}`"
-                elif item_type == 'line':
-                    details = f"Line {item.get('line', '?')}"
-                    if 'context' in item:
-                        # Get just the relevant line from context for the table
-                        context_lines = item['context'].split('\n')
+                    function_name = item.get('name', 'Unknown')
+                    # Truncate very long function names for readability
+                    if len(function_name) > 60:
+                        function_name = function_name[:57] + "..."
+                    details = f"`{function_name}`"
+                    
+                    # Add context if available
+                    context = item.get('context', '')
+                    if context:
+                        # Get the most relevant line from context
+                        context_lines = context.split('\n')
                         relevant_line = next((line for line in context_lines if '>>>' in line), '')
                         if relevant_line:
-                            code_part = relevant_line.split(':', 1)[-1].strip()[:50] + ('...' if len(relevant_line.split(':', 1)[-1].strip()) > 50 else '')
-                            details += f" - `{code_part}`"
+                            code_part = relevant_line.split(':', 1)[-1].strip()
+                            if len(code_part) > 80:
+                                code_part = code_part[:77] + "..."
+                            context_display = f"`{code_part}`"
+                        else:
+                            context_display = "Function definition"
+                    else:
+                        context_display = "Function definition"
+                        
+                elif item_type == 'line':
+                    details = f"Line {item.get('line', '?')}"
+                    
+                    # Add context if available
+                    context = item.get('context', '')
+                    if context:
+                        # Get the most relevant line from context
+                        context_lines = context.split('\n')
+                        relevant_line = next((line for line in context_lines if '>>>' in line), '')
+                        if relevant_line:
+                            code_part = relevant_line.split(':', 1)[-1].strip()
+                            if len(code_part) > 80:
+                                code_part = code_part[:77] + "..."
+                            context_display = f"`{code_part}`"
+                        else:
+                            # Fallback: show any line from context
+                            non_empty_lines = [line.strip() for line in context_lines if line.strip()]
+                            if non_empty_lines:
+                                code_part = non_empty_lines[0]
+                                if len(code_part) > 80:
+                                    code_part = code_part[:77] + "..."
+                                context_display = f"`{code_part}`"
+                            else:
+                                context_display = "Code line"
+                    else:
+                        context_display = "Code line"
                 else:
                     details = "Unknown type"
+                    context_display = ""
                 
-                detailed_analysis += f"| {location} | {item_type.title()} | {details} |\n"
-            
-            if len(category_data['items']) > 10:
-                detailed_analysis += f"| ... | ... | *(and {len(category_data['items']) - 10} more items)* |\n"
+                detailed_analysis += f"| {location} | {item_type.title()} | {details} | {context_display} |\n"
         
         detailed_analysis += "\n"
     
