@@ -56,10 +56,14 @@ def parse_clang_tidy_output(input_file):
             message = match.group(5).strip()
             check_name = match.group(6)
             
-            # Extract filename for file analysis - exclude mocks
+            # Extract filename for file analysis - exclude mocks and tests
             filename = os.path.basename(file_path)
-            # Skip files from mocks directory
-            if '/mocks/' in file_path or 'mocks/' in file_path:
+            # Skip files from mocks directory and test files
+            if '/mocks/' in file_path or 'mocks/' in file_path or 'test_' in filename or '/tests/' in file_path:
+                continue
+            # Only include files from src/ and include/ directories
+            if not ('/src/' in file_path or '/include/' in file_path or 
+                    file_path.endswith('.hpp') or file_path.endswith('.cc') or file_path.endswith('.cpp')):
                 continue
             stats['files_analyzed'].add(filename)
             stats['issues_by_file'][filename] += 1
@@ -71,12 +75,16 @@ def parse_clang_tidy_output(input_file):
             category = check_name.split('-')[0] if '-' in check_name else check_name
             stats['check_categories'][category] += 1
         
-        # Also extract files mentioned in error processing lines - exclude mocks
+        # Also extract files mentioned in error processing lines - exclude mocks and tests
         # Pattern: "Error while processing /path/to/file.cc"
         error_files = re.findall(r'Error while processing ([^\s]+)', content)
         for file_path in error_files:
-            # Skip files from mocks directory
-            if '/mocks/' in file_path or 'mocks/' in file_path:
+            # Skip files from mocks directory and test files
+            if '/mocks/' in file_path or 'mocks/' in file_path or 'test_' in os.path.basename(file_path) or '/tests/' in file_path:
+                continue
+            # Only include files from src/ and include/ directories
+            if not ('/src/' in file_path or '/include/' in file_path or 
+                    file_path.endswith('.hpp') or file_path.endswith('.cc') or file_path.endswith('.cpp')):
                 continue
             filename = os.path.basename(file_path)
             stats['files_analyzed'].add(filename)
@@ -85,8 +93,12 @@ def parse_clang_tidy_output(input_file):
         # Pattern: "[X/Y] Processing file /path/to/file.ext."
         processed_files = re.findall(r'\[\d+/\d+\] Processing file ([^.]+\.[^.]+)\.', content)
         for file_path in processed_files:
-            # Skip files from mocks directory
-            if '/mocks/' in file_path or 'mocks/' in file_path:
+            # Skip files from mocks directory and test files
+            if '/mocks/' in file_path or 'mocks/' in file_path or 'test_' in os.path.basename(file_path) or '/tests/' in file_path:
+                continue
+            # Only include files from src/ and include/ directories
+            if not ('/src/' in file_path or '/include/' in file_path or 
+                    file_path.endswith('.hpp') or file_path.endswith('.cc') or file_path.endswith('.cpp')):
                 continue
             filename = os.path.basename(file_path)
             stats['files_analyzed'].add(filename)

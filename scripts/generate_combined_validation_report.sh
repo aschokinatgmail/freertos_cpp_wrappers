@@ -33,7 +33,30 @@ CLANG_TIDY_STATS="$TEMP_DIR/clang_tidy_stats.md"
 MISRA_REPORT="$BUILD_DIR/misra_report.txt"
 ENHANCED_CPPCHECK_REPORT="$BUILD_DIR/enhanced_cppcheck_report.txt"
 
-# Step 1: Generate static analysis report if raw data exists
+# Step 1: Run static analysis tools to get fresh results
+echo "Running static analysis tools to ensure fresh results..."
+
+# Run MISRA analysis
+if [ -f "$SOURCE_DIR/scripts/run_misra_analysis.sh" ]; then
+    echo "Running MISRA C++ analysis..."
+    bash "$SOURCE_DIR/scripts/run_misra_analysis.sh" "$SOURCE_DIR" "$MISRA_REPORT"
+else
+    echo "Warning: MISRA analysis script not found"
+fi
+
+# Run clang-tidy analysis (if not already available)
+if [ ! -f "$CLANG_TIDY_REPORT" ] && [ -f "$SOURCE_DIR/compile_commands.json" ]; then
+    echo "Running clang-tidy analysis..."
+    cd "$SOURCE_DIR"
+    clang-tidy \
+        --config-file=.clang-tidy \
+        --header-filter=".*include.*" \
+        $(find src include -name "*.hpp" -o -name "*.cc" -o -name "*.cpp") \
+        > "$CLANG_TIDY_REPORT" 2>&1 || true
+    cd - > /dev/null
+fi
+
+# Step 2: Generate static analysis report if raw data exists
 if [ -f "$CLANG_TIDY_REPORT" ] || [ -f "$MISRA_REPORT" ]; then
     echo "Generating static analysis section..."
     
@@ -80,7 +103,7 @@ else
 EOF
 fi
 
-# Step 2: Generate validation and verification report
+# Step 3: Generate validation and verification report
 echo "Generating validation and verification section..."
 if [ -f "$SOURCE_DIR/scripts/generate_validation_verification_report.py" ]; then
     python3 "$SOURCE_DIR/scripts/generate_validation_verification_report.py" \
@@ -91,7 +114,7 @@ else
     exit 1
 fi
 
-# Step 3: Combine reports
+# Step 4: Combine reports
 echo "Combining reports..."
 cat > "$OUTPUT_MD" << 'EOF'
 # Validation and Verification Report
@@ -120,7 +143,7 @@ if [ -f "$VV_REPORT_MD" ]; then
     sed -n '/^### Test Execution Summary/,$p' "$VV_REPORT_MD" >> "$OUTPUT_MD"
 fi
 
-# Step 4: Generate HTML version
+# Step 5: Generate HTML version
 echo "Generating HTML report..."
 if [ -f "$SOURCE_DIR/scripts/generate_html_report.py" ]; then
     python3 "$SOURCE_DIR/scripts/generate_html_report.py" \
