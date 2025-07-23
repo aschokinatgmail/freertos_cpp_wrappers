@@ -2,9 +2,9 @@
 
 ## Overview
 
-**Static Analysis Tools**: clang-tidy + MISRA C++ (cppcheck)
+**Static Analysis Tools**: clang-tidy + Enhanced cppcheck (all rules) + MISRA C++ (cppcheck)
 **Analysis Scope**: Library modules only - src/ include/
-**Check Sets**: cppcoreguidelines-*, cert-*, google-*, hicpp-* + MISRA C 2012 (applicable to C++)
+**Check Sets**: cppcoreguidelines-*, cert-*, google-*, hicpp-* + All cppcheck rules (style, performance, portability, security, etc.) + MISRA C 2012 (applicable to C++)
 
 ## clang-tidy Analysis
 
@@ -3517,6 +3517,1377 @@ Some files could not be fully analyzed:
 - **Compatibility**: Many MISRA C 2012 rules overlap with MISRA C++ 2008 requirements
 - **Integration**: This analysis complements the existing clang-tidy static analysis
 
+## Enhanced cppcheck Analysis (All Rules)
+
+### Summary
+
+- **Total Violations**: 100
+- **Unique Rules Violated**: 4
+- **Files Analyzed**: 9
+- **Analysis Errors**: 3
+
+### Violations by Severity
+
+- **Style**: 94
+- **Warning**: 6
+
+### Violations by Category
+
+- **Unused Code**: 84 violation(s)
+- **Other**: 10 violation(s)
+- **Const Correctness**: 6 violation(s)
+
+### Violations by Rule
+
+- **constParameterReference** (Const Correctness): 6 violation(s)
+- **shadowFunction** (Other): 4 violation(s)
+- **uninitMemberVar** (Other): 6 violation(s)
+- **unusedFunction** (Unused Code): 84 violation(s)
+
+### Violations by File
+
+- **freertos_event_group.hpp**: 11 violation(s)
+- **freertos_message_buffer.hpp**: 9 violation(s)
+- **freertos_queue.hpp**: 26 violation(s)
+- **freertos_semaphore.hpp**: 8 violation(s)
+- **freertos_stream_buffer.hpp**: 11 violation(s)
+- **freertos_sw_timer.hpp**: 11 violation(s)
+- **freertos_task.cc**: 6 violation(s)
+- **freertos_task.hpp**: 18 violation(s)
+
+### Detailed Violations with Code Context
+
+#### Const Correctness (6 violation(s))
+
+##### constParameterReference
+
+**Violation 1**: freertos_task.hpp:914:37
+*Style*: Parameter 'higherPriorityTaskWoken' can be declared as reference to const
+
+```cpp
+     911:    * @return BaseType_t  pdTRUE if the notification was given, pdFALSE otherwise
+     912:    */
+     913:   BaseType_t notify_isr(const uint32_t val, eNotifyAction action,
+>>>  914:                         BaseType_t &higherPriorityTaskWoken) {
+     915:     return m_task.notify_isr(val, action, higherPriorityTaskWoken);
+     916:   }
+     917:   /**
+```
+
+**Violation 2**: freertos_task.hpp:939:47
+*Style*: Parameter 'higherPriorityTaskWoken' can be declared as reference to const
+
+```cpp
+     936:    */
+     937:   BaseType_t notify_and_query_isr(const uint32_t val, eNotifyAction action,
+     938:                                   uint32_t &prev_value,
+>>>  939:                                   BaseType_t &higherPriorityTaskWoken) {
+     940:     return m_task.notify_and_query_isr(val, action, prev_value,
+     941:                                        higherPriorityTaskWoken);
+     942:   }
+```
+
+**Violation 3**: freertos_task.hpp:914:37
+*Style*: Parameter 'higherPriorityTaskWoken' can be declared as reference to const
+
+```cpp
+     911:    * @return BaseType_t  pdTRUE if the notification was given, pdFALSE otherwise
+     912:    */
+     913:   BaseType_t notify_isr(const uint32_t val, eNotifyAction action,
+>>>  914:                         BaseType_t &higherPriorityTaskWoken) {
+     915:     return m_task.notify_isr(val, action, higherPriorityTaskWoken);
+     916:   }
+     917:   /**
+```
+
+**Violation 4**: freertos_task.hpp:939:47
+*Style*: Parameter 'higherPriorityTaskWoken' can be declared as reference to const
+
+```cpp
+     936:    */
+     937:   BaseType_t notify_and_query_isr(const uint32_t val, eNotifyAction action,
+     938:                                   uint32_t &prev_value,
+>>>  939:                                   BaseType_t &higherPriorityTaskWoken) {
+     940:     return m_task.notify_and_query_isr(val, action, prev_value,
+     941:                                        higherPriorityTaskWoken);
+     942:   }
+```
+
+**Violation 5**: freertos_task.hpp:914:37
+*Style*: Parameter 'higherPriorityTaskWoken' can be declared as reference to const
+
+```cpp
+     911:    * @return BaseType_t  pdTRUE if the notification was given, pdFALSE otherwise
+     912:    */
+     913:   BaseType_t notify_isr(const uint32_t val, eNotifyAction action,
+>>>  914:                         BaseType_t &higherPriorityTaskWoken) {
+     915:     return m_task.notify_isr(val, action, higherPriorityTaskWoken);
+     916:   }
+     917:   /**
+```
+
+**Violation 6**: freertos_task.hpp:939:47
+*Style*: Parameter 'higherPriorityTaskWoken' can be declared as reference to const
+
+```cpp
+     936:    */
+     937:   BaseType_t notify_and_query_isr(const uint32_t val, eNotifyAction action,
+     938:                                   uint32_t &prev_value,
+>>>  939:                                   BaseType_t &higherPriorityTaskWoken) {
+     940:     return m_task.notify_and_query_isr(val, action, prev_value,
+     941:                                        higherPriorityTaskWoken);
+     942:   }
+```
+
+#### Other (10 violation(s))
+
+##### shadowFunction
+
+**Violation 1**: freertos_sw_timer.hpp:202:14
+*Style*: Local variable 'name' shadows outer function
+
+```cpp
+     199:         while (xTimerIsTimerActive(src.m_timer) != pdFALSE) {
+     200:           vTaskDelay(pdMS_TO_TICKS(1));
+     201:         }
+>>>  202:         auto name = pcTimerGetName(src.m_timer);
+     203:         auto period = xTimerGetPeriod(src.m_timer);
+     204:         auto auto_reload = uxTimerGetReloadMode(src.m_timer);
+     205:         rc = xTimerDelete(src.m_timer, portMAX_DELAY);
+```
+
+**Violation 2**: freertos_sw_timer.hpp:203:14
+*Style*: Local variable 'period' shadows outer function
+
+```cpp
+     200:           vTaskDelay(pdMS_TO_TICKS(1));
+     201:         }
+     202:         auto name = pcTimerGetName(src.m_timer);
+>>>  203:         auto period = xTimerGetPeriod(src.m_timer);
+     204:         auto auto_reload = uxTimerGetReloadMode(src.m_timer);
+     205:         rc = xTimerDelete(src.m_timer, portMAX_DELAY);
+     206:         if (rc == pdPASS) {
+```
+
+**Violation 3**: freertos_sw_timer.hpp:202:14
+*Style*: Local variable 'name' shadows outer function
+
+```cpp
+     199:         while (xTimerIsTimerActive(src.m_timer) != pdFALSE) {
+     200:           vTaskDelay(pdMS_TO_TICKS(1));
+     201:         }
+>>>  202:         auto name = pcTimerGetName(src.m_timer);
+     203:         auto period = xTimerGetPeriod(src.m_timer);
+     204:         auto auto_reload = uxTimerGetReloadMode(src.m_timer);
+     205:         rc = xTimerDelete(src.m_timer, portMAX_DELAY);
+```
+
+**Violation 4**: freertos_sw_timer.hpp:203:14
+*Style*: Local variable 'period' shadows outer function
+
+```cpp
+     200:           vTaskDelay(pdMS_TO_TICKS(1));
+     201:         }
+     202:         auto name = pcTimerGetName(src.m_timer);
+>>>  203:         auto period = xTimerGetPeriod(src.m_timer);
+     204:         auto auto_reload = uxTimerGetReloadMode(src.m_timer);
+     205:         rc = xTimerDelete(src.m_timer, portMAX_DELAY);
+     206:         if (rc == pdPASS) {
+```
+
+##### uninitMemberVar
+
+**Violation 1**: freertos_message_buffer.hpp:57:3
+*Warning*: Member variable 'static_message_buffer_allocator::m_storage' is not initialized in the constructor.
+
+```cpp
+      54:   std::array<uint8_t, MessageBufferSize> m_storage;
+      55: 
+      56: public:
+>>>   57:   static_message_buffer_allocator() = default;
+      58:   ~static_message_buffer_allocator() = default;
+      59:   static_message_buffer_allocator(const static_message_buffer_allocator &) =
+      60:       delete;
+```
+
+**Violation 2**: freertos_queue.hpp:59:3
+*Warning*: Member variable 'static_queue_allocator::m_storage' is not initialized in the constructor.
+
+```cpp
+      56:   std::array<uint8_t, QueueLength * sizeof(T)> m_storage;
+      57: 
+      58: public:
+>>>   59:   static_queue_allocator() = default;
+      60:   ~static_queue_allocator() = default;
+      61:   static_queue_allocator(const static_queue_allocator &) = delete;
+      62:   static_queue_allocator(static_queue_allocator &&) = delete;
+```
+
+**Violation 3**: freertos_stream_buffer.hpp:58:3
+*Warning*: Member variable 'static_stream_buffer_allocator::m_storage' is not initialized in the constructor.
+
+```cpp
+      55:   std::array<uint8_t, StreamBufferSize> m_storage;
+      56: 
+      57: public:
+>>>   58:   static_stream_buffer_allocator() = default;
+      59:   ~static_stream_buffer_allocator() = default;
+      60:   static_stream_buffer_allocator(const static_stream_buffer_allocator &) =
+      61:       delete;
+```
+
+**Violation 4**: freertos_message_buffer.hpp:57:3
+*Warning*: Member variable 'static_message_buffer_allocator::m_storage' is not initialized in the constructor.
+
+```cpp
+      54:   std::array<uint8_t, MessageBufferSize> m_storage;
+      55: 
+      56: public:
+>>>   57:   static_message_buffer_allocator() = default;
+      58:   ~static_message_buffer_allocator() = default;
+      59:   static_message_buffer_allocator(const static_message_buffer_allocator &) =
+      60:       delete;
+```
+
+**Violation 5**: freertos_queue.hpp:59:3
+*Warning*: Member variable 'static_queue_allocator::m_storage' is not initialized in the constructor.
+
+```cpp
+      56:   std::array<uint8_t, QueueLength * sizeof(T)> m_storage;
+      57: 
+      58: public:
+>>>   59:   static_queue_allocator() = default;
+      60:   ~static_queue_allocator() = default;
+      61:   static_queue_allocator(const static_queue_allocator &) = delete;
+      62:   static_queue_allocator(static_queue_allocator &&) = delete;
+```
+
+**Violation 6**: freertos_stream_buffer.hpp:58:3
+*Warning*: Member variable 'static_stream_buffer_allocator::m_storage' is not initialized in the constructor.
+
+```cpp
+      55:   std::array<uint8_t, StreamBufferSize> m_storage;
+      56: 
+      57: public:
+>>>   58:   static_stream_buffer_allocator() = default;
+      59:   ~static_stream_buffer_allocator() = default;
+      60:   static_stream_buffer_allocator(const static_stream_buffer_allocator &) =
+      61:       delete;
+```
+
+#### Unused Code (84 violation(s))
+
+##### unusedFunction
+
+**Violation 1**: freertos_task.hpp:1041:0
+*Style*: The function 'sleep_for' is never used.
+
+```cpp
+    1038:  * @param duration duration to sleep
+    1039:  */
+    1040: template <typename Rep, typename Period>
+>>> 1041: void sleep_for(std::chrono::duration<Rep, Period> duration) {
+    1042:   delay(duration);
+    1043: }
+    1044: 
+```
+
+**Violation 2**: freertos_task.hpp:1108:0
+*Style*: The function 'total_run_time' is never used.
+
+```cpp
+    1105:    * @return UBaseType_t number of tasks
+    1106:    */
+    1107:   UBaseType_t count(void) const { return m_task_count; }
+>>> 1108:   std::chrono::milliseconds total_run_time(void) const {
+    1109:     return std::chrono::milliseconds{m_total_run_time};
+    1110:   }
+    1111:   /**
+```
+
+**Violation 3**: freertos_task.hpp:1116:0
+*Style*: The function 'begin' is never used.
+
+```cpp
+    1113:    *
+    1114:    * @return const TaskStatus_t* begin iterator
+    1115:    */
+>>> 1116:   const TaskStatus_t *begin(void) const { return m_status_array.data(); }
+    1117:   /**
+    1118:    * @brief Return the end iterator of the task status array.
+    1119:    *
+```
+
+**Violation 4**: freertos_task.hpp:1122:0
+*Style*: The function 'end' is never used.
+
+```cpp
+    1119:    *
+    1120:    * @return const TaskStatus_t* end iterator
+    1121:    */
+>>> 1122:   const TaskStatus_t *end(void) const {
+    1123:     return m_status_array.data() + m_task_count;
+    1124:   }
+    1125: };
+```
+
+**Violation 5**: freertos_task.cc:54:0
+*Style*: The function 'current_task_handle' is never used.
+
+```cpp
+      51:   }
+      52: }
+      53: #if INCLUDE_xTaskGetCurrentTaskHandle
+>>>   54: TaskHandle_t current_task_handle(void) { return xTaskGetCurrentTaskHandle(); }
+      55: #endif
+      56: #if INCLUDE_xTaskGetIdleTaskHandle
+      57: TaskHandle_t idle_task_handle(void) { return xTaskGetIdleTaskHandle(); }
+```
+
+**Violation 6**: freertos_task.cc:57:0
+*Style*: The function 'idle_task_handle' is never used.
+
+```cpp
+      54: TaskHandle_t current_task_handle(void) { return xTaskGetCurrentTaskHandle(); }
+      55: #endif
+      56: #if INCLUDE_xTaskGetIdleTaskHandle
+>>>   57: TaskHandle_t idle_task_handle(void) { return xTaskGetIdleTaskHandle(); }
+      58: #endif
+      59: TickType_t tick_count(void) { return xTaskGetTickCount(); }
+      60: TickType_t tick_count_isr(void) { return xTaskGetTickCountFromISR(); }
+```
+
+**Violation 7**: freertos_task.cc:61:0
+*Style*: The function 'time_since_scheduler_started' is never used.
+
+```cpp
+      58: #endif
+      59: TickType_t tick_count(void) { return xTaskGetTickCount(); }
+      60: TickType_t tick_count_isr(void) { return xTaskGetTickCountFromISR(); }
+>>>   61: std::chrono::milliseconds time_since_scheduler_started(void) {
+      62:   return std::chrono::milliseconds{tick_count() * portTICK_PERIOD_MS};
+      63: }
+      64: std::chrono::milliseconds time_since_scheduler_started_isr(void) {
+```
+
+**Violation 8**: freertos_task.cc:64:0
+*Style*: The function 'time_since_scheduler_started_isr' is never used.
+
+```cpp
+      61: std::chrono::milliseconds time_since_scheduler_started(void) {
+      62:   return std::chrono::milliseconds{tick_count() * portTICK_PERIOD_MS};
+      63: }
+>>>   64: std::chrono::milliseconds time_since_scheduler_started_isr(void) {
+      65:   return std::chrono::milliseconds{tick_count_isr() * portTICK_PERIOD_MS};
+      66: }
+      67: #if INCLUDE_xTaskGetSchedulerState || configUSE_TIMERS
+```
+
+**Violation 9**: freertos_task.cc:70:0
+*Style*: The function 'task_count' is never used.
+
+```cpp
+      67: #if INCLUDE_xTaskGetSchedulerState || configUSE_TIMERS
+      68: BaseType_t get_scheduler_state(void) { return xTaskGetSchedulerState(); }
+      69: #endif
+>>>   70: UBaseType_t task_count(void) { return uxTaskGetNumberOfTasks(); }
+      71: void yield(void) { taskYIELD(); }
+      72: 
+      73: } // namespace freertos
+```
+
+**Violation 10**: freertos_task.cc:71:0
+*Style*: The function 'yield' is never used.
+
+```cpp
+      68: BaseType_t get_scheduler_state(void) { return xTaskGetSchedulerState(); }
+      69: #endif
+      70: UBaseType_t task_count(void) { return uxTaskGetNumberOfTasks(); }
+>>>   71: void yield(void) { taskYIELD(); }
+      72: 
+      73: } // namespace freertos
+```
+
+**Violation 11**: freertos_event_group.hpp:126:0
+*Style*: The function 'set_bits' is never used.
+
+```cpp
+     123:    * @param bits_to_set bits to set
+     124:    * @return EventBits_t bits set
+     125:    */
+>>>  126:   EventBits_t set_bits(const EventBits_t bits_to_set) {
+     127:     return xEventGroupSetBits(m_event_group, bits_to_set);
+     128:   }
+     129:   /**
+```
+
+**Violation 12**: freertos_event_group.hpp:136:0
+*Style*: The function 'set_bits_isr' is never used.
+
+```cpp
+     133:    * @param bits_to_set bits to set
+     134:    * @return EventBits_t bits set
+     135:    */
+>>>  136:   EventBits_t set_bits_isr(const EventBits_t bits_to_set) {
+     137:     BaseType_t higher_priority_task_woken = pdFALSE;
+     138:     const EventBits_t bits_set = xEventGroupSetBitsFromISR(
+     139:         m_event_group, bits_to_set, &higher_priority_task_woken);
+```
+
+**Violation 13**: freertos_event_group.hpp:150:0
+*Style*: The function 'clear_bits' is never used.
+
+```cpp
+     147:    * @param bits_to_clear bits to clear
+     148:    * @return EventBits_t bits cleared
+     149:    */
+>>>  150:   EventBits_t clear_bits(const EventBits_t bits_to_clear) {
+     151:     return xEventGroupClearBits(m_event_group, bits_to_clear);
+     152:   }
+     153:   /**
+```
+
+**Violation 14**: freertos_event_group.hpp:198:0
+*Style*: The function 'get_bits' is never used.
+
+```cpp
+     195:    *
+     196:    * @return EventBits_t Current value of the event group bits
+     197:    */
+>>>  198:   EventBits_t get_bits(void) const { return xEventGroupGetBits(m_event_group); }
+     199:   /**
+     200:    * @brief Method to get the bits of the event group from an ISR.
+     201:    * @ref https://www.freertos.org/xEventGroupGetBitsFromISR.html
+```
+
+**Violation 15**: freertos_event_group.hpp:205:0
+*Style*: The function 'get_bits_isr' is never used.
+
+```cpp
+     202:    *
+     203:    * @return EventBits_t Current value of the event group bits
+     204:    */
+>>>  205:   EventBits_t get_bits_isr(void) const {
+     206:     return xEventGroupGetBitsFromISR(m_event_group);
+     207:   }
+     208:   /**
+```
+
+**Violation 16**: freertos_message_buffer.hpp:193:0
+*Style*: The function 'available' is never used.
+
+```cpp
+     190:    *
+     191:    * @return size_t the number of bytes available in the buffer
+     192:    */
+>>>  193:   size_t available(void) const {
+     194:     return xMessageBufferSpaceAvailable(m_message_buffer);
+     195:   }
+     196:   /**
+```
+
+**Violation 17**: freertos_message_buffer.hpp:209:0
+*Style*: The function 'empty' is never used.
+
+```cpp
+     206:    *
+     207:    * @return BaseType_t pdTRUE if the message buffer is empty, pdFALSE otherwise
+     208:    */
+>>>  209:   BaseType_t empty(void) { return xMessageBufferIsEmpty(m_message_buffer); }
+     210:   /**
+     211:    * @brief Method checking if the message buffer is full.
+     212:    * @ref https://www.freertos.org/xMessageBufferIsFull.html
+```
+
+**Violation 18**: freertos_message_buffer.hpp:216:0
+*Style*: The function 'full' is never used.
+
+```cpp
+     213:    *
+     214:    * @return BaseType_t pdTRUE if the message buffer is full, pdFALSE otherwise
+     215:    */
+>>>  216:   BaseType_t full(void) { return xMessageBufferIsFull(m_message_buffer); }
+     217: };
+     218: 
+     219: #if configSUPPORT_STATIC_ALLOCATION
+```
+
+**Violation 19**: freertos_queue.hpp:316:0
+*Style*: The function 'send_back_isr' is never used.
+
+```cpp
+     313:    * @return BaseType_t pdPASS if the item
+     314:    * was successfully posted, otherwise errQUEUE_FULL.
+     315:    */
+>>>  316:   BaseType_t send_back_isr(const T &item,
+     317:                            BaseType_t &higher_priority_task_woken) {
+     318:     return xQueueSendToBackFromISR(m_queue, &item, &higher_priority_task_woken);
+     319:   }
+```
+
+**Violation 20**: freertos_queue.hpp:372:0
+*Style*: The function 'send_front_isr' is never used.
+
+```cpp
+     369:    * @return BaseType_t pdPASS if the item
+     370:    * was successfully posted, otherwise errQUEUE_FULL.
+     371:    */
+>>>  372:   BaseType_t send_front_isr(const T &item,
+     373:                             BaseType_t &higher_priority_task_woken) {
+     374:     return xQueueSendToFrontFromISR(m_queue, &item,
+     375:                                     &higher_priority_task_woken);
+```
+
+**Violation 21**: freertos_queue.hpp:497:0
+*Style*: The function 'messages_waiting' is never used.
+
+```cpp
+     494:    *
+     495:    * @return UBaseType_t The number of items stored in the queue.
+     496:    */
+>>>  497:   UBaseType_t messages_waiting(void) { return uxQueueMessagesWaiting(m_queue); }
+     498:   /**
+     499:    * @brief Return the number of items stored in the queue from an ISR.
+     500:    * @ref https://www.freertos.org/a00018.html#uxQueueMessagesWaitingFromISR
+```
+
+**Violation 22**: freertos_queue.hpp:504:0
+*Style*: The function 'messages_waiting_isr' is never used.
+
+```cpp
+     501:    *
+     502:    * @return UBaseType_t The number of items stored in the queue.
+     503:    */
+>>>  504:   UBaseType_t messages_waiting_isr(void) {
+     505:     return uxQueueMessagesWaitingFromISR(m_queue);
+     506:   }
+     507:   /**
+```
+
+**Violation 23**: freertos_queue.hpp:513:0
+*Style*: The function 'spaces_available' is never used.
+
+```cpp
+     510:    *
+     511:    * @return UBaseType_t The number of spaces available in the queue.
+     512:    */
+>>>  513:   UBaseType_t spaces_available(void) { return uxQueueSpacesAvailable(m_queue); }
+     514:   /**
+     515:    * @brief Resets the queue to the empty state.
+     516:    * @ref https://www.freertos.org/a00018.html#xQueueReset
+```
+
+**Violation 24**: freertos_queue.hpp:529:0
+*Style*: The function 'overwrite' is never used.
+
+```cpp
+     526:    * @param item An item to be posted on the queue.
+     527:    * @return BaseType_t pdPASS returned always.
+     528:    */
+>>>  529:   BaseType_t overwrite(const T &item) {
+     530:     return xQueueOverwrite(m_queue, &item);
+     531:   }
+     532:   /**
+```
+
+**Violation 25**: freertos_queue.hpp:542:0
+*Style*: The function 'overwrite_isr' is never used.
+
+```cpp
+     539:    * unblocked a task of higher priority.
+     540:    * @return BaseType_t pdPASS returned always.
+     541:    */
+>>>  542:   BaseType_t overwrite_isr(const T &item,
+     543:                            BaseType_t &higher_priority_task_woken) {
+     544:     return xQueueOverwriteFromISR(m_queue, &item, &higher_priority_task_woken);
+     545:   }
+```
+
+**Violation 26**: freertos_queue.hpp:598:0
+*Style*: The function 'peek_isr' is never used.
+
+```cpp
+     595:    * @return BaseType_t pdPASS if the item
+     596:    * was successfully peeked, otherwise pdFALSE.
+     597:    */
+>>>  598:   BaseType_t peek_isr(T &item, BaseType_t &higher_priority_task_woken) {
+     599:     return xQueuePeekFromISR(m_queue, &item, &higher_priority_task_woken);
+     600:   }
+     601:   /**
+```
+
+**Violation 27**: freertos_queue.hpp:675:0
+*Style*: The function 'full_isr' is never used.
+
+```cpp
+     672:    *
+     673:    * @return BaseType_t pdTRUE if the queue is full, pdFALSE otherwise.
+     674:    */
+>>>  675:   BaseType_t full_isr(void) const { return xQueueIsQueueFullFromISR(m_queue); }
+     676:   /**
+     677:    * @brief Method checking if the queue is empty from an ISR.
+     678:    * @ref https://www.freertos.org/a00018.html#xQueueIsQueueEmptyFromISR
+```
+
+**Violation 28**: freertos_queue.hpp:682:0
+*Style*: The function 'empty_isr' is never used.
+
+```cpp
+     679:    *
+     680:    * @return BaseType_t pdTRUE if the queue is empty, pdFALSE otherwise.
+     681:    */
+>>>  682:   BaseType_t empty_isr(void) const {
+     683:     return xQueueIsQueueEmptyFromISR(m_queue);
+     684:   }
+     685: };
+```
+
+**Violation 29**: freertos_semaphore.hpp:211:0
+*Style*: The function 'give_isr' is never used.
+
+```cpp
+     208:    * @return BaseType_t pdTRUE if the semaphore was successfully given,
+     209:    *
+     210:    */
+>>>  211:   BaseType_t give_isr(BaseType_t &high_priority_task_woken) {
+     212:     return xSemaphoreGiveFromISR(m_semaphore, &high_priority_task_woken);
+     213:   }
+     214:   /**
+```
+
+**Violation 30**: freertos_semaphore.hpp:248:0
+*Style*: The function 'take_isr' is never used.
+
+```cpp
+     245:    * otherwise pdFALSE.
+     246:    *
+     247:    */
+>>>  248:   BaseType_t take_isr(BaseType_t &high_priority_task_woken) {
+     249:     return xSemaphoreTakeFromISR(m_semaphore, &high_priority_task_woken);
+     250:   }
+     251:   /**
+```
+
+**Violation 31**: freertos_semaphore.hpp:768:0
+*Style*: The function 'recursions_count' is never used.
+
+```cpp
+     765:    *
+     766:    * @return uint8_t number of recursions of the recursive mutex.
+     767:    */
+>>>  768:   uint8_t recursions_count(void) const { return m_recursions_count; }
+     769: };
+     770: 
+     771: /**
+```
+
+**Violation 32**: freertos_semaphore.hpp:891:0
+*Style*: The function 'high_priority_task_woken' is never used.
+
+```cpp
+     888:    * @return BaseType_t pdTRUE if the high priority task was woken, otherwise
+     889:    * pdFALSE.
+     890:    */
+>>>  891:   BaseType_t high_priority_task_woken(void) const {
+     892:     return m_high_priority_task_woken;
+     893:   }
+     894:   /**
+```
+
+**Violation 33**: freertos_stream_buffer.hpp:346:0
+*Style*: The function 'free' is never used.
+
+```cpp
+     343:    *
+     344:    * @return size_t Number of bytes free in the stream buffer.
+     345:    */
+>>>  346:   size_t free(void) { return xStreamBufferSpacesAvailable(m_stream_buffer); }
+     347:   /**
+     348:    * @brief Reset the stream buffer to the cleared state.
+     349:    * @ref https://www.freertos.org/xStreamBufferReset.html
+```
+
+**Violation 34**: freertos_stream_buffer.hpp:362:0
+*Style*: The function 'set_trigger_level' is never used.
+
+```cpp
+     359:    * buffer before a task that is blocked on a read operation will be unblocked.
+     360:    * @return BaseType_t pdPass if the trigger level was set, pdFAIL otherwise.
+     361:    */
+>>>  362:   BaseType_t set_trigger_level(size_t trigger_level_bytes) {
+     363:     return xStreamBufferSetTriggerLevel(m_stream_buffer, trigger_level_bytes);
+     364:   }
+     365:   /**
+```
+
+**Violation 35**: freertos_sw_timer.hpp:535:0
+*Style*: The function 'reload_mode' is never used.
+
+```cpp
+     532:    * @param auto_reload pdTRUE to enable auto-reload mode, pdFALSE to disable
+     533:    * @return timer& reference to the timer object
+     534:    */
+>>>  535:   timer &reload_mode(UBaseType_t auto_reload) {
+     536:     if (m_timer) {
+     537:       vTimerSetReloadMode(m_timer, auto_reload);
+     538:     }
+```
+
+**Violation 36**: freertos_sw_timer.hpp:567:0
+*Style*: The function 'remaining_time' is never used.
+
+```cpp
+     564:    * @return std::chrono::milliseconds remaining time before the timer expires
+     565:    * in milliseconds.
+     566:    */
+>>>  567:   std::chrono::milliseconds remaining_time(void) const {
+     568:     return std::chrono::milliseconds{remaining_ticks()};
+     569:   }
+     570:   /**
+```
+
+**Violation 37**: freertos_sw_timer.hpp:576:0
+*Style*: The function 'running' is never used.
+
+```cpp
+     573:    *
+     574:    * @return BaseType_t pdTRUE if the timer is running, pdFALSE otherwise
+     575:    */
+>>>  576:   BaseType_t running(void) const {
+     577:     if (!m_timer) {
+     578:       return pdFALSE;
+     579:     }
+```
+
+**Violation 38**: freertos_task.hpp:1041:0
+*Style*: The function 'sleep_for' is never used.
+
+```cpp
+    1038:  * @param duration duration to sleep
+    1039:  */
+    1040: template <typename Rep, typename Period>
+>>> 1041: void sleep_for(std::chrono::duration<Rep, Period> duration) {
+    1042:   delay(duration);
+    1043: }
+    1044: 
+```
+
+**Violation 39**: freertos_task.hpp:1108:0
+*Style*: The function 'total_run_time' is never used.
+
+```cpp
+    1105:    * @return UBaseType_t number of tasks
+    1106:    */
+    1107:   UBaseType_t count(void) const { return m_task_count; }
+>>> 1108:   std::chrono::milliseconds total_run_time(void) const {
+    1109:     return std::chrono::milliseconds{m_total_run_time};
+    1110:   }
+    1111:   /**
+```
+
+**Violation 40**: freertos_task.hpp:1116:0
+*Style*: The function 'begin' is never used.
+
+```cpp
+    1113:    *
+    1114:    * @return const TaskStatus_t* begin iterator
+    1115:    */
+>>> 1116:   const TaskStatus_t *begin(void) const { return m_status_array.data(); }
+    1117:   /**
+    1118:    * @brief Return the end iterator of the task status array.
+    1119:    *
+```
+
+**Violation 41**: freertos_task.hpp:1122:0
+*Style*: The function 'end' is never used.
+
+```cpp
+    1119:    *
+    1120:    * @return const TaskStatus_t* end iterator
+    1121:    */
+>>> 1122:   const TaskStatus_t *end(void) const {
+    1123:     return m_status_array.data() + m_task_count;
+    1124:   }
+    1125: };
+```
+
+**Violation 42**: freertos_message_buffer.hpp:193:0
+*Style*: The function 'available' is never used.
+
+```cpp
+     190:    *
+     191:    * @return size_t the number of bytes available in the buffer
+     192:    */
+>>>  193:   size_t available(void) const {
+     194:     return xMessageBufferSpaceAvailable(m_message_buffer);
+     195:   }
+     196:   /**
+```
+
+**Violation 43**: freertos_message_buffer.hpp:202:0
+*Style*: The function 'reset' is never used.
+
+```cpp
+     199:    *
+     200:    * @return BaseType_t pdPass if the message buffer was reset, pdFAIL otherwise
+     201:    */
+>>>  202:   BaseType_t reset(void) { return xMessageBufferReset(m_message_buffer); }
+     203:   /**
+     204:    * @brief Method checking if the message buffer is empty.
+     205:    * @ref https://www.freertos.org/xMessageBufferIsEmpty.html
+```
+
+**Violation 44**: freertos_message_buffer.hpp:209:0
+*Style*: The function 'empty' is never used.
+
+```cpp
+     206:    *
+     207:    * @return BaseType_t pdTRUE if the message buffer is empty, pdFALSE otherwise
+     208:    */
+>>>  209:   BaseType_t empty(void) { return xMessageBufferIsEmpty(m_message_buffer); }
+     210:   /**
+     211:    * @brief Method checking if the message buffer is full.
+     212:    * @ref https://www.freertos.org/xMessageBufferIsFull.html
+```
+
+**Violation 45**: freertos_message_buffer.hpp:216:0
+*Style*: The function 'full' is never used.
+
+```cpp
+     213:    *
+     214:    * @return BaseType_t pdTRUE if the message buffer is full, pdFALSE otherwise
+     215:    */
+>>>  216:   BaseType_t full(void) { return xMessageBufferIsFull(m_message_buffer); }
+     217: };
+     218: 
+     219: #if configSUPPORT_STATIC_ALLOCATION
+```
+
+**Violation 46**: freertos_queue.hpp:261:0
+*Style*: The function 'send_isr' is never used.
+
+```cpp
+     258:    * @return BaseType_t pdPASS if the item was successfully posted, otherwise
+     259:    * errQUEUE_FULL.
+     260:    */
+>>>  261:   BaseType_t send_isr(const T &item, BaseType_t &higher_priority_task_woken) {
+     262:     return xQueueSendFromISR(m_queue, &item, &higher_priority_task_woken);
+     263:   }
+     264:   /**
+```
+
+**Violation 47**: freertos_queue.hpp:316:0
+*Style*: The function 'send_back_isr' is never used.
+
+```cpp
+     313:    * @return BaseType_t pdPASS if the item
+     314:    * was successfully posted, otherwise errQUEUE_FULL.
+     315:    */
+>>>  316:   BaseType_t send_back_isr(const T &item,
+     317:                            BaseType_t &higher_priority_task_woken) {
+     318:     return xQueueSendToBackFromISR(m_queue, &item, &higher_priority_task_woken);
+     319:   }
+```
+
+**Violation 48**: freertos_queue.hpp:372:0
+*Style*: The function 'send_front_isr' is never used.
+
+```cpp
+     369:    * @return BaseType_t pdPASS if the item
+     370:    * was successfully posted, otherwise errQUEUE_FULL.
+     371:    */
+>>>  372:   BaseType_t send_front_isr(const T &item,
+     373:                             BaseType_t &higher_priority_task_woken) {
+     374:     return xQueueSendToFrontFromISR(m_queue, &item,
+     375:                                     &higher_priority_task_woken);
+```
+
+**Violation 49**: freertos_queue.hpp:459:0
+*Style*: The function 'receive_isr' is never used.
+
+```cpp
+     456:    * @return BaseType_t pdPASS if the item was successfully received, otherwise
+     457:    * pdFALSE.
+     458:    */
+>>>  459:   BaseType_t receive_isr(T &item, BaseType_t &higher_priority_task_woken) {
+     460:     return xQueueReceiveFromISR(m_queue, &item, &higher_priority_task_woken);
+     461:   }
+     462:   /**
+```
+
+**Violation 50**: freertos_queue.hpp:497:0
+*Style*: The function 'messages_waiting' is never used.
+
+```cpp
+     494:    *
+     495:    * @return UBaseType_t The number of items stored in the queue.
+     496:    */
+>>>  497:   UBaseType_t messages_waiting(void) { return uxQueueMessagesWaiting(m_queue); }
+     498:   /**
+     499:    * @brief Return the number of items stored in the queue from an ISR.
+     500:    * @ref https://www.freertos.org/a00018.html#uxQueueMessagesWaitingFromISR
+```
+
+**Violation 51**: freertos_queue.hpp:504:0
+*Style*: The function 'messages_waiting_isr' is never used.
+
+```cpp
+     501:    *
+     502:    * @return UBaseType_t The number of items stored in the queue.
+     503:    */
+>>>  504:   UBaseType_t messages_waiting_isr(void) {
+     505:     return uxQueueMessagesWaitingFromISR(m_queue);
+     506:   }
+     507:   /**
+```
+
+**Violation 52**: freertos_queue.hpp:513:0
+*Style*: The function 'spaces_available' is never used.
+
+```cpp
+     510:    *
+     511:    * @return UBaseType_t The number of spaces available in the queue.
+     512:    */
+>>>  513:   UBaseType_t spaces_available(void) { return uxQueueSpacesAvailable(m_queue); }
+     514:   /**
+     515:    * @brief Resets the queue to the empty state.
+     516:    * @ref https://www.freertos.org/a00018.html#xQueueReset
+```
+
+**Violation 53**: freertos_queue.hpp:520:0
+*Style*: The function 'reset' is never used.
+
+```cpp
+     517:    *
+     518:    * @return BaseType_t pdPASS if the queue was reset, pdFAIL otherwise.
+     519:    */
+>>>  520:   BaseType_t reset(void) { return xQueueReset(m_queue); }
+     521:   /**
+     522:    * @brief A version of send_back method that overwrites the items in the queue
+     523:    * if it is full.
+```
+
+**Violation 54**: freertos_queue.hpp:529:0
+*Style*: The function 'overwrite' is never used.
+
+```cpp
+     526:    * @param item An item to be posted on the queue.
+     527:    * @return BaseType_t pdPASS returned always.
+     528:    */
+>>>  529:   BaseType_t overwrite(const T &item) {
+     530:     return xQueueOverwrite(m_queue, &item);
+     531:   }
+     532:   /**
+```
+
+**Violation 55**: freertos_queue.hpp:542:0
+*Style*: The function 'overwrite_isr' is never used.
+
+```cpp
+     539:    * unblocked a task of higher priority.
+     540:    * @return BaseType_t pdPASS returned always.
+     541:    */
+>>>  542:   BaseType_t overwrite_isr(const T &item,
+     543:                            BaseType_t &higher_priority_task_woken) {
+     544:     return xQueueOverwriteFromISR(m_queue, &item, &higher_priority_task_woken);
+     545:   }
+```
+
+**Violation 56**: freertos_queue.hpp:598:0
+*Style*: The function 'peek_isr' is never used.
+
+```cpp
+     595:    * @return BaseType_t pdPASS if the item
+     596:    * was successfully peeked, otherwise pdFALSE.
+     597:    */
+>>>  598:   BaseType_t peek_isr(T &item, BaseType_t &higher_priority_task_woken) {
+     599:     return xQueuePeekFromISR(m_queue, &item, &higher_priority_task_woken);
+     600:   }
+     601:   /**
+```
+
+**Violation 57**: freertos_queue.hpp:668:0
+*Style*: The function 'name' is never used.
+
+```cpp
+     665:    *
+     666:    * @return const char* The name of the queue.
+     667:    */
+>>>  668:   const char *name(void) const { return pcQueueGetName(m_queue); }
+     669:   /**
+     670:    * @brief Method checking if the queue is full from an ISR.
+     671:    * @ref https://www.freertos.org/a00018.html#xQueueIsQueueFullFromISR
+```
+
+**Violation 58**: freertos_queue.hpp:675:0
+*Style*: The function 'full_isr' is never used.
+
+```cpp
+     672:    *
+     673:    * @return BaseType_t pdTRUE if the queue is full, pdFALSE otherwise.
+     674:    */
+>>>  675:   BaseType_t full_isr(void) const { return xQueueIsQueueFullFromISR(m_queue); }
+     676:   /**
+     677:    * @brief Method checking if the queue is empty from an ISR.
+     678:    * @ref https://www.freertos.org/a00018.html#xQueueIsQueueEmptyFromISR
+```
+
+**Violation 59**: freertos_queue.hpp:682:0
+*Style*: The function 'empty_isr' is never used.
+
+```cpp
+     679:    *
+     680:    * @return BaseType_t pdTRUE if the queue is empty, pdFALSE otherwise.
+     681:    */
+>>>  682:   BaseType_t empty_isr(void) const {
+     683:     return xQueueIsQueueEmptyFromISR(m_queue);
+     684:   }
+     685: };
+```
+
+**Violation 60**: freertos_semaphore.hpp:211:0
+*Style*: The function 'give_isr' is never used.
+
+```cpp
+     208:    * @return BaseType_t pdTRUE if the semaphore was successfully given,
+     209:    *
+     210:    */
+>>>  211:   BaseType_t give_isr(BaseType_t &high_priority_task_woken) {
+     212:     return xSemaphoreGiveFromISR(m_semaphore, &high_priority_task_woken);
+     213:   }
+     214:   /**
+```
+
+**Violation 61**: freertos_semaphore.hpp:248:0
+*Style*: The function 'take_isr' is never used.
+
+```cpp
+     245:    * otherwise pdFALSE.
+     246:    *
+     247:    */
+>>>  248:   BaseType_t take_isr(BaseType_t &high_priority_task_woken) {
+     249:     return xSemaphoreTakeFromISR(m_semaphore, &high_priority_task_woken);
+     250:   }
+     251:   /**
+```
+
+**Violation 62**: freertos_semaphore.hpp:768:0
+*Style*: The function 'recursions_count' is never used.
+
+```cpp
+     765:    *
+     766:    * @return uint8_t number of recursions of the recursive mutex.
+     767:    */
+>>>  768:   uint8_t recursions_count(void) const { return m_recursions_count; }
+     769: };
+     770: 
+     771: /**
+```
+
+**Violation 63**: freertos_semaphore.hpp:891:0
+*Style*: The function 'high_priority_task_woken' is never used.
+
+```cpp
+     888:    * @return BaseType_t pdTRUE if the high priority task was woken, otherwise
+     889:    * pdFALSE.
+     890:    */
+>>>  891:   BaseType_t high_priority_task_woken(void) const {
+     892:     return m_high_priority_task_woken;
+     893:   }
+     894:   /**
+```
+
+**Violation 64**: freertos_task.hpp:1041:0
+*Style*: The function 'sleep_for' is never used.
+
+```cpp
+    1038:  * @param duration duration to sleep
+    1039:  */
+    1040: template <typename Rep, typename Period>
+>>> 1041: void sleep_for(std::chrono::duration<Rep, Period> duration) {
+    1042:   delay(duration);
+    1043: }
+    1044: 
+```
+
+**Violation 65**: freertos_task.hpp:1108:0
+*Style*: The function 'total_run_time' is never used.
+
+```cpp
+    1105:    * @return UBaseType_t number of tasks
+    1106:    */
+    1107:   UBaseType_t count(void) const { return m_task_count; }
+>>> 1108:   std::chrono::milliseconds total_run_time(void) const {
+    1109:     return std::chrono::milliseconds{m_total_run_time};
+    1110:   }
+    1111:   /**
+```
+
+**Violation 66**: freertos_task.hpp:1116:0
+*Style*: The function 'begin' is never used.
+
+```cpp
+    1113:    *
+    1114:    * @return const TaskStatus_t* begin iterator
+    1115:    */
+>>> 1116:   const TaskStatus_t *begin(void) const { return m_status_array.data(); }
+    1117:   /**
+    1118:    * @brief Return the end iterator of the task status array.
+    1119:    *
+```
+
+**Violation 67**: freertos_task.hpp:1122:0
+*Style*: The function 'end' is never used.
+
+```cpp
+    1119:    *
+    1120:    * @return const TaskStatus_t* end iterator
+    1121:    */
+>>> 1122:   const TaskStatus_t *end(void) const {
+    1123:     return m_status_array.data() + m_task_count;
+    1124:   }
+    1125: };
+```
+
+**Violation 68**: freertos_sw_timer.hpp:535:0
+*Style*: The function 'reload_mode' is never used.
+
+```cpp
+     532:    * @param auto_reload pdTRUE to enable auto-reload mode, pdFALSE to disable
+     533:    * @return timer& reference to the timer object
+     534:    */
+>>>  535:   timer &reload_mode(UBaseType_t auto_reload) {
+     536:     if (m_timer) {
+     537:       vTimerSetReloadMode(m_timer, auto_reload);
+     538:     }
+```
+
+**Violation 69**: freertos_sw_timer.hpp:567:0
+*Style*: The function 'remaining_time' is never used.
+
+```cpp
+     564:    * @return std::chrono::milliseconds remaining time before the timer expires
+     565:    * in milliseconds.
+     566:    */
+>>>  567:   std::chrono::milliseconds remaining_time(void) const {
+     568:     return std::chrono::milliseconds{remaining_ticks()};
+     569:   }
+     570:   /**
+```
+
+**Violation 70**: freertos_sw_timer.hpp:576:0
+*Style*: The function 'running' is never used.
+
+```cpp
+     573:    *
+     574:    * @return BaseType_t pdTRUE if the timer is running, pdFALSE otherwise
+     575:    */
+>>>  576:   BaseType_t running(void) const {
+     577:     if (!m_timer) {
+     578:       return pdFALSE;
+     579:     }
+```
+
+**Violation 71**: freertos_sw_timer.hpp:587:0
+*Style*: The function 'name' is never used.
+
+```cpp
+     584:    *
+     585:    * @return const char* name of the timer
+     586:    */
+>>>  587:   const char *name(void) const {
+     588:     if (!m_timer) {
+     589:       return nullptr;
+     590:     }
+```
+
+**Violation 72**: freertos_event_group.hpp:117:0
+*Style*: The function 'handle' is never used.
+
+```cpp
+     114:    *
+     115:    * @return EventGroupHandle_t event group handle
+     116:    */
+>>>  117:   EventGroupHandle_t handle(void) const { return m_event_group; }
+     118: 
+     119:   /**
+     120:    * @brief Method to set bits in the event group.
+```
+
+**Violation 73**: freertos_event_group.hpp:126:0
+*Style*: The function 'set_bits' is never used.
+
+```cpp
+     123:    * @param bits_to_set bits to set
+     124:    * @return EventBits_t bits set
+     125:    */
+>>>  126:   EventBits_t set_bits(const EventBits_t bits_to_set) {
+     127:     return xEventGroupSetBits(m_event_group, bits_to_set);
+     128:   }
+     129:   /**
+```
+
+**Violation 74**: freertos_event_group.hpp:136:0
+*Style*: The function 'set_bits_isr' is never used.
+
+```cpp
+     133:    * @param bits_to_set bits to set
+     134:    * @return EventBits_t bits set
+     135:    */
+>>>  136:   EventBits_t set_bits_isr(const EventBits_t bits_to_set) {
+     137:     BaseType_t higher_priority_task_woken = pdFALSE;
+     138:     const EventBits_t bits_set = xEventGroupSetBitsFromISR(
+     139:         m_event_group, bits_to_set, &higher_priority_task_woken);
+```
+
+**Violation 75**: freertos_event_group.hpp:150:0
+*Style*: The function 'clear_bits' is never used.
+
+```cpp
+     147:    * @param bits_to_clear bits to clear
+     148:    * @return EventBits_t bits cleared
+     149:    */
+>>>  150:   EventBits_t clear_bits(const EventBits_t bits_to_clear) {
+     151:     return xEventGroupClearBits(m_event_group, bits_to_clear);
+     152:   }
+     153:   /**
+```
+
+**Violation 76**: freertos_event_group.hpp:198:0
+*Style*: The function 'get_bits' is never used.
+
+```cpp
+     195:    *
+     196:    * @return EventBits_t Current value of the event group bits
+     197:    */
+>>>  198:   EventBits_t get_bits(void) const { return xEventGroupGetBits(m_event_group); }
+     199:   /**
+     200:    * @brief Method to get the bits of the event group from an ISR.
+     201:    * @ref https://www.freertos.org/xEventGroupGetBitsFromISR.html
+```
+
+**Violation 77**: freertos_event_group.hpp:205:0
+*Style*: The function 'get_bits_isr' is never used.
+
+```cpp
+     202:    *
+     203:    * @return EventBits_t Current value of the event group bits
+     204:    */
+>>>  205:   EventBits_t get_bits_isr(void) const {
+     206:     return xEventGroupGetBitsFromISR(m_event_group);
+     207:   }
+     208:   /**
+```
+
+**Violation 78**: freertos_stream_buffer.hpp:337:0
+*Style*: The function 'available' is never used.
+
+```cpp
+     334:    *
+     335:    * @return size_t Number of bytes available in the stream buffer.
+     336:    */
+>>>  337:   size_t available(void) {
+     338:     return xStreamBufferBytesAvailable(m_stream_buffer);
+     339:   }
+     340:   /**
+```
+
+**Violation 79**: freertos_stream_buffer.hpp:346:0
+*Style*: The function 'free' is never used.
+
+```cpp
+     343:    *
+     344:    * @return size_t Number of bytes free in the stream buffer.
+     345:    */
+>>>  346:   size_t free(void) { return xStreamBufferSpacesAvailable(m_stream_buffer); }
+     347:   /**
+     348:    * @brief Reset the stream buffer to the cleared state.
+     349:    * @ref https://www.freertos.org/xStreamBufferReset.html
+```
+
+**Violation 80**: freertos_stream_buffer.hpp:353:0
+*Style*: The function 'reset' is never used.
+
+```cpp
+     350:    *
+     351:    * @return BaseType_t pdPass if the stream buffer was reset, pdFAIL otherwise.
+     352:    */
+>>>  353:   BaseType_t reset(void) { return xStreamBufferReset(m_stream_buffer); }
+     354:   /**
+     355:    * @brief Set the trigger level of the stream buffer.
+     356:    * @ref https://www.freertos.org/xStreamBufferSetTriggerLevel.html
+```
+
+**Violation 81**: freertos_stream_buffer.hpp:362:0
+*Style*: The function 'set_trigger_level' is never used.
+
+```cpp
+     359:    * buffer before a task that is blocked on a read operation will be unblocked.
+     360:    * @return BaseType_t pdPass if the trigger level was set, pdFAIL otherwise.
+     361:    */
+>>>  362:   BaseType_t set_trigger_level(size_t trigger_level_bytes) {
+     363:     return xStreamBufferSetTriggerLevel(m_stream_buffer, trigger_level_bytes);
+     364:   }
+     365:   /**
+```
+
+**Violation 82**: freertos_stream_buffer.hpp:370:0
+*Style*: The function 'handle' is never used.
+
+```cpp
+     367:    *
+     368:    * @return StreamBufferHandle_t Handle of the stream buffer.
+     369:    */
+>>>  370:   StreamBufferHandle_t handle(void) const { return m_stream_buffer; }
+     371:   /**
+     372:    * @brief Check if the stream buffer is empty.
+     373:    * @ref https://www.freertos.org/xStreamBufferIsEmpty.html
+```
+
+**Violation 83**: freertos_stream_buffer.hpp:377:0
+*Style*: The function 'empty' is never used.
+
+```cpp
+     374:    *
+     375:    * @return BaseType_t pdTRUE if the stream buffer is empty, pdFALSE otherwise.
+     376:    */
+>>>  377:   BaseType_t empty(void) { return xStreamBufferIsEmpty(m_stream_buffer); }
+     378:   /**
+     379:    * @brief Check if the stream buffer is full.
+     380:    * @ref https://www.freertos.org/xStreamBufferIsFull.html
+```
+
+**Violation 84**: freertos_stream_buffer.hpp:384:0
+*Style*: The function 'full' is never used.
+
+```cpp
+     381:    *
+     382:    * @return BaseType_t pdTRUE if the stream buffer is full, pdFALSE otherwise.
+     383:    */
+>>>  384:   BaseType_t full(void) { return xStreamBufferIsFull(m_stream_buffer); }
+     385: };
+     386: 
+     387: #if configSUPPORT_STATIC_ALLOCATION
+```
+
+### Analysis Errors
+
+Some files could not be fully analyzed:
+
+```
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/src/freertos_task.cc:0:0: error: Bailing out from analysis: Checking file failed: Failed to execute addon 'misra' - exitcode is 1 [internalError]
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos.hpp:0:0: error: Bailing out from analysis: Checking file failed: Failed to execute addon 'misra' - exitcode is 1 [internalError]
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:0:0: error: Bailing out from analysis: Checking file failed: Failed to execute addon 'misra' - exitcode is 1 [internalError]
+```
+
+### Analysis Notes
+
+- **Tool**: cppcheck with all rules enabled (--enable=all)
+- **Checks**: All available cppcheck checks including MISRA C 2012, style, performance, portability, security
+- **Scope**: Library modules only (src/, include/)
+- **Integration**: This analysis complements the existing clang-tidy static analysis
+- **MISRA Compliance**: MISRA rule texts cannot be displayed due to licensing restrictions
+
 ## Detailed clang-tidy Analysis
 
 ```
@@ -3613,5 +4984,5 @@ Found compiler error(s).
 
 ---
 *Generated: July 23, 2025*
-*Tools: clang-tidy + MISRA C++ (cppcheck)*
+*Tools: clang-tidy + Enhanced cppcheck (all rules) + MISRA C++ (cppcheck)*
 *Scope: Library modules only*

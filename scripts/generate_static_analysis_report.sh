@@ -6,6 +6,7 @@ CLANG_TIDY_STATS_MD="$2"
 CLANG_TIDY_REPORT_MD="$3"
 SOURCE_DIR="$4"
 MISRA_REPORT_TXT="$5"
+ENHANCED_CPPCHECK_REPORT_TXT="$6"
 
 # Generate statistics for clang-tidy
 python3 "${SOURCE_DIR}/scripts/parse_clang_tidy_stats.py" "$CLANG_TIDY_REPORT_TXT" "$CLANG_TIDY_STATS_MD"
@@ -16,9 +17,9 @@ cat > "$CLANG_TIDY_REPORT_MD" << EOF
 
 ## Overview
 
-**Static Analysis Tools**: clang-tidy + MISRA C++ (cppcheck)
+**Static Analysis Tools**: clang-tidy + Enhanced cppcheck (all rules) + MISRA C++ (cppcheck)
 **Analysis Scope**: Library modules only - src/ include/
-**Check Sets**: cppcoreguidelines-*, cert-*, google-*, hicpp-* + MISRA C 2012 (applicable to C++)
+**Check Sets**: cppcoreguidelines-*, cert-*, google-*, hicpp-* + All cppcheck rules (style, performance, portability, security, etc.) + MISRA C 2012 (applicable to C++)
 
 EOF
 
@@ -44,6 +45,19 @@ if [ -n "$MISRA_REPORT_TXT" ] && [ -f "$MISRA_REPORT_TXT" ]; then
 " >> "$CLANG_TIDY_REPORT_MD"
 fi
 
+# Add Enhanced cppcheck analysis if available
+if [ -n "$ENHANCED_CPPCHECK_REPORT_TXT" ] && [ -f "$ENHANCED_CPPCHECK_REPORT_TXT" ]; then
+    echo "## Enhanced cppcheck Analysis (All Rules)" >> "$CLANG_TIDY_REPORT_MD"
+    echo "" >> "$CLANG_TIDY_REPORT_MD"
+    
+    # Generate enhanced cppcheck statistics and code context
+    python3 "${SOURCE_DIR}/scripts/parse_enhanced_cppcheck_report.py" "$ENHANCED_CPPCHECK_REPORT_TXT" "$SOURCE_DIR" >> "$CLANG_TIDY_REPORT_MD" 2>/dev/null || echo "### Enhanced cppcheck Analysis
+
+*Enhanced cppcheck analysis not available.*
+
+" >> "$CLANG_TIDY_REPORT_MD"
+fi
+
 # Add detailed clang-tidy analysis
 cat >> "$CLANG_TIDY_REPORT_MD" << EOF
 ## Detailed clang-tidy Analysis
@@ -61,7 +75,7 @@ EOF
 
 # Add footer with date
 date +"*Generated: %B %d, %Y*" >> "$CLANG_TIDY_REPORT_MD"
-echo "*Tools: clang-tidy + MISRA C++ (cppcheck)*" >> "$CLANG_TIDY_REPORT_MD"
+echo "*Tools: clang-tidy + Enhanced cppcheck (all rules) + MISRA C++ (cppcheck)*" >> "$CLANG_TIDY_REPORT_MD"
 echo "*Scope: Library modules only*" >> "$CLANG_TIDY_REPORT_MD"
 
 # Also generate an HTML version with Apple Developer styling
