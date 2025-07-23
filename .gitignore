@@ -54,6 +54,7 @@ Thumbs.db
 
 # cppcheck dump files
 *.dump
+*.ctu-info
 
 # Static analysis reports (optional - generated automatically)
 # STATIC_ANALYSIS_REPORT.md
