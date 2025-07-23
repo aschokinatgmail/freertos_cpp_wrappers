@@ -534,15 +534,13 @@ These uncovered areas are intentional and represent code that:
                             context = item.get('context', '')
                             if context:
                                 detailed_analysis += "```cpp\n"
-                                # Clean up the context for display
+                                # Preserve line numbers like MISRA violation format
                                 context_lines = context.split('\n')
                                 clean_lines = []
                                 for line in context_lines:
                                     if line.strip():
-                                        # Remove the line number prefix
-                                        if ':' in line:
-                                            clean_line = line.split(':', 1)[-1].strip()
-                                            clean_lines.append(clean_line)
+                                        # Keep line numbers in the format used by MISRA violations
+                                        clean_lines.append(line)
                                 detailed_analysis += '\n'.join(clean_lines)
                                 detailed_analysis += "\n```\n\n"
                             else:
@@ -552,15 +550,13 @@ These uncovered areas are intentional and represent code that:
                         context = item.get('context', '')
                         if context:
                             detailed_analysis += "```cpp\n"
-                            # Clean up the context for display
+                            # Preserve line numbers like MISRA violation format  
                             context_lines = context.split('\n')
                             clean_lines = []
                             for line in context_lines:
                                 if line.strip():
-                                    # Remove the line number prefix
-                                    if ':' in line:
-                                        clean_line = line.split(':', 1)[-1].strip()
-                                        clean_lines.append(clean_line)
+                                    # Keep line numbers in the format used by MISRA violations
+                                    clean_lines.append(line)
                             detailed_analysis += '\n'.join(clean_lines)
                             detailed_analysis += "\n```\n\n"
                         else:
@@ -574,17 +570,13 @@ These uncovered areas are intentional and represent code that:
                     context = item.get('context', '')
                     if context:
                         detailed_analysis += "```cpp\n"
-                        # Clean up the context for display
+                        # Preserve line numbers like MISRA violation format
                         context_lines = context.split('\n')
                         clean_lines = []
                         for line in context_lines:
                             if line.strip():
-                                # Remove the line number prefix but keep >>> indicator
-                                if ':' in line:
-                                    clean_line = line.split(':', 1)[-1].strip()
-                                    if '>>>' in line:
-                                        clean_line = clean_line  # Keep the line as is for highlighted lines
-                                    clean_lines.append(clean_line)
+                                # Keep line numbers in the format used by MISRA violations
+                                clean_lines.append(line)
                         detailed_analysis += '\n'.join(clean_lines)
                         detailed_analysis += "\n```\n\n"
                     else:

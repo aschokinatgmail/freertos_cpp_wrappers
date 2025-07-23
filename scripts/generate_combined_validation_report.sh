@@ -81,15 +81,53 @@ else
     exit 1
 fi
 
-# Step 3: Create simplified static analysis section
-echo "Creating static analysis placeholder section..."
-cat > "$TEMP_DIR/static_analysis.md" << 'EOF'
+# Step 3: Run actual static analysis and embed results
+echo "Running static analysis tools..."
+
+# Run MISRA analysis
+echo "Running MISRA C++ analysis..."
+bash "$SOURCE_DIR_ABS/scripts/run_misra_analysis.sh" "$SOURCE_DIR_ABS" "$TEMP_DIR/misra_report.txt"
+
+# Run clang-tidy analysis on all main project files
+echo "Running clang-tidy analysis..."
+CLANG_TIDY_FILES=($(find "$SOURCE_DIR_ABS/src" "$SOURCE_DIR_ABS/include" \( -name "*.hpp" -o -name "*.cc" -o -name "*.cpp" -o -name "*.h" \) 2>/dev/null))
+echo "Found ${#CLANG_TIDY_FILES[@]} files for clang-tidy analysis"
+
+# Create compile commands for clang-tidy
+cd "$BUILD_DIR"
+cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON .. 2>/dev/null || true
+
+# Run clang-tidy on all files
+> "$TEMP_DIR/clang_tidy_report.txt"
+for file in "${CLANG_TIDY_FILES[@]}"; do
+    echo "Analyzing $(basename "$file") with clang-tidy..."
+    clang-tidy \
+        --checks='cppcoreguidelines-*,cert-*,google-*,hicpp-*,readability-*,performance-*,modernize-*,misc-*,-misc-no-recursion,-cert-dcl21-cpp,-misc-non-private-member-variables-in-classes,-cppcoreguidelines-non-private-member-variables-in-classes' \
+        --format-style=llvm \
+        "$file" \
+        -- -std=c++17 -I"$SOURCE_DIR_ABS/include" \
+        2>> "$TEMP_DIR/clang_tidy_report.txt" || true
+done
+
+echo "Static analysis completed."
+
+# Generate embedded static analysis section with actual results
+echo "Generating static analysis section with embedded results..."
+if python3 "$SOURCE_DIR_ABS/scripts/generate_embedded_static_analysis.py" \
+    "$TEMP_DIR/clang_tidy_report.txt" \
+    "$TEMP_DIR/misra_report.txt" \
+    "$SOURCE_DIR_ABS" \
+    "$TEMP_DIR/static_analysis.md"; then
+    echo "Static analysis embedding successful"
+else
+    echo "Static analysis embedding failed, creating fallback section..."
+    cat > "$TEMP_DIR/static_analysis.md" << 'EOF'
 ## Static Code Analysis
 
 ### Overview
 
 **Static Analysis Tools**: clang-tidy + cppcheck (MISRA C++ 2012)
-**Analysis Scope**: Main project code only (src/ and include/ directories)
+**Analysis Scope**: Main project code only (src/ and include/ directories)  
 **Excluded**: Test harness, mocks, and external dependencies
 
 ### Combined Static Analysis Results
@@ -108,6 +146,7 @@ This will generate comprehensive static analysis results with:
 - Detailed violation reports with code context
 
 EOF
+fi
 
 # Step 4: Combine everything into final report
 echo "Combining reports..."
@@ -126,10 +165,40 @@ This report provides comprehensive validation and verification results for the F
 
 EOF
 
-# Add static analysis placeholder
+# Add static analysis section
 if [ -f "$TEMP_DIR/static_analysis.md" ]; then
+    echo "Adding embedded static analysis section..."
     cat "$TEMP_DIR/static_analysis.md" >> "$OUTPUT_MD"
     echo "" >> "$OUTPUT_MD"
+    echo "Embedded static analysis section added successfully."
+else
+    echo "ERROR: Embedded static analysis file not found at $TEMP_DIR/static_analysis.md"
+    echo "Creating placeholder static analysis section..."
+    cat >> "$OUTPUT_MD" << 'EOF'
+## Static Code Analysis
+
+### Overview
+
+**Static Analysis Tools**: clang-tidy + cppcheck (MISRA C++ 2012)
+**Analysis Scope**: Main project code only (src/ and include/ directories)  
+**Excluded**: Test harness, mocks, and external dependencies
+
+### Combined Static Analysis Results
+
+#### Summary
+
+Static analysis tools are configured and available. For detailed static analysis results including MISRA C++ violations and clang-tidy findings, run:
+
+```bash
+make static-analysis-report
+```
+
+This will generate comprehensive static analysis results with:
+- MISRA C++ 2012 compliance analysis
+- clang-tidy code quality checks
+- Detailed violation reports with code context
+
+EOF
 fi
 
 # Add V&V content (skip the title and executive summary since we have our own)
@@ -139,11 +208,11 @@ if [ -f "$VV_REPORT_MD" ]; then
     sed -n '/^### Test Execution Summary/,/^### Code Coverage Summary/p' "$VV_REPORT_MD" | sed '1d' | head -n -1 >> "$OUTPUT_MD" 2>/dev/null || true
     echo "" >> "$OUTPUT_MD"
     
-    # Then add the detailed test results and everything after
+    # Then add the detailed test results and everything after, excluding any static analysis content
     sed -n '/^## Detailed Test Results/,$p' "$VV_REPORT_MD" >> "$OUTPUT_MD" || \
     sed -n '/^### Test Execution Summary/,$p' "$VV_REPORT_MD" >> "$OUTPUT_MD" || \
-    # If those don't work, include everything after the executive summary
-    tail -n +20 "$VV_REPORT_MD" >> "$OUTPUT_MD"
+    # If those don't work, include everything after the executive summary, skipping static analysis
+    sed -n '20,$p' "$VV_REPORT_MD" | sed '/^## Static Code Analysis/,/^## /d' >> "$OUTPUT_MD"
 fi
 
 # Step 5: Generate HTML version
