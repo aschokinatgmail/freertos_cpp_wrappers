@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Static Analysis Report - FreeRTOS C++ Wrappers</title>
+    <style>
+        /* Apple Developer-inspired report styling */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=SF+Mono:wght@400;500;600&display=swap');
+        
+        :root {
+            --apple-blue: #007AFF;
+            --apple-blue-dark: #0056CC;
+            --apple-gray: #8E8E93;
+            --apple-gray-light: #F2F2F7;
+            --background: #ffffff;
+            --surface: #fbfbfd;
+            --surface-elevated: #ffffff;
+            --text-primary: #1d1d1f;
+            --text-secondary: #86868b;
+            --text-tertiary: #a1a1a6;
+            --border: #d2d2d7;
+            --separator: #e5e5e7;
+            --success: #34C759;
+            --warning: #FF9500;
+            --error: #FF3B30;
+            --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.08), 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+            --radius: 8px;
+            --radius-lg: 12px;
+            --space-sm: 0.5rem;
+            --space-md: 0.75rem;
+            --space-lg: 1rem;
+            --space-xl: 1.5rem;
+            --space-2xl: 2rem;
+            --space-3xl: 3rem;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', sans-serif;
+            font-size: 17px;
+            line-height: 1.47059;
+            color: var(--text-primary);
+            background: var(--background);
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--apple-blue) 0%, var(--apple-blue-dark) 100%);
+            color: white;
+            padding: var(--space-2xl);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin: 0;
+            letter-spacing: -0.015em;
+        }
+        
+        .header p {
+            font-size: 19px;
+            margin-top: var(--space-sm);
+            opacity: 0.92;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: var(--space-3xl) var(--space-2xl);
+        }
+        
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--space-xl);
+            margin: var(--space-2xl) 0;
+        }
+        
+        .card {
+            background: var(--surface-elevated);
+            border: 1px solid var(--separator);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            box-shadow: var(--shadow-sm);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--apple-blue), var(--success));
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        }
+        
+        .card h3 {
+            font-size: 21px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0 0 var(--space-md) 0;
+        }
+        
+        .metric {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--apple-blue);
+            margin: var(--space-sm) 0;
+        }
+        
+        .metric.success { color: var(--success); }
+        .metric.warning { color: var(--warning); }
+        .metric.error { color: var(--error); }
+        
+        .section {
+            background: var(--surface-elevated);
+            border: 1px solid var(--separator);
+            border-radius: var(--radius-lg);
+            padding: var(--space-2xl);
+            margin: var(--space-2xl) 0;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .section h2 {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0 0 var(--space-xl) 0;
+            border-bottom: 2px solid var(--separator);
+            padding-bottom: var(--space-md);
+        }
+        
+        .code-block {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: var(--space-xl);
+            margin: var(--space-lg) 0;
+            overflow-x: auto;
+            font-family: 'SF Mono', 'Menlo', monospace;
+            font-size: 14px;
+            line-height: 1.45;
+        }
+        
+        .timestamp {
+            color: var(--text-tertiary);
+            font-size: 15px;
+            text-align: center;
+            margin-top: var(--space-2xl);
+            padding-top: var(--space-xl);
+            border-top: 1px solid var(--separator);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: var(--space-lg) 0;
+            background: var(--surface-elevated);
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        table th {
+            background: var(--surface);
+            color: var(--text-primary);
+            font-weight: 600;
+            padding: var(--space-lg);
+            text-align: left;
+            border-bottom: 2px solid var(--separator);
+        }
+        
+        table td {
+            padding: var(--space-lg);
+            border-bottom: 1px solid var(--separator);
+            color: var(--text-secondary);
+        }
+        
+        table tr:hover {
+            background: var(--surface);
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: var(--space-sm) var(--space-md);
+            border-radius: var(--radius);
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .badge.success {
+            background: rgba(52, 199, 89, 0.1);
+            color: var(--success);
+        }
+        
+        .badge.warning {
+            background: rgba(255, 149, 0, 0.1);
+            color: var(--warning);
+        }
+        
+        .badge.error {
+            background: rgba(255, 59, 48, 0.1);
+            color: var(--error);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: var(--space-xl);
+            }
+            
+            .header h1 {
+                font-size: 28px;
+            }
+            
+            .summary-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Static Analysis Report</h1>
+        <p>Automated code quality analysis using clang-tidy</p>
+    </div>
+    
+    <div class="container">
+        <div class="summary-cards">
+                <div class="card">
+                    <h3>Issues</h3>
+                    <div class="metric">0</div>
+                </div>
+                
+                <div class="card">
+                    <h3>Warnings</h3>
+                    <div class="metric warning">0</div>
+                </div>
+                
+                <div class="card">
+                    <h3>Errors</h3>
+                    <div class="metric error">0</div>
+                </div>
+                
+                <div class="card">
+                    <h3>Files</h3>
+                    <div class="metric">9</div>
+                </div>
+                </div><h1 id="static-analysis-report">Static Analysis Report</h1>
+<div class="section"><h2 id="overview">Overview</h2>
+<p><strong>Static Analysis Tool</strong>: clang-tidy
+<strong>Analysis Scope</strong>: Library modules only - src/ include/
+<strong>Check Sets</strong>: cppcoreguidelines-<em>, cert-</em>, google-<em>, hicpp-</em></p>
+</div><div class="section"><h2 id="statistics">Statistics</h2>
+<h3 id="summary">Summary</h3>
+<ul>
+<li><strong>Total Issues Found</strong>: 0</li>
+<li><strong>Warnings</strong>: 0</li>
+<li><strong>Errors</strong>: 0</li>
+<li><strong>Files Analyzed</strong>: 9</li>
+<li><strong>Unique Check Types</strong>: 0</li>
+</ul>
+<h3 id="suppressed-issues">Suppressed Issues</h3>
+<ul>
+<li><strong>Total Suppressed</strong>: 706538</li>
+<li><strong>Non-user Code</strong>: 705517</li>
+<li><strong>NOLINT Directives</strong>: 1021</li>
+</ul>
+<h3 id="analyzed-files">Analyzed Files</h3>
+<ul>
+<li>freertos.hpp</li>
+<li>freertos_event_group.hpp</li>
+<li>freertos_message_buffer.hpp</li>
+<li>freertos_queue.hpp</li>
+<li>freertos_semaphore.hpp</li>
+<li>freertos_stream_buffer.hpp</li>
+<li>freertos_sw_timer.hpp</li>
+<li>freertos_task.cc</li>
+<li>freertos_task.hpp</li>
+</ul>
+</div><div class="section"><h2 id="detailed-analysis">Detailed Analysis</h2>
+<div class="code-block"><pre><code>[1/9] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/src/freertos_task.cc.
+78381 warnings generated.
+[2/9] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos.hpp.
+156776 warnings generated.
+[3/9] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_event_group.hpp.
+235170 warnings generated.
+[4/9] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_message_buffer.hpp.
+313562 warnings generated.
+[5/9] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_queue.hpp.
+391959 warnings generated.
+[6/9] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_semaphore.hpp.
+470351 warnings generated.
+[7/9] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_stream_buffer.hpp.
+548743 warnings generated.
+[8/9] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_sw_timer.hpp.
+627137 warnings generated.
+[9/9] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp.
+705517 warnings generated.
+Suppressed 706538 warnings (705517 in non-user code, 1021 NOLINT).
+Use -header-filter=.* to display errors from all non-system headers. Use -system-headers to display errors from system headers as well.
+</code></pre></div>
+<hr />
+<p><em>Generated: July 23, 2025</em>
+<em>Tool: clang-tidy</em>
+<em>Scope: Library modules only</em></p></div>
+        
+        <div class="timestamp">
+            Generated on July 23, 2025 at 08:21 AM by FreeRTOS C++ Wrappers build system
+        </div>
+    </div>
+</body>
+</html>
