@@ -9,8 +9,8 @@ This report provides comprehensive validation and verification results for the F
 - **✅ Passed**: 421 tests
 - **❌ Failed**: 0 tests
 - **Success Rate**: 100.0% (All tests passed!)
-- **Total Execution Time**: 5.01 seconds
-- **Average Test Time**: 0.0119 seconds per test
+- **Total Execution Time**: 5.06 seconds
+- **Average Test Time**: 0.0120 seconds per test
 
 ### Code Coverage Summary
 - **Line Coverage**: 96.6% (6843/7082 lines)
@@ -26,7 +26,7 @@ This report provides comprehensive validation and verification results for the F
 - Passed: 81
 - Failed: 0
 - Success Rate: 100.0%
-- Total Time: 0.810s
+- Total Time: 0.860s
 
 **Detailed Test Results:**
 
@@ -35,9 +35,9 @@ This report provides comprehensive validation and verification results for the F
 | 1 | FreeRTOSTaskTest.StaticTaskAllocatorConstruction | ✅ PASS | 0.010s |
 | 2 | FreeRTOSTaskTest.StaticTaskAllocatorCreate | ✅ PASS | 0.010s |
 | 3 | FreeRTOSTaskTest.StaticTaskAllocatorCreateNullReturn | ✅ PASS | 0.010s |
-| 4 | FreeRTOSTaskTest.DynamicTaskAllocatorConstruction | ✅ PASS | 0.010s |
-| 5 | FreeRTOSTaskTest.DynamicTaskAllocatorCreateSuccess | ✅ PASS | 0.010s |
-| 6 | FreeRTOSTaskTest.DynamicTaskAllocatorCreateFailure | ✅ PASS | 0.010s |
+| 4 | FreeRTOSTaskTest.DynamicTaskAllocatorConstruction | ✅ PASS | 0.020s |
+| 5 | FreeRTOSTaskTest.DynamicTaskAllocatorCreateSuccess | ✅ PASS | 0.020s |
+| 6 | FreeRTOSTaskTest.DynamicTaskAllocatorCreateFailure | ✅ PASS | 0.020s |
 | 7 | FreeRTOSTaskTest.StaticTaskConstruction | ✅ PASS | 0.010s |
 | 8 | FreeRTOSTaskTest.StaticTaskConstructionWithString | ✅ PASS | 0.010s |
 | 9 | FreeRTOSTaskTest.StaticTaskDestruction | ✅ PASS | 0.010s |
@@ -48,8 +48,8 @@ This report provides comprehensive validation and verification results for the F
 | 14 | FreeRTOSTaskTest.StaticTaskName | ✅ PASS | 0.010s |
 | 15 | FreeRTOSTaskTest.StaticTaskState | ✅ PASS | 0.010s |
 | 16 | FreeRTOSTaskTest.TaskApplicationTag | ✅ PASS | 0.010s |
-| 17 | FreeRTOSTaskTest.TaskStackWatermark | ✅ PASS | 0.010s |
-| 18 | FreeRTOSTaskTest.TaskTraceStatus | ✅ PASS | 0.010s |
+| 17 | FreeRTOSTaskTest.TaskStackWatermark | ✅ PASS | 0.020s |
+| 18 | FreeRTOSTaskTest.TaskTraceStatus | ✅ PASS | 0.020s |
 | 19 | FreeRTOSTaskTest.StaticTaskAbortDelay | ✅ PASS | 0.010s |
 | 20 | FreeRTOSTaskTest.StaticTaskAbortDelayNullHandle | ✅ PASS | 0.010s |
 | 21 | FreeRTOSTaskTest.TaskSuspendedOnStart | ✅ PASS | 0.010s |
@@ -802,8 +802,8 @@ This report is automatically generated with each test execution to ensure:
 
 ---
 
-*Report Generated*: July 23, 2025 at 08:34:16  
+*Report Generated*: July 23, 2025 at 08:37:47  
 *Test Framework*: GoogleTest/GoogleMock  
 *Coverage Tool*: LCOV/GCOV  
-*Total Test Execution Time*: 5.01 seconds  
+*Total Test Execution Time*: 5.06 seconds  
 *Validation Status*: ✅ **All tests passing - System validated for production use**
