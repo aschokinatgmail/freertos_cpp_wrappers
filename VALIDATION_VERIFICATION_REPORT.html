@@ -270,8 +270,29 @@
 <li><strong>freertos_semaphore.hpp</strong>: 2 issues</li>
 <li><strong>freertos_sw_timer.hpp</strong>: 2 issues</li>
 </ul>
+<h5 id="analyzed-files">Analyzed Files</h5>
+<ul>
+<li>freertos.hpp</li>
+<li>freertos.hpp.</li>
+<li>freertos_event_group.hpp</li>
+<li>freertos_event_group.hpp.</li>
+<li>freertos_message_buffer.hpp</li>
+<li>freertos_message_buffer.hpp.</li>
+<li>freertos_queue.hpp</li>
+<li>freertos_queue.hpp.</li>
+<li>freertos_semaphore.hpp</li>
+<li>freertos_semaphore.hpp.</li>
+<li>freertos_stream_buffer.hpp</li>
+<li>freertos_stream_buffer.hpp.</li>
+<li>freertos_sw_timer.hpp</li>
+<li>freertos_sw_timer.hpp.</li>
+<li>freertos_task.cc</li>
+<li>freertos_task.cc.</li>
+<li>freertos_task.hpp</li>
+<li>freertos_task.hpp.</li>
+</ul>
 <h3 id="misra-c-analysis">MISRA C++ Analysis</h3>
-<h4 id="summary">Summary</h4>
+<h4 id="summary_1">Summary</h4>
 <ul>
 <li><strong>Total MISRA Violations</strong>: 259</li>
 <li><strong>Unique Rules Violated</strong>: 17</li>
@@ -283,6 +304,26 @@
 <ul>
 <li><strong>Style</strong>: 259</li>
 </ul>
+<h4 id="violations-by-rule">Violations by Rule</h4>
+<ul>
+<li><strong>MISRA C 2012 Rule 10.4</strong>: 4 violation(s) - Both operands of an operator in which the usual arithmetic conversions are performed shall have the same essential type</li>
+<li><strong>MISRA C 2012 Rule 12.3</strong>: 36 violation(s) - The comma operator should not be used</li>
+<li><strong>MISRA C 2012 Rule 13.4</strong>: 1 violation(s) - The result of an assignment operator should not be used</li>
+<li><strong>MISRA C 2012 Rule 15.5</strong>: 17 violation(s) - A function should have a single point of exit at the end</li>
+<li><strong>MISRA C 2012 Rule 16.3</strong>: 13 violation(s) - An unconditional break statement shall terminate every switch-clause</li>
+<li><strong>MISRA C 2012 Rule 17.3</strong>: 7 violation(s) - A function shall not be declared implicitly</li>
+<li><strong>MISRA C 2012 Rule 17.8</strong>: 14 violation(s) - A function parameter should not be modified</li>
+<li><strong>MISRA C 2012 Rule 2.3</strong>: 2 violation(s) - A project should not contain unused type declarations</li>
+<li><strong>MISRA C 2012 Rule 2.7</strong>: 15 violation(s) - There should be no unused parameters in functions</li>
+<li><strong>MISRA C 2012 Rule 20.9</strong>: 25 violation(s) - All identifiers used in the controlling expression of #if or #elif preprocessing directives shall be #define'd before evaluation</li>
+<li><strong>MISRA C 2012 Rule 21.2</strong>: 1 violation(s) - A reserved identifier or reserved macro name shall not be declared</li>
+<li><strong>MISRA C 2012 Rule 3.1</strong>: 2 violation(s) - The character sequences /<em> and // shall not appear in /</em> comment */</li>
+<li><strong>MISRA C 2012 Rule 5.8</strong>: 16 violation(s) - Identifiers that define objects or functions with external linkage shall be unique</li>
+<li><strong>MISRA C 2012 Rule 8.2</strong>: 45 violation(s) - Function types shall be in prototype form with named parameters</li>
+<li><strong>MISRA C 2012 Rule 8.5</strong>: 6 violation(s) - An external object or function shall be declared once in one and only one file</li>
+<li><strong>MISRA C 2012 Rule 8.6</strong>: 40 violation(s) - An identifier with external linkage shall have exactly one external definition</li>
+<li><strong>MISRA C 2012 Rule 8.7</strong>: 15 violation(s) - Functions and objects should not be defined with external linkage if they are referenced from only one translation unit</li>
+</ul>
 <h4 id="analysis-notes">Analysis Notes</h4>
 <ul>
 <li><strong>Tool</strong>: cppcheck with all rules enabled (--enable=all)</li>
@@ -291,6 +332,274 @@
 <li><strong>Integration</strong>: This analysis complements the existing clang-tidy static analysis</li>
 <li><strong>MISRA Compliance</strong>: MISRA rule texts cannot be displayed due to licensing restrictions</li>
 </ul>
+<h3 id="detailed-violations-with-code-context">Detailed Violations with Code Context</h3>
+<h4 id="misra-c-2012-rule-104-4-violations">MISRA C 2012 Rule 10.4 (4 violation(s))</h4>
+<p><strong>Both operands of an operator in which the usual arithmetic conversions are performed shall have the same essential type</strong></p>
+<p>Arithmetic operations should be performed on operands of compatible types to avoid unexpected type conversions and potential loss of precision.</p>
+<p><em>Rationale: Mixed-type arithmetic can lead to unexpected results due to implicit type conversions.</em></p>
+<p><strong>Violation 1</strong>: freertos_semaphore.hpp:656:34
+<em>Style</em>: misra violation</p>
+<pre><code class="language-cpp">     653:    */
+     654:   BaseType_t unlock() {
+     655:     auto rc = xSemaphoreGiveRecursive(m_semaphore);
+&gt;&gt;&gt;  656:     if (rc &amp;&amp; m_recursions_count &gt; 0) {
+     657:       m_recursions_count--;
+     658:     }
+     659:     return rc;
+</code></pre></div>
+<p><strong>Violation 2</strong>: freertos_semaphore.hpp:671:34
+<em>Style</em>: misra violation</p>
+<pre><code class="language-cpp">     668:    */
+     669:   BaseType_t unlock_isr(BaseType_t &amp;high_priority_task_woken) {
+     670:     auto rc = xSemaphoreGiveFromISR(m_semaphore, &amp;high_priority_task_woken);
+&gt;&gt;&gt;  671:     if (rc &amp;&amp; m_recursions_count &gt; 0) {
+     672:       m_recursions_count--;
+     673:     }
+     674:     return rc;
+</code></pre></div>
+<p><strong>Violation 3</strong>: freertos_semaphore.hpp:685:34
+<em>Style</em>: misra violation</p>
+<pre><code class="language-cpp">     682:   BaseType_t unlock_isr(void) {
+     683:     BaseType_t high_priority_task_woken = pdFALSE;
+     684:     auto rc = xSemaphoreGiveFromISR(m_semaphore, &amp;high_priority_task_woken);
+&gt;&gt;&gt;  685:     if (rc &amp;&amp; m_recursions_count &gt; 0) {
+     686:       m_recursions_count--;
+     687:     }
+     688:     return rc;
+</code></pre></div>
+<p><strong>Violation 4</strong>: freertos_semaphore.hpp:762:55
+<em>Style</em>: misra violation</p>
+<pre><code class="language-cpp">     759:       explicit operator int() const { return m_count; }
+     760:       explicit operator uint32_t() const { return m_count; }
+     761:       bool operator&gt;(const counting_semaphore &amp;rhs) const {
+&gt;&gt;&gt;  762:         return m_count &gt; static_cast&lt;std::atomic_uint32_t&gt;(rhs.m_count);
+     763:       }
+     764:       bool operator&gt;=(const counting_semaphore &amp;rhs) const {
+     765:         return m_count &gt;= static_cast&lt;std::atomic_uint32_t&gt;(rhs.m_count);
+</code></pre></div>
+<h4 id="misra-c-2012-rule-123-36-violations">MISRA C 2012 Rule 12.3 (36 violation(s))</h4>
+<p><strong>The comma operator should not be used</strong></p>
+<p>The comma operator can make code difficult to understand and can lead to unexpected side effects. Sequential execution should be explicit.</p>
+<p><em>Rationale: The comma operator evaluates operands left to right and returns the value of the rightmost operand, which can be confusing.</em></p>
+<p><strong>Violation 1</strong>: freertos_event_group.hpp:112:22
+<em>Style</em>: misra violation</p>
+<pre><code class="language-cpp">     109:   event_group(const event_group &amp;) = delete;
+     110:   event_group &amp;operator=(const event_group &amp;) = delete;
+     111:   event_group(event_group &amp;&amp;) = delete;
+&gt;&gt;&gt;  112:   event_group &amp;operator=(event_group &amp;&amp;) = delete;
+     113: };
+     114: 
+     115: }  // namespace freertos
+</code></pre></div>
+<p><strong>Violation 2</strong>: freertos_event_group.hpp:118:27
+<em>Style</em>: misra violation</p>
+<pre><code class="language-cpp">     115: }  // namespace freertos
+     116: 
+     117: /* Template implementation */
+&gt;&gt;&gt;  118: template &lt;class EventGroupAllocator&gt;
+     119: freertos::event_group&lt;EventGroupAllocator&gt;::event_group() {
+     120:   /* Check if enough free memory is available */
+     121:   if (!EventGroupAllocator::get_instance().has_free_memory())
+</code></pre></div>
+<p><strong>Violation 3</strong>: freertos_event_group.hpp:147:32
+<em>Style</em>: misra violation</p>
+<pre><code class="language-cpp">     144:   if (m_event_group) {
+     145:     vEventGroupDelete(m_event_group);
+     146:   }
+&gt;&gt;&gt;  147: }
+     148: 
+     149: template &lt;class EventGroupAllocator&gt;
+     150: BaseType_t freertos::event_group&lt;EventGroupAllocator&gt;::set_bits(
+</code></pre></div>
+<p><strong>Violation 4</strong>: freertos_event_group.hpp:155:1
+<em>Style</em>: misra violation</p>
+<pre><code class="language-cpp">     152:   return xEventGroupSetBits(m_event_group, bits_to_set);
+     153: }
+     154: 
+&gt;&gt;&gt;  155: template &lt;class EventGroupAllocator&gt;
+     156: BaseType_t freertos::event_group&lt;EventGroupAllocator&gt;::set_bits_isr(
+     157:     const EventBits_t bits_to_set,
+     158:     BaseType_t &amp;higher_priority_task_woken) {
+</code></pre></div>
+<p><strong>Violation 5</strong>: freertos_event_group.hpp:163:32
+<em>Style</em>: misra violation</p>
+<pre><code class="language-cpp">     160:   return xEventGroupSetBitsFromISR(m_event_group, bits_to_set,
+     161:                                     &amp;higher_priority_task_woken);
+     162: }
+&gt;&gt;&gt;  163: 
+     164: template &lt;class EventGroupAllocator&gt;
+     165: BaseType_t freertos::event_group&lt;EventGroupAllocator&gt;::set_bits_isr(
+     166:     const EventBits_t bits_to_set) {
+</code></pre></div>
+<h4 id="misra-c-2012-rule-134-1-violations">MISRA C 2012 Rule 13.4 (1 violation(s))</h4>
+<p><strong>The result of an assignment operator should not be used</strong></p>
+<p>Assignment expressions should not be used as operands to other operators to avoid confusion about order of evaluation.</p>
+<p><em>Rationale: Using assignment results in complex expressions can lead to unclear code and potential side effects.</em></p>
+<p><strong>Violation 1</strong>: freertos_task.cc:68:10
+<em>Style</em>: misra violation</p>
+<pre><code class="language-cpp">      65:   // Task function implementation
+      66:   TaskHandle_t current_task_handle = xTaskGetCurrentTaskHandle();
+      67:   if (task_handle == current_task_handle) {
+&gt;&gt;&gt;   68:     if ((task_wrapper = static_cast&lt;task_wrapper_base *&gt;(
+      69:              pvTaskGetThreadLocalStoragePointer(task_handle, 0))) !=
+      70:         nullptr) {
+      71:       task_wrapper-&gt;task_func();
+</code></pre></div>
+<h4 id="misra-c-2012-rule-155-17-violations">MISRA C 2012 Rule 15.5 (17 violation(s))</h4>
+<p><strong>A function should have a single point of exit at the end</strong></p>
+<p>Functions should have one return statement at the end to improve clarity and maintainability.</p>
+<p><em>Rationale: Multiple return statements can make code harder to understand and debug, especially with resource cleanup.</em></p>
+<p><strong>Violation 1</strong>: freertos_event_group.hpp:121:5
+<em>Style</em>: misra violation</p>
+<pre><code class="language-cpp">     118: template &lt;class EventGroupAllocator&gt;
+     119: freertos::event_group&lt;EventGroupAllocator&gt;::event_group() {
+     120:   /* Check if enough free memory is available */
+&gt;&gt;&gt;  121:   if (!EventGroupAllocator::get_instance().has_free_memory())
+     122:     return;
+     123: 
+     124:   m_event_group = xEventGroupCreateStatic(&amp;m_event_group_buffer);
+</code></pre></div>
+<h4 id="misra-c-2012-rule-163-13-violations">MISRA C 2012 Rule 16.3 (13 violation(s))</h4>
+<p><strong>An unconditional break statement shall terminate every switch-clause</strong></p>
+<p>Every case in a switch statement should have an explicit break to prevent fall-through.</p>
+<p><em>Rationale: Missing break statements can lead to unintended fall-through behavior.</em></p>
+<h4 id="misra-c-2012-rule-173-7-violations">MISRA C 2012 Rule 17.3 (7 violation(s))</h4>
+<p><strong>A function shall not be declared implicitly</strong></p>
+<p>All functions should be explicitly declared before use to ensure type safety.</p>
+<p><em>Rationale: Implicit function declarations can lead to type mismatches and undefined behavior.</em></p>
+<h4 id="misra-c-2012-rule-178-14-violations">MISRA C 2012 Rule 17.8 (14 violation(s))</h4>
+<p><strong>A function parameter should not be modified</strong></p>
+<p>Function parameters should be treated as read-only to avoid confusion and side effects.</p>
+<p><em>Rationale: Modifying parameters can make code harder to understand and debug.</em></p>
+<h4 id="misra-c-2012-rule-23-2-violations">MISRA C 2012 Rule 2.3 (2 violation(s))</h4>
+<p><strong>A project should not contain unused type declarations</strong></p>
+<p>Unused type declarations increase code size and maintenance burden without providing value.</p>
+<p><em>Rationale: Dead code should be removed to keep the codebase clean and maintainable.</em></p>
+<h4 id="misra-c-2012-rule-27-15-violations">MISRA C 2012 Rule 2.7 (15 violation(s))</h4>
+<p><strong>There should be no unused parameters in functions</strong></p>
+<p>Unused parameters should be removed or marked appropriately to indicate intentional non-use.</p>
+<p><em>Rationale: Unused parameters may indicate incomplete implementation or design issues.</em></p>
+<h4 id="misra-c-2012-rule-209-25-violations">MISRA C 2012 Rule 20.9 (25 violation(s))</h4>
+<p><strong>All identifiers used in the controlling expression of #if or #elif preprocessing directives shall be #define'd before evaluation</strong></p>
+<p>Preprocessor conditions should only reference defined macros to avoid undefined behavior.</p>
+<p><em>Rationale: Undefined macros evaluate to 0, which may not be the intended behavior.</em></p>
+<h4 id="misra-c-2012-rule-212-1-violations">MISRA C 2012 Rule 21.2 (1 violation(s))</h4>
+<p><strong>A reserved identifier or reserved macro name shall not be declared</strong></p>
+<p>Code should not declare identifiers that are reserved by the standard.</p>
+<p><em>Rationale: Using reserved names can conflict with standard library implementations.</em></p>
+<h4 id="misra-c-2012-rule-31-2-violations">MISRA C 2012 Rule 3.1 (2 violation(s))</h4>
+<p><strong>The character sequences /<em> and // shall not appear in /</em> comment */</strong></p>
+<p>Comment syntax should not appear within comments to avoid confusion.</p>
+<p><em>Rationale: Nested comment syntax can lead to unexpected comment termination.</em></p>
+<h4 id="misra-c-2012-rule-58-16-violations">MISRA C 2012 Rule 5.8 (16 violation(s))</h4>
+<p><strong>Identifiers that define objects or functions with external linkage shall be unique</strong></p>
+<p>External identifiers should be unique to avoid linking conflicts.</p>
+<p><em>Rationale: Non-unique external identifiers can cause linking errors or unexpected behavior.</em></p>
+<h4 id="misra-c-2012-rule-82-45-violations">MISRA C 2012 Rule 8.2 (45 violation(s))</h4>
+<p><strong>Function types shall be in prototype form with named parameters</strong></p>
+<p>All function declarations should include parameter names for clarity.</p>
+<p><em>Rationale: Named parameters improve code readability and documentation.</em></p>
+<h4 id="misra-c-2012-rule-85-6-violations">MISRA C 2012 Rule 8.5 (6 violation(s))</h4>
+<p><strong>An external object or function shall be declared once in one and only one file</strong></p>
+<p>External declarations should appear in exactly one header file.</p>
+<p><em>Rationale: Multiple declarations can lead to inconsistencies and linking issues.</em></p>
+<h4 id="misra-c-2012-rule-86-40-violations">MISRA C 2012 Rule 8.6 (40 violation(s))</h4>
+<p><strong>An identifier with external linkage shall have exactly one external definition</strong></p>
+<p>Each externally linked identifier should have exactly one definition.</p>
+<p><em>Rationale: Multiple definitions can cause linking errors.</em></p>
+<h4 id="misra-c-2012-rule-87-15-violations">MISRA C 2012 Rule 8.7 (15 violation(s))</h4>
+<p><strong>Functions and objects should not be defined with external linkage if they are referenced from only one translation unit</strong></p>
+<p>Items used in only one file should have internal linkage.</p>
+<p><em>Rationale: Limiting scope improves encapsulation and reduces global namespace pollution.</em></p>
+<h3 id="detailed-clang-tidy-analysis">Detailed clang-tidy Analysis</h3>
+<div class="code-block"><pre><code>[1/9] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/src/freertos_task.cc.
+34437 warnings and 1 error generated.
+Error while processing /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/src/freertos_task.cc.
+[2/9] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos.hpp.
+69922 warnings and 2 errors generated.
+Error while processing /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos.hpp.
+[3/9] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_event_group.hpp.
+76750 warnings and 3 errors generated.
+Error while processing /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_event_group.hpp.
+[4/9] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_message_buffer.hpp.
+88645 warnings and 4 errors generated.
+Error while processing /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_message_buffer.hpp.
+[5/9] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_queue.hpp.
+102507 warnings and 5 errors generated.
+Error while processing /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_queue.hpp.
+[6/9] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_semaphore.hpp.
+109335 warnings and 6 errors generated.
+Error while processing /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_semaphore.hpp.
+[7/9] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_stream_buffer.hpp.
+123186 warnings and 7 errors generated.
+Error while processing /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_stream_buffer.hpp.
+[8/9] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_sw_timer.hpp.
+149713 warnings and 8 errors generated.
+Error while processing /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_sw_timer.hpp.
+[9/9] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp.
+184150 warnings and 9 errors generated.
+Error while processing /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp.
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_semaphore.hpp:424:3: warning: overloaded 'operator++' returns a reference instead of a constant object type [cert-dcl21-cpp]
+  424 |   counting_semaphore &amp;operator++(int) {
+      |   ^~~~~~~~~~~~~~~~~~~~
+      |   const counting_semaphore&lt;SemaphoreAllocator&gt; 
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_semaphore.hpp:436:3: warning: overloaded 'operator--' returns a reference instead of a constant object type [cert-dcl21-cpp]
+  436 |   counting_semaphore &amp;operator--(int) {
+      |   ^~~~~~~~~~~~~~~~~~~~
+      |   const counting_semaphore&lt;SemaphoreAllocator&gt; 
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_sw_timer.hpp:129:62: warning: rvalue reference parameter 'callback' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
+  129 |                  UBaseType_t auto_reload, timer_callback_t &amp;&amp;callback)
+      |                                                              ^
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_sw_timer.hpp:148:62: warning: rvalue reference parameter 'callback' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
+  148 |                  UBaseType_t auto_reload, timer_callback_t &amp;&amp;callback)
+      |                                                              ^
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:194:65: warning: rvalue reference parameter 'task_routine' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
+  194 |   task(const char *name, UBaseType_t priority, task_routine_t &amp;&amp;task_routine,
+      |                                                                 ^
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:208:25: warning: rvalue reference parameter 'task_routine' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
+  208 |        task_routine_t &amp;&amp;task_routine, bool start_suspended = true)
+      |                         ^
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:604:34: warning: rvalue reference parameter 'on_start' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
+  604 |   task(const char *name, task_routine_t &amp;&amp;on_start, UBaseType_t priority,
+      |                                  ^
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:616:25: warning: rvalue reference parameter 'on_start' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
+  616 |        task_routine_t &amp;&amp;on_start, bool start_suspended = true)
+      |                         ^
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:804:52: warning: rvalue reference parameter 'on_start' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
+  804 |   task(UBaseType_t priority, task_routine_t &amp;&amp;on_start,
+      |                                                    ^
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:817:25: warning: rvalue reference parameter 'on_start' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
+  817 |        task_routine_t &amp;&amp;on_start, bool start_suspended = true)
+      |                         ^
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:829:46: warning: rvalue reference parameter 'on_start' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
+  829 |   task(task_routine_t &amp;&amp;on_start, UBaseType_t priority,
+      |                                              ^
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:841:25: warning: rvalue reference parameter 'on_start' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
+  841 |        task_routine_t &amp;&amp;on_start, bool start_suspended = true)
+      |                         ^
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:853:34: warning: rvalue reference parameter 'on_start' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
+  853 |   task(task_routine_t &amp;&amp;on_start, bool start_suspended = true)
+      |                                  ^
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:1007:45: warning: rvalue reference parameter 'task_routine' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
+ 1007 |                   task_routine_t &amp;&amp;task_routine,
+      |                                             ^
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:1025:25: warning: rvalue reference parameter 'task_routine' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
+ 1025 |        task_routine_t &amp;&amp;task_routine, bool start_suspended = true)
+      |                         ^
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:1039:53: warning: rvalue reference parameter 'task_routine' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
+ 1039 |                         task_routine_t &amp;&amp;task_routine,
+      |                                                     ^
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:1057:25: warning: rvalue reference parameter 'task_routine' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
+ 1057 |        task_routine_t &amp;&amp;task_routine, bool start_suspended = true)
+      |                         ^
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:1071:45: warning: rvalue reference parameter 'task_routine' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
+ 1071 |                   task_routine_t &amp;&amp;task_routine,
+      |                                             ^
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:1083:25: warning: rvalue reference parameter 'task_routine' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
+ 1083 |        task_routine_t &amp;&amp;task_routine, bool start_suspended = true)
+      |                         ^
+</code></pre></div>
+<hr />
 </div><div class="section"><h2 id="test-execution-results">Test Execution Results</h2>
 <h3 id="test-execution-summary">Test Execution Summary</h3>
 <ul>
@@ -4206,7 +4515,7 @@ return {};
 <em>Validation Status</em>: ✅ <strong>All tests passing - System validated for production use</strong></p></div>
         
         <div class="timestamp">
-            Generated on July 23, 2025 at 11:50 AM by FreeRTOS C++ Wrappers build system
+            Generated on July 23, 2025 at 12:33 PM by FreeRTOS C++ Wrappers build system
         </div>
     </div>
 </body>
