@@ -418,8 +418,9 @@ public:
    *
    * @return counting_semaphore& reference to the counting semaphore.
    */
+  // NOLINTNEXTLINE(cert-dcl21-cpp): RAII class, copy is deleted - post-increment returns reference instead of copy
   counting_semaphore &
-  operator++(int) { // NOLINT(cert-dcl21-cpp): RAII class, copy is deleted
+  operator++(int) {
     give();
     return *this;
   }
@@ -429,8 +430,9 @@ public:
    *
    * @return counting_semaphore& reference to the counting semaphore.
    */
+  // NOLINTNEXTLINE(cert-dcl21-cpp): RAII class, copy is deleted - post-decrement returns reference instead of copy
   counting_semaphore &
-  operator--(int) { // NOLINT(cert-dcl21-cpp): RAII class, copy is deleted
+  operator--(int) {
     take();
     return *this;
   }
