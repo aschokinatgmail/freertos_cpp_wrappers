@@ -26,8 +26,8 @@ doxygen Doxyfile
 
 - Modern C++17 RAII wrappers for FreeRTOS APIs
 - Comprehensive test coverage (421+ tests)
-- Static analysis integration with clang-tidy
-- MISRA C++ compliance analysis with cppcheck
+- Comprehensive static analysis with clang-tidy + enhanced cppcheck (all rules)
+- MISRA C++ compliance analysis with detailed rule descriptions
 - Automated code formatting with clang-format (LLVM-based style)
 - Support for both static and dynamic allocation strategies
 - chrono compatibility for timeout handling
@@ -65,19 +65,15 @@ The project automatically generates three comprehensive quality reports that are
 
 ### 1. Static Analysis Report
 - **File**: `STATIC_ANALYSIS_REPORT.md`
-- **Content**: clang-tidy static analysis results for main library modules only
+- **Content**: Comprehensive static analysis with clang-tidy + enhanced cppcheck (all rules) + MISRA C++
 - **Scope**: Library code only (src/, include/) - test harness excluded
-- **Checks**: cppcoreguidelines-*, cert-*, google-*, hicpp-*
-- **Purpose**: Identifies code quality issues, style violations, and potential bugs
+- **Tools**: 
+  - **clang-tidy**: cppcoreguidelines-*, cert-*, google-*, hicpp-*
+  - **Enhanced cppcheck**: All rules (style, performance, portability, security, unused code, const correctness)
+  - **MISRA C++**: MISRA C 2012 rules applicable to C++ with detailed descriptions
+- **Purpose**: Comprehensive code quality analysis covering standards compliance and best practices
 
-### 2. MISRA C++ Analysis Report
-- **File**: `MISRA_ANALYSIS_REPORT.md`
-- **Content**: MISRA C++ compliance analysis using cppcheck with MISRA addon
-- **Scope**: Library modules only (src/, include/) - test harness excluded
-- **Standard**: MISRA C 2012 rules applicable to C++ (overlaps with MISRA C++ 2008)
-- **Purpose**: Ensures compliance with MISRA C++ coding standards for safety-critical applications
-
-### 3. Validation and Verification Report
+### 2. Validation and Verification Report
 - **File**: `VALIDATION_VERIFICATION_REPORT.md`
 - **Content**: 
   - Complete test execution results with pass/fail status
@@ -99,19 +95,15 @@ make validation-verification-report
 # 1. Build the project with coverage enabled
 # 2. Run all 421 tests
 # 3. Generate coverage data
-# 4. Run static analysis (clang-tidy)
-# 5. Run MISRA C++ analysis (cppcheck)
-# 6. Generate all three reports with current results
+# 4. Run comprehensive static analysis (clang-tidy + enhanced cppcheck + MISRA C++)
+# 5. Generate all reports with current results
 ```
 
 ### Manual Report Generation
 
 ```bash
-# Generate static analysis report only
+# Generate comprehensive static analysis report (clang-tidy + enhanced cppcheck + MISRA C++)
 make static-analysis-report
-
-# Generate MISRA C++ analysis report only
-make misra-analysis
 
 # Generate validation report manually
 ./scripts/run_tests_and_generate_reports.sh
@@ -119,10 +111,10 @@ make misra-analysis
 
 ## Build Options
 
-- `ENABLE_CLANG_TIDY` (default: ON) - Enable static analysis
+- `ENABLE_CLANG_TIDY` (default: ON) - Enable comprehensive static analysis
 - `CLANG_TIDY_WARNINGS_AS_ERRORS` (default: OFF) - Treat warnings as errors
-- `GENERATE_CLANG_TIDY_REPORT` (default: ON) - Generate static analysis report
-- `ENABLE_MISRA_ANALYSIS` (default: ON) - Enable MISRA C++ compliance analysis
+- `GENERATE_CLANG_TIDY_REPORT` (default: ON) - Generate comprehensive static analysis report
+- `ENABLE_MISRA_ANALYSIS` (default: ON) - Enable enhanced cppcheck and MISRA C++ analysis
 - `ENABLE_COVERAGE` (default: OFF) - Enable code coverage collection
 
 ## Code Formatting
@@ -170,7 +162,6 @@ make validation-verification-report
 
 # View results
 cat ../STATIC_ANALYSIS_REPORT.md
-cat ../MISRA_ANALYSIS_REPORT.md
 cat ../VALIDATION_VERIFICATION_REPORT.md
 ```
 
@@ -178,6 +169,5 @@ cat ../VALIDATION_VERIFICATION_REPORT.md
 
 - ✅ **All 421 tests passing** (100% success rate)
 - ✅ **96.6% line coverage** and **94.9% function coverage**
-- ✅ **Clean static analysis** (library modules only)
-- ✅ **MISRA C++ compliance analysis** (safety-critical standards)
+- ✅ **Comprehensive static analysis** with clang-tidy + enhanced cppcheck (all rules) + MISRA C++
 - ✅ **Production ready** with comprehensive validation

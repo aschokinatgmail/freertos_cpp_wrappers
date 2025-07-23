@@ -176,10 +176,15 @@ if(ENABLE_CLANG_TIDY)
                     -DUNIT_TESTING=1
                     > ${CMAKE_BINARY_DIR}/clang-tidy-report.txt 2>&1 || true
                 
-                # Generate combined static analysis report (clang-tidy + MISRA)
+                # Generate combined static analysis report (clang-tidy + MISRA + Enhanced cppcheck)
                 COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/scripts/run_misra_analysis.sh
                     ${CMAKE_CURRENT_SOURCE_DIR}
                     ${CMAKE_BINARY_DIR}/misra_analysis_output.txt
+                
+                # Generate enhanced cppcheck analysis with all rules
+                COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/scripts/run_enhanced_cppcheck_analysis.sh
+                    ${CMAKE_CURRENT_SOURCE_DIR}
+                    ${CMAKE_BINARY_DIR}/enhanced_cppcheck_output.txt
                 
                 # Generate integrated report using shell script
                 COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/scripts/generate_static_analysis_report.sh
@@ -188,12 +193,13 @@ if(ENABLE_CLANG_TIDY)
                     ${CLANG_TIDY_REPORT_FILE}
                     ${CMAKE_CURRENT_SOURCE_DIR}
                     ${CMAKE_BINARY_DIR}/misra_analysis_output.txt
+                    ${CMAKE_BINARY_DIR}/enhanced_cppcheck_output.txt
                 
                 # Status messages
                 COMMAND ${CMAKE_COMMAND} -E echo "Fixes exported to: ${CMAKE_BINARY_DIR}/clang-tidy-fixes.yaml"
                 
                 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-                COMMENT "Generating comprehensive static analysis report with statistics for library modules"
+                COMMENT "Generating comprehensive static analysis report with statistics for library modules (clang-tidy + MISRA + enhanced cppcheck)"
             )
             message(STATUS "Run 'make static-analysis-report' to generate a detailed static analysis report")
         endif()
@@ -220,6 +226,7 @@ if(ENABLE_MISRA_ANALYSIS)
     if(CPPCHECK_EXE)
         message(STATUS "cppcheck found: ${CPPCHECK_EXE}")
         message(STATUS "MISRA C++ analysis will be integrated into static analysis report")
+        message(STATUS "Enhanced cppcheck analysis enabled - includes all rules (style, performance, portability, security, etc.)")
         message(STATUS "MISRA C++ analysis enabled - uses MISRA C 2012 rules applicable to C++")
     else()
         message(WARNING "cppcheck not found! MISRA C++ analysis will be skipped. Install cppcheck to enable MISRA analysis.")
