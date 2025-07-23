@@ -27,6 +27,7 @@ doxygen Doxyfile
 - Modern C++17 RAII wrappers for FreeRTOS APIs
 - Comprehensive test coverage (421+ tests)
 - Static analysis integration with clang-tidy
+- Automated code formatting with clang-format (LLVM-based style)
 - Support for both static and dynamic allocation strategies
 - chrono compatibility for timeout handling
 - Enhanced C++17 features testing
@@ -110,6 +111,39 @@ make static-analysis-report
 - `CLANG_TIDY_WARNINGS_AS_ERRORS` (default: OFF) - Treat warnings as errors
 - `GENERATE_CLANG_TIDY_REPORT` (default: ON) - Generate static analysis report
 - `ENABLE_COVERAGE` (default: OFF) - Enable code coverage collection
+
+## Code Formatting
+
+The project follows a consistent coding standard enforced by clang-format based on LLVM style. All source files in `include/` and `src/` directories are automatically formatted according to the `.clang-format` configuration.
+
+### Manual Code Formatting
+
+```bash
+# Format all source files using the standalone script
+./scripts/format_code.sh
+
+# Format specific files manually
+clang-format -i include/freertos_task.hpp src/freertos_task.cc
+
+# Format using CMake target
+make format
+```
+
+### Automatic Formatting
+
+Code formatting is automatically applied when running tests:
+
+```bash
+# This script automatically formats code before building and testing
+./scripts/run_tests_and_generate_reports.sh
+```
+
+The formatting configuration ensures:
+- 2-space indentation
+- 80-character line limit
+- Consistent bracket placement
+- Proper spacing and alignment
+- Include sorting and organization
 
 ## Quick Start
 
