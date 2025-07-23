@@ -233,6 +233,24 @@ def get_source_context(file_path, line_num, context_lines=2):
     except Exception:
         return f"Unable to read source context for line {line_num}"
 
+def get_function_code_block(file_path, start_line, end_line):
+    """Get the actual code block for a function for detailed violations format"""
+    try:
+        with open(file_path, 'r') as f:
+            lines = f.readlines()
+        
+        # Ensure we stay within file bounds
+        start_idx = max(0, start_line - 1)
+        end_idx = min(len(lines), end_line)
+        
+        code_lines = []
+        for i in range(start_idx, end_idx):
+            code_lines.append(lines[i].rstrip())
+        
+        return "\n".join(code_lines)
+    except Exception:
+        return f"Unable to read code block for lines {start_line}-{end_line}"
+
 def demangle_function_name(mangled_name):
     """Convert mangled C++ function names to more readable format using c++filt"""
     # First try to use c++filt for proper demangling
@@ -446,9 +464,16 @@ These uncovered areas are intentional and represent code that:
     # Categorize uncovered code
     categories = categorize_uncovered_code(coverage_details, project_root)
     
-    # Generate detailed analysis
+    # Generate detailed analysis in violations format
     detailed_analysis = "**Detailed Uncovered Areas Analysis:**\n\n"
     detailed_analysis += "The following sections provide specific references to uncovered code areas and explanations for why they cannot be covered by unit tests.\n\n"
+    
+    # Count all uncovered areas for numbering
+    area_count = 0
+    for category_data in categories.values():
+        area_count += len(category_data['items'])
+    
+    current_area = 1
     
     for category_key, category_data in categories.items():
         if not category_data['items']:
@@ -458,69 +483,98 @@ These uncovered areas are intentional and represent code that:
         detailed_analysis += f"**Reason for exclusion:** {category_data['reason']}\n\n"
         
         if category_data['items']:
-            detailed_analysis += "**Specific code references:**\n\n"
-            detailed_analysis += "| File:Line | Type | Function/Code | Context |\n"
-            detailed_analysis += "|-----------|------|---------------|----------|\n"
-            
-            # Show ALL items, not just first 10
+            # Generate detailed violations format for each item
             for item in category_data['items']:
                 location = item.get('location', 'Unknown')
                 item_type = item.get('type', 'Unknown')
                 
+                detailed_analysis += f"**Uncovered Area {current_area}**: {location}\n"
+                
                 if item_type == 'function':
                     function_name = item.get('name', 'Unknown')
-                    # Truncate very long function names for readability
-                    if len(function_name) > 60:
-                        function_name = function_name[:57] + "..."
-                    details = f"`{function_name}`"
+                    detailed_analysis += f"*Function*: `{function_name}`\n\n"
                     
-                    # Add context if available
-                    context = item.get('context', '')
-                    if context:
-                        # Get the most relevant line from context
-                        context_lines = context.split('\n')
-                        relevant_line = next((line for line in context_lines if '>>>' in line), '')
-                        if relevant_line:
-                            code_part = relevant_line.split(':', 1)[-1].strip()
-                            if len(code_part) > 80:
-                                code_part = code_part[:77] + "..."
-                            context_display = f"`{code_part}`"
-                        else:
-                            context_display = "Function definition"
-                    else:
-                        context_display = "Function definition"
+                    # Get the actual code block if we have line numbers
+                    start_line = item.get('start_line', 0)
+                    end_line = item.get('end_line', 0)
+                    file_path = item.get('file', '')
+                    
+                    if start_line > 0 and end_line > start_line:
+                        # Try to get the full file path for reading
+                        # The item file is just basename, so we need to construct full path
+                        full_path = None
+                        for func_info in coverage_details.get('uncovered_functions', []):
+                            if func_info.get('function') == function_name or function_name in func_info.get('function', ''):
+                                full_path = func_info.get('file', '')
+                                break
                         
+                        if full_path and os.path.exists(full_path):
+                            code_block = get_function_code_block(full_path, start_line, end_line)
+                            detailed_analysis += "```cpp\n"
+                            detailed_analysis += code_block
+                            detailed_analysis += "\n```\n\n"
+                        else:
+                            # Fallback to context if available
+                            context = item.get('context', '')
+                            if context:
+                                detailed_analysis += "```cpp\n"
+                                # Clean up the context for display
+                                context_lines = context.split('\n')
+                                clean_lines = []
+                                for line in context_lines:
+                                    if line.strip():
+                                        # Remove the line number prefix
+                                        if ':' in line:
+                                            clean_line = line.split(':', 1)[-1].strip()
+                                            clean_lines.append(clean_line)
+                                detailed_analysis += '\n'.join(clean_lines)
+                                detailed_analysis += "\n```\n\n"
+                            else:
+                                detailed_analysis += "*Code block not available*\n\n"
+                    else:
+                        # For functions without line numbers, use context if available
+                        context = item.get('context', '')
+                        if context:
+                            detailed_analysis += "```cpp\n"
+                            # Clean up the context for display
+                            context_lines = context.split('\n')
+                            clean_lines = []
+                            for line in context_lines:
+                                if line.strip():
+                                    # Remove the line number prefix
+                                    if ':' in line:
+                                        clean_line = line.split(':', 1)[-1].strip()
+                                        clean_lines.append(clean_line)
+                            detailed_analysis += '\n'.join(clean_lines)
+                            detailed_analysis += "\n```\n\n"
+                        else:
+                            detailed_analysis += "*Function definition not available*\n\n"
+                            
                 elif item_type == 'line':
-                    details = f"Line {item.get('line', '?')}"
+                    line_num = item.get('line', 0)
+                    detailed_analysis += f"*Line*: {line_num}\n\n"
                     
                     # Add context if available
                     context = item.get('context', '')
                     if context:
-                        # Get the most relevant line from context
+                        detailed_analysis += "```cpp\n"
+                        # Clean up the context for display
                         context_lines = context.split('\n')
-                        relevant_line = next((line for line in context_lines if '>>>' in line), '')
-                        if relevant_line:
-                            code_part = relevant_line.split(':', 1)[-1].strip()
-                            if len(code_part) > 80:
-                                code_part = code_part[:77] + "..."
-                            context_display = f"`{code_part}`"
-                        else:
-                            # Fallback: show any line from context
-                            non_empty_lines = [line.strip() for line in context_lines if line.strip()]
-                            if non_empty_lines:
-                                code_part = non_empty_lines[0]
-                                if len(code_part) > 80:
-                                    code_part = code_part[:77] + "..."
-                                context_display = f"`{code_part}`"
-                            else:
-                                context_display = "Code line"
+                        clean_lines = []
+                        for line in context_lines:
+                            if line.strip():
+                                # Remove the line number prefix but keep >>> indicator
+                                if ':' in line:
+                                    clean_line = line.split(':', 1)[-1].strip()
+                                    if '>>>' in line:
+                                        clean_line = clean_line  # Keep the line as is for highlighted lines
+                                    clean_lines.append(clean_line)
+                        detailed_analysis += '\n'.join(clean_lines)
+                        detailed_analysis += "\n```\n\n"
                     else:
-                        context_display = "Code line"
-                else:
-                    details = "Unknown type"
-                    context_display = ""
+                        detailed_analysis += "*Code context not available*\n\n"
                 
-                detailed_analysis += f"| {location} | {item_type.title()} | {details} | {context_display} |\n"
+                current_area += 1
         
         detailed_analysis += "\n"
     
