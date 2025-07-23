@@ -31,5 +31,5 @@ rm "$TEMP_DOXYFILE"
 
 echo
 echo "=== Documentation Generated Successfully ==="
-echo "Generated documentation in: $PROJECT_ROOT/html"
-echo "Open $PROJECT_ROOT/html/index.html in a browser to view"
+echo "Generated documentation in: $PROJECT_ROOT/docs/html"
+echo "Open $PROJECT_ROOT/docs/html/index.html in a browser to view"
