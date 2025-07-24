@@ -59,19 +59,19 @@ if [ -n "$ENHANCED_CPPCHECK_REPORT_TXT" ] && [ -f "$ENHANCED_CPPCHECK_REPORT_TXT
 fi
 
 # Add detailed clang-tidy analysis
-cat >> "$CLANG_TIDY_REPORT_MD" << EOF
-## Detailed clang-tidy Analysis
+echo "## Detailed clang-tidy Analysis" >> "$CLANG_TIDY_REPORT_MD"
+echo "" >> "$CLANG_TIDY_REPORT_MD"
 
-\`\`\`
-EOF
+# Generate formatted clang-tidy detailed analysis with code context
+python3 "${SOURCE_DIR}/scripts/parse_clang_tidy_detailed.py" "$CLANG_TIDY_REPORT_TXT" "$SOURCE_DIR" >> "$CLANG_TIDY_REPORT_MD" 2>/dev/null || {
+    echo "### Raw Output" >> "$CLANG_TIDY_REPORT_MD"
+    echo "" >> "$CLANG_TIDY_REPORT_MD"
+    echo "\`\`\`" >> "$CLANG_TIDY_REPORT_MD"
+    cat "$CLANG_TIDY_REPORT_TXT" >> "$CLANG_TIDY_REPORT_MD" 2>/dev/null || echo "No detailed output available" >> "$CLANG_TIDY_REPORT_MD"
+    echo "\`\`\`" >> "$CLANG_TIDY_REPORT_MD"
+}
 
-cat "$CLANG_TIDY_REPORT_TXT" >> "$CLANG_TIDY_REPORT_MD" 2>/dev/null || echo "No detailed output available" >> "$CLANG_TIDY_REPORT_MD"
-
-cat >> "$CLANG_TIDY_REPORT_MD" << EOF
-\`\`\`
-
----
-EOF
+echo "" >> "$CLANG_TIDY_REPORT_MD"
 
 # Add footer with date
 date +"*Generated: %B %d, %Y*" >> "$CLANG_TIDY_REPORT_MD"
