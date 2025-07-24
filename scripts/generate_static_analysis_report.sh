@@ -71,8 +71,7 @@ python3 "${SOURCE_DIR}/scripts/parse_clang_tidy_detailed.py" "$CLANG_TIDY_REPORT
     echo "\`\`\`" >> "$CLANG_TIDY_REPORT_MD"
 }
 
----
-EOF
+echo "" >> "$CLANG_TIDY_REPORT_MD"
 
 # Add footer with date
 date +"*Generated: %B %d, %Y*" >> "$CLANG_TIDY_REPORT_MD"

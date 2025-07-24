@@ -15,7 +15,7 @@
 - **Total Issues Found**: 34438
 - **Warnings**: 34437
 - **Errors**: 1
-- **Files Analyzed**: 18
+- **Files Analyzed**: 9
 - **Unique Check Types**: 2
 
 ### Issues by Check Category
@@ -32,23 +32,14 @@
 ### Analyzed Files
 
 - freertos.hpp
-- freertos.hpp.
 - freertos_event_group.hpp
-- freertos_event_group.hpp.
 - freertos_message_buffer.hpp
-- freertos_message_buffer.hpp.
 - freertos_queue.hpp
-- freertos_queue.hpp.
 - freertos_semaphore.hpp
-- freertos_semaphore.hpp.
 - freertos_stream_buffer.hpp
-- freertos_stream_buffer.hpp.
 - freertos_sw_timer.hpp
-- freertos_sw_timer.hpp.
 - freertos_task.cc
-- freertos_task.cc.
 - freertos_task.hpp
-- freertos_task.hpp.
 
 ## MISRA C++ Analysis
 
@@ -106,7 +97,7 @@ Arithmetic operations should be performed on operands of compatible types to avo
 *Rationale: Mixed-type arithmetic can lead to unexpected results due to implicit type conversions.*
 
 **Violation 1**: freertos_semaphore.hpp:656:34
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      653:    */
@@ -119,7 +110,7 @@ Arithmetic operations should be performed on operands of compatible types to avo
 ```
 
 **Violation 2**: freertos_semaphore.hpp:671:34
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      668:    */
@@ -132,7 +123,7 @@ Arithmetic operations should be performed on operands of compatible types to avo
 ```
 
 **Violation 3**: freertos_semaphore.hpp:685:34
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      682:   BaseType_t unlock_isr(void) {
@@ -145,7 +136,7 @@ Arithmetic operations should be performed on operands of compatible types to avo
 ```
 
 **Violation 4**: freertos_semaphore.hpp:762:55
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      759:    *
@@ -166,7 +157,7 @@ The comma operator can make code difficult to understand and maintain. Its use s
 *Rationale: The comma operator can obscure control flow and make code harder to read and debug.*
 
 **Violation 1**: freertos_message_buffer.hpp:147:25
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      144:    * @param xTicksToWait timeout in ticks to wait for the message buffer to
@@ -179,7 +170,7 @@ The comma operator can make code difficult to understand and maintain. Its use s
 ```
 
 **Violation 2**: freertos_message_buffer.hpp:180:25
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      177:    * become available
@@ -192,7 +183,7 @@ The comma operator can make code difficult to understand and maintain. Its use s
 ```
 
 **Violation 3**: freertos_message_buffer.hpp:94:35
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
       91:  * @tparam MessageBufferSize size of the message buffer
@@ -205,7 +196,7 @@ The comma operator can make code difficult to understand and maintain. Its use s
 ```
 
 **Violation 4**: freertos_message_buffer.hpp:54:21
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
       51:  */
@@ -218,7 +209,7 @@ The comma operator can make code difficult to understand and maintain. Its use s
 ```
 
 **Violation 5**: freertos_queue.hpp:243:25
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      240:    * @return BaseType_t pdPASS if the item was successfully posted, otherwise
@@ -231,7 +222,7 @@ The comma operator can make code difficult to understand and maintain. Its use s
 ```
 
 **Violation 6**: freertos_queue.hpp:298:25
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      295:    * @return BaseType_t pdPASS if the item was successfully posted, otherwise
@@ -244,7 +235,7 @@ The comma operator can make code difficult to understand and maintain. Its use s
 ```
 
 **Violation 7**: freertos_queue.hpp:354:25
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      351:    * @return BaseType_t pdPASS if the item was successfully posted, otherwise
@@ -257,7 +248,7 @@ The comma operator can make code difficult to understand and maintain. Its use s
 ```
 
 **Violation 8**: freertos_queue.hpp:427:25
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      424:    * @return BaseType_t pdPASS if the item
@@ -270,7 +261,7 @@ The comma operator can make code difficult to understand and maintain. Its use s
 ```
 
 **Violation 9**: freertos_queue.hpp:443:25
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      440:    * @return optional<T> The item received from the queue or std::nullopt if the
@@ -283,7 +274,7 @@ The comma operator can make code difficult to understand and maintain. Its use s
 ```
 
 **Violation 10**: freertos_queue.hpp:580:25
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      577:    * @return BaseType_t pdPASS if the item was successfully peeked, otherwise
@@ -296,7 +287,7 @@ The comma operator can make code difficult to understand and maintain. Its use s
 ```
 
 **Violation 11**: freertos_queue.hpp:638:25
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      635:    * @return optional<T> The item peeked from the queue or std::nullopt if the
@@ -309,7 +300,7 @@ The comma operator can make code difficult to understand and maintain. Its use s
 ```
 
 **Violation 12**: freertos_queue.hpp:188:29
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      185:  * static_queue;
@@ -322,7 +313,7 @@ The comma operator can make code difficult to understand and maintain. Its use s
 ```
 
 **Violation 13**: freertos_queue.hpp:56:21
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
       53:  */
@@ -335,7 +326,7 @@ The comma operator can make code difficult to understand and maintain. Its use s
 ```
 
 **Violation 14**: freertos_semaphore.hpp:271:25
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      268:    * otherwise pdFALSE.
@@ -348,7 +339,7 @@ The comma operator can make code difficult to understand and maintain. Its use s
 ```
 
 **Violation 15**: freertos_semaphore.hpp:393:25
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      390:    * otherwise pdFALSE.
@@ -361,7 +352,7 @@ The comma operator can make code difficult to understand and maintain. Its use s
 ```
 
 **Violation 16**: freertos_semaphore.hpp:586:25
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      583:    * @param timeout timeout to wait for the mutex.
@@ -374,7 +365,7 @@ The comma operator can make code difficult to understand and maintain. Its use s
 ```
 
 **Violation 17**: freertos_semaphore.hpp:739:25
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      736:    * @param timeout timeout to wait for the recursive mutex.
@@ -387,7 +378,7 @@ The comma operator can make code difficult to understand and maintain. Its use s
 ```
 
 **Violation 18**: freertos_semaphore.hpp:827:23
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      824:    * @param mutex mutex to guard
@@ -400,7 +391,7 @@ The comma operator can make code difficult to understand and maintain. Its use s
 ```
 
 **Violation 19**: freertos_semaphore.hpp:921:23
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      918:    * @param ticks_to_wait timeout in ticks to wait for the mutex.
@@ -413,7 +404,7 @@ The comma operator can make code difficult to understand and maintain. Its use s
 ```
 
 **Violation 20**: freertos_semaphore.hpp:929:25
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      926:    * @param mutex mutex to guard
@@ -426,7 +417,7 @@ The comma operator can make code difficult to understand and maintain. Its use s
 ```
 
 **Violation 21**: freertos_semaphore.hpp:932:23
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      929:   template <typename Rep, typename Period>
@@ -439,7 +430,7 @@ The comma operator can make code difficult to understand and maintain. Its use s
 ```
 
 **Violation 22**: freertos_sw_timer.hpp:130:58
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      127:    */
@@ -452,7 +443,7 @@ The comma operator can make code difficult to understand and maintain. Its use s
 ```
 
 **Violation 23**: freertos_sw_timer.hpp:145:25
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      142:    * @param auto_reload auto-reload flag
@@ -465,7 +456,7 @@ The comma operator can make code difficult to understand and maintain. Its use s
 ```
 
 **Violation 24**: freertos_sw_timer.hpp:254:25
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      251:    * @param timeout timeout to wait for the timer to start
@@ -478,7 +469,7 @@ The comma operator can make code difficult to understand and maintain. Its use s
 ```
 
 **Violation 25**: freertos_sw_timer.hpp:313:25
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      310:    * @param timeout timeout to wait for the timer to stop
@@ -491,7 +482,7 @@ The comma operator can make code difficult to understand and maintain. Its use s
 ```
 
 **Violation 26**: freertos_sw_timer.hpp:368:25
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      365:    * @param timeout timeout to wait for the timer to reset
@@ -504,7 +495,7 @@ The comma operator can make code difficult to understand and maintain. Its use s
 ```
 
 **Violation 27**: freertos_sw_timer.hpp:427:31
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      424:    * @return BaseType_t pdPASS if the timer period was changed successfully else
@@ -517,7 +508,7 @@ The comma operator can make code difficult to understand and maintain. Its use s
 ```
 
 **Violation 28**: freertos_sw_timer.hpp:467:25
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      464:    * @return BaseType_t pdPASS if the timer period was changed successfully else
@@ -530,7 +521,7 @@ The comma operator can make code difficult to understand and maintain. Its use s
 ```
 
 **Violation 29**: freertos_sw_timer.hpp:497:25
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      494:    * @return BaseType_t pdPASS if the timer period was changed successfully else
@@ -543,7 +534,7 @@ The comma operator can make code difficult to understand and maintain. Its use s
 ```
 
 **Violation 30**: freertos_event_group.hpp:181:25
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      178:    * @param timeout timeout to wait for the bits
@@ -556,7 +547,7 @@ The comma operator can make code difficult to understand and maintain. Its use s
 ```
 
 **Violation 31**: freertos_event_group.hpp:223:25
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      220:     return xEventGroupSync(m_event_group, bits_to_set, bits_to_wait_for,
@@ -569,7 +560,7 @@ The comma operator can make code difficult to understand and maintain. Its use s
 ```
 
 **Violation 32**: freertos_stream_buffer.hpp:156:25
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      153:    * stream buffer, otherwise errCOULD_NOT_ALLOCATE_REQUIRED_MEMORY if there was
@@ -582,7 +573,7 @@ The comma operator can make code difficult to understand and maintain. Its use s
 ```
 
 **Violation 33**: freertos_stream_buffer.hpp:194:30
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      191:    * stream buffer, otherwise errCOULD_NOT_ALLOCATE_REQUIRED_MEMORY if there was
@@ -595,7 +586,7 @@ The comma operator can make code difficult to understand and maintain. Its use s
 ```
 
 **Violation 34**: freertos_stream_buffer.hpp:294:25
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      291:    * @param timeout Duration to wait for the data to be copied into the buffer.
@@ -608,7 +599,7 @@ The comma operator can make code difficult to understand and maintain. Its use s
 ```
 
 **Violation 35**: freertos_stream_buffer.hpp:96:34
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
       93:  * @tparam StreamBufferSize size of the stream buffer
@@ -621,7 +612,7 @@ The comma operator can make code difficult to understand and maintain. Its use s
 ```
 
 **Violation 36**: freertos_stream_buffer.hpp:55:21
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
       52:  */
@@ -642,7 +633,7 @@ Assignment expressions should not be used as sub-expressions. Assignments should
 *Rationale: Using assignment results as expressions can make code harder to read and may hide logical errors.*
 
 **Violation 1**: freertos_queue.hpp:199:45
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      196:    * @param registred_name Name of the queue, which will be used to register it
@@ -663,7 +654,7 @@ Functions should have one return statement at the end rather than multiple retur
 *Rationale: Single exit points make functions easier to understand, debug, and maintain.*
 
 **Violation 1**: freertos_queue.hpp:414:7
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      411:   optional<T> receive(TickType_t ticks_to_wait) {
@@ -676,7 +667,7 @@ Functions should have one return statement at the end rather than multiple retur
 ```
 
 **Violation 2**: freertos_queue.hpp:487:7
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      484:     BaseType_t higher_priority_task_woken = pdFALSE;
@@ -689,7 +680,7 @@ Functions should have one return statement at the end rather than multiple retur
 ```
 
 **Violation 3**: freertos_queue.hpp:626:7
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      623:   optional<T> peek(TickType_t ticks_to_wait) {
@@ -702,7 +693,7 @@ Functions should have one return statement at the end rather than multiple retur
 ```
 
 **Violation 4**: freertos_queue.hpp:658:7
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      655:     BaseType_t higher_priority_task_woken = pdFALSE;
@@ -715,7 +706,7 @@ Functions should have one return statement at the end rather than multiple retur
 ```
 
 **Violation 5**: freertos_sw_timer.hpp:237:7
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      234:    */
@@ -728,7 +719,7 @@ Functions should have one return statement at the end rather than multiple retur
 ```
 
 **Violation 6**: freertos_sw_timer.hpp:269:7
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      266:    */
@@ -741,7 +732,7 @@ Functions should have one return statement at the end rather than multiple retur
 ```
 
 **Violation 7**: freertos_sw_timer.hpp:296:7
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      293:    */
@@ -754,7 +745,7 @@ Functions should have one return statement at the end rather than multiple retur
 ```
 
 **Violation 8**: freertos_sw_timer.hpp:328:7
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      325:    */
@@ -767,7 +758,7 @@ Functions should have one return statement at the end rather than multiple retur
 ```
 
 **Violation 9**: freertos_sw_timer.hpp:355:7
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      352:    */
@@ -780,7 +771,7 @@ Functions should have one return statement at the end rather than multiple retur
 ```
 
 **Violation 10**: freertos_sw_timer.hpp:383:7
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      380:    */
@@ -793,7 +784,7 @@ Functions should have one return statement at the end rather than multiple retur
 ```
 
 **Violation 11**: freertos_sw_timer.hpp:410:7
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      407:   BaseType_t period(const TickType_t new_period_ticks,
@@ -806,7 +797,7 @@ Functions should have one return statement at the end rather than multiple retur
 ```
 
 **Violation 12**: freertos_sw_timer.hpp:450:7
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      447:   BaseType_t period_isr(const TickType_t new_period_ticks,
@@ -819,7 +810,7 @@ Functions should have one return statement at the end rather than multiple retur
 ```
 
 **Violation 13**: freertos_sw_timer.hpp:516:7
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      513:    */
@@ -832,7 +823,7 @@ Functions should have one return statement at the end rather than multiple retur
 ```
 
 **Violation 14**: freertos_sw_timer.hpp:556:7
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      553:    */
@@ -845,7 +836,7 @@ Functions should have one return statement at the end rather than multiple retur
 ```
 
 **Violation 15**: freertos_sw_timer.hpp:558:7
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      555:     if (m_timer) {
@@ -858,7 +849,7 @@ Functions should have one return statement at the end rather than multiple retur
 ```
 
 **Violation 16**: freertos_sw_timer.hpp:578:7
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      575:    */
@@ -871,7 +862,7 @@ Functions should have one return statement at the end rather than multiple retur
 ```
 
 **Violation 17**: freertos_sw_timer.hpp:589:7
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      586:    */
@@ -892,7 +883,7 @@ Every case in a switch statement should end with a break statement to prevent fa
 *Rationale: Missing break statements can cause unintended fall-through behavior that leads to bugs.*
 
 **Violation 1**: freertos_message_buffer.hpp:57:39
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
       54:   std::array<uint8_t, MessageBufferSize> m_storage;
@@ -905,7 +896,7 @@ Every case in a switch statement should end with a break statement to prevent fa
 ```
 
 **Violation 2**: freertos_message_buffer.hpp:58:40
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
       55: 
@@ -918,7 +909,7 @@ Every case in a switch statement should end with a break statement to prevent fa
 ```
 
 **Violation 3**: freertos_queue.hpp:59:30
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
       56:   std::array<uint8_t, QueueLength * sizeof(T)> m_storage;
@@ -931,7 +922,7 @@ Every case in a switch statement should end with a break statement to prevent fa
 ```
 
 **Violation 4**: freertos_queue.hpp:60:31
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
       57: 
@@ -944,7 +935,7 @@ Every case in a switch statement should end with a break statement to prevent fa
 ```
 
 **Violation 5**: freertos_semaphore.hpp:56:34
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
       53:   StaticSemaphore_t m_semaphore_placeholder{};
@@ -957,7 +948,7 @@ Every case in a switch statement should end with a break statement to prevent fa
 ```
 
 **Violation 6**: freertos_semaphore.hpp:57:35
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
       54: 
@@ -970,7 +961,7 @@ Every case in a switch statement should end with a break statement to prevent fa
 ```
 
 **Violation 7**: freertos_sw_timer.hpp:63:33
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
       60:   StaticTimer_t m_timer_placeholder{};
@@ -983,7 +974,7 @@ Every case in a switch statement should end with a break statement to prevent fa
 ```
 
 **Violation 8**: freertos_sw_timer.hpp:64:34
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
       61: 
@@ -996,7 +987,7 @@ Every case in a switch statement should end with a break statement to prevent fa
 ```
 
 **Violation 9**: freertos_sw_timer.hpp:66:61
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
       63:   static_sw_timer_allocator() = default;
@@ -1009,7 +1000,7 @@ Every case in a switch statement should end with a break statement to prevent fa
 ```
 
 **Violation 10**: freertos_event_group.hpp:54:36
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
       51:   StaticEventGroup_t m_event_group_placeholder{};
@@ -1022,7 +1013,7 @@ Every case in a switch statement should end with a break statement to prevent fa
 ```
 
 **Violation 11**: freertos_event_group.hpp:55:37
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
       52: 
@@ -1035,7 +1026,7 @@ Every case in a switch statement should end with a break statement to prevent fa
 ```
 
 **Violation 12**: freertos_stream_buffer.hpp:58:38
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
       55:   std::array<uint8_t, StreamBufferSize> m_storage;
@@ -1048,7 +1039,7 @@ Every case in a switch statement should end with a break statement to prevent fa
 ```
 
 **Violation 13**: freertos_stream_buffer.hpp:59:39
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
       56: 
@@ -1069,7 +1060,7 @@ All functions should be explicitly declared before use. Implicit function declar
 *Rationale: Implicit function declarations can cause type mismatches and make code harder to understand and maintain.*
 
 **Violation 1**: freertos_queue.hpp:413:9
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      410:    */
@@ -1082,7 +1073,7 @@ All functions should be explicitly declared before use. Implicit function declar
 ```
 
 **Violation 2**: freertos_queue.hpp:485:9
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      482:   optional<T> receive_isr(void) {
@@ -1095,7 +1086,7 @@ All functions should be explicitly declared before use. Implicit function declar
 ```
 
 **Violation 3**: freertos_queue.hpp:625:9
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      622:    */
@@ -1108,7 +1099,7 @@ All functions should be explicitly declared before use. Implicit function declar
 ```
 
 **Violation 4**: freertos_queue.hpp:656:9
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      653:   optional<T> peek_isr(void) {
@@ -1121,7 +1112,7 @@ All functions should be explicitly declared before use. Implicit function declar
 ```
 
 **Violation 5**: freertos_sw_timer.hpp:184:16
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      181:     if (m_timer) {
@@ -1134,7 +1125,7 @@ All functions should be explicitly declared before use. Implicit function declar
 ```
 
 **Violation 6**: freertos_sw_timer.hpp:199:16
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      196:       }
@@ -1147,7 +1138,7 @@ All functions should be explicitly declared before use. Implicit function declar
 ```
 
 **Violation 7**: freertos_sw_timer.hpp:207:18
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      204:         auto auto_reload = uxTimerGetReloadMode(src.m_timer);
@@ -1168,7 +1159,7 @@ Function parameters should not be modified within the function body. If modifica
 *Rationale: Modifying parameters can make function behavior less predictable and harder to understand.*
 
 **Violation 1**: freertos_semaphore.hpp:234:50
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      231:    * otherwise pdFALSE.
@@ -1181,7 +1172,7 @@ Function parameters should not be modified within the function body. If modifica
 ```
 
 **Violation 2**: freertos_semaphore.hpp:356:50
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      353:    * otherwise pdFALSE.
@@ -1194,7 +1185,7 @@ Function parameters should not be modified within the function body. If modifica
 ```
 
 **Violation 3**: freertos_semaphore.hpp:453:17
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      450:    * @return counting_semaphore& reference to the counting semaphore.
@@ -1207,7 +1198,7 @@ Function parameters should not be modified within the function body. If modifica
 ```
 
 **Violation 4**: freertos_semaphore.hpp:544:50
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      541:    * @param ticks_to_wait timeout in ticks to wait for the mutex.
@@ -1220,7 +1211,7 @@ Function parameters should not be modified within the function body. If modifica
 ```
 
 **Violation 5**: freertos_semaphore.hpp:697:50
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      694:    * @param ticks_to_wait timeout in ticks to wait for the recursive mutex.
@@ -1233,7 +1224,7 @@ Function parameters should not be modified within the function body. If modifica
 ```
 
 **Violation 6**: freertos_sw_timer.hpp:235:51
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      232:    * @param ticks_to_wait timeout in ticks to wait for the timer to start
@@ -1246,7 +1237,7 @@ Function parameters should not be modified within the function body. If modifica
 ```
 
 **Violation 7**: freertos_sw_timer.hpp:294:50
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      291:    * @param ticks_to_wait timeout in ticks to wait for the timer to stop
@@ -1259,7 +1250,7 @@ Function parameters should not be modified within the function body. If modifica
 ```
 
 **Violation 8**: freertos_sw_timer.hpp:353:51
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      350:    * @param ticks_to_wait timeout in ticks to wait for the timer to reset
@@ -1272,7 +1263,7 @@ Function parameters should not be modified within the function body. If modifica
 ```
 
 **Violation 9**: freertos_sw_timer.hpp:408:52
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      405:    * pdFAIL
@@ -1285,7 +1276,7 @@ Function parameters should not be modified within the function body. If modifica
 ```
 
 **Violation 10**: freertos_stream_buffer.hpp:141:38
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      138:    * insufficient memory available to copy the data into the stream buffer.
@@ -1298,7 +1289,7 @@ Function parameters should not be modified within the function body. If modifica
 ```
 
 **Violation 11**: freertos_stream_buffer.hpp:178:38
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      175:    */
@@ -1311,7 +1302,7 @@ Function parameters should not be modified within the function body. If modifica
 ```
 
 **Violation 12**: freertos_stream_buffer.hpp:281:37
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      278:    * @return size_t Number of bytes received.
@@ -1324,7 +1315,7 @@ Function parameters should not be modified within the function body. If modifica
 ```
 
 **Violation 13**: freertos_stream_buffer.hpp:84:58
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
       81:  */
@@ -1337,7 +1328,7 @@ Function parameters should not be modified within the function body. If modifica
 ```
 
 **Violation 14**: freertos_stream_buffer.hpp:69:58
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
       66:   static_stream_buffer_allocator &
@@ -1358,7 +1349,7 @@ Unused type declarations may indicate incomplete code or can be removed to simpl
 *Rationale: Unused declarations can confuse developers and increase compilation time unnecessarily.*
 
 **Violation 1**: freertos_queue.hpp:47:0
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
       44: 
@@ -1371,7 +1362,7 @@ Unused type declarations may indicate incomplete code or can be removed to simpl
 ```
 
 **Violation 2**: freertos_queue.hpp:47:0
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
       44: 
@@ -1392,7 +1383,7 @@ Function parameters that are not used may indicate an error in the implementatio
 *Rationale: Unused parameters can indicate incomplete implementations or interface issues and should be explicitly handled.*
 
 **Violation 1**: freertos_semaphore.hpp:295:43
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      292:    * @param max_count maximum count of the counting semaphore.
@@ -1405,7 +1396,7 @@ Function parameters that are not used may indicate an error in the implementatio
 ```
 
 **Violation 2**: freertos_semaphore.hpp:424:23
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      421:    */
@@ -1418,7 +1409,7 @@ Function parameters that are not used may indicate an error in the implementatio
 ```
 
 **Violation 3**: freertos_semaphore.hpp:436:23
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      433:    */
@@ -1431,7 +1422,7 @@ Function parameters that are not used may indicate an error in the implementatio
 ```
 
 **Violation 4**: freertos_semaphore.hpp:787:30
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      784:    *
@@ -1444,7 +1435,7 @@ Function parameters that are not used may indicate an error in the implementatio
 ```
 
 **Violation 5**: freertos_semaphore.hpp:826:34
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      823:    *
@@ -1457,7 +1448,7 @@ Function parameters that are not used may indicate an error in the implementatio
 ```
 
 **Violation 6**: freertos_semaphore.hpp:870:34
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      867:    *
@@ -1470,7 +1461,7 @@ Function parameters that are not used may indicate an error in the implementatio
 ```
 
 **Violation 7**: freertos_semaphore.hpp:920:29
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      917:    * @param mutex mutex to guard
@@ -1483,7 +1474,7 @@ Function parameters that are not used may indicate an error in the implementatio
 ```
 
 **Violation 8**: freertos_semaphore.hpp:930:29
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      927:    * @param timeout timeout to wait for the mutex.
@@ -1496,7 +1487,7 @@ Function parameters that are not used may indicate an error in the implementatio
 ```
 
 **Violation 9**: freertos_semaphore.hpp:931:64
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      928:    */
@@ -1509,7 +1500,7 @@ Function parameters that are not used may indicate an error in the implementatio
 ```
 
 **Violation 10**: freertos_sw_timer.hpp:128:30
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      125:    * @param auto_reload auto-reload flag
@@ -1522,7 +1513,7 @@ Function parameters that are not used may indicate an error in the implementatio
 ```
 
 **Violation 11**: freertos_sw_timer.hpp:129:30
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      126:    * @param callback callback routine
@@ -1535,7 +1526,7 @@ Function parameters that are not used may indicate an error in the implementatio
 ```
 
 **Violation 12**: freertos_sw_timer.hpp:146:30
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      143:    * @param callback callback routine
@@ -1548,7 +1539,7 @@ Function parameters that are not used may indicate an error in the implementatio
 ```
 
 **Violation 13**: freertos_sw_timer.hpp:147:60
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      144:    */
@@ -1561,7 +1552,7 @@ Function parameters that are not used may indicate an error in the implementatio
 ```
 
 **Violation 14**: freertos_sw_timer.hpp:148:30
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      145:   template <typename Rep, typename Period>
@@ -1574,7 +1565,7 @@ Function parameters that are not used may indicate an error in the implementatio
 ```
 
 **Violation 15**: freertos_stream_buffer.hpp:108:33
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      105:    * @param trigger_level_bytes the number of bytes that must be in the stream
@@ -1595,7 +1586,7 @@ Preprocessor identifiers used in conditional compilation should be explicitly de
 *Rationale: Undefined preprocessor identifiers evaluate to 0, which may not be the intended behavior.*
 
 **Violation 1**: freertos_message_buffer.hpp:46:2
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
       43: 
@@ -1608,7 +1599,7 @@ Preprocessor identifiers used in conditional compilation should be explicitly de
 ```
 
 **Violation 2**: freertos_message_buffer.hpp:74:2
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
       71:   }
@@ -1621,7 +1612,7 @@ Preprocessor identifiers used in conditional compilation should be explicitly de
 ```
 
 **Violation 3**: freertos_message_buffer.hpp:219:2
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      216:   BaseType_t full(void) { return xMessageBufferIsFull(m_message_buffer); }
@@ -1634,7 +1625,7 @@ Preprocessor identifiers used in conditional compilation should be explicitly de
 ```
 
 **Violation 4**: freertos_message_buffer.hpp:237:2
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      234:     freertos::static_message_buffer_allocator<MessageBufferSize>>;
@@ -1647,7 +1638,7 @@ Preprocessor identifiers used in conditional compilation should be explicitly de
 ```
 
 **Violation 5**: freertos_queue.hpp:49:2
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
       46: 
@@ -1660,7 +1651,7 @@ Preprocessor identifiers used in conditional compilation should be explicitly de
 ```
 
 **Violation 6**: freertos_queue.hpp:73:2
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
       70:   }
@@ -1673,7 +1664,7 @@ Preprocessor identifiers used in conditional compilation should be explicitly de
 ```
 
 **Violation 7**: freertos_queue.hpp:687:2
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      684:   }
@@ -1686,7 +1677,7 @@ Preprocessor identifiers used in conditional compilation should be explicitly de
 ```
 
 **Violation 8**: freertos_queue.hpp:702:2
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      699:     freertos::queue<QueueLength, T, static_queue_allocator<QueueLength, T>>;
@@ -1699,7 +1690,7 @@ Preprocessor identifiers used in conditional compilation should be explicitly de
 ```
 
 **Violation 9**: freertos_semaphore.hpp:47:2
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
       44: 
@@ -1712,7 +1703,7 @@ Preprocessor identifiers used in conditional compilation should be explicitly de
 ```
 
 **Violation 10**: freertos_semaphore.hpp:80:2
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
       77:   }
@@ -1725,7 +1716,7 @@ Preprocessor identifiers used in conditional compilation should be explicitly de
 ```
 
 **Violation 11**: freertos_semaphore.hpp:960:2
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      957:   bool locked(void) const { return m_lock_acquired && m_mutex.locked(); }
@@ -1738,7 +1729,7 @@ Preprocessor identifiers used in conditional compilation should be explicitly de
 ```
 
 **Violation 12**: freertos_semaphore.hpp:992:2
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      989:     freertos::recursive_mutex<freertos::static_semaphore_allocator>;
@@ -1751,7 +1742,7 @@ Preprocessor identifiers used in conditional compilation should be explicitly de
 ```
 
 **Violation 13**: freertos_sw_timer.hpp:49:2
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
       46: 
@@ -1764,7 +1755,7 @@ Preprocessor identifiers used in conditional compilation should be explicitly de
 ```
 
 **Violation 14**: freertos_sw_timer.hpp:53:2
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
       50: 
@@ -1777,7 +1768,7 @@ Preprocessor identifiers used in conditional compilation should be explicitly de
 ```
 
 **Violation 15**: freertos_sw_timer.hpp:595:2
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      592:   }
@@ -1790,7 +1781,7 @@ Preprocessor identifiers used in conditional compilation should be explicitly de
 ```
 
 **Violation 16**: freertos_sw_timer.hpp:80:2
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
       77:   }
@@ -1803,7 +1794,7 @@ Preprocessor identifiers used in conditional compilation should be explicitly de
 ```
 
 **Violation 17**: freertos_sw_timer.hpp:608:2
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      605: using timer = freertos::timer<freertos::static_sw_timer_allocator>;
@@ -1816,7 +1807,7 @@ Preprocessor identifiers used in conditional compilation should be explicitly de
 ```
 
 **Violation 18**: freertos_event_group.hpp:45:2
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
       42: 
@@ -1829,7 +1820,7 @@ Preprocessor identifiers used in conditional compilation should be explicitly de
 ```
 
 **Violation 19**: freertos_event_group.hpp:68:2
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
       65:   }
@@ -1842,7 +1833,7 @@ Preprocessor identifiers used in conditional compilation should be explicitly de
 ```
 
 **Violation 20**: freertos_event_group.hpp:235:2
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      232:   }
@@ -1855,7 +1846,7 @@ Preprocessor identifiers used in conditional compilation should be explicitly de
 ```
 
 **Violation 21**: freertos_event_group.hpp:249:2
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      246:     freertos::event_group<freertos::static_event_group_allocator>;
@@ -1868,7 +1859,7 @@ Preprocessor identifiers used in conditional compilation should be explicitly de
 ```
 
 **Violation 22**: freertos_stream_buffer.hpp:47:2
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
       44: 
@@ -1881,7 +1872,7 @@ Preprocessor identifiers used in conditional compilation should be explicitly de
 ```
 
 **Violation 23**: freertos_stream_buffer.hpp:76:2
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
       73:   }
@@ -1894,7 +1885,7 @@ Preprocessor identifiers used in conditional compilation should be explicitly de
 ```
 
 **Violation 24**: freertos_stream_buffer.hpp:387:2
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      384:   BaseType_t full(void) { return xStreamBufferIsFull(m_stream_buffer); }
@@ -1907,7 +1898,7 @@ Preprocessor identifiers used in conditional compilation should be explicitly de
 ```
 
 **Violation 25**: freertos_stream_buffer.hpp:404:2
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      401:     freertos::static_stream_buffer_allocator<StreamBufferSize>>;
@@ -1928,7 +1919,7 @@ Identifiers reserved by the C standard (such as those beginning with underscore)
 *Rationale: Using reserved identifiers can conflict with compiler and standard library implementations.*
 
 **Violation 1**: freertos_stream_buffer.hpp:346:10
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      343:    *
@@ -1949,7 +1940,7 @@ Comment delimiters should not appear within comments to avoid confusion about co
 *Rationale: Nested comment sequences can lead to unexpected comment boundaries and code being accidentally commented out.*
 
 **Violation 1**: freertos_queue.hpp:84:1
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
       81: };
@@ -1962,7 +1953,7 @@ Comment delimiters should not appear within comments to avoid confusion about co
 ```
 
 **Violation 2**: freertos_semaphore.hpp:98:1
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
       95: };
@@ -1983,7 +1974,7 @@ External identifiers must be unique to avoid linking errors and undefined behavi
 *Rationale: Non-unique external identifiers can cause linking errors and unpredictable behavior in multi-file projects.*
 
 **Violation 1**: freertos_task.hpp:219:20
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      216:    * @param priority  priority of the task
@@ -1996,7 +1987,7 @@ External identifiers must be unique to avoid linking errors and undefined behavi
 ```
 
 **Violation 2**: freertos_task.hpp:848:15
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      845:    *
@@ -2009,7 +2000,7 @@ External identifiers must be unique to avoid linking errors and undefined behavi
 ```
 
 **Violation 3**: freertos_task.hpp:219:20
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      216:    * @param priority  priority of the task
@@ -2022,7 +2013,7 @@ External identifiers must be unique to avoid linking errors and undefined behavi
 ```
 
 **Violation 4**: freertos_task.hpp:848:15
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      845:    *
@@ -2035,7 +2026,7 @@ External identifiers must be unique to avoid linking errors and undefined behavi
 ```
 
 **Violation 5**: freertos_semaphore.hpp:452:46
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      449:    * @param count the number of times to give the counting semaphore.
@@ -2048,7 +2039,7 @@ External identifiers must be unique to avoid linking errors and undefined behavi
 ```
 
 **Violation 6**: freertos_semaphore.hpp:445:15
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      442:    *
@@ -2061,7 +2052,7 @@ External identifiers must be unique to avoid linking errors and undefined behavi
 ```
 
 **Violation 7**: freertos_semaphore.hpp:787:30
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      784:    *
@@ -2074,7 +2065,7 @@ External identifiers must be unique to avoid linking errors and undefined behavi
 ```
 
 **Violation 8**: freertos_semaphore.hpp:486:4
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      483:    * created.
@@ -2087,7 +2078,7 @@ External identifiers must be unique to avoid linking errors and undefined behavi
 ```
 
 **Violation 9**: freertos_semaphore.hpp:530:16
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      527:    * @return BaseType_t pdTRUE if the mutex was successfully unlocked,
@@ -2100,7 +2091,7 @@ External identifiers must be unique to avoid linking errors and undefined behavi
 ```
 
 **Violation 10**: freertos_semaphore.hpp:891:14
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      888:    * @return BaseType_t pdTRUE if the high priority task was woken, otherwise
@@ -2113,7 +2104,7 @@ External identifiers must be unique to avoid linking errors and undefined behavi
 ```
 
 **Violation 11**: freertos_semaphore.hpp:452:46
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      449:    * @param count the number of times to give the counting semaphore.
@@ -2126,7 +2117,7 @@ External identifiers must be unique to avoid linking errors and undefined behavi
 ```
 
 **Violation 12**: freertos_semaphore.hpp:486:4
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      483:    * created.
@@ -2139,7 +2130,7 @@ External identifiers must be unique to avoid linking errors and undefined behavi
 ```
 
 **Violation 13**: freertos_semaphore.hpp:530:16
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      527:    * @return BaseType_t pdTRUE if the mutex was successfully unlocked,
@@ -2152,7 +2143,7 @@ External identifiers must be unique to avoid linking errors and undefined behavi
 ```
 
 **Violation 14**: freertos_semaphore.hpp:891:14
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      888:    * @return BaseType_t pdTRUE if the high priority task was woken, otherwise
@@ -2165,7 +2156,7 @@ External identifiers must be unique to avoid linking errors and undefined behavi
 ```
 
 **Violation 15**: freertos_task.hpp:219:20
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      216:    * @param priority  priority of the task
@@ -2178,7 +2169,7 @@ External identifiers must be unique to avoid linking errors and undefined behavi
 ```
 
 **Violation 16**: freertos_task.hpp:848:15
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      845:    *
@@ -2199,7 +2190,7 @@ Function declarations should include parameter names in addition to types. This 
 *Rationale: Named parameters in function prototypes make the interface clearer and improve code documentation.*
 
 **Violation 1**: freertos_message_buffer.hpp:104:26
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      101:    * @brief Construct a new message buffer object
@@ -2212,7 +2203,7 @@ Function declarations should include parameter names in addition to types. This 
 ```
 
 **Violation 2**: freertos_message_buffer.hpp:107:24
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      104:   explicit message_buffer() : m_message_buffer{m_allocator.create()} {
@@ -2225,7 +2216,7 @@ Function declarations should include parameter names in addition to types. This 
 ```
 
 **Violation 3**: freertos_message_buffer.hpp:120:35
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      117:     }
@@ -2238,7 +2229,7 @@ Function declarations should include parameter names in addition to types. This 
 ```
 
 **Violation 4**: freertos_queue.hpp:206:15
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      203:       vQueueAddToRegistry(m_queue, registred_name);
@@ -2251,7 +2242,7 @@ Function declarations should include parameter names in addition to types. This 
 ```
 
 **Violation 5**: freertos_queue.hpp:218:26
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      215:     }
@@ -2264,7 +2255,7 @@ Function declarations should include parameter names in addition to types. This 
 ```
 
 **Violation 6**: freertos_semaphore.hpp:174:19
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      171:    * @brief Construct a new binary semaphore object
@@ -2277,7 +2268,7 @@ Function declarations should include parameter names in addition to types. This 
 ```
 
 **Violation 7**: freertos_semaphore.hpp:177:26
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      174:   binary_semaphore() : m_semaphore{m_allocator.create_binary()} {
@@ -2290,7 +2281,7 @@ Function declarations should include parameter names in addition to types. This 
 ```
 
 **Violation 8**: freertos_semaphore.hpp:190:37
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      187:     }
@@ -2303,7 +2294,7 @@ Function declarations should include parameter names in addition to types. This 
 ```
 
 **Violation 9**: freertos_semaphore.hpp:201:18
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      198:    * otherwise pdFALSE.
@@ -2316,7 +2307,7 @@ Function declarations should include parameter names in addition to types. This 
 ```
 
 **Violation 10**: freertos_semaphore.hpp:299:28
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      296:       : m_semaphore{m_allocator.create_counting(max_count)} {
@@ -2329,7 +2320,7 @@ Function declarations should include parameter names in addition to types. This 
 ```
 
 **Violation 11**: freertos_semaphore.hpp:312:39
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      309:     }
@@ -2342,7 +2333,7 @@ Function declarations should include parameter names in addition to types. This 
 ```
 
 **Violation 12**: freertos_semaphore.hpp:323:18
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      320:    * otherwise pdFALSE.
@@ -2355,7 +2346,7 @@ Function declarations should include parameter names in addition to types. This 
 ```
 
 **Violation 13**: freertos_semaphore.hpp:403:33
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      400:    *
@@ -2368,7 +2359,7 @@ Function declarations should include parameter names in addition to types. This 
 ```
 
 **Violation 14**: freertos_semaphore.hpp:412:33
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      409:    *
@@ -2381,7 +2372,7 @@ Function declarations should include parameter names in addition to types. This 
 ```
 
 **Violation 15**: freertos_semaphore.hpp:445:20
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      442:    *
@@ -2394,7 +2385,7 @@ Function declarations should include parameter names in addition to types. This 
 ```
 
 **Violation 16**: freertos_semaphore.hpp:476:8
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      473:    * @brief Construct a new mutex object
@@ -2407,7 +2398,7 @@ Function declarations should include parameter names in addition to types. This 
 ```
 
 **Violation 17**: freertos_semaphore.hpp:479:15
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      476:   mutex() : m_semaphore{m_allocator.create_mutex()}, m_locked{false} {
@@ -2420,7 +2411,7 @@ Function declarations should include parameter names in addition to types. This 
 ```
 
 **Violation 18**: freertos_semaphore.hpp:492:26
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      489:     }
@@ -2433,7 +2424,7 @@ Function declarations should include parameter names in addition to types. This 
 ```
 
 **Violation 19**: freertos_semaphore.hpp:501:20
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      498:    *
@@ -2446,7 +2437,7 @@ Function declarations should include parameter names in addition to types. This 
 ```
 
 **Violation 20**: freertos_semaphore.hpp:597:22
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      594:    *
@@ -2459,7 +2450,7 @@ Function declarations should include parameter names in addition to types. This 
 ```
 
 **Violation 21**: freertos_semaphore.hpp:628:18
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      625:    * @brief Construct a new recursive mutex object
@@ -2472,7 +2463,7 @@ Function declarations should include parameter names in addition to types. This 
 ```
 
 **Violation 22**: freertos_semaphore.hpp:631:25
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      628:   recursive_mutex() : m_semaphore{m_allocator.create_recursive_mutex()} {
@@ -2485,7 +2476,7 @@ Function declarations should include parameter names in addition to types. This 
 ```
 
 **Violation 23**: freertos_semaphore.hpp:644:36
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      641:     }
@@ -2498,7 +2489,7 @@ Function declarations should include parameter names in addition to types. This 
 ```
 
 **Violation 24**: freertos_semaphore.hpp:654:20
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      651:    * @return BaseType_t pdTRUE if the recursive mutex was successfully unlocked,
@@ -2511,7 +2502,7 @@ Function declarations should include parameter names in addition to types. This 
 ```
 
 **Violation 25**: freertos_semaphore.hpp:750:22
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      747:    *
@@ -2524,7 +2515,7 @@ Function declarations should include parameter names in addition to types. This 
 ```
 
 **Violation 26**: freertos_semaphore.hpp:796:20
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      793:   ~lock_guard(void) { m_mutex.unlock(); }
@@ -2537,7 +2528,7 @@ Function declarations should include parameter names in addition to types. This 
 ```
 
 **Violation 27**: freertos_semaphore.hpp:797:14
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      794: 
@@ -2550,7 +2541,7 @@ Function declarations should include parameter names in addition to types. This 
 ```
 
 **Violation 28**: freertos_semaphore.hpp:798:31
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      795:   // Delete copy and move operations for RAII safety
@@ -2563,7 +2554,7 @@ Function declarations should include parameter names in addition to types. This 
 ```
 
 **Violation 29**: freertos_semaphore.hpp:799:25
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      796:   lock_guard(const lock_guard &) = delete;
@@ -2576,7 +2567,7 @@ Function declarations should include parameter names in addition to types. This 
 ```
 
 **Violation 30**: freertos_semaphore.hpp:840:24
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      837:   }
@@ -2589,7 +2580,7 @@ Function declarations should include parameter names in addition to types. This 
 ```
 
 **Violation 31**: freertos_semaphore.hpp:841:18
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      838: 
@@ -2602,7 +2593,7 @@ Function declarations should include parameter names in addition to types. This 
 ```
 
 **Violation 32**: freertos_semaphore.hpp:842:35
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      839:   // Delete copy and move operations for RAII safety
@@ -2615,7 +2606,7 @@ Function declarations should include parameter names in addition to types. This 
 ```
 
 **Violation 33**: freertos_semaphore.hpp:843:29
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      840:   try_lock_guard(const try_lock_guard &) = delete;
@@ -2628,7 +2619,7 @@ Function declarations should include parameter names in addition to types. This 
 ```
 
 **Violation 34**: freertos_semaphore.hpp:880:24
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      877:   ~lock_guard_isr(void) { m_mutex.unlock_isr(m_high_priority_task_woken); }
@@ -2641,7 +2632,7 @@ Function declarations should include parameter names in addition to types. This 
 ```
 
 **Violation 35**: freertos_semaphore.hpp:881:18
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      878: 
@@ -2654,7 +2645,7 @@ Function declarations should include parameter names in addition to types. This 
 ```
 
 **Violation 36**: freertos_semaphore.hpp:882:35
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      879:   // Delete copy and move operations for RAII safety
@@ -2667,7 +2658,7 @@ Function declarations should include parameter names in addition to types. This 
 ```
 
 **Violation 37**: freertos_semaphore.hpp:883:29
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      880:   lock_guard_isr(const lock_guard_isr &) = delete;
@@ -2680,7 +2671,7 @@ Function declarations should include parameter names in addition to types. This 
 ```
 
 **Violation 38**: freertos_semaphore.hpp:947:28
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      944:   }
@@ -2693,7 +2684,7 @@ Function declarations should include parameter names in addition to types. This 
 ```
 
 **Violation 39**: freertos_semaphore.hpp:948:22
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      945: 
@@ -2706,7 +2697,7 @@ Function declarations should include parameter names in addition to types. This 
 ```
 
 **Violation 40**: freertos_semaphore.hpp:949:39
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      946:   // Delete copy and move operations for RAII safety
@@ -2719,7 +2710,7 @@ Function declarations should include parameter names in addition to types. This 
 ```
 
 **Violation 41**: freertos_semaphore.hpp:950:33
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      947:   timeout_lock_guard(const timeout_lock_guard &) = delete;
@@ -2732,7 +2723,7 @@ Function declarations should include parameter names in addition to types. This 
 ```
 
 **Violation 42**: freertos_event_group.hpp:95:21
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
       92:    *
@@ -2745,7 +2736,7 @@ Function declarations should include parameter names in addition to types. This 
 ```
 
 **Violation 43**: freertos_event_group.hpp:108:32
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      105:     }
@@ -2758,7 +2749,7 @@ Function declarations should include parameter names in addition to types. This 
 ```
 
 **Violation 44**: freertos_stream_buffer.hpp:112:23
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      109:       : m_stream_buffer{m_allocator.create(trigger_level_bytes)} {
@@ -2771,7 +2762,7 @@ Function declarations should include parameter names in addition to types. This 
 ```
 
 **Violation 45**: freertos_stream_buffer.hpp:125:34
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      122:     }
@@ -2792,7 +2783,7 @@ External objects and functions should have exactly one declaration to avoid mult
 *Rationale: Multiple declarations can lead to inconsistencies and linking errors.*
 
 **Violation 1**: freertos_task.hpp:1069:6
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
     1066:  * @tparam Duration duration type
@@ -2805,7 +2796,7 @@ External objects and functions should have exactly one declaration to avoid mult
 ```
 
 **Violation 2**: freertos_task.hpp:1052:6
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
     1049:  * @tparam Duration duration type
@@ -2818,7 +2809,7 @@ External objects and functions should have exactly one declaration to avoid mult
 ```
 
 **Violation 3**: freertos_task.hpp:1077:6
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
     1074:  * @tparam Duration duration type
@@ -2831,7 +2822,7 @@ External objects and functions should have exactly one declaration to avoid mult
 ```
 
 **Violation 4**: freertos_task.hpp:1069:6
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
     1066:  * @tparam Duration duration type
@@ -2844,7 +2835,7 @@ External objects and functions should have exactly one declaration to avoid mult
 ```
 
 **Violation 5**: freertos_task.hpp:1052:6
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
     1049:  * @tparam Duration duration type
@@ -2857,7 +2848,7 @@ External objects and functions should have exactly one declaration to avoid mult
 ```
 
 **Violation 6**: freertos_task.hpp:1077:6
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
     1074:  * @tparam Duration duration type
@@ -2878,7 +2869,7 @@ Each external identifier should be defined exactly once across the entire progra
 *Rationale: Multiple definitions of the same external identifier violate the one definition rule and can cause linking errors.*
 
 **Violation 1**: freertos_task.cc:37:6
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
       34: 
@@ -2891,7 +2882,7 @@ Each external identifier should be defined exactly once across the entire progra
 ```
 
 **Violation 2**: freertos_task.hpp:1028:6
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
     1025:  * @param duration duration to delay
@@ -2904,7 +2895,7 @@ Each external identifier should be defined exactly once across the entire progra
 ```
 
 **Violation 3**: freertos_task.cc:38:6
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
       35: namespace freertos {
@@ -2917,7 +2908,7 @@ Each external identifier should be defined exactly once across the entire progra
 ```
 
 **Violation 4**: freertos_task.hpp:1055:6
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
     1052: void delay_until(TickType_t &previousWakeTime, TickType_t period);
@@ -2930,7 +2921,7 @@ Each external identifier should be defined exactly once across the entire progra
 ```
 
 **Violation 5**: freertos_message_buffer.hpp:120:19
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      117:     }
@@ -2943,7 +2934,7 @@ Each external identifier should be defined exactly once across the entire progra
 ```
 
 **Violation 6**: freertos_event_group.hpp:109:16
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      106:   }
@@ -2956,7 +2947,7 @@ Each external identifier should be defined exactly once across the entire progra
 ```
 
 **Violation 7**: freertos_queue.hpp:218:10
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      215:     }
@@ -2969,7 +2960,7 @@ Each external identifier should be defined exactly once across the entire progra
 ```
 
 **Violation 8**: freertos_message_buffer.hpp:121:19
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      118:   }
@@ -2982,7 +2973,7 @@ Each external identifier should be defined exactly once across the entire progra
 ```
 
 **Violation 9**: freertos_queue.hpp:231:14
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      228:    * @return BaseType_t pdPASS if the item was successfully posted, otherwise
@@ -2995,7 +2986,7 @@ Each external identifier should be defined exactly once across the entire progra
 ```
 
 **Violation 10**: freertos_message_buffer.hpp:148:10
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      145:    * @return size_t number of bytes sent
@@ -3008,7 +2999,7 @@ Each external identifier should be defined exactly once across the entire progra
 ```
 
 **Violation 11**: freertos_queue.hpp:400:14
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      397:    * @return BaseType_t pdPASS if the item was successfully received, otherwise
@@ -3021,7 +3012,7 @@ Each external identifier should be defined exactly once across the entire progra
 ```
 
 **Violation 12**: freertos_message_buffer.hpp:181:10
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      178:    * @return size_t number of bytes received
@@ -3034,7 +3025,7 @@ Each external identifier should be defined exactly once across the entire progra
 ```
 
 **Violation 13**: freertos_queue.hpp:520:14
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      517:    *
@@ -3047,7 +3038,7 @@ Each external identifier should be defined exactly once across the entire progra
 ```
 
 **Violation 14**: freertos_message_buffer.hpp:202:14
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      199:    *
@@ -3060,7 +3051,7 @@ Each external identifier should be defined exactly once across the entire progra
 ```
 
 **Violation 15**: freertos_semaphore.hpp:190:21
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      187:     }
@@ -3073,7 +3064,7 @@ Each external identifier should be defined exactly once across the entire progra
 ```
 
 **Violation 16**: freertos_queue.hpp:219:10
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      216:   }
@@ -3086,7 +3077,7 @@ Each external identifier should be defined exactly once across the entire progra
 ```
 
 **Violation 17**: freertos_stream_buffer.hpp:125:18
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      122:     }
@@ -3099,7 +3090,7 @@ Each external identifier should be defined exactly once across the entire progra
 ```
 
 **Violation 18**: freertos_semaphore.hpp:950:23
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      947:   timeout_lock_guard(const timeout_lock_guard &) = delete;
@@ -3112,7 +3103,7 @@ Each external identifier should be defined exactly once across the entire progra
 ```
 
 **Violation 19**: freertos_stream_buffer.hpp:140:14
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      137:    * stream buffer, otherwise errCOULD_NOT_ALLOCATE_REQUIRED_MEMORY if there was
@@ -3125,7 +3116,7 @@ Each external identifier should be defined exactly once across the entire progra
 ```
 
 **Violation 20**: freertos_queue.hpp:244:14
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      241:    * errQUEUE_FULL.
@@ -3138,7 +3129,7 @@ Each external identifier should be defined exactly once across the entire progra
 ```
 
 **Violation 21**: freertos_stream_buffer.hpp:212:14
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      209:    * stream buffer, otherwise errCOULD_NOT_ALLOCATE_REQUIRED_MEMORY if there was
@@ -3151,7 +3142,7 @@ Each external identifier should be defined exactly once across the entire progra
 ```
 
 **Violation 22**: freertos_queue.hpp:272:14
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      269:    * @return BaseType_t  pdPASS if the item was successfully posted, otherwise
@@ -3164,7 +3155,7 @@ Each external identifier should be defined exactly once across the entire progra
 ```
 
 **Violation 23**: freertos_stream_buffer.hpp:280:10
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      277:    * buffer.
@@ -3177,7 +3168,7 @@ Each external identifier should be defined exactly once across the entire progra
 ```
 
 **Violation 24**: freertos_queue.hpp:444:15
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      441:    * queue is empty.
@@ -3190,7 +3181,7 @@ Each external identifier should be defined exactly once across the entire progra
 ```
 
 **Violation 25**: freertos_stream_buffer.hpp:313:10
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      310:    * data from the stream buffer, otherwise it will be set to pdFALSE.
@@ -3203,7 +3194,7 @@ Each external identifier should be defined exactly once across the entire progra
 ```
 
 **Violation 26**: freertos_queue.hpp:482:15
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      479:    * @return optional<T> The item received from the queue or std::nullopt if the
@@ -3216,7 +3207,7 @@ Each external identifier should be defined exactly once across the entire progra
 ```
 
 **Violation 27**: freertos_stream_buffer.hpp:337:10
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      334:    *
@@ -3229,7 +3220,7 @@ Each external identifier should be defined exactly once across the entire progra
 ```
 
 **Violation 28**: freertos_message_buffer.hpp:193:10
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      190:    *
@@ -3242,7 +3233,7 @@ Each external identifier should be defined exactly once across the entire progra
 ```
 
 **Violation 29**: freertos_stream_buffer.hpp:353:14
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      350:    *
@@ -3255,7 +3246,7 @@ Each external identifier should be defined exactly once across the entire progra
 ```
 
 **Violation 30**: freertos_stream_buffer.hpp:370:24
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      367:    *
@@ -3268,7 +3259,7 @@ Each external identifier should be defined exactly once across the entire progra
 ```
 
 **Violation 31**: freertos_event_group.hpp:117:22
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      114:    *
@@ -3281,7 +3272,7 @@ Each external identifier should be defined exactly once across the entire progra
 ```
 
 **Violation 32**: freertos_stream_buffer.hpp:377:14
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      374:    *
@@ -3294,7 +3285,7 @@ Each external identifier should be defined exactly once across the entire progra
 ```
 
 **Violation 33**: freertos_message_buffer.hpp:209:14
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      206:    *
@@ -3307,7 +3298,7 @@ Each external identifier should be defined exactly once across the entire progra
 ```
 
 **Violation 34**: freertos_stream_buffer.hpp:384:14
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      381:    *
@@ -3320,7 +3311,7 @@ Each external identifier should be defined exactly once across the entire progra
 ```
 
 **Violation 35**: freertos_message_buffer.hpp:216:14
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      213:    *
@@ -3333,7 +3324,7 @@ Each external identifier should be defined exactly once across the entire progra
 ```
 
 **Violation 36**: freertos_task.hpp:1214:21
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
     1211:   // Delete copy and move operations for RAII safety
@@ -3346,7 +3337,7 @@ Each external identifier should be defined exactly once across the entire progra
 ```
 
 **Violation 37**: freertos_stream_buffer.hpp:126:18
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      123:   }
@@ -3359,7 +3350,7 @@ Each external identifier should be defined exactly once across the entire progra
 ```
 
 **Violation 38**: freertos_task.hpp:267:16
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      264:    *
@@ -3372,7 +3363,7 @@ Each external identifier should be defined exactly once across the entire progra
 ```
 
 **Violation 39**: freertos_task.hpp:421:15
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      418:    *
@@ -3385,7 +3376,7 @@ Each external identifier should be defined exactly once across the entire progra
 ```
 
 **Violation 40**: freertos_queue.hpp:668:15
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      665:    *
@@ -3406,7 +3397,7 @@ Functions and objects used only within a single file should be declared static t
 *Rationale: Internal linkage prevents namespace pollution and allows for better optimization by the compiler.*
 
 **Violation 1**: freertos_task.hpp:728:8
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      725:    *
@@ -3419,7 +3410,7 @@ Functions and objects used only within a single file should be declared static t
 ```
 
 **Violation 2**: freertos_task.hpp:704:16
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      701:    *
@@ -3432,7 +3423,7 @@ Functions and objects used only within a single file should be declared static t
 ```
 
 **Violation 3**: freertos_task.hpp:743:8
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      740:    * @brief Terminate the task.
@@ -3445,7 +3436,7 @@ Functions and objects used only within a single file should be declared static t
 ```
 
 **Violation 4**: freertos_task.cc:59:12
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
       56: #if INCLUDE_xTaskGetIdleTaskHandle
@@ -3458,7 +3449,7 @@ Functions and objects used only within a single file should be declared static t
 ```
 
 **Violation 5**: freertos_task.cc:60:12
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
       57: TaskHandle_t idle_task_handle(void) { return xTaskGetIdleTaskHandle(); }
@@ -3471,7 +3462,7 @@ Functions and objects used only within a single file should be declared static t
 ```
 
 **Violation 6**: freertos_stream_buffer.hpp:264:14
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      261:    * insufficient memory available to copy the data into the stream buffer.
@@ -3484,7 +3475,7 @@ Functions and objects used only within a single file should be declared static t
 ```
 
 **Violation 7**: freertos_stream_buffer.hpp:327:10
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      324:    * @param data_size Maximum number of bytes to copy into the buffer.
@@ -3497,7 +3488,7 @@ Functions and objects used only within a single file should be declared static t
 ```
 
 **Violation 8**: freertos_task.hpp:728:8
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      725:    *
@@ -3510,7 +3501,7 @@ Functions and objects used only within a single file should be declared static t
 ```
 
 **Violation 9**: freertos_task.hpp:704:16
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      701:    *
@@ -3523,7 +3514,7 @@ Functions and objects used only within a single file should be declared static t
 ```
 
 **Violation 10**: freertos_task.hpp:743:8
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      740:    * @brief Terminate the task.
@@ -3536,7 +3527,7 @@ Functions and objects used only within a single file should be declared static t
 ```
 
 **Violation 11**: freertos_task.hpp:728:8
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      725:    *
@@ -3549,7 +3540,7 @@ Functions and objects used only within a single file should be declared static t
 ```
 
 **Violation 12**: freertos_task.hpp:704:16
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      701:    *
@@ -3562,7 +3553,7 @@ Functions and objects used only within a single file should be declared static t
 ```
 
 **Violation 13**: freertos_task.hpp:743:8
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      740:    * @brief Terminate the task.
@@ -3575,7 +3566,7 @@ Functions and objects used only within a single file should be declared static t
 ```
 
 **Violation 14**: freertos_stream_buffer.hpp:264:14
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      261:    * insufficient memory available to copy the data into the stream buffer.
@@ -3588,7 +3579,7 @@ Functions and objects used only within a single file should be declared static t
 ```
 
 **Violation 15**: freertos_stream_buffer.hpp:327:10
-*Style*: misra violation
+*Reason: Coding Style*
 
 ```cpp
      324:    * @param data_size Maximum number of bytes to copy into the buffer.
@@ -4992,99 +4983,295 @@ Some files could not be fully analyzed:
 
 ## Detailed clang-tidy Analysis
 
-```
-[1/9] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/src/freertos_task.cc.
-34437 warnings and 1 error generated.
-Error while processing /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/src/freertos_task.cc.
-[2/9] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos.hpp.
-69922 warnings and 2 errors generated.
-Error while processing /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos.hpp.
-[3/9] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_event_group.hpp.
-76750 warnings and 3 errors generated.
-Error while processing /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_event_group.hpp.
-[4/9] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_message_buffer.hpp.
-88645 warnings and 4 errors generated.
-Error while processing /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_message_buffer.hpp.
-[5/9] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_queue.hpp.
-102507 warnings and 5 errors generated.
-Error while processing /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_queue.hpp.
-[6/9] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_semaphore.hpp.
-109335 warnings and 6 errors generated.
-Error while processing /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_semaphore.hpp.
-[7/9] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_stream_buffer.hpp.
-123186 warnings and 7 errors generated.
-Error while processing /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_stream_buffer.hpp.
-[8/9] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_sw_timer.hpp.
-149713 warnings and 8 errors generated.
-Error while processing /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_sw_timer.hpp.
-[9/9] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp.
-184150 warnings and 9 errors generated.
-Error while processing /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp.
-/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_semaphore.hpp:424:3: warning: overloaded 'operator++' returns a reference instead of a constant object type [cert-dcl21-cpp]
-  424 |   counting_semaphore &operator++(int) {
-      |   ^~~~~~~~~~~~~~~~~~~~
-      |   const counting_semaphore<SemaphoreAllocator> 
-/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_semaphore.hpp:436:3: warning: overloaded 'operator--' returns a reference instead of a constant object type [cert-dcl21-cpp]
-  436 |   counting_semaphore &operator--(int) {
-      |   ^~~~~~~~~~~~~~~~~~~~
-      |   const counting_semaphore<SemaphoreAllocator> 
-/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_sw_timer.hpp:129:62: warning: rvalue reference parameter 'callback' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
-  129 |                  UBaseType_t auto_reload, timer_callback_t &&callback)
-      |                                                              ^
-/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_sw_timer.hpp:148:62: warning: rvalue reference parameter 'callback' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
-  148 |                  UBaseType_t auto_reload, timer_callback_t &&callback)
-      |                                                              ^
-/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:194:65: warning: rvalue reference parameter 'task_routine' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
-  194 |   task(const char *name, UBaseType_t priority, task_routine_t &&task_routine,
-      |                                                                 ^
-/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:208:25: warning: rvalue reference parameter 'task_routine' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
-  208 |        task_routine_t &&task_routine, bool start_suspended = true)
-      |                         ^
-/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:604:34: warning: rvalue reference parameter 'on_start' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
-  604 |                 task_routine_t &&on_start, task_routine_t &&on_stop,
-      |                                  ^
-/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:604:61: warning: rvalue reference parameter 'on_stop' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
-  604 |                 task_routine_t &&on_start, task_routine_t &&on_stop,
-      |                                                             ^
-/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:605:34: warning: rvalue reference parameter 'periodic_routine' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
-  605 |                 task_routine_t &&periodic_routine,
-      |                                  ^
-/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:627:34: warning: rvalue reference parameter 'on_start' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
-  627 |                 task_routine_t &&on_start, task_routine_t &&on_stop,
-      |                                  ^
-/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:627:61: warning: rvalue reference parameter 'on_stop' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
-  627 |                 task_routine_t &&on_start, task_routine_t &&on_stop,
-      |                                                             ^
-/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:628:34: warning: rvalue reference parameter 'periodic_routine' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
-  628 |                 task_routine_t &&periodic_routine,
-      |                                  ^
-/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:649:34: warning: rvalue reference parameter 'on_start' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
-  649 |                 task_routine_t &&on_start, task_routine_t &&on_stop,
-      |                                  ^
-/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:649:61: warning: rvalue reference parameter 'on_stop' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
-  649 |                 task_routine_t &&on_start, task_routine_t &&on_stop,
-      |                                                             ^
-/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:650:34: warning: rvalue reference parameter 'periodic_routine' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
-  650 |                 task_routine_t &&periodic_routine, bool start_suspended = true)
-      |                                  ^
-/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:669:34: warning: rvalue reference parameter 'on_start' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
-  669 |                 task_routine_t &&on_start, task_routine_t &&on_stop,
-      |                                  ^
-/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:669:61: warning: rvalue reference parameter 'on_stop' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
-  669 |                 task_routine_t &&on_start, task_routine_t &&on_stop,
-      |                                                             ^
-/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:670:34: warning: rvalue reference parameter 'periodic_routine' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
-  670 |                 task_routine_t &&periodic_routine, bool start_suspended = true)
-      |                                  ^
-/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/mocks/FreeRTOS.h:6:10: error: 'gmock/gmock.h' file not found [clang-diagnostic-error]
-    6 | #include <gmock/gmock.h>
-      |          ^~~~~~~~~~~~~~~
-Suppressed 184114 warnings (184114 in non-user code).
-Use -header-filter=.* to display errors from all non-system headers. Use -system-headers to display errors from system headers as well.
-Found compiler error(s).
+### Actionable Issues with Code Context (18 issues)
+
+#### C++ Core Guidelines (16 issue(s))
+
+##### cppcoreguidelines-rvalue-reference-param-not-moved (16 issue(s))
+
+**Issue 1**: freertos_sw_timer.hpp:129:62
+*Reason: Unused RValue Reference Parameter*
+
+**Message**: rvalue reference parameter 'callback' is never moved from inside the function body
+
+```cpp
+     126:    * @param callback callback routine
+     127:    */
+     128:   explicit timer(const char *name, const TickType_t period_ticks,
+>>>  129:                  UBaseType_t auto_reload, timer_callback_t &&callback)
+     130:       : m_callback{std::move(callback)}, m_started{false},
+     131:         m_timer{m_allocator.create(name, period_ticks, auto_reload, this,
+     132:                                    callback_wrapper)} {
 ```
 
----
-*Generated: July 23, 2025*
+**Issue 2**: freertos_sw_timer.hpp:148:62
+*Reason: Unused RValue Reference Parameter*
+
+**Message**: rvalue reference parameter 'callback' is never moved from inside the function body
+
+```cpp
+     145:   template <typename Rep, typename Period>
+     146:   explicit timer(const char *name,
+     147:                  const std::chrono::duration<Rep, Period> &period,
+>>>  148:                  UBaseType_t auto_reload, timer_callback_t &&callback)
+     149:       : timer{name,
+     150:               static_cast<TickType_t>(
+     151:                   std::chrono::duration_cast<std::chrono::milliseconds>(period)
+```
+
+**Issue 3**: freertos_task.hpp:194:65
+*Reason: Unused RValue Reference Parameter*
+
+**Message**: rvalue reference parameter 'task_routine' is never moved from inside the function body
+
+```cpp
+     191:    * @param task_routine task routine function
+     192:    * @param start_suspended start the task in the suspended state
+     193:    */
+>>>  194:   task(const char *name, UBaseType_t priority, task_routine_t &&task_routine,
+     195:        bool start_suspended = true)
+     196:       : m_allocator{}, m_taskRoutine{std::move(task_routine)},
+     197:         m_start_suspended{start_suspended},
+```
+
+**Issue 4**: freertos_task.hpp:208:25
+*Reason: Unused RValue Reference Parameter*
+
+**Message**: rvalue reference parameter 'task_routine' is never moved from inside the function body
+
+```cpp
+     205:    * @param start_suspended start the task in the suspended state
+     206:    */
+     207:   task(const std::string &name, UBaseType_t priority,
+>>>  208:        task_routine_t &&task_routine, bool start_suspended = true)
+     209:       : task{name.c_str(), priority, std::move(task_routine), start_suspended} {
+     210:   }
+     211: #else
+```
+
+**Issue 5**: freertos_task.hpp:604:34
+*Reason: Unused RValue Reference Parameter*
+
+**Message**: rvalue reference parameter 'on_start' is never moved from inside the function body
+
+```cpp
+     601:    */
+     602:   template <typename Rep, typename Period>
+     603:   periodic_task(const char *name, UBaseType_t priority,
+>>>  604:                 task_routine_t &&on_start, task_routine_t &&on_stop,
+     605:                 task_routine_t &&periodic_routine,
+     606:                 const std::chrono::duration<Rep, Period> &period,
+     607:                 bool start_suspended = true)
+```
+
+**Issue 6**: freertos_task.hpp:604:61
+*Reason: Unused RValue Reference Parameter*
+
+**Message**: rvalue reference parameter 'on_stop' is never moved from inside the function body
+
+```cpp
+     601:    */
+     602:   template <typename Rep, typename Period>
+     603:   periodic_task(const char *name, UBaseType_t priority,
+>>>  604:                 task_routine_t &&on_start, task_routine_t &&on_stop,
+     605:                 task_routine_t &&periodic_routine,
+     606:                 const std::chrono::duration<Rep, Period> &period,
+     607:                 bool start_suspended = true)
+```
+
+**Issue 7**: freertos_task.hpp:605:34
+*Reason: Unused RValue Reference Parameter*
+
+**Message**: rvalue reference parameter 'periodic_routine' is never moved from inside the function body
+
+```cpp
+     602:   template <typename Rep, typename Period>
+     603:   periodic_task(const char *name, UBaseType_t priority,
+     604:                 task_routine_t &&on_start, task_routine_t &&on_stop,
+>>>  605:                 task_routine_t &&periodic_routine,
+     606:                 const std::chrono::duration<Rep, Period> &period,
+     607:                 bool start_suspended = true)
+     608:       : m_period{std::chrono::duration_cast<std::chrono::milliseconds>(period)},
+```
+
+**Issue 8**: freertos_task.hpp:627:34
+*Reason: Unused RValue Reference Parameter*
+
+**Message**: rvalue reference parameter 'on_start' is never moved from inside the function body
+
+```cpp
+     624:    */
+     625:   template <typename Rep, typename Period>
+     626:   periodic_task(const std::string &name, UBaseType_t priority,
+>>>  627:                 task_routine_t &&on_start, task_routine_t &&on_stop,
+     628:                 task_routine_t &&periodic_routine,
+     629:                 const std::chrono::duration<Rep, Period> &period,
+     630:                 bool start_suspended = true)
+```
+
+**Issue 9**: freertos_task.hpp:627:61
+*Reason: Unused RValue Reference Parameter*
+
+**Message**: rvalue reference parameter 'on_stop' is never moved from inside the function body
+
+```cpp
+     624:    */
+     625:   template <typename Rep, typename Period>
+     626:   periodic_task(const std::string &name, UBaseType_t priority,
+>>>  627:                 task_routine_t &&on_start, task_routine_t &&on_stop,
+     628:                 task_routine_t &&periodic_routine,
+     629:                 const std::chrono::duration<Rep, Period> &period,
+     630:                 bool start_suspended = true)
+```
+
+**Issue 10**: freertos_task.hpp:628:34
+*Reason: Unused RValue Reference Parameter*
+
+**Message**: rvalue reference parameter 'periodic_routine' is never moved from inside the function body
+
+```cpp
+     625:   template <typename Rep, typename Period>
+     626:   periodic_task(const std::string &name, UBaseType_t priority,
+     627:                 task_routine_t &&on_start, task_routine_t &&on_stop,
+>>>  628:                 task_routine_t &&periodic_routine,
+     629:                 const std::chrono::duration<Rep, Period> &period,
+     630:                 bool start_suspended = true)
+     631:       : periodic_task{name.c_str(),
+```
+
+**Issue 11**: freertos_task.hpp:649:34
+*Reason: Unused RValue Reference Parameter*
+
+**Message**: rvalue reference parameter 'on_start' is never moved from inside the function body
+
+```cpp
+     646:    * @param start_suspended  start the task in the suspended state
+     647:    */
+     648:   periodic_task(const char *name, UBaseType_t priority,
+>>>  649:                 task_routine_t &&on_start, task_routine_t &&on_stop,
+     650:                 task_routine_t &&periodic_routine, bool start_suspended = true)
+     651:       : periodic_task{name,
+     652:                       priority,
+```
+
+**Issue 12**: freertos_task.hpp:649:61
+*Reason: Unused RValue Reference Parameter*
+
+**Message**: rvalue reference parameter 'on_stop' is never moved from inside the function body
+
+```cpp
+     646:    * @param start_suspended  start the task in the suspended state
+     647:    */
+     648:   periodic_task(const char *name, UBaseType_t priority,
+>>>  649:                 task_routine_t &&on_start, task_routine_t &&on_stop,
+     650:                 task_routine_t &&periodic_routine, bool start_suspended = true)
+     651:       : periodic_task{name,
+     652:                       priority,
+```
+
+**Issue 13**: freertos_task.hpp:650:34
+*Reason: Unused RValue Reference Parameter*
+
+**Message**: rvalue reference parameter 'periodic_routine' is never moved from inside the function body
+
+```cpp
+     647:    */
+     648:   periodic_task(const char *name, UBaseType_t priority,
+     649:                 task_routine_t &&on_start, task_routine_t &&on_stop,
+>>>  650:                 task_routine_t &&periodic_routine, bool start_suspended = true)
+     651:       : periodic_task{name,
+     652:                       priority,
+     653:                       std::move(on_start),
+```
+
+**Issue 14**: freertos_task.hpp:669:34
+*Reason: Unused RValue Reference Parameter*
+
+**Message**: rvalue reference parameter 'on_start' is never moved from inside the function body
+
+```cpp
+     666:    * @param start_suspended  start the task in the suspended state
+     667:    */
+     668:   periodic_task(const std::string &name, UBaseType_t priority,
+>>>  669:                 task_routine_t &&on_start, task_routine_t &&on_stop,
+     670:                 task_routine_t &&periodic_routine, bool start_suspended = true)
+     671:       : periodic_task{name.c_str(),
+     672:                       priority,
+```
+
+**Issue 15**: freertos_task.hpp:669:61
+*Reason: Unused RValue Reference Parameter*
+
+**Message**: rvalue reference parameter 'on_stop' is never moved from inside the function body
+
+```cpp
+     666:    * @param start_suspended  start the task in the suspended state
+     667:    */
+     668:   periodic_task(const std::string &name, UBaseType_t priority,
+>>>  669:                 task_routine_t &&on_start, task_routine_t &&on_stop,
+     670:                 task_routine_t &&periodic_routine, bool start_suspended = true)
+     671:       : periodic_task{name.c_str(),
+     672:                       priority,
+```
+
+**Issue 16**: freertos_task.hpp:670:34
+*Reason: Unused RValue Reference Parameter*
+
+**Message**: rvalue reference parameter 'periodic_routine' is never moved from inside the function body
+
+```cpp
+     667:    */
+     668:   periodic_task(const std::string &name, UBaseType_t priority,
+     669:                 task_routine_t &&on_start, task_routine_t &&on_stop,
+>>>  670:                 task_routine_t &&periodic_routine, bool start_suspended = true)
+     671:       : periodic_task{name.c_str(),
+     672:                       priority,
+     673:                       std::move(on_start),
+```
+
+#### CERT Secure Coding (2 issue(s))
+
+##### cert-dcl21-cpp (2 issue(s))
+
+**Issue 1**: freertos_semaphore.hpp:424:3
+*Reason: Const Correctness*
+
+**Message**: overloaded 'operator++' returns a reference instead of a constant object type
+
+```cpp
+     421:    */
+     422:   // NOLINTNEXTLINE(cert-dcl21-cpp): RAII class, copy is deleted -
+     423:   // post-increment returns reference instead of copy
+>>>  424:   counting_semaphore &operator++(int) {
+     425:     give();
+     426:     return *this;
+     427:   }
+```
+
+**Issue 2**: freertos_semaphore.hpp:436:3
+*Reason: Const Correctness*
+
+**Message**: overloaded 'operator--' returns a reference instead of a constant object type
+
+```cpp
+     433:    */
+     434:   // NOLINTNEXTLINE(cert-dcl21-cpp): RAII class, copy is deleted -
+     435:   // post-decrement returns reference instead of copy
+>>>  436:   counting_semaphore &operator--(int) {
+     437:     take();
+     438:     return *this;
+     439:   }
+```
+
+### Compilation Errors
+
+Some files had compilation errors that prevented full analysis:
+
+```
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/mocks/FreeRTOS.h:6:10: error: 'gmock/gmock.h' file not found [clang-diagnostic-error]
+```
+
+
+*Generated: July 24, 2025*
 *Tools: clang-tidy + Enhanced cppcheck (all rules) + MISRA C++ (cppcheck)*
 *Scope: Library modules only*
