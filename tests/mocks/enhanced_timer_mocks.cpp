@@ -51,9 +51,16 @@ BaseType_t TimerServiceSimulator::deleteTimer(TimerHandle_t timer, TickType_t ti
         return pdFAIL;
     }
     
-    // Add delete command to queue
-    command_queue_.emplace(timer, TimerCommand::Delete);
-    command_queue_.back().command_time = current_time_;
+    // For delete operations, process immediately to avoid destructor hanging
+    auto& info = timers_[timer];
+    info->is_active = false;
+    info->expiry_time = 0;
+    
+    if (track_callbacks_) {
+        callback_counts_.erase(timer);
+    }
+    
+    timers_.erase(timer);
     
     return pdPASS;
 }

@@ -204,6 +204,7 @@ target_link_libraries(
 
 target_link_libraries(
     test_enhanced_debug
+    freertos_cpp_wrappers
     freertos_mocks
     ${GTEST_LIBRARIES}
     ${GMOCK_LIBRARIES}
