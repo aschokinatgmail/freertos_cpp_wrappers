@@ -518,15 +518,21 @@ These uncovered areas are intentional and represent code that:
                             context = item.get('context', '')
                             if context:
                                 detailed_analysis += "```cpp\n"
-                                # Clean up the context for display
+                                # Clean up the context for display while preserving line pointers
                                 context_lines = context.split('\n')
                                 clean_lines = []
                                 for line in context_lines:
                                     if line.strip():
-                                        # Remove the line number prefix
+                                        # Preserve line pointers and clean up line number prefix
                                         if ':' in line:
-                                            clean_line = line.split(':', 1)[-1].strip()
-                                            clean_lines.append(clean_line)
+                                            if '>>> ' in line:
+                                                # This is the highlighted uncovered line - preserve the pointer
+                                                clean_line = line.split(':', 1)[-1].strip()
+                                                clean_lines.append(f">>> {clean_line}")  # Keep the line pointer visible
+                                            else:
+                                                # Regular context line
+                                                clean_line = line.split(':', 1)[-1].strip()
+                                                clean_lines.append(f"    {clean_line}")
                                 detailed_analysis += '\n'.join(clean_lines)
                                 detailed_analysis += "\n```\n\n"
                             else:
@@ -536,15 +542,21 @@ These uncovered areas are intentional and represent code that:
                         context = item.get('context', '')
                         if context:
                             detailed_analysis += "```cpp\n"
-                            # Clean up the context for display
+                            # Clean up the context for display while preserving line pointers
                             context_lines = context.split('\n')
                             clean_lines = []
                             for line in context_lines:
                                 if line.strip():
-                                    # Remove the line number prefix
+                                    # Preserve line pointers and clean up line number prefix
                                     if ':' in line:
-                                        clean_line = line.split(':', 1)[-1].strip()
-                                        clean_lines.append(clean_line)
+                                        if '>>> ' in line:
+                                            # This is the highlighted uncovered line - preserve the pointer
+                                            clean_line = line.split(':', 1)[-1].strip()
+                                            clean_lines.append(f">>> {clean_line}")  # Keep the line pointer visible
+                                        else:
+                                            # Regular context line
+                                            clean_line = line.split(':', 1)[-1].strip()
+                                            clean_lines.append(f"    {clean_line}")
                             detailed_analysis += '\n'.join(clean_lines)
                             detailed_analysis += "\n```\n\n"
                         else:
@@ -558,17 +570,21 @@ These uncovered areas are intentional and represent code that:
                     context = item.get('context', '')
                     if context:
                         detailed_analysis += "```cpp\n"
-                        # Clean up the context for display
+                        # Clean up the context for display while preserving line pointers
                         context_lines = context.split('\n')
                         clean_lines = []
                         for line in context_lines:
                             if line.strip():
-                                # Remove the line number prefix but keep >>> indicator
+                                # Preserve line pointers and clean up line number prefix
                                 if ':' in line:
-                                    clean_line = line.split(':', 1)[-1].strip()
-                                    if '>>>' in line:
-                                        clean_line = clean_line  # Keep the line as is for highlighted lines
-                                    clean_lines.append(clean_line)
+                                    if '>>> ' in line:
+                                        # This is the highlighted uncovered line - preserve the pointer
+                                        clean_line = line.split(':', 1)[-1].strip()
+                                        clean_lines.append(f">>> {clean_line}")  # Keep the line pointer visible
+                                    else:
+                                        # Regular context line
+                                        clean_line = line.split(':', 1)[-1].strip()
+                                        clean_lines.append(f"    {clean_line}")
                         detailed_analysis += '\n'.join(clean_lines)
                         detailed_analysis += "\n```\n\n"
                     else:
