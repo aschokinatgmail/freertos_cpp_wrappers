@@ -121,7 +121,7 @@ This report provides comprehensive validation and verification results for the F
 - Passed: 96
 - Failed: 0
 - Success Rate: 100.0%
-- Total Time: 1.990s
+- Total Time: 2.090s
 
 **Detailed Test Results:**
 
@@ -220,7 +220,7 @@ This report provides comprehensive validation and verification results for the F
 | 392 | STLSemaphoreTest.STLRecursiveMutexBasicOperations | ✅ PASS | 0.000s |
 | 393 | STLSemaphoreTest.STLRecursiveMutexNestedLocking | ✅ PASS | 0.000s |
 | 394 | STLSemaphoreTest.STLProducerConsumerWithBuffering | ✅ PASS | 0.100s |
-| 395 | STLSemaphoreTest.STLReaderWriterPattern | ✅ PASS | 0.330s |
+| 395 | STLSemaphoreTest.STLReaderWriterPattern | ✅ PASS | 0.430s |
 | 396 | STLSemaphoreTest.STLSemaphoreStressTest | ✅ PASS | 0.080s |
 | 397 | STLSemaphoreTest.STLTimeoutAccuracy | ✅ PASS | 0.350s |
 
@@ -509,7 +509,7 @@ This report provides comprehensive validation and verification results for the F
 - Passed: 12
 - Failed: 0
 - Success Rate: 100.0%
-- Total Time: 0.690s
+- Total Time: 0.680s
 
 **Detailed Test Results:**
 
@@ -524,7 +524,7 @@ This report provides comprehensive validation and verification results for the F
 | 377 | EnhancedMultitaskingTest.PeriodicTaskExecution | ✅ PASS | 0.050s |
 | 378 | EnhancedMultitaskingTest.MultiplePeriodicTasksCoordination | ✅ PASS | 0.070s |
 | 379 | EnhancedMultitaskingTest.TaskExceptionHandling | ✅ PASS | 0.030s |
-| 380 | EnhancedMultitaskingTest.TaskDeleteDuringExecution | ✅ PASS | 0.120s |
+| 380 | EnhancedMultitaskingTest.TaskDeleteDuringExecution | ✅ PASS | 0.110s |
 | 381 | EnhancedMultitaskingTest.TaskExecFunctionCoverage | ✅ PASS | 0.020s |
 | 382 | EnhancedMultitaskingTest.SuspendedTaskStartupCoverage | ✅ PASS | 0.020s |
 
@@ -550,66 +550,66 @@ The following sections provide specific references to uncovered code areas and e
 *Function*: `FreeRTOSTaskTest_TaskExecutionDirectCall_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
-    std::atomic<bool> task_executed{false};
-    
->>> sa::task<1024> test_task("ExecutionTask", 2, [&task_executed]() {
     task_executed.store(true);
     });
+>>> // LCOV_EXCL_STOP
+    
+    // The task_exec should have been called during construction via the allocator
 ```
 
 **Uncovered Area 2**: test_freertos_task.cpp:1626-1628
 *Function*: `FreeRTOSTaskTest_TaskExecutionInternalFunction_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
-    .WillOnce(Return(mock_task_handle));
+    .WillOnce(Return(reinterpret_cast<TaskHandle_t>(0x2000)));
     
->>> sa::task<1024> suspended_task("SuspendedTask", 1, []() {
-    // Task routine that would be executed
-    }, true); // start_suspended = true
+>>> sa::task<1024> normal_task("NormalTask", 2, empty_task_routine); // start_suspended defaults to false for this constructor
+    
+    EXPECT_EQ(normal_task.handle(), reinterpret_cast<TaskHandle_t>(0x2000));
 ```
 
 **Uncovered Area 3**: test_freertos_task.cpp:1636-1638
 *Function*: `FreeRTOSTaskTest_TaskExecutionInternalFunction_Test::TestBody()::{lambda()#2}::operator()() const`
 
 ```cpp
-    .WillOnce(Return(reinterpret_cast<TaskHandle_t>(0x2000)));
+    EXPECT_CALL(*mock, vTaskDelete(mock_task_handle));
+    EXPECT_CALL(*mock, vTaskDelete(reinterpret_cast<TaskHandle_t>(0x2000)));
+>>> }
     
->>> sa::task<1024> normal_task("NormalTask", 2, []() {
-    // Normal task routine
-    }); // start_suspended defaults to false for this constructor
+    TEST_F(FreeRTOSTaskTest, PeriodicTaskRunMethodExecution) {
 ```
 
 **Uncovered Area 4**: test_freertos_task.cpp:1663
 *Function*: `FreeRTOSTaskTest_PeriodicTaskRunMethodExecution_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
-    sa::periodic_task<1024> periodic_task(
-    "PeriodicRunTask", 1,
->>> [&on_start_calls]() { on_start_calls++; },    // on_start
-    [&on_stop_calls]() { on_stop_calls++; },      // on_stop
-    []() { /* periodic_routine */ },               // periodic_routine
+    EXPECT_CALL(*mock, vTaskDelete(mock_task_handle));
+    
+>>> // Destructor will be called here - covers abort_delay and delete
+    }
+    
 ```
 
 **Uncovered Area 5**: test_freertos_task.cpp:1664
 *Function*: `FreeRTOSTaskTest_PeriodicTaskRunMethodExecution_Test::TestBody()::{lambda()#2}::operator()() const`
 
 ```cpp
-    "PeriodicRunTask", 1,
-    [&on_start_calls]() { on_start_calls++; },    // on_start
->>> [&on_stop_calls]() { on_stop_calls++; },      // on_stop
-    []() { /* periodic_routine */ },               // periodic_routine
-    std::chrono::milliseconds(100)                 // period
+    
+    // Destructor will be called here - covers abort_delay and delete
+>>> }
+    
+    TEST_F(FreeRTOSTaskTest, YieldFunctionExecution) {
 ```
 
 **Uncovered Area 6**: test_freertos_task.cpp:1665
 *Function*: `FreeRTOSTaskTest_PeriodicTaskRunMethodExecution_Test::TestBody()::{lambda()#3}::operator()() const`
 
 ```cpp
-    [&on_start_calls]() { on_start_calls++; },    // on_start
-    [&on_stop_calls]() { on_stop_calls++; },      // on_stop
->>> []() { /* periodic_routine */ },               // periodic_routine
-    std::chrono::milliseconds(100)                 // period
-    );
+    // Destructor will be called here - covers abort_delay and delete
+    }
+>>> 
+    TEST_F(FreeRTOSTaskTest, YieldFunctionExecution) {
+    // Test the yield() function - in host testing it's stubbed as empty
 ```
 
 **Uncovered Area 7**: freertos_sw_timer.hpp:202
@@ -1195,11 +1195,11 @@ The following sections provide specific references to uncovered code areas and e
 *Function*: `FreeRTOSSwTimerTest_StaticTimerAllocatorCreate_Test::TestBody()::{lambda(void*)#1}::operator()(void*) const`
 
 ```cpp
+    NotNull(),              // timer ID (pointer to timer object)
+    NotNull(),              // callback function
+>>> NotNull()               // static timer buffer
+    )).WillOnce(Return(mock_timer_handle));
     
-    TimerHandle_t handle = allocator.create("TestTimer", 100, pdTRUE, &allocator,
->>> [](TimerHandle_t){});
-    
-    EXPECT_EQ(handle, mock_timer_handle);
 ```
 
 **Uncovered Area 60**: test_freertos_sw_timer.cpp:168
@@ -1207,21 +1207,21 @@ The following sections provide specific references to uncovered code areas and e
 
 ```cpp
     
-    TimerHandle_t handle = allocator.create("TestTimer", 100, pdTRUE, nullptr,
->>> [](TimerHandle_t){});
+    // Test case where FreeRTOS returns NULL (allocation failure)
+>>> EXPECT_CALL(*mock, xTimerCreateStatic(_, _, _, _, _, _))
+    .WillOnce(Return(nullptr));
     
-    EXPECT_EQ(handle, nullptr);
 ```
 
 **Uncovered Area 61**: test_freertos_sw_timer.cpp:203
 *Function*: `FreeRTOSSwTimerTest_DynamicTimerAllocatorCreate_Test::TestBody()::{lambda(void*)#1}::operator()(void*) const`
 
 ```cpp
+    pdFALSE,                // single shot
+    NotNull(),              // timer ID (pointer to timer object)
+>>> NotNull()               // callback function
+    )).WillOnce(Return(mock_timer_handle));
     
-    TimerHandle_t handle = allocator.create("TestTimer", 200, pdFALSE, &allocator,
->>> [](TimerHandle_t){});
-    
-    EXPECT_EQ(handle, mock_timer_handle);
 ```
 
 **Uncovered Area 62**: test_freertos_sw_timer.cpp:216
@@ -1229,10 +1229,10 @@ The following sections provide specific references to uncovered code areas and e
 
 ```cpp
     
-    TimerHandle_t handle = allocator.create("TestTimer", 200, pdFALSE, nullptr,
->>> [](TimerHandle_t){});
+    // Test case where FreeRTOS returns NULL (allocation failure)
+>>> EXPECT_CALL(*mock, xTimerCreate(_, _, _, _, _))
+    .WillOnce(Return(nullptr));
     
-    EXPECT_EQ(handle, nullptr);
 ```
 
 **Uncovered Area 63**: test_freertos_sw_timer.cpp:90
@@ -1250,88 +1250,88 @@ The following sections provide specific references to uncovered code areas and e
 *Function*: `FreeRTOSTaskTest_RacingConditionTaskConstructorInitialization_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
-    });
+    sa::task<1024> test_task("RacingTask", 2, empty_task_routine);
     
->>> sa::task<1024> test_task("RacingTask", 2, []() {
-    // Task execution body
-    });
+>>> EXPECT_TRUE(routine_set_before_handle);
+    EXPECT_EQ(test_task.handle(), mock_task_handle);
+    
 ```
 
 **Uncovered Area 65**: test_freertos_task.cpp:1395
 *Function*: `FreeRTOSTaskTest_PeriodicTaskLifecycleRacingConditions_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
-    "PeriodicRace",
-    2,
->>> [&start_count]() { start_count++; },  // on_start
-    [&stop_count]() { stop_count++; },    // on_stop
-    [&periodic_count]() { periodic_count++; },  // periodic_routine
+    empty_task_routine,  // periodic_routine
+    std::chrono::milliseconds(100)
+>>> );
+    
+    // Test task suspend/resume operations in sequence
 ```
 
 **Uncovered Area 66**: test_freertos_task.cpp:1396
 *Function*: `FreeRTOSTaskTest_PeriodicTaskLifecycleRacingConditions_Test::TestBody()::{lambda()#2}::operator()() const`
 
 ```cpp
-    2,
-    [&start_count]() { start_count++; },  // on_start
->>> [&stop_count]() { stop_count++; },    // on_stop
-    [&periodic_count]() { periodic_count++; },  // periodic_routine
     std::chrono::milliseconds(100)
+    );
+>>> 
+    // Test task suspend/resume operations in sequence
+    EXPECT_CALL(*mock, vTaskResume(mock_task_handle))
 ```
 
 **Uncovered Area 67**: test_freertos_task.cpp:1397
 *Function*: `FreeRTOSTaskTest_PeriodicTaskLifecycleRacingConditions_Test::TestBody()::{lambda()#3}::operator()() const`
 
 ```cpp
-    [&start_count]() { start_count++; },  // on_start
-    [&stop_count]() { stop_count++; },    // on_stop
->>> [&periodic_count]() { periodic_count++; },  // periodic_routine
-    std::chrono::milliseconds(100)
     );
+    
+>>> // Test task suspend/resume operations in sequence
+    EXPECT_CALL(*mock, vTaskResume(mock_task_handle))
+    .Times(AtLeast(1));
 ```
 
 **Uncovered Area 68**: test_freertos_task.cpp:1469-1471
 *Function*: `FreeRTOSTaskTest_ComplexMultitaskingScenario_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
-    .WillOnce(Return(producer_handle));
+    // Create consumer task
+    EXPECT_CALL(*mock, xTaskCreateStatic(_, StrEq("Consumer"), _, _, 2, _, _))
+>>> .WillOnce(Return(consumer_handle));
     
->>> sa::task<1024> producer("Producer", 3, []() {
-    // Producer logic
-    });
+    sa::task<1024> consumer("Consumer", 2, empty_task_routine);
 ```
 
 **Uncovered Area 69**: test_freertos_task.cpp:1477-1479
 *Function*: `FreeRTOSTaskTest_ComplexMultitaskingScenario_Test::TestBody()::{lambda()#2}::operator()() const`
 
 ```cpp
-    .WillOnce(Return(consumer_handle));
+    .WillOnce(Return(coordinator_handle));
     
->>> sa::task<1024> consumer("Consumer", 2, []() {
-    // Consumer logic
-    });
+>>> sa::task<1024> coordinator("Coordinator", 4, empty_task_routine);
+    
+    // Simulate complex interactions
 ```
 
 **Uncovered Area 70**: test_freertos_task.cpp:1485-1487
 *Function*: `FreeRTOSTaskTest_ComplexMultitaskingScenario_Test::TestBody()::{lambda()#3}::operator()() const`
 
 ```cpp
-    .WillOnce(Return(coordinator_handle));
-    
->>> sa::task<1024> coordinator("Coordinator", 4, []() {
-    // Coordinator logic
-    });
+    .WillOnce(Return(pdTRUE));
+    consumer.notify(0x100, eSetBits);
+>>> 
+    // Consumer requests more data from producer via notification
+    EXPECT_CALL(*mock, xTaskNotify(producer_handle, 0x200, eIncrement))
 ```
 
 **Uncovered Area 71**: test_freertos_task.cpp:1607-1609
 *Function*: `FreeRTOSTaskTest_ConstructorInitializationOrderRaceCondition_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
+    EXPECT_EQ(race_test_task.handle(), mock_task_handle);
     
-    // Create task with routine that sets atomic flag
->>> sa::task<1024> race_test_task("RaceTest", 2, [&task_routine_called]() {
-    task_routine_called = true;
-    });
+>>> EXPECT_CALL(*mock, vTaskDelete(mock_task_handle));
+    }
+    
 ```
 
 **Uncovered Area 72**: test_freertos_task.cpp:427-429
@@ -1340,64 +1340,64 @@ The following sections provide specific references to uncovered code areas and e
 ```cpp
     
     // Test task created with start_suspended = true (default)
->>> sa::task<1024> suspended_task("SuspendedTask", 1, []() {
-    // This task should start suspended
-    }, true);
+>>> sa::task<1024> suspended_task("SuspendedTask", 1, empty_task_routine, true);
+    
+    EXPECT_EQ(suspended_task.handle(), mock_task_handle);
 ```
 
 **Uncovered Area 73**: test_freertos_task.cpp:441-443
 *Function*: `FreeRTOSTaskTest_TaskNotSuspendedOnStart_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
+    sa::task<1024> active_task("ActiveTask", 1, empty_task_routine, false);
     
-    // Test task created with start_suspended = false
->>> sa::task<1024> active_task("ActiveTask", 1, []() {
-    // This task should start immediately
-    }, false);
+>>> EXPECT_EQ(active_task.handle(), mock_task_handle);
+    
+    EXPECT_CALL(*mock, vTaskDelete(mock_task_handle));
 ```
 
 **Uncovered Area 74**: test_freertos_task.cpp:457-459
 *Function*: `FreeRTOSTaskTest_DynamicTaskConstruction_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
-    ));
+    EXPECT_EQ(test_task.handle(), mock_task_handle);
     
->>> da::task<2048> test_task("DynamicTask", 3, []() {
-    // Test task routine
-    });
+>>> EXPECT_CALL(*mock, vTaskDelete(mock_task_handle));
+    }
+    
 ```
 
 **Uncovered Area 75**: test_freertos_task.cpp:598
 *Function*: `FreeRTOSTaskTest_PeriodicTaskConstruction_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
-    "PeriodicTask",
-    2,
->>> [&on_start_called]() { on_start_called = true; },      // on_start
-    [&on_stop_called]() { on_stop_called = true; },       // on_stop
-    [&periodic_called]() { periodic_called = true; },     // periodic_routine
+    100ms                                                   // period
+    );
+>>> // LCOV_EXCL_STOP
+    
+    EXPECT_EQ(periodic_task.handle(), mock_task_handle);
 ```
 
 **Uncovered Area 76**: test_freertos_task.cpp:599
 *Function*: `FreeRTOSTaskTest_PeriodicTaskConstruction_Test::TestBody()::{lambda()#2}::operator()() const`
 
 ```cpp
-    2,
-    [&on_start_called]() { on_start_called = true; },      // on_start
->>> [&on_stop_called]() { on_stop_called = true; },       // on_stop
-    [&periodic_called]() { periodic_called = true; },     // periodic_routine
-    100ms                                                   // period
+    );
+    // LCOV_EXCL_STOP
+>>> 
+    EXPECT_EQ(periodic_task.handle(), mock_task_handle);
+    
 ```
 
 **Uncovered Area 77**: test_freertos_task.cpp:600
 *Function*: `FreeRTOSTaskTest_PeriodicTaskConstruction_Test::TestBody()::{lambda()#3}::operator()() const`
 
 ```cpp
-    [&on_start_called]() { on_start_called = true; },      // on_start
-    [&on_stop_called]() { on_stop_called = true; },       // on_stop
->>> [&periodic_called]() { periodic_called = true; },     // periodic_routine
-    100ms                                                   // period
-    );
+    // LCOV_EXCL_STOP
+    
+>>> EXPECT_EQ(periodic_task.handle(), mock_task_handle);
+    
+    EXPECT_CALL(*mock, xTaskAbortDelay(mock_task_handle))
 ```
 
 **Uncovered Area 78**: freertos_queue.hpp:489
@@ -1451,7 +1451,7 @@ The high coverage percentage indicates:
 
 ### Performance Characteristics
 - **Fastest Test**: 0.000 seconds
-- **Slowest Test**: 0.350 seconds
+- **Slowest Test**: 0.430 seconds
 - **Performance Distribution**:
   - Very Fast (< 0.01s): 6 tests
   - Fast (0.01-0.05s): 401 tests
@@ -1486,7 +1486,7 @@ This report is automatically generated with each test execution to ensure:
 
 ---
 
-*Report Generated*: July 24, 2025 at 15:34:27  
+*Report Generated*: July 24, 2025 at 15:45:15  
 *Test Framework*: GoogleTest/GoogleMock  
 *Coverage Tool*: LCOV/GCOV  
 *Total Test Execution Time*: 5.10 seconds  
