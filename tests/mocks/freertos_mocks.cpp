@@ -1,5 +1,6 @@
 #include "FreeRTOS.h"
 #include "freertos_mocks.hpp"
+#include "enhanced_timer_mocks.hpp"
 
 // Static member definitions for mock instance management
 std::shared_ptr<::testing::StrictMock<::FreeRTOSMock>> FreeRTOSMockInstance::instance_;
@@ -618,6 +619,12 @@ void portYIELD_FROM_ISR(BaseType_t xHigherPriorityTaskWoken) {
 
 // Timer function implementations
 TimerHandle_t xTimerCreate(const char* pcTimerName, TickType_t xTimerPeriodInTicks, UBaseType_t uxAutoReload, void* pvTimerID, TimerCallbackFunction_t pxCallbackFunction) {
+    // Use enhanced simulation if enabled
+    auto& enhanced_mock = freertos_mocks::EnhancedTimerMock::instance();
+    if (enhanced_mock.isSimulationEnabled()) {
+        return enhanced_mock.getSimulator().createTimer(pcTimerName, xTimerPeriodInTicks, uxAutoReload, pvTimerID, pxCallbackFunction, false);
+    }
+    
     if (g_freertos_mock) {
         return g_freertos_mock->xTimerCreate(pcTimerName, xTimerPeriodInTicks, uxAutoReload, pvTimerID, pxCallbackFunction);
     }
@@ -625,6 +632,12 @@ TimerHandle_t xTimerCreate(const char* pcTimerName, TickType_t xTimerPeriodInTic
 }
 
 TimerHandle_t xTimerCreateStatic(const char* pcTimerName, TickType_t xTimerPeriodInTicks, UBaseType_t uxAutoReload, void* pvTimerID, TimerCallbackFunction_t pxCallbackFunction, StaticTimer_t* pxTimerBuffer) {
+    // Use enhanced simulation if enabled
+    auto& enhanced_mock = freertos_mocks::EnhancedTimerMock::instance();
+    if (enhanced_mock.isSimulationEnabled()) {
+        return enhanced_mock.getSimulator().createTimer(pcTimerName, xTimerPeriodInTicks, uxAutoReload, pvTimerID, pxCallbackFunction, true);
+    }
+    
     if (g_freertos_mock) {
         return g_freertos_mock->xTimerCreateStatic(pcTimerName, xTimerPeriodInTicks, uxAutoReload, pvTimerID, pxCallbackFunction, pxTimerBuffer);
     }
@@ -632,6 +645,12 @@ TimerHandle_t xTimerCreateStatic(const char* pcTimerName, TickType_t xTimerPerio
 }
 
 BaseType_t xTimerDelete(TimerHandle_t xTimer, TickType_t xTicksToWait) {
+    // Use enhanced simulation if enabled
+    auto& enhanced_mock = freertos_mocks::EnhancedTimerMock::instance();
+    if (enhanced_mock.isSimulationEnabled()) {
+        return enhanced_mock.getSimulator().deleteTimer(xTimer, xTicksToWait);
+    }
+    
     if (g_freertos_mock) {
         return g_freertos_mock->xTimerDelete(xTimer, xTicksToWait);
     }
@@ -639,6 +658,12 @@ BaseType_t xTimerDelete(TimerHandle_t xTimer, TickType_t xTicksToWait) {
 }
 
 BaseType_t xTimerStart(TimerHandle_t xTimer, TickType_t xTicksToWait) {
+    // Use enhanced simulation if enabled
+    auto& enhanced_mock = freertos_mocks::EnhancedTimerMock::instance();
+    if (enhanced_mock.isSimulationEnabled()) {
+        return enhanced_mock.getSimulator().startTimer(xTimer, xTicksToWait);
+    }
+    
     if (g_freertos_mock) {
         return g_freertos_mock->xTimerStart(xTimer, xTicksToWait);
     }
@@ -646,6 +671,15 @@ BaseType_t xTimerStart(TimerHandle_t xTimer, TickType_t xTicksToWait) {
 }
 
 BaseType_t xTimerStartFromISR(TimerHandle_t xTimer, BaseType_t* pxHigherPriorityTaskWoken) {
+    // Use enhanced simulation if enabled - ISR functions behave the same as non-ISR for simulation
+    auto& enhanced_mock = freertos_mocks::EnhancedTimerMock::instance();
+    if (enhanced_mock.isSimulationEnabled()) {
+        if (pxHigherPriorityTaskWoken) {
+            *pxHigherPriorityTaskWoken = pdFALSE;  // Simplified for simulation
+        }
+        return enhanced_mock.getSimulator().startTimer(xTimer, 0);
+    }
+    
     if (g_freertos_mock) {
         return g_freertos_mock->xTimerStartFromISR(xTimer, pxHigherPriorityTaskWoken);
     }
@@ -653,6 +687,12 @@ BaseType_t xTimerStartFromISR(TimerHandle_t xTimer, BaseType_t* pxHigherPriority
 }
 
 BaseType_t xTimerStop(TimerHandle_t xTimer, TickType_t xTicksToWait) {
+    // Use enhanced simulation if enabled
+    auto& enhanced_mock = freertos_mocks::EnhancedTimerMock::instance();
+    if (enhanced_mock.isSimulationEnabled()) {
+        return enhanced_mock.getSimulator().stopTimer(xTimer, xTicksToWait);
+    }
+    
     if (g_freertos_mock) {
         return g_freertos_mock->xTimerStop(xTimer, xTicksToWait);
     }
@@ -660,6 +700,15 @@ BaseType_t xTimerStop(TimerHandle_t xTimer, TickType_t xTicksToWait) {
 }
 
 BaseType_t xTimerStopFromISR(TimerHandle_t xTimer, BaseType_t* pxHigherPriorityTaskWoken) {
+    // Use enhanced simulation if enabled
+    auto& enhanced_mock = freertos_mocks::EnhancedTimerMock::instance();
+    if (enhanced_mock.isSimulationEnabled()) {
+        if (pxHigherPriorityTaskWoken) {
+            *pxHigherPriorityTaskWoken = pdFALSE;  // Simplified for simulation
+        }
+        return enhanced_mock.getSimulator().stopTimer(xTimer, 0);
+    }
+    
     if (g_freertos_mock) {
         return g_freertos_mock->xTimerStopFromISR(xTimer, pxHigherPriorityTaskWoken);
     }
@@ -667,6 +716,12 @@ BaseType_t xTimerStopFromISR(TimerHandle_t xTimer, BaseType_t* pxHigherPriorityT
 }
 
 BaseType_t xTimerReset(TimerHandle_t xTimer, TickType_t xTicksToWait) {
+    // Use enhanced simulation if enabled
+    auto& enhanced_mock = freertos_mocks::EnhancedTimerMock::instance();
+    if (enhanced_mock.isSimulationEnabled()) {
+        return enhanced_mock.getSimulator().resetTimer(xTimer, xTicksToWait);
+    }
+    
     if (g_freertos_mock) {
         return g_freertos_mock->xTimerReset(xTimer, xTicksToWait);
     }
@@ -674,6 +729,15 @@ BaseType_t xTimerReset(TimerHandle_t xTimer, TickType_t xTicksToWait) {
 }
 
 BaseType_t xTimerResetFromISR(TimerHandle_t xTimer, BaseType_t* pxHigherPriorityTaskWoken) {
+    // Use enhanced simulation if enabled
+    auto& enhanced_mock = freertos_mocks::EnhancedTimerMock::instance();
+    if (enhanced_mock.isSimulationEnabled()) {
+        if (pxHigherPriorityTaskWoken) {
+            *pxHigherPriorityTaskWoken = pdFALSE;  // Simplified for simulation
+        }
+        return enhanced_mock.getSimulator().resetTimer(xTimer, 0);
+    }
+    
     if (g_freertos_mock) {
         return g_freertos_mock->xTimerResetFromISR(xTimer, pxHigherPriorityTaskWoken);
     }
@@ -681,6 +745,12 @@ BaseType_t xTimerResetFromISR(TimerHandle_t xTimer, BaseType_t* pxHigherPriority
 }
 
 BaseType_t xTimerChangePeriod(TimerHandle_t xTimer, TickType_t xNewPeriod, TickType_t xTicksToWait) {
+    // Use enhanced simulation if enabled
+    auto& enhanced_mock = freertos_mocks::EnhancedTimerMock::instance();
+    if (enhanced_mock.isSimulationEnabled()) {
+        return enhanced_mock.getSimulator().changePeriod(xTimer, xNewPeriod, xTicksToWait);
+    }
+    
     if (g_freertos_mock) {
         return g_freertos_mock->xTimerChangePeriod(xTimer, xNewPeriod, xTicksToWait);
     }
@@ -688,6 +758,15 @@ BaseType_t xTimerChangePeriod(TimerHandle_t xTimer, TickType_t xNewPeriod, TickT
 }
 
 BaseType_t xTimerChangePeriodFromISR(TimerHandle_t xTimer, TickType_t xNewPeriod, BaseType_t* pxHigherPriorityTaskWoken) {
+    // Use enhanced simulation if enabled
+    auto& enhanced_mock = freertos_mocks::EnhancedTimerMock::instance();
+    if (enhanced_mock.isSimulationEnabled()) {
+        if (pxHigherPriorityTaskWoken) {
+            *pxHigherPriorityTaskWoken = pdFALSE;  // Simplified for simulation
+        }
+        return enhanced_mock.getSimulator().changePeriod(xTimer, xNewPeriod, 0);
+    }
+    
     if (g_freertos_mock) {
         return g_freertos_mock->xTimerChangePeriodFromISR(xTimer, xNewPeriod, pxHigherPriorityTaskWoken);
     }
@@ -695,6 +774,12 @@ BaseType_t xTimerChangePeriodFromISR(TimerHandle_t xTimer, TickType_t xNewPeriod
 }
 
 BaseType_t xTimerIsTimerActive(TimerHandle_t xTimer) {
+    // Use enhanced simulation if enabled
+    auto& enhanced_mock = freertos_mocks::EnhancedTimerMock::instance();
+    if (enhanced_mock.isSimulationEnabled()) {
+        return enhanced_mock.getSimulator().isTimerActive(xTimer);
+    }
+    
     if (g_freertos_mock) {
         return g_freertos_mock->xTimerIsTimerActive(xTimer);
     }
@@ -702,6 +787,12 @@ BaseType_t xTimerIsTimerActive(TimerHandle_t xTimer) {
 }
 
 TickType_t xTimerGetPeriod(TimerHandle_t xTimer) {
+    // Use enhanced simulation if enabled
+    auto& enhanced_mock = freertos_mocks::EnhancedTimerMock::instance();
+    if (enhanced_mock.isSimulationEnabled()) {
+        return enhanced_mock.getSimulator().getTimerPeriod(xTimer);
+    }
+    
     if (g_freertos_mock) {
         return g_freertos_mock->xTimerGetPeriod(xTimer);
     }
@@ -709,6 +800,12 @@ TickType_t xTimerGetPeriod(TimerHandle_t xTimer) {
 }
 
 TickType_t xTimerGetExpiryTime(TimerHandle_t xTimer) {
+    // Use enhanced simulation if enabled
+    auto& enhanced_mock = freertos_mocks::EnhancedTimerMock::instance();
+    if (enhanced_mock.isSimulationEnabled()) {
+        return enhanced_mock.getSimulator().getTimerExpiryTime(xTimer);
+    }
+    
     if (g_freertos_mock) {
         return g_freertos_mock->xTimerGetExpiryTime(xTimer);
     }
@@ -716,6 +813,12 @@ TickType_t xTimerGetExpiryTime(TimerHandle_t xTimer) {
 }
 
 UBaseType_t uxTimerGetReloadMode(TimerHandle_t xTimer) {
+    // Use enhanced simulation if enabled
+    auto& enhanced_mock = freertos_mocks::EnhancedTimerMock::instance();
+    if (enhanced_mock.isSimulationEnabled()) {
+        return enhanced_mock.getSimulator().getReloadMode(xTimer);
+    }
+    
     if (g_freertos_mock) {
         return g_freertos_mock->uxTimerGetReloadMode(xTimer);
     }
@@ -723,12 +826,25 @@ UBaseType_t uxTimerGetReloadMode(TimerHandle_t xTimer) {
 }
 
 void vTimerSetReloadMode(TimerHandle_t xTimer, UBaseType_t uxAutoReload) {
+    // Use enhanced simulation if enabled
+    auto& enhanced_mock = freertos_mocks::EnhancedTimerMock::instance();
+    if (enhanced_mock.isSimulationEnabled()) {
+        enhanced_mock.getSimulator().setReloadMode(xTimer, uxAutoReload);
+        return;
+    }
+    
     if (g_freertos_mock) {
         g_freertos_mock->vTimerSetReloadMode(xTimer, uxAutoReload);
     }
 }
 
 const char* pcTimerGetName(TimerHandle_t xTimer) {
+    // Use enhanced simulation if enabled
+    auto& enhanced_mock = freertos_mocks::EnhancedTimerMock::instance();
+    if (enhanced_mock.isSimulationEnabled()) {
+        return enhanced_mock.getSimulator().getTimerName(xTimer);
+    }
+    
     if (g_freertos_mock) {
         return g_freertos_mock->pcTimerGetName(xTimer);
     }
@@ -736,6 +852,12 @@ const char* pcTimerGetName(TimerHandle_t xTimer) {
 }
 
 void* pvTimerGetTimerID(TimerHandle_t xTimer) {
+    // Use enhanced simulation if enabled
+    auto& enhanced_mock = freertos_mocks::EnhancedTimerMock::instance();
+    if (enhanced_mock.isSimulationEnabled()) {
+        return enhanced_mock.getSimulator().getTimerID(xTimer);
+    }
+    
     if (g_freertos_mock) {
         return g_freertos_mock->pvTimerGetTimerID(xTimer);
     }

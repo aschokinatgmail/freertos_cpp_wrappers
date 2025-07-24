@@ -3,6 +3,7 @@
 # Create FreeRTOS mock library first
 add_library(freertos_mocks
     mocks/freertos_mocks.cpp
+    mocks/enhanced_timer_mocks.cpp
 )
 target_include_directories(freertos_mocks PUBLIC mocks)
 
@@ -71,6 +72,16 @@ add_executable(
     test_enhanced_cpp17_features.cpp
 )
 
+add_executable(
+    test_enhanced_freertos_sw_timer
+    test_enhanced_freertos_sw_timer.cpp
+)
+
+add_executable(
+    test_enhanced_debug
+    test_enhanced_debug.cpp
+)
+
 target_link_libraries(
     test_freertos_task
     freertos_cpp_wrappers
@@ -181,6 +192,25 @@ target_link_libraries(
     pthread
 )
 
+target_link_libraries(
+    test_enhanced_freertos_sw_timer
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    ${GMOCK_LIBRARIES}
+    gtest_main
+    pthread
+)
+
+target_link_libraries(
+    test_enhanced_debug
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    ${GMOCK_LIBRARIES}
+    gtest_main
+    pthread
+)
+
 target_compile_options(test_freertos_task PRIVATE ${GTEST_CFLAGS_OTHER} ${GMOCK_CFLAGS_OTHER})
 target_compile_options(test_freertos_semaphore PRIVATE ${GTEST_CFLAGS_OTHER} ${GMOCK_CFLAGS_OTHER})
 target_compile_options(test_freertos_queue PRIVATE ${GTEST_CFLAGS_OTHER} ${GMOCK_CFLAGS_OTHER})
@@ -192,6 +222,8 @@ target_compile_options(test_enhanced_multitasking PRIVATE ${GTEST_CFLAGS_OTHER} 
 target_compile_options(test_freertos_semaphore_stl PRIVATE ${GTEST_CFLAGS_OTHER} ${GMOCK_CFLAGS_OTHER})
 target_compile_options(test_enhanced_timeout_precision PRIVATE ${GTEST_CFLAGS_OTHER} ${GMOCK_CFLAGS_OTHER})
 target_compile_options(test_enhanced_cpp17_features PRIVATE ${GTEST_CFLAGS_OTHER} ${GMOCK_CFLAGS_OTHER})
+target_compile_options(test_enhanced_freertos_sw_timer PRIVATE ${GTEST_CFLAGS_OTHER} ${GMOCK_CFLAGS_OTHER})
+target_compile_options(test_enhanced_debug PRIVATE ${GTEST_CFLAGS_OTHER} ${GMOCK_CFLAGS_OTHER})
 
 # Discover tests
 include(GoogleTest)
@@ -206,3 +238,4 @@ gtest_discover_tests(test_enhanced_multitasking)
 gtest_discover_tests(test_freertos_semaphore_stl)
 gtest_discover_tests(test_enhanced_timeout_precision)
 gtest_discover_tests(test_enhanced_cpp17_features)
+gtest_discover_tests(test_enhanced_freertos_sw_timer)
