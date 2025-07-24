@@ -83,12 +83,14 @@ def parse_clang_tidy_output(input_file):
         
         # Extract all files that were processed - these show up as "[X/Y] Processing file /path/to/file"
         # Pattern: "[X/Y] Processing file /path/to/file.ext."
-        processed_files = re.findall(r'\[\d+/\d+\] Processing file ([^.]+\.[^.]+)\.', content)
+        processed_files = re.findall(r'\[\d+/\d+\] Processing file ([^\s]+)\.', content)
         for file_path in processed_files:
             # Skip files from mocks directory
             if '/mocks/' in file_path or 'mocks/' in file_path:
                 continue
-            filename = os.path.basename(file_path)
+            # Normalize file path and extract basename to avoid duplicates
+            normalized_path = file_path.rstrip('.')
+            filename = os.path.basename(normalized_path)
             stats['files_analyzed'].add(filename)
     
     except Exception as e:
