@@ -203,7 +203,7 @@ if [ "$MISRA_VIOLATIONS" -gt 0 ] && [ -f "$MISRA_OUTPUT" ]; then
 
 EOF
 
-    # Parse MISRA violations and add code context
+    # Parse MISRA violations and add code context using Python
     python3 - << 'PYEOF' "$MISRA_OUTPUT" "$SOURCE_DIR_ABS" >> "$OUTPUT_MD"
 import sys
 import os
@@ -221,20 +221,16 @@ violations = []
 with open(misra_file, 'r') as f:
     for line in f:
         line = line.strip()
-        if not line or line.startswith('#'):
-            continue
-            
-        # Parse cppcheck format: file:line:column: severity: message [id]
-        match = re.match(r'^([^:]+):(\d+):(\d+):\s*(\w+):\s*(.+?)\s*\[([^\]]+)\]', line)
-        if match:
-            file_path = match.group(1)
-            line_num = int(match.group(2))
-            severity = match.group(4)
-            message = match.group(5)
-            rule_id = match.group(6)
-            
-            # Only include MISRA violations
-            if 'misra' in rule_id.lower() or 'MISRA' in message:
+        if 'misra-c2012' in line:
+            # Parse cppcheck format: file:line:column: severity: message [id]
+            match = re.match(r'^([^:]+):(\d+):(\d+):\s*(\w+):\s*(.+?)\s*\[([^\]]+)\]', line)
+            if match:
+                file_path = match.group(1)
+                line_num = int(match.group(2))
+                severity = match.group(4)
+                message = match.group(5)
+                rule_id = match.group(6)
+                
                 violations.append({
                     'file': file_path,
                     'line': line_num,
@@ -305,7 +301,7 @@ if [ "$CLANG_TIDY_WARNINGS" -gt 0 ] || [ "$CLANG_TIDY_ERRORS" -gt 0 ]; then
 
 EOF
 
-    # Parse clang-tidy violations and add code context
+    # Parse clang-tidy violations and add code context using Python
     python3 - << 'PYEOF' "$CLANG_TIDY_OUTPUT" "$SOURCE_DIR_ABS" >> "$OUTPUT_MD"
 import sys
 import os
@@ -479,7 +475,7 @@ for module_name, module_tests in modules.items():
         print()
 PYEOF
 
-# Add code coverage analysis if available
+# Add code coverage analysis
 echo "Adding code coverage analysis..."
 cat >> "$OUTPUT_MD" << 'EOF'
 
@@ -497,15 +493,12 @@ if [ -f "$BUILD_DIR_ABS/coverage_filtered.info" ]; then
     python3 - << 'PYEOF' "$BUILD_DIR_ABS/coverage_filtered.info" "$SOURCE_DIR_ABS" >> "$OUTPUT_MD"
 import sys
 import os
-import re
 
 coverage_file = sys.argv[1]
 source_dir = sys.argv[2]
 
 if not os.path.exists(coverage_file):
     print("**Coverage Data**: Not available")
-    print()
-    print("*Coverage analysis was not successful. Ensure the project is built with coverage enabled.*")
     sys.exit(0)
 
 try:
@@ -557,7 +550,7 @@ print()
 print("| File | Line Coverage | Functions |")
 print("|------|---------------|-----------|")
 
-# Parse per-file coverage
+# Parse per-file coverage - focus on main project files only
 current_file = None
 file_lines_found = 0
 file_lines_hit = 0
@@ -566,8 +559,8 @@ file_functions_hit = 0
 
 for line in content.split('\n'):
     if line.startswith('SF:'):
-        # Print previous file if exists
-        if current_file:
+        # Print previous file if exists and is in main project
+        if current_file and ('/src/' in current_file or '/include/' in current_file):
             file_line_cov = (file_lines_hit / file_lines_found * 100) if file_lines_found > 0 else 0
             rel_path = os.path.relpath(current_file, source_dir) if current_file.startswith(source_dir) else current_file
             print(f"| `{rel_path}` | {file_line_cov:.1f}% | {file_functions_hit}/{file_functions_found} |")
@@ -588,7 +581,7 @@ for line in content.split('\n'):
         file_functions_hit = int(line.split(':')[1])
 
 # Don't forget the last file
-if current_file:
+if current_file and ('/src/' in current_file or '/include/' in current_file):
     file_line_cov = (file_lines_hit / file_lines_found * 100) if file_lines_found > 0 else 0
     rel_path = os.path.relpath(current_file, source_dir) if current_file.startswith(source_dir) else current_file
     print(f"| `{rel_path}` | {file_line_cov:.1f}% | {file_functions_hit}/{file_functions_found} |")
