@@ -1,0 +1,41 @@
+src/freertos_task.cc:0:0: information: Too many #ifdef configurations - cppcheck only checks 12 of 15 configurations. Use --force to check all configurations. [toomanyconfigs]
+
+^
+src/freertos_task.cc:0:0: error: Bailing out from analysis: Checking file failed: Failed to execute addon 'misra' - exitcode is 1 [internalError]
+
+^
+src/freertos_task.cc:37:6: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-8.6]
+void delay(TickType_t ticks) { vTaskDelay(ticks); }
+     ^
+include/freertos_task.hpp:1028:6: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-8.6]
+void delay(std::chrono::duration<Rep, Period> duration) {
+     ^
+src/freertos_task.cc:38:6: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-8.6]
+void delay_until(TickType_t &previousWakeTime, TickType_t period) {
+     ^
+include/freertos_task.hpp:1055:6: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-8.6]
+void delay_until(TickType_t &previousWakeTime,
+     ^
+include/freertos_task.hpp:219:20: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-5.8]
+  task(const char *name, UBaseType_t priority, task_routine_t &&task_routine)
+                   ^
+include/freertos_task.hpp:848:15: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-5.8]
+  const char *name(void) const { return m_task.name(); }
+              ^
+include/freertos_task.hpp:728:8: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-8.7]
+  bool is_running(void) const {
+       ^
+include/freertos_task.hpp:704:16: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-8.7]
+  TaskHandle_t handle(void) const { return m_task.handle(); }
+               ^
+include/freertos_task.hpp:743:8: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-8.7]
+  void terminate(void) { m_task.terminate(); }
+       ^
+src/freertos_task.cc:59:12: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-8.7]
+TickType_t tick_count(void) { return xTaskGetTickCount(); }
+           ^
+src/freertos_task.cc:60:12: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-8.7]
+TickType_t tick_count_isr(void) { return xTaskGetTickCountFromISR(); }
+           ^
+nofile:0:0: information: Active checkers: There was critical errors (use --checkers-report=<filename> to see details) [checkersReport]
+
