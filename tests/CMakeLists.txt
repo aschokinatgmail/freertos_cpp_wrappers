@@ -7,14 +7,24 @@ add_library(freertos_mocks
 )
 target_include_directories(freertos_mocks PUBLIC mocks)
 
-# Find system GoogleTest libraries
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(GTEST REQUIRED gtest_main)
-pkg_check_modules(GMOCK REQUIRED gmock_main)
+# Find GoogleTest using CMake config first, fallback to PkgConfig
+find_package(GTest QUIET)
+if(NOT GTest_FOUND)
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(GTEST REQUIRED gtest_main)
+    pkg_check_modules(GMOCK REQUIRED gmock_main)
+    set(GTEST_LIBRARIES ${GTEST_LIBRARIES} ${GMOCK_LIBRARIES})
+    set(GTEST_COMPILE_OPTIONS ${GTEST_CFLAGS_OTHER} ${GMOCK_CFLAGS_OTHER})
+else()
+    set(GTEST_LIBRARIES GTest::gtest GTest::gtest_main GTest::gmock GTest::gmock_main)
+    set(GTEST_COMPILE_OPTIONS "")
+endif()
 
 # Link GoogleTest to mock library
-target_link_libraries(freertos_mocks PUBLIC ${GMOCK_LIBRARIES})
-target_compile_options(freertos_mocks PUBLIC ${GMOCK_CFLAGS_OTHER})
+target_link_libraries(freertos_mocks PUBLIC ${GTEST_LIBRARIES})
+if(GTEST_COMPILE_OPTIONS)
+    target_compile_options(freertos_mocks PUBLIC ${GTEST_COMPILE_OPTIONS})
+endif()
 
 # Add the main test executables
 add_executable(
@@ -87,8 +97,6 @@ target_link_libraries(
     freertos_cpp_wrappers
     freertos_mocks
     ${GTEST_LIBRARIES}
-    ${GMOCK_LIBRARIES}
-    gtest_main
     pthread
 )
 
@@ -97,8 +105,6 @@ target_link_libraries(
     freertos_cpp_wrappers
     freertos_mocks
     ${GTEST_LIBRARIES}
-    ${GMOCK_LIBRARIES}
-    gtest_main
     pthread
 )
 
@@ -107,8 +113,6 @@ target_link_libraries(
     freertos_cpp_wrappers
     freertos_mocks
     ${GTEST_LIBRARIES}
-    ${GMOCK_LIBRARIES}
-    gtest_main
     pthread
 )
 
@@ -117,8 +121,6 @@ target_link_libraries(
     freertos_cpp_wrappers
     freertos_mocks
     ${GTEST_LIBRARIES}
-    ${GMOCK_LIBRARIES}
-    gtest_main
     pthread
 )
 
@@ -127,8 +129,6 @@ target_link_libraries(
     freertos_cpp_wrappers
     freertos_mocks
     ${GTEST_LIBRARIES}
-    ${GMOCK_LIBRARIES}
-    gtest_main
     pthread
 )
 
@@ -137,8 +137,6 @@ target_link_libraries(
     freertos_cpp_wrappers
     freertos_mocks
     ${GTEST_LIBRARIES}
-    ${GMOCK_LIBRARIES}
-    gtest_main
     pthread
 )
 
@@ -147,8 +145,6 @@ target_link_libraries(
     freertos_cpp_wrappers
     freertos_mocks
     ${GTEST_LIBRARIES}
-    ${GMOCK_LIBRARIES}
-    gtest_main
     pthread
 )
 
@@ -157,8 +153,6 @@ target_link_libraries(
     freertos_cpp_wrappers
     freertos_mocks
     ${GTEST_LIBRARIES}
-    ${GMOCK_LIBRARIES}
-    gtest_main
     pthread
 )
 
@@ -167,8 +161,6 @@ target_link_libraries(
     freertos_cpp_wrappers
     freertos_mocks
     ${GTEST_LIBRARIES}
-    ${GMOCK_LIBRARIES}
-    gtest_main
     pthread
 )
 
@@ -177,8 +169,6 @@ target_link_libraries(
     freertos_cpp_wrappers
     freertos_mocks
     ${GTEST_LIBRARIES}
-    ${GMOCK_LIBRARIES}
-    gtest_main
     pthread
 )
 
@@ -187,8 +177,6 @@ target_link_libraries(
     freertos_cpp_wrappers
     freertos_mocks
     ${GTEST_LIBRARIES}
-    ${GMOCK_LIBRARIES}
-    gtest_main
     pthread
 )
 
@@ -197,8 +185,6 @@ target_link_libraries(
     freertos_cpp_wrappers
     freertos_mocks
     ${GTEST_LIBRARIES}
-    ${GMOCK_LIBRARIES}
-    gtest_main
     pthread
 )
 
@@ -207,24 +193,25 @@ target_link_libraries(
     freertos_cpp_wrappers
     freertos_mocks
     ${GTEST_LIBRARIES}
-    ${GMOCK_LIBRARIES}
-    gtest_main
     pthread
 )
 
-target_compile_options(test_freertos_task PRIVATE ${GTEST_CFLAGS_OTHER} ${GMOCK_CFLAGS_OTHER})
-target_compile_options(test_freertos_semaphore PRIVATE ${GTEST_CFLAGS_OTHER} ${GMOCK_CFLAGS_OTHER})
-target_compile_options(test_freertos_queue PRIVATE ${GTEST_CFLAGS_OTHER} ${GMOCK_CFLAGS_OTHER})
-target_compile_options(test_freertos_event_group PRIVATE ${GTEST_CFLAGS_OTHER} ${GMOCK_CFLAGS_OTHER})
-target_compile_options(test_freertos_stream_buffer PRIVATE ${GTEST_CFLAGS_OTHER} ${GMOCK_CFLAGS_OTHER})
-target_compile_options(test_freertos_message_buffer PRIVATE ${GTEST_CFLAGS_OTHER} ${GMOCK_CFLAGS_OTHER})
-target_compile_options(test_freertos_sw_timer PRIVATE ${GTEST_CFLAGS_OTHER} ${GMOCK_CFLAGS_OTHER})
-target_compile_options(test_enhanced_multitasking PRIVATE ${GTEST_CFLAGS_OTHER} ${GMOCK_CFLAGS_OTHER})
-target_compile_options(test_freertos_semaphore_stl PRIVATE ${GTEST_CFLAGS_OTHER} ${GMOCK_CFLAGS_OTHER})
-target_compile_options(test_enhanced_timeout_precision PRIVATE ${GTEST_CFLAGS_OTHER} ${GMOCK_CFLAGS_OTHER})
-target_compile_options(test_enhanced_cpp17_features PRIVATE ${GTEST_CFLAGS_OTHER} ${GMOCK_CFLAGS_OTHER})
-target_compile_options(test_enhanced_freertos_sw_timer PRIVATE ${GTEST_CFLAGS_OTHER} ${GMOCK_CFLAGS_OTHER})
-target_compile_options(test_enhanced_debug PRIVATE ${GTEST_CFLAGS_OTHER} ${GMOCK_CFLAGS_OTHER})
+# Apply compile options if using PkgConfig
+if(GTEST_COMPILE_OPTIONS)
+    target_compile_options(test_freertos_task PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_semaphore PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_queue PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_event_group PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_stream_buffer PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_message_buffer PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_sw_timer PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_enhanced_multitasking PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_semaphore_stl PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_enhanced_timeout_precision PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_enhanced_cpp17_features PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_enhanced_freertos_sw_timer PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_enhanced_debug PRIVATE ${GTEST_COMPILE_OPTIONS})
+endif()
 
 # Discover tests
 include(GoogleTest)

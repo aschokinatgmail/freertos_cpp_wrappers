@@ -135,7 +135,7 @@ private:
     TimerHandle_t generateHandle();
     bool isValidTimer(TimerHandle_t timer) const;
     void executeCallback(TimerHandle_t timer);
-    void scheduleTimerExpiry(TimerHandle_t timer, TickType_t delay = 0);
+    void scheduleTimerExpiry(TimerHandle_t timer, TickType_t delay = 0, TickType_t base_time = 0);
 };
 
 /**

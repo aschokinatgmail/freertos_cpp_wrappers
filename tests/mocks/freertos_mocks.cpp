@@ -114,6 +114,12 @@ TaskHandle_t xTaskGetIdleTaskHandle(void) {
 }
 
 TickType_t xTaskGetTickCount(void) {
+    // Use enhanced simulation if enabled
+    auto& enhanced_mock = freertos_mocks::EnhancedTimerMock::instance();
+    if (enhanced_mock.isSimulationEnabled()) {
+        return enhanced_mock.getSimulator().getCurrentTime();
+    }
+    
     if (g_freertos_mock) {
         return g_freertos_mock->xTaskGetTickCount();
     }

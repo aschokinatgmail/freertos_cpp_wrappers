@@ -74,9 +74,6 @@ BaseType_t TimerServiceSimulator::startTimer(TimerHandle_t timer, TickType_t tic
     command_queue_.emplace(timer, TimerCommand::Start);
     command_queue_.back().command_time = current_time_;
     
-    // Process commands immediately for start operations to provide immediate response
-    processTimerCommands();
-    
     return pdPASS;
 }
 
@@ -88,9 +85,6 @@ BaseType_t TimerServiceSimulator::stopTimer(TimerHandle_t timer, TickType_t tick
     // Add stop command to queue
     command_queue_.emplace(timer, TimerCommand::Stop);
     command_queue_.back().command_time = current_time_;
-    
-    // Process commands immediately
-    processTimerCommands();
     
     return pdPASS;
 }
@@ -104,9 +98,6 @@ BaseType_t TimerServiceSimulator::resetTimer(TimerHandle_t timer, TickType_t tic
     command_queue_.emplace(timer, TimerCommand::Reset);
     command_queue_.back().command_time = current_time_;
     
-    // Process commands immediately
-    processTimerCommands();
-    
     return pdPASS;
 }
 
@@ -119,9 +110,6 @@ BaseType_t TimerServiceSimulator::changePeriod(TimerHandle_t timer, TickType_t n
     // Add change period command to queue
     command_queue_.emplace(timer, TimerCommand::ChangePeriod, new_period);
     command_queue_.back().command_time = current_time_;
-    
-    // Process commands immediately
-    processTimerCommands();
     
     return pdPASS;
 }
@@ -180,10 +168,11 @@ void* TimerServiceSimulator::getTimerID(TimerHandle_t timer) {
     return timers_[timer]->timer_id;
 }
 
-void TimerServiceSimulator::scheduleTimerExpiry(TimerHandle_t timer, TickType_t delay) {
+void TimerServiceSimulator::scheduleTimerExpiry(TimerHandle_t timer, TickType_t delay, TickType_t base_time) {
     if (isValidTimer(timer)) {
         auto& info = timers_[timer];
-        info->expiry_time = current_time_ + (delay > 0 ? delay : info->period_ticks);
+        TickType_t time_base = (base_time > 0) ? base_time : current_time_;
+        info->expiry_time = time_base + (delay > 0 ? delay : info->period_ticks);
     }
 }
 
@@ -219,7 +208,7 @@ void TimerServiceSimulator::processTimerCommands() {
         case TimerCommand::Start:
             if (!info->is_active) {
                 info->is_active = true;
-                scheduleTimerExpiry(command.timer);
+                scheduleTimerExpiry(command.timer, 0, command.command_time);
             }
             break;
             

@@ -425,13 +425,28 @@ TEST_F(EnhancedFreeRTOSSwTimerTest, ExpiryTimeCalculation) {
     
     // Start timer at time 100
     advanceTime(100);
-    EXPECT_EQ(test_timer.start(), pdPASS);
     
-    // Expiry time should be current_time + period = 100 + 300 = 400
-    EXPECT_EQ(xTimerGetExpiryTime(reinterpret_cast<TimerHandle_t>(&test_timer)), 400);
+    auto& sim = enhanced_mock->getSimulator();
+    EXPECT_EQ(sim.getPendingCommandCount(), 0);  // Should be 0 initially
+    
+    EXPECT_EQ(test_timer.start(), pdPASS);
+    EXPECT_EQ(sim.getPendingCommandCount(), 1);  // Should have 1 command queued
+    
+    // Process the start command
+    advanceTime(1);  // Now at time 101, commands processed
+    EXPECT_EQ(sim.getPendingCommandCount(), 0);  // Commands should be processed
+    
+    // Check if timer is running
+    EXPECT_TRUE(test_timer.running());
+    
+    // remaining_ticks() should show time until expiry
+    // Timer started at time 100 with period 300, so expiry at 400
+    // Current time is 101, so remaining = 400 - 101 = 299
+    TickType_t remaining_after_start = test_timer.remaining_ticks();
+    EXPECT_EQ(remaining_after_start, 299);
     
     // Advance time and check remaining time calculation
-    advanceTime(150);  // Now at time 250
+    advanceTime(149);  // Now at time 250 (101 + 149)
     TickType_t remaining = test_timer.remaining_ticks();
     EXPECT_EQ(remaining, 150);  // 400 - 250 = 150
 }
