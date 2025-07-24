@@ -26,6 +26,7 @@
 #include <chrono>
 #include <queue>
 #include <memory>
+#include <thread>
 
 namespace freertos_mocks {
 
@@ -123,6 +124,10 @@ public:
     void enableCallbackTracking(bool enable) { track_callbacks_ = enable; }
     size_t getCallbackCount(TimerHandle_t timer) const;
     void clearCallbackHistory();
+    
+    // Command processing control
+    void setImmediateProcessing(bool immediate) { immediate_processing_ = immediate; }
+    bool isImmediateProcessing() const { return immediate_processing_; }
 
 private:
     std::unordered_map<TimerHandle_t, std::unique_ptr<TimerInfo>> timers_;
@@ -130,6 +135,7 @@ private:
     TickType_t current_time_;
     TimerHandle_t next_handle_;
     bool track_callbacks_;
+    bool immediate_processing_;
     std::unordered_map<TimerHandle_t, size_t> callback_counts_;
     
     TimerHandle_t generateHandle();
@@ -155,6 +161,17 @@ public:
     bool isSimulationEnabled() const { return simulation_enabled_; }
     
     void reset() { simulator_.reset(); }
+    
+    // vTaskDelay simulation - works with timer time advancement
+    void simulateTaskDelay(TickType_t ticks) {
+        if (simulation_enabled_) {
+            // In enhanced simulation mode, vTaskDelay just advances simulated time
+            simulator_.advanceTime(ticks);
+        } else {
+            // In regular mode, simulate with actual sleep (much shorter for testing)
+            std::this_thread::sleep_for(std::chrono::microseconds(ticks * 10));
+        }
+    }
 
 private:
     EnhancedTimerMock() : simulation_enabled_(false) {}  // Disabled by default

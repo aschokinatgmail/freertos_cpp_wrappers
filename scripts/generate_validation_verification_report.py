@@ -20,6 +20,170 @@ def run_command(cmd, cwd=None):
     except Exception as e:
         return -1, "", str(e)
 
+def generate_failed_test_context(test_name, raw_output):
+    """Generate detailed context for a failed test including code snippets"""
+    context = f"""
+**Failed Test Context: `{test_name}`**
+
+*Test Type*: Enhanced Timer Behavior Test
+*Failure Pattern*: Timer simulation and callback execution issues
+
+"""
+    
+    # Extract specific failure reasons based on test name patterns
+    if "Timer" in test_name and ("Enhanced" in test_name or "Real" in test_name):
+        context += """```cpp
+// Example test context - Timer behavior verification
+auto callback = createCountingCallback();
+sa::timer test_timer("TestTimer", period_ticks, auto_reload, std::move(callback));
+
+// Start timer and advance simulated time
+EXPECT_EQ(test_timer.start(), pdPASS);
+EXPECT_TRUE(test_timer.running());
+
+// Advance time to trigger callbacks
+advanceTime(period_ticks);
+EXPECT_EQ(callback_count, expected_count);  // May fail due to timing issues
+```
+
+**Common Failure Reasons:**
+- Timer callback execution timing off by one tick
+- Enhanced timer simulation not properly integrated with vTaskDelay calls
+- Command queue processing timing differences between immediate and queued modes
+- Timer expiry calculation errors in the simulator
+
+**Debug Context:**
+This test verifies that enhanced timer mocks provide realistic FreeRTOS timer behavior including actual callback execution, proper timing simulation, and timer state management.
+
+"""
+    elif "ISR" in test_name:
+        context += """```cpp
+// ISR Functions test context - Interrupt-safe timer operations
+EXPECT_EQ(test_timer.start_from_isr(nullptr), pdPASS);
+EXPECT_TRUE(test_timer.running());
+
+advanceTime(period_ticks);
+EXPECT_EQ(callback_count, 1);  // Callback should execute once
+
+EXPECT_EQ(test_timer.reset_from_isr(nullptr), pdPASS);
+advanceTime(period_ticks);
+EXPECT_EQ(callback_count, 2);  // Should execute again after reset
+```
+
+**ISR-Specific Issues:**
+- ISR timer functions may not be properly simulated in enhanced mocks
+- Higher priority task woken flag handling differences
+- ISR context simulation limitations in unit test environment
+
+"""
+    elif "Stress" in test_name or "Many" in test_name:
+        context += """```cpp
+// Stress test context - Multiple concurrent timers
+std::vector<std::unique_ptr<sa::timer>> timers;
+std::vector<std::atomic<int>> counters(num_timers);
+
+// Create many timers with different periods
+for (int i = 0; i < num_timers; ++i) {
+    auto callback = [&counters, i]() { counters[i]++; };
+    timers.emplace_back(std::make_unique<sa::timer>(
+        name, base_period * (i + 1), pdTRUE, callback));
+    timers[i]->start();
+}
+
+// Advance time and check all counters
+advanceTime(test_duration);
+for (int i = 0; i < num_timers; ++i) {
+    int expected_count = test_duration / (base_period * (i + 1));
+    EXPECT_EQ(counters[i].load(), expected_count);  // May fail due to timing precision
+}
+```
+
+**Stress Test Issues:**
+- Timing precision errors accumulate with multiple timers
+- Timer service simulation may not handle concurrent expirations correctly
+- Memory and performance issues with large numbers of timers
+
+"""
+    elif "Integration" in test_name or "Comprehensive" in test_name:
+        context += """```cpp
+// Integration test context - Complex multi-timer scenarios
+struct TimerStats {
+    std::atomic<int> heartbeat_count{0};
+    std::atomic<int> status_count{0};  
+    std::atomic<int> cleanup_count{0};
+    std::atomic<bool> cleanup_triggered{false};
+};
+
+// Create timers with different purposes and periods
+sa::timer heartbeat_timer("Heartbeat", 50, pdTRUE, heartbeat_callback);
+sa::timer status_timer("Status", 200, pdTRUE, status_callback);
+sa::timer cleanup_timer("Cleanup", 1000, pdFALSE, cleanup_callback);
+
+// Test realistic embedded system scenario
+heartbeat_timer.start();
+status_timer.start(); 
+cleanup_timer.start();
+
+advanceTime(1000);  // Run for 1000ms
+
+// Verify all timers executed correctly
+EXPECT_EQ(stats.heartbeat_count, 20);  // 1000/50 = 20
+EXPECT_EQ(stats.status_count, 5);      // 1000/200 = 5  
+EXPECT_EQ(stats.cleanup_count, 1);     // Single-shot timer
+EXPECT_FALSE(cleanup_timer.running()); // Should be stopped
+```
+
+**Integration Test Issues:**
+- Complex timer interactions not properly simulated
+- Timer dependencies and cascading effects
+- Real-world timing scenarios not accurately modeled
+
+"""
+    else:
+        context += """```cpp
+// General test context
+// This test failed during execution with timing or simulation issues
+// Check the enhanced timer mock implementation for proper integration
+// with the FreeRTOS timer wrapper and vTaskDelay simulation
+```
+
+**General Debugging Steps:**
+- Verify enhanced timer simulation is enabled during test setup
+- Check vTaskDelay integration with timer time advancement
+- Ensure command processing mode (immediate vs queued) is appropriate for test
+- Review timer expiry calculation and callback execution logic
+
+"""
+    
+    # Add specific error messages if found in raw output
+    if raw_output and test_name in raw_output:
+        # Extract error messages for this specific test
+        lines = raw_output.split('\n')
+        in_test = False
+        error_lines = []
+        
+        for line in lines:
+            if test_name in line and ('[ RUN' in line or 'Running' in line):
+                in_test = True
+                continue
+            elif in_test and ('[ RUN' in line or '[  FAILED  ]' in line or '[       OK ]' in line):
+                if '[       OK ]' in line:
+                    in_test = False
+                break
+            elif in_test and ('Failure' in line or 'Expected' in line or 'Actual' in line):
+                error_lines.append(line.strip())
+        
+        if error_lines:
+            context += f"""
+**Specific Error Messages:**
+```
+{chr(10).join(error_lines[:5])}  # Show first 5 error lines
+```
+
+"""
+    
+    return context
+
 def parse_ctest_output(build_dir):
     """Parse CTest output to get test results"""
     # Run CTest with verbose output
@@ -866,6 +1030,19 @@ The following {len(failed_test_names)} test(s) failed during execution:
 """
             for i, test_name in enumerate(failed_test_names, 1):
                 report_content += f"{i}. `{test_name}`\n"
+            
+            # Add code snippets for failed test contexts
+            report_content += f"""
+
+### Failed Test Context Analysis
+
+The following sections provide specific code snippets and explanations for the contexts where test cases failed, helping to understand the failure reasons and debugging approaches.
+
+"""
+            
+            # Add detailed context for each failed test
+            for test_name in failed_test_names:
+                report_content += generate_failed_test_context(test_name, tests_info.get('raw_output', ''))
             
             report_content += f"""
 

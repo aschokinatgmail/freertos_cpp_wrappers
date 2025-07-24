@@ -6,15 +6,15 @@ This report provides comprehensive validation and verification results for the F
 
 ### Test Execution Summary
 - **Total Tests Executed**: 439
-- **✅ Passed**: 426 tests
-- **❌ Failed**: 13 tests
-- **Success Rate**: 97.0% (13 tests failed)
-- **Total Execution Time**: 5.49 seconds
-- **Average Test Time**: 0.0125 seconds per test
+- **✅ Passed**: 439 tests
+- **❌ Failed**: 0 tests
+- **Success Rate**: 100.0% (All tests passed!)
+- **Total Execution Time**: 5.19 seconds
+- **Average Test Time**: 0.0118 seconds per test
 
 ### Code Coverage Summary
-- **Line Coverage**: 96.4% (7388/7661 lines)
-- **Function Coverage**: 95.0% (2903/3055 functions)
+- **Line Coverage**: 96.3% (7399/7680 lines)
+- **Function Coverage**: 95.0% (2904/3057 functions)
 - **Coverage Scope**: Main library modules only (src/ and include/ directories)
 
 ## Detailed Test Results by Module
@@ -506,10 +506,10 @@ This report provides comprehensive validation and verification results for the F
 
 **Module Statistics:**
 - Tests: 30
-- Passed: 17
-- Failed: 13
-- Success Rate: 56.7%
-- Total Time: 0.710s
+- Passed: 30
+- Failed: 0
+- Success Rate: 100.0%
+- Total Time: 0.690s
 
 **Detailed Test Results:**
 
@@ -527,49 +527,33 @@ This report provides comprehensive validation and verification results for the F
 | 380 | EnhancedMultitaskingTest.TaskDeleteDuringExecution | ✅ PASS | 0.110s |
 | 381 | EnhancedMultitaskingTest.TaskExecFunctionCoverage | ✅ PASS | 0.020s |
 | 382 | EnhancedMultitaskingTest.SuspendedTaskStartupCoverage | ✅ PASS | 0.020s |
-| 422 | EnhancedFreeRTOSSwTimerTest.TimerCreationWithEnhancedMocks | ❌ FAIL | 0.000s |
-| 423 | EnhancedFreeRTOSSwTimerTest.SingleShotTimerRealBehavior | ❌ FAIL | 0.010s |
-| 424 | EnhancedFreeRTOSSwTimerTest.AutoReloadTimerRealBehavior | ❌ FAIL | 0.010s |
-| 425 | EnhancedFreeRTOSSwTimerTest.TimerResetRealBehavior | ❌ FAIL | 0.000s |
-| 426 | EnhancedFreeRTOSSwTimerTest.PeriodChangeWithRealBehavior | ❌ FAIL | 0.000s |
-| 427 | EnhancedFreeRTOSSwTimerTest.PeriodChangeWithChronoDurations | ❌ FAIL | 0.000s |
-| 428 | EnhancedFreeRTOSSwTimerTest.MultipleTimersCoordination | ❌ FAIL | 0.000s |
-| 429 | EnhancedFreeRTOSSwTimerTest.TimerInteraction | ❌ FAIL | 0.000s |
+| 422 | EnhancedFreeRTOSSwTimerTest.TimerCreationWithEnhancedMocks | ✅ PASS | 0.000s |
+| 423 | EnhancedFreeRTOSSwTimerTest.SingleShotTimerRealBehavior | ✅ PASS | 0.000s |
+| 424 | EnhancedFreeRTOSSwTimerTest.AutoReloadTimerRealBehavior | ✅ PASS | 0.000s |
+| 425 | EnhancedFreeRTOSSwTimerTest.TimerResetRealBehavior | ✅ PASS | 0.000s |
+| 426 | EnhancedFreeRTOSSwTimerTest.PeriodChangeWithRealBehavior | ✅ PASS | 0.000s |
+| 427 | EnhancedFreeRTOSSwTimerTest.PeriodChangeWithChronoDurations | ✅ PASS | 0.000s |
+| 428 | EnhancedFreeRTOSSwTimerTest.MultipleTimersCoordination | ✅ PASS | 0.000s |
+| 429 | EnhancedFreeRTOSSwTimerTest.TimerInteraction | ✅ PASS | 0.000s |
 | 430 | EnhancedFreeRTOSSwTimerTest.InvalidTimerOperations | ✅ PASS | 0.000s |
 | 431 | EnhancedFreeRTOSSwTimerTest.ZeroPeriodTimer | ✅ PASS | 0.000s |
 | 432 | EnhancedFreeRTOSSwTimerTest.NullCallbackTimer | ✅ PASS | 0.000s |
-| 433 | EnhancedFreeRTOSSwTimerTest.TimingAccuracyVerification | ❌ FAIL | 0.000s |
+| 433 | EnhancedFreeRTOSSwTimerTest.TimingAccuracyVerification | ✅ PASS | 0.000s |
 | 434 | EnhancedFreeRTOSSwTimerTest.ExpiryTimeCalculation | ✅ PASS | 0.000s |
-| 435 | EnhancedFreeRTOSSwTimerTest.DynamicTimerEnhancedBehavior | ❌ FAIL | 0.000s |
-| 436 | EnhancedFreeRTOSSwTimerTest.ISRFunctionsEnhancedBehavior | ❌ FAIL | 0.000s |
+| 435 | EnhancedFreeRTOSSwTimerTest.DynamicTimerEnhancedBehavior | ✅ PASS | 0.000s |
+| 436 | EnhancedFreeRTOSSwTimerTest.ISRFunctionsEnhancedBehavior | ✅ PASS | 0.000s |
 | 437 | EnhancedFreeRTOSSwTimerTest.CommandQueueProcessing | ✅ PASS | 0.000s |
-| 438 | EnhancedFreeRTOSSwTimerTest.ComprehensiveIntegrationTest | ❌ FAIL | 0.000s |
-| 439 | EnhancedFreeRTOSSwTimerTest.ManyTimersStressTest | ❌ FAIL | 0.010s |
-
-**Failed Test Details:**
-
-- **Test 422**: `EnhancedFreeRTOSSwTimerTest.TimerCreationWithEnhancedMocks` - Failed after 0.000s
-- **Test 423**: `EnhancedFreeRTOSSwTimerTest.SingleShotTimerRealBehavior` - Failed after 0.010s
-- **Test 424**: `EnhancedFreeRTOSSwTimerTest.AutoReloadTimerRealBehavior` - Failed after 0.010s
-- **Test 425**: `EnhancedFreeRTOSSwTimerTest.TimerResetRealBehavior` - Failed after 0.000s
-- **Test 426**: `EnhancedFreeRTOSSwTimerTest.PeriodChangeWithRealBehavior` - Failed after 0.000s
-- **Test 427**: `EnhancedFreeRTOSSwTimerTest.PeriodChangeWithChronoDurations` - Failed after 0.000s
-- **Test 428**: `EnhancedFreeRTOSSwTimerTest.MultipleTimersCoordination` - Failed after 0.000s
-- **Test 429**: `EnhancedFreeRTOSSwTimerTest.TimerInteraction` - Failed after 0.000s
-- **Test 433**: `EnhancedFreeRTOSSwTimerTest.TimingAccuracyVerification` - Failed after 0.000s
-- **Test 435**: `EnhancedFreeRTOSSwTimerTest.DynamicTimerEnhancedBehavior` - Failed after 0.000s
-- **Test 436**: `EnhancedFreeRTOSSwTimerTest.ISRFunctionsEnhancedBehavior` - Failed after 0.000s
-- **Test 438**: `EnhancedFreeRTOSSwTimerTest.ComprehensiveIntegrationTest` - Failed after 0.000s
-- **Test 439**: `EnhancedFreeRTOSSwTimerTest.ManyTimersStressTest` - Failed after 0.010s
+| 438 | EnhancedFreeRTOSSwTimerTest.ComprehensiveIntegrationTest | ✅ PASS | 0.000s |
+| 439 | EnhancedFreeRTOSSwTimerTest.ManyTimersStressTest | ✅ PASS | 0.010s |
 
 ## Code Coverage Analysis
 
 ### Coverage Overview
-The project achieves excellent code coverage with **96.4% line coverage** and **95.0% function coverage**.
+The project achieves excellent code coverage with **96.3% line coverage** and **95.0% function coverage**.
 
 ### Coverage Breakdown
-- **Lines Covered**: 7388 out of 7661 total lines
-- **Functions Covered**: 2903 out of 3055 total functions
+- **Lines Covered**: 7399 out of 7680 total lines
+- **Functions Covered**: 2904 out of 3057 total functions
 - **Coverage Target**: Main library modules only (excludes test infrastructure and system headers)
 
 **Detailed Uncovered Areas Analysis:**
@@ -1024,7 +1008,7 @@ The following sections provide specific references to uncovered code areas and e
     MOCK_METHOD(BaseType_t, xMessageBufferReset, (MessageBufferHandle_t xMessageBuffer));
 ```
 
-**Uncovered Area 40**: enhanced_timer_mocks.cpp:149-153
+**Uncovered Area 40**: enhanced_timer_mocks.cpp:169-173
 *Function*: `freertos_mocks::TimerServiceSimulator::setReloadMode(void*, unsigned int)`
 
 ```cpp
@@ -1035,7 +1019,7 @@ The following sections provide specific references to uncovered code areas and e
     timers_[timer]->auto_reload = auto_reload;
 ```
 
-**Uncovered Area 41**: enhanced_timer_mocks.cpp:310-318
+**Uncovered Area 41**: enhanced_timer_mocks.cpp:330-338
 *Function*: `freertos_mocks::TimerServiceSimulator::getActiveTimerCount() const`
 
 ```cpp
@@ -1046,7 +1030,7 @@ The following sections provide specific references to uncovered code areas and e
     for (const auto& pair : timers_) {
 ```
 
-**Uncovered Area 42**: enhanced_timer_mocks.cpp:324-326
+**Uncovered Area 42**: enhanced_timer_mocks.cpp:344-346
 *Function*: `freertos_mocks::TimerServiceSimulator::hasTimer(void*) const`
 
 ```cpp
@@ -1057,7 +1041,7 @@ The following sections provide specific references to uncovered code areas and e
     }
 ```
 
-**Uncovered Area 43**: enhanced_timer_mocks.cpp:328-331
+**Uncovered Area 43**: enhanced_timer_mocks.cpp:348-351
 *Function*: `freertos_mocks::TimerServiceSimulator::getCallbackCount(void*) const`
 
 ```cpp
@@ -1068,7 +1052,7 @@ The following sections provide specific references to uncovered code areas and e
     return it != callback_counts_.end() ? it->second : 0;
 ```
 
-**Uncovered Area 44**: enhanced_timer_mocks.cpp:333-335
+**Uncovered Area 44**: enhanced_timer_mocks.cpp:353-355
 *Function*: `freertos_mocks::TimerServiceSimulator::clearCallbackHistory()`
 
 ```cpp
@@ -1079,21 +1063,32 @@ The following sections provide specific references to uncovered code areas and e
     }
 ```
 
-**Uncovered Area 45**: freertos_mocks.cpp:900-905
+**Uncovered Area 45**: enhanced_timer_mocks.hpp:166-174
+*Function*: `freertos_mocks::EnhancedTimerMock::simulateTaskDelay(unsigned int)`
+
+```cpp
+    
+    // vTaskDelay simulation - works with timer time advancement
+>>> void simulateTaskDelay(TickType_t ticks) {
+    if (simulation_enabled_) {
+    // In enhanced simulation mode, vTaskDelay just advances simulated time
+```
+
+**Uncovered Area 46**: freertos_mocks.cpp:908-913
 *Function*: `xMessageBufferSendFromISR`
 
 ```cpp
 
 ```
 
-**Uncovered Area 46**: freertos_mocks.cpp:914-919
+**Uncovered Area 47**: freertos_mocks.cpp:922-927
 *Function*: `xMessageBufferReceiveFromISR`
 
 ```cpp
 
 ```
 
-**Uncovered Area 47**: stl_semaphore_mocks.hpp:165
+**Uncovered Area 48**: stl_semaphore_mocks.hpp:165
 *Function*: `freertos_test::stl_counting_semaphore::take(unsigned int)::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -1104,7 +1099,7 @@ The following sections provide specific references to uncovered code areas and e
     return pdTRUE;
 ```
 
-**Uncovered Area 48**: stl_semaphore_mocks.hpp:77
+**Uncovered Area 49**: stl_semaphore_mocks.hpp:77
 *Function*: `freertos_test::stl_binary_semaphore::take(unsigned int)::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -1115,7 +1110,7 @@ The following sections provide specific references to uncovered code areas and e
     return pdTRUE;
 ```
 
-**Uncovered Area 49**: test_enhanced_cpp17_features.cpp:115
+**Uncovered Area 50**: test_enhanced_cpp17_features.cpp:115
 *Function*: `Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -1126,7 +1121,7 @@ The following sections provide specific references to uncovered code areas and e
     auto periodic = [&periodic_count]() { periodic_count++; };
 ```
 
-**Uncovered Area 50**: test_enhanced_cpp17_features.cpp:116
+**Uncovered Area 51**: test_enhanced_cpp17_features.cpp:116
 *Function*: `Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test::TestBody()::{lambda()#2}::operator()() const`
 
 ```cpp
@@ -1137,7 +1132,7 @@ The following sections provide specific references to uncovered code areas and e
     
 ```
 
-**Uncovered Area 51**: test_enhanced_cpp17_features.cpp:117
+**Uncovered Area 52**: test_enhanced_cpp17_features.cpp:117
 *Function*: `Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test::TestBody()::{lambda()#3}::operator()() const`
 
 ```cpp
@@ -1148,7 +1143,7 @@ The following sections provide specific references to uncovered code areas and e
     // Test move with different chrono duration types - using static allocation
 ```
 
-**Uncovered Area 52**: test_enhanced_cpp17_features.cpp:127
+**Uncovered Area 53**: test_enhanced_cpp17_features.cpp:127
 *Function*: `Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test::TestBody()::{lambda()#4}::operator()() const`
 
 ```cpp
@@ -1159,7 +1154,7 @@ The following sections provide specific references to uncovered code areas and e
     [&periodic_count]() { periodic_count++; });
 ```
 
-**Uncovered Area 53**: test_enhanced_cpp17_features.cpp:128
+**Uncovered Area 54**: test_enhanced_cpp17_features.cpp:128
 *Function*: `Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test::TestBody()::{lambda()#5}::operator()() const`
 
 ```cpp
@@ -1170,7 +1165,7 @@ The following sections provide specific references to uncovered code areas and e
     
 ```
 
-**Uncovered Area 54**: test_enhanced_cpp17_features.cpp:129
+**Uncovered Area 55**: test_enhanced_cpp17_features.cpp:129
 *Function*: `Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test::TestBody()::{lambda()#6}::operator()() const`
 
 ```cpp
@@ -1181,7 +1176,7 @@ The following sections provide specific references to uncovered code areas and e
     // Test move construction instead of assignment (which is deleted)
 ```
 
-**Uncovered Area 55**: test_enhanced_cpp17_features.cpp:152-154
+**Uncovered Area 56**: test_enhanced_cpp17_features.cpp:152-154
 *Function*: `Cpp17FeaturesTest_LambdaCaptureVarieties_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -1192,7 +1187,7 @@ The following sections provide specific references to uncovered code areas and e
     });
 ```
 
-**Uncovered Area 56**: test_enhanced_cpp17_features.cpp:157-159
+**Uncovered Area 57**: test_enhanced_cpp17_features.cpp:157-159
 *Function*: `Cpp17FeaturesTest_LambdaCaptureVarieties_Test::TestBody()::{lambda()#2}::operator()() const`
 
 ```cpp
@@ -1203,7 +1198,7 @@ The following sections provide specific references to uncovered code areas and e
     });
 ```
 
-**Uncovered Area 57**: test_enhanced_cpp17_features.cpp:162-164
+**Uncovered Area 58**: test_enhanced_cpp17_features.cpp:162-164
 *Function*: `Cpp17FeaturesTest_LambdaCaptureVarieties_Test::TestBody()::{lambda()#3}::operator()() const`
 
 ```cpp
@@ -1214,7 +1209,7 @@ The following sections provide specific references to uncovered code areas and e
     });
 ```
 
-**Uncovered Area 58**: test_enhanced_cpp17_features.cpp:172
+**Uncovered Area 59**: test_enhanced_cpp17_features.cpp:172
 *Function*: `Cpp17FeaturesTest_FunctionObjectVarieties_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -1225,7 +1220,7 @@ The following sections provide specific references to uncovered code areas and e
     
 ```
 
-**Uncovered Area 59**: test_enhanced_cpp17_features.cpp:178
+**Uncovered Area 60**: test_enhanced_cpp17_features.cpp:178
 *Function*: `Cpp17FeaturesTest_FunctionObjectVarieties_Test::TestBody()::CustomCallable::operator()() const`
 
 ```cpp
@@ -1236,7 +1231,7 @@ The following sections provide specific references to uncovered code areas and e
     
 ```
 
-**Uncovered Area 60**: test_enhanced_cpp17_features.cpp:185
+**Uncovered Area 61**: test_enhanced_cpp17_features.cpp:185
 *Function*: `Cpp17FeaturesTest_FunctionObjectVarieties_Test::TestBody()::{lambda()#2}::operator()() const`
 
 ```cpp
@@ -1247,7 +1242,7 @@ The following sections provide specific references to uncovered code areas and e
     
 ```
 
-**Uncovered Area 61**: test_enhanced_cpp17_features.cpp:292
+**Uncovered Area 62**: test_enhanced_cpp17_features.cpp:292
 *Function*: `Cpp17FeaturesTest_CompileTimeConstants_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -1258,7 +1253,7 @@ The following sections provide specific references to uncovered code areas and e
     
 ```
 
-**Uncovered Area 62**: test_enhanced_cpp17_features.cpp:313
+**Uncovered Area 63**: test_enhanced_cpp17_features.cpp:313
 *Function*: `Cpp17FeaturesTest_ChronoTypesIntegration_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -1269,7 +1264,7 @@ The following sections provide specific references to uncovered code areas and e
     []() { /* periodic */ },
 ```
 
-**Uncovered Area 63**: test_enhanced_cpp17_features.cpp:314
+**Uncovered Area 64**: test_enhanced_cpp17_features.cpp:314
 *Function*: `Cpp17FeaturesTest_ChronoTypesIntegration_Test::TestBody()::{lambda()#2}::operator()() const`
 
 ```cpp
@@ -1280,7 +1275,7 @@ The following sections provide specific references to uncovered code areas and e
     500ms);
 ```
 
-**Uncovered Area 64**: test_enhanced_cpp17_features.cpp:315
+**Uncovered Area 65**: test_enhanced_cpp17_features.cpp:315
 *Function*: `Cpp17FeaturesTest_ChronoTypesIntegration_Test::TestBody()::{lambda()#3}::operator()() const`
 
 ```cpp
@@ -1291,7 +1286,7 @@ The following sections provide specific references to uncovered code areas and e
     
 ```
 
-**Uncovered Area 65**: test_enhanced_cpp17_features.cpp:319
+**Uncovered Area 66**: test_enhanced_cpp17_features.cpp:319
 *Function*: `Cpp17FeaturesTest_ChronoTypesIntegration_Test::TestBody()::{lambda()#4}::operator()() const`
 
 ```cpp
@@ -1302,7 +1297,7 @@ The following sections provide specific references to uncovered code areas and e
     []() { /* periodic */ },
 ```
 
-**Uncovered Area 66**: test_enhanced_cpp17_features.cpp:320
+**Uncovered Area 67**: test_enhanced_cpp17_features.cpp:320
 *Function*: `Cpp17FeaturesTest_ChronoTypesIntegration_Test::TestBody()::{lambda()#5}::operator()() const`
 
 ```cpp
@@ -1313,7 +1308,7 @@ The following sections provide specific references to uncovered code areas and e
     750ms);
 ```
 
-**Uncovered Area 67**: test_enhanced_cpp17_features.cpp:321
+**Uncovered Area 68**: test_enhanced_cpp17_features.cpp:321
 *Function*: `Cpp17FeaturesTest_ChronoTypesIntegration_Test::TestBody()::{lambda()#6}::operator()() const`
 
 ```cpp
@@ -1324,7 +1319,7 @@ The following sections provide specific references to uncovered code areas and e
     
 ```
 
-**Uncovered Area 68**: test_enhanced_cpp17_features.cpp:325
+**Uncovered Area 69**: test_enhanced_cpp17_features.cpp:325
 *Function*: `Cpp17FeaturesTest_ChronoTypesIntegration_Test::TestBody()::{lambda()#7}::operator()() const`
 
 ```cpp
@@ -1335,7 +1330,7 @@ The following sections provide specific references to uncovered code areas and e
     []() { /* periodic */ },
 ```
 
-**Uncovered Area 69**: test_enhanced_cpp17_features.cpp:326
+**Uncovered Area 70**: test_enhanced_cpp17_features.cpp:326
 *Function*: `Cpp17FeaturesTest_ChronoTypesIntegration_Test::TestBody()::{lambda()#8}::operator()() const`
 
 ```cpp
@@ -1346,7 +1341,7 @@ The following sections provide specific references to uncovered code areas and e
     duration<double, std::milli>(123.456));
 ```
 
-**Uncovered Area 70**: test_enhanced_cpp17_features.cpp:327
+**Uncovered Area 71**: test_enhanced_cpp17_features.cpp:327
 *Function*: `Cpp17FeaturesTest_ChronoTypesIntegration_Test::TestBody()::{lambda()#9}::operator()() const`
 
 ```cpp
@@ -1357,7 +1352,7 @@ The following sections provide specific references to uncovered code areas and e
     
 ```
 
-**Uncovered Area 71**: test_enhanced_cpp17_features.cpp:350
+**Uncovered Area 72**: test_enhanced_cpp17_features.cpp:350
 *Function*: `Cpp17FeaturesTest_STLContainerIntegration_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -1368,7 +1363,7 @@ The following sections provide specific references to uncovered code areas and e
     tasks.emplace_back("VectorTask3", 3, []() { /* test */ });
 ```
 
-**Uncovered Area 72**: test_enhanced_cpp17_features.cpp:351
+**Uncovered Area 73**: test_enhanced_cpp17_features.cpp:351
 *Function*: `Cpp17FeaturesTest_STLContainerIntegration_Test::TestBody()::{lambda()#2}::operator()() const`
 
 ```cpp
@@ -1379,7 +1374,7 @@ The following sections provide specific references to uncovered code areas and e
     
 ```
 
-**Uncovered Area 73**: test_enhanced_cpp17_features.cpp:352
+**Uncovered Area 74**: test_enhanced_cpp17_features.cpp:352
 *Function*: `Cpp17FeaturesTest_STLContainerIntegration_Test::TestBody()::{lambda()#3}::operator()() const`
 
 ```cpp
@@ -1390,7 +1385,7 @@ The following sections provide specific references to uncovered code areas and e
     EXPECT_EQ(tasks.size(), 3);
 ```
 
-**Uncovered Area 74**: test_enhanced_cpp17_features.cpp:369
+**Uncovered Area 75**: test_enhanced_cpp17_features.cpp:369
 *Function*: `Cpp17FeaturesTest_UniquePtrIntegration_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -1401,7 +1396,7 @@ The following sections provide specific references to uncovered code areas and e
     
 ```
 
-**Uncovered Area 75**: test_enhanced_cpp17_features.cpp:370
+**Uncovered Area 76**: test_enhanced_cpp17_features.cpp:370
 *Function*: `Cpp17FeaturesTest_UniquePtrIntegration_Test::TestBody()::{lambda()#2}::operator()() const`
 
 ```cpp
@@ -1412,7 +1407,7 @@ The following sections provide specific references to uncovered code areas and e
     EXPECT_NE(task1->handle(), nullptr);
 ```
 
-**Uncovered Area 76**: test_enhanced_cpp17_features.cpp:69
+**Uncovered Area 77**: test_enhanced_cpp17_features.cpp:69
 *Function*: `Cpp17FeaturesTest_TaskMoveSemanticsPerfectForwarding_Test::TestBody()::{lambda()#1}::operator()()`
 
 ```cpp
@@ -1423,7 +1418,7 @@ The following sections provide specific references to uncovered code areas and e
     
 ```
 
-**Uncovered Area 77**: test_enhanced_cpp17_features.cpp:70
+**Uncovered Area 78**: test_enhanced_cpp17_features.cpp:70
 *Function*: `Cpp17FeaturesTest_TaskMoveSemanticsPerfectForwarding_Test::TestBody()::{lambda()#2}::operator()() const`
 
 ```cpp
@@ -1434,7 +1429,7 @@ The following sections provide specific references to uncovered code areas and e
     EXPECT_CALL(*mock, xTaskCreateStatic(_, _, _, _, _, _, _))
 ```
 
-**Uncovered Area 78**: test_enhanced_cpp17_features.cpp:92
+**Uncovered Area 79**: test_enhanced_cpp17_features.cpp:92
 *Function*: `Cpp17FeaturesTest_TaskMoveAssignmentChaining_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -1445,7 +1440,7 @@ The following sections provide specific references to uncovered code areas and e
     // Create multiple tasks
 ```
 
-**Uncovered Area 79**: test_enhanced_cpp17_features.cpp:95
+**Uncovered Area 80**: test_enhanced_cpp17_features.cpp:95
 *Function*: `Cpp17FeaturesTest_TaskMoveAssignmentChaining_Test::TestBody()::{lambda()#2}::operator()() const`
 
 ```cpp
@@ -1456,7 +1451,7 @@ The following sections provide specific references to uncovered code areas and e
     sa::task<1024> task3("ToMove2", 3, task_func);
 ```
 
-**Uncovered Area 80**: test_enhanced_freertos_sw_timer.cpp:379
+**Uncovered Area 81**: test_enhanced_freertos_sw_timer.cpp:379
 *Function*: `EnhancedFreeRTOSSwTimerTest_ZeroPeriodTimer_Test::TestBody()::{lambda(void*)#1}::operator()(void*) const`
 
 ```cpp
@@ -1467,7 +1462,7 @@ The following sections provide specific references to uncovered code areas and e
     }
 ```
 
-**Uncovered Area 81**: test_freertos_sw_timer.cpp:155
+**Uncovered Area 82**: test_freertos_sw_timer.cpp:155
 *Function*: `FreeRTOSSwTimerTest_StaticTimerAllocatorCreate_Test::TestBody()::{lambda(void*)#1}::operator()(void*) const`
 
 ```cpp
@@ -1478,7 +1473,7 @@ The following sections provide specific references to uncovered code areas and e
     EXPECT_EQ(handle, mock_timer_handle);
 ```
 
-**Uncovered Area 82**: test_freertos_sw_timer.cpp:168
+**Uncovered Area 83**: test_freertos_sw_timer.cpp:168
 *Function*: `FreeRTOSSwTimerTest_StaticTimerAllocatorCreateNullReturn_Test::TestBody()::{lambda(void*)#1}::operator()(void*) const`
 
 ```cpp
@@ -1489,7 +1484,7 @@ The following sections provide specific references to uncovered code areas and e
     EXPECT_EQ(handle, nullptr);
 ```
 
-**Uncovered Area 83**: test_freertos_sw_timer.cpp:203
+**Uncovered Area 84**: test_freertos_sw_timer.cpp:203
 *Function*: `FreeRTOSSwTimerTest_DynamicTimerAllocatorCreate_Test::TestBody()::{lambda(void*)#1}::operator()(void*) const`
 
 ```cpp
@@ -1500,7 +1495,7 @@ The following sections provide specific references to uncovered code areas and e
     EXPECT_EQ(handle, mock_timer_handle);
 ```
 
-**Uncovered Area 84**: test_freertos_sw_timer.cpp:216
+**Uncovered Area 85**: test_freertos_sw_timer.cpp:216
 *Function*: `FreeRTOSSwTimerTest_DynamicTimerAllocatorCreateNullReturn_Test::TestBody()::{lambda(void*)#1}::operator()(void*) const`
 
 ```cpp
@@ -1511,7 +1506,7 @@ The following sections provide specific references to uncovered code areas and e
     EXPECT_EQ(handle, nullptr);
 ```
 
-**Uncovered Area 85**: test_freertos_sw_timer.cpp:90
+**Uncovered Area 86**: test_freertos_sw_timer.cpp:90
 *Function*: `FreeRTOSSwTimerTest::createTestCallback()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -1522,7 +1517,7 @@ The following sections provide specific references to uncovered code areas and e
     
 ```
 
-**Uncovered Area 86**: test_freertos_task.cpp:1020
+**Uncovered Area 87**: test_freertos_task.cpp:1020
 *Function*: `FreeRTOSTaskTest_TaskChronoCompatibility_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -1533,7 +1528,7 @@ The following sections provide specific references to uncovered code areas and e
     // Test chrono duration compatibility with notify_take
 ```
 
-**Uncovered Area 87**: test_freertos_task.cpp:1090
+**Uncovered Area 88**: test_freertos_task.cpp:1090
 *Function*: `FreeRTOSTaskTest_TaskMoveConstruction_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -1544,7 +1539,7 @@ The following sections provide specific references to uncovered code areas and e
     
 ```
 
-**Uncovered Area 88**: test_freertos_task.cpp:1108
+**Uncovered Area 89**: test_freertos_task.cpp:1108
 *Function*: `FreeRTOSTaskTest_PeriodicTaskMoveConstruction_Test::TestBody()::{lambda()#2}::operator()() const`
 
 ```cpp
@@ -1555,7 +1550,7 @@ The following sections provide specific references to uncovered code areas and e
     
 ```
 
-**Uncovered Area 89**: test_freertos_task.cpp:1108
+**Uncovered Area 90**: test_freertos_task.cpp:1108
 *Function*: `FreeRTOSTaskTest_PeriodicTaskMoveConstruction_Test::TestBody()::{lambda()#3}::operator()() const`
 
 ```cpp
@@ -1566,7 +1561,7 @@ The following sections provide specific references to uncovered code areas and e
     
 ```
 
-**Uncovered Area 90**: test_freertos_task.cpp:1108
+**Uncovered Area 91**: test_freertos_task.cpp:1108
 *Function*: `FreeRTOSTaskTest_PeriodicTaskMoveConstruction_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -1577,7 +1572,7 @@ The following sections provide specific references to uncovered code areas and e
     
 ```
 
-**Uncovered Area 91**: test_freertos_task.cpp:1162
+**Uncovered Area 92**: test_freertos_task.cpp:1162
 *Function*: `FreeRTOSTaskTest_PeriodicTaskTypo_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -1588,7 +1583,7 @@ The following sections provide specific references to uncovered code areas and e
     []() {},  // periodic_routine
 ```
 
-**Uncovered Area 92**: test_freertos_task.cpp:1163
+**Uncovered Area 93**: test_freertos_task.cpp:1163
 *Function*: `FreeRTOSTaskTest_PeriodicTaskTypo_Test::TestBody()::{lambda()#2}::operator()() const`
 
 ```cpp
@@ -1599,7 +1594,7 @@ The following sections provide specific references to uncovered code areas and e
     100ms     // period
 ```
 
-**Uncovered Area 93**: test_freertos_task.cpp:1164
+**Uncovered Area 94**: test_freertos_task.cpp:1164
 *Function*: `FreeRTOSTaskTest_PeriodicTaskTypo_Test::TestBody()::{lambda()#3}::operator()() const`
 
 ```cpp
@@ -1610,7 +1605,7 @@ The following sections provide specific references to uncovered code areas and e
     );
 ```
 
-**Uncovered Area 94**: test_freertos_task.cpp:1187
+**Uncovered Area 95**: test_freertos_task.cpp:1187
 *Function*: `FreeRTOSTaskTest_TaskTemplateInstantiation_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -1621,7 +1616,7 @@ The following sections provide specific references to uncovered code areas and e
     
 ```
 
-**Uncovered Area 95**: test_freertos_task.cpp:1203
+**Uncovered Area 96**: test_freertos_task.cpp:1203
 *Function*: `FreeRTOSTaskTest_DynamicTaskDifferentSizes_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -1632,7 +1627,7 @@ The following sections provide specific references to uncovered code areas and e
     
 ```
 
-**Uncovered Area 96**: test_freertos_task.cpp:1213
+**Uncovered Area 97**: test_freertos_task.cpp:1213
 *Function*: `FreeRTOSTaskTest_TaskNotificationEdgeCases_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -1643,7 +1638,7 @@ The following sections provide specific references to uncovered code areas and e
     // Test notification with different duration types (microseconds)
 ```
 
-**Uncovered Area 97**: test_freertos_task.cpp:1298-1300
+**Uncovered Area 98**: test_freertos_task.cpp:1298-1300
 *Function*: `FreeRTOSTaskTest_RacingConditionTaskConstructorInitialization_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -1654,7 +1649,7 @@ The following sections provide specific references to uncovered code areas and e
     });
 ```
 
-**Uncovered Area 98**: test_freertos_task.cpp:1326
+**Uncovered Area 99**: test_freertos_task.cpp:1326
 *Function*: `FreeRTOSTaskTest_ConcurrentTaskCreationAndDestruction_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -1665,7 +1660,7 @@ The following sections provide specific references to uncovered code areas and e
     auto task3 = std::make_unique<sa::task<512>>("Task3", 3, []() {});
 ```
 
-**Uncovered Area 99**: test_freertos_task.cpp:1327
+**Uncovered Area 100**: test_freertos_task.cpp:1327
 *Function*: `FreeRTOSTaskTest_ConcurrentTaskCreationAndDestruction_Test::TestBody()::{lambda()#2}::operator()() const`
 
 ```cpp
@@ -1676,7 +1671,7 @@ The following sections provide specific references to uncovered code areas and e
     
 ```
 
-**Uncovered Area 100**: test_freertos_task.cpp:1328
+**Uncovered Area 101**: test_freertos_task.cpp:1328
 *Function*: `FreeRTOSTaskTest_ConcurrentTaskCreationAndDestruction_Test::TestBody()::{lambda()#3}::operator()() const`
 
 ```cpp
@@ -1687,7 +1682,7 @@ The following sections provide specific references to uncovered code areas and e
     EXPECT_EQ(task1->handle(), handles[0]);
 ```
 
-**Uncovered Area 101**: test_freertos_task.cpp:135
+**Uncovered Area 102**: test_freertos_task.cpp:135
 *Function*: `FreeRTOSTaskTest_DynamicTaskAllocatorCreateSuccess_Test::TestBody()::{lambda(void*)#1}::operator()(void*) const`
 
 ```cpp
@@ -1698,7 +1693,7 @@ The following sections provide specific references to uncovered code areas and e
     
 ```
 
-**Uncovered Area 102**: test_freertos_task.cpp:1354
+**Uncovered Area 103**: test_freertos_task.cpp:1354
 *Function*: `FreeRTOSTaskTest_MoveSemanticsRacingConditions_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -1709,7 +1704,7 @@ The following sections provide specific references to uncovered code areas and e
     
 ```
 
-**Uncovered Area 103**: test_freertos_task.cpp:1382
+**Uncovered Area 104**: test_freertos_task.cpp:1382
 *Function*: `FreeRTOSTaskTest_PeriodicTaskLifecycleRacingConditions_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -1720,7 +1715,7 @@ The following sections provide specific references to uncovered code areas and e
     [&periodic_count]() { periodic_count++; },  // periodic_routine
 ```
 
-**Uncovered Area 104**: test_freertos_task.cpp:1383
+**Uncovered Area 105**: test_freertos_task.cpp:1383
 *Function*: `FreeRTOSTaskTest_PeriodicTaskLifecycleRacingConditions_Test::TestBody()::{lambda()#2}::operator()() const`
 
 ```cpp
@@ -1731,7 +1726,7 @@ The following sections provide specific references to uncovered code areas and e
     std::chrono::milliseconds(100)
 ```
 
-**Uncovered Area 105**: test_freertos_task.cpp:1384
+**Uncovered Area 106**: test_freertos_task.cpp:1384
 *Function*: `FreeRTOSTaskTest_PeriodicTaskLifecycleRacingConditions_Test::TestBody()::{lambda()#3}::operator()() const`
 
 ```cpp
@@ -1742,7 +1737,7 @@ The following sections provide specific references to uncovered code areas and e
     );
 ```
 
-**Uncovered Area 106**: test_freertos_task.cpp:1411
+**Uncovered Area 107**: test_freertos_task.cpp:1411
 *Function*: `FreeRTOSTaskTest_NotificationRacingConditions_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -1753,7 +1748,7 @@ The following sections provide specific references to uncovered code areas and e
     // Simulate rapid notification operations
 ```
 
-**Uncovered Area 107**: test_freertos_task.cpp:1456-1458
+**Uncovered Area 108**: test_freertos_task.cpp:1456-1458
 *Function*: `FreeRTOSTaskTest_ComplexMultitaskingScenario_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -1764,7 +1759,7 @@ The following sections provide specific references to uncovered code areas and e
     });
 ```
 
-**Uncovered Area 108**: test_freertos_task.cpp:1464-1466
+**Uncovered Area 109**: test_freertos_task.cpp:1464-1466
 *Function*: `FreeRTOSTaskTest_ComplexMultitaskingScenario_Test::TestBody()::{lambda()#2}::operator()() const`
 
 ```cpp
@@ -1775,7 +1770,7 @@ The following sections provide specific references to uncovered code areas and e
     });
 ```
 
-**Uncovered Area 109**: test_freertos_task.cpp:1472-1474
+**Uncovered Area 110**: test_freertos_task.cpp:1472-1474
 *Function*: `FreeRTOSTaskTest_ComplexMultitaskingScenario_Test::TestBody()::{lambda()#3}::operator()() const`
 
 ```cpp
@@ -1786,7 +1781,7 @@ The following sections provide specific references to uncovered code areas and e
     });
 ```
 
-**Uncovered Area 110**: test_freertos_task.cpp:1543
+**Uncovered Area 111**: test_freertos_task.cpp:1543
 *Function*: `FreeRTOSTaskTest_TaskSystemStatusUnderLoad_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -1797,7 +1792,7 @@ The following sections provide specific references to uncovered code areas and e
     sa::task<512> task3("SysTask3", 3, []() {});
 ```
 
-**Uncovered Area 111**: test_freertos_task.cpp:1544
+**Uncovered Area 112**: test_freertos_task.cpp:1544
 *Function*: `FreeRTOSTaskTest_TaskSystemStatusUnderLoad_Test::TestBody()::{lambda()#2}::operator()() const`
 
 ```cpp
@@ -1808,7 +1803,7 @@ The following sections provide specific references to uncovered code areas and e
     
 ```
 
-**Uncovered Area 112**: test_freertos_task.cpp:1545
+**Uncovered Area 113**: test_freertos_task.cpp:1545
 *Function*: `FreeRTOSTaskTest_TaskSystemStatusUnderLoad_Test::TestBody()::{lambda()#3}::operator()() const`
 
 ```cpp
@@ -1819,7 +1814,7 @@ The following sections provide specific references to uncovered code areas and e
     // Test task system status with multiple tasks
 ```
 
-**Uncovered Area 113**: test_freertos_task.cpp:1594-1596
+**Uncovered Area 114**: test_freertos_task.cpp:1594-1596
 *Function*: `FreeRTOSTaskTest_ConstructorInitializationOrderRaceCondition_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -1830,7 +1825,7 @@ The following sections provide specific references to uncovered code areas and e
     });
 ```
 
-**Uncovered Area 114**: test_freertos_task.cpp:165-167
+**Uncovered Area 115**: test_freertos_task.cpp:165-167
 *Function*: `FreeRTOSTaskTest_StaticTaskConstruction_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -1841,7 +1836,7 @@ The following sections provide specific references to uncovered code areas and e
     });
 ```
 
-**Uncovered Area 115**: test_freertos_task.cpp:1741
+**Uncovered Area 116**: test_freertos_task.cpp:1741
 *Function*: `FreeRTOSTaskTest_AdvancedRacingConditionScenarios_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -1852,7 +1847,7 @@ The following sections provide specific references to uncovered code areas and e
     
 ```
 
-**Uncovered Area 116**: test_freertos_task.cpp:1748
+**Uncovered Area 117**: test_freertos_task.cpp:1748
 *Function*: `FreeRTOSTaskTest_AdvancedRacingConditionScenarios_Test::TestBody()::{lambda()#2}::operator()() const`
 
 ```cpp
@@ -1863,7 +1858,7 @@ The following sections provide specific references to uncovered code areas and e
     
 ```
 
-**Uncovered Area 117**: test_freertos_task.cpp:1796
+**Uncovered Area 118**: test_freertos_task.cpp:1796
 *Function*: `FreeRTOSTaskTest_AdvancedChronoCompatibility_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -1874,7 +1869,7 @@ The following sections provide specific references to uncovered code areas and e
     // Test notification take with very small durations
 ```
 
-**Uncovered Area 118**: test_freertos_task.cpp:180-182
+**Uncovered Area 119**: test_freertos_task.cpp:180-182
 *Function*: `FreeRTOSTaskTest_StaticTaskConstructionWithString_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -1885,7 +1880,7 @@ The following sections provide specific references to uncovered code areas and e
     });
 ```
 
-**Uncovered Area 119**: test_freertos_task.cpp:1838
+**Uncovered Area 120**: test_freertos_task.cpp:1838
 *Function*: `FreeRTOSTaskTest_PriorityInheritanceScenario_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -1896,7 +1891,7 @@ The following sections provide specific references to uncovered code areas and e
     
 ```
 
-**Uncovered Area 120**: test_freertos_task.cpp:1839
+**Uncovered Area 121**: test_freertos_task.cpp:1839
 *Function*: `FreeRTOSTaskTest_PriorityInheritanceScenario_Test::TestBody()::{lambda()#2}::operator()() const`
 
 ```cpp
@@ -1907,7 +1902,7 @@ The following sections provide specific references to uncovered code areas and e
     // Low priority task acquires resource and gets priority boosted
 ```
 
-**Uncovered Area 121**: test_freertos_task.cpp:194
+**Uncovered Area 122**: test_freertos_task.cpp:194
 *Function*: `FreeRTOSTaskTest_StaticTaskDestruction_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -1918,7 +1913,7 @@ The following sections provide specific references to uncovered code areas and e
     }
 ```
 
-**Uncovered Area 122**: test_freertos_task.cpp:207
+**Uncovered Area 123**: test_freertos_task.cpp:207
 *Function*: `FreeRTOSTaskTest_StaticTaskDestructionNullHandle_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -1929,7 +1924,7 @@ The following sections provide specific references to uncovered code areas and e
     }
 ```
 
-**Uncovered Area 123**: test_freertos_task.cpp:215
+**Uncovered Area 124**: test_freertos_task.cpp:215
 *Function*: `FreeRTOSTaskTest_StaticTaskSuspendResume_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -1940,7 +1935,7 @@ The following sections provide specific references to uncovered code areas and e
     EXPECT_CALL(*mock, vTaskSuspend(mock_task_handle));
 ```
 
-**Uncovered Area 124**: test_freertos_task.cpp:235
+**Uncovered Area 125**: test_freertos_task.cpp:235
 *Function*: `FreeRTOSTaskTest_StaticTaskTerminate_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -1951,7 +1946,7 @@ The following sections provide specific references to uncovered code areas and e
     EXPECT_CALL(*mock, vTaskDelete(mock_task_handle));
 ```
 
-**Uncovered Area 125**: test_freertos_task.cpp:248
+**Uncovered Area 126**: test_freertos_task.cpp:248
 *Function*: `FreeRTOSTaskTest_StaticTaskPriority_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -1962,7 +1957,7 @@ The following sections provide specific references to uncovered code areas and e
     EXPECT_CALL(*mock, uxTaskPriorityGet(mock_task_handle))
 ```
 
-**Uncovered Area 126**: test_freertos_task.cpp:271
+**Uncovered Area 127**: test_freertos_task.cpp:271
 *Function*: `FreeRTOSTaskTest_StaticTaskName_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -1973,7 +1968,7 @@ The following sections provide specific references to uncovered code areas and e
     EXPECT_CALL(*mock, pcTaskGetName(mock_task_handle))
 ```
 
-**Uncovered Area 127**: test_freertos_task.cpp:285
+**Uncovered Area 128**: test_freertos_task.cpp:285
 *Function*: `FreeRTOSTaskTest_StaticTaskState_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -1984,7 +1979,7 @@ The following sections provide specific references to uncovered code areas and e
     EXPECT_CALL(*mock, eTaskGetState(mock_task_handle))
 ```
 
-**Uncovered Area 128**: test_freertos_task.cpp:299
+**Uncovered Area 129**: test_freertos_task.cpp:299
 *Function*: `FreeRTOSTaskTest_TaskApplicationTag_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -1995,7 +1990,7 @@ The following sections provide specific references to uncovered code areas and e
     // Test setting application task tag
 ```
 
-**Uncovered Area 129**: test_freertos_task.cpp:326
+**Uncovered Area 130**: test_freertos_task.cpp:326
 *Function*: `FreeRTOSTaskTest_TaskStackWatermark_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -2006,7 +2001,7 @@ The following sections provide specific references to uncovered code areas and e
     // Test stack high water mark
 ```
 
-**Uncovered Area 130**: test_freertos_task.cpp:347
+**Uncovered Area 131**: test_freertos_task.cpp:347
 *Function*: `FreeRTOSTaskTest_TaskTraceStatus_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -2017,7 +2012,7 @@ The following sections provide specific references to uncovered code areas and e
     // Test task status with default parameters
 ```
 
-**Uncovered Area 131**: test_freertos_task.cpp:417-419
+**Uncovered Area 132**: test_freertos_task.cpp:417-419
 *Function*: `FreeRTOSTaskTest_TaskSuspendedOnStart_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -2028,7 +2023,7 @@ The following sections provide specific references to uncovered code areas and e
     }, true);
 ```
 
-**Uncovered Area 132**: test_freertos_task.cpp:431-433
+**Uncovered Area 133**: test_freertos_task.cpp:431-433
 *Function*: `FreeRTOSTaskTest_TaskNotSuspendedOnStart_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -2039,7 +2034,7 @@ The following sections provide specific references to uncovered code areas and e
     }, false);
 ```
 
-**Uncovered Area 133**: test_freertos_task.cpp:447-449
+**Uncovered Area 134**: test_freertos_task.cpp:447-449
 *Function*: `FreeRTOSTaskTest_DynamicTaskConstruction_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -2050,7 +2045,7 @@ The following sections provide specific references to uncovered code areas and e
     });
 ```
 
-**Uncovered Area 134**: test_freertos_task.cpp:476
+**Uncovered Area 135**: test_freertos_task.cpp:476
 *Function*: `FreeRTOSTaskTest_TaskNotifications_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -2061,7 +2056,7 @@ The following sections provide specific references to uncovered code areas and e
     // Test notify_give
 ```
 
-**Uncovered Area 135**: test_freertos_task.cpp:514
+**Uncovered Area 136**: test_freertos_task.cpp:514
 *Function*: `FreeRTOSTaskTest_TaskNotificationsExtended_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -2072,7 +2067,7 @@ The following sections provide specific references to uncovered code areas and e
     // Test notify_and_query (fixed typo: was notfy_and_query)
 ```
 
-**Uncovered Area 136**: test_freertos_task.cpp:588
+**Uncovered Area 137**: test_freertos_task.cpp:588
 *Function*: `FreeRTOSTaskTest_PeriodicTaskConstruction_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -2083,7 +2078,7 @@ The following sections provide specific references to uncovered code areas and e
     [&periodic_called]() { periodic_called = true; },     // periodic_routine
 ```
 
-**Uncovered Area 137**: test_freertos_task.cpp:589
+**Uncovered Area 138**: test_freertos_task.cpp:589
 *Function*: `FreeRTOSTaskTest_PeriodicTaskConstruction_Test::TestBody()::{lambda()#2}::operator()() const`
 
 ```cpp
@@ -2094,7 +2089,7 @@ The following sections provide specific references to uncovered code areas and e
     100ms                                                   // period
 ```
 
-**Uncovered Area 138**: test_freertos_task.cpp:590
+**Uncovered Area 139**: test_freertos_task.cpp:590
 *Function*: `FreeRTOSTaskTest_PeriodicTaskConstruction_Test::TestBody()::{lambda()#3}::operator()() const`
 
 ```cpp
@@ -2105,7 +2100,7 @@ The following sections provide specific references to uncovered code areas and e
     );
 ```
 
-**Uncovered Area 139**: test_freertos_task.cpp:614
+**Uncovered Area 140**: test_freertos_task.cpp:614
 *Function*: `FreeRTOSTaskTest_PeriodicTaskWithString_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -2116,7 +2111,7 @@ The following sections provide specific references to uncovered code areas and e
     []() {},  // periodic_routine
 ```
 
-**Uncovered Area 140**: test_freertos_task.cpp:615
+**Uncovered Area 141**: test_freertos_task.cpp:615
 *Function*: `FreeRTOSTaskTest_PeriodicTaskWithString_Test::TestBody()::{lambda()#2}::operator()() const`
 
 ```cpp
@@ -2127,7 +2122,7 @@ The following sections provide specific references to uncovered code areas and e
     50ms      // period
 ```
 
-**Uncovered Area 141**: test_freertos_task.cpp:616
+**Uncovered Area 142**: test_freertos_task.cpp:616
 *Function*: `FreeRTOSTaskTest_PeriodicTaskWithString_Test::TestBody()::{lambda()#3}::operator()() const`
 
 ```cpp
@@ -2138,7 +2133,7 @@ The following sections provide specific references to uncovered code areas and e
     );
 ```
 
-**Uncovered Area 142**: test_freertos_task.cpp:635
+**Uncovered Area 143**: test_freertos_task.cpp:635
 *Function*: `FreeRTOSTaskTest_PeriodicTaskZeroPeriod_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -2149,7 +2144,7 @@ The following sections provide specific references to uncovered code areas and e
     []() {},  // periodic_routine
 ```
 
-**Uncovered Area 143**: test_freertos_task.cpp:636
+**Uncovered Area 144**: test_freertos_task.cpp:636
 *Function*: `FreeRTOSTaskTest_PeriodicTaskZeroPeriod_Test::TestBody()::{lambda()#2}::operator()() const`
 
 ```cpp
@@ -2160,7 +2155,7 @@ The following sections provide specific references to uncovered code areas and e
     0ms       // period - should run continuously
 ```
 
-**Uncovered Area 144**: test_freertos_task.cpp:637
+**Uncovered Area 145**: test_freertos_task.cpp:637
 *Function*: `FreeRTOSTaskTest_PeriodicTaskZeroPeriod_Test::TestBody()::{lambda()#3}::operator()() const`
 
 ```cpp
@@ -2171,7 +2166,7 @@ The following sections provide specific references to uncovered code areas and e
     );
 ```
 
-**Uncovered Area 145**: test_freertos_task.cpp:656
+**Uncovered Area 146**: test_freertos_task.cpp:656
 *Function*: `FreeRTOSTaskTest_PeriodicTaskNoPeriod_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -2182,7 +2177,7 @@ The following sections provide specific references to uncovered code areas and e
     []() {}   // periodic_routine
 ```
 
-**Uncovered Area 146**: test_freertos_task.cpp:657
+**Uncovered Area 147**: test_freertos_task.cpp:657
 *Function*: `FreeRTOSTaskTest_PeriodicTaskNoPeriod_Test::TestBody()::{lambda()#2}::operator()() const`
 
 ```cpp
@@ -2193,7 +2188,7 @@ The following sections provide specific references to uncovered code areas and e
     // No period specified - should default to 0ms
 ```
 
-**Uncovered Area 147**: test_freertos_task.cpp:658
+**Uncovered Area 148**: test_freertos_task.cpp:658
 *Function*: `FreeRTOSTaskTest_PeriodicTaskNoPeriod_Test::TestBody()::{lambda()#3}::operator()() const`
 
 ```cpp
@@ -2204,7 +2199,7 @@ The following sections provide specific references to uncovered code areas and e
     );
 ```
 
-**Uncovered Area 148**: test_freertos_task.cpp:715
+**Uncovered Area 149**: test_freertos_task.cpp:715
 *Function*: `FreeRTOSTaskTest_PeriodicTaskTerminate_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -2215,7 +2210,7 @@ The following sections provide specific references to uncovered code areas and e
     []() {},  // periodic_routine
 ```
 
-**Uncovered Area 149**: test_freertos_task.cpp:716
+**Uncovered Area 150**: test_freertos_task.cpp:716
 *Function*: `FreeRTOSTaskTest_PeriodicTaskTerminate_Test::TestBody()::{lambda()#2}::operator()() const`
 
 ```cpp
@@ -2226,7 +2221,7 @@ The following sections provide specific references to uncovered code areas and e
     100ms     // period
 ```
 
-**Uncovered Area 150**: test_freertos_task.cpp:717
+**Uncovered Area 151**: test_freertos_task.cpp:717
 *Function*: `FreeRTOSTaskTest_PeriodicTaskTerminate_Test::TestBody()::{lambda()#3}::operator()() const`
 
 ```cpp
@@ -2237,7 +2232,7 @@ The following sections provide specific references to uncovered code areas and e
     );
 ```
 
-**Uncovered Area 151**: test_freertos_task.cpp:761
+**Uncovered Area 152**: test_freertos_task.cpp:761
 *Function*: `FreeRTOSTaskTest_PeriodicTaskNotificationExtensions_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -2248,7 +2243,7 @@ The following sections provide specific references to uncovered code areas and e
     []() {},  // periodic_routine
 ```
 
-**Uncovered Area 152**: test_freertos_task.cpp:762
+**Uncovered Area 153**: test_freertos_task.cpp:762
 *Function*: `FreeRTOSTaskTest_PeriodicTaskNotificationExtensions_Test::TestBody()::{lambda()#2}::operator()() const`
 
 ```cpp
@@ -2259,7 +2254,7 @@ The following sections provide specific references to uncovered code areas and e
     100ms     // period
 ```
 
-**Uncovered Area 153**: test_freertos_task.cpp:763
+**Uncovered Area 154**: test_freertos_task.cpp:763
 *Function*: `FreeRTOSTaskTest_PeriodicTaskNotificationExtensions_Test::TestBody()::{lambda()#3}::operator()() const`
 
 ```cpp
@@ -2270,7 +2265,7 @@ The following sections provide specific references to uncovered code areas and e
     );
 ```
 
-**Uncovered Area 154**: test_freertos_task.cpp:85
+**Uncovered Area 155**: test_freertos_task.cpp:85
 *Function*: `FreeRTOSTaskTest_StaticTaskAllocatorCreate_Test::TestBody()::{lambda(void*)#1}::operator()(void*) const`
 
 ```cpp
@@ -2281,7 +2276,7 @@ The following sections provide specific references to uncovered code areas and e
     
 ```
 
-**Uncovered Area 155**: test_freertos_task.cpp:957
+**Uncovered Area 156**: test_freertos_task.cpp:957
 *Function*: `FreeRTOSTaskTest_StackAllocationLimitation_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -2292,7 +2287,7 @@ The following sections provide specific references to uncovered code areas and e
     }
 ```
 
-**Uncovered Area 156**: test_freertos_task.cpp:970
+**Uncovered Area 157**: test_freertos_task.cpp:970
 *Function*: `FreeRTOSTaskTest_InvalidParameters_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -2303,7 +2298,7 @@ The following sections provide specific references to uncovered code areas and e
     
 ```
 
-**Uncovered Area 157**: test_freertos_task.cpp:98
+**Uncovered Area 158**: test_freertos_task.cpp:98
 *Function*: `FreeRTOSTaskTest_StaticTaskAllocatorCreateNullReturn_Test::TestBody()::{lambda(void*)#1}::operator()(void*) const`
 
 ```cpp
@@ -2314,7 +2309,7 @@ The following sections provide specific references to uncovered code areas and e
     
 ```
 
-**Uncovered Area 158**: test_freertos_task.cpp:982
+**Uncovered Area 159**: test_freertos_task.cpp:982
 *Function*: `FreeRTOSTaskTest_ZeroStackSize_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -2325,7 +2320,7 @@ The following sections provide specific references to uncovered code areas and e
     
 ```
 
-**Uncovered Area 159**: test_freertos_task.cpp:995
+**Uncovered Area 160**: test_freertos_task.cpp:995
 *Function*: `FreeRTOSTaskTest_VeryHighPriority_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -2336,7 +2331,7 @@ The following sections provide specific references to uncovered code areas and e
     
 ```
 
-**Uncovered Area 160**: freertos_queue.hpp:489
+**Uncovered Area 161**: freertos_queue.hpp:489
 *Line*: 489
 
 ```cpp
@@ -2347,7 +2342,7 @@ The following sections provide specific references to uncovered code areas and e
     /**
 ```
 
-**Uncovered Area 161**: freertos_queue.hpp:628
+**Uncovered Area 162**: freertos_queue.hpp:628
 *Line*: 628
 
 ```cpp
@@ -2359,7 +2354,7 @@ The following sections provide specific references to uncovered code areas and e
 ```
 
 
-**Summary:** 161 uncovered code areas identified across 4 categories.
+**Summary:** 162 uncovered code areas identified across 4 categories.
 
 **Note:** These uncovered areas represent code that by design cannot be easily tested in a unit test environment. They require either integration testing with the actual FreeRTOS kernel, specific hardware configurations, or are defensive programming measures for edge cases that are difficult to reproduce.
 
@@ -2389,8 +2384,8 @@ The high coverage percentage indicates:
 - **Fastest Test**: 0.000 seconds
 - **Slowest Test**: 0.430 seconds
 - **Performance Distribution**:
-  - Very Fast (< 0.01s): 21 tests
-  - Fast (0.01-0.05s): 404 tests
+  - Very Fast (< 0.01s): 23 tests
+  - Fast (0.01-0.05s): 402 tests
   - Normal (0.05-0.1s): 7 tests
   - Slow (> 0.1s): 7 tests
 
@@ -2402,7 +2397,7 @@ The high coverage percentage indicates:
 - **Good Module Distribution**: Balanced testing across tasks, synchronization primitives, and communication mechanisms
 
 ### ✅ Code Quality Validation
-- **High Coverage**: 96.4% line coverage demonstrates thorough validation
+- **High Coverage**: 96.3% line coverage demonstrates thorough validation
 - **API Completeness**: 95.0% function coverage shows comprehensive API testing
 - **Production Ready**: Test results indicate code is ready for production use
 
@@ -2419,37 +2414,11 @@ This report is automatically generated with each test execution to ensure:
 3. **Performance Monitoring**: Monitor test execution times to detect performance regressions
 4. **Failure Analysis**: When failures occur, this report will provide detailed failure information
 
-## Failed Test Analysis
-
-The following 13 test(s) failed during execution:
-
-1. `EnhancedFreeRTOSSwTimerTest.TimerCreationWithEnhancedMocks`
-2. `EnhancedFreeRTOSSwTimerTest.SingleShotTimerRealBehavior`
-3. `EnhancedFreeRTOSSwTimerTest.AutoReloadTimerRealBehavior`
-4. `EnhancedFreeRTOSSwTimerTest.TimerResetRealBehavior`
-5. `EnhancedFreeRTOSSwTimerTest.PeriodChangeWithRealBehavior`
-6. `EnhancedFreeRTOSSwTimerTest.PeriodChangeWithChronoDurations`
-7. `EnhancedFreeRTOSSwTimerTest.MultipleTimersCoordination`
-8. `EnhancedFreeRTOSSwTimerTest.TimerInteraction`
-9. `EnhancedFreeRTOSSwTimerTest.TimingAccuracyVerification`
-10. `EnhancedFreeRTOSSwTimerTest.DynamicTimerEnhancedBehavior`
-11. `EnhancedFreeRTOSSwTimerTest.ISRFunctionsEnhancedBehavior`
-12. `EnhancedFreeRTOSSwTimerTest.ComprehensiveIntegrationTest`
-13. `EnhancedFreeRTOSSwTimerTest.ManyTimersStressTest`
-
-
-**Test Execution Details:**
-- CTest Return Code: 8
-- Total Execution Time: 5.49 seconds
-- Failed Tests: 13/439 (3.0%)
-
-**Note:** This report includes failed test cases as requested. The failures provide important debugging information for addressing any issues in the codebase.
-
 
 ---
 
-*Report Generated*: July 24, 2025 at 17:07:36  
+*Report Generated*: July 24, 2025 at 23:55:36  
 *Test Framework*: GoogleTest/GoogleMock  
 *Coverage Tool*: LCOV/GCOV  
-*Total Test Execution Time*: 5.49 seconds  
-*Validation Status*: ❌ **13 tests failing - System requires attention**
+*Total Test Execution Time*: 5.19 seconds  
+*Validation Status*: ✅ **All tests passing - System validated for production use**

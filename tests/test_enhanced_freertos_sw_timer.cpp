@@ -418,6 +418,10 @@ TEST_F(EnhancedFreeRTOSSwTimerTest, TimingAccuracyVerification) {
 TEST_F(EnhancedFreeRTOSSwTimerTest, ExpiryTimeCalculation) {
     auto callback = createCountingCallback();
     
+    // Disable immediate processing to test command queuing behavior
+    auto& sim = enhanced_mock->getSimulator();
+    sim.setImmediateProcessing(false);
+    
     sa::timer test_timer("ExpiryTest", 300, pdTRUE, std::move(callback));
     
     // Timer not started - expiry time should be 0
@@ -426,7 +430,6 @@ TEST_F(EnhancedFreeRTOSSwTimerTest, ExpiryTimeCalculation) {
     // Start timer at time 100
     advanceTime(100);
     
-    auto& sim = enhanced_mock->getSimulator();
     EXPECT_EQ(sim.getPendingCommandCount(), 0);  // Should be 0 initially
     
     EXPECT_EQ(test_timer.start(), pdPASS);
@@ -516,9 +519,11 @@ TEST_F(EnhancedFreeRTOSSwTimerTest, ISRFunctionsEnhancedBehavior) {
 TEST_F(EnhancedFreeRTOSSwTimerTest, CommandQueueProcessing) {
     auto callback = createCountingCallback();
     
-    sa::timer test_timer("QueueTest", 500, pdTRUE, std::move(callback));
-    
+    // Disable immediate processing to test command queuing behavior
     auto& sim = enhanced_mock->getSimulator();
+    sim.setImmediateProcessing(false);
+    
+    sa::timer test_timer("QueueTest", 500, pdTRUE, std::move(callback));
     
     // Commands are queued but not processed until time advances
     EXPECT_EQ(test_timer.start(), pdPASS);

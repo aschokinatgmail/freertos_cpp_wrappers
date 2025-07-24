@@ -162,6 +162,14 @@ UBaseType_t uxTaskGetStackHighWaterMark2(TaskHandle_t xTask) {
 }
 
 void vTaskDelay(TickType_t xTicksToDelay) {
+    // Check if enhanced timer simulation is enabled first
+    auto& enhanced_mock = freertos_mocks::EnhancedTimerMock::instance();
+    if (enhanced_mock.isSimulationEnabled()) {
+        enhanced_mock.simulateTaskDelay(xTicksToDelay);
+        return;
+    }
+    
+    // Fall back to regular mock behavior
     if (g_freertos_mock) {
         g_freertos_mock->vTaskDelay(xTicksToDelay);
     }

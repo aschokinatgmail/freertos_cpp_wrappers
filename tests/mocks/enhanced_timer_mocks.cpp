@@ -12,7 +12,7 @@ namespace freertos_mocks {
 // TimerServiceSimulator implementation
 
 TimerServiceSimulator::TimerServiceSimulator()
-    : current_time_(0), next_handle_(reinterpret_cast<TimerHandle_t>(0x1000)), track_callbacks_(false) {
+    : current_time_(0), next_handle_(reinterpret_cast<TimerHandle_t>(0x1000)), track_callbacks_(false), immediate_processing_(true) {
 }
 
 TimerHandle_t TimerServiceSimulator::generateHandle() {
@@ -74,6 +74,11 @@ BaseType_t TimerServiceSimulator::startTimer(TimerHandle_t timer, TickType_t tic
     command_queue_.emplace(timer, TimerCommand::Start);
     command_queue_.back().command_time = current_time_;
     
+    // Process commands immediately if enabled (default for unit testing)
+    if (immediate_processing_) {
+        processTimerCommands();
+    }
+    
     return pdPASS;
 }
 
@@ -85,6 +90,11 @@ BaseType_t TimerServiceSimulator::stopTimer(TimerHandle_t timer, TickType_t tick
     // Add stop command to queue
     command_queue_.emplace(timer, TimerCommand::Stop);
     command_queue_.back().command_time = current_time_;
+    
+    // Process commands immediately if enabled (default for unit testing)
+    if (immediate_processing_) {
+        processTimerCommands();
+    }
     
     return pdPASS;
 }
@@ -98,6 +108,11 @@ BaseType_t TimerServiceSimulator::resetTimer(TimerHandle_t timer, TickType_t tic
     command_queue_.emplace(timer, TimerCommand::Reset);
     command_queue_.back().command_time = current_time_;
     
+    // Process commands immediately if enabled (default for unit testing)
+    if (immediate_processing_) {
+        processTimerCommands();
+    }
+    
     return pdPASS;
 }
 
@@ -110,6 +125,11 @@ BaseType_t TimerServiceSimulator::changePeriod(TimerHandle_t timer, TickType_t n
     // Add change period command to queue
     command_queue_.emplace(timer, TimerCommand::ChangePeriod, new_period);
     command_queue_.back().command_time = current_time_;
+    
+    // Process commands immediately if enabled (default for unit testing)
+    if (immediate_processing_) {
+        processTimerCommands();
+    }
     
     return pdPASS;
 }
