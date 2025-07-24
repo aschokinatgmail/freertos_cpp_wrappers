@@ -31,15 +31,17 @@ def parse_ctest_output(build_dir):
         'passed': 0,
         'failed': 0,
         'tests': [],
-        'execution_time': 0.0
+        'execution_time': 0.0,
+        'raw_output': stdout,
+        'ctest_return_code': ret_code
     }
     
     # Parse CTest verbose output for individual test results
     lines = stdout.split('\n')
     
     for line in lines:
-        # Look for test result lines like "1/377 Test   #1: TestName ...   Passed    0.01 sec"
-        if re.match(r'\s*\d+/\d+\s+Test', line):
+        # Look for test result lines like "422/439 Test #422: TestName ...   ***Failed    0.00 sec"
+        if re.match(r'\s*\d+/\d+\s+Test', line) or re.match(r'^\d+/\d+\s+Test', line):
             parts = line.split(':')
             if len(parts) >= 2:
                 # Extract test number and total
@@ -49,11 +51,15 @@ def parse_ctest_output(build_dir):
                     
                 # Extract test name (everything after the colon and before the status)
                 name_part = parts[1].strip()
-                status_match = re.search(r'(.+?)\s+\.+\s+(Passed|Failed)\s+(\d+\.\d+)\s+sec', name_part)
+                
+                # Handle both passed and failed test patterns
+                status_match = re.search(r'(.+?)\s+\.+\s*(Passed|Failed|\*\*\*Failed)\s+(\d+\.\d+)\s+sec', name_part)
                 
                 if status_match:
                     test_name = status_match.group(1).strip()
-                    status = status_match.group(2)
+                    status_raw = status_match.group(2)
+                    # Normalize status - treat ***Failed as Failed
+                    status = "Failed" if "Failed" in status_raw else "Passed"
                     time_taken = float(status_match.group(3))
                     
                     test_info = {
@@ -64,17 +70,32 @@ def parse_ctest_output(build_dir):
                     }
                     tests_info['tests'].append(test_info)
     
-    # Parse summary
+    # Parse summary - handle both success and failure cases
     summary_match = re.search(r'(\d+)% tests passed, (\d+) tests failed out of (\d+)', stdout)
     if summary_match:
         tests_info['failed'] = int(summary_match.group(2))
         tests_info['total'] = int(summary_match.group(3))
         tests_info['passed'] = tests_info['total'] - tests_info['failed']
+    else:
+        # Try alternative pattern for 100% success case
+        success_match = re.search(r'100% tests passed, 0 tests failed out of (\d+)', stdout)
+        if success_match:
+            tests_info['total'] = int(success_match.group(1))
+            tests_info['passed'] = tests_info['total']
+            tests_info['failed'] = 0
+        else:
+            # Fallback: count from parsed test results
+            tests_info['total'] = len(tests_info['tests'])
+            tests_info['passed'] = len([t for t in tests_info['tests'] if t['status'] == 'Passed'])
+            tests_info['failed'] = len([t for t in tests_info['tests'] if t['status'] == 'Failed'])
     
     # Parse total time
     time_match = re.search(r'Total Test time \(real\) =\s+(\d+\.\d+) sec', stdout)
     if time_match:
         tests_info['execution_time'] = float(time_match.group(1))
+    else:
+        # Fallback: sum individual test times
+        tests_info['execution_time'] = sum(t['time'] for t in tests_info['tests'])
     
     return tests_info
 
@@ -634,9 +655,9 @@ def categorize_tests(tests):
             categories['StreamBuffer'].append(test)
         elif 'FreeRTOSMessageBufferTest' in name or 'MessageBufferTest' in name:
             categories['MessageBuffer'].append(test)
-        elif 'FreeRTOSTimerTest' in name or 'TimerTest' in name or 'SwTimerTest' in name:
+        elif ('FreeRTOSTimerTest' in name or 'TimerTest' in name or 'SwTimerTest' in name) and 'Enhanced' not in name:
             categories['Timer'].append(test)
-        elif 'Enhanced' in name:
+        elif 'Enhanced' in name or 'EnhancedFreeRTOSSwTimerTest' in name:
             categories['Enhanced'].append(test)
     
     return categories
@@ -726,19 +747,25 @@ This report provides comprehensive validation and verification results for the F
 
 """
         
-        # Detailed test results table
         report_content += "**Detailed Test Results:**\n\n"
         report_content += "| Test ID | Test Name | Outcome | Execution Time |\n"
         report_content += "|---------|-----------|---------|----------------|\n"
         
         # Sort tests by test number for consistent ordering
-        sorted_tests = sorted(tests, key=lambda x: int(x['number']))
+        sorted_tests = sorted(tests, key=lambda x: int(x['number']) if x['number'].isdigit() else 0)
         
         for test in sorted_tests:
             outcome_icon = "✅ PASS" if test['status'] == 'Passed' else "❌ FAIL"
             report_content += f"| {test['number']} | {test['name']} | {outcome_icon} | {test['time']:.3f}s |\n"
         
         report_content += "\n"
+        
+        # Add failed test details if there are any failures
+        if failed_tests:
+            report_content += "**Failed Test Details:**\n\n"
+            for test in failed_tests:
+                report_content += f"- **Test {test['number']}**: `{test['name']}` - Failed after {test['time']:.3f}s\n"
+            report_content += "\n"
 
     # Add coverage analysis
     report_content += f"""## Code Coverage Analysis
@@ -827,6 +854,28 @@ This report is automatically generated with each test execution to ensure:
         validation_status = "✅ **All tests passing - System validated for production use**"
     elif tests_info['total'] > 0 and tests_info['failed'] > 0:
         validation_status = f"❌ **{tests_info['failed']} tests failing - System requires attention**"
+        
+        # Add failed test summary for debugging
+        failed_test_names = [t['name'] for t in tests_info['tests'] if t['status'] == 'Failed']
+        if failed_test_names:
+            report_content += f"""
+## Failed Test Analysis
+
+The following {len(failed_test_names)} test(s) failed during execution:
+
+"""
+            for i, test_name in enumerate(failed_test_names, 1):
+                report_content += f"{i}. `{test_name}`\n"
+            
+            report_content += f"""
+
+**Test Execution Details:**
+- CTest Return Code: {tests_info.get('ctest_return_code', 'Unknown')}
+- Total Execution Time: {tests_info['execution_time']:.2f} seconds
+- Failed Tests: {tests_info['failed']}/{tests_info['total']} ({(tests_info['failed']/tests_info['total']*100):.1f}%)
+
+**Note:** This report includes failed test cases as requested. The failures provide important debugging information for addressing any issues in the codebase.
+"""
     else:
         validation_status = "⚠️ **No tests executed - Validation status unknown**"
     
