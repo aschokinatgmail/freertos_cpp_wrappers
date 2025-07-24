@@ -12,22 +12,25 @@
 
 ### Summary
 
-- **Total Issues Found**: 34438
-- **Warnings**: 34437
-- **Errors**: 1
+- **Total Issues Found**: 0
+- **Warnings**: 0
+- **Errors**: 0
 - **Files Analyzed**: 9
-- **Unique Check Types**: 2
+- **Unique Check Types**: 1
+
+### Suppressed Issues
+
+- **Total Suppressed**: 706534
+- **Non-user Code**: 705517
+- **NOLINT Directives**: 1017
 
 ### Issues by Check Category
 
-- **cppcoreguidelines**: 16 issues
 - **cert**: 2 issues
 
 ### Files with Issues
 
-- **freertos_task.hpp**: 14 issues
 - **freertos_semaphore.hpp**: 2 issues
-- **freertos_sw_timer.hpp**: 2 issues
 
 ### Analyzed Files
 
@@ -4983,39 +4986,36 @@ Some files could not be fully analyzed:
 
 ## Detailed clang-tidy Analysis
 
-### Actionable Issues with Code Context (18 issues)
-
-#### C++ Core Guidelines (16 issue(s))
-
-##### cppcoreguidelines-rvalue-reference-param-not-moved (16 issue(s))
-
-**Issue 1**: freertos_sw_timer.hpp:129:62
-*Reason: Unused RValue Reference Parameter*
-
-**Message**: rvalue reference parameter 'callback' is never moved from inside the function body
-
-```cpp
-     126:    * @param callback callback routine
-     127:    */
-     128:   explicit timer(const char *name, const TickType_t period_ticks,
->>>  129:                  UBaseType_t auto_reload, timer_callback_t &&callback)
-     130:       : m_callback{std::move(callback)}, m_started{false},
-     131:         m_timer{m_allocator.create(name, period_ticks, auto_reload, this,
-     132:                                    callback_wrapper)} {
 ```
-
-**Issue 2**: freertos_sw_timer.hpp:148:62
-*Reason: Unused RValue Reference Parameter*
-
-**Message**: rvalue reference parameter 'callback' is never moved from inside the function body
-
-```cpp
-     145:   template <typename Rep, typename Period>
-     146:   explicit timer(const char *name,
-     147:                  const std::chrono::duration<Rep, Period> &period,
->>>  148:                  UBaseType_t auto_reload, timer_callback_t &&callback)
-     149:       : timer{name,
-     150:               static_cast<TickType_t>(
+[1/9] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/src/freertos_task.cc.
+78381 warnings generated.
+[2/9] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos.hpp.
+156778 warnings generated.
+[3/9] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_event_group.hpp.
+235172 warnings generated.
+[4/9] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_message_buffer.hpp.
+313564 warnings generated.
+[5/9] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_queue.hpp.
+391961 warnings generated.
+[6/9] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_semaphore.hpp.
+470355 warnings generated.
+[7/9] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_stream_buffer.hpp.
+548747 warnings generated.
+[8/9] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_sw_timer.hpp.
+627141 warnings generated.
+[9/9] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp.
+705521 warnings generated.
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_semaphore.hpp:424:3: warning: overloaded 'operator++' returns a reference instead of a constant object type [cert-dcl21-cpp]
+ 424 |   counting_semaphore &operator++(int) {
+     |   ^~~~~~~~~~~~~~~~~~~~
+     |   const counting_semaphore<SemaphoreAllocator> 
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_semaphore.hpp:436:3: warning: overloaded 'operator--' returns a reference instead of a constant object type [cert-dcl21-cpp]
+ 436 |   counting_semaphore &operator--(int) {
+     |   ^~~~~~~~~~~~~~~~~~~~
+     |   const counting_semaphore<SemaphoreAllocator> 
+Suppressed 706534 warnings (705517 in non-user code, 1017 NOLINT).
+Use -header-filter=.* to display errors from all non-system headers. Use -system-headers to display errors from system headers as well.
+```
      151:                   std::chrono::duration_cast<std::chrono::milliseconds>(period)
 ```
 
@@ -5263,15 +5263,38 @@ Some files could not be fully analyzed:
      439:   }
 ```
 
-### Compilation Errors
-
-Some files had compilation errors that prevented full analysis:
-
 ```
-/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/mocks/FreeRTOS.h:6:10: error: 'gmock/gmock.h' file not found [clang-diagnostic-error]
+[1/9] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/src/freertos_task.cc.
+78381 warnings generated.
+[2/9] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos.hpp.
+156778 warnings generated.
+[3/9] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_event_group.hpp.
+235172 warnings generated.
+[4/9] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_message_buffer.hpp.
+313564 warnings generated.
+[5/9] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_queue.hpp.
+391961 warnings generated.
+[6/9] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_semaphore.hpp.
+470355 warnings generated.
+[7/9] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_stream_buffer.hpp.
+548747 warnings generated.
+[8/9] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_sw_timer.hpp.
+627141 warnings generated.
+[9/9] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp.
+705521 warnings generated.
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_semaphore.hpp:424:3: warning: overloaded 'operator++' returns a reference instead of a constant object type [cert-dcl21-cpp]
+  424 |   counting_semaphore &operator++(int) {
+      |   ^~~~~~~~~~~~~~~~~~~~
+      |   const counting_semaphore<SemaphoreAllocator> 
+/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_semaphore.hpp:436:3: warning: overloaded 'operator--' returns a reference instead of a constant object type [cert-dcl21-cpp]
+  436 |   counting_semaphore &operator--(int) {
+      |   ^~~~~~~~~~~~~~~~~~~~
+      |   const counting_semaphore<SemaphoreAllocator> 
+Suppressed 706534 warnings (705517 in non-user code, 1017 NOLINT).
+Use -header-filter=.* to display errors from all non-system headers. Use -system-headers to display errors from system headers as well.
 ```
 
-
+---
 *Generated: July 24, 2025*
 *Tools: clang-tidy + Enhanced cppcheck (all rules) + MISRA C++ (cppcheck)*
 *Scope: Library modules only*
