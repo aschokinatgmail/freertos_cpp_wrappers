@@ -12,43 +12,37 @@
 
 ### Summary
 
-- **Total Issues Found**: 34438
-- **Warnings**: 34437
-- **Errors**: 1
-- **Files Analyzed**: 18
-- **Unique Check Types**: 2
+- **Total Issues Found**: 0
+- **Warnings**: 0
+- **Errors**: 0
+- **Files Analyzed**: 9
+- **Unique Check Types**: 1
+
+### Suppressed Issues
+
+- **Total Suppressed**: 706534
+- **Non-user Code**: 705517
+- **NOLINT Directives**: 1017
 
 ### Issues by Check Category
 
-- **cppcoreguidelines**: 16 issues
 - **cert**: 2 issues
 
 ### Files with Issues
 
-- **freertos_task.hpp**: 14 issues
 - **freertos_semaphore.hpp**: 2 issues
-- **freertos_sw_timer.hpp**: 2 issues
 
 ### Analyzed Files
 
 - freertos.hpp
-- freertos.hpp.
 - freertos_event_group.hpp
-- freertos_event_group.hpp.
 - freertos_message_buffer.hpp
-- freertos_message_buffer.hpp.
 - freertos_queue.hpp
-- freertos_queue.hpp.
 - freertos_semaphore.hpp
-- freertos_semaphore.hpp.
 - freertos_stream_buffer.hpp
-- freertos_stream_buffer.hpp.
 - freertos_sw_timer.hpp
-- freertos_sw_timer.hpp.
 - freertos_task.cc
-- freertos_task.cc.
 - freertos_task.hpp
-- freertos_task.hpp.
 
 ## MISRA C++ Analysis
 
@@ -4994,32 +4988,23 @@ Some files could not be fully analyzed:
 
 ```
 [1/9] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/src/freertos_task.cc.
-34437 warnings and 1 error generated.
-Error while processing /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/src/freertos_task.cc.
+78381 warnings generated.
 [2/9] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos.hpp.
-69922 warnings and 2 errors generated.
-Error while processing /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos.hpp.
+156778 warnings generated.
 [3/9] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_event_group.hpp.
-76750 warnings and 3 errors generated.
-Error while processing /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_event_group.hpp.
+235172 warnings generated.
 [4/9] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_message_buffer.hpp.
-88645 warnings and 4 errors generated.
-Error while processing /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_message_buffer.hpp.
+313564 warnings generated.
 [5/9] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_queue.hpp.
-102507 warnings and 5 errors generated.
-Error while processing /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_queue.hpp.
+391961 warnings generated.
 [6/9] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_semaphore.hpp.
-109335 warnings and 6 errors generated.
-Error while processing /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_semaphore.hpp.
+470355 warnings generated.
 [7/9] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_stream_buffer.hpp.
-123186 warnings and 7 errors generated.
-Error while processing /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_stream_buffer.hpp.
+548747 warnings generated.
 [8/9] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_sw_timer.hpp.
-149713 warnings and 8 errors generated.
-Error while processing /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_sw_timer.hpp.
+627141 warnings generated.
 [9/9] Processing file /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp.
-184150 warnings and 9 errors generated.
-Error while processing /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp.
+705521 warnings generated.
 /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_semaphore.hpp:424:3: warning: overloaded 'operator++' returns a reference instead of a constant object type [cert-dcl21-cpp]
   424 |   counting_semaphore &operator++(int) {
       |   ^~~~~~~~~~~~~~~~~~~~
@@ -5028,63 +5013,11 @@ Error while processing /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrap
   436 |   counting_semaphore &operator--(int) {
       |   ^~~~~~~~~~~~~~~~~~~~
       |   const counting_semaphore<SemaphoreAllocator> 
-/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_sw_timer.hpp:129:62: warning: rvalue reference parameter 'callback' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
-  129 |                  UBaseType_t auto_reload, timer_callback_t &&callback)
-      |                                                              ^
-/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_sw_timer.hpp:148:62: warning: rvalue reference parameter 'callback' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
-  148 |                  UBaseType_t auto_reload, timer_callback_t &&callback)
-      |                                                              ^
-/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:194:65: warning: rvalue reference parameter 'task_routine' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
-  194 |   task(const char *name, UBaseType_t priority, task_routine_t &&task_routine,
-      |                                                                 ^
-/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:208:25: warning: rvalue reference parameter 'task_routine' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
-  208 |        task_routine_t &&task_routine, bool start_suspended = true)
-      |                         ^
-/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:604:34: warning: rvalue reference parameter 'on_start' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
-  604 |                 task_routine_t &&on_start, task_routine_t &&on_stop,
-      |                                  ^
-/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:604:61: warning: rvalue reference parameter 'on_stop' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
-  604 |                 task_routine_t &&on_start, task_routine_t &&on_stop,
-      |                                                             ^
-/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:605:34: warning: rvalue reference parameter 'periodic_routine' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
-  605 |                 task_routine_t &&periodic_routine,
-      |                                  ^
-/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:627:34: warning: rvalue reference parameter 'on_start' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
-  627 |                 task_routine_t &&on_start, task_routine_t &&on_stop,
-      |                                  ^
-/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:627:61: warning: rvalue reference parameter 'on_stop' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
-  627 |                 task_routine_t &&on_start, task_routine_t &&on_stop,
-      |                                                             ^
-/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:628:34: warning: rvalue reference parameter 'periodic_routine' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
-  628 |                 task_routine_t &&periodic_routine,
-      |                                  ^
-/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:649:34: warning: rvalue reference parameter 'on_start' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
-  649 |                 task_routine_t &&on_start, task_routine_t &&on_stop,
-      |                                  ^
-/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:649:61: warning: rvalue reference parameter 'on_stop' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
-  649 |                 task_routine_t &&on_start, task_routine_t &&on_stop,
-      |                                                             ^
-/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:650:34: warning: rvalue reference parameter 'periodic_routine' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
-  650 |                 task_routine_t &&periodic_routine, bool start_suspended = true)
-      |                                  ^
-/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:669:34: warning: rvalue reference parameter 'on_start' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
-  669 |                 task_routine_t &&on_start, task_routine_t &&on_stop,
-      |                                  ^
-/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:669:61: warning: rvalue reference parameter 'on_stop' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
-  669 |                 task_routine_t &&on_start, task_routine_t &&on_stop,
-      |                                                             ^
-/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/include/freertos_task.hpp:670:34: warning: rvalue reference parameter 'periodic_routine' is never moved from inside the function body [cppcoreguidelines-rvalue-reference-param-not-moved]
-  670 |                 task_routine_t &&periodic_routine, bool start_suspended = true)
-      |                                  ^
-/home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/mocks/FreeRTOS.h:6:10: error: 'gmock/gmock.h' file not found [clang-diagnostic-error]
-    6 | #include <gmock/gmock.h>
-      |          ^~~~~~~~~~~~~~~
-Suppressed 184114 warnings (184114 in non-user code).
+Suppressed 706534 warnings (705517 in non-user code, 1017 NOLINT).
 Use -header-filter=.* to display errors from all non-system headers. Use -system-headers to display errors from system headers as well.
-Found compiler error(s).
 ```
 
 ---
-*Generated: July 23, 2025*
+*Generated: July 24, 2025*
 *Tools: clang-tidy + Enhanced cppcheck (all rules) + MISRA C++ (cppcheck)*
 *Scope: Library modules only*
