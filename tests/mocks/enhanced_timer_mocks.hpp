@@ -95,6 +95,12 @@ public:
     BaseType_t resetTimer(TimerHandle_t timer, TickType_t ticks_to_wait);
     BaseType_t changePeriod(TimerHandle_t timer, TickType_t new_period, TickType_t ticks_to_wait);
     
+    // ISR Timer control functions
+    BaseType_t startTimerFromISR(TimerHandle_t timer, BaseType_t* higher_priority_task_woken);
+    BaseType_t stopTimerFromISR(TimerHandle_t timer, BaseType_t* higher_priority_task_woken);
+    BaseType_t resetTimerFromISR(TimerHandle_t timer, BaseType_t* higher_priority_task_woken);
+    BaseType_t changePeriodFromISR(TimerHandle_t timer, TickType_t new_period, BaseType_t* higher_priority_task_woken);
+    
     // Timer state queries
     BaseType_t isTimerActive(TimerHandle_t timer);
     TickType_t getTimerPeriod(TimerHandle_t timer);

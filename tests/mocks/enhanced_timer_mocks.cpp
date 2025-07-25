@@ -134,6 +134,35 @@ BaseType_t TimerServiceSimulator::changePeriod(TimerHandle_t timer, TickType_t n
     return pdPASS;
 }
 
+// ISR Functions - behave the same as normal functions but simulate interrupt context
+BaseType_t TimerServiceSimulator::startTimerFromISR(TimerHandle_t timer, BaseType_t* higher_priority_task_woken) {
+    if (higher_priority_task_woken) {
+        *higher_priority_task_woken = pdFALSE;  // Simulate no high priority task woken for testing
+    }
+    return startTimer(timer, 0);  // ISR functions typically don't wait
+}
+
+BaseType_t TimerServiceSimulator::stopTimerFromISR(TimerHandle_t timer, BaseType_t* higher_priority_task_woken) {
+    if (higher_priority_task_woken) {
+        *higher_priority_task_woken = pdFALSE;  // Simulate no high priority task woken for testing
+    }
+    return stopTimer(timer, 0);  // ISR functions typically don't wait
+}
+
+BaseType_t TimerServiceSimulator::resetTimerFromISR(TimerHandle_t timer, BaseType_t* higher_priority_task_woken) {
+    if (higher_priority_task_woken) {
+        *higher_priority_task_woken = pdFALSE;  // Simulate no high priority task woken for testing
+    }
+    return resetTimer(timer, 0);  // ISR functions typically don't wait
+}
+
+BaseType_t TimerServiceSimulator::changePeriodFromISR(TimerHandle_t timer, TickType_t new_period, BaseType_t* higher_priority_task_woken) {
+    if (higher_priority_task_woken) {
+        *higher_priority_task_woken = pdFALSE;  // Simulate no high priority task woken for testing
+    }
+    return changePeriod(timer, new_period, 0);  // ISR functions typically don't wait
+}
+
 BaseType_t TimerServiceSimulator::isTimerActive(TimerHandle_t timer) {
     if (!isValidTimer(timer)) {
         return pdFALSE;

@@ -685,13 +685,10 @@ BaseType_t xTimerStart(TimerHandle_t xTimer, TickType_t xTicksToWait) {
 }
 
 BaseType_t xTimerStartFromISR(TimerHandle_t xTimer, BaseType_t* pxHigherPriorityTaskWoken) {
-    // Use enhanced simulation if enabled - ISR functions behave the same as non-ISR for simulation
+    // Use enhanced simulation if enabled
     auto& enhanced_mock = freertos_mocks::EnhancedTimerMock::instance();
     if (enhanced_mock.isSimulationEnabled()) {
-        if (pxHigherPriorityTaskWoken) {
-            *pxHigherPriorityTaskWoken = pdFALSE;  // Simplified for simulation
-        }
-        return enhanced_mock.getSimulator().startTimer(xTimer, 0);
+        return enhanced_mock.getSimulator().startTimerFromISR(xTimer, pxHigherPriorityTaskWoken);
     }
     
     if (g_freertos_mock) {
@@ -717,10 +714,7 @@ BaseType_t xTimerStopFromISR(TimerHandle_t xTimer, BaseType_t* pxHigherPriorityT
     // Use enhanced simulation if enabled
     auto& enhanced_mock = freertos_mocks::EnhancedTimerMock::instance();
     if (enhanced_mock.isSimulationEnabled()) {
-        if (pxHigherPriorityTaskWoken) {
-            *pxHigherPriorityTaskWoken = pdFALSE;  // Simplified for simulation
-        }
-        return enhanced_mock.getSimulator().stopTimer(xTimer, 0);
+        return enhanced_mock.getSimulator().stopTimerFromISR(xTimer, pxHigherPriorityTaskWoken);
     }
     
     if (g_freertos_mock) {
@@ -746,10 +740,7 @@ BaseType_t xTimerResetFromISR(TimerHandle_t xTimer, BaseType_t* pxHigherPriority
     // Use enhanced simulation if enabled
     auto& enhanced_mock = freertos_mocks::EnhancedTimerMock::instance();
     if (enhanced_mock.isSimulationEnabled()) {
-        if (pxHigherPriorityTaskWoken) {
-            *pxHigherPriorityTaskWoken = pdFALSE;  // Simplified for simulation
-        }
-        return enhanced_mock.getSimulator().resetTimer(xTimer, 0);
+        return enhanced_mock.getSimulator().resetTimerFromISR(xTimer, pxHigherPriorityTaskWoken);
     }
     
     if (g_freertos_mock) {
@@ -775,10 +766,7 @@ BaseType_t xTimerChangePeriodFromISR(TimerHandle_t xTimer, TickType_t xNewPeriod
     // Use enhanced simulation if enabled
     auto& enhanced_mock = freertos_mocks::EnhancedTimerMock::instance();
     if (enhanced_mock.isSimulationEnabled()) {
-        if (pxHigherPriorityTaskWoken) {
-            *pxHigherPriorityTaskWoken = pdFALSE;  // Simplified for simulation
-        }
-        return enhanced_mock.getSimulator().changePeriod(xTimer, xNewPeriod, 0);
+        return enhanced_mock.getSimulator().changePeriodFromISR(xTimer, xNewPeriod, pxHigherPriorityTaskWoken);
     }
     
     if (g_freertos_mock) {
