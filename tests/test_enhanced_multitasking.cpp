@@ -464,13 +464,17 @@ TEST_F(EnhancedMultitaskingTest, MultiplePeriodicTasksCoordination) {
     EXPECT_CALL(*mock, xTaskCreateStatic(_, StrEq("SlowPeriodic"), _, _, _, _, _))
         .WillOnce(DoDefault());
     
-    // Use constructor with period specification and start_suspended = false
+    // Create first task and allow it to initialize before creating second
     sa::periodic_task<256> fast_task("FastPeriodic", 2, 
                                    std::move(fast_on_start), 
                                    std::move(fast_on_stop), 
                                    std::move(fast_function),
                                    std::chrono::milliseconds{5}, // 5ms period
                                    false); // Start not suspended
+    
+    // Small delay to allow first task to initialize properly
+    std::this_thread::sleep_for(2ms);
+    
     sa::periodic_task<256> slow_task("SlowPeriodic", 1, 
                                    std::move(slow_on_start), 
                                    std::move(slow_on_stop), 
@@ -478,18 +482,19 @@ TEST_F(EnhancedMultitaskingTest, MultiplePeriodicTasksCoordination) {
                                    std::chrono::milliseconds{10}, // 10ms period
                                    false); // Start not suspended
     
-    // Let them run
-    std::this_thread::sleep_for(50ms);
+    // Let them run for a longer period to ensure both tasks execute
+    std::this_thread::sleep_for(80ms);
     
     should_stop = true;
     
     // Wait for cleanup
-    std::this_thread::sleep_for(10ms);
+    std::this_thread::sleep_for(15ms);
     
-    // Fast task should execute more times than slow task
-    EXPECT_GT(fast_count.load(), slow_count.load());
-    EXPECT_GT(slow_count.load(), 0);
+    // Both tasks should have executed at least once
     EXPECT_GT(fast_count.load(), 0);
+    EXPECT_GT(slow_count.load(), 0);
+    // Fast task should execute more times than slow task due to shorter period
+    EXPECT_GT(fast_count.load(), slow_count.load());
 }
 
 // =============================================================================
