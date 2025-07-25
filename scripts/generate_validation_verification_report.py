@@ -185,7 +185,7 @@ EXPECT_FALSE(cleanup_timer.running()); // Should be stopped
     return context
 
 def parse_ctest_output(build_dir):
-    """Parse CTest output to get test results"""
+    """Parse CTest output to get both CTest executables and individual Google Test results"""
     # Run CTest with verbose output
     cmd = "ctest --verbose"
     ret_code, stdout, stderr = run_command(cmd, cwd=build_dir)
@@ -195,23 +195,37 @@ def parse_ctest_output(build_dir):
         'passed': 0,
         'failed': 0,
         'tests': [],
+        'ctest_executables': [],  # Store CTest level results for summary
         'execution_time': 0.0,
         'raw_output': stdout,
         'ctest_return_code': ret_code
     }
     
-    # Parse CTest verbose output for individual test results
+    # Parse Google Test output within CTest verbose output
     lines = stdout.split('\n')
+    current_executable = None
+    current_test_number = 0
+    individual_test_counter = 0
     
-    for line in lines:
-        # Look for test result lines like "422/439 Test #422: TestName ...   ***Failed    0.00 sec"
+    for i, line in enumerate(lines):
+        # Track which CTest executable we're in
+        ctest_match = re.match(r'test (\d+)', line)
+        if ctest_match:
+            current_test_number = int(ctest_match.group(1))
+            # Look ahead to find the executable name
+            for j in range(i + 1, min(i + 10, len(lines))):
+                if lines[j].strip().startswith('Start') and ':' in lines[j]:
+                    current_executable = lines[j].split(':', 1)[1].strip()
+                    break
+        
+        # Parse CTest executable results for summary
         if re.match(r'\s*\d+/\d+\s+Test', line) or re.match(r'^\d+/\d+\s+Test', line):
             parts = line.split(':')
             if len(parts) >= 2:
                 # Extract test number and total
                 test_match = re.search(r'(\d+)/(\d+)\s+Test\s+#(\d+)', line)
                 if test_match:
-                    test_num = test_match.group(3)
+                    ctest_num = test_match.group(3)
                     
                 # Extract test name (everything after the colon and before the status)
                 name_part = parts[1].strip()
@@ -220,40 +234,66 @@ def parse_ctest_output(build_dir):
                 status_match = re.search(r'(.+?)\s+\.+\s*(Passed|Failed|\*\*\*Failed)\s+(\d+\.\d+)\s+sec', name_part)
                 
                 if status_match:
-                    test_name = status_match.group(1).strip()
+                    ctest_name = status_match.group(1).strip()
                     status_raw = status_match.group(2)
                     # Normalize status - treat ***Failed as Failed
                     status = "Failed" if "Failed" in status_raw else "Passed"
                     time_taken = float(status_match.group(3))
                     
-                    test_info = {
-                        'number': test_num,
-                        'name': test_name,
+                    ctest_info = {
+                        'number': ctest_num,
+                        'name': ctest_name,
                         'status': status,
                         'time': time_taken
                     }
-                    tests_info['tests'].append(test_info)
+                    tests_info['ctest_executables'].append(ctest_info)
+        
+        # Parse individual Google Test results
+        gtest_run_match = re.match(r'\d+:\s*\[\s*RUN\s*\]\s*(.+)', line)
+        if gtest_run_match:
+            test_name = gtest_run_match.group(1).strip()
+            individual_test_counter += 1
+            
+            # Look ahead to find the result
+            for j in range(i + 1, min(i + 20, len(lines))):
+                # Look for OK or FAILED result
+                result_line = lines[j]
+                ok_match = re.match(r'\d+:\s*\[\s*OK\s*\]\s*(.+?)\s*\((\d+)\s*ms\)', result_line)
+                failed_match = re.match(r'\d+:\s*\[\s*FAILED\s*\]\s*(.+?)\s*\((\d+)\s*ms\)', result_line)
+                
+                if ok_match:
+                    result_test_name = ok_match.group(1).strip()
+                    time_ms = int(ok_match.group(2))
+                    if result_test_name == test_name:  # Make sure it's the same test
+                        test_info = {
+                            'number': str(individual_test_counter),
+                            'name': test_name,
+                            'status': 'Passed',
+                            'time': time_ms / 1000.0,  # Convert ms to seconds
+                            'executable': current_executable or 'Unknown'
+                        }
+                        tests_info['tests'].append(test_info)
+                        break
+                elif failed_match:
+                    result_test_name = failed_match.group(1).strip()
+                    time_ms = int(failed_match.group(2))
+                    if result_test_name == test_name:  # Make sure it's the same test
+                        test_info = {
+                            'number': str(individual_test_counter),
+                            'name': test_name,
+                            'status': 'Failed',
+                            'time': time_ms / 1000.0,  # Convert ms to seconds
+                            'executable': current_executable or 'Unknown'
+                        }
+                        tests_info['tests'].append(test_info)
+                        break
     
-    # Parse summary - handle both success and failure cases
-    summary_match = re.search(r'(\d+)% tests passed, (\d+) tests failed out of (\d+)', stdout)
-    if summary_match:
-        tests_info['failed'] = int(summary_match.group(2))
-        tests_info['total'] = int(summary_match.group(3))
-        tests_info['passed'] = tests_info['total'] - tests_info['failed']
-    else:
-        # Try alternative pattern for 100% success case
-        success_match = re.search(r'100% tests passed, 0 tests failed out of (\d+)', stdout)
-        if success_match:
-            tests_info['total'] = int(success_match.group(1))
-            tests_info['passed'] = tests_info['total']
-            tests_info['failed'] = 0
-        else:
-            # Fallback: count from parsed test results
-            tests_info['total'] = len(tests_info['tests'])
-            tests_info['passed'] = len([t for t in tests_info['tests'] if t['status'] == 'Passed'])
-            tests_info['failed'] = len([t for t in tests_info['tests'] if t['status'] == 'Failed'])
+    # Calculate totals from individual Google Test results
+    tests_info['total'] = len(tests_info['tests'])
+    tests_info['passed'] = len([t for t in tests_info['tests'] if t['status'] == 'Passed'])
+    tests_info['failed'] = len([t for t in tests_info['tests'] if t['status'] == 'Failed'])
     
-    # Parse total time
+    # Calculate total execution time from CTest summary
     time_match = re.search(r'Total Test time \(real\) =\s+(\d+\.\d+) sec', stdout)
     if time_match:
         tests_info['execution_time'] = float(time_match.group(1))
@@ -793,7 +833,7 @@ These uncovered areas are intentional and represent code that:
     return analysis
 
 def categorize_tests(tests):
-    """Categorize tests by module and type"""
+    """Categorize tests by module and type based on individual Google Test names"""
     categories = {
         'Task': [],
         'Semaphore': [],
@@ -802,27 +842,48 @@ def categorize_tests(tests):
         'StreamBuffer': [],
         'MessageBuffer': [],
         'Timer': [],
-        'Enhanced': []
+        'EnhancedTimer': [],
+        'EnhancedFeatures': [],
+        'EnhancedMultitasking': [],
+        'EnhancedDebug': [],
+        'EnhancedTimeout': []
     }
     
     for test in tests:
         name = test.get('name', '')
-        if 'FreeRTOSTaskTest' in name or 'TaskTest' in name:
+        executable = test.get('executable', '')
+        
+        # Use both test name and executable to categorize
+        if 'FreeRTOSTaskTest' in name or 'task' in executable.lower():
             categories['Task'].append(test)
-        elif 'FreeRTOSSemaphoreTest' in name or 'SemaphoreTest' in name:
+        elif 'FreeRTOSSemaphoreTest' in name or 'semaphore' in executable.lower():
             categories['Semaphore'].append(test)
-        elif 'FreeRTOSQueueTest' in name or 'QueueTest' in name:
+        elif 'FreeRTOSQueueTest' in name or 'queue' in executable.lower():
             categories['Queue'].append(test)
-        elif 'FreeRTOSEventGroupTest' in name or 'EventGroupTest' in name:
+        elif 'FreeRTOSEventGroupTest' in name or 'event_group' in executable.lower():
             categories['EventGroup'].append(test)
-        elif 'FreeRTOSStreamBufferTest' in name or 'StreamBufferTest' in name:
+        elif 'FreeRTOSStreamBufferTest' in name or 'stream_buffer' in executable.lower():
             categories['StreamBuffer'].append(test)
-        elif 'FreeRTOSMessageBufferTest' in name or 'MessageBufferTest' in name:
+        elif 'FreeRTOSMessageBufferTest' in name or 'message_buffer' in executable.lower():
             categories['MessageBuffer'].append(test)
-        elif ('FreeRTOSTimerTest' in name or 'TimerTest' in name or 'SwTimerTest' in name) and 'Enhanced' not in name:
+        elif ('FreeRTOSSwTimerTest' in name or 'sw_timer' in executable.lower()) and 'enhanced' not in executable.lower():
             categories['Timer'].append(test)
-        elif 'Enhanced' in name or 'EnhancedFreeRTOSSwTimerTest' in name:
-            categories['Enhanced'].append(test)
+        elif 'EnhancedFreeRTOSSwTimerTest' in name or 'enhanced_freertos_sw_timer' in executable.lower():
+            categories['EnhancedTimer'].append(test)
+        elif 'Cpp17FeaturesTest' in name or 'enhanced_cpp17_features' in executable.lower():
+            categories['EnhancedFeatures'].append(test)
+        elif 'multitasking' in executable.lower():
+            categories['EnhancedMultitasking'].append(test)
+        elif 'debug' in executable.lower():
+            categories['EnhancedDebug'].append(test)
+        elif 'timeout' in executable.lower():
+            categories['EnhancedTimeout'].append(test)
+        else:
+            # Default fallback - try to guess from executable name
+            if 'enhanced' in executable.lower():
+                categories['EnhancedFeatures'].append(test)
+            else:
+                categories['Task'].append(test)  # Default to Task for uncategorized
     
     return categories
 
@@ -884,6 +945,30 @@ This report provides comprehensive validation and verification results for the F
 - **Line Coverage**: {line_coverage_pct:.1f}% ({coverage_data['lines_covered']}/{coverage_data['lines_total']} lines)
 - **Function Coverage**: {func_coverage_pct:.1f}% ({coverage_data['functions_covered']}/{coverage_data['functions_total']} functions)
 - **Coverage Scope**: Main library modules only (src/ and include/ directories)
+
+## Complete Test Results Summary
+
+The following table shows all individual test cases executed during this validation run:
+
+| Test ID | Test Name | Module | Status | Time (s) |
+|---------|-----------|---------|---------|----------|"""
+
+    # Add all test results in a comprehensive table
+    if tests_info['tests']:
+        for test in tests_info['tests']:
+            status_icon = "✅ PASS" if test['status'] == 'Passed' else "❌ FAIL"
+            module = test.get('executable', 'Unknown').replace('test_', '').replace('_', ' ').title()
+            report_content += f"\n| {test['number']} | {test['name']} | {module} | {status_icon} | {test['time']:.3f} |"
+    else:
+        report_content += "\n| - | No test results available | - | - | - |"
+
+    report_content += f"""
+
+**Table Summary:**
+- **Total Individual Tests**: {tests_info['total']}
+- **Passed**: {tests_info['passed']} (✅)
+- **Failed**: {tests_info['failed']} (❌)
+- **Success Rate**: {success_rate:.1f}%
 
 ## Detailed Test Results by Module
 
