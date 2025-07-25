@@ -571,7 +571,8 @@ template <typename TaskAllocator> class periodic_task {
   task_routine_t m_periodic_routine;
   task<TaskAllocator> m_task;
 
-  // LCOV_EXCL_START - Internal periodic task run method called by FreeRTOS kernel
+  // LCOV_EXCL_START - Internal periodic task run method called by FreeRTOS
+  // kernel
   void run() {
     m_on_start();
     while (is_running()) {

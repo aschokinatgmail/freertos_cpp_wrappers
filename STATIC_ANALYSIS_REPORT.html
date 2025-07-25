@@ -599,85 +599,85 @@
      934:             std::chrono::duration_cast&lt;std::chrono::milliseconds&gt;(timeout)
      935:                 .count()))} {}
 </code></pre></div>
-<p><strong>Violation 22</strong>: freertos_sw_timer.hpp:130:58
+<p><strong>Violation 22</strong>: freertos_sw_timer.hpp:132:58
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">     127:    */
-     128:   explicit timer(const char *name, const TickType_t period_ticks,
-     129:                  UBaseType_t auto_reload, timer_callback_t &amp;&amp;callback)
-&gt;&gt;&gt;  130:       : m_callback{std::move(callback)}, m_started{false},
-     131:         m_timer{m_allocator.create(name, period_ticks, auto_reload, this,
-     132:                                    callback_wrapper)} {
-     133:     configASSERT(m_timer);
+<pre><code class="language-cpp">     129:    */
+     130:   explicit timer(const char *name, const TickType_t period_ticks,
+     131:                  UBaseType_t auto_reload, timer_callback_t &amp;&amp;callback)
+&gt;&gt;&gt;  132:       : m_callback{std::move(callback)}, m_started{false},
+     133:         m_timer{m_allocator.create(name, period_ticks, auto_reload, this,
+     134:                                    callback_wrapper)} {
+     135:     configASSERT(m_timer);
 </code></pre></div>
-<p><strong>Violation 23</strong>: freertos_sw_timer.hpp:145:25
+<p><strong>Violation 23</strong>: freertos_sw_timer.hpp:147:25
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">     142:    * @param auto_reload auto-reload flag
-     143:    * @param callback callback routine
-     144:    */
-&gt;&gt;&gt;  145:   template &lt;typename Rep, typename Period&gt;
-     146:   explicit timer(const char *name,
-     147:                  const std::chrono::duration&lt;Rep, Period&gt; &amp;period,
-     148:                  UBaseType_t auto_reload, timer_callback_t &amp;&amp;callback)
+<pre><code class="language-cpp">     144:    * @param auto_reload auto-reload flag
+     145:    * @param callback callback routine
+     146:    */
+&gt;&gt;&gt;  147:   template &lt;typename Rep, typename Period&gt;
+     148:   explicit timer(const char *name,
+     149:                  const std::chrono::duration&lt;Rep, Period&gt; &amp;period,
+     150:                  UBaseType_t auto_reload, timer_callback_t &amp;&amp;callback)
 </code></pre></div>
-<p><strong>Violation 24</strong>: freertos_sw_timer.hpp:254:25
+<p><strong>Violation 24</strong>: freertos_sw_timer.hpp:256:25
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">     251:    * @param timeout timeout to wait for the timer to start
-     252:    * @return BaseType_t pdPASS if the timer was started successfully else pdFAIL
-     253:    */
-&gt;&gt;&gt;  254:   template &lt;typename Rep, typename Period&gt;
-     255:   BaseType_t start(const std::chrono::duration&lt;Rep, Period&gt; &amp;timeout) {
-     256:     return start(
-     257:         std::chrono::duration_cast&lt;std::chrono::milliseconds&gt;(timeout).count());
+<pre><code class="language-cpp">     253:    * @param timeout timeout to wait for the timer to start
+     254:    * @return BaseType_t pdPASS if the timer was started successfully else pdFAIL
+     255:    */
+&gt;&gt;&gt;  256:   template &lt;typename Rep, typename Period&gt;
+     257:   BaseType_t start(const std::chrono::duration&lt;Rep, Period&gt; &amp;timeout) {
+     258:     return start(
+     259:         std::chrono::duration_cast&lt;std::chrono::milliseconds&gt;(timeout).count());
 </code></pre></div>
-<p><strong>Violation 25</strong>: freertos_sw_timer.hpp:313:25
+<p><strong>Violation 25</strong>: freertos_sw_timer.hpp:315:25
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">     310:    * @param timeout timeout to wait for the timer to stop
-     311:    * @return BaseType_t pdPASS if the timer was stopped successfully else pdFAIL
-     312:    */
-&gt;&gt;&gt;  313:   template &lt;typename Rep, typename Period&gt;
-     314:   BaseType_t stop(const std::chrono::duration&lt;Rep, Period&gt; &amp;timeout) {
-     315:     return stop(
-     316:         std::chrono::duration_cast&lt;std::chrono::milliseconds&gt;(timeout).count());
+<pre><code class="language-cpp">     312:    * @param timeout timeout to wait for the timer to stop
+     313:    * @return BaseType_t pdPASS if the timer was stopped successfully else pdFAIL
+     314:    */
+&gt;&gt;&gt;  315:   template &lt;typename Rep, typename Period&gt;
+     316:   BaseType_t stop(const std::chrono::duration&lt;Rep, Period&gt; &amp;timeout) {
+     317:     return stop(
+     318:         std::chrono::duration_cast&lt;std::chrono::milliseconds&gt;(timeout).count());
 </code></pre></div>
-<p><strong>Violation 26</strong>: freertos_sw_timer.hpp:368:25
+<p><strong>Violation 26</strong>: freertos_sw_timer.hpp:370:25
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">     365:    * @param timeout timeout to wait for the timer to reset
-     366:    * @return BaseType_t pdPASS if the timer was reset successfully else pdFAIL
-     367:    */
-&gt;&gt;&gt;  368:   template &lt;typename Rep, typename Period&gt;
-     369:   BaseType_t reset(const std::chrono::duration&lt;Rep, Period&gt; &amp;timeout) {
-     370:     return reset(
-     371:         std::chrono::duration_cast&lt;std::chrono::milliseconds&gt;(timeout).count());
+<pre><code class="language-cpp">     367:    * @param timeout timeout to wait for the timer to reset
+     368:    * @return BaseType_t pdPASS if the timer was reset successfully else pdFAIL
+     369:    */
+&gt;&gt;&gt;  370:   template &lt;typename Rep, typename Period&gt;
+     371:   BaseType_t reset(const std::chrono::duration&lt;Rep, Period&gt; &amp;timeout) {
+     372:     return reset(
+     373:         std::chrono::duration_cast&lt;std::chrono::milliseconds&gt;(timeout).count());
 </code></pre></div>
-<p><strong>Violation 27</strong>: freertos_sw_timer.hpp:427:31
+<p><strong>Violation 27</strong>: freertos_sw_timer.hpp:429:31
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">     424:    * @return BaseType_t pdPASS if the timer period was changed successfully else
-     425:    * pdFAIL
-     426:    */
-&gt;&gt;&gt;  427:   template &lt;typename RepPeriod, typename PeriodPeriod, typename RepTimeout,
-     428:             typename PeriodTimeout&gt;
-     429:   BaseType_t
-     430:   period(const std::chrono::duration&lt;RepPeriod, PeriodPeriod&gt; &amp;new_period,
+<pre><code class="language-cpp">     426:    * @return BaseType_t pdPASS if the timer period was changed successfully else
+     427:    * pdFAIL
+     428:    */
+&gt;&gt;&gt;  429:   template &lt;typename RepPeriod, typename PeriodPeriod, typename RepTimeout,
+     430:             typename PeriodTimeout&gt;
+     431:   BaseType_t
+     432:   period(const std::chrono::duration&lt;RepPeriod, PeriodPeriod&gt; &amp;new_period,
 </code></pre></div>
-<p><strong>Violation 28</strong>: freertos_sw_timer.hpp:467:25
+<p><strong>Violation 28</strong>: freertos_sw_timer.hpp:469:25
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">     464:    * @return BaseType_t pdPASS if the timer period was changed successfully else
-     465:    * pdFAIL
-     466:    */
-&gt;&gt;&gt;  467:   template &lt;typename Rep, typename Period&gt;
-     468:   BaseType_t period_isr(const std::chrono::duration&lt;Rep, Period&gt; &amp;new_period,
-     469:                         BaseType_t &amp;high_priority_task_woken) {
-     470:     return period_isr(
+<pre><code class="language-cpp">     466:    * @return BaseType_t pdPASS if the timer period was changed successfully else
+     467:    * pdFAIL
+     468:    */
+&gt;&gt;&gt;  469:   template &lt;typename Rep, typename Period&gt;
+     470:   BaseType_t period_isr(const std::chrono::duration&lt;Rep, Period&gt; &amp;new_period,
+     471:                         BaseType_t &amp;high_priority_task_woken) {
+     472:     return period_isr(
 </code></pre></div>
-<p><strong>Violation 29</strong>: freertos_sw_timer.hpp:497:25
+<p><strong>Violation 29</strong>: freertos_sw_timer.hpp:499:25
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">     494:    * @return BaseType_t pdPASS if the timer period was changed successfully else
-     495:    * pdFAIL
-     496:    */
-&gt;&gt;&gt;  497:   template &lt;typename Rep, typename Period&gt;
-     498:   BaseType_t period_isr(const std::chrono::duration&lt;Rep, Period&gt; &amp;new_period) {
-     499:     return period_isr(
-     500:         std::chrono::duration_cast&lt;std::chrono::milliseconds&gt;(new_period)
+<pre><code class="language-cpp">     496:    * @return BaseType_t pdPASS if the timer period was changed successfully else
+     497:    * pdFAIL
+     498:    */
+&gt;&gt;&gt;  499:   template &lt;typename Rep, typename Period&gt;
+     500:   BaseType_t period_isr(const std::chrono::duration&lt;Rep, Period&gt; &amp;new_period) {
+     501:     return period_isr(
+     502:         std::chrono::duration_cast&lt;std::chrono::milliseconds&gt;(new_period)
 </code></pre></div>
 <p><strong>Violation 30</strong>: freertos_event_group.hpp:181:25
 <em>Reason: Coding Style</em></p>
@@ -807,135 +807,135 @@
      660:     return {};
      661:   }
 </code></pre></div>
-<p><strong>Violation 5</strong>: freertos_sw_timer.hpp:237:7
+<p><strong>Violation 5</strong>: freertos_sw_timer.hpp:239:7
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">     234:    */
-     235:   BaseType_t start(const TickType_t ticks_to_wait = portMAX_DELAY) {
-     236:     if (!m_timer) {
-&gt;&gt;&gt;  237:       return pdFAIL;
-     238:     }
-     239:     auto rc = xTimerStart(m_timer, ticks_to_wait);
-     240:     if (rc) {
+<pre><code class="language-cpp">     236:    */
+     237:   BaseType_t start(const TickType_t ticks_to_wait = portMAX_DELAY) {
+     238:     if (!m_timer) {
+&gt;&gt;&gt;  239:       return pdFAIL;
+     240:     }
+     241:     auto rc = xTimerStart(m_timer, ticks_to_wait);
+     242:     if (rc) {
 </code></pre></div>
-<p><strong>Violation 6</strong>: freertos_sw_timer.hpp:269:7
+<p><strong>Violation 6</strong>: freertos_sw_timer.hpp:271:7
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">     266:    */
-     267:   BaseType_t start_isr(BaseType_t &amp;high_priority_task_woken) {
-     268:     if (!m_timer) {
-&gt;&gt;&gt;  269:       return pdFAIL;
-     270:     }
-     271:     auto rc = xTimerStartFromISR(m_timer, &amp;high_priority_task_woken);
-     272:     if (rc) {
+<pre><code class="language-cpp">     268:    */
+     269:   BaseType_t start_isr(BaseType_t &amp;high_priority_task_woken) {
+     270:     if (!m_timer) {
+&gt;&gt;&gt;  271:       return pdFAIL;
+     272:     }
+     273:     auto rc = xTimerStartFromISR(m_timer, &amp;high_priority_task_woken);
+     274:     if (rc) {
 </code></pre></div>
-<p><strong>Violation 7</strong>: freertos_sw_timer.hpp:296:7
+<p><strong>Violation 7</strong>: freertos_sw_timer.hpp:298:7
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">     293:    */
-     294:   BaseType_t stop(const TickType_t ticks_to_wait = portMAX_DELAY) {
-     295:     if (!m_timer) {
-&gt;&gt;&gt;  296:       return pdFAIL;
-     297:     }
-     298:     auto rc = xTimerStop(m_timer, ticks_to_wait);
-     299:     if (rc) {
+<pre><code class="language-cpp">     295:    */
+     296:   BaseType_t stop(const TickType_t ticks_to_wait = portMAX_DELAY) {
+     297:     if (!m_timer) {
+&gt;&gt;&gt;  298:       return pdFAIL;
+     299:     }
+     300:     auto rc = xTimerStop(m_timer, ticks_to_wait);
+     301:     if (rc) {
 </code></pre></div>
-<p><strong>Violation 8</strong>: freertos_sw_timer.hpp:328:7
+<p><strong>Violation 8</strong>: freertos_sw_timer.hpp:330:7
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">     325:    */
-     326:   BaseType_t stop_isr(BaseType_t &amp;high_priority_task_woken) {
-     327:     if (!m_timer) {
-&gt;&gt;&gt;  328:       return pdFAIL;
-     329:     }
-     330:     auto rc = xTimerStopFromISR(m_timer, &amp;high_priority_task_woken);
-     331:     if (rc) {
+<pre><code class="language-cpp">     327:    */
+     328:   BaseType_t stop_isr(BaseType_t &amp;high_priority_task_woken) {
+     329:     if (!m_timer) {
+&gt;&gt;&gt;  330:       return pdFAIL;
+     331:     }
+     332:     auto rc = xTimerStopFromISR(m_timer, &amp;high_priority_task_woken);
+     333:     if (rc) {
 </code></pre></div>
-<p><strong>Violation 9</strong>: freertos_sw_timer.hpp:355:7
+<p><strong>Violation 9</strong>: freertos_sw_timer.hpp:357:7
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">     352:    */
-     353:   BaseType_t reset(const TickType_t ticks_to_wait = portMAX_DELAY) {
-     354:     if (!m_timer) {
-&gt;&gt;&gt;  355:       return pdFAIL;
-     356:     }
-     357:     return xTimerReset(m_timer, ticks_to_wait);
-     358:   }
+<pre><code class="language-cpp">     354:    */
+     355:   BaseType_t reset(const TickType_t ticks_to_wait = portMAX_DELAY) {
+     356:     if (!m_timer) {
+&gt;&gt;&gt;  357:       return pdFAIL;
+     358:     }
+     359:     return xTimerReset(m_timer, ticks_to_wait);
+     360:   }
 </code></pre></div>
-<p><strong>Violation 10</strong>: freertos_sw_timer.hpp:383:7
+<p><strong>Violation 10</strong>: freertos_sw_timer.hpp:385:7
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">     380:    */
-     381:   BaseType_t reset_isr(BaseType_t &amp;high_priority_task_woken) {
-     382:     if (!m_timer) {
-&gt;&gt;&gt;  383:       return pdFAIL;
-     384:     }
-     385:     return xTimerResetFromISR(m_timer, &amp;high_priority_task_woken);
-     386:   }
+<pre><code class="language-cpp">     382:    */
+     383:   BaseType_t reset_isr(BaseType_t &amp;high_priority_task_woken) {
+     384:     if (!m_timer) {
+&gt;&gt;&gt;  385:       return pdFAIL;
+     386:     }
+     387:     return xTimerResetFromISR(m_timer, &amp;high_priority_task_woken);
+     388:   }
 </code></pre></div>
-<p><strong>Violation 11</strong>: freertos_sw_timer.hpp:410:7
+<p><strong>Violation 11</strong>: freertos_sw_timer.hpp:412:7
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">     407:   BaseType_t period(const TickType_t new_period_ticks,
-     408:                     const TickType_t ticks_to_wait = portMAX_DELAY) {
-     409:     if (!m_timer) {
-&gt;&gt;&gt;  410:       return pdFAIL;
-     411:     }
-     412:     return xTimerChangePeriod(m_timer, new_period_ticks, ticks_to_wait);
-     413:   }
+<pre><code class="language-cpp">     409:   BaseType_t period(const TickType_t new_period_ticks,
+     410:                     const TickType_t ticks_to_wait = portMAX_DELAY) {
+     411:     if (!m_timer) {
+&gt;&gt;&gt;  412:       return pdFAIL;
+     413:     }
+     414:     return xTimerChangePeriod(m_timer, new_period_ticks, ticks_to_wait);
+     415:   }
 </code></pre></div>
-<p><strong>Violation 12</strong>: freertos_sw_timer.hpp:450:7
+<p><strong>Violation 12</strong>: freertos_sw_timer.hpp:452:7
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">     447:   BaseType_t period_isr(const TickType_t new_period_ticks,
-     448:                         BaseType_t &amp;high_priority_task_woken) {
-     449:     if (!m_timer) {
-&gt;&gt;&gt;  450:       return pdFAIL;
-     451:     }
-     452:     return xTimerChangePeriodFromISR(m_timer, new_period_ticks,
-     453:                                      &amp;high_priority_task_woken);
+<pre><code class="language-cpp">     449:   BaseType_t period_isr(const TickType_t new_period_ticks,
+     450:                         BaseType_t &amp;high_priority_task_woken) {
+     451:     if (!m_timer) {
+&gt;&gt;&gt;  452:       return pdFAIL;
+     453:     }
+     454:     return xTimerChangePeriodFromISR(m_timer, new_period_ticks,
+     455:                                      &amp;high_priority_task_woken);
 </code></pre></div>
-<p><strong>Violation 13</strong>: freertos_sw_timer.hpp:516:7
+<p><strong>Violation 13</strong>: freertos_sw_timer.hpp:518:7
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">     513:    */
-     514:   TickType_t period_ticks(void) const {
-     515:     if (!m_timer) {
-&gt;&gt;&gt;  516:       return 0;
-     517:     }
-     518:     return xTimerGetPeriod(m_timer);
-     519:   }
+<pre><code class="language-cpp">     515:    */
+     516:   TickType_t period_ticks(void) const {
+     517:     if (!m_timer) {
+&gt;&gt;&gt;  518:       return 0;
+     519:     }
+     520:     return xTimerGetPeriod(m_timer);
+     521:   }
 </code></pre></div>
-<p><strong>Violation 14</strong>: freertos_sw_timer.hpp:556:7
+<p><strong>Violation 14</strong>: freertos_sw_timer.hpp:558:7
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">     553:    */
-     554:   TickType_t remaining_ticks(void) const {
-     555:     if (m_timer) {
-&gt;&gt;&gt;  556:       return xTimerGetExpiryTime(m_timer) - xTaskGetTickCount();
-     557:     } else {
-     558:       return 0;
-     559:     }
+<pre><code class="language-cpp">     555:    */
+     556:   TickType_t remaining_ticks(void) const {
+     557:     if (m_timer) {
+&gt;&gt;&gt;  558:       return xTimerGetExpiryTime(m_timer) - xTaskGetTickCount();
+     559:     } else {
+     560:       return 0;
+     561:     }
 </code></pre></div>
-<p><strong>Violation 15</strong>: freertos_sw_timer.hpp:558:7
+<p><strong>Violation 15</strong>: freertos_sw_timer.hpp:560:7
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">     555:     if (m_timer) {
-     556:       return xTimerGetExpiryTime(m_timer) - xTaskGetTickCount();
-     557:     } else {
-&gt;&gt;&gt;  558:       return 0;
-     559:     }
-     560:   }
-     561:   /**
+<pre><code class="language-cpp">     557:     if (m_timer) {
+     558:       return xTimerGetExpiryTime(m_timer) - xTaskGetTickCount();
+     559:     } else {
+&gt;&gt;&gt;  560:       return 0;
+     561:     }
+     562:   }
+     563:   /**
 </code></pre></div>
-<p><strong>Violation 16</strong>: freertos_sw_timer.hpp:578:7
+<p><strong>Violation 16</strong>: freertos_sw_timer.hpp:580:7
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">     575:    */
-     576:   BaseType_t running(void) const {
-     577:     if (!m_timer) {
-&gt;&gt;&gt;  578:       return pdFALSE;
-     579:     }
-     580:     return xTimerIsTimerActive(m_timer);
-     581:   }
+<pre><code class="language-cpp">     577:    */
+     578:   BaseType_t running(void) const {
+     579:     if (!m_timer) {
+&gt;&gt;&gt;  580:       return pdFALSE;
+     581:     }
+     582:     return xTimerIsTimerActive(m_timer);
+     583:   }
 </code></pre></div>
-<p><strong>Violation 17</strong>: freertos_sw_timer.hpp:589:7
+<p><strong>Violation 17</strong>: freertos_sw_timer.hpp:591:7
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">     586:    */
-     587:   const char *name(void) const {
-     588:     if (!m_timer) {
-&gt;&gt;&gt;  589:       return nullptr;
-     590:     }
-     591:     return pcTimerGetName(m_timer);
-     592:   }
+<pre><code class="language-cpp">     588:    */
+     589:   const char *name(void) const {
+     590:     if (!m_timer) {
+&gt;&gt;&gt;  591:       return nullptr;
+     592:     }
+     593:     return pcTimerGetName(m_timer);
+     594:   }
 </code></pre></div>
 <h4 id="misra-c-2012-rule-163-13-violations">MISRA C 2012 Rule 16.3 (13 violation(s))</h4>
 <p><strong>An unconditional break statement shall terminate every switch-clause</strong></p>
@@ -1115,35 +1115,35 @@
      658:       return item;
      659:     }
 </code></pre></div>
-<p><strong>Violation 5</strong>: freertos_sw_timer.hpp:184:16
+<p><strong>Violation 5</strong>: freertos_sw_timer.hpp:186:16
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">     181:     if (m_timer) {
-     182:       auto rc = xTimerDelete(m_timer, portMAX_DELAY);
-     183:       if (rc == pdPASS) {
-&gt;&gt;&gt;  184:         while (xTimerIsTimerActive(m_timer) != pdFALSE) {
-     185:           vTaskDelay(pdMS_TO_TICKS(1));
-     186:         }
-     187:       }
+<pre><code class="language-cpp">     183:     if (m_timer) {
+     184:       auto rc = xTimerDelete(m_timer, portMAX_DELAY);
+     185:       if (rc == pdPASS) {
+&gt;&gt;&gt;  186:         while (xTimerIsTimerActive(m_timer) != pdFALSE) {
+     187:           vTaskDelay(pdMS_TO_TICKS(1));
+     188:         }
+     189:       }
 </code></pre></div>
-<p><strong>Violation 6</strong>: freertos_sw_timer.hpp:199:16
+<p><strong>Violation 6</strong>: freertos_sw_timer.hpp:201:16
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">     196:       }
-     197:       auto rc = xTimerStop(src.m_timer, portMAX_DELAY);
-     198:       if (rc == pdPASS) {
-&gt;&gt;&gt;  199:         while (xTimerIsTimerActive(src.m_timer) != pdFALSE) {
-     200:           vTaskDelay(pdMS_TO_TICKS(1));
-     201:         }
-     202:         auto name = pcTimerGetName(src.m_timer);
+<pre><code class="language-cpp">     198:       }
+     199:       auto rc = xTimerStop(src.m_timer, portMAX_DELAY);
+     200:       if (rc == pdPASS) {
+&gt;&gt;&gt;  201:         while (xTimerIsTimerActive(src.m_timer) != pdFALSE) {
+     202:           vTaskDelay(pdMS_TO_TICKS(1));
+     203:         }
+     204:         auto name = pcTimerGetName(src.m_timer);
 </code></pre></div>
-<p><strong>Violation 7</strong>: freertos_sw_timer.hpp:207:18
+<p><strong>Violation 7</strong>: freertos_sw_timer.hpp:209:18
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">     204:         auto auto_reload = uxTimerGetReloadMode(src.m_timer);
-     205:         rc = xTimerDelete(src.m_timer, portMAX_DELAY);
-     206:         if (rc == pdPASS) {
-&gt;&gt;&gt;  207:           while (xTimerIsTimerActive(src.m_timer) != pdFALSE) {
-     208:             vTaskDelay(pdMS_TO_TICKS(1));
-     209:           }
-     210:           src.m_timer = nullptr;
+<pre><code class="language-cpp">     206:         auto auto_reload = uxTimerGetReloadMode(src.m_timer);
+     207:         rc = xTimerDelete(src.m_timer, portMAX_DELAY);
+     208:         if (rc == pdPASS) {
+&gt;&gt;&gt;  209:           while (xTimerIsTimerActive(src.m_timer) != pdFALSE) {
+     210:             vTaskDelay(pdMS_TO_TICKS(1));
+     211:           }
+     212:           src.m_timer = nullptr;
 </code></pre></div>
 <h4 id="misra-c-2012-rule-178-14-violations">MISRA C 2012 Rule 17.8 (14 violation(s))</h4>
 <p><strong>A function parameter should not be modified</strong></p>
@@ -1199,45 +1199,45 @@
      699:     if (rc) {
      700:       m_recursions_count++;
 </code></pre></div>
-<p><strong>Violation 6</strong>: freertos_sw_timer.hpp:235:51
+<p><strong>Violation 6</strong>: freertos_sw_timer.hpp:237:51
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">     232:    * @param ticks_to_wait timeout in ticks to wait for the timer to start
-     233:    * @return BaseType_t pdPASS if the timer was started successfully else pdFAIL
-     234:    */
-&gt;&gt;&gt;  235:   BaseType_t start(const TickType_t ticks_to_wait = portMAX_DELAY) {
-     236:     if (!m_timer) {
-     237:       return pdFAIL;
-     238:     }
+<pre><code class="language-cpp">     234:    * @param ticks_to_wait timeout in ticks to wait for the timer to start
+     235:    * @return BaseType_t pdPASS if the timer was started successfully else pdFAIL
+     236:    */
+&gt;&gt;&gt;  237:   BaseType_t start(const TickType_t ticks_to_wait = portMAX_DELAY) {
+     238:     if (!m_timer) {
+     239:       return pdFAIL;
+     240:     }
 </code></pre></div>
-<p><strong>Violation 7</strong>: freertos_sw_timer.hpp:294:50
+<p><strong>Violation 7</strong>: freertos_sw_timer.hpp:296:50
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">     291:    * @param ticks_to_wait timeout in ticks to wait for the timer to stop
-     292:    * @return BaseType_t pdPASS if the timer was stopped successfully else pdFAIL
-     293:    */
-&gt;&gt;&gt;  294:   BaseType_t stop(const TickType_t ticks_to_wait = portMAX_DELAY) {
-     295:     if (!m_timer) {
-     296:       return pdFAIL;
-     297:     }
+<pre><code class="language-cpp">     293:    * @param ticks_to_wait timeout in ticks to wait for the timer to stop
+     294:    * @return BaseType_t pdPASS if the timer was stopped successfully else pdFAIL
+     295:    */
+&gt;&gt;&gt;  296:   BaseType_t stop(const TickType_t ticks_to_wait = portMAX_DELAY) {
+     297:     if (!m_timer) {
+     298:       return pdFAIL;
+     299:     }
 </code></pre></div>
-<p><strong>Violation 8</strong>: freertos_sw_timer.hpp:353:51
+<p><strong>Violation 8</strong>: freertos_sw_timer.hpp:355:51
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">     350:    * @param ticks_to_wait timeout in ticks to wait for the timer to reset
-     351:    * @return BaseType_t pdPASS if the timer was reset successfully else pdFAIL
-     352:    */
-&gt;&gt;&gt;  353:   BaseType_t reset(const TickType_t ticks_to_wait = portMAX_DELAY) {
-     354:     if (!m_timer) {
-     355:       return pdFAIL;
-     356:     }
+<pre><code class="language-cpp">     352:    * @param ticks_to_wait timeout in ticks to wait for the timer to reset
+     353:    * @return BaseType_t pdPASS if the timer was reset successfully else pdFAIL
+     354:    */
+&gt;&gt;&gt;  355:   BaseType_t reset(const TickType_t ticks_to_wait = portMAX_DELAY) {
+     356:     if (!m_timer) {
+     357:       return pdFAIL;
+     358:     }
 </code></pre></div>
-<p><strong>Violation 9</strong>: freertos_sw_timer.hpp:408:52
+<p><strong>Violation 9</strong>: freertos_sw_timer.hpp:410:52
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">     405:    * pdFAIL
-     406:    */
-     407:   BaseType_t period(const TickType_t new_period_ticks,
-&gt;&gt;&gt;  408:                     const TickType_t ticks_to_wait = portMAX_DELAY) {
-     409:     if (!m_timer) {
-     410:       return pdFAIL;
-     411:     }
+<pre><code class="language-cpp">     407:    * pdFAIL
+     408:    */
+     409:   BaseType_t period(const TickType_t new_period_ticks,
+&gt;&gt;&gt;  410:                     const TickType_t ticks_to_wait = portMAX_DELAY) {
+     411:     if (!m_timer) {
+     412:       return pdFAIL;
+     413:     }
 </code></pre></div>
 <p><strong>Violation 10</strong>: freertos_stream_buffer.hpp:141:38
 <em>Reason: Coding Style</em></p>
@@ -1407,55 +1407,55 @@
      933:         m_lock_acquired{static_cast&lt;bool&gt;(m_mutex.lock(
      934:             std::chrono::duration_cast&lt;std::chrono::milliseconds&gt;(timeout)
 </code></pre></div>
-<p><strong>Violation 10</strong>: freertos_sw_timer.hpp:128:30
+<p><strong>Violation 10</strong>: freertos_sw_timer.hpp:130:30
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">     125:    * @param auto_reload auto-reload flag
-     126:    * @param callback callback routine
-     127:    */
-&gt;&gt;&gt;  128:   explicit timer(const char *name, const TickType_t period_ticks,
-     129:                  UBaseType_t auto_reload, timer_callback_t &amp;&amp;callback)
-     130:       : m_callback{std::move(callback)}, m_started{false},
-     131:         m_timer{m_allocator.create(name, period_ticks, auto_reload, this,
+<pre><code class="language-cpp">     127:    * @param auto_reload auto-reload flag
+     128:    * @param callback callback routine
+     129:    */
+&gt;&gt;&gt;  130:   explicit timer(const char *name, const TickType_t period_ticks,
+     131:                  UBaseType_t auto_reload, timer_callback_t &amp;&amp;callback)
+     132:       : m_callback{std::move(callback)}, m_started{false},
+     133:         m_timer{m_allocator.create(name, period_ticks, auto_reload, this,
 </code></pre></div>
-<p><strong>Violation 11</strong>: freertos_sw_timer.hpp:129:30
+<p><strong>Violation 11</strong>: freertos_sw_timer.hpp:131:30
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">     126:    * @param callback callback routine
-     127:    */
-     128:   explicit timer(const char *name, const TickType_t period_ticks,
-&gt;&gt;&gt;  129:                  UBaseType_t auto_reload, timer_callback_t &amp;&amp;callback)
-     130:       : m_callback{std::move(callback)}, m_started{false},
-     131:         m_timer{m_allocator.create(name, period_ticks, auto_reload, this,
-     132:                                    callback_wrapper)} {
+<pre><code class="language-cpp">     128:    * @param callback callback routine
+     129:    */
+     130:   explicit timer(const char *name, const TickType_t period_ticks,
+&gt;&gt;&gt;  131:                  UBaseType_t auto_reload, timer_callback_t &amp;&amp;callback)
+     132:       : m_callback{std::move(callback)}, m_started{false},
+     133:         m_timer{m_allocator.create(name, period_ticks, auto_reload, this,
+     134:                                    callback_wrapper)} {
 </code></pre></div>
-<p><strong>Violation 12</strong>: freertos_sw_timer.hpp:146:30
+<p><strong>Violation 12</strong>: freertos_sw_timer.hpp:148:30
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">     143:    * @param callback callback routine
-     144:    */
-     145:   template &lt;typename Rep, typename Period&gt;
-&gt;&gt;&gt;  146:   explicit timer(const char *name,
-     147:                  const std::chrono::duration&lt;Rep, Period&gt; &amp;period,
-     148:                  UBaseType_t auto_reload, timer_callback_t &amp;&amp;callback)
-     149:       : timer{name,
+<pre><code class="language-cpp">     145:    * @param callback callback routine
+     146:    */
+     147:   template &lt;typename Rep, typename Period&gt;
+&gt;&gt;&gt;  148:   explicit timer(const char *name,
+     149:                  const std::chrono::duration&lt;Rep, Period&gt; &amp;period,
+     150:                  UBaseType_t auto_reload, timer_callback_t &amp;&amp;callback)
+     151:       : timer{name,
 </code></pre></div>
-<p><strong>Violation 13</strong>: freertos_sw_timer.hpp:147:60
+<p><strong>Violation 13</strong>: freertos_sw_timer.hpp:149:60
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">     144:    */
-     145:   template &lt;typename Rep, typename Period&gt;
-     146:   explicit timer(const char *name,
-&gt;&gt;&gt;  147:                  const std::chrono::duration&lt;Rep, Period&gt; &amp;period,
-     148:                  UBaseType_t auto_reload, timer_callback_t &amp;&amp;callback)
-     149:       : timer{name,
-     150:               static_cast&lt;TickType_t&gt;(
+<pre><code class="language-cpp">     146:    */
+     147:   template &lt;typename Rep, typename Period&gt;
+     148:   explicit timer(const char *name,
+&gt;&gt;&gt;  149:                  const std::chrono::duration&lt;Rep, Period&gt; &amp;period,
+     150:                  UBaseType_t auto_reload, timer_callback_t &amp;&amp;callback)
+     151:       : timer{name,
+     152:               static_cast&lt;TickType_t&gt;(
 </code></pre></div>
-<p><strong>Violation 14</strong>: freertos_sw_timer.hpp:148:30
+<p><strong>Violation 14</strong>: freertos_sw_timer.hpp:150:30
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">     145:   template &lt;typename Rep, typename Period&gt;
-     146:   explicit timer(const char *name,
-     147:                  const std::chrono::duration&lt;Rep, Period&gt; &amp;period,
-&gt;&gt;&gt;  148:                  UBaseType_t auto_reload, timer_callback_t &amp;&amp;callback)
-     149:       : timer{name,
-     150:               static_cast&lt;TickType_t&gt;(
-     151:                   std::chrono::duration_cast&lt;std::chrono::milliseconds&gt;(period)
+<pre><code class="language-cpp">     147:   template &lt;typename Rep, typename Period&gt;
+     148:   explicit timer(const char *name,
+     149:                  const std::chrono::duration&lt;Rep, Period&gt; &amp;period,
+&gt;&gt;&gt;  150:                  UBaseType_t auto_reload, timer_callback_t &amp;&amp;callback)
+     151:       : timer{name,
+     152:               static_cast&lt;TickType_t&gt;(
+     153:                   std::chrono::duration_cast&lt;std::chrono::milliseconds&gt;(period)
 </code></pre></div>
 <p><strong>Violation 15</strong>: freertos_stream_buffer.hpp:108:33
 <em>Reason: Coding Style</em></p>
@@ -1611,15 +1611,15 @@
       55:  * @brief An allocator for the software timer that uses a static memory
       56:  * allocation.
 </code></pre></div>
-<p><strong>Violation 15</strong>: freertos_sw_timer.hpp:595:2
+<p><strong>Violation 15</strong>: freertos_sw_timer.hpp:597:2
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">     592:   }
-     593: };
-     594: 
-&gt;&gt;&gt;  595: #if configSUPPORT_STATIC_ALLOCATION
-     596: /**
-     597:  * @brief Namespace for the kernel objects static memory allocation.
-     598:  *
+<pre><code class="language-cpp">     594:   }
+     595: };
+     596: 
+&gt;&gt;&gt;  597: #if configSUPPORT_STATIC_ALLOCATION
+     598: /**
+     599:  * @brief Namespace for the kernel objects static memory allocation.
+     600:  *
 </code></pre></div>
 <p><strong>Violation 16</strong>: freertos_sw_timer.hpp:80:2
 <em>Reason: Coding Style</em></p>
@@ -1631,15 +1631,15 @@
       82:  * @brief An allocator for the software timer that uses a dynamic memory
       83:  * allocation.
 </code></pre></div>
-<p><strong>Violation 17</strong>: freertos_sw_timer.hpp:608:2
+<p><strong>Violation 17</strong>: freertos_sw_timer.hpp:610:2
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">     605: using timer = freertos::timer&lt;freertos::static_sw_timer_allocator&gt;;
-     606: } // namespace sa
-     607: #endif
-&gt;&gt;&gt;  608: #if configSUPPORT_DYNAMIC_ALLOCATION
-     609: /**
-     610:  * @brief Namespace for the kernel objects dynamic memory allocation.
-     611:  *
+<pre><code class="language-cpp">     607: using timer = freertos::timer&lt;freertos::static_sw_timer_allocator&gt;;
+     608: } // namespace sa
+     609: #endif
+&gt;&gt;&gt;  610: #if configSUPPORT_DYNAMIC_ALLOCATION
+     611: /**
+     612:  * @brief Namespace for the kernel objects dynamic memory allocation.
+     613:  *
 </code></pre></div>
 <p><strong>Violation 18</strong>: freertos_event_group.hpp:45:2
 <em>Reason: Coding Style</em></p>
@@ -1763,45 +1763,45 @@
 <p><strong>Identifiers that define objects or functions with external linkage shall be unique</strong></p>
 <p>External identifiers must be unique to avoid linking errors and undefined behavior when linking multiple translation units.</p>
 <p><em>Rationale: Non-unique external identifiers can cause linking errors and unpredictable behavior in multi-file projects.</em></p>
-<p><strong>Violation 1</strong>: freertos_task.hpp:219:20
+<p><strong>Violation 1</strong>: freertos_task.hpp:221:20
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">     216:    * @param priority  priority of the task
-     217:    * @param task_routine  task routine function
-     218:    */
-&gt;&gt;&gt;  219:   task(const char *name, UBaseType_t priority, task_routine_t &amp;&amp;task_routine)
-     220:       : m_allocator{}, m_taskRoutine{task_routine},
-     221:         m_hTask{m_allocator.create(task_exec, name, priority, this)} {}
-     222:   /**
+<pre><code class="language-cpp">     218:    * @param priority  priority of the task
+     219:    * @param task_routine  task routine function
+     220:    */
+&gt;&gt;&gt;  221:   task(const char *name, UBaseType_t priority, task_routine_t &amp;&amp;task_routine)
+     222:       : m_allocator{}, m_taskRoutine{task_routine},
+     223:         m_hTask{m_allocator.create(task_exec, name, priority, this)} {}
+     224:   /**
 </code></pre></div>
-<p><strong>Violation 2</strong>: freertos_task.hpp:848:15
+<p><strong>Violation 2</strong>: freertos_task.hpp:853:15
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">     845:    *
-     846:    * @return const char*  task name
-     847:    */
-&gt;&gt;&gt;  848:   const char *name(void) const { return m_task.name(); }
-     849: // Task notification API
-     850: #if configUSE_TASK_NOTIFICATIONS
-     851:   /**
+<pre><code class="language-cpp">     850:    *
+     851:    * @return const char*  task name
+     852:    */
+&gt;&gt;&gt;  853:   const char *name(void) const { return m_task.name(); }
+     854: // Task notification API
+     855: #if configUSE_TASK_NOTIFICATIONS
+     856:   /**
 </code></pre></div>
-<p><strong>Violation 3</strong>: freertos_task.hpp:219:20
+<p><strong>Violation 3</strong>: freertos_task.hpp:221:20
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">     216:    * @param priority  priority of the task
-     217:    * @param task_routine  task routine function
-     218:    */
-&gt;&gt;&gt;  219:   task(const char *name, UBaseType_t priority, task_routine_t &amp;&amp;task_routine)
-     220:       : m_allocator{}, m_taskRoutine{task_routine},
-     221:         m_hTask{m_allocator.create(task_exec, name, priority, this)} {}
-     222:   /**
+<pre><code class="language-cpp">     218:    * @param priority  priority of the task
+     219:    * @param task_routine  task routine function
+     220:    */
+&gt;&gt;&gt;  221:   task(const char *name, UBaseType_t priority, task_routine_t &amp;&amp;task_routine)
+     222:       : m_allocator{}, m_taskRoutine{task_routine},
+     223:         m_hTask{m_allocator.create(task_exec, name, priority, this)} {}
+     224:   /**
 </code></pre></div>
-<p><strong>Violation 4</strong>: freertos_task.hpp:848:15
+<p><strong>Violation 4</strong>: freertos_task.hpp:853:15
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">     845:    *
-     846:    * @return const char*  task name
-     847:    */
-&gt;&gt;&gt;  848:   const char *name(void) const { return m_task.name(); }
-     849: // Task notification API
-     850: #if configUSE_TASK_NOTIFICATIONS
-     851:   /**
+<pre><code class="language-cpp">     850:    *
+     851:    * @return const char*  task name
+     852:    */
+&gt;&gt;&gt;  853:   const char *name(void) const { return m_task.name(); }
+     854: // Task notification API
+     855: #if configUSE_TASK_NOTIFICATIONS
+     856:   /**
 </code></pre></div>
 <p><strong>Violation 5</strong>: freertos_semaphore.hpp:452:46
 <em>Reason: Coding Style</em></p>
@@ -1903,25 +1903,25 @@
      893:   }
      894:   /**
 </code></pre></div>
-<p><strong>Violation 15</strong>: freertos_task.hpp:219:20
+<p><strong>Violation 15</strong>: freertos_task.hpp:221:20
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">     216:    * @param priority  priority of the task
-     217:    * @param task_routine  task routine function
-     218:    */
-&gt;&gt;&gt;  219:   task(const char *name, UBaseType_t priority, task_routine_t &amp;&amp;task_routine)
-     220:       : m_allocator{}, m_taskRoutine{task_routine},
-     221:         m_hTask{m_allocator.create(task_exec, name, priority, this)} {}
-     222:   /**
+<pre><code class="language-cpp">     218:    * @param priority  priority of the task
+     219:    * @param task_routine  task routine function
+     220:    */
+&gt;&gt;&gt;  221:   task(const char *name, UBaseType_t priority, task_routine_t &amp;&amp;task_routine)
+     222:       : m_allocator{}, m_taskRoutine{task_routine},
+     223:         m_hTask{m_allocator.create(task_exec, name, priority, this)} {}
+     224:   /**
 </code></pre></div>
-<p><strong>Violation 16</strong>: freertos_task.hpp:848:15
+<p><strong>Violation 16</strong>: freertos_task.hpp:853:15
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">     845:    *
-     846:    * @return const char*  task name
-     847:    */
-&gt;&gt;&gt;  848:   const char *name(void) const { return m_task.name(); }
-     849: // Task notification API
-     850: #if configUSE_TASK_NOTIFICATIONS
-     851:   /**
+<pre><code class="language-cpp">     850:    *
+     851:    * @return const char*  task name
+     852:    */
+&gt;&gt;&gt;  853:   const char *name(void) const { return m_task.name(); }
+     854: // Task notification API
+     855: #if configUSE_TASK_NOTIFICATIONS
+     856:   /**
 </code></pre></div>
 <h4 id="misra-c-2012-rule-82-45-violations">MISRA C 2012 Rule 8.2 (45 violation(s))</h4>
 <p><strong>Function types shall be in prototype form with named parameters</strong></p>
@@ -2381,65 +2381,65 @@
 <p><strong>An external object or function shall be declared once in one and only one file</strong></p>
 <p>External objects and functions should have exactly one declaration to avoid multiple definition errors and ensure consistent interfaces.</p>
 <p><em>Rationale: Multiple declarations can lead to inconsistencies and linking errors.</em></p>
-<p><strong>Violation 1</strong>: freertos_task.hpp:1069:6
+<p><strong>Violation 1</strong>: freertos_task.hpp:1074:6
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">    1066:  * @tparam Duration duration type
-    1067:  * @param timePoint time point to sleep until
-    1068:  */
-&gt;&gt;&gt; 1069: void delay_until(const std::chrono::system_clock::time_point &amp;wakeTime);
-    1070: /**
-    1071:  * @brief Sleep the task until the specified time point.
-    1072:  *
+<pre><code class="language-cpp">    1071:  * @tparam Duration duration type
+    1072:  * @param timePoint time point to sleep until
+    1073:  */
+&gt;&gt;&gt; 1074: void delay_until(const std::chrono::system_clock::time_point &amp;wakeTime);
+    1075: /**
+    1076:  * @brief Sleep the task until the specified time point.
+    1077:  *
 </code></pre></div>
-<p><strong>Violation 2</strong>: freertos_task.hpp:1052:6
+<p><strong>Violation 2</strong>: freertos_task.hpp:1057:6
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">    1049:  * @tparam Duration duration type
-    1050:  * @param timePoint time point to sleep until
-    1051:  */
-&gt;&gt;&gt; 1052: void delay_until(TickType_t &amp;previousWakeTime, TickType_t period);
-    1053: 
-    1054: template &lt;typename Rep, typename Period&gt;
-    1055: void delay_until(TickType_t &amp;previousWakeTime,
+<pre><code class="language-cpp">    1054:  * @tparam Duration duration type
+    1055:  * @param timePoint time point to sleep until
+    1056:  */
+&gt;&gt;&gt; 1057: void delay_until(TickType_t &amp;previousWakeTime, TickType_t period);
+    1058: 
+    1059: template &lt;typename Rep, typename Period&gt;
+    1060: void delay_until(TickType_t &amp;previousWakeTime,
 </code></pre></div>
-<p><strong>Violation 3</strong>: freertos_task.hpp:1077:6
+<p><strong>Violation 3</strong>: freertos_task.hpp:1082:6
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">    1074:  * @tparam Duration duration type
-    1075:  * @param timePoint time point to sleep until
-    1076:  */
-&gt;&gt;&gt; 1077: void delay_until(const std::chrono::steady_clock::time_point &amp;wakeTime);
-    1078: 
-    1079: // task utilities:
-    1080: 
+<pre><code class="language-cpp">    1079:  * @tparam Duration duration type
+    1080:  * @param timePoint time point to sleep until
+    1081:  */
+&gt;&gt;&gt; 1082: void delay_until(const std::chrono::steady_clock::time_point &amp;wakeTime);
+    1083: 
+    1084: // task utilities:
+    1085: 
 </code></pre></div>
-<p><strong>Violation 4</strong>: freertos_task.hpp:1069:6
+<p><strong>Violation 4</strong>: freertos_task.hpp:1074:6
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">    1066:  * @tparam Duration duration type
-    1067:  * @param timePoint time point to sleep until
-    1068:  */
-&gt;&gt;&gt; 1069: void delay_until(const std::chrono::system_clock::time_point &amp;wakeTime);
-    1070: /**
-    1071:  * @brief Sleep the task until the specified time point.
-    1072:  *
+<pre><code class="language-cpp">    1071:  * @tparam Duration duration type
+    1072:  * @param timePoint time point to sleep until
+    1073:  */
+&gt;&gt;&gt; 1074: void delay_until(const std::chrono::system_clock::time_point &amp;wakeTime);
+    1075: /**
+    1076:  * @brief Sleep the task until the specified time point.
+    1077:  *
 </code></pre></div>
-<p><strong>Violation 5</strong>: freertos_task.hpp:1052:6
+<p><strong>Violation 5</strong>: freertos_task.hpp:1057:6
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">    1049:  * @tparam Duration duration type
-    1050:  * @param timePoint time point to sleep until
-    1051:  */
-&gt;&gt;&gt; 1052: void delay_until(TickType_t &amp;previousWakeTime, TickType_t period);
-    1053: 
-    1054: template &lt;typename Rep, typename Period&gt;
-    1055: void delay_until(TickType_t &amp;previousWakeTime,
+<pre><code class="language-cpp">    1054:  * @tparam Duration duration type
+    1055:  * @param timePoint time point to sleep until
+    1056:  */
+&gt;&gt;&gt; 1057: void delay_until(TickType_t &amp;previousWakeTime, TickType_t period);
+    1058: 
+    1059: template &lt;typename Rep, typename Period&gt;
+    1060: void delay_until(TickType_t &amp;previousWakeTime,
 </code></pre></div>
-<p><strong>Violation 6</strong>: freertos_task.hpp:1077:6
+<p><strong>Violation 6</strong>: freertos_task.hpp:1082:6
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">    1074:  * @tparam Duration duration type
-    1075:  * @param timePoint time point to sleep until
-    1076:  */
-&gt;&gt;&gt; 1077: void delay_until(const std::chrono::steady_clock::time_point &amp;wakeTime);
-    1078: 
-    1079: // task utilities:
-    1080: 
+<pre><code class="language-cpp">    1079:  * @tparam Duration duration type
+    1080:  * @param timePoint time point to sleep until
+    1081:  */
+&gt;&gt;&gt; 1082: void delay_until(const std::chrono::steady_clock::time_point &amp;wakeTime);
+    1083: 
+    1084: // task utilities:
+    1085: 
 </code></pre></div>
 <h4 id="misra-c-2012-rule-86-40-violations">MISRA C 2012 Rule 8.6 (40 violation(s))</h4>
 <p><strong>An identifier with external linkage shall have exactly one external definition</strong></p>
@@ -2455,15 +2455,15 @@
       39:   vTaskDelayUntil(&amp;previousWakeTime, period);
       40: }
 </code></pre></div>
-<p><strong>Violation 2</strong>: freertos_task.hpp:1028:6
+<p><strong>Violation 2</strong>: freertos_task.hpp:1033:6
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">    1025:  * @param duration duration to delay
-    1026:  */
-    1027: template &lt;typename Rep, typename Period&gt;
-&gt;&gt;&gt; 1028: void delay(std::chrono::duration&lt;Rep, Period&gt; duration) {
-    1029:   delay(
-    1030:       std::chrono::duration_cast&lt;std::chrono::milliseconds&gt;(duration).count());
-    1031: }
+<pre><code class="language-cpp">    1030:  * @param duration duration to delay
+    1031:  */
+    1032: template &lt;typename Rep, typename Period&gt;
+&gt;&gt;&gt; 1033: void delay(std::chrono::duration&lt;Rep, Period&gt; duration) {
+    1034:   delay(
+    1035:       std::chrono::duration_cast&lt;std::chrono::milliseconds&gt;(duration).count());
+    1036: }
 </code></pre></div>
 <p><strong>Violation 3</strong>: freertos_task.cc:38:6
 <em>Reason: Coding Style</em></p>
@@ -2475,15 +2475,15 @@
       40: }
       41: void delay_until(const std::chrono::system_clock::time_point &amp;wakeTime) {
 </code></pre></div>
-<p><strong>Violation 4</strong>: freertos_task.hpp:1055:6
+<p><strong>Violation 4</strong>: freertos_task.hpp:1060:6
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">    1052: void delay_until(TickType_t &amp;previousWakeTime, TickType_t period);
-    1053: 
-    1054: template &lt;typename Rep, typename Period&gt;
-&gt;&gt;&gt; 1055: void delay_until(TickType_t &amp;previousWakeTime,
-    1056:                  std::chrono::duration&lt;Rep, Period&gt; period) {
-    1057:   delay_until(
-    1058:       previousWakeTime,
+<pre><code class="language-cpp">    1057: void delay_until(TickType_t &amp;previousWakeTime, TickType_t period);
+    1058: 
+    1059: template &lt;typename Rep, typename Period&gt;
+&gt;&gt;&gt; 1060: void delay_until(TickType_t &amp;previousWakeTime,
+    1061:                  std::chrono::duration&lt;Rep, Period&gt; period) {
+    1062:   delay_until(
+    1063:       previousWakeTime,
 </code></pre></div>
 <p><strong>Violation 5</strong>: freertos_message_buffer.hpp:120:19
 <em>Reason: Coding Style</em></p>
@@ -2795,15 +2795,15 @@
      218: 
      219: #if configSUPPORT_STATIC_ALLOCATION
 </code></pre></div>
-<p><strong>Violation 36</strong>: freertos_task.hpp:1214:21
+<p><strong>Violation 36</strong>: freertos_task.hpp:1219:21
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">    1211:   // Delete copy and move operations for RAII safety
-    1212:   critical_section(const critical_section &amp;) = delete;
-    1213:   critical_section(critical_section &amp;&amp;) = delete;
-&gt;&gt;&gt; 1214:   critical_section &amp;operator=(const critical_section &amp;) = delete;
-    1215:   critical_section &amp;operator=(critical_section &amp;&amp;) = delete;
-    1216: };
-    1217: 
+<pre><code class="language-cpp">    1216:   // Delete copy and move operations for RAII safety
+    1217:   critical_section(const critical_section &amp;) = delete;
+    1218:   critical_section(critical_section &amp;&amp;) = delete;
+&gt;&gt;&gt; 1219:   critical_section &amp;operator=(const critical_section &amp;) = delete;
+    1220:   critical_section &amp;operator=(critical_section &amp;&amp;) = delete;
+    1221: };
+    1222: 
 </code></pre></div>
 <p><strong>Violation 37</strong>: freertos_stream_buffer.hpp:126:18
 <em>Reason: Coding Style</em></p>
@@ -2815,25 +2815,25 @@
      128:   /**
      129:    * @brief Send data to the stream buffer.
 </code></pre></div>
-<p><strong>Violation 38</strong>: freertos_task.hpp:267:16
+<p><strong>Violation 38</strong>: freertos_task.hpp:269:16
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">     264:    *
-     265:    * @return TaskHandle_t task handle
-     266:    */
-&gt;&gt;&gt;  267:   TaskHandle_t handle(void) const { return m_hTask; }
-     268: #if INCLUDE_vTaskSuspend
-     269:   /**
-     270:    * @brief Suspend the task.
+<pre><code class="language-cpp">     266:    *
+     267:    * @return TaskHandle_t task handle
+     268:    */
+&gt;&gt;&gt;  269:   TaskHandle_t handle(void) const { return m_hTask; }
+     270: #if INCLUDE_vTaskSuspend
+     271:   /**
+     272:    * @brief Suspend the task.
 </code></pre></div>
-<p><strong>Violation 39</strong>: freertos_task.hpp:421:15
+<p><strong>Violation 39</strong>: freertos_task.hpp:423:15
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">     418:    *
-     419:    * @return const char* task name
-     420:    */
-&gt;&gt;&gt;  421:   const char *name(void) const { return pcTaskGetName(m_hTask); }
-     422: // Task notification API
-     423: #if configUSE_TASK_NOTIFICATIONS
-     424:   /**
+<pre><code class="language-cpp">     420:    *
+     421:    * @return const char* task name
+     422:    */
+&gt;&gt;&gt;  423:   const char *name(void) const { return pcTaskGetName(m_hTask); }
+     424: // Task notification API
+     425: #if configUSE_TASK_NOTIFICATIONS
+     426:   /**
 </code></pre></div>
 <p><strong>Violation 40</strong>: freertos_queue.hpp:668:15
 <em>Reason: Coding Style</em></p>
@@ -2849,35 +2849,35 @@
 <p><strong>Functions and objects should not be defined with external linkage if they are referenced from only one translation unit</strong></p>
 <p>Functions and objects used only within a single file should be declared static to limit their scope and avoid namespace pollution.</p>
 <p><em>Rationale: Internal linkage prevents namespace pollution and allows for better optimization by the compiler.</em></p>
-<p><strong>Violation 1</strong>: freertos_task.hpp:728:8
+<p><strong>Violation 1</strong>: freertos_task.hpp:733:8
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">     725:    *
-     726:    * @return bool true if the task is running, false otherwise
-     727:    */
-&gt;&gt;&gt;  728:   bool is_running(void) const {
-     729:     switch (m_task.state()) {
-     730:     case eRunning:
-     731:     case eReady:
+<pre><code class="language-cpp">     730:    *
+     731:    * @return bool true if the task is running, false otherwise
+     732:    */
+&gt;&gt;&gt;  733:   bool is_running(void) const {
+     734:     switch (m_task.state()) {
+     735:     case eRunning:
+     736:     case eReady:
 </code></pre></div>
-<p><strong>Violation 2</strong>: freertos_task.hpp:704:16
+<p><strong>Violation 2</strong>: freertos_task.hpp:709:16
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">     701:    *
-     702:    * @return TaskHandle_t task handle
-     703:    */
-&gt;&gt;&gt;  704:   TaskHandle_t handle(void) const { return m_task.handle(); }
-     705: #if INCLUDE_vTaskSuspend
-     706:   /**
-     707:    * @brief Suspend the task.
+<pre><code class="language-cpp">     706:    *
+     707:    * @return TaskHandle_t task handle
+     708:    */
+&gt;&gt;&gt;  709:   TaskHandle_t handle(void) const { return m_task.handle(); }
+     710: #if INCLUDE_vTaskSuspend
+     711:   /**
+     712:    * @brief Suspend the task.
 </code></pre></div>
-<p><strong>Violation 3</strong>: freertos_task.hpp:743:8
+<p><strong>Violation 3</strong>: freertos_task.hpp:748:8
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">     740:    * @brief Terminate the task.
-     741:    *
-     742:    */
-&gt;&gt;&gt;  743:   void terminate(void) { m_task.terminate(); }
-     744: #if INCLUDE_xTaskAbortDelay
-     745:   /**
-     746:    * @brief Abort the delay of the task.
+<pre><code class="language-cpp">     745:    * @brief Terminate the task.
+     746:    *
+     747:    */
+&gt;&gt;&gt;  748:   void terminate(void) { m_task.terminate(); }
+     749: #if INCLUDE_xTaskAbortDelay
+     750:   /**
+     751:    * @brief Abort the delay of the task.
 </code></pre></div>
 <p><strong>Violation 4</strong>: freertos_task.cc:59:12
 <em>Reason: Coding Style</em></p>
@@ -2919,65 +2919,65 @@
      329:     return receive_isr(data, data_size, higher_priority_task_woken);
      330:   }
 </code></pre></div>
-<p><strong>Violation 8</strong>: freertos_task.hpp:728:8
+<p><strong>Violation 8</strong>: freertos_task.hpp:733:8
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">     725:    *
-     726:    * @return bool true if the task is running, false otherwise
-     727:    */
-&gt;&gt;&gt;  728:   bool is_running(void) const {
-     729:     switch (m_task.state()) {
-     730:     case eRunning:
-     731:     case eReady:
+<pre><code class="language-cpp">     730:    *
+     731:    * @return bool true if the task is running, false otherwise
+     732:    */
+&gt;&gt;&gt;  733:   bool is_running(void) const {
+     734:     switch (m_task.state()) {
+     735:     case eRunning:
+     736:     case eReady:
 </code></pre></div>
-<p><strong>Violation 9</strong>: freertos_task.hpp:704:16
+<p><strong>Violation 9</strong>: freertos_task.hpp:709:16
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">     701:    *
-     702:    * @return TaskHandle_t task handle
-     703:    */
-&gt;&gt;&gt;  704:   TaskHandle_t handle(void) const { return m_task.handle(); }
-     705: #if INCLUDE_vTaskSuspend
-     706:   /**
-     707:    * @brief Suspend the task.
+<pre><code class="language-cpp">     706:    *
+     707:    * @return TaskHandle_t task handle
+     708:    */
+&gt;&gt;&gt;  709:   TaskHandle_t handle(void) const { return m_task.handle(); }
+     710: #if INCLUDE_vTaskSuspend
+     711:   /**
+     712:    * @brief Suspend the task.
 </code></pre></div>
-<p><strong>Violation 10</strong>: freertos_task.hpp:743:8
+<p><strong>Violation 10</strong>: freertos_task.hpp:748:8
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">     740:    * @brief Terminate the task.
-     741:    *
-     742:    */
-&gt;&gt;&gt;  743:   void terminate(void) { m_task.terminate(); }
-     744: #if INCLUDE_xTaskAbortDelay
-     745:   /**
-     746:    * @brief Abort the delay of the task.
+<pre><code class="language-cpp">     745:    * @brief Terminate the task.
+     746:    *
+     747:    */
+&gt;&gt;&gt;  748:   void terminate(void) { m_task.terminate(); }
+     749: #if INCLUDE_xTaskAbortDelay
+     750:   /**
+     751:    * @brief Abort the delay of the task.
 </code></pre></div>
-<p><strong>Violation 11</strong>: freertos_task.hpp:728:8
+<p><strong>Violation 11</strong>: freertos_task.hpp:733:8
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">     725:    *
-     726:    * @return bool true if the task is running, false otherwise
-     727:    */
-&gt;&gt;&gt;  728:   bool is_running(void) const {
-     729:     switch (m_task.state()) {
-     730:     case eRunning:
-     731:     case eReady:
+<pre><code class="language-cpp">     730:    *
+     731:    * @return bool true if the task is running, false otherwise
+     732:    */
+&gt;&gt;&gt;  733:   bool is_running(void) const {
+     734:     switch (m_task.state()) {
+     735:     case eRunning:
+     736:     case eReady:
 </code></pre></div>
-<p><strong>Violation 12</strong>: freertos_task.hpp:704:16
+<p><strong>Violation 12</strong>: freertos_task.hpp:709:16
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">     701:    *
-     702:    * @return TaskHandle_t task handle
-     703:    */
-&gt;&gt;&gt;  704:   TaskHandle_t handle(void) const { return m_task.handle(); }
-     705: #if INCLUDE_vTaskSuspend
-     706:   /**
-     707:    * @brief Suspend the task.
+<pre><code class="language-cpp">     706:    *
+     707:    * @return TaskHandle_t task handle
+     708:    */
+&gt;&gt;&gt;  709:   TaskHandle_t handle(void) const { return m_task.handle(); }
+     710: #if INCLUDE_vTaskSuspend
+     711:   /**
+     712:    * @brief Suspend the task.
 </code></pre></div>
-<p><strong>Violation 13</strong>: freertos_task.hpp:743:8
+<p><strong>Violation 13</strong>: freertos_task.hpp:748:8
 <em>Reason: Coding Style</em></p>
-<pre><code class="language-cpp">     740:    * @brief Terminate the task.
-     741:    *
-     742:    */
-&gt;&gt;&gt;  743:   void terminate(void) { m_task.terminate(); }
-     744: #if INCLUDE_xTaskAbortDelay
-     745:   /**
-     746:    * @brief Abort the delay of the task.
+<pre><code class="language-cpp">     745:    * @brief Terminate the task.
+     746:    *
+     747:    */
+&gt;&gt;&gt;  748:   void terminate(void) { m_task.terminate(); }
+     749: #if INCLUDE_xTaskAbortDelay
+     750:   /**
+     751:    * @brief Abort the delay of the task.
 </code></pre></div>
 <p><strong>Violation 14</strong>: freertos_stream_buffer.hpp:264:14
 <em>Reason: Coding Style</em></p>
@@ -3054,107 +3054,107 @@
 <h3 id="detailed-violations-with-code-context_1">Detailed Violations with Code Context</h3>
 <h4 id="const-correctness-6-violations">Const Correctness (6 violation(s))</h4>
 <h5 id="constparameterreference">constParameterReference</h5>
-<p><strong>Violation 1</strong>: freertos_task.hpp:914:37
+<p><strong>Violation 1</strong>: freertos_task.hpp:919:37
 <em>Style</em>: Parameter 'higherPriorityTaskWoken' can be declared as reference to const</p>
-<pre><code class="language-cpp">     911:    * @return BaseType_t  pdTRUE if the notification was given, pdFALSE otherwise
-     912:    */
-     913:   BaseType_t notify_isr(const uint32_t val, eNotifyAction action,
-&gt;&gt;&gt;  914:                         BaseType_t &amp;higherPriorityTaskWoken) {
-     915:     return m_task.notify_isr(val, action, higherPriorityTaskWoken);
-     916:   }
-     917:   /**
+<pre><code class="language-cpp">     916:    * @return BaseType_t  pdTRUE if the notification was given, pdFALSE otherwise
+     917:    */
+     918:   BaseType_t notify_isr(const uint32_t val, eNotifyAction action,
+&gt;&gt;&gt;  919:                         BaseType_t &amp;higherPriorityTaskWoken) {
+     920:     return m_task.notify_isr(val, action, higherPriorityTaskWoken);
+     921:   }
+     922:   /**
 </code></pre></div>
-<p><strong>Violation 2</strong>: freertos_task.hpp:939:47
+<p><strong>Violation 2</strong>: freertos_task.hpp:944:47
 <em>Style</em>: Parameter 'higherPriorityTaskWoken' can be declared as reference to const</p>
-<pre><code class="language-cpp">     936:    */
-     937:   BaseType_t notify_and_query_isr(const uint32_t val, eNotifyAction action,
-     938:                                   uint32_t &amp;prev_value,
-&gt;&gt;&gt;  939:                                   BaseType_t &amp;higherPriorityTaskWoken) {
-     940:     return m_task.notify_and_query_isr(val, action, prev_value,
-     941:                                        higherPriorityTaskWoken);
-     942:   }
+<pre><code class="language-cpp">     941:    */
+     942:   BaseType_t notify_and_query_isr(const uint32_t val, eNotifyAction action,
+     943:                                   uint32_t &amp;prev_value,
+&gt;&gt;&gt;  944:                                   BaseType_t &amp;higherPriorityTaskWoken) {
+     945:     return m_task.notify_and_query_isr(val, action, prev_value,
+     946:                                        higherPriorityTaskWoken);
+     947:   }
 </code></pre></div>
-<p><strong>Violation 3</strong>: freertos_task.hpp:914:37
+<p><strong>Violation 3</strong>: freertos_task.hpp:919:37
 <em>Style</em>: Parameter 'higherPriorityTaskWoken' can be declared as reference to const</p>
-<pre><code class="language-cpp">     911:    * @return BaseType_t  pdTRUE if the notification was given, pdFALSE otherwise
-     912:    */
-     913:   BaseType_t notify_isr(const uint32_t val, eNotifyAction action,
-&gt;&gt;&gt;  914:                         BaseType_t &amp;higherPriorityTaskWoken) {
-     915:     return m_task.notify_isr(val, action, higherPriorityTaskWoken);
-     916:   }
-     917:   /**
+<pre><code class="language-cpp">     916:    * @return BaseType_t  pdTRUE if the notification was given, pdFALSE otherwise
+     917:    */
+     918:   BaseType_t notify_isr(const uint32_t val, eNotifyAction action,
+&gt;&gt;&gt;  919:                         BaseType_t &amp;higherPriorityTaskWoken) {
+     920:     return m_task.notify_isr(val, action, higherPriorityTaskWoken);
+     921:   }
+     922:   /**
 </code></pre></div>
-<p><strong>Violation 4</strong>: freertos_task.hpp:939:47
+<p><strong>Violation 4</strong>: freertos_task.hpp:944:47
 <em>Style</em>: Parameter 'higherPriorityTaskWoken' can be declared as reference to const</p>
-<pre><code class="language-cpp">     936:    */
-     937:   BaseType_t notify_and_query_isr(const uint32_t val, eNotifyAction action,
-     938:                                   uint32_t &amp;prev_value,
-&gt;&gt;&gt;  939:                                   BaseType_t &amp;higherPriorityTaskWoken) {
-     940:     return m_task.notify_and_query_isr(val, action, prev_value,
-     941:                                        higherPriorityTaskWoken);
-     942:   }
+<pre><code class="language-cpp">     941:    */
+     942:   BaseType_t notify_and_query_isr(const uint32_t val, eNotifyAction action,
+     943:                                   uint32_t &amp;prev_value,
+&gt;&gt;&gt;  944:                                   BaseType_t &amp;higherPriorityTaskWoken) {
+     945:     return m_task.notify_and_query_isr(val, action, prev_value,
+     946:                                        higherPriorityTaskWoken);
+     947:   }
 </code></pre></div>
-<p><strong>Violation 5</strong>: freertos_task.hpp:914:37
+<p><strong>Violation 5</strong>: freertos_task.hpp:919:37
 <em>Style</em>: Parameter 'higherPriorityTaskWoken' can be declared as reference to const</p>
-<pre><code class="language-cpp">     911:    * @return BaseType_t  pdTRUE if the notification was given, pdFALSE otherwise
-     912:    */
-     913:   BaseType_t notify_isr(const uint32_t val, eNotifyAction action,
-&gt;&gt;&gt;  914:                         BaseType_t &amp;higherPriorityTaskWoken) {
-     915:     return m_task.notify_isr(val, action, higherPriorityTaskWoken);
-     916:   }
-     917:   /**
+<pre><code class="language-cpp">     916:    * @return BaseType_t  pdTRUE if the notification was given, pdFALSE otherwise
+     917:    */
+     918:   BaseType_t notify_isr(const uint32_t val, eNotifyAction action,
+&gt;&gt;&gt;  919:                         BaseType_t &amp;higherPriorityTaskWoken) {
+     920:     return m_task.notify_isr(val, action, higherPriorityTaskWoken);
+     921:   }
+     922:   /**
 </code></pre></div>
-<p><strong>Violation 6</strong>: freertos_task.hpp:939:47
+<p><strong>Violation 6</strong>: freertos_task.hpp:944:47
 <em>Style</em>: Parameter 'higherPriorityTaskWoken' can be declared as reference to const</p>
-<pre><code class="language-cpp">     936:    */
-     937:   BaseType_t notify_and_query_isr(const uint32_t val, eNotifyAction action,
-     938:                                   uint32_t &amp;prev_value,
-&gt;&gt;&gt;  939:                                   BaseType_t &amp;higherPriorityTaskWoken) {
-     940:     return m_task.notify_and_query_isr(val, action, prev_value,
-     941:                                        higherPriorityTaskWoken);
-     942:   }
+<pre><code class="language-cpp">     941:    */
+     942:   BaseType_t notify_and_query_isr(const uint32_t val, eNotifyAction action,
+     943:                                   uint32_t &amp;prev_value,
+&gt;&gt;&gt;  944:                                   BaseType_t &amp;higherPriorityTaskWoken) {
+     945:     return m_task.notify_and_query_isr(val, action, prev_value,
+     946:                                        higherPriorityTaskWoken);
+     947:   }
 </code></pre></div>
 <h4 id="other-10-violations">Other (10 violation(s))</h4>
 <h5 id="shadowfunction">shadowFunction</h5>
-<p><strong>Violation 1</strong>: freertos_sw_timer.hpp:202:14
+<p><strong>Violation 1</strong>: freertos_sw_timer.hpp:204:14
 <em>Style</em>: Local variable 'name' shadows outer function</p>
-<pre><code class="language-cpp">     199:         while (xTimerIsTimerActive(src.m_timer) != pdFALSE) {
-     200:           vTaskDelay(pdMS_TO_TICKS(1));
-     201:         }
-&gt;&gt;&gt;  202:         auto name = pcTimerGetName(src.m_timer);
-     203:         auto period = xTimerGetPeriod(src.m_timer);
-     204:         auto auto_reload = uxTimerGetReloadMode(src.m_timer);
-     205:         rc = xTimerDelete(src.m_timer, portMAX_DELAY);
+<pre><code class="language-cpp">     201:         while (xTimerIsTimerActive(src.m_timer) != pdFALSE) {
+     202:           vTaskDelay(pdMS_TO_TICKS(1));
+     203:         }
+&gt;&gt;&gt;  204:         auto name = pcTimerGetName(src.m_timer);
+     205:         auto period = xTimerGetPeriod(src.m_timer);
+     206:         auto auto_reload = uxTimerGetReloadMode(src.m_timer);
+     207:         rc = xTimerDelete(src.m_timer, portMAX_DELAY);
 </code></pre></div>
-<p><strong>Violation 2</strong>: freertos_sw_timer.hpp:203:14
+<p><strong>Violation 2</strong>: freertos_sw_timer.hpp:205:14
 <em>Style</em>: Local variable 'period' shadows outer function</p>
-<pre><code class="language-cpp">     200:           vTaskDelay(pdMS_TO_TICKS(1));
-     201:         }
-     202:         auto name = pcTimerGetName(src.m_timer);
-&gt;&gt;&gt;  203:         auto period = xTimerGetPeriod(src.m_timer);
-     204:         auto auto_reload = uxTimerGetReloadMode(src.m_timer);
-     205:         rc = xTimerDelete(src.m_timer, portMAX_DELAY);
-     206:         if (rc == pdPASS) {
+<pre><code class="language-cpp">     202:           vTaskDelay(pdMS_TO_TICKS(1));
+     203:         }
+     204:         auto name = pcTimerGetName(src.m_timer);
+&gt;&gt;&gt;  205:         auto period = xTimerGetPeriod(src.m_timer);
+     206:         auto auto_reload = uxTimerGetReloadMode(src.m_timer);
+     207:         rc = xTimerDelete(src.m_timer, portMAX_DELAY);
+     208:         if (rc == pdPASS) {
 </code></pre></div>
-<p><strong>Violation 3</strong>: freertos_sw_timer.hpp:202:14
+<p><strong>Violation 3</strong>: freertos_sw_timer.hpp:204:14
 <em>Style</em>: Local variable 'name' shadows outer function</p>
-<pre><code class="language-cpp">     199:         while (xTimerIsTimerActive(src.m_timer) != pdFALSE) {
-     200:           vTaskDelay(pdMS_TO_TICKS(1));
-     201:         }
-&gt;&gt;&gt;  202:         auto name = pcTimerGetName(src.m_timer);
-     203:         auto period = xTimerGetPeriod(src.m_timer);
-     204:         auto auto_reload = uxTimerGetReloadMode(src.m_timer);
-     205:         rc = xTimerDelete(src.m_timer, portMAX_DELAY);
+<pre><code class="language-cpp">     201:         while (xTimerIsTimerActive(src.m_timer) != pdFALSE) {
+     202:           vTaskDelay(pdMS_TO_TICKS(1));
+     203:         }
+&gt;&gt;&gt;  204:         auto name = pcTimerGetName(src.m_timer);
+     205:         auto period = xTimerGetPeriod(src.m_timer);
+     206:         auto auto_reload = uxTimerGetReloadMode(src.m_timer);
+     207:         rc = xTimerDelete(src.m_timer, portMAX_DELAY);
 </code></pre></div>
-<p><strong>Violation 4</strong>: freertos_sw_timer.hpp:203:14
+<p><strong>Violation 4</strong>: freertos_sw_timer.hpp:205:14
 <em>Style</em>: Local variable 'period' shadows outer function</p>
-<pre><code class="language-cpp">     200:           vTaskDelay(pdMS_TO_TICKS(1));
-     201:         }
-     202:         auto name = pcTimerGetName(src.m_timer);
-&gt;&gt;&gt;  203:         auto period = xTimerGetPeriod(src.m_timer);
-     204:         auto auto_reload = uxTimerGetReloadMode(src.m_timer);
-     205:         rc = xTimerDelete(src.m_timer, portMAX_DELAY);
-     206:         if (rc == pdPASS) {
+<pre><code class="language-cpp">     202:           vTaskDelay(pdMS_TO_TICKS(1));
+     203:         }
+     204:         auto name = pcTimerGetName(src.m_timer);
+&gt;&gt;&gt;  205:         auto period = xTimerGetPeriod(src.m_timer);
+     206:         auto auto_reload = uxTimerGetReloadMode(src.m_timer);
+     207:         rc = xTimerDelete(src.m_timer, portMAX_DELAY);
+     208:         if (rc == pdPASS) {
 </code></pre></div>
 <h5 id="uninitmembervar">uninitMemberVar</h5>
 <p><strong>Violation 1</strong>: freertos_message_buffer.hpp:57:3
@@ -3219,45 +3219,45 @@
 </code></pre></div>
 <h4 id="unused-code-84-violations">Unused Code (84 violation(s))</h4>
 <h5 id="unusedfunction">unusedFunction</h5>
-<p><strong>Violation 1</strong>: freertos_task.hpp:1041:0
+<p><strong>Violation 1</strong>: freertos_task.hpp:1046:0
 <em>Style</em>: The function 'sleep_for' is never used.</p>
-<pre><code class="language-cpp">    1038:  * @param duration duration to sleep
-    1039:  */
-    1040: template &lt;typename Rep, typename Period&gt;
-&gt;&gt;&gt; 1041: void sleep_for(std::chrono::duration&lt;Rep, Period&gt; duration) {
-    1042:   delay(duration);
-    1043: }
-    1044: 
+<pre><code class="language-cpp">    1043:  * @param duration duration to sleep
+    1044:  */
+    1045: template &lt;typename Rep, typename Period&gt;
+&gt;&gt;&gt; 1046: void sleep_for(std::chrono::duration&lt;Rep, Period&gt; duration) {
+    1047:   delay(duration);
+    1048: }
+    1049: 
 </code></pre></div>
-<p><strong>Violation 2</strong>: freertos_task.hpp:1108:0
+<p><strong>Violation 2</strong>: freertos_task.hpp:1113:0
 <em>Style</em>: The function 'total_run_time' is never used.</p>
-<pre><code class="language-cpp">    1105:    * @return UBaseType_t number of tasks
-    1106:    */
-    1107:   UBaseType_t count(void) const { return m_task_count; }
-&gt;&gt;&gt; 1108:   std::chrono::milliseconds total_run_time(void) const {
-    1109:     return std::chrono::milliseconds{m_total_run_time};
-    1110:   }
-    1111:   /**
+<pre><code class="language-cpp">    1110:    * @return UBaseType_t number of tasks
+    1111:    */
+    1112:   UBaseType_t count(void) const { return m_task_count; }
+&gt;&gt;&gt; 1113:   std::chrono::milliseconds total_run_time(void) const {
+    1114:     return std::chrono::milliseconds{m_total_run_time};
+    1115:   }
+    1116:   /**
 </code></pre></div>
-<p><strong>Violation 3</strong>: freertos_task.hpp:1116:0
+<p><strong>Violation 3</strong>: freertos_task.hpp:1121:0
 <em>Style</em>: The function 'begin' is never used.</p>
-<pre><code class="language-cpp">    1113:    *
-    1114:    * @return const TaskStatus_t* begin iterator
-    1115:    */
-&gt;&gt;&gt; 1116:   const TaskStatus_t *begin(void) const { return m_status_array.data(); }
-    1117:   /**
-    1118:    * @brief Return the end iterator of the task status array.
-    1119:    *
+<pre><code class="language-cpp">    1118:    *
+    1119:    * @return const TaskStatus_t* begin iterator
+    1120:    */
+&gt;&gt;&gt; 1121:   const TaskStatus_t *begin(void) const { return m_status_array.data(); }
+    1122:   /**
+    1123:    * @brief Return the end iterator of the task status array.
+    1124:    *
 </code></pre></div>
-<p><strong>Violation 4</strong>: freertos_task.hpp:1122:0
+<p><strong>Violation 4</strong>: freertos_task.hpp:1127:0
 <em>Style</em>: The function 'end' is never used.</p>
-<pre><code class="language-cpp">    1119:    *
-    1120:    * @return const TaskStatus_t* end iterator
-    1121:    */
-&gt;&gt;&gt; 1122:   const TaskStatus_t *end(void) const {
-    1123:     return m_status_array.data() + m_task_count;
-    1124:   }
-    1125: };
+<pre><code class="language-cpp">    1124:    *
+    1125:    * @return const TaskStatus_t* end iterator
+    1126:    */
+&gt;&gt;&gt; 1127:   const TaskStatus_t *end(void) const {
+    1128:     return m_status_array.data() + m_task_count;
+    1129:   }
+    1130: };
 </code></pre></div>
 <p><strong>Violation 5</strong>: freertos_task.cc:54:0
 <em>Style</em>: The function 'current_task_handle' is never used.</p>
@@ -3558,75 +3558,75 @@
      364:   }
      365:   /**
 </code></pre></div>
-<p><strong>Violation 35</strong>: freertos_sw_timer.hpp:535:0
+<p><strong>Violation 35</strong>: freertos_sw_timer.hpp:537:0
 <em>Style</em>: The function 'reload_mode' is never used.</p>
-<pre><code class="language-cpp">     532:    * @param auto_reload pdTRUE to enable auto-reload mode, pdFALSE to disable
-     533:    * @return timer&amp; reference to the timer object
-     534:    */
-&gt;&gt;&gt;  535:   timer &amp;reload_mode(UBaseType_t auto_reload) {
-     536:     if (m_timer) {
-     537:       vTimerSetReloadMode(m_timer, auto_reload);
-     538:     }
+<pre><code class="language-cpp">     534:    * @param auto_reload pdTRUE to enable auto-reload mode, pdFALSE to disable
+     535:    * @return timer&amp; reference to the timer object
+     536:    */
+&gt;&gt;&gt;  537:   timer &amp;reload_mode(UBaseType_t auto_reload) {
+     538:     if (m_timer) {
+     539:       vTimerSetReloadMode(m_timer, auto_reload);
+     540:     }
 </code></pre></div>
-<p><strong>Violation 36</strong>: freertos_sw_timer.hpp:567:0
+<p><strong>Violation 36</strong>: freertos_sw_timer.hpp:569:0
 <em>Style</em>: The function 'remaining_time' is never used.</p>
-<pre><code class="language-cpp">     564:    * @return std::chrono::milliseconds remaining time before the timer expires
-     565:    * in milliseconds.
-     566:    */
-&gt;&gt;&gt;  567:   std::chrono::milliseconds remaining_time(void) const {
-     568:     return std::chrono::milliseconds{remaining_ticks()};
-     569:   }
-     570:   /**
+<pre><code class="language-cpp">     566:    * @return std::chrono::milliseconds remaining time before the timer expires
+     567:    * in milliseconds.
+     568:    */
+&gt;&gt;&gt;  569:   std::chrono::milliseconds remaining_time(void) const {
+     570:     return std::chrono::milliseconds{remaining_ticks()};
+     571:   }
+     572:   /**
 </code></pre></div>
-<p><strong>Violation 37</strong>: freertos_sw_timer.hpp:576:0
+<p><strong>Violation 37</strong>: freertos_sw_timer.hpp:578:0
 <em>Style</em>: The function 'running' is never used.</p>
-<pre><code class="language-cpp">     573:    *
-     574:    * @return BaseType_t pdTRUE if the timer is running, pdFALSE otherwise
-     575:    */
-&gt;&gt;&gt;  576:   BaseType_t running(void) const {
-     577:     if (!m_timer) {
-     578:       return pdFALSE;
-     579:     }
+<pre><code class="language-cpp">     575:    *
+     576:    * @return BaseType_t pdTRUE if the timer is running, pdFALSE otherwise
+     577:    */
+&gt;&gt;&gt;  578:   BaseType_t running(void) const {
+     579:     if (!m_timer) {
+     580:       return pdFALSE;
+     581:     }
 </code></pre></div>
-<p><strong>Violation 38</strong>: freertos_task.hpp:1041:0
+<p><strong>Violation 38</strong>: freertos_task.hpp:1046:0
 <em>Style</em>: The function 'sleep_for' is never used.</p>
-<pre><code class="language-cpp">    1038:  * @param duration duration to sleep
-    1039:  */
-    1040: template &lt;typename Rep, typename Period&gt;
-&gt;&gt;&gt; 1041: void sleep_for(std::chrono::duration&lt;Rep, Period&gt; duration) {
-    1042:   delay(duration);
-    1043: }
-    1044: 
+<pre><code class="language-cpp">    1043:  * @param duration duration to sleep
+    1044:  */
+    1045: template &lt;typename Rep, typename Period&gt;
+&gt;&gt;&gt; 1046: void sleep_for(std::chrono::duration&lt;Rep, Period&gt; duration) {
+    1047:   delay(duration);
+    1048: }
+    1049: 
 </code></pre></div>
-<p><strong>Violation 39</strong>: freertos_task.hpp:1108:0
+<p><strong>Violation 39</strong>: freertos_task.hpp:1113:0
 <em>Style</em>: The function 'total_run_time' is never used.</p>
-<pre><code class="language-cpp">    1105:    * @return UBaseType_t number of tasks
-    1106:    */
-    1107:   UBaseType_t count(void) const { return m_task_count; }
-&gt;&gt;&gt; 1108:   std::chrono::milliseconds total_run_time(void) const {
-    1109:     return std::chrono::milliseconds{m_total_run_time};
-    1110:   }
-    1111:   /**
+<pre><code class="language-cpp">    1110:    * @return UBaseType_t number of tasks
+    1111:    */
+    1112:   UBaseType_t count(void) const { return m_task_count; }
+&gt;&gt;&gt; 1113:   std::chrono::milliseconds total_run_time(void) const {
+    1114:     return std::chrono::milliseconds{m_total_run_time};
+    1115:   }
+    1116:   /**
 </code></pre></div>
-<p><strong>Violation 40</strong>: freertos_task.hpp:1116:0
+<p><strong>Violation 40</strong>: freertos_task.hpp:1121:0
 <em>Style</em>: The function 'begin' is never used.</p>
-<pre><code class="language-cpp">    1113:    *
-    1114:    * @return const TaskStatus_t* begin iterator
-    1115:    */
-&gt;&gt;&gt; 1116:   const TaskStatus_t *begin(void) const { return m_status_array.data(); }
-    1117:   /**
-    1118:    * @brief Return the end iterator of the task status array.
-    1119:    *
+<pre><code class="language-cpp">    1118:    *
+    1119:    * @return const TaskStatus_t* begin iterator
+    1120:    */
+&gt;&gt;&gt; 1121:   const TaskStatus_t *begin(void) const { return m_status_array.data(); }
+    1122:   /**
+    1123:    * @brief Return the end iterator of the task status array.
+    1124:    *
 </code></pre></div>
-<p><strong>Violation 41</strong>: freertos_task.hpp:1122:0
+<p><strong>Violation 41</strong>: freertos_task.hpp:1127:0
 <em>Style</em>: The function 'end' is never used.</p>
-<pre><code class="language-cpp">    1119:    *
-    1120:    * @return const TaskStatus_t* end iterator
-    1121:    */
-&gt;&gt;&gt; 1122:   const TaskStatus_t *end(void) const {
-    1123:     return m_status_array.data() + m_task_count;
-    1124:   }
-    1125: };
+<pre><code class="language-cpp">    1124:    *
+    1125:    * @return const TaskStatus_t* end iterator
+    1126:    */
+&gt;&gt;&gt; 1127:   const TaskStatus_t *end(void) const {
+    1128:     return m_status_array.data() + m_task_count;
+    1129:   }
+    1130: };
 </code></pre></div>
 <p><strong>Violation 42</strong>: freertos_message_buffer.hpp:193:0
 <em>Style</em>: The function 'available' is never used.</p>
@@ -3848,85 +3848,85 @@
      893:   }
      894:   /**
 </code></pre></div>
-<p><strong>Violation 64</strong>: freertos_task.hpp:1041:0
+<p><strong>Violation 64</strong>: freertos_task.hpp:1046:0
 <em>Style</em>: The function 'sleep_for' is never used.</p>
-<pre><code class="language-cpp">    1038:  * @param duration duration to sleep
-    1039:  */
-    1040: template &lt;typename Rep, typename Period&gt;
-&gt;&gt;&gt; 1041: void sleep_for(std::chrono::duration&lt;Rep, Period&gt; duration) {
-    1042:   delay(duration);
-    1043: }
-    1044: 
+<pre><code class="language-cpp">    1043:  * @param duration duration to sleep
+    1044:  */
+    1045: template &lt;typename Rep, typename Period&gt;
+&gt;&gt;&gt; 1046: void sleep_for(std::chrono::duration&lt;Rep, Period&gt; duration) {
+    1047:   delay(duration);
+    1048: }
+    1049: 
 </code></pre></div>
-<p><strong>Violation 65</strong>: freertos_task.hpp:1108:0
+<p><strong>Violation 65</strong>: freertos_task.hpp:1113:0
 <em>Style</em>: The function 'total_run_time' is never used.</p>
-<pre><code class="language-cpp">    1105:    * @return UBaseType_t number of tasks
-    1106:    */
-    1107:   UBaseType_t count(void) const { return m_task_count; }
-&gt;&gt;&gt; 1108:   std::chrono::milliseconds total_run_time(void) const {
-    1109:     return std::chrono::milliseconds{m_total_run_time};
-    1110:   }
-    1111:   /**
+<pre><code class="language-cpp">    1110:    * @return UBaseType_t number of tasks
+    1111:    */
+    1112:   UBaseType_t count(void) const { return m_task_count; }
+&gt;&gt;&gt; 1113:   std::chrono::milliseconds total_run_time(void) const {
+    1114:     return std::chrono::milliseconds{m_total_run_time};
+    1115:   }
+    1116:   /**
 </code></pre></div>
-<p><strong>Violation 66</strong>: freertos_task.hpp:1116:0
+<p><strong>Violation 66</strong>: freertos_task.hpp:1121:0
 <em>Style</em>: The function 'begin' is never used.</p>
-<pre><code class="language-cpp">    1113:    *
-    1114:    * @return const TaskStatus_t* begin iterator
-    1115:    */
-&gt;&gt;&gt; 1116:   const TaskStatus_t *begin(void) const { return m_status_array.data(); }
-    1117:   /**
-    1118:    * @brief Return the end iterator of the task status array.
-    1119:    *
+<pre><code class="language-cpp">    1118:    *
+    1119:    * @return const TaskStatus_t* begin iterator
+    1120:    */
+&gt;&gt;&gt; 1121:   const TaskStatus_t *begin(void) const { return m_status_array.data(); }
+    1122:   /**
+    1123:    * @brief Return the end iterator of the task status array.
+    1124:    *
 </code></pre></div>
-<p><strong>Violation 67</strong>: freertos_task.hpp:1122:0
+<p><strong>Violation 67</strong>: freertos_task.hpp:1127:0
 <em>Style</em>: The function 'end' is never used.</p>
-<pre><code class="language-cpp">    1119:    *
-    1120:    * @return const TaskStatus_t* end iterator
-    1121:    */
-&gt;&gt;&gt; 1122:   const TaskStatus_t *end(void) const {
-    1123:     return m_status_array.data() + m_task_count;
-    1124:   }
-    1125: };
+<pre><code class="language-cpp">    1124:    *
+    1125:    * @return const TaskStatus_t* end iterator
+    1126:    */
+&gt;&gt;&gt; 1127:   const TaskStatus_t *end(void) const {
+    1128:     return m_status_array.data() + m_task_count;
+    1129:   }
+    1130: };
 </code></pre></div>
-<p><strong>Violation 68</strong>: freertos_sw_timer.hpp:535:0
+<p><strong>Violation 68</strong>: freertos_sw_timer.hpp:537:0
 <em>Style</em>: The function 'reload_mode' is never used.</p>
-<pre><code class="language-cpp">     532:    * @param auto_reload pdTRUE to enable auto-reload mode, pdFALSE to disable
-     533:    * @return timer&amp; reference to the timer object
-     534:    */
-&gt;&gt;&gt;  535:   timer &amp;reload_mode(UBaseType_t auto_reload) {
-     536:     if (m_timer) {
-     537:       vTimerSetReloadMode(m_timer, auto_reload);
-     538:     }
+<pre><code class="language-cpp">     534:    * @param auto_reload pdTRUE to enable auto-reload mode, pdFALSE to disable
+     535:    * @return timer&amp; reference to the timer object
+     536:    */
+&gt;&gt;&gt;  537:   timer &amp;reload_mode(UBaseType_t auto_reload) {
+     538:     if (m_timer) {
+     539:       vTimerSetReloadMode(m_timer, auto_reload);
+     540:     }
 </code></pre></div>
-<p><strong>Violation 69</strong>: freertos_sw_timer.hpp:567:0
+<p><strong>Violation 69</strong>: freertos_sw_timer.hpp:569:0
 <em>Style</em>: The function 'remaining_time' is never used.</p>
-<pre><code class="language-cpp">     564:    * @return std::chrono::milliseconds remaining time before the timer expires
-     565:    * in milliseconds.
-     566:    */
-&gt;&gt;&gt;  567:   std::chrono::milliseconds remaining_time(void) const {
-     568:     return std::chrono::milliseconds{remaining_ticks()};
-     569:   }
-     570:   /**
+<pre><code class="language-cpp">     566:    * @return std::chrono::milliseconds remaining time before the timer expires
+     567:    * in milliseconds.
+     568:    */
+&gt;&gt;&gt;  569:   std::chrono::milliseconds remaining_time(void) const {
+     570:     return std::chrono::milliseconds{remaining_ticks()};
+     571:   }
+     572:   /**
 </code></pre></div>
-<p><strong>Violation 70</strong>: freertos_sw_timer.hpp:576:0
+<p><strong>Violation 70</strong>: freertos_sw_timer.hpp:578:0
 <em>Style</em>: The function 'running' is never used.</p>
-<pre><code class="language-cpp">     573:    *
-     574:    * @return BaseType_t pdTRUE if the timer is running, pdFALSE otherwise
-     575:    */
-&gt;&gt;&gt;  576:   BaseType_t running(void) const {
-     577:     if (!m_timer) {
-     578:       return pdFALSE;
-     579:     }
+<pre><code class="language-cpp">     575:    *
+     576:    * @return BaseType_t pdTRUE if the timer is running, pdFALSE otherwise
+     577:    */
+&gt;&gt;&gt;  578:   BaseType_t running(void) const {
+     579:     if (!m_timer) {
+     580:       return pdFALSE;
+     581:     }
 </code></pre></div>
-<p><strong>Violation 71</strong>: freertos_sw_timer.hpp:587:0
+<p><strong>Violation 71</strong>: freertos_sw_timer.hpp:589:0
 <em>Style</em>: The function 'name' is never used.</p>
-<pre><code class="language-cpp">     584:    *
-     585:    * @return const char* name of the timer
-     586:    */
-&gt;&gt;&gt;  587:   const char *name(void) const {
-     588:     if (!m_timer) {
-     589:       return nullptr;
-     590:     }
+<pre><code class="language-cpp">     586:    *
+     587:    * @return const char* name of the timer
+     588:    */
+&gt;&gt;&gt;  589:   const char *name(void) const {
+     590:     if (!m_timer) {
+     591:       return nullptr;
+     592:     }
 </code></pre></div>
 <p><strong>Violation 72</strong>: freertos_event_group.hpp:117:0
 <em>Style</em>: The function 'handle' is never used.</p>
@@ -4103,7 +4103,7 @@
 <em>Scope: Library modules only</em></p></div>
         
         <div class="timestamp">
-            Generated on July 25, 2025 at 11:02 AM by FreeRTOS C++ Wrappers build system
+            Generated on July 25, 2025 at 11:30 AM by FreeRTOS C++ Wrappers build system
         </div>
     </div>
 </body>
