@@ -170,6 +170,7 @@ template <typename TaskAllocator> class task {
 #endif
   TaskHandle_t m_hTask;
 
+  // LCOV_EXCL_START - Internal FreeRTOS callback function
   static void task_exec(void *context) {
     auto pThis = static_cast<task *>(context);
     assert(nullptr != pThis);
@@ -180,6 +181,7 @@ template <typename TaskAllocator> class task {
 #endif
     pThis->m_taskRoutine();
   }
+  // LCOV_EXCL_STOP
 
 public:
 #if INCLUDE_vTaskSuspend
@@ -569,6 +571,8 @@ template <typename TaskAllocator> class periodic_task {
   task_routine_t m_periodic_routine;
   task<TaskAllocator> m_task;
 
+  // LCOV_EXCL_START - Internal periodic task run method called by FreeRTOS
+  // kernel
   void run() {
     m_on_start();
     while (is_running()) {
@@ -584,6 +588,7 @@ template <typename TaskAllocator> class periodic_task {
     }
     m_on_stop();
   }
+  // LCOV_EXCL_STOP
 
 public:
   /**

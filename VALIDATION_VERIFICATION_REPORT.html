@@ -244,13 +244,13 @@
 <li><strong>✅ Passed</strong>: 439 tests</li>
 <li><strong>❌ Failed</strong>: 0 tests</li>
 <li><strong>Success Rate</strong>: 100.0% (All tests passed!)</li>
-<li><strong>Total Execution Time</strong>: 1.95 seconds</li>
-<li><strong>Average Test Time</strong>: 0.0044 seconds per test</li>
+<li><strong>Total Execution Time</strong>: 2.01 seconds</li>
+<li><strong>Average Test Time</strong>: 0.0046 seconds per test</li>
 </ul>
 <h3 id="code-coverage-summary">Code Coverage Summary</h3>
 <ul>
-<li><strong>Line Coverage</strong>: 96.3% (7406/7689 lines)</li>
-<li><strong>Function Coverage</strong>: 95.0% (2907/3061 functions)</li>
+<li><strong>Line Coverage</strong>: 97.0% (7395/7620 lines)</li>
+<li><strong>Function Coverage</strong>: 98.2% (2902/2955 functions)</li>
 <li><strong>Coverage Scope</strong>: Main library modules only (src/ and include/ directories)</li>
 </ul>
 </div><div class="section"><h2 id="complete-test-results-summary">Complete Test Results Summary</h2>
@@ -2910,7 +2910,7 @@
 <td>EnhancedMultitaskingTest.MultiplePeriodicTasksCoordination</td>
 <td>Enhanced Multitasking</td>
 <td>✅ PASS</td>
-<td>0.060</td>
+<td>0.097</td>
 </tr>
 <tr>
 <td>379</td>
@@ -3029,14 +3029,14 @@
 <td>STLSemaphoreTest.STLReaderWriterPattern</td>
 <td>Freertos Semaphore Stl</td>
 <td>✅ PASS</td>
-<td>0.393</td>
+<td>0.413</td>
 </tr>
 <tr>
 <td>396</td>
 <td>STLSemaphoreTest.STLSemaphoreStressTest</td>
 <td>Freertos Semaphore Stl</td>
 <td>✅ PASS</td>
-<td>0.075</td>
+<td>0.076</td>
 </tr>
 <tr>
 <td>397</td>
@@ -3353,7 +3353,7 @@
 - Passed: 93
 - Failed: 0
 - Success Rate: 100.0%
-- Total Time: 0.578s</p>
+- Total Time: 0.615s</p>
 <p><strong>Detailed Test Results:</strong></p>
 <table>
 <thead>
@@ -3897,7 +3897,7 @@
 <td>378</td>
 <td>EnhancedMultitaskingTest.MultiplePeriodicTasksCoordination</td>
 <td>✅ PASS</td>
-<td>0.060s</td>
+<td>0.097s</td>
 </tr>
 <tr>
 <td>379</td>
@@ -3931,7 +3931,7 @@
 - Passed: 96
 - Failed: 0
 - Success Rate: 100.0%
-- Total Time: 1.240s</p>
+- Total Time: 1.261s</p>
 <p><strong>Detailed Test Results:</strong></p>
 <table>
 <thead>
@@ -4505,13 +4505,13 @@
 <td>395</td>
 <td>STLSemaphoreTest.STLReaderWriterPattern</td>
 <td>✅ PASS</td>
-<td>0.393s</td>
+<td>0.413s</td>
 </tr>
 <tr>
 <td>396</td>
 <td>STLSemaphoreTest.STLSemaphoreStressTest</td>
 <td>✅ PASS</td>
-<td>0.075s</td>
+<td>0.076s</td>
 </tr>
 <tr>
 <td>397</td>
@@ -6183,123 +6183,35 @@
 </table>
 </div><div class="section"><h2 id="code-coverage-analysis">Code Coverage Analysis</h2>
 <h3 id="coverage-overview">Coverage Overview</h3>
-<p>The project achieves excellent code coverage with <strong>96.3% line coverage</strong> and <strong>95.0% function coverage</strong>.</p>
+<p>The project achieves excellent code coverage with <strong>97.0% line coverage</strong> and <strong>98.2% function coverage</strong>.</p>
 <h3 id="coverage-breakdown">Coverage Breakdown</h3>
 <ul>
-<li><strong>Lines Covered</strong>: 7406 out of 7689 total lines</li>
-<li><strong>Functions Covered</strong>: 2907 out of 3061 total functions</li>
+<li><strong>Lines Covered</strong>: 7395 out of 7620 total lines</li>
+<li><strong>Functions Covered</strong>: 2902 out of 2955 total functions</li>
 <li><strong>Coverage Target</strong>: Main library modules only (excludes test infrastructure and system headers)</li>
 </ul>
 <p><strong>Detailed Uncovered Areas Analysis:</strong></p>
 <p>The following sections provide specific references to uncovered code areas and explanations for why they cannot be covered by unit tests.</p>
 <h3 id="internal-task-execution-functions-called-by-freertos-kernel">Internal task execution functions called by FreeRTOS kernel</h3>
 <p><strong>Reason for exclusion:</strong> These functions are called internally by the FreeRTOS kernel during task execution and cannot be directly invoked in unit tests</p>
-<p><strong>Uncovered Area 1</strong>: freertos_task.hpp:173-182
-<em>Function</em>: <code>freertos::task&lt;freertos::static_task_allocator&lt;0ul&gt; &gt;::task_exec(void*)</code></p>
-<pre><code class="language-cpp">    TaskHandle_t m_hTask;
-
-&gt;&gt;&gt; static void task_exec(void *context) {
-    auto pThis = static_cast&lt;task *&gt;(context);
-    assert(nullptr != pThis);
-</code></pre></div>
-<p><strong>Uncovered Area 2</strong>: freertos_task.hpp:173-182
-<em>Function</em>: <code>freertos::task&lt;freertos::dynamic_task_allocator&lt;2048ul&gt; &gt;::task_exec(void*)</code></p>
-<pre><code class="language-cpp">    TaskHandle_t m_hTask;
-
-&gt;&gt;&gt; static void task_exec(void *context) {
-    auto pThis = static_cast&lt;task *&gt;(context);
-    assert(nullptr != pThis);
-</code></pre></div>
-<p><strong>Uncovered Area 3</strong>: freertos_task.hpp:572-586
-<em>Function</em>: <code>freertos::periodic_task&lt;freertos::static_task_allocator&lt;1024ul&gt; &gt;::run()</code></p>
-<pre><code class="language-cpp">    task&lt;TaskAllocator&gt; m_task;
-
-&gt;&gt;&gt; void run() {
-    m_on_start();
-    while (is_running()) {
-</code></pre></div>
-<p><strong>Uncovered Area 4</strong>: test_freertos_task.cpp:1140-1142
-<em>Function</em>: <code>FreeRTOSTaskTest_TaskExecutionDirectCall_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
-<pre><code class="language-cpp">
-    bool task_executed = false;
-&gt;&gt;&gt; sa::task&lt;1024&gt; test_task(&quot;ExecutionTask&quot;, 2, [&amp;task_executed]() {
-    task_executed = true;
-    });
-</code></pre></div>
-<p><strong>Uncovered Area 5</strong>: test_freertos_task.cpp:1613-1615
-<em>Function</em>: <code>FreeRTOSTaskTest_TaskExecutionInternalFunction_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
-<pre><code class="language-cpp">    .WillOnce(Return(mock_task_handle));
-
-&gt;&gt;&gt; sa::task&lt;1024&gt; suspended_task(&quot;SuspendedTask&quot;, 1, []() {
-    // Task routine that would be executed
-    }, true); // start_suspended = true
-</code></pre></div>
-<p><strong>Uncovered Area 6</strong>: test_freertos_task.cpp:1623-1625
-<em>Function</em>: <code>FreeRTOSTaskTest_TaskExecutionInternalFunction_Test::TestBody()::{lambda()#2}::operator()() const</code></p>
-<pre><code class="language-cpp">    .WillOnce(Return(reinterpret_cast&lt;TaskHandle_t&gt;(0x2000)));
-
-&gt;&gt;&gt; sa::task&lt;1024&gt; normal_task(&quot;NormalTask&quot;, 2, []() {
-    // Normal task routine
-    }); // start_suspended defaults to false for this constructor
-</code></pre></div>
-<p><strong>Uncovered Area 7</strong>: test_freertos_task.cpp:1650
+<p><strong>Uncovered Area 1</strong>: test_freertos_task.cpp:1653
 <em>Function</em>: <code>FreeRTOSTaskTest_PeriodicTaskRunMethodExecution_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
-<pre><code class="language-cpp">    sa::periodic_task&lt;1024&gt; periodic_task(
-    &quot;PeriodicRunTask&quot;, 1,
-&gt;&gt;&gt; [&amp;on_start_calls]() { on_start_calls++; },    // on_start
-    [&amp;on_stop_calls]() { on_stop_calls++; },      // on_stop
-    []() { /* periodic_routine */ },               // periodic_routine
-</code></pre></div>
-<p><strong>Uncovered Area 8</strong>: test_freertos_task.cpp:1651
-<em>Function</em>: <code>FreeRTOSTaskTest_PeriodicTaskRunMethodExecution_Test::TestBody()::{lambda()#2}::operator()() const</code></p>
-<pre><code class="language-cpp">    &quot;PeriodicRunTask&quot;, 1,
-    [&amp;on_start_calls]() { on_start_calls++; },    // on_start
-&gt;&gt;&gt; [&amp;on_stop_calls]() { on_stop_calls++; },      // on_stop
-    []() { /* periodic_routine */ },               // periodic_routine
-    std::chrono::milliseconds(100)                 // period
-</code></pre></div>
-<p><strong>Uncovered Area 9</strong>: test_freertos_task.cpp:1652
-<em>Function</em>: <code>FreeRTOSTaskTest_PeriodicTaskRunMethodExecution_Test::TestBody()::{lambda()#3}::operator()() const</code></p>
-<pre><code class="language-cpp">    [&amp;on_start_calls]() { on_start_calls++; },    // on_start
-    [&amp;on_stop_calls]() { on_stop_calls++; },      // on_stop
+<pre><code class="language-cpp">    empty_task_routine,    // on_start
+    empty_task_routine,      // on_stop
 &gt;&gt;&gt; []() { /* periodic_routine */ },               // periodic_routine
     std::chrono::milliseconds(100)                 // period
     );
 </code></pre></div>
-<p><strong>Uncovered Area 10</strong>: test_freertos_task.cpp:676
-<em>Function</em>: <code>FreeRTOSTaskTest_PeriodicTaskIsRunning_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
-<pre><code class="language-cpp">    &quot;RunningTask&quot;,
-    2,
-&gt;&gt;&gt; []() {},  // on_start
-    []() {},  // on_stop
-    []() {},  // periodic_routine
-</code></pre></div>
-<p><strong>Uncovered Area 11</strong>: test_freertos_task.cpp:677
-<em>Function</em>: <code>FreeRTOSTaskTest_PeriodicTaskIsRunning_Test::TestBody()::{lambda()#2}::operator()() const</code></p>
-<pre><code class="language-cpp">    2,
-    []() {},  // on_start
-&gt;&gt;&gt; []() {},  // on_stop
-    []() {},  // periodic_routine
-    100ms     // period
-</code></pre></div>
-<p><strong>Uncovered Area 12</strong>: test_freertos_task.cpp:678
-<em>Function</em>: <code>FreeRTOSTaskTest_PeriodicTaskIsRunning_Test::TestBody()::{lambda()#3}::operator()() const</code></p>
-<pre><code class="language-cpp">    []() {},  // on_start
-    []() {},  // on_stop
-&gt;&gt;&gt; []() {},  // periodic_routine
-    100ms     // period
-    );
-</code></pre></div>
-<p><strong>Uncovered Area 13</strong>: freertos_sw_timer.hpp:200
-<em>Line</em>: 200</p>
+<p><strong>Uncovered Area 2</strong>: freertos_sw_timer.hpp:202
+<em>Line</em>: 202</p>
 <pre><code class="language-cpp">    if (rc == pdPASS) {
     while (xTimerIsTimerActive(src.m_timer) != pdFALSE) {
 &gt;&gt;&gt; vTaskDelay(pdMS_TO_TICKS(1));
     }
     auto name = pcTimerGetName(src.m_timer);
 </code></pre></div>
-<p><strong>Uncovered Area 14</strong>: freertos_sw_timer.hpp:208
-<em>Line</em>: 208</p>
+<p><strong>Uncovered Area 3</strong>: freertos_sw_timer.hpp:210
+<em>Line</em>: 210</p>
 <pre><code class="language-cpp">    if (rc == pdPASS) {
     while (xTimerIsTimerActive(src.m_timer) != pdFALSE) {
 &gt;&gt;&gt; vTaskDelay(pdMS_TO_TICKS(1));
@@ -6308,7 +6220,7 @@
 </code></pre></div>
 <h3 id="error-handling-and-edge-case-scenarios">Error handling and edge case scenarios</h3>
 <p><strong>Reason for exclusion:</strong> These code paths handle rare error conditions or require specific FreeRTOS kernel states that are difficult to reproduce in unit tests</p>
-<p><strong>Uncovered Area 15</strong>: test_enhanced_cpp17_features.cpp:200
+<p><strong>Uncovered Area 4</strong>: test_enhanced_cpp17_features.cpp:200
 <em>Function</em>: <code>Cpp17FeaturesTest_RAIIExceptionSafety_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
 <pre><code class="language-cpp">    // Test RAII behavior with exceptions
     {
@@ -6316,147 +6228,35 @@
     EXPECT_NE(task.handle(), nullptr);
 
 </code></pre></div>
-<p><strong>Uncovered Area 16</strong>: test_freertos_task.cpp:148
-<em>Function</em>: <code>FreeRTOSTaskTest_DynamicTaskAllocatorCreateFailure_Test::TestBody()::{lambda(void*)#1}::operator()(void*) const</code></p>
-<pre><code class="language-cpp">    .WillOnce(Return(pdFAIL));
-
-&gt;&gt;&gt; auto task_function = [](void*){};
-    TaskHandle_t handle = allocator.create(task_function, &quot;TestTask&quot;, 2, nullptr);
-
-</code></pre></div>
-<p><strong>Uncovered Area 17</strong>: test_freertos_task.cpp:1771
-<em>Function</em>: <code>FreeRTOSTaskTest_EdgeCaseErrorHandling_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
-<pre><code class="language-cpp">    .WillOnce(Return(nullptr));
-
-&gt;&gt;&gt; sa::task&lt;1024&gt; null_task(&quot;TestTask&quot;, 1, []() {});
-
-    // Task should handle null gracefully
-</code></pre></div>
-<p><strong>Uncovered Area 18</strong>: test_freertos_task.cpp:382
-<em>Function</em>: <code>FreeRTOSTaskTest_StaticTaskAbortDelay_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
-<pre><code class="language-cpp">    .WillOnce(Return(mock_task_handle));
-
-&gt;&gt;&gt; sa::task&lt;1024&gt; test_task(&quot;AbortTask&quot;, 2, []() {});
-
-    // Test abort_delay with valid handle
-</code></pre></div>
-<p><strong>Uncovered Area 19</strong>: test_freertos_task.cpp:398
-<em>Function</em>: <code>FreeRTOSTaskTest_StaticTaskAbortDelayNullHandle_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
-<pre><code class="language-cpp">    .WillOnce(Return(nullptr));
-
-&gt;&gt;&gt; sa::task&lt;1024&gt; test_task(&quot;NullAbortTask&quot;, 2, []() {});
-
-    // Should return pdFALSE for null handle without calling FreeRTOS function
-</code></pre></div>
-<p><strong>Uncovered Area 20</strong>: test_freertos_task.cpp:460
-<em>Function</em>: <code>FreeRTOSTaskTest_DynamicTaskConstructionFailure_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
-<pre><code class="language-cpp">    .WillOnce(Return(pdFAIL));
-
-&gt;&gt;&gt; da::task&lt;2048&gt; test_task(&quot;FailTask&quot;, 3, []() {});
-
-    EXPECT_EQ(test_task.handle(), nullptr);
-</code></pre></div>
-<p><strong>Uncovered Area 21</strong>: test_freertos_task.cpp:737
-<em>Function</em>: <code>FreeRTOSTaskTest_PeriodicTaskDestructorAbortDelay_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
-<pre><code class="language-cpp">    &quot;AbortDelayTask&quot;,
-    2,
-&gt;&gt;&gt; []() {},  // on_start
-    []() {},  // on_stop
-    []() {},  // periodic_routine
-</code></pre></div>
-<p><strong>Uncovered Area 22</strong>: test_freertos_task.cpp:738
-<em>Function</em>: <code>FreeRTOSTaskTest_PeriodicTaskDestructorAbortDelay_Test::TestBody()::{lambda()#2}::operator()() const</code></p>
-<pre><code class="language-cpp">    2,
-    []() {},  // on_start
-&gt;&gt;&gt; []() {},  // on_stop
-    []() {},  // periodic_routine
-    100ms     // period
-</code></pre></div>
-<p><strong>Uncovered Area 23</strong>: test_freertos_task.cpp:739
-<em>Function</em>: <code>FreeRTOSTaskTest_PeriodicTaskDestructorAbortDelay_Test::TestBody()::{lambda()#3}::operator()() const</code></p>
-<pre><code class="language-cpp">    []() {},  // on_start
-    []() {},  // on_stop
-&gt;&gt;&gt; []() {},  // periodic_routine
-    100ms     // period
-    );
-</code></pre></div>
 <h3 id="platform-specific-or-hardware-dependent-code">Platform-specific or hardware-dependent code</h3>
 <p><strong>Reason for exclusion:</strong> These code sections depend on specific hardware configurations or FreeRTOS kernel internals not available in the test environment</p>
-<p><strong>Uncovered Area 24</strong>: freertos_task.hpp:515-521
-<em>Function</em>: <code>freertos::task&lt;freertos::static_task_allocator&lt;256ul&gt; &gt;::notify_wait(unsigned int, unsigned int, unsigned int&amp;, unsigned int)</code></p>
-<pre><code class="language-cpp">    * @return BaseType_t pdTRUE if the notification was given, pdFALSE otherwise
-    */
-&gt;&gt;&gt; BaseType_t notify_wait(uint32_t ulBitsToClearOnEntry,
-    uint32_t ulBitsToClearOnExit,
-    uint32_t &amp;notification_value,
-</code></pre></div>
-<p><strong>Uncovered Area 25</strong>: freertos_task.hpp:515-521
-<em>Function</em>: <code>freertos::task&lt;freertos::static_task_allocator&lt;512ul&gt; &gt;::notify_wait(unsigned int, unsigned int, unsigned int&amp;, unsigned int)</code></p>
-<pre><code class="language-cpp">    * @return BaseType_t pdTRUE if the notification was given, pdFALSE otherwise
-    */
-&gt;&gt;&gt; BaseType_t notify_wait(uint32_t ulBitsToClearOnEntry,
-    uint32_t ulBitsToClearOnExit,
-    uint32_t &amp;notification_value,
-</code></pre></div>
-<p><strong>Uncovered Area 26</strong>: freertos_task.hpp:532-540
-<em>Function</em>: <code>int freertos::task&lt;freertos::static_task_allocator&lt;256ul&gt; &gt;::notify_wait&lt;long, std::ratio&lt;1l, 1000l&gt; &gt;(unsigned int, unsigned int, unsigned int&amp;, std::chrono::duration&lt;long, std::ratio&lt;1l, 1000l&gt; &gt;)</code></p>
-<pre><code class="language-cpp">    */
-    template &lt;typename Rep, typename Period&gt;
-&gt;&gt;&gt; BaseType_t notify_wait(uint32_t ulBitsToClearOnEntry,
-    uint32_t ulBitsToClearOnExit,
-    uint32_t &amp;notification_value,
-</code></pre></div>
-<p><strong>Uncovered Area 27</strong>: freertos_task.hpp:532-540
-<em>Function</em>: <code>int freertos::task&lt;freertos::static_task_allocator&lt;512ul&gt; &gt;::notify_wait&lt;long, std::ratio&lt;1l, 1000l&gt; &gt;(unsigned int, unsigned int, unsigned int&amp;, std::chrono::duration&lt;long, std::ratio&lt;1l, 1000l&gt; &gt;)</code></p>
-<pre><code class="language-cpp">    */
-    template &lt;typename Rep, typename Period&gt;
-&gt;&gt;&gt; BaseType_t notify_wait(uint32_t ulBitsToClearOnEntry,
-    uint32_t ulBitsToClearOnExit,
-    uint32_t &amp;notification_value,
-</code></pre></div>
-<p><strong>Uncovered Area 28</strong>: freertos_sw_timer.hpp:216
-<em>Line</em>: 216</p>
+<p><strong>Uncovered Area 5</strong>: freertos_sw_timer.hpp:218
+<em>Line</em>: 218</p>
 <pre><code class="language-cpp">    if (m_timer) {
     if (src.m_started) {
 &gt;&gt;&gt; rc = xTimerStart(m_timer, portMAX_DELAY);
     if (rc == pdPASS) {
     m_started = true;
 </code></pre></div>
-<p><strong>Uncovered Area 29</strong>: freertos_sw_timer.hpp:217
-<em>Line</em>: 217</p>
+<p><strong>Uncovered Area 6</strong>: freertos_sw_timer.hpp:219
+<em>Line</em>: 219</p>
 <pre><code class="language-cpp">    if (src.m_started) {
     rc = xTimerStart(m_timer, portMAX_DELAY);
 &gt;&gt;&gt; if (rc == pdPASS) {
     m_started = true;
     }
 </code></pre></div>
-<p><strong>Uncovered Area 30</strong>: freertos_sw_timer.hpp:218
-<em>Line</em>: 218</p>
+<p><strong>Uncovered Area 7</strong>: freertos_sw_timer.hpp:220
+<em>Line</em>: 220</p>
 <pre><code class="language-cpp">    rc = xTimerStart(m_timer, portMAX_DELAY);
     if (rc == pdPASS) {
 &gt;&gt;&gt; m_started = true;
     }
     }
 </code></pre></div>
-<p><strong>Uncovered Area 31</strong>: freertos_task.hpp:577
-<em>Line</em>: 577</p>
-<pre><code class="language-cpp">    if (0 != m_period.count()) {
-    #if configUSE_TASK_NOTIFICATIONS
-&gt;&gt;&gt; uint32_t notification_value = 0;
-    m_task.notify_wait(0, 0, notification_value, m_period);
-    #else
-</code></pre></div>
-<p><strong>Uncovered Area 32</strong>: freertos_task.hpp:578
-<em>Line</em>: 578</p>
-<pre><code class="language-cpp">    #if configUSE_TASK_NOTIFICATIONS
-    uint32_t notification_value = 0;
-&gt;&gt;&gt; m_task.notify_wait(0, 0, notification_value, m_period);
-    #else
-    delay(m_period);
-</code></pre></div>
 <h3 id="defensive-programming-and-robustness-checks">Defensive programming and robustness checks</h3>
 <p><strong>Reason for exclusion:</strong> These are safety checks and defensive programming patterns that are difficult to trigger in controlled test conditions</p>
-<p><strong>Uncovered Area 33</strong>: freertos_task.hpp:273
+<p><strong>Uncovered Area 8</strong>: freertos_task.hpp:275
 <em>Function</em>: <code>freertos::task&lt;freertos::static_task_allocator&lt;0ul&gt; &gt;::suspend()</code></p>
 <pre><code class="language-cpp">    *
     */
@@ -6464,7 +6264,7 @@
     /**
     * @brief Resume the task.
 </code></pre></div>
-<p><strong>Uncovered Area 34</strong>: freertos_task.hpp:273
+<p><strong>Uncovered Area 9</strong>: freertos_task.hpp:275
 <em>Function</em>: <code>freertos::task&lt;freertos::dynamic_task_allocator&lt;2048ul&gt; &gt;::suspend()</code></p>
 <pre><code class="language-cpp">    *
     */
@@ -6472,7 +6272,7 @@
     /**
     * @brief Resume the task.
 </code></pre></div>
-<p><strong>Uncovered Area 35</strong>: freertos_task.hpp:611
+<p><strong>Uncovered Area 10</strong>: freertos_task.hpp:616
 <em>Function</em>: <code>freertos::periodic_task&lt;freertos::static_task_allocator&lt;1024ul&gt; &gt;::periodic_task&lt;double, std::ratio&lt;1l, 1000l&gt; &gt;(char const*, unsigned int, std::function&lt;void ()&gt;&amp;&amp;, std::function&lt;void ()&gt;&amp;&amp;, std::function&lt;void ()&gt;&amp;&amp;, std::chrono::duration&lt;double, std::ratio&lt;1l, 1000l&gt; &gt; const&amp;, bool)::{lambda()#1}::operator()() const</code></p>
 <pre><code class="language-cpp">    m_on_start{std::move(on_start)}, m_on_stop{std::move(on_stop)},
     m_periodic_routine{std::move(periodic_routine)},
@@ -6480,7 +6280,7 @@
     /**
     * @brief Construct a new periodic task object
 </code></pre></div>
-<p><strong>Uncovered Area 36</strong>: freertos_task.hpp:611
+<p><strong>Uncovered Area 11</strong>: freertos_task.hpp:616
 <em>Function</em>: <code>freertos::periodic_task&lt;freertos::static_task_allocator&lt;1024ul&gt; &gt;::periodic_task&lt;long, std::ratio&lt;1l, 1000l&gt; &gt;(char const*, unsigned int, std::function&lt;void ()&gt;&amp;&amp;, std::function&lt;void ()&gt;&amp;&amp;, std::function&lt;void ()&gt;&amp;&amp;, std::chrono::duration&lt;long, std::ratio&lt;1l, 1000l&gt; &gt; const&amp;, bool)::{lambda()#1}::operator()() const</code></p>
 <pre><code class="language-cpp">    m_on_start{std::move(on_start)}, m_on_stop{std::move(on_stop)},
     m_periodic_routine{std::move(periodic_routine)},
@@ -6488,7 +6288,7 @@
     /**
     * @brief Construct a new periodic task object
 </code></pre></div>
-<p><strong>Uncovered Area 37</strong>: FreeRTOS.h:163
+<p><strong>Uncovered Area 12</strong>: FreeRTOS.h:163
 <em>Function</em>: <code>FreeRTOSMock::~FreeRTOSMock()</code></p>
 <pre><code class="language-cpp">    class FreeRTOSMock {
     public:
@@ -6496,7 +6296,7 @@
 
     // Task creation and deletion
 </code></pre></div>
-<p><strong>Uncovered Area 38</strong>: FreeRTOS.h:323
+<p><strong>Uncovered Area 13</strong>: FreeRTOS.h:323
 <em>Function</em>: <code>FreeRTOSMock::xMessageBufferSendFromISR(void*, void const*, unsigned long, int*)</code></p>
 <pre><code class="language-cpp">    MOCK_METHOD(void, vMessageBufferDelete, (MessageBufferHandle_t xMessageBuffer));
     MOCK_METHOD(size_t, xMessageBufferSend, (MessageBufferHandle_t xMessageBuffer, const void* pvTxData, size_t xDataLengthBytes, TickType_t xTicksToWait));
@@ -6504,7 +6304,7 @@
     MOCK_METHOD(size_t, xMessageBufferReceive, (MessageBufferHandle_t xMessageBuffer, void* pvRxData, size_t xBufferLengthBytes, TickType_t xTicksToWait));
     MOCK_METHOD(size_t, xMessageBufferReceiveFromISR, (MessageBufferHandle_t xMessageBuffer, void* pvRxData, size_t xBufferLengthBytes, BaseType_t* pxHigherPriorityTaskWoken));
 </code></pre></div>
-<p><strong>Uncovered Area 39</strong>: FreeRTOS.h:325
+<p><strong>Uncovered Area 14</strong>: FreeRTOS.h:325
 <em>Function</em>: <code>FreeRTOSMock::xMessageBufferReceiveFromISR(void*, void*, unsigned long, int*)</code></p>
 <pre><code class="language-cpp">    MOCK_METHOD(size_t, xMessageBufferSendFromISR, (MessageBufferHandle_t xMessageBuffer, const void* pvTxData, size_t xDataLengthBytes, BaseType_t* pxHigherPriorityTaskWoken));
     MOCK_METHOD(size_t, xMessageBufferReceive, (MessageBufferHandle_t xMessageBuffer, void* pvRxData, size_t xBufferLengthBytes, TickType_t xTicksToWait));
@@ -6512,7 +6312,7 @@
     MOCK_METHOD(size_t, xMessageBufferSpaceAvailable, (MessageBufferHandle_t xMessageBuffer));
     MOCK_METHOD(BaseType_t, xMessageBufferReset, (MessageBufferHandle_t xMessageBuffer));
 </code></pre></div>
-<p><strong>Uncovered Area 40</strong>: enhanced_timer_mocks.cpp:159-164
+<p><strong>Uncovered Area 15</strong>: enhanced_timer_mocks.cpp:159-164
 <em>Function</em>: <code>freertos_mocks::TimerServiceSimulator::changePeriodFromISR(void*, unsigned int, int*)</code></p>
 <pre><code class="language-cpp">    }
 
@@ -6520,7 +6320,7 @@
     if (higher_priority_task_woken) {
     *higher_priority_task_woken = pdFALSE;  // Simulate no high priority task woken for testing
 </code></pre></div>
-<p><strong>Uncovered Area 41</strong>: enhanced_timer_mocks.cpp:198-202
+<p><strong>Uncovered Area 16</strong>: enhanced_timer_mocks.cpp:198-202
 <em>Function</em>: <code>freertos_mocks::TimerServiceSimulator::setReloadMode(void*, unsigned int)</code></p>
 <pre><code class="language-cpp">    }
 
@@ -6528,7 +6328,7 @@
     if (isValidTimer(timer)) {
     timers_[timer]-&gt;auto_reload = auto_reload;
 </code></pre></div>
-<p><strong>Uncovered Area 42</strong>: enhanced_timer_mocks.cpp:360-368
+<p><strong>Uncovered Area 17</strong>: enhanced_timer_mocks.cpp:360-368
 <em>Function</em>: <code>freertos_mocks::TimerServiceSimulator::getActiveTimerCount() const</code></p>
 <pre><code class="language-cpp">    }
 
@@ -6536,7 +6336,7 @@
     size_t count = 0;
     for (const auto&amp; pair : timers_) {
 </code></pre></div>
-<p><strong>Uncovered Area 43</strong>: enhanced_timer_mocks.cpp:374-376
+<p><strong>Uncovered Area 18</strong>: enhanced_timer_mocks.cpp:374-376
 <em>Function</em>: <code>freertos_mocks::TimerServiceSimulator::hasTimer(void*) const</code></p>
 <pre><code class="language-cpp">    }
 
@@ -6544,7 +6344,7 @@
     return isValidTimer(timer);
     }
 </code></pre></div>
-<p><strong>Uncovered Area 44</strong>: enhanced_timer_mocks.cpp:378-381
+<p><strong>Uncovered Area 19</strong>: enhanced_timer_mocks.cpp:378-381
 <em>Function</em>: <code>freertos_mocks::TimerServiceSimulator::getCallbackCount(void*) const</code></p>
 <pre><code class="language-cpp">    }
 
@@ -6552,7 +6352,7 @@
     auto it = callback_counts_.find(timer);
     return it != callback_counts_.end() ? it-&gt;second : 0;
 </code></pre></div>
-<p><strong>Uncovered Area 45</strong>: enhanced_timer_mocks.cpp:383-385
+<p><strong>Uncovered Area 20</strong>: enhanced_timer_mocks.cpp:383-385
 <em>Function</em>: <code>freertos_mocks::TimerServiceSimulator::clearCallbackHistory()</code></p>
 <pre><code class="language-cpp">    }
 
@@ -6560,7 +6360,7 @@
     callback_counts_.clear();
     }
 </code></pre></div>
-<p><strong>Uncovered Area 46</strong>: enhanced_timer_mocks.hpp:172-180
+<p><strong>Uncovered Area 21</strong>: enhanced_timer_mocks.hpp:172-180
 <em>Function</em>: <code>freertos_mocks::EnhancedTimerMock::simulateTaskDelay(unsigned int)</code></p>
 <pre><code class="language-cpp">
     // vTaskDelay simulation - works with timer time advancement
@@ -6568,15 +6368,15 @@
     if (simulation_enabled_) {
     // In enhanced simulation mode, vTaskDelay just advances simulated time
 </code></pre></div>
-<p><strong>Uncovered Area 47</strong>: freertos_mocks.cpp:896-901
+<p><strong>Uncovered Area 22</strong>: freertos_mocks.cpp:896-901
 <em>Function</em>: <code>xMessageBufferSendFromISR</code></p>
 <pre><code class="language-cpp">
 </code></pre></div>
-<p><strong>Uncovered Area 48</strong>: freertos_mocks.cpp:910-915
+<p><strong>Uncovered Area 23</strong>: freertos_mocks.cpp:910-915
 <em>Function</em>: <code>xMessageBufferReceiveFromISR</code></p>
 <pre><code class="language-cpp">
 </code></pre></div>
-<p><strong>Uncovered Area 49</strong>: stl_semaphore_mocks.hpp:165
+<p><strong>Uncovered Area 24</strong>: stl_semaphore_mocks.hpp:165
 <em>Function</em>: <code>freertos_test::stl_counting_semaphore::take(unsigned int)::{lambda()#1}::operator()() const</code></p>
 <pre><code class="language-cpp">    if (timeout_ms == portMAX_DELAY) {
     // Infinite wait
@@ -6584,7 +6384,7 @@
     m_count--;
     return pdTRUE;
 </code></pre></div>
-<p><strong>Uncovered Area 50</strong>: stl_semaphore_mocks.hpp:77
+<p><strong>Uncovered Area 25</strong>: stl_semaphore_mocks.hpp:77
 <em>Function</em>: <code>freertos_test::stl_binary_semaphore::take(unsigned int)::{lambda()#1}::operator()() const</code></p>
 <pre><code class="language-cpp">    if (timeout_ms == portMAX_DELAY) {
     // Infinite wait
@@ -6592,7 +6392,7 @@
     m_available = false;
     return pdTRUE;
 </code></pre></div>
-<p><strong>Uncovered Area 51</strong>: test_enhanced_cpp17_features.cpp:115
+<p><strong>Uncovered Area 26</strong>: test_enhanced_cpp17_features.cpp:115
 <em>Function</em>: <code>Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
 <pre><code class="language-cpp">    .Times(AtLeast(2));
 
@@ -6600,7 +6400,7 @@
     auto on_stop = [&amp;stop_count]() { stop_count++; };
     auto periodic = [&amp;periodic_count]() { periodic_count++; };
 </code></pre></div>
-<p><strong>Uncovered Area 52</strong>: test_enhanced_cpp17_features.cpp:116
+<p><strong>Uncovered Area 27</strong>: test_enhanced_cpp17_features.cpp:116
 <em>Function</em>: <code>Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test::TestBody()::{lambda()#2}::operator()() const</code></p>
 <pre><code class="language-cpp">
     auto on_start = [&amp;start_count]() { start_count++; };
@@ -6608,7 +6408,7 @@
     auto periodic = [&amp;periodic_count]() { periodic_count++; };
 
 </code></pre></div>
-<p><strong>Uncovered Area 53</strong>: test_enhanced_cpp17_features.cpp:117
+<p><strong>Uncovered Area 28</strong>: test_enhanced_cpp17_features.cpp:117
 <em>Function</em>: <code>Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test::TestBody()::{lambda()#3}::operator()() const</code></p>
 <pre><code class="language-cpp">    auto on_start = [&amp;start_count]() { start_count++; };
     auto on_stop = [&amp;stop_count]() { stop_count++; };
@@ -6616,7 +6416,7 @@
 
     // Test move with different chrono duration types - using static allocation
 </code></pre></div>
-<p><strong>Uncovered Area 54</strong>: test_enhanced_cpp17_features.cpp:127
+<p><strong>Uncovered Area 29</strong>: test_enhanced_cpp17_features.cpp:127
 <em>Function</em>: <code>Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test::TestBody()::{lambda()#4}::operator()() const</code></p>
 <pre><code class="language-cpp">    // Create another task and move it
     sa::periodic_task&lt;1024&gt; task2(&quot;PeriodicMove2&quot;, 2,
@@ -6624,7 +6424,7 @@
     [&amp;stop_count]() { stop_count++; },
     [&amp;periodic_count]() { periodic_count++; });
 </code></pre></div>
-<p><strong>Uncovered Area 55</strong>: test_enhanced_cpp17_features.cpp:128
+<p><strong>Uncovered Area 30</strong>: test_enhanced_cpp17_features.cpp:128
 <em>Function</em>: <code>Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test::TestBody()::{lambda()#5}::operator()() const</code></p>
 <pre><code class="language-cpp">    sa::periodic_task&lt;1024&gt; task2(&quot;PeriodicMove2&quot;, 2,
     [&amp;start_count]() { start_count++; },
@@ -6632,7 +6432,7 @@
     [&amp;periodic_count]() { periodic_count++; });
 
 </code></pre></div>
-<p><strong>Uncovered Area 56</strong>: test_enhanced_cpp17_features.cpp:129
+<p><strong>Uncovered Area 31</strong>: test_enhanced_cpp17_features.cpp:129
 <em>Function</em>: <code>Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test::TestBody()::{lambda()#6}::operator()() const</code></p>
 <pre><code class="language-cpp">    [&amp;start_count]() { start_count++; },
     [&amp;stop_count]() { stop_count++; },
@@ -6640,7 +6440,7 @@
 
     // Test move construction instead of assignment (which is deleted)
 </code></pre></div>
-<p><strong>Uncovered Area 57</strong>: test_enhanced_cpp17_features.cpp:152-154
+<p><strong>Uncovered Area 32</strong>: test_enhanced_cpp17_features.cpp:152-154
 <em>Function</em>: <code>Cpp17FeaturesTest_LambdaCaptureVarieties_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
 <pre><code class="language-cpp">
     // Capture by reference
@@ -6648,7 +6448,7 @@
     EXPECT_EQ(message, &quot;Test message&quot;);
     });
 </code></pre></div>
-<p><strong>Uncovered Area 58</strong>: test_enhanced_cpp17_features.cpp:157-159
+<p><strong>Uncovered Area 33</strong>: test_enhanced_cpp17_features.cpp:157-159
 <em>Function</em>: <code>Cpp17FeaturesTest_LambdaCaptureVarieties_Test::TestBody()::{lambda()#2}::operator()() const</code></p>
 <pre><code class="language-cpp">
     // Capture by value
@@ -6656,7 +6456,7 @@
     EXPECT_EQ(counter, 42);
     });
 </code></pre></div>
-<p><strong>Uncovered Area 59</strong>: test_enhanced_cpp17_features.cpp:162-164
+<p><strong>Uncovered Area 34</strong>: test_enhanced_cpp17_features.cpp:162-164
 <em>Function</em>: <code>Cpp17FeaturesTest_LambdaCaptureVarieties_Test::TestBody()::{lambda()#3}::operator()() const</code></p>
 <pre><code class="language-cpp">
     // Simple lambda without capture
@@ -6664,7 +6464,7 @@
     // Simple test function
     });
 </code></pre></div>
-<p><strong>Uncovered Area 60</strong>: test_enhanced_cpp17_features.cpp:172
+<p><strong>Uncovered Area 35</strong>: test_enhanced_cpp17_features.cpp:172
 <em>Function</em>: <code>Cpp17FeaturesTest_FunctionObjectVarieties_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
 <pre><code class="language-cpp">
     // Test with copyable function object instead
@@ -6672,7 +6472,7 @@
     sa::task&lt;1024&gt; task1(&quot;StdFunction&quot;, 1, func_lambda);
 
 </code></pre></div>
-<p><strong>Uncovered Area 61</strong>: test_enhanced_cpp17_features.cpp:178
+<p><strong>Uncovered Area 36</strong>: test_enhanced_cpp17_features.cpp:178
 <em>Function</em>: <code>Cpp17FeaturesTest_FunctionObjectVarieties_Test::TestBody()::CustomCallable::operator()() const</code></p>
 <pre><code class="language-cpp">    class CustomCallable {
     public:
@@ -6680,7 +6480,7 @@
     };
 
 </code></pre></div>
-<p><strong>Uncovered Area 62</strong>: test_enhanced_cpp17_features.cpp:185
+<p><strong>Uncovered Area 37</strong>: test_enhanced_cpp17_features.cpp:185
 <em>Function</em>: <code>Cpp17FeaturesTest_FunctionObjectVarieties_Test::TestBody()::{lambda()#2}::operator()() const</code></p>
 <pre><code class="language-cpp">
     // Test with function pointer
@@ -6688,7 +6488,7 @@
     }
 
 </code></pre></div>
-<p><strong>Uncovered Area 63</strong>: test_enhanced_cpp17_features.cpp:292
+<p><strong>Uncovered Area 38</strong>: test_enhanced_cpp17_features.cpp:292
 <em>Function</em>: <code>Cpp17FeaturesTest_CompileTimeConstants_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
 <pre><code class="language-cpp">
     // These should compile with constexpr values - queues are created at construction
@@ -6696,7 +6496,7 @@
     sa::queue&lt;queue_size, int&gt; queue;
 
 </code></pre></div>
-<p><strong>Uncovered Area 64</strong>: test_enhanced_cpp17_features.cpp:313
+<p><strong>Uncovered Area 39</strong>: test_enhanced_cpp17_features.cpp:313
 <em>Function</em>: <code>Cpp17FeaturesTest_ChronoTypesIntegration_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
 <pre><code class="language-cpp">    // Test with different chrono duration types in periodic tasks - using static allocation
     sa::periodic_task&lt;1024&gt; task1(&quot;ChronoMs&quot;, 1,
@@ -6704,7 +6504,7 @@
     []() { /* stop */ },
     []() { /* periodic */ },
 </code></pre></div>
-<p><strong>Uncovered Area 65</strong>: test_enhanced_cpp17_features.cpp:314
+<p><strong>Uncovered Area 40</strong>: test_enhanced_cpp17_features.cpp:314
 <em>Function</em>: <code>Cpp17FeaturesTest_ChronoTypesIntegration_Test::TestBody()::{lambda()#2}::operator()() const</code></p>
 <pre><code class="language-cpp">    sa::periodic_task&lt;1024&gt; task1(&quot;ChronoMs&quot;, 1,
     []() { /* start */ },
@@ -6712,7 +6512,7 @@
     []() { /* periodic */ },
     500ms);
 </code></pre></div>
-<p><strong>Uncovered Area 66</strong>: test_enhanced_cpp17_features.cpp:315
+<p><strong>Uncovered Area 41</strong>: test_enhanced_cpp17_features.cpp:315
 <em>Function</em>: <code>Cpp17FeaturesTest_ChronoTypesIntegration_Test::TestBody()::{lambda()#3}::operator()() const</code></p>
 <pre><code class="language-cpp">    []() { /* start */ },
     []() { /* stop */ },
@@ -6720,7 +6520,7 @@
     500ms);
 
 </code></pre></div>
-<p><strong>Uncovered Area 67</strong>: test_enhanced_cpp17_features.cpp:319
+<p><strong>Uncovered Area 42</strong>: test_enhanced_cpp17_features.cpp:319
 <em>Function</em>: <code>Cpp17FeaturesTest_ChronoTypesIntegration_Test::TestBody()::{lambda()#4}::operator()() const</code></p>
 <pre><code class="language-cpp">
     sa::periodic_task&lt;1024&gt; task2(&quot;ChronoMs2&quot;, 1,
@@ -6728,7 +6528,7 @@
     []() { /* stop */ },
     []() { /* periodic */ },
 </code></pre></div>
-<p><strong>Uncovered Area 68</strong>: test_enhanced_cpp17_features.cpp:320
+<p><strong>Uncovered Area 43</strong>: test_enhanced_cpp17_features.cpp:320
 <em>Function</em>: <code>Cpp17FeaturesTest_ChronoTypesIntegration_Test::TestBody()::{lambda()#5}::operator()() const</code></p>
 <pre><code class="language-cpp">    sa::periodic_task&lt;1024&gt; task2(&quot;ChronoMs2&quot;, 1,
     []() { /* start */ },
@@ -6736,7 +6536,7 @@
     []() { /* periodic */ },
     750ms);
 </code></pre></div>
-<p><strong>Uncovered Area 69</strong>: test_enhanced_cpp17_features.cpp:321
+<p><strong>Uncovered Area 44</strong>: test_enhanced_cpp17_features.cpp:321
 <em>Function</em>: <code>Cpp17FeaturesTest_ChronoTypesIntegration_Test::TestBody()::{lambda()#6}::operator()() const</code></p>
 <pre><code class="language-cpp">    []() { /* start */ },
     []() { /* stop */ },
@@ -6744,7 +6544,7 @@
     750ms);
 
 </code></pre></div>
-<p><strong>Uncovered Area 70</strong>: test_enhanced_cpp17_features.cpp:325
+<p><strong>Uncovered Area 45</strong>: test_enhanced_cpp17_features.cpp:325
 <em>Function</em>: <code>Cpp17FeaturesTest_ChronoTypesIntegration_Test::TestBody()::{lambda()#7}::operator()() const</code></p>
 <pre><code class="language-cpp">
     sa::periodic_task&lt;1024&gt; task3(&quot;ChronoCustom&quot;, 1,
@@ -6752,7 +6552,7 @@
     []() { /* stop */ },
     []() { /* periodic */ },
 </code></pre></div>
-<p><strong>Uncovered Area 71</strong>: test_enhanced_cpp17_features.cpp:326
+<p><strong>Uncovered Area 46</strong>: test_enhanced_cpp17_features.cpp:326
 <em>Function</em>: <code>Cpp17FeaturesTest_ChronoTypesIntegration_Test::TestBody()::{lambda()#8}::operator()() const</code></p>
 <pre><code class="language-cpp">    sa::periodic_task&lt;1024&gt; task3(&quot;ChronoCustom&quot;, 1,
     []() { /* start */ },
@@ -6760,7 +6560,7 @@
     []() { /* periodic */ },
     duration&lt;double, std::milli&gt;(123.456));
 </code></pre></div>
-<p><strong>Uncovered Area 72</strong>: test_enhanced_cpp17_features.cpp:327
+<p><strong>Uncovered Area 47</strong>: test_enhanced_cpp17_features.cpp:327
 <em>Function</em>: <code>Cpp17FeaturesTest_ChronoTypesIntegration_Test::TestBody()::{lambda()#9}::operator()() const</code></p>
 <pre><code class="language-cpp">    []() { /* start */ },
     []() { /* stop */ },
@@ -6768,7 +6568,7 @@
     duration&lt;double, std::milli&gt;(123.456));
 
 </code></pre></div>
-<p><strong>Uncovered Area 73</strong>: test_enhanced_cpp17_features.cpp:350
+<p><strong>Uncovered Area 48</strong>: test_enhanced_cpp17_features.cpp:350
 <em>Function</em>: <code>Cpp17FeaturesTest_STLContainerIntegration_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
 <pre><code class="language-cpp">
     // Use emplace_back to construct in place
@@ -6776,7 +6576,7 @@
     tasks.emplace_back(&quot;VectorTask2&quot;, 2, []() { /* test */ });
     tasks.emplace_back(&quot;VectorTask3&quot;, 3, []() { /* test */ });
 </code></pre></div>
-<p><strong>Uncovered Area 74</strong>: test_enhanced_cpp17_features.cpp:351
+<p><strong>Uncovered Area 49</strong>: test_enhanced_cpp17_features.cpp:351
 <em>Function</em>: <code>Cpp17FeaturesTest_STLContainerIntegration_Test::TestBody()::{lambda()#2}::operator()() const</code></p>
 <pre><code class="language-cpp">    // Use emplace_back to construct in place
     tasks.emplace_back(&quot;VectorTask1&quot;, 1, []() { /* test */ });
@@ -6784,7 +6584,7 @@
     tasks.emplace_back(&quot;VectorTask3&quot;, 3, []() { /* test */ });
 
 </code></pre></div>
-<p><strong>Uncovered Area 75</strong>: test_enhanced_cpp17_features.cpp:352
+<p><strong>Uncovered Area 50</strong>: test_enhanced_cpp17_features.cpp:352
 <em>Function</em>: <code>Cpp17FeaturesTest_STLContainerIntegration_Test::TestBody()::{lambda()#3}::operator()() const</code></p>
 <pre><code class="language-cpp">    tasks.emplace_back(&quot;VectorTask1&quot;, 1, []() { /* test */ });
     tasks.emplace_back(&quot;VectorTask2&quot;, 2, []() { /* test */ });
@@ -6792,7 +6592,7 @@
 
     EXPECT_EQ(tasks.size(), 3);
 </code></pre></div>
-<p><strong>Uncovered Area 76</strong>: test_enhanced_cpp17_features.cpp:369
+<p><strong>Uncovered Area 51</strong>: test_enhanced_cpp17_features.cpp:369
 <em>Function</em>: <code>Cpp17FeaturesTest_UniquePtrIntegration_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
 <pre><code class="language-cpp">
     // Test with unique_ptr for dynamic task management
@@ -6800,7 +6600,7 @@
     auto task2 = std::make_unique&lt;sa::task&lt;1024&gt;&gt;(&quot;UniqueTask2&quot;, 2, []() { /* test */ });
 
 </code></pre></div>
-<p><strong>Uncovered Area 77</strong>: test_enhanced_cpp17_features.cpp:370
+<p><strong>Uncovered Area 52</strong>: test_enhanced_cpp17_features.cpp:370
 <em>Function</em>: <code>Cpp17FeaturesTest_UniquePtrIntegration_Test::TestBody()::{lambda()#2}::operator()() const</code></p>
 <pre><code class="language-cpp">    // Test with unique_ptr for dynamic task management
     auto task1 = std::make_unique&lt;sa::task&lt;1024&gt;&gt;(&quot;UniqueTask1&quot;, 1, []() { /* test */ });
@@ -6808,7 +6608,7 @@
 
     EXPECT_NE(task1-&gt;handle(), nullptr);
 </code></pre></div>
-<p><strong>Uncovered Area 78</strong>: test_enhanced_cpp17_features.cpp:69
+<p><strong>Uncovered Area 53</strong>: test_enhanced_cpp17_features.cpp:69
 <em>Function</em>: <code>Cpp17FeaturesTest_TaskMoveSemanticsPerfectForwarding_Test::TestBody()::{lambda()#1}::operator()()</code></p>
 <pre><code class="language-cpp">
     // Test perfect forwarding with various lambda captures
@@ -6816,7 +6616,7 @@
     auto task_func2 = [&amp;call_count](){ call_count += 2; };
 
 </code></pre></div>
-<p><strong>Uncovered Area 79</strong>: test_enhanced_cpp17_features.cpp:70
+<p><strong>Uncovered Area 54</strong>: test_enhanced_cpp17_features.cpp:70
 <em>Function</em>: <code>Cpp17FeaturesTest_TaskMoveSemanticsPerfectForwarding_Test::TestBody()::{lambda()#2}::operator()() const</code></p>
 <pre><code class="language-cpp">    // Test perfect forwarding with various lambda captures
     auto task_func1 = [&amp;call_count]() mutable { call_count++; };
@@ -6824,7 +6624,7 @@
 
     EXPECT_CALL(*mock, xTaskCreateStatic(_, _, _, _, _, _, _))
 </code></pre></div>
-<p><strong>Uncovered Area 80</strong>: test_enhanced_cpp17_features.cpp:92
+<p><strong>Uncovered Area 55</strong>: test_enhanced_cpp17_features.cpp:92
 <em>Function</em>: <code>Cpp17FeaturesTest_TaskMoveAssignmentChaining_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
 <pre><code class="language-cpp">    .Times(AtLeast(2)); // Two tasks will be destroyed during moves
 
@@ -6832,7 +6632,7 @@
 
     // Create multiple tasks
 </code></pre></div>
-<p><strong>Uncovered Area 81</strong>: test_enhanced_cpp17_features.cpp:95
+<p><strong>Uncovered Area 56</strong>: test_enhanced_cpp17_features.cpp:95
 <em>Function</em>: <code>Cpp17FeaturesTest_TaskMoveAssignmentChaining_Test::TestBody()::{lambda()#2}::operator()() const</code></p>
 <pre><code class="language-cpp">
     // Create multiple tasks
@@ -6840,7 +6640,7 @@
     sa::task&lt;1024&gt; task2(&quot;ToMove1&quot;, 2, task_func);
     sa::task&lt;1024&gt; task3(&quot;ToMove2&quot;, 3, task_func);
 </code></pre></div>
-<p><strong>Uncovered Area 82</strong>: test_enhanced_freertos_sw_timer.cpp:379
+<p><strong>Uncovered Area 57</strong>: test_enhanced_freertos_sw_timer.cpp:379
 <em>Function</em>: <code>EnhancedFreeRTOSSwTimerTest_ZeroPeriodTimer_Test::TestBody()::{lambda(void*)#1}::operator()(void*) const</code></p>
 <pre><code class="language-cpp">    auto&amp; sim = enhanced_mock-&gt;getSimulator();
     TimerHandle_t handle = sim.createTimer(&quot;ZeroPeriod&quot;, 0, pdTRUE, nullptr,
@@ -6848,39 +6648,7 @@
     EXPECT_EQ(handle, nullptr);
     }
 </code></pre></div>
-<p><strong>Uncovered Area 83</strong>: test_freertos_sw_timer.cpp:155
-<em>Function</em>: <code>FreeRTOSSwTimerTest_StaticTimerAllocatorCreate_Test::TestBody()::{lambda(void*)#1}::operator()(void*) const</code></p>
-<pre><code class="language-cpp">
-    TimerHandle_t handle = allocator.create(&quot;TestTimer&quot;, 100, pdTRUE, &amp;allocator,
-&gt;&gt;&gt; [](TimerHandle_t){});
-
-    EXPECT_EQ(handle, mock_timer_handle);
-</code></pre></div>
-<p><strong>Uncovered Area 84</strong>: test_freertos_sw_timer.cpp:168
-<em>Function</em>: <code>FreeRTOSSwTimerTest_StaticTimerAllocatorCreateNullReturn_Test::TestBody()::{lambda(void*)#1}::operator()(void*) const</code></p>
-<pre><code class="language-cpp">
-    TimerHandle_t handle = allocator.create(&quot;TestTimer&quot;, 100, pdTRUE, nullptr,
-&gt;&gt;&gt; [](TimerHandle_t){});
-
-    EXPECT_EQ(handle, nullptr);
-</code></pre></div>
-<p><strong>Uncovered Area 85</strong>: test_freertos_sw_timer.cpp:203
-<em>Function</em>: <code>FreeRTOSSwTimerTest_DynamicTimerAllocatorCreate_Test::TestBody()::{lambda(void*)#1}::operator()(void*) const</code></p>
-<pre><code class="language-cpp">
-    TimerHandle_t handle = allocator.create(&quot;TestTimer&quot;, 200, pdFALSE, &amp;allocator,
-&gt;&gt;&gt; [](TimerHandle_t){});
-
-    EXPECT_EQ(handle, mock_timer_handle);
-</code></pre></div>
-<p><strong>Uncovered Area 86</strong>: test_freertos_sw_timer.cpp:216
-<em>Function</em>: <code>FreeRTOSSwTimerTest_DynamicTimerAllocatorCreateNullReturn_Test::TestBody()::{lambda(void*)#1}::operator()(void*) const</code></p>
-<pre><code class="language-cpp">
-    TimerHandle_t handle = allocator.create(&quot;TestTimer&quot;, 200, pdFALSE, nullptr,
-&gt;&gt;&gt; [](TimerHandle_t){});
-
-    EXPECT_EQ(handle, nullptr);
-</code></pre></div>
-<p><strong>Uncovered Area 87</strong>: test_freertos_sw_timer.cpp:90
+<p><strong>Uncovered Area 58</strong>: test_freertos_sw_timer.cpp:90
 <em>Function</em>: <code>FreeRTOSSwTimerTest::createTestCallback()::{lambda()#1}::operator()() const</code></p>
 <pre><code class="language-cpp">    // Helper function to create a test callback
     std::function&lt;void()&gt; createTestCallback() {
@@ -6888,599 +6656,7 @@
     }
 
 </code></pre></div>
-<p><strong>Uncovered Area 88</strong>: test_freertos_task.cpp:1020
-<em>Function</em>: <code>FreeRTOSTaskTest_TaskChronoCompatibility_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
-<pre><code class="language-cpp">    .WillOnce(Return(mock_task_handle));
-
-&gt;&gt;&gt; sa::task&lt;1024&gt; test_task(&quot;ChronoTask&quot;, 2, [](){});
-
-    // Test chrono duration compatibility with notify_take
-</code></pre></div>
-<p><strong>Uncovered Area 89</strong>: test_freertos_task.cpp:1090
-<em>Function</em>: <code>FreeRTOSTaskTest_TaskMoveConstruction_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
-<pre><code class="language-cpp">    .WillOnce(Return(mock_task_handle));
-
-&gt;&gt;&gt; sa::task&lt;1024&gt; original_task(&quot;MoveTest&quot;, 2, [](){});
-    EXPECT_EQ(original_task.handle(), mock_task_handle);
-
-</code></pre></div>
-<p><strong>Uncovered Area 90</strong>: test_freertos_task.cpp:1108
-<em>Function</em>: <code>FreeRTOSTaskTest_PeriodicTaskMoveConstruction_Test::TestBody()::{lambda()#2}::operator()() const</code></p>
-<pre><code class="language-cpp">
-    sa::periodic_task&lt;1024&gt; original_task(&quot;PeriodicMoveTest&quot;, 2,
-&gt;&gt;&gt; [](){}, [](){}, [](){}, 100ms);
-    EXPECT_EQ(original_task.handle(), mock_task_handle);
-
-</code></pre></div>
-<p><strong>Uncovered Area 91</strong>: test_freertos_task.cpp:1108
-<em>Function</em>: <code>FreeRTOSTaskTest_PeriodicTaskMoveConstruction_Test::TestBody()::{lambda()#3}::operator()() const</code></p>
-<pre><code class="language-cpp">
-    sa::periodic_task&lt;1024&gt; original_task(&quot;PeriodicMoveTest&quot;, 2,
-&gt;&gt;&gt; [](){}, [](){}, [](){}, 100ms);
-    EXPECT_EQ(original_task.handle(), mock_task_handle);
-
-</code></pre></div>
-<p><strong>Uncovered Area 92</strong>: test_freertos_task.cpp:1108
-<em>Function</em>: <code>FreeRTOSTaskTest_PeriodicTaskMoveConstruction_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
-<pre><code class="language-cpp">
-    sa::periodic_task&lt;1024&gt; original_task(&quot;PeriodicMoveTest&quot;, 2,
-&gt;&gt;&gt; [](){}, [](){}, [](){}, 100ms);
-    EXPECT_EQ(original_task.handle(), mock_task_handle);
-
-</code></pre></div>
-<p><strong>Uncovered Area 93</strong>: test_freertos_task.cpp:1162
-<em>Function</em>: <code>FreeRTOSTaskTest_PeriodicTaskTypo_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
-<pre><code class="language-cpp">    &quot;TypoTask&quot;,
-    2,
-&gt;&gt;&gt; []() {},  // on_start
-    []() {},  // on_stop
-    []() {},  // periodic_routine
-</code></pre></div>
-<p><strong>Uncovered Area 94</strong>: test_freertos_task.cpp:1163
-<em>Function</em>: <code>FreeRTOSTaskTest_PeriodicTaskTypo_Test::TestBody()::{lambda()#2}::operator()() const</code></p>
-<pre><code class="language-cpp">    2,
-    []() {},  // on_start
-&gt;&gt;&gt; []() {},  // on_stop
-    []() {},  // periodic_routine
-    100ms     // period
-</code></pre></div>
-<p><strong>Uncovered Area 95</strong>: test_freertos_task.cpp:1164
-<em>Function</em>: <code>FreeRTOSTaskTest_PeriodicTaskTypo_Test::TestBody()::{lambda()#3}::operator()() const</code></p>
-<pre><code class="language-cpp">    []() {},  // on_start
-    []() {},  // on_stop
-&gt;&gt;&gt; []() {},  // periodic_routine
-    100ms     // period
-    );
-</code></pre></div>
-<p><strong>Uncovered Area 96</strong>: test_freertos_task.cpp:1187
-<em>Function</em>: <code>FreeRTOSTaskTest_TaskTemplateInstantiation_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
-<pre><code class="language-cpp">    .WillOnce(Return(mock_task_handle));
-
-&gt;&gt;&gt; sa::task&lt;512&gt; small_task(&quot;SmallTask&quot;, 1, []() {});
-    EXPECT_EQ(small_task.handle(), mock_task_handle);
-
-</code></pre></div>
-<p><strong>Uncovered Area 97</strong>: test_freertos_task.cpp:1203
-<em>Function</em>: <code>FreeRTOSTaskTest_DynamicTaskDifferentSizes_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
-<pre><code class="language-cpp">    ));
-
-&gt;&gt;&gt; da::task&lt;2048&gt; dyn_task(&quot;DynTask&quot;, 3, []() {});
-    EXPECT_EQ(dyn_task.handle(), mock_handle2);
-
-</code></pre></div>
-<p><strong>Uncovered Area 98</strong>: test_freertos_task.cpp:1213
-<em>Function</em>: <code>FreeRTOSTaskTest_TaskNotificationEdgeCases_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
-<pre><code class="language-cpp">    .WillOnce(Return(mock_task_handle));
-
-&gt;&gt;&gt; sa::task&lt;1024&gt; test_task(&quot;EdgeTask&quot;, 2, []() {});
-
-    // Test notification with different duration types (microseconds)
-</code></pre></div>
-<p><strong>Uncovered Area 99</strong>: test_freertos_task.cpp:1298-1300
-<em>Function</em>: <code>FreeRTOSTaskTest_RacingConditionTaskConstructorInitialization_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
-<pre><code class="language-cpp">    });
-
-&gt;&gt;&gt; sa::task&lt;1024&gt; test_task(&quot;RacingTask&quot;, 2, []() {
-    // Task execution body
-    });
-</code></pre></div>
-<p><strong>Uncovered Area 100</strong>: test_freertos_task.cpp:1326
-<em>Function</em>: <code>FreeRTOSTaskTest_ConcurrentTaskCreationAndDestruction_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
-<pre><code class="language-cpp">
-    // Create tasks with different lifetimes to test destructor race conditions
-&gt;&gt;&gt; auto task1 = std::make_unique&lt;sa::task&lt;512&gt;&gt;(&quot;Task1&quot;, 1, []() {});
-    auto task2 = std::make_unique&lt;sa::task&lt;512&gt;&gt;(&quot;Task2&quot;, 2, []() {});
-    auto task3 = std::make_unique&lt;sa::task&lt;512&gt;&gt;(&quot;Task3&quot;, 3, []() {});
-</code></pre></div>
-<p><strong>Uncovered Area 101</strong>: test_freertos_task.cpp:1327
-<em>Function</em>: <code>FreeRTOSTaskTest_ConcurrentTaskCreationAndDestruction_Test::TestBody()::{lambda()#2}::operator()() const</code></p>
-<pre><code class="language-cpp">    // Create tasks with different lifetimes to test destructor race conditions
-    auto task1 = std::make_unique&lt;sa::task&lt;512&gt;&gt;(&quot;Task1&quot;, 1, []() {});
-&gt;&gt;&gt; auto task2 = std::make_unique&lt;sa::task&lt;512&gt;&gt;(&quot;Task2&quot;, 2, []() {});
-    auto task3 = std::make_unique&lt;sa::task&lt;512&gt;&gt;(&quot;Task3&quot;, 3, []() {});
-
-</code></pre></div>
-<p><strong>Uncovered Area 102</strong>: test_freertos_task.cpp:1328
-<em>Function</em>: <code>FreeRTOSTaskTest_ConcurrentTaskCreationAndDestruction_Test::TestBody()::{lambda()#3}::operator()() const</code></p>
-<pre><code class="language-cpp">    auto task1 = std::make_unique&lt;sa::task&lt;512&gt;&gt;(&quot;Task1&quot;, 1, []() {});
-    auto task2 = std::make_unique&lt;sa::task&lt;512&gt;&gt;(&quot;Task2&quot;, 2, []() {});
-&gt;&gt;&gt; auto task3 = std::make_unique&lt;sa::task&lt;512&gt;&gt;(&quot;Task3&quot;, 3, []() {});
-
-    EXPECT_EQ(task1-&gt;handle(), handles[0]);
-</code></pre></div>
-<p><strong>Uncovered Area 103</strong>: test_freertos_task.cpp:135
-<em>Function</em>: <code>FreeRTOSTaskTest_DynamicTaskAllocatorCreateSuccess_Test::TestBody()::{lambda(void*)#1}::operator()(void*) const</code></p>
-<pre><code class="language-cpp">    ));
-
-&gt;&gt;&gt; auto task_function = [](void*){};
-    TaskHandle_t handle = allocator.create(task_function, &quot;TestTask&quot;, 2, &amp;allocator);
-
-</code></pre></div>
-<p><strong>Uncovered Area 104</strong>: test_freertos_task.cpp:1354
-<em>Function</em>: <code>FreeRTOSTaskTest_MoveSemanticsRacingConditions_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
-<pre><code class="language-cpp">
-    // Create original task
-&gt;&gt;&gt; sa::task&lt;1024&gt; original_task(&quot;MoveTask&quot;, 1, []() {});
-    EXPECT_EQ(original_task.handle(), original_handle);
-
-</code></pre></div>
-<p><strong>Uncovered Area 105</strong>: test_freertos_task.cpp:1382
-<em>Function</em>: <code>FreeRTOSTaskTest_PeriodicTaskLifecycleRacingConditions_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
-<pre><code class="language-cpp">    &quot;PeriodicRace&quot;,
-    2,
-&gt;&gt;&gt; [&amp;start_count]() { start_count++; },  // on_start
-    [&amp;stop_count]() { stop_count++; },    // on_stop
-    [&amp;periodic_count]() { periodic_count++; },  // periodic_routine
-</code></pre></div>
-<p><strong>Uncovered Area 106</strong>: test_freertos_task.cpp:1383
-<em>Function</em>: <code>FreeRTOSTaskTest_PeriodicTaskLifecycleRacingConditions_Test::TestBody()::{lambda()#2}::operator()() const</code></p>
-<pre><code class="language-cpp">    2,
-    [&amp;start_count]() { start_count++; },  // on_start
-&gt;&gt;&gt; [&amp;stop_count]() { stop_count++; },    // on_stop
-    [&amp;periodic_count]() { periodic_count++; },  // periodic_routine
-    std::chrono::milliseconds(100)
-</code></pre></div>
-<p><strong>Uncovered Area 107</strong>: test_freertos_task.cpp:1384
-<em>Function</em>: <code>FreeRTOSTaskTest_PeriodicTaskLifecycleRacingConditions_Test::TestBody()::{lambda()#3}::operator()() const</code></p>
-<pre><code class="language-cpp">    [&amp;start_count]() { start_count++; },  // on_start
-    [&amp;stop_count]() { stop_count++; },    // on_stop
-&gt;&gt;&gt; [&amp;periodic_count]() { periodic_count++; },  // periodic_routine
-    std::chrono::milliseconds(100)
-    );
-</code></pre></div>
-<p><strong>Uncovered Area 108</strong>: test_freertos_task.cpp:1411
-<em>Function</em>: <code>FreeRTOSTaskTest_NotificationRacingConditions_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
-<pre><code class="language-cpp">    .WillOnce(Return(mock_task_handle));
-
-&gt;&gt;&gt; sa::task&lt;1024&gt; test_task(&quot;NotifyRace&quot;, 2, []() {});
-
-    // Simulate rapid notification operations
-</code></pre></div>
-<p><strong>Uncovered Area 109</strong>: test_freertos_task.cpp:1456-1458
-<em>Function</em>: <code>FreeRTOSTaskTest_ComplexMultitaskingScenario_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
-<pre><code class="language-cpp">    .WillOnce(Return(producer_handle));
-
-&gt;&gt;&gt; sa::task&lt;1024&gt; producer(&quot;Producer&quot;, 3, []() {
-    // Producer logic
-    });
-</code></pre></div>
-<p><strong>Uncovered Area 110</strong>: test_freertos_task.cpp:1464-1466
-<em>Function</em>: <code>FreeRTOSTaskTest_ComplexMultitaskingScenario_Test::TestBody()::{lambda()#2}::operator()() const</code></p>
-<pre><code class="language-cpp">    .WillOnce(Return(consumer_handle));
-
-&gt;&gt;&gt; sa::task&lt;1024&gt; consumer(&quot;Consumer&quot;, 2, []() {
-    // Consumer logic
-    });
-</code></pre></div>
-<p><strong>Uncovered Area 111</strong>: test_freertos_task.cpp:1472-1474
-<em>Function</em>: <code>FreeRTOSTaskTest_ComplexMultitaskingScenario_Test::TestBody()::{lambda()#3}::operator()() const</code></p>
-<pre><code class="language-cpp">    .WillOnce(Return(coordinator_handle));
-
-&gt;&gt;&gt; sa::task&lt;1024&gt; coordinator(&quot;Coordinator&quot;, 4, []() {
-    // Coordinator logic
-    });
-</code></pre></div>
-<p><strong>Uncovered Area 112</strong>: test_freertos_task.cpp:1543
-<em>Function</em>: <code>FreeRTOSTaskTest_TaskSystemStatusUnderLoad_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
-<pre><code class="language-cpp">    .WillOnce(Return(handles[2]));
-
-&gt;&gt;&gt; sa::task&lt;512&gt; task1(&quot;SysTask1&quot;, 1, []() {});
-    sa::task&lt;512&gt; task2(&quot;SysTask2&quot;, 2, []() {});
-    sa::task&lt;512&gt; task3(&quot;SysTask3&quot;, 3, []() {});
-</code></pre></div>
-<p><strong>Uncovered Area 113</strong>: test_freertos_task.cpp:1544
-<em>Function</em>: <code>FreeRTOSTaskTest_TaskSystemStatusUnderLoad_Test::TestBody()::{lambda()#2}::operator()() const</code></p>
-<pre><code class="language-cpp">
-    sa::task&lt;512&gt; task1(&quot;SysTask1&quot;, 1, []() {});
-&gt;&gt;&gt; sa::task&lt;512&gt; task2(&quot;SysTask2&quot;, 2, []() {});
-    sa::task&lt;512&gt; task3(&quot;SysTask3&quot;, 3, []() {});
-
-</code></pre></div>
-<p><strong>Uncovered Area 114</strong>: test_freertos_task.cpp:1545
-<em>Function</em>: <code>FreeRTOSTaskTest_TaskSystemStatusUnderLoad_Test::TestBody()::{lambda()#3}::operator()() const</code></p>
-<pre><code class="language-cpp">    sa::task&lt;512&gt; task1(&quot;SysTask1&quot;, 1, []() {});
-    sa::task&lt;512&gt; task2(&quot;SysTask2&quot;, 2, []() {});
-&gt;&gt;&gt; sa::task&lt;512&gt; task3(&quot;SysTask3&quot;, 3, []() {});
-
-    // Test task system status with multiple tasks
-</code></pre></div>
-<p><strong>Uncovered Area 115</strong>: test_freertos_task.cpp:1594-1596
-<em>Function</em>: <code>FreeRTOSTaskTest_ConstructorInitializationOrderRaceCondition_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
-<pre><code class="language-cpp">
-    // Create task with routine that sets atomic flag
-&gt;&gt;&gt; sa::task&lt;1024&gt; race_test_task(&quot;RaceTest&quot;, 2, [&amp;task_routine_called]() {
-    task_routine_called = true;
-    });
-</code></pre></div>
-<p><strong>Uncovered Area 116</strong>: test_freertos_task.cpp:165-167
-<em>Function</em>: <code>FreeRTOSTaskTest_StaticTaskConstruction_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
-<pre><code class="language-cpp">
-    bool task_executed = false;
-&gt;&gt;&gt; sa::task&lt;1024&gt; test_task(&quot;TestTask&quot;, 2, [&amp;task_executed]() {
-    task_executed = true;
-    });
-</code></pre></div>
-<p><strong>Uncovered Area 117</strong>: test_freertos_task.cpp:1741
-<em>Function</em>: <code>FreeRTOSTaskTest_AdvancedRacingConditionScenarios_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
-<pre><code class="language-cpp">    .WillOnce(Return(reinterpret_cast&lt;TaskHandle_t&gt;(0x3001)));
-
-&gt;&gt;&gt; sa::task&lt;512&gt; task1(&quot;RaceTask1&quot;, 1, []() {});
-    EXPECT_EQ(task1.handle(), reinterpret_cast&lt;TaskHandle_t&gt;(0x3001));
-
-</code></pre></div>
-<p><strong>Uncovered Area 118</strong>: test_freertos_task.cpp:1748
-<em>Function</em>: <code>FreeRTOSTaskTest_AdvancedRacingConditionScenarios_Test::TestBody()::{lambda()#2}::operator()() const</code></p>
-<pre><code class="language-cpp">    .WillOnce(Return(reinterpret_cast&lt;TaskHandle_t&gt;(0x3002)));
-
-&gt;&gt;&gt; sa::task&lt;512&gt; task2(&quot;RaceTask2&quot;, 2, []() {});
-    EXPECT_EQ(task2.handle(), reinterpret_cast&lt;TaskHandle_t&gt;(0x3002));
-
-</code></pre></div>
-<p><strong>Uncovered Area 119</strong>: test_freertos_task.cpp:1796
-<em>Function</em>: <code>FreeRTOSTaskTest_AdvancedChronoCompatibility_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
-<pre><code class="language-cpp">    .WillOnce(Return(mock_task_handle));
-
-&gt;&gt;&gt; sa::task&lt;1024&gt; test_task(&quot;ChronoTask&quot;, 2, []() {});
-
-    // Test notification take with very small durations
-</code></pre></div>
-<p><strong>Uncovered Area 120</strong>: test_freertos_task.cpp:180-182
-<em>Function</em>: <code>FreeRTOSTaskTest_StaticTaskConstructionWithString_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
-<pre><code class="language-cpp">    EXPECT_CALL(*mock, vTaskDelete(mock_task_handle));
-
-&gt;&gt;&gt; sa::task&lt;1024&gt; test_task(task_name, 3, []() {
-    // Test task routine
-    });
-</code></pre></div>
-<p><strong>Uncovered Area 121</strong>: test_freertos_task.cpp:1838
-<em>Function</em>: <code>FreeRTOSTaskTest_PriorityInheritanceScenario_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
-<pre><code class="language-cpp">    .WillOnce(Return(high_prio_handle));
-
-&gt;&gt;&gt; sa::task&lt;1024&gt; low_prio_task(&quot;LowPrio&quot;, 1, []() {});
-    sa::task&lt;1024&gt; high_prio_task(&quot;HighPrio&quot;, 5, []() {});
-
-</code></pre></div>
-<p><strong>Uncovered Area 122</strong>: test_freertos_task.cpp:1839
-<em>Function</em>: <code>FreeRTOSTaskTest_PriorityInheritanceScenario_Test::TestBody()::{lambda()#2}::operator()() const</code></p>
-<pre><code class="language-cpp">
-    sa::task&lt;1024&gt; low_prio_task(&quot;LowPrio&quot;, 1, []() {});
-&gt;&gt;&gt; sa::task&lt;1024&gt; high_prio_task(&quot;HighPrio&quot;, 5, []() {});
-
-    // Low priority task acquires resource and gets priority boosted
-</code></pre></div>
-<p><strong>Uncovered Area 123</strong>: test_freertos_task.cpp:194
-<em>Function</em>: <code>FreeRTOSTaskTest_StaticTaskDestruction_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
-<pre><code class="language-cpp">
-    {
-&gt;&gt;&gt; sa::task&lt;1024&gt; test_task(&quot;TestTask&quot;, 2, []() {});
-    } // Destructor should call vTaskDelete
-    }
-</code></pre></div>
-<p><strong>Uncovered Area 124</strong>: test_freertos_task.cpp:207
-<em>Function</em>: <code>FreeRTOSTaskTest_StaticTaskDestructionNullHandle_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
-<pre><code class="language-cpp">
-    {
-&gt;&gt;&gt; sa::task&lt;1024&gt; test_task(&quot;TestTask&quot;, 2, []() {});
-    }
-    }
-</code></pre></div>
-<p><strong>Uncovered Area 125</strong>: test_freertos_task.cpp:215
-<em>Function</em>: <code>FreeRTOSTaskTest_StaticTaskSuspendResume_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
-<pre><code class="language-cpp">    .WillOnce(Return(mock_task_handle));
-
-&gt;&gt;&gt; sa::task&lt;1024&gt; test_task(&quot;TestTask&quot;, 2, []() {});
-
-    EXPECT_CALL(*mock, vTaskSuspend(mock_task_handle));
-</code></pre></div>
-<p><strong>Uncovered Area 126</strong>: test_freertos_task.cpp:235
-<em>Function</em>: <code>FreeRTOSTaskTest_StaticTaskTerminate_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
-<pre><code class="language-cpp">    .WillOnce(Return(mock_task_handle));
-
-&gt;&gt;&gt; sa::task&lt;1024&gt; test_task(&quot;TestTask&quot;, 2, []() {});
-
-    EXPECT_CALL(*mock, vTaskDelete(mock_task_handle));
-</code></pre></div>
-<p><strong>Uncovered Area 127</strong>: test_freertos_task.cpp:248
-<em>Function</em>: <code>FreeRTOSTaskTest_StaticTaskPriority_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
-<pre><code class="language-cpp">    .WillOnce(Return(mock_task_handle));
-
-&gt;&gt;&gt; sa::task&lt;1024&gt; test_task(&quot;TestTask&quot;, 2, []() {});
-
-    EXPECT_CALL(*mock, uxTaskPriorityGet(mock_task_handle))
-</code></pre></div>
-<p><strong>Uncovered Area 128</strong>: test_freertos_task.cpp:271
-<em>Function</em>: <code>FreeRTOSTaskTest_StaticTaskName_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
-<pre><code class="language-cpp">    .WillOnce(Return(mock_task_handle));
-
-&gt;&gt;&gt; sa::task&lt;1024&gt; test_task(&quot;TestTask&quot;, 2, []() {});
-
-    EXPECT_CALL(*mock, pcTaskGetName(mock_task_handle))
-</code></pre></div>
-<p><strong>Uncovered Area 129</strong>: test_freertos_task.cpp:285
-<em>Function</em>: <code>FreeRTOSTaskTest_StaticTaskState_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
-<pre><code class="language-cpp">    .WillOnce(Return(mock_task_handle));
-
-&gt;&gt;&gt; sa::task&lt;1024&gt; test_task(&quot;TestTask&quot;, 2, []() {});
-
-    EXPECT_CALL(*mock, eTaskGetState(mock_task_handle))
-</code></pre></div>
-<p><strong>Uncovered Area 130</strong>: test_freertos_task.cpp:299
-<em>Function</em>: <code>FreeRTOSTaskTest_TaskApplicationTag_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
-<pre><code class="language-cpp">    .WillOnce(Return(mock_task_handle));
-
-&gt;&gt;&gt; sa::task&lt;1024&gt; test_task(&quot;TagTask&quot;, 2, []() {});
-
-    // Test setting application task tag
-</code></pre></div>
-<p><strong>Uncovered Area 131</strong>: test_freertos_task.cpp:326
-<em>Function</em>: <code>FreeRTOSTaskTest_TaskStackWatermark_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
-<pre><code class="language-cpp">    .WillOnce(Return(mock_task_handle));
-
-&gt;&gt;&gt; sa::task&lt;1024&gt; test_task(&quot;WatermarkTask&quot;, 2, []() {});
-
-    // Test stack high water mark
-</code></pre></div>
-<p><strong>Uncovered Area 132</strong>: test_freertos_task.cpp:347
-<em>Function</em>: <code>FreeRTOSTaskTest_TaskTraceStatus_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
-<pre><code class="language-cpp">    .WillOnce(Return(mock_task_handle));
-
-&gt;&gt;&gt; sa::task&lt;1024&gt; test_task(&quot;StatusTask&quot;, 2, []() {});
-
-    // Test task status with default parameters
-</code></pre></div>
-<p><strong>Uncovered Area 133</strong>: test_freertos_task.cpp:417-419
-<em>Function</em>: <code>FreeRTOSTaskTest_TaskSuspendedOnStart_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
-<pre><code class="language-cpp">
-    // Test task created with start_suspended = true (default)
-&gt;&gt;&gt; sa::task&lt;1024&gt; suspended_task(&quot;SuspendedTask&quot;, 1, []() {
-    // This task should start suspended
-    }, true);
-</code></pre></div>
-<p><strong>Uncovered Area 134</strong>: test_freertos_task.cpp:431-433
-<em>Function</em>: <code>FreeRTOSTaskTest_TaskNotSuspendedOnStart_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
-<pre><code class="language-cpp">
-    // Test task created with start_suspended = false
-&gt;&gt;&gt; sa::task&lt;1024&gt; active_task(&quot;ActiveTask&quot;, 1, []() {
-    // This task should start immediately
-    }, false);
-</code></pre></div>
-<p><strong>Uncovered Area 135</strong>: test_freertos_task.cpp:447-449
-<em>Function</em>: <code>FreeRTOSTaskTest_DynamicTaskConstruction_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
-<pre><code class="language-cpp">    ));
-
-&gt;&gt;&gt; da::task&lt;2048&gt; test_task(&quot;DynamicTask&quot;, 3, []() {
-    // Test task routine
-    });
-</code></pre></div>
-<p><strong>Uncovered Area 136</strong>: test_freertos_task.cpp:476
-<em>Function</em>: <code>FreeRTOSTaskTest_TaskNotifications_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
-<pre><code class="language-cpp">    .WillOnce(Return(mock_task_handle));
-
-&gt;&gt;&gt; sa::task&lt;1024&gt; test_task(&quot;NotifyTask&quot;, 2, []() {});
-
-    // Test notify_give
-</code></pre></div>
-<p><strong>Uncovered Area 137</strong>: test_freertos_task.cpp:514
-<em>Function</em>: <code>FreeRTOSTaskTest_TaskNotificationsExtended_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
-<pre><code class="language-cpp">    .WillOnce(Return(mock_task_handle));
-
-&gt;&gt;&gt; sa::task&lt;1024&gt; test_task(&quot;ExtendedNotifyTask&quot;, 2, []() {});
-
-    // Test notify_and_query (fixed typo: was notfy_and_query)
-</code></pre></div>
-<p><strong>Uncovered Area 138</strong>: test_freertos_task.cpp:588
-<em>Function</em>: <code>FreeRTOSTaskTest_PeriodicTaskConstruction_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
-<pre><code class="language-cpp">    &quot;PeriodicTask&quot;,
-    2,
-&gt;&gt;&gt; [&amp;on_start_called]() { on_start_called = true; },      // on_start
-    [&amp;on_stop_called]() { on_stop_called = true; },       // on_stop
-    [&amp;periodic_called]() { periodic_called = true; },     // periodic_routine
-</code></pre></div>
-<p><strong>Uncovered Area 139</strong>: test_freertos_task.cpp:589
-<em>Function</em>: <code>FreeRTOSTaskTest_PeriodicTaskConstruction_Test::TestBody()::{lambda()#2}::operator()() const</code></p>
-<pre><code class="language-cpp">    2,
-    [&amp;on_start_called]() { on_start_called = true; },      // on_start
-&gt;&gt;&gt; [&amp;on_stop_called]() { on_stop_called = true; },       // on_stop
-    [&amp;periodic_called]() { periodic_called = true; },     // periodic_routine
-    100ms                                                   // period
-</code></pre></div>
-<p><strong>Uncovered Area 140</strong>: test_freertos_task.cpp:590
-<em>Function</em>: <code>FreeRTOSTaskTest_PeriodicTaskConstruction_Test::TestBody()::{lambda()#3}::operator()() const</code></p>
-<pre><code class="language-cpp">    [&amp;on_start_called]() { on_start_called = true; },      // on_start
-    [&amp;on_stop_called]() { on_stop_called = true; },       // on_stop
-&gt;&gt;&gt; [&amp;periodic_called]() { periodic_called = true; },     // periodic_routine
-    100ms                                                   // period
-    );
-</code></pre></div>
-<p><strong>Uncovered Area 141</strong>: test_freertos_task.cpp:614
-<em>Function</em>: <code>FreeRTOSTaskTest_PeriodicTaskWithString_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
-<pre><code class="language-cpp">    task_name,
-    3,
-&gt;&gt;&gt; []() {},  // on_start
-    []() {},  // on_stop
-    []() {},  // periodic_routine
-</code></pre></div>
-<p><strong>Uncovered Area 142</strong>: test_freertos_task.cpp:615
-<em>Function</em>: <code>FreeRTOSTaskTest_PeriodicTaskWithString_Test::TestBody()::{lambda()#2}::operator()() const</code></p>
-<pre><code class="language-cpp">    3,
-    []() {},  // on_start
-&gt;&gt;&gt; []() {},  // on_stop
-    []() {},  // periodic_routine
-    50ms      // period
-</code></pre></div>
-<p><strong>Uncovered Area 143</strong>: test_freertos_task.cpp:616
-<em>Function</em>: <code>FreeRTOSTaskTest_PeriodicTaskWithString_Test::TestBody()::{lambda()#3}::operator()() const</code></p>
-<pre><code class="language-cpp">    []() {},  // on_start
-    []() {},  // on_stop
-&gt;&gt;&gt; []() {},  // periodic_routine
-    50ms      // period
-    );
-</code></pre></div>
-<p><strong>Uncovered Area 144</strong>: test_freertos_task.cpp:635
-<em>Function</em>: <code>FreeRTOSTaskTest_PeriodicTaskZeroPeriod_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
-<pre><code class="language-cpp">    &quot;ZeroPeriodTask&quot;,
-    2,
-&gt;&gt;&gt; []() {},  // on_start
-    []() {},  // on_stop
-    []() {},  // periodic_routine
-</code></pre></div>
-<p><strong>Uncovered Area 145</strong>: test_freertos_task.cpp:636
-<em>Function</em>: <code>FreeRTOSTaskTest_PeriodicTaskZeroPeriod_Test::TestBody()::{lambda()#2}::operator()() const</code></p>
-<pre><code class="language-cpp">    2,
-    []() {},  // on_start
-&gt;&gt;&gt; []() {},  // on_stop
-    []() {},  // periodic_routine
-    0ms       // period - should run continuously
-</code></pre></div>
-<p><strong>Uncovered Area 146</strong>: test_freertos_task.cpp:637
-<em>Function</em>: <code>FreeRTOSTaskTest_PeriodicTaskZeroPeriod_Test::TestBody()::{lambda()#3}::operator()() const</code></p>
-<pre><code class="language-cpp">    []() {},  // on_start
-    []() {},  // on_stop
-&gt;&gt;&gt; []() {},  // periodic_routine
-    0ms       // period - should run continuously
-    );
-</code></pre></div>
-<p><strong>Uncovered Area 147</strong>: test_freertos_task.cpp:656
-<em>Function</em>: <code>FreeRTOSTaskTest_PeriodicTaskNoPeriod_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
-<pre><code class="language-cpp">    &quot;NoPeriodTask&quot;,
-    2,
-&gt;&gt;&gt; []() {},  // on_start
-    []() {},  // on_stop
-    []() {}   // periodic_routine
-</code></pre></div>
-<p><strong>Uncovered Area 148</strong>: test_freertos_task.cpp:657
-<em>Function</em>: <code>FreeRTOSTaskTest_PeriodicTaskNoPeriod_Test::TestBody()::{lambda()#2}::operator()() const</code></p>
-<pre><code class="language-cpp">    2,
-    []() {},  // on_start
-&gt;&gt;&gt; []() {},  // on_stop
-    []() {}   // periodic_routine
-    // No period specified - should default to 0ms
-</code></pre></div>
-<p><strong>Uncovered Area 149</strong>: test_freertos_task.cpp:658
-<em>Function</em>: <code>FreeRTOSTaskTest_PeriodicTaskNoPeriod_Test::TestBody()::{lambda()#3}::operator()() const</code></p>
-<pre><code class="language-cpp">    []() {},  // on_start
-    []() {},  // on_stop
-&gt;&gt;&gt; []() {}   // periodic_routine
-    // No period specified - should default to 0ms
-    );
-</code></pre></div>
-<p><strong>Uncovered Area 150</strong>: test_freertos_task.cpp:715
-<em>Function</em>: <code>FreeRTOSTaskTest_PeriodicTaskTerminate_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
-<pre><code class="language-cpp">    &quot;TerminateTask&quot;,
-    2,
-&gt;&gt;&gt; []() {},  // on_start
-    []() {},  // on_stop
-    []() {},  // periodic_routine
-</code></pre></div>
-<p><strong>Uncovered Area 151</strong>: test_freertos_task.cpp:716
-<em>Function</em>: <code>FreeRTOSTaskTest_PeriodicTaskTerminate_Test::TestBody()::{lambda()#2}::operator()() const</code></p>
-<pre><code class="language-cpp">    2,
-    []() {},  // on_start
-&gt;&gt;&gt; []() {},  // on_stop
-    []() {},  // periodic_routine
-    100ms     // period
-</code></pre></div>
-<p><strong>Uncovered Area 152</strong>: test_freertos_task.cpp:717
-<em>Function</em>: <code>FreeRTOSTaskTest_PeriodicTaskTerminate_Test::TestBody()::{lambda()#3}::operator()() const</code></p>
-<pre><code class="language-cpp">    []() {},  // on_start
-    []() {},  // on_stop
-&gt;&gt;&gt; []() {},  // periodic_routine
-    100ms     // period
-    );
-</code></pre></div>
-<p><strong>Uncovered Area 153</strong>: test_freertos_task.cpp:761
-<em>Function</em>: <code>FreeRTOSTaskTest_PeriodicTaskNotificationExtensions_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
-<pre><code class="language-cpp">    &quot;PeriodicNotifyTask&quot;,
-    2,
-&gt;&gt;&gt; []() {},  // on_start
-    []() {},  // on_stop
-    []() {},  // periodic_routine
-</code></pre></div>
-<p><strong>Uncovered Area 154</strong>: test_freertos_task.cpp:762
-<em>Function</em>: <code>FreeRTOSTaskTest_PeriodicTaskNotificationExtensions_Test::TestBody()::{lambda()#2}::operator()() const</code></p>
-<pre><code class="language-cpp">    2,
-    []() {},  // on_start
-&gt;&gt;&gt; []() {},  // on_stop
-    []() {},  // periodic_routine
-    100ms     // period
-</code></pre></div>
-<p><strong>Uncovered Area 155</strong>: test_freertos_task.cpp:763
-<em>Function</em>: <code>FreeRTOSTaskTest_PeriodicTaskNotificationExtensions_Test::TestBody()::{lambda()#3}::operator()() const</code></p>
-<pre><code class="language-cpp">    []() {},  // on_start
-    []() {},  // on_stop
-&gt;&gt;&gt; []() {},  // periodic_routine
-    100ms     // period
-    );
-</code></pre></div>
-<p><strong>Uncovered Area 156</strong>: test_freertos_task.cpp:85
-<em>Function</em>: <code>FreeRTOSTaskTest_StaticTaskAllocatorCreate_Test::TestBody()::{lambda(void*)#1}::operator()(void*) const</code></p>
-<pre><code class="language-cpp">    )).WillOnce(Return(mock_task_handle));
-
-&gt;&gt;&gt; auto task_function = [](void*){};
-    TaskHandle_t handle = allocator.create(task_function, &quot;TestTask&quot;, 2, &amp;allocator);
-
-</code></pre></div>
-<p><strong>Uncovered Area 157</strong>: test_freertos_task.cpp:957
-<em>Function</em>: <code>FreeRTOSTaskTest_StackAllocationLimitation_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
-<pre><code class="language-cpp">    // but in a real environment, this pattern should be avoided for static tasks
-    {
-&gt;&gt;&gt; sa::task&lt;1024&gt; stack_task(&quot;StackLimitationDemo&quot;, 1, [](){});
-    } // Stack allocation limitation applies here in real FreeRTOS usage
-    }
-</code></pre></div>
-<p><strong>Uncovered Area 158</strong>: test_freertos_task.cpp:970
-<em>Function</em>: <code>FreeRTOSTaskTest_InvalidParameters_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
-<pre><code class="language-cpp">    .WillOnce(Return(nullptr));
-
-&gt;&gt;&gt; sa::task&lt;1024&gt; task_with_null_name(nullptr, 1, [](){});
-    EXPECT_EQ(task_with_null_name.handle(), nullptr);
-
-</code></pre></div>
-<p><strong>Uncovered Area 159</strong>: test_freertos_task.cpp:98
-<em>Function</em>: <code>FreeRTOSTaskTest_StaticTaskAllocatorCreateNullReturn_Test::TestBody()::{lambda(void*)#1}::operator()(void*) const</code></p>
-<pre><code class="language-cpp">    .WillOnce(Return(nullptr));
-
-&gt;&gt;&gt; auto task_function = [](void*){};
-    TaskHandle_t handle = allocator.create(task_function, &quot;TestTask&quot;, 2, nullptr);
-
-</code></pre></div>
-<p><strong>Uncovered Area 160</strong>: test_freertos_task.cpp:982
-<em>Function</em>: <code>FreeRTOSTaskTest_ZeroStackSize_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
-<pre><code class="language-cpp">    .WillOnce(Return(nullptr));  // FreeRTOS would likely fail this
-
-&gt;&gt;&gt; sa::task&lt;0&gt; zero_stack_task(&quot;ZeroStack&quot;, 1, [](){});
-    EXPECT_EQ(zero_stack_task.handle(), nullptr);
-
-</code></pre></div>
-<p><strong>Uncovered Area 161</strong>: test_freertos_task.cpp:995
-<em>Function</em>: <code>FreeRTOSTaskTest_VeryHighPriority_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
-<pre><code class="language-cpp">    .WillOnce(Return(mock_task_handle));
-
-&gt;&gt;&gt; sa::task&lt;1024&gt; high_priority_task(&quot;HighPriority&quot;, max_priority, [](){});
-    EXPECT_EQ(high_priority_task.handle(), mock_task_handle);
-
-</code></pre></div>
-<p><strong>Uncovered Area 162</strong>: freertos_queue.hpp:489
+<p><strong>Uncovered Area 59</strong>: freertos_queue.hpp:489
 <em>Line</em>: 489</p>
 <pre><code class="language-cpp">    return item;
     }
@@ -7488,7 +6664,7 @@
     }
     /**
 </code></pre></div>
-<p><strong>Uncovered Area 163</strong>: freertos_queue.hpp:628
+<p><strong>Uncovered Area 60</strong>: freertos_queue.hpp:628
 <em>Line</em>: 628</p>
 <pre><code class="language-cpp">    return item;
     }
@@ -7496,7 +6672,7 @@
     }
     /**
 </code></pre></div>
-<p><strong>Summary:</strong> 163 uncovered code areas identified across 4 categories.</p>
+<p><strong>Summary:</strong> 60 uncovered code areas identified across 4 categories.</p>
 <p><strong>Note:</strong> These uncovered areas represent code that by design cannot be easily tested in a unit test environment. They require either integration testing with the actual FreeRTOS kernel, specific hardware configurations, or are defensive programming measures for edge cases that are difficult to reproduce.</p>
 <h3 id="coverage-quality-assessment">Coverage Quality Assessment</h3>
 <p>The high coverage percentage indicates:
@@ -7521,7 +6697,7 @@
 <h3 id="performance-characteristics">Performance Characteristics</h3>
 <ul>
 <li><strong>Fastest Test</strong>: 0.000 seconds</li>
-<li><strong>Slowest Test</strong>: 0.393 seconds</li>
+<li><strong>Slowest Test</strong>: 0.413 seconds</li>
 <li><strong>Performance Distribution</strong>:</li>
 <li>Very Fast (&lt; 0.01s): 418 tests</li>
 <li>Fast (0.01-0.05s): 8 tests</li>
@@ -7537,8 +6713,8 @@
 </ul>
 <h3 id="code-quality-validation">✅ Code Quality Validation</h3>
 <ul>
-<li><strong>High Coverage</strong>: 96.3% line coverage demonstrates thorough validation</li>
-<li><strong>API Completeness</strong>: 95.0% function coverage shows comprehensive API testing</li>
+<li><strong>High Coverage</strong>: 97.0% line coverage demonstrates thorough validation</li>
+<li><strong>API Completeness</strong>: 98.2% function coverage shows comprehensive API testing</li>
 <li><strong>Production Ready</strong>: Test results indicate code is ready for production use</li>
 </ul>
 <h3 id="continuous-validation">🔄 Continuous Validation</h3>
@@ -7554,14 +6730,14 @@
 <li><strong>Failure Analysis</strong>: When failures occur, this report will provide detailed failure information</li>
 </ol>
 <hr />
-<p><em>Report Generated</em>: July 25, 2025 at 11:02:50<br />
+<p><em>Report Generated</em>: July 25, 2025 at 13:02:16<br />
 <em>Test Framework</em>: GoogleTest/GoogleMock<br />
 <em>Coverage Tool</em>: LCOV/GCOV<br />
-<em>Total Test Execution Time</em>: 1.95 seconds<br />
+<em>Total Test Execution Time</em>: 2.01 seconds<br />
 <em>Validation Status</em>: ✅ <strong>All tests passing - System validated for production use</strong></p></div>
         
         <div class="timestamp">
-            Generated on July 25, 2025 at 11:02 AM by FreeRTOS C++ Wrappers build system
+            Generated on July 25, 2025 at 01:02 PM by FreeRTOS C++ Wrappers build system
         </div>
     </div>
 </body>
