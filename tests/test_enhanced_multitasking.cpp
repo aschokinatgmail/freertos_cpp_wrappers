@@ -404,8 +404,8 @@ TEST_F(EnhancedMultitaskingTest, PeriodicTaskExecution) {
     auto on_start = []() { /* Task startup */ };
     auto on_stop = []() { /* Task cleanup */ };
     auto periodic_function = [&]() {
-        // Run for a limited number of iterations instead of infinite loop
-        for (int i = 0; i < 5 && !should_stop.load(); ++i) {
+        // This is called once per periodic iteration
+        if (!should_stop.load()) {
             execution_count++;
             std::this_thread::sleep_for(5ms);
         }
@@ -417,12 +417,14 @@ TEST_F(EnhancedMultitaskingTest, PeriodicTaskExecution) {
     sa::periodic_task<512> periodic_task("PeriodicTest", 1, 
                                         std::move(on_start), 
                                         std::move(on_stop), 
-                                        std::move(periodic_function));
+                                        std::move(periodic_function),
+                                        std::chrono::milliseconds{10}, // 10ms period
+                                        false); // Start not suspended
     
     // Let it run for a while
     std::this_thread::sleep_for(30ms);
     
-    // Stop the task (not needed anymore since it's limited iterations)
+    // Stop the task
     should_stop = true;
     
     // Wait for cleanup
@@ -440,8 +442,8 @@ TEST_F(EnhancedMultitaskingTest, MultiplePeriodicTasksCoordination) {
     auto fast_on_start = []() { /* Fast task startup */ };
     auto fast_on_stop = []() { /* Fast task cleanup */ };
     auto fast_function = [&]() {
-        // Run for a limited number of iterations instead of infinite loop
-        for (int i = 0; i < 10 && !should_stop.load(); ++i) {
+        // This function is called once per periodic iteration
+        if (!should_stop.load()) {
             fast_count++;
             std::this_thread::sleep_for(2ms);
         }
@@ -450,8 +452,8 @@ TEST_F(EnhancedMultitaskingTest, MultiplePeriodicTasksCoordination) {
     auto slow_on_start = []() { /* Slow task startup */ };
     auto slow_on_stop = []() { /* Slow task cleanup */ };
     auto slow_function = [&]() {
-        // Run for a limited number of iterations instead of infinite loop
-        for (int i = 0; i < 3 && !should_stop.load(); ++i) {
+        // This function is called once per periodic iteration
+        if (!should_stop.load()) {
             slow_count++;
             std::this_thread::sleep_for(8ms);
         }
@@ -462,14 +464,19 @@ TEST_F(EnhancedMultitaskingTest, MultiplePeriodicTasksCoordination) {
     EXPECT_CALL(*mock, xTaskCreateStatic(_, StrEq("SlowPeriodic"), _, _, _, _, _))
         .WillOnce(DoDefault());
     
+    // Use constructor with period specification and start_suspended = false
     sa::periodic_task<256> fast_task("FastPeriodic", 2, 
                                    std::move(fast_on_start), 
                                    std::move(fast_on_stop), 
-                                   std::move(fast_function));
+                                   std::move(fast_function),
+                                   std::chrono::milliseconds{5}, // 5ms period
+                                   false); // Start not suspended
     sa::periodic_task<256> slow_task("SlowPeriodic", 1, 
                                    std::move(slow_on_start), 
                                    std::move(slow_on_stop), 
-                                   std::move(slow_function));
+                                   std::move(slow_function),
+                                   std::chrono::milliseconds{10}, // 10ms period
+                                   false); // Start not suspended
     
     // Let them run
     std::this_thread::sleep_for(50ms);
@@ -482,7 +489,7 @@ TEST_F(EnhancedMultitaskingTest, MultiplePeriodicTasksCoordination) {
     // Fast task should execute more times than slow task
     EXPECT_GT(fast_count.load(), slow_count.load());
     EXPECT_GT(slow_count.load(), 0);
-    EXPECT_GT(slow_count.load(), 0);
+    EXPECT_GT(fast_count.load(), 0);
 }
 
 // =============================================================================
