@@ -26,7 +26,7 @@
  * <div class="feature-card">
  *   <div class="feature-icon">🧪</div>
  *   <div class="feature-title">Well Tested</div>
- *   <div class="feature-description">377+ comprehensive tests covering all functionality</div>
+ *   <div class="feature-description">439 comprehensive tests covering all functionality</div>
  * </div>
  * <div class="feature-card">
  *   <div class="feature-icon">📱</div>
@@ -43,7 +43,7 @@
  * @section features_sec Key Features
  * 
  * - **Modern C++17 RAII wrappers** for all major FreeRTOS APIs
- * - **Comprehensive test coverage** with 377+ automated tests
+ * - **Comprehensive test coverage** with 439 automated tests
  * - **Static analysis integration** with clang-tidy
  * - **Dual allocation support** for both static and dynamic strategies
  * - **std::chrono compatibility** for intuitive timeout handling
@@ -306,8 +306,8 @@
  * 
  * The library includes comprehensive testing with:
  * 
- * - **377+ automated tests** covering all functionality
- * - **96.8% line coverage** and **95.7% function coverage**
+ * - **439 automated tests** covering all functionality
+ * - **97.0% line coverage** and **98.2% function coverage**
  * - **Static analysis** with clang-tidy integration
  * - **Continuous integration** with automated validation
  * 
