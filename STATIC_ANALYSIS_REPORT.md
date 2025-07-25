@@ -5018,6 +5018,6 @@ Use -header-filter=.* to display errors from all non-system headers. Use -system
 ```
 
 ---
-*Generated: July 24, 2025*
+*Generated: July 25, 2025*
 *Tools: clang-tidy + Enhanced cppcheck (all rules) + MISRA C++ (cppcheck)*
 *Scope: Library modules only*
