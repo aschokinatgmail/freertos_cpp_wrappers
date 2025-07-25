@@ -5023,6 +5023,6 @@ Some files could not be fully analyzed:
 ```
 
 
-*Generated: July 24, 2025*
+*Generated: July 25, 2025*
 *Tools: clang-tidy + Enhanced cppcheck (all rules) + MISRA C++ (cppcheck)*
 *Scope: Library modules only*
