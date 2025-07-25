@@ -241,16 +241,16 @@
 <h3 id="test-execution-summary">Test Execution Summary</h3>
 <ul>
 <li><strong>Total Tests Executed</strong>: 439</li>
-<li><strong>✅ Passed</strong>: 439 tests</li>
-<li><strong>❌ Failed</strong>: 0 tests</li>
-<li><strong>Success Rate</strong>: 100.0% (All tests passed!)</li>
-<li><strong>Total Execution Time</strong>: 1.98 seconds</li>
+<li><strong>✅ Passed</strong>: 438 tests</li>
+<li><strong>❌ Failed</strong>: 1 tests</li>
+<li><strong>Success Rate</strong>: 99.8% (1 tests failed)</li>
+<li><strong>Total Execution Time</strong>: 1.96 seconds</li>
 <li><strong>Average Test Time</strong>: 0.0045 seconds per test</li>
 </ul>
 <h3 id="code-coverage-summary">Code Coverage Summary</h3>
 <ul>
-<li><strong>Line Coverage</strong>: 97.0% (7388/7613 lines)</li>
-<li><strong>Function Coverage</strong>: 98.1% (2900/2957 functions)</li>
+<li><strong>Line Coverage</strong>: 97.0% (7394/7619 lines)</li>
+<li><strong>Function Coverage</strong>: 98.2% (2902/2955 functions)</li>
 <li><strong>Coverage Scope</strong>: Main library modules only (src/ and include/ directories)</li>
 </ul>
 </div><div class="section"><h2 id="complete-test-results-summary">Complete Test Results Summary</h2>
@@ -2909,7 +2909,7 @@
 <td>378</td>
 <td>EnhancedMultitaskingTest.MultiplePeriodicTasksCoordination</td>
 <td>Enhanced Multitasking</td>
-<td>✅ PASS</td>
+<td>❌ FAIL</td>
 <td>0.060</td>
 </tr>
 <tr>
@@ -3001,7 +3001,7 @@
 <td>STLSemaphoreTest.STLMutexCriticalSection</td>
 <td>Freertos Semaphore Stl</td>
 <td>✅ PASS</td>
-<td>0.032</td>
+<td>0.031</td>
 </tr>
 <tr>
 <td>392</td>
@@ -3022,14 +3022,14 @@
 <td>STLSemaphoreTest.STLProducerConsumerWithBuffering</td>
 <td>Freertos Semaphore Stl</td>
 <td>✅ PASS</td>
-<td>0.100</td>
+<td>0.101</td>
 </tr>
 <tr>
 <td>395</td>
 <td>STLSemaphoreTest.STLReaderWriterPattern</td>
 <td>Freertos Semaphore Stl</td>
 <td>✅ PASS</td>
-<td>0.413</td>
+<td>0.402</td>
 </tr>
 <tr>
 <td>396</td>
@@ -3343,16 +3343,16 @@
 </table>
 <p><strong>Table Summary:</strong>
 - <strong>Total Individual Tests</strong>: 439
-- <strong>Passed</strong>: 439 (✅)
-- <strong>Failed</strong>: 0 (❌)
-- <strong>Success Rate</strong>: 100.0%</p>
+- <strong>Passed</strong>: 438 (✅)
+- <strong>Failed</strong>: 1 (❌)
+- <strong>Success Rate</strong>: 99.8%</p>
 </div><div class="section"><h2 id="detailed-test-results-by-module">Detailed Test Results by Module</h2>
 <h3 id="task-module-tests">Task Module Tests</h3>
 <p><strong>Module Statistics:</strong>
 - Tests: 93
-- Passed: 93
-- Failed: 0
-- Success Rate: 100.0%
+- Passed: 92
+- Failed: 1
+- Success Rate: 98.9%
 - Total Time: 0.578s</p>
 <p><strong>Detailed Test Results:</strong></p>
 <table>
@@ -3896,7 +3896,7 @@
 <tr>
 <td>378</td>
 <td>EnhancedMultitaskingTest.MultiplePeriodicTasksCoordination</td>
-<td>✅ PASS</td>
+<td>❌ FAIL</td>
 <td>0.060s</td>
 </tr>
 <tr>
@@ -3925,13 +3925,17 @@
 </tr>
 </tbody>
 </table>
+<p><strong>Failed Test Details:</strong></p>
+<ul>
+<li><strong>Test 378</strong>: <code>EnhancedMultitaskingTest.MultiplePeriodicTasksCoordination</code> - Failed after 0.060s</li>
+</ul>
 <h3 id="semaphore-module-tests">Semaphore Module Tests</h3>
 <p><strong>Module Statistics:</strong>
 - Tests: 96
 - Passed: 96
 - Failed: 0
 - Success Rate: 100.0%
-- Total Time: 1.261s</p>
+- Total Time: 1.250s</p>
 <p><strong>Detailed Test Results:</strong></p>
 <table>
 <thead>
@@ -4481,7 +4485,7 @@
 <td>391</td>
 <td>STLSemaphoreTest.STLMutexCriticalSection</td>
 <td>✅ PASS</td>
-<td>0.032s</td>
+<td>0.031s</td>
 </tr>
 <tr>
 <td>392</td>
@@ -4499,13 +4503,13 @@
 <td>394</td>
 <td>STLSemaphoreTest.STLProducerConsumerWithBuffering</td>
 <td>✅ PASS</td>
-<td>0.100s</td>
+<td>0.101s</td>
 </tr>
 <tr>
 <td>395</td>
 <td>STLSemaphoreTest.STLReaderWriterPattern</td>
 <td>✅ PASS</td>
-<td>0.413s</td>
+<td>0.402s</td>
 </tr>
 <tr>
 <td>396</td>
@@ -6183,11 +6187,11 @@
 </table>
 </div><div class="section"><h2 id="code-coverage-analysis">Code Coverage Analysis</h2>
 <h3 id="coverage-overview">Coverage Overview</h3>
-<p>The project achieves excellent code coverage with <strong>97.0% line coverage</strong> and <strong>98.1% function coverage</strong>.</p>
+<p>The project achieves excellent code coverage with <strong>97.0% line coverage</strong> and <strong>98.2% function coverage</strong>.</p>
 <h3 id="coverage-breakdown">Coverage Breakdown</h3>
 <ul>
-<li><strong>Lines Covered</strong>: 7388 out of 7613 total lines</li>
-<li><strong>Functions Covered</strong>: 2900 out of 2957 total functions</li>
+<li><strong>Lines Covered</strong>: 7394 out of 7619 total lines</li>
+<li><strong>Functions Covered</strong>: 2902 out of 2955 total functions</li>
 <li><strong>Coverage Target</strong>: Main library modules only (excludes test infrastructure and system headers)</li>
 </ul>
 <p><strong>Detailed Uncovered Areas Analysis:</strong></p>
@@ -6230,39 +6234,7 @@
 </code></pre></div>
 <h3 id="platform-specific-or-hardware-dependent-code">Platform-specific or hardware-dependent code</h3>
 <p><strong>Reason for exclusion:</strong> These code sections depend on specific hardware configurations or FreeRTOS kernel internals not available in the test environment</p>
-<p><strong>Uncovered Area 5</strong>: freertos_task.hpp:517-523
-<em>Function</em>: <code>freertos::task&lt;freertos::static_task_allocator&lt;256ul&gt; &gt;::notify_wait(unsigned int, unsigned int, unsigned int&amp;, unsigned int)</code></p>
-<pre><code class="language-cpp">    * @return BaseType_t pdTRUE if the notification was given, pdFALSE otherwise
-    */
-&gt;&gt;&gt; BaseType_t notify_wait(uint32_t ulBitsToClearOnEntry,
-    uint32_t ulBitsToClearOnExit,
-    uint32_t &amp;notification_value,
-</code></pre></div>
-<p><strong>Uncovered Area 6</strong>: freertos_task.hpp:517-523
-<em>Function</em>: <code>freertos::task&lt;freertos::static_task_allocator&lt;512ul&gt; &gt;::notify_wait(unsigned int, unsigned int, unsigned int&amp;, unsigned int)</code></p>
-<pre><code class="language-cpp">    * @return BaseType_t pdTRUE if the notification was given, pdFALSE otherwise
-    */
-&gt;&gt;&gt; BaseType_t notify_wait(uint32_t ulBitsToClearOnEntry,
-    uint32_t ulBitsToClearOnExit,
-    uint32_t &amp;notification_value,
-</code></pre></div>
-<p><strong>Uncovered Area 7</strong>: freertos_task.hpp:534-542
-<em>Function</em>: <code>int freertos::task&lt;freertos::static_task_allocator&lt;256ul&gt; &gt;::notify_wait&lt;long, std::ratio&lt;1l, 1000l&gt; &gt;(unsigned int, unsigned int, unsigned int&amp;, std::chrono::duration&lt;long, std::ratio&lt;1l, 1000l&gt; &gt;)</code></p>
-<pre><code class="language-cpp">    */
-    template &lt;typename Rep, typename Period&gt;
-&gt;&gt;&gt; BaseType_t notify_wait(uint32_t ulBitsToClearOnEntry,
-    uint32_t ulBitsToClearOnExit,
-    uint32_t &amp;notification_value,
-</code></pre></div>
-<p><strong>Uncovered Area 8</strong>: freertos_task.hpp:534-542
-<em>Function</em>: <code>int freertos::task&lt;freertos::static_task_allocator&lt;512ul&gt; &gt;::notify_wait&lt;long, std::ratio&lt;1l, 1000l&gt; &gt;(unsigned int, unsigned int, unsigned int&amp;, std::chrono::duration&lt;long, std::ratio&lt;1l, 1000l&gt; &gt;)</code></p>
-<pre><code class="language-cpp">    */
-    template &lt;typename Rep, typename Period&gt;
-&gt;&gt;&gt; BaseType_t notify_wait(uint32_t ulBitsToClearOnEntry,
-    uint32_t ulBitsToClearOnExit,
-    uint32_t &amp;notification_value,
-</code></pre></div>
-<p><strong>Uncovered Area 9</strong>: freertos_sw_timer.hpp:218
+<p><strong>Uncovered Area 5</strong>: freertos_sw_timer.hpp:218
 <em>Line</em>: 218</p>
 <pre><code class="language-cpp">    if (m_timer) {
     if (src.m_started) {
@@ -6270,7 +6242,7 @@
     if (rc == pdPASS) {
     m_started = true;
 </code></pre></div>
-<p><strong>Uncovered Area 10</strong>: freertos_sw_timer.hpp:219
+<p><strong>Uncovered Area 6</strong>: freertos_sw_timer.hpp:219
 <em>Line</em>: 219</p>
 <pre><code class="language-cpp">    if (src.m_started) {
     rc = xTimerStart(m_timer, portMAX_DELAY);
@@ -6278,7 +6250,7 @@
     m_started = true;
     }
 </code></pre></div>
-<p><strong>Uncovered Area 11</strong>: freertos_sw_timer.hpp:220
+<p><strong>Uncovered Area 7</strong>: freertos_sw_timer.hpp:220
 <em>Line</em>: 220</p>
 <pre><code class="language-cpp">    rc = xTimerStart(m_timer, portMAX_DELAY);
     if (rc == pdPASS) {
@@ -6288,7 +6260,7 @@
 </code></pre></div>
 <h3 id="defensive-programming-and-robustness-checks">Defensive programming and robustness checks</h3>
 <p><strong>Reason for exclusion:</strong> These are safety checks and defensive programming patterns that are difficult to trigger in controlled test conditions</p>
-<p><strong>Uncovered Area 12</strong>: freertos_task.hpp:275
+<p><strong>Uncovered Area 8</strong>: freertos_task.hpp:275
 <em>Function</em>: <code>freertos::task&lt;freertos::static_task_allocator&lt;0ul&gt; &gt;::suspend()</code></p>
 <pre><code class="language-cpp">    *
     */
@@ -6296,7 +6268,7 @@
     /**
     * @brief Resume the task.
 </code></pre></div>
-<p><strong>Uncovered Area 13</strong>: freertos_task.hpp:275
+<p><strong>Uncovered Area 9</strong>: freertos_task.hpp:275
 <em>Function</em>: <code>freertos::task&lt;freertos::dynamic_task_allocator&lt;2048ul&gt; &gt;::suspend()</code></p>
 <pre><code class="language-cpp">    *
     */
@@ -6304,7 +6276,7 @@
     /**
     * @brief Resume the task.
 </code></pre></div>
-<p><strong>Uncovered Area 14</strong>: freertos_task.hpp:616
+<p><strong>Uncovered Area 10</strong>: freertos_task.hpp:616
 <em>Function</em>: <code>freertos::periodic_task&lt;freertos::static_task_allocator&lt;1024ul&gt; &gt;::periodic_task&lt;double, std::ratio&lt;1l, 1000l&gt; &gt;(char const*, unsigned int, std::function&lt;void ()&gt;&amp;&amp;, std::function&lt;void ()&gt;&amp;&amp;, std::function&lt;void ()&gt;&amp;&amp;, std::chrono::duration&lt;double, std::ratio&lt;1l, 1000l&gt; &gt; const&amp;, bool)::{lambda()#1}::operator()() const</code></p>
 <pre><code class="language-cpp">    m_on_start{std::move(on_start)}, m_on_stop{std::move(on_stop)},
     m_periodic_routine{std::move(periodic_routine)},
@@ -6312,7 +6284,7 @@
     /**
     * @brief Construct a new periodic task object
 </code></pre></div>
-<p><strong>Uncovered Area 15</strong>: freertos_task.hpp:616
+<p><strong>Uncovered Area 11</strong>: freertos_task.hpp:616
 <em>Function</em>: <code>freertos::periodic_task&lt;freertos::static_task_allocator&lt;1024ul&gt; &gt;::periodic_task&lt;long, std::ratio&lt;1l, 1000l&gt; &gt;(char const*, unsigned int, std::function&lt;void ()&gt;&amp;&amp;, std::function&lt;void ()&gt;&amp;&amp;, std::function&lt;void ()&gt;&amp;&amp;, std::chrono::duration&lt;long, std::ratio&lt;1l, 1000l&gt; &gt; const&amp;, bool)::{lambda()#1}::operator()() const</code></p>
 <pre><code class="language-cpp">    m_on_start{std::move(on_start)}, m_on_stop{std::move(on_stop)},
     m_periodic_routine{std::move(periodic_routine)},
@@ -6320,7 +6292,7 @@
     /**
     * @brief Construct a new periodic task object
 </code></pre></div>
-<p><strong>Uncovered Area 16</strong>: FreeRTOS.h:163
+<p><strong>Uncovered Area 12</strong>: FreeRTOS.h:163
 <em>Function</em>: <code>FreeRTOSMock::~FreeRTOSMock()</code></p>
 <pre><code class="language-cpp">    class FreeRTOSMock {
     public:
@@ -6328,7 +6300,7 @@
 
     // Task creation and deletion
 </code></pre></div>
-<p><strong>Uncovered Area 17</strong>: FreeRTOS.h:323
+<p><strong>Uncovered Area 13</strong>: FreeRTOS.h:323
 <em>Function</em>: <code>FreeRTOSMock::xMessageBufferSendFromISR(void*, void const*, unsigned long, int*)</code></p>
 <pre><code class="language-cpp">    MOCK_METHOD(void, vMessageBufferDelete, (MessageBufferHandle_t xMessageBuffer));
     MOCK_METHOD(size_t, xMessageBufferSend, (MessageBufferHandle_t xMessageBuffer, const void* pvTxData, size_t xDataLengthBytes, TickType_t xTicksToWait));
@@ -6336,7 +6308,7 @@
     MOCK_METHOD(size_t, xMessageBufferReceive, (MessageBufferHandle_t xMessageBuffer, void* pvRxData, size_t xBufferLengthBytes, TickType_t xTicksToWait));
     MOCK_METHOD(size_t, xMessageBufferReceiveFromISR, (MessageBufferHandle_t xMessageBuffer, void* pvRxData, size_t xBufferLengthBytes, BaseType_t* pxHigherPriorityTaskWoken));
 </code></pre></div>
-<p><strong>Uncovered Area 18</strong>: FreeRTOS.h:325
+<p><strong>Uncovered Area 14</strong>: FreeRTOS.h:325
 <em>Function</em>: <code>FreeRTOSMock::xMessageBufferReceiveFromISR(void*, void*, unsigned long, int*)</code></p>
 <pre><code class="language-cpp">    MOCK_METHOD(size_t, xMessageBufferSendFromISR, (MessageBufferHandle_t xMessageBuffer, const void* pvTxData, size_t xDataLengthBytes, BaseType_t* pxHigherPriorityTaskWoken));
     MOCK_METHOD(size_t, xMessageBufferReceive, (MessageBufferHandle_t xMessageBuffer, void* pvRxData, size_t xBufferLengthBytes, TickType_t xTicksToWait));
@@ -6344,7 +6316,7 @@
     MOCK_METHOD(size_t, xMessageBufferSpaceAvailable, (MessageBufferHandle_t xMessageBuffer));
     MOCK_METHOD(BaseType_t, xMessageBufferReset, (MessageBufferHandle_t xMessageBuffer));
 </code></pre></div>
-<p><strong>Uncovered Area 19</strong>: enhanced_timer_mocks.cpp:159-164
+<p><strong>Uncovered Area 15</strong>: enhanced_timer_mocks.cpp:159-164
 <em>Function</em>: <code>freertos_mocks::TimerServiceSimulator::changePeriodFromISR(void*, unsigned int, int*)</code></p>
 <pre><code class="language-cpp">    }
 
@@ -6352,7 +6324,7 @@
     if (higher_priority_task_woken) {
     *higher_priority_task_woken = pdFALSE;  // Simulate no high priority task woken for testing
 </code></pre></div>
-<p><strong>Uncovered Area 20</strong>: enhanced_timer_mocks.cpp:198-202
+<p><strong>Uncovered Area 16</strong>: enhanced_timer_mocks.cpp:198-202
 <em>Function</em>: <code>freertos_mocks::TimerServiceSimulator::setReloadMode(void*, unsigned int)</code></p>
 <pre><code class="language-cpp">    }
 
@@ -6360,7 +6332,7 @@
     if (isValidTimer(timer)) {
     timers_[timer]-&gt;auto_reload = auto_reload;
 </code></pre></div>
-<p><strong>Uncovered Area 21</strong>: enhanced_timer_mocks.cpp:360-368
+<p><strong>Uncovered Area 17</strong>: enhanced_timer_mocks.cpp:360-368
 <em>Function</em>: <code>freertos_mocks::TimerServiceSimulator::getActiveTimerCount() const</code></p>
 <pre><code class="language-cpp">    }
 
@@ -6368,7 +6340,7 @@
     size_t count = 0;
     for (const auto&amp; pair : timers_) {
 </code></pre></div>
-<p><strong>Uncovered Area 22</strong>: enhanced_timer_mocks.cpp:374-376
+<p><strong>Uncovered Area 18</strong>: enhanced_timer_mocks.cpp:374-376
 <em>Function</em>: <code>freertos_mocks::TimerServiceSimulator::hasTimer(void*) const</code></p>
 <pre><code class="language-cpp">    }
 
@@ -6376,7 +6348,7 @@
     return isValidTimer(timer);
     }
 </code></pre></div>
-<p><strong>Uncovered Area 23</strong>: enhanced_timer_mocks.cpp:378-381
+<p><strong>Uncovered Area 19</strong>: enhanced_timer_mocks.cpp:378-381
 <em>Function</em>: <code>freertos_mocks::TimerServiceSimulator::getCallbackCount(void*) const</code></p>
 <pre><code class="language-cpp">    }
 
@@ -6384,7 +6356,7 @@
     auto it = callback_counts_.find(timer);
     return it != callback_counts_.end() ? it-&gt;second : 0;
 </code></pre></div>
-<p><strong>Uncovered Area 24</strong>: enhanced_timer_mocks.cpp:383-385
+<p><strong>Uncovered Area 20</strong>: enhanced_timer_mocks.cpp:383-385
 <em>Function</em>: <code>freertos_mocks::TimerServiceSimulator::clearCallbackHistory()</code></p>
 <pre><code class="language-cpp">    }
 
@@ -6392,7 +6364,7 @@
     callback_counts_.clear();
     }
 </code></pre></div>
-<p><strong>Uncovered Area 25</strong>: enhanced_timer_mocks.hpp:172-180
+<p><strong>Uncovered Area 21</strong>: enhanced_timer_mocks.hpp:172-180
 <em>Function</em>: <code>freertos_mocks::EnhancedTimerMock::simulateTaskDelay(unsigned int)</code></p>
 <pre><code class="language-cpp">
     // vTaskDelay simulation - works with timer time advancement
@@ -6400,15 +6372,15 @@
     if (simulation_enabled_) {
     // In enhanced simulation mode, vTaskDelay just advances simulated time
 </code></pre></div>
-<p><strong>Uncovered Area 26</strong>: freertos_mocks.cpp:896-901
+<p><strong>Uncovered Area 22</strong>: freertos_mocks.cpp:896-901
 <em>Function</em>: <code>xMessageBufferSendFromISR</code></p>
 <pre><code class="language-cpp">
 </code></pre></div>
-<p><strong>Uncovered Area 27</strong>: freertos_mocks.cpp:910-915
+<p><strong>Uncovered Area 23</strong>: freertos_mocks.cpp:910-915
 <em>Function</em>: <code>xMessageBufferReceiveFromISR</code></p>
 <pre><code class="language-cpp">
 </code></pre></div>
-<p><strong>Uncovered Area 28</strong>: stl_semaphore_mocks.hpp:165
+<p><strong>Uncovered Area 24</strong>: stl_semaphore_mocks.hpp:165
 <em>Function</em>: <code>freertos_test::stl_counting_semaphore::take(unsigned int)::{lambda()#1}::operator()() const</code></p>
 <pre><code class="language-cpp">    if (timeout_ms == portMAX_DELAY) {
     // Infinite wait
@@ -6416,7 +6388,7 @@
     m_count--;
     return pdTRUE;
 </code></pre></div>
-<p><strong>Uncovered Area 29</strong>: stl_semaphore_mocks.hpp:77
+<p><strong>Uncovered Area 25</strong>: stl_semaphore_mocks.hpp:77
 <em>Function</em>: <code>freertos_test::stl_binary_semaphore::take(unsigned int)::{lambda()#1}::operator()() const</code></p>
 <pre><code class="language-cpp">    if (timeout_ms == portMAX_DELAY) {
     // Infinite wait
@@ -6424,7 +6396,7 @@
     m_available = false;
     return pdTRUE;
 </code></pre></div>
-<p><strong>Uncovered Area 30</strong>: test_enhanced_cpp17_features.cpp:115
+<p><strong>Uncovered Area 26</strong>: test_enhanced_cpp17_features.cpp:115
 <em>Function</em>: <code>Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
 <pre><code class="language-cpp">    .Times(AtLeast(2));
 
@@ -6432,7 +6404,7 @@
     auto on_stop = [&amp;stop_count]() { stop_count++; };
     auto periodic = [&amp;periodic_count]() { periodic_count++; };
 </code></pre></div>
-<p><strong>Uncovered Area 31</strong>: test_enhanced_cpp17_features.cpp:116
+<p><strong>Uncovered Area 27</strong>: test_enhanced_cpp17_features.cpp:116
 <em>Function</em>: <code>Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test::TestBody()::{lambda()#2}::operator()() const</code></p>
 <pre><code class="language-cpp">
     auto on_start = [&amp;start_count]() { start_count++; };
@@ -6440,7 +6412,7 @@
     auto periodic = [&amp;periodic_count]() { periodic_count++; };
 
 </code></pre></div>
-<p><strong>Uncovered Area 32</strong>: test_enhanced_cpp17_features.cpp:117
+<p><strong>Uncovered Area 28</strong>: test_enhanced_cpp17_features.cpp:117
 <em>Function</em>: <code>Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test::TestBody()::{lambda()#3}::operator()() const</code></p>
 <pre><code class="language-cpp">    auto on_start = [&amp;start_count]() { start_count++; };
     auto on_stop = [&amp;stop_count]() { stop_count++; };
@@ -6448,7 +6420,7 @@
 
     // Test move with different chrono duration types - using static allocation
 </code></pre></div>
-<p><strong>Uncovered Area 33</strong>: test_enhanced_cpp17_features.cpp:127
+<p><strong>Uncovered Area 29</strong>: test_enhanced_cpp17_features.cpp:127
 <em>Function</em>: <code>Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test::TestBody()::{lambda()#4}::operator()() const</code></p>
 <pre><code class="language-cpp">    // Create another task and move it
     sa::periodic_task&lt;1024&gt; task2(&quot;PeriodicMove2&quot;, 2,
@@ -6456,7 +6428,7 @@
     [&amp;stop_count]() { stop_count++; },
     [&amp;periodic_count]() { periodic_count++; });
 </code></pre></div>
-<p><strong>Uncovered Area 34</strong>: test_enhanced_cpp17_features.cpp:128
+<p><strong>Uncovered Area 30</strong>: test_enhanced_cpp17_features.cpp:128
 <em>Function</em>: <code>Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test::TestBody()::{lambda()#5}::operator()() const</code></p>
 <pre><code class="language-cpp">    sa::periodic_task&lt;1024&gt; task2(&quot;PeriodicMove2&quot;, 2,
     [&amp;start_count]() { start_count++; },
@@ -6464,7 +6436,7 @@
     [&amp;periodic_count]() { periodic_count++; });
 
 </code></pre></div>
-<p><strong>Uncovered Area 35</strong>: test_enhanced_cpp17_features.cpp:129
+<p><strong>Uncovered Area 31</strong>: test_enhanced_cpp17_features.cpp:129
 <em>Function</em>: <code>Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test::TestBody()::{lambda()#6}::operator()() const</code></p>
 <pre><code class="language-cpp">    [&amp;start_count]() { start_count++; },
     [&amp;stop_count]() { stop_count++; },
@@ -6472,7 +6444,7 @@
 
     // Test move construction instead of assignment (which is deleted)
 </code></pre></div>
-<p><strong>Uncovered Area 36</strong>: test_enhanced_cpp17_features.cpp:152-154
+<p><strong>Uncovered Area 32</strong>: test_enhanced_cpp17_features.cpp:152-154
 <em>Function</em>: <code>Cpp17FeaturesTest_LambdaCaptureVarieties_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
 <pre><code class="language-cpp">
     // Capture by reference
@@ -6480,7 +6452,7 @@
     EXPECT_EQ(message, &quot;Test message&quot;);
     });
 </code></pre></div>
-<p><strong>Uncovered Area 37</strong>: test_enhanced_cpp17_features.cpp:157-159
+<p><strong>Uncovered Area 33</strong>: test_enhanced_cpp17_features.cpp:157-159
 <em>Function</em>: <code>Cpp17FeaturesTest_LambdaCaptureVarieties_Test::TestBody()::{lambda()#2}::operator()() const</code></p>
 <pre><code class="language-cpp">
     // Capture by value
@@ -6488,7 +6460,7 @@
     EXPECT_EQ(counter, 42);
     });
 </code></pre></div>
-<p><strong>Uncovered Area 38</strong>: test_enhanced_cpp17_features.cpp:162-164
+<p><strong>Uncovered Area 34</strong>: test_enhanced_cpp17_features.cpp:162-164
 <em>Function</em>: <code>Cpp17FeaturesTest_LambdaCaptureVarieties_Test::TestBody()::{lambda()#3}::operator()() const</code></p>
 <pre><code class="language-cpp">
     // Simple lambda without capture
@@ -6496,7 +6468,7 @@
     // Simple test function
     });
 </code></pre></div>
-<p><strong>Uncovered Area 39</strong>: test_enhanced_cpp17_features.cpp:172
+<p><strong>Uncovered Area 35</strong>: test_enhanced_cpp17_features.cpp:172
 <em>Function</em>: <code>Cpp17FeaturesTest_FunctionObjectVarieties_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
 <pre><code class="language-cpp">
     // Test with copyable function object instead
@@ -6504,7 +6476,7 @@
     sa::task&lt;1024&gt; task1(&quot;StdFunction&quot;, 1, func_lambda);
 
 </code></pre></div>
-<p><strong>Uncovered Area 40</strong>: test_enhanced_cpp17_features.cpp:178
+<p><strong>Uncovered Area 36</strong>: test_enhanced_cpp17_features.cpp:178
 <em>Function</em>: <code>Cpp17FeaturesTest_FunctionObjectVarieties_Test::TestBody()::CustomCallable::operator()() const</code></p>
 <pre><code class="language-cpp">    class CustomCallable {
     public:
@@ -6512,7 +6484,7 @@
     };
 
 </code></pre></div>
-<p><strong>Uncovered Area 41</strong>: test_enhanced_cpp17_features.cpp:185
+<p><strong>Uncovered Area 37</strong>: test_enhanced_cpp17_features.cpp:185
 <em>Function</em>: <code>Cpp17FeaturesTest_FunctionObjectVarieties_Test::TestBody()::{lambda()#2}::operator()() const</code></p>
 <pre><code class="language-cpp">
     // Test with function pointer
@@ -6520,7 +6492,7 @@
     }
 
 </code></pre></div>
-<p><strong>Uncovered Area 42</strong>: test_enhanced_cpp17_features.cpp:292
+<p><strong>Uncovered Area 38</strong>: test_enhanced_cpp17_features.cpp:292
 <em>Function</em>: <code>Cpp17FeaturesTest_CompileTimeConstants_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
 <pre><code class="language-cpp">
     // These should compile with constexpr values - queues are created at construction
@@ -6528,7 +6500,7 @@
     sa::queue&lt;queue_size, int&gt; queue;
 
 </code></pre></div>
-<p><strong>Uncovered Area 43</strong>: test_enhanced_cpp17_features.cpp:313
+<p><strong>Uncovered Area 39</strong>: test_enhanced_cpp17_features.cpp:313
 <em>Function</em>: <code>Cpp17FeaturesTest_ChronoTypesIntegration_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
 <pre><code class="language-cpp">    // Test with different chrono duration types in periodic tasks - using static allocation
     sa::periodic_task&lt;1024&gt; task1(&quot;ChronoMs&quot;, 1,
@@ -6536,7 +6508,7 @@
     []() { /* stop */ },
     []() { /* periodic */ },
 </code></pre></div>
-<p><strong>Uncovered Area 44</strong>: test_enhanced_cpp17_features.cpp:314
+<p><strong>Uncovered Area 40</strong>: test_enhanced_cpp17_features.cpp:314
 <em>Function</em>: <code>Cpp17FeaturesTest_ChronoTypesIntegration_Test::TestBody()::{lambda()#2}::operator()() const</code></p>
 <pre><code class="language-cpp">    sa::periodic_task&lt;1024&gt; task1(&quot;ChronoMs&quot;, 1,
     []() { /* start */ },
@@ -6544,7 +6516,7 @@
     []() { /* periodic */ },
     500ms);
 </code></pre></div>
-<p><strong>Uncovered Area 45</strong>: test_enhanced_cpp17_features.cpp:315
+<p><strong>Uncovered Area 41</strong>: test_enhanced_cpp17_features.cpp:315
 <em>Function</em>: <code>Cpp17FeaturesTest_ChronoTypesIntegration_Test::TestBody()::{lambda()#3}::operator()() const</code></p>
 <pre><code class="language-cpp">    []() { /* start */ },
     []() { /* stop */ },
@@ -6552,7 +6524,7 @@
     500ms);
 
 </code></pre></div>
-<p><strong>Uncovered Area 46</strong>: test_enhanced_cpp17_features.cpp:319
+<p><strong>Uncovered Area 42</strong>: test_enhanced_cpp17_features.cpp:319
 <em>Function</em>: <code>Cpp17FeaturesTest_ChronoTypesIntegration_Test::TestBody()::{lambda()#4}::operator()() const</code></p>
 <pre><code class="language-cpp">
     sa::periodic_task&lt;1024&gt; task2(&quot;ChronoMs2&quot;, 1,
@@ -6560,7 +6532,7 @@
     []() { /* stop */ },
     []() { /* periodic */ },
 </code></pre></div>
-<p><strong>Uncovered Area 47</strong>: test_enhanced_cpp17_features.cpp:320
+<p><strong>Uncovered Area 43</strong>: test_enhanced_cpp17_features.cpp:320
 <em>Function</em>: <code>Cpp17FeaturesTest_ChronoTypesIntegration_Test::TestBody()::{lambda()#5}::operator()() const</code></p>
 <pre><code class="language-cpp">    sa::periodic_task&lt;1024&gt; task2(&quot;ChronoMs2&quot;, 1,
     []() { /* start */ },
@@ -6568,7 +6540,7 @@
     []() { /* periodic */ },
     750ms);
 </code></pre></div>
-<p><strong>Uncovered Area 48</strong>: test_enhanced_cpp17_features.cpp:321
+<p><strong>Uncovered Area 44</strong>: test_enhanced_cpp17_features.cpp:321
 <em>Function</em>: <code>Cpp17FeaturesTest_ChronoTypesIntegration_Test::TestBody()::{lambda()#6}::operator()() const</code></p>
 <pre><code class="language-cpp">    []() { /* start */ },
     []() { /* stop */ },
@@ -6576,7 +6548,7 @@
     750ms);
 
 </code></pre></div>
-<p><strong>Uncovered Area 49</strong>: test_enhanced_cpp17_features.cpp:325
+<p><strong>Uncovered Area 45</strong>: test_enhanced_cpp17_features.cpp:325
 <em>Function</em>: <code>Cpp17FeaturesTest_ChronoTypesIntegration_Test::TestBody()::{lambda()#7}::operator()() const</code></p>
 <pre><code class="language-cpp">
     sa::periodic_task&lt;1024&gt; task3(&quot;ChronoCustom&quot;, 1,
@@ -6584,7 +6556,7 @@
     []() { /* stop */ },
     []() { /* periodic */ },
 </code></pre></div>
-<p><strong>Uncovered Area 50</strong>: test_enhanced_cpp17_features.cpp:326
+<p><strong>Uncovered Area 46</strong>: test_enhanced_cpp17_features.cpp:326
 <em>Function</em>: <code>Cpp17FeaturesTest_ChronoTypesIntegration_Test::TestBody()::{lambda()#8}::operator()() const</code></p>
 <pre><code class="language-cpp">    sa::periodic_task&lt;1024&gt; task3(&quot;ChronoCustom&quot;, 1,
     []() { /* start */ },
@@ -6592,7 +6564,7 @@
     []() { /* periodic */ },
     duration&lt;double, std::milli&gt;(123.456));
 </code></pre></div>
-<p><strong>Uncovered Area 51</strong>: test_enhanced_cpp17_features.cpp:327
+<p><strong>Uncovered Area 47</strong>: test_enhanced_cpp17_features.cpp:327
 <em>Function</em>: <code>Cpp17FeaturesTest_ChronoTypesIntegration_Test::TestBody()::{lambda()#9}::operator()() const</code></p>
 <pre><code class="language-cpp">    []() { /* start */ },
     []() { /* stop */ },
@@ -6600,7 +6572,7 @@
     duration&lt;double, std::milli&gt;(123.456));
 
 </code></pre></div>
-<p><strong>Uncovered Area 52</strong>: test_enhanced_cpp17_features.cpp:350
+<p><strong>Uncovered Area 48</strong>: test_enhanced_cpp17_features.cpp:350
 <em>Function</em>: <code>Cpp17FeaturesTest_STLContainerIntegration_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
 <pre><code class="language-cpp">
     // Use emplace_back to construct in place
@@ -6608,7 +6580,7 @@
     tasks.emplace_back(&quot;VectorTask2&quot;, 2, []() { /* test */ });
     tasks.emplace_back(&quot;VectorTask3&quot;, 3, []() { /* test */ });
 </code></pre></div>
-<p><strong>Uncovered Area 53</strong>: test_enhanced_cpp17_features.cpp:351
+<p><strong>Uncovered Area 49</strong>: test_enhanced_cpp17_features.cpp:351
 <em>Function</em>: <code>Cpp17FeaturesTest_STLContainerIntegration_Test::TestBody()::{lambda()#2}::operator()() const</code></p>
 <pre><code class="language-cpp">    // Use emplace_back to construct in place
     tasks.emplace_back(&quot;VectorTask1&quot;, 1, []() { /* test */ });
@@ -6616,7 +6588,7 @@
     tasks.emplace_back(&quot;VectorTask3&quot;, 3, []() { /* test */ });
 
 </code></pre></div>
-<p><strong>Uncovered Area 54</strong>: test_enhanced_cpp17_features.cpp:352
+<p><strong>Uncovered Area 50</strong>: test_enhanced_cpp17_features.cpp:352
 <em>Function</em>: <code>Cpp17FeaturesTest_STLContainerIntegration_Test::TestBody()::{lambda()#3}::operator()() const</code></p>
 <pre><code class="language-cpp">    tasks.emplace_back(&quot;VectorTask1&quot;, 1, []() { /* test */ });
     tasks.emplace_back(&quot;VectorTask2&quot;, 2, []() { /* test */ });
@@ -6624,7 +6596,7 @@
 
     EXPECT_EQ(tasks.size(), 3);
 </code></pre></div>
-<p><strong>Uncovered Area 55</strong>: test_enhanced_cpp17_features.cpp:369
+<p><strong>Uncovered Area 51</strong>: test_enhanced_cpp17_features.cpp:369
 <em>Function</em>: <code>Cpp17FeaturesTest_UniquePtrIntegration_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
 <pre><code class="language-cpp">
     // Test with unique_ptr for dynamic task management
@@ -6632,7 +6604,7 @@
     auto task2 = std::make_unique&lt;sa::task&lt;1024&gt;&gt;(&quot;UniqueTask2&quot;, 2, []() { /* test */ });
 
 </code></pre></div>
-<p><strong>Uncovered Area 56</strong>: test_enhanced_cpp17_features.cpp:370
+<p><strong>Uncovered Area 52</strong>: test_enhanced_cpp17_features.cpp:370
 <em>Function</em>: <code>Cpp17FeaturesTest_UniquePtrIntegration_Test::TestBody()::{lambda()#2}::operator()() const</code></p>
 <pre><code class="language-cpp">    // Test with unique_ptr for dynamic task management
     auto task1 = std::make_unique&lt;sa::task&lt;1024&gt;&gt;(&quot;UniqueTask1&quot;, 1, []() { /* test */ });
@@ -6640,7 +6612,7 @@
 
     EXPECT_NE(task1-&gt;handle(), nullptr);
 </code></pre></div>
-<p><strong>Uncovered Area 57</strong>: test_enhanced_cpp17_features.cpp:69
+<p><strong>Uncovered Area 53</strong>: test_enhanced_cpp17_features.cpp:69
 <em>Function</em>: <code>Cpp17FeaturesTest_TaskMoveSemanticsPerfectForwarding_Test::TestBody()::{lambda()#1}::operator()()</code></p>
 <pre><code class="language-cpp">
     // Test perfect forwarding with various lambda captures
@@ -6648,7 +6620,7 @@
     auto task_func2 = [&amp;call_count](){ call_count += 2; };
 
 </code></pre></div>
-<p><strong>Uncovered Area 58</strong>: test_enhanced_cpp17_features.cpp:70
+<p><strong>Uncovered Area 54</strong>: test_enhanced_cpp17_features.cpp:70
 <em>Function</em>: <code>Cpp17FeaturesTest_TaskMoveSemanticsPerfectForwarding_Test::TestBody()::{lambda()#2}::operator()() const</code></p>
 <pre><code class="language-cpp">    // Test perfect forwarding with various lambda captures
     auto task_func1 = [&amp;call_count]() mutable { call_count++; };
@@ -6656,7 +6628,7 @@
 
     EXPECT_CALL(*mock, xTaskCreateStatic(_, _, _, _, _, _, _))
 </code></pre></div>
-<p><strong>Uncovered Area 59</strong>: test_enhanced_cpp17_features.cpp:92
+<p><strong>Uncovered Area 55</strong>: test_enhanced_cpp17_features.cpp:92
 <em>Function</em>: <code>Cpp17FeaturesTest_TaskMoveAssignmentChaining_Test::TestBody()::{lambda()#1}::operator()() const</code></p>
 <pre><code class="language-cpp">    .Times(AtLeast(2)); // Two tasks will be destroyed during moves
 
@@ -6664,7 +6636,7 @@
 
     // Create multiple tasks
 </code></pre></div>
-<p><strong>Uncovered Area 60</strong>: test_enhanced_cpp17_features.cpp:95
+<p><strong>Uncovered Area 56</strong>: test_enhanced_cpp17_features.cpp:95
 <em>Function</em>: <code>Cpp17FeaturesTest_TaskMoveAssignmentChaining_Test::TestBody()::{lambda()#2}::operator()() const</code></p>
 <pre><code class="language-cpp">
     // Create multiple tasks
@@ -6672,7 +6644,7 @@
     sa::task&lt;1024&gt; task2(&quot;ToMove1&quot;, 2, task_func);
     sa::task&lt;1024&gt; task3(&quot;ToMove2&quot;, 3, task_func);
 </code></pre></div>
-<p><strong>Uncovered Area 61</strong>: test_enhanced_freertos_sw_timer.cpp:379
+<p><strong>Uncovered Area 57</strong>: test_enhanced_freertos_sw_timer.cpp:379
 <em>Function</em>: <code>EnhancedFreeRTOSSwTimerTest_ZeroPeriodTimer_Test::TestBody()::{lambda(void*)#1}::operator()(void*) const</code></p>
 <pre><code class="language-cpp">    auto&amp; sim = enhanced_mock-&gt;getSimulator();
     TimerHandle_t handle = sim.createTimer(&quot;ZeroPeriod&quot;, 0, pdTRUE, nullptr,
@@ -6680,7 +6652,7 @@
     EXPECT_EQ(handle, nullptr);
     }
 </code></pre></div>
-<p><strong>Uncovered Area 62</strong>: test_freertos_sw_timer.cpp:90
+<p><strong>Uncovered Area 58</strong>: test_freertos_sw_timer.cpp:90
 <em>Function</em>: <code>FreeRTOSSwTimerTest::createTestCallback()::{lambda()#1}::operator()() const</code></p>
 <pre><code class="language-cpp">    // Helper function to create a test callback
     std::function&lt;void()&gt; createTestCallback() {
@@ -6688,7 +6660,7 @@
     }
 
 </code></pre></div>
-<p><strong>Uncovered Area 63</strong>: freertos_queue.hpp:489
+<p><strong>Uncovered Area 59</strong>: freertos_queue.hpp:489
 <em>Line</em>: 489</p>
 <pre><code class="language-cpp">    return item;
     }
@@ -6696,7 +6668,7 @@
     }
     /**
 </code></pre></div>
-<p><strong>Uncovered Area 64</strong>: freertos_queue.hpp:628
+<p><strong>Uncovered Area 60</strong>: freertos_queue.hpp:628
 <em>Line</em>: 628</p>
 <pre><code class="language-cpp">    return item;
     }
@@ -6704,7 +6676,7 @@
     }
     /**
 </code></pre></div>
-<p><strong>Summary:</strong> 64 uncovered code areas identified across 4 categories.</p>
+<p><strong>Summary:</strong> 60 uncovered code areas identified across 4 categories.</p>
 <p><strong>Note:</strong> These uncovered areas represent code that by design cannot be easily tested in a unit test environment. They require either integration testing with the actual FreeRTOS kernel, specific hardware configurations, or are defensive programming measures for edge cases that are difficult to reproduce.</p>
 <h3 id="coverage-quality-assessment">Coverage Quality Assessment</h3>
 <p>The high coverage percentage indicates:
@@ -6729,7 +6701,7 @@
 <h3 id="performance-characteristics">Performance Characteristics</h3>
 <ul>
 <li><strong>Fastest Test</strong>: 0.000 seconds</li>
-<li><strong>Slowest Test</strong>: 0.413 seconds</li>
+<li><strong>Slowest Test</strong>: 0.402 seconds</li>
 <li><strong>Performance Distribution</strong>:</li>
 <li>Very Fast (&lt; 0.01s): 418 tests</li>
 <li>Fast (0.01-0.05s): 8 tests</li>
@@ -6746,7 +6718,7 @@
 <h3 id="code-quality-validation">✅ Code Quality Validation</h3>
 <ul>
 <li><strong>High Coverage</strong>: 97.0% line coverage demonstrates thorough validation</li>
-<li><strong>API Completeness</strong>: 98.1% function coverage shows comprehensive API testing</li>
+<li><strong>API Completeness</strong>: 98.2% function coverage shows comprehensive API testing</li>
 <li><strong>Production Ready</strong>: Test results indicate code is ready for production use</li>
 </ul>
 <h3 id="continuous-validation">🔄 Continuous Validation</h3>
@@ -6761,15 +6733,44 @@
 <li><strong>Performance Monitoring</strong>: Monitor test execution times to detect performance regressions</li>
 <li><strong>Failure Analysis</strong>: When failures occur, this report will provide detailed failure information</li>
 </ol>
+</div><div class="section"><h2 id="failed-test-analysis">Failed Test Analysis</h2>
+<p>The following 1 test(s) failed during execution:</p>
+<ol>
+<li><code>EnhancedMultitaskingTest.MultiplePeriodicTasksCoordination</code></li>
+</ol>
+<h3 id="failed-test-context-analysis">Failed Test Context Analysis</h3>
+<p>The following sections provide specific code snippets and explanations for the contexts where test cases failed, helping to understand the failure reasons and debugging approaches.</p>
+<p><strong>Failed Test Context: <code>EnhancedMultitaskingTest.MultiplePeriodicTasksCoordination</code></strong></p>
+<p><em>Test Type</em>: Enhanced Timer Behavior Test
+<em>Failure Pattern</em>: Timer simulation and callback execution issues</p>
+<pre><code class="language-cpp">// General test context
+// This test failed during execution with timing or simulation issues
+// Check the enhanced timer mock implementation for proper integration
+// with the FreeRTOS timer wrapper and vTaskDelay simulation
+</code></pre></div>
+<p><strong>General Debugging Steps:</strong>
+- Verify enhanced timer simulation is enabled during test setup
+- Check vTaskDelay integration with timer time advancement
+- Ensure command processing mode (immediate vs queued) is appropriate for test
+- Review timer expiry calculation and callback execution logic</p>
+<p><strong>Specific Error Messages:</strong></p>
+<div class="code-block"><pre><code>8: /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_enhanced_multitasking.cpp:491: Failure
+8: Expected: (slow_count.load()) &gt; (0), actual: 0 vs 0  # Show first 5 error lines
+</code></pre></div>
+<p><strong>Test Execution Details:</strong>
+- CTest Return Code: 8
+- Total Execution Time: 1.96 seconds
+- Failed Tests: 1/439 (0.2%)</p>
+<p><strong>Note:</strong> This report includes failed test cases as requested. The failures provide important debugging information for addressing any issues in the codebase.</p>
 <hr />
-<p><em>Report Generated</em>: July 25, 2025 at 12:01:34<br />
+<p><em>Report Generated</em>: July 25, 2025 at 12:25:51<br />
 <em>Test Framework</em>: GoogleTest/GoogleMock<br />
 <em>Coverage Tool</em>: LCOV/GCOV<br />
-<em>Total Test Execution Time</em>: 1.98 seconds<br />
-<em>Validation Status</em>: ✅ <strong>All tests passing - System validated for production use</strong></p></div>
+<em>Total Test Execution Time</em>: 1.96 seconds<br />
+<em>Validation Status</em>: ❌ <strong>1 tests failing - System requires attention</strong></p></div>
         
         <div class="timestamp">
-            Generated on July 25, 2025 at 12:01 PM by FreeRTOS C++ Wrappers build system
+            Generated on July 25, 2025 at 12:25 PM by FreeRTOS C++ Wrappers build system
         </div>
     </div>
 </body>

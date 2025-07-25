@@ -6,15 +6,15 @@ This report provides comprehensive validation and verification results for the F
 
 ### Test Execution Summary
 - **Total Tests Executed**: 439
-- **✅ Passed**: 439 tests
-- **❌ Failed**: 0 tests
-- **Success Rate**: 100.0% (All tests passed!)
-- **Total Execution Time**: 1.98 seconds
+- **✅ Passed**: 438 tests
+- **❌ Failed**: 1 tests
+- **Success Rate**: 99.8% (1 tests failed)
+- **Total Execution Time**: 1.96 seconds
 - **Average Test Time**: 0.0045 seconds per test
 
 ### Code Coverage Summary
-- **Line Coverage**: 97.0% (7388/7613 lines)
-- **Function Coverage**: 98.1% (2900/2957 functions)
+- **Line Coverage**: 97.0% (7394/7619 lines)
+- **Function Coverage**: 98.2% (2902/2955 functions)
 - **Coverage Scope**: Main library modules only (src/ and include/ directories)
 
 ## Complete Test Results Summary
@@ -400,7 +400,7 @@ The following table shows all individual test cases executed during this validat
 | 375 | EnhancedMultitaskingTest.TaskLifecycleRacingConditions | Enhanced Multitasking | ✅ PASS | 0.032 |
 | 376 | EnhancedMultitaskingTest.TaskMoveSemanticsConcurrency | Enhanced Multitasking | ✅ PASS | 0.035 |
 | 377 | EnhancedMultitaskingTest.PeriodicTaskExecution | Enhanced Multitasking | ✅ PASS | 0.040 |
-| 378 | EnhancedMultitaskingTest.MultiplePeriodicTasksCoordination | Enhanced Multitasking | ✅ PASS | 0.060 |
+| 378 | EnhancedMultitaskingTest.MultiplePeriodicTasksCoordination | Enhanced Multitasking | ❌ FAIL | 0.060 |
 | 379 | EnhancedMultitaskingTest.TaskExceptionHandling | Enhanced Multitasking | ✅ PASS | 0.020 |
 | 380 | EnhancedMultitaskingTest.TaskDeleteDuringExecution | Enhanced Multitasking | ✅ PASS | 0.106 |
 | 381 | EnhancedMultitaskingTest.TaskExecFunctionCoverage | Enhanced Multitasking | ✅ PASS | 0.010 |
@@ -413,11 +413,11 @@ The following table shows all individual test cases executed during this validat
 | 388 | STLSemaphoreTest.STLCountingSemaphoreMaxLimit | Freertos Semaphore Stl | ✅ PASS | 0.000 |
 | 389 | STLSemaphoreTest.STLCountingSemaphoreResourcePool | Freertos Semaphore Stl | ✅ PASS | 0.100 |
 | 390 | STLSemaphoreTest.STLMutexBasicOperations | Freertos Semaphore Stl | ✅ PASS | 0.000 |
-| 391 | STLSemaphoreTest.STLMutexCriticalSection | Freertos Semaphore Stl | ✅ PASS | 0.032 |
+| 391 | STLSemaphoreTest.STLMutexCriticalSection | Freertos Semaphore Stl | ✅ PASS | 0.031 |
 | 392 | STLSemaphoreTest.STLRecursiveMutexBasicOperations | Freertos Semaphore Stl | ✅ PASS | 0.000 |
 | 393 | STLSemaphoreTest.STLRecursiveMutexNestedLocking | Freertos Semaphore Stl | ✅ PASS | 0.000 |
-| 394 | STLSemaphoreTest.STLProducerConsumerWithBuffering | Freertos Semaphore Stl | ✅ PASS | 0.100 |
-| 395 | STLSemaphoreTest.STLReaderWriterPattern | Freertos Semaphore Stl | ✅ PASS | 0.413 |
+| 394 | STLSemaphoreTest.STLProducerConsumerWithBuffering | Freertos Semaphore Stl | ✅ PASS | 0.101 |
+| 395 | STLSemaphoreTest.STLReaderWriterPattern | Freertos Semaphore Stl | ✅ PASS | 0.402 |
 | 396 | STLSemaphoreTest.STLSemaphoreStressTest | Freertos Semaphore Stl | ✅ PASS | 0.076 |
 | 397 | STLSemaphoreTest.STLTimeoutAccuracy | Freertos Semaphore Stl | ✅ PASS | 0.350 |
 | 398 | TimeoutPrecisionTest.MicrosecondDelayConversion | Enhanced Timeout Precision | ✅ PASS | 0.000 |
@@ -465,9 +465,9 @@ The following table shows all individual test cases executed during this validat
 
 **Table Summary:**
 - **Total Individual Tests**: 439
-- **Passed**: 439 (✅)
-- **Failed**: 0 (❌)
-- **Success Rate**: 100.0%
+- **Passed**: 438 (✅)
+- **Failed**: 1 (❌)
+- **Success Rate**: 99.8%
 
 ## Detailed Test Results by Module
 
@@ -475,9 +475,9 @@ The following table shows all individual test cases executed during this validat
 
 **Module Statistics:**
 - Tests: 93
-- Passed: 93
-- Failed: 0
-- Success Rate: 100.0%
+- Passed: 92
+- Failed: 1
+- Success Rate: 98.9%
 - Total Time: 0.578s
 
 **Detailed Test Results:**
@@ -572,11 +572,15 @@ The following table shows all individual test cases executed during this validat
 | 375 | EnhancedMultitaskingTest.TaskLifecycleRacingConditions | ✅ PASS | 0.032s |
 | 376 | EnhancedMultitaskingTest.TaskMoveSemanticsConcurrency | ✅ PASS | 0.035s |
 | 377 | EnhancedMultitaskingTest.PeriodicTaskExecution | ✅ PASS | 0.040s |
-| 378 | EnhancedMultitaskingTest.MultiplePeriodicTasksCoordination | ✅ PASS | 0.060s |
+| 378 | EnhancedMultitaskingTest.MultiplePeriodicTasksCoordination | ❌ FAIL | 0.060s |
 | 379 | EnhancedMultitaskingTest.TaskExceptionHandling | ✅ PASS | 0.020s |
 | 380 | EnhancedMultitaskingTest.TaskDeleteDuringExecution | ✅ PASS | 0.106s |
 | 381 | EnhancedMultitaskingTest.TaskExecFunctionCoverage | ✅ PASS | 0.010s |
 | 382 | EnhancedMultitaskingTest.SuspendedTaskStartupCoverage | ✅ PASS | 0.015s |
+
+**Failed Test Details:**
+
+- **Test 378**: `EnhancedMultitaskingTest.MultiplePeriodicTasksCoordination` - Failed after 0.060s
 
 ### Semaphore Module Tests
 
@@ -585,7 +589,7 @@ The following table shows all individual test cases executed during this validat
 - Passed: 96
 - Failed: 0
 - Success Rate: 100.0%
-- Total Time: 1.261s
+- Total Time: 1.250s
 
 **Detailed Test Results:**
 
@@ -680,11 +684,11 @@ The following table shows all individual test cases executed during this validat
 | 388 | STLSemaphoreTest.STLCountingSemaphoreMaxLimit | ✅ PASS | 0.000s |
 | 389 | STLSemaphoreTest.STLCountingSemaphoreResourcePool | ✅ PASS | 0.100s |
 | 390 | STLSemaphoreTest.STLMutexBasicOperations | ✅ PASS | 0.000s |
-| 391 | STLSemaphoreTest.STLMutexCriticalSection | ✅ PASS | 0.032s |
+| 391 | STLSemaphoreTest.STLMutexCriticalSection | ✅ PASS | 0.031s |
 | 392 | STLSemaphoreTest.STLRecursiveMutexBasicOperations | ✅ PASS | 0.000s |
 | 393 | STLSemaphoreTest.STLRecursiveMutexNestedLocking | ✅ PASS | 0.000s |
-| 394 | STLSemaphoreTest.STLProducerConsumerWithBuffering | ✅ PASS | 0.100s |
-| 395 | STLSemaphoreTest.STLReaderWriterPattern | ✅ PASS | 0.413s |
+| 394 | STLSemaphoreTest.STLProducerConsumerWithBuffering | ✅ PASS | 0.101s |
+| 395 | STLSemaphoreTest.STLReaderWriterPattern | ✅ PASS | 0.402s |
 | 396 | STLSemaphoreTest.STLSemaphoreStressTest | ✅ PASS | 0.076s |
 | 397 | STLSemaphoreTest.STLTimeoutAccuracy | ✅ PASS | 0.350s |
 
@@ -1053,11 +1057,11 @@ The following table shows all individual test cases executed during this validat
 ## Code Coverage Analysis
 
 ### Coverage Overview
-The project achieves excellent code coverage with **97.0% line coverage** and **98.1% function coverage**.
+The project achieves excellent code coverage with **97.0% line coverage** and **98.2% function coverage**.
 
 ### Coverage Breakdown
-- **Lines Covered**: 7388 out of 7613 total lines
-- **Functions Covered**: 2900 out of 2957 total functions
+- **Lines Covered**: 7394 out of 7619 total lines
+- **Functions Covered**: 2902 out of 2955 total functions
 - **Coverage Target**: Main library modules only (excludes test infrastructure and system headers)
 
 **Detailed Uncovered Areas Analysis:**
@@ -1122,51 +1126,7 @@ The following sections provide specific references to uncovered code areas and e
 
 **Reason for exclusion:** These code sections depend on specific hardware configurations or FreeRTOS kernel internals not available in the test environment
 
-**Uncovered Area 5**: freertos_task.hpp:517-523
-*Function*: `freertos::task<freertos::static_task_allocator<256ul> >::notify_wait(unsigned int, unsigned int, unsigned int&, unsigned int)`
-
-```cpp
-    * @return BaseType_t pdTRUE if the notification was given, pdFALSE otherwise
-    */
->>> BaseType_t notify_wait(uint32_t ulBitsToClearOnEntry,
-    uint32_t ulBitsToClearOnExit,
-    uint32_t &notification_value,
-```
-
-**Uncovered Area 6**: freertos_task.hpp:517-523
-*Function*: `freertos::task<freertos::static_task_allocator<512ul> >::notify_wait(unsigned int, unsigned int, unsigned int&, unsigned int)`
-
-```cpp
-    * @return BaseType_t pdTRUE if the notification was given, pdFALSE otherwise
-    */
->>> BaseType_t notify_wait(uint32_t ulBitsToClearOnEntry,
-    uint32_t ulBitsToClearOnExit,
-    uint32_t &notification_value,
-```
-
-**Uncovered Area 7**: freertos_task.hpp:534-542
-*Function*: `int freertos::task<freertos::static_task_allocator<256ul> >::notify_wait<long, std::ratio<1l, 1000l> >(unsigned int, unsigned int, unsigned int&, std::chrono::duration<long, std::ratio<1l, 1000l> >)`
-
-```cpp
-    */
-    template <typename Rep, typename Period>
->>> BaseType_t notify_wait(uint32_t ulBitsToClearOnEntry,
-    uint32_t ulBitsToClearOnExit,
-    uint32_t &notification_value,
-```
-
-**Uncovered Area 8**: freertos_task.hpp:534-542
-*Function*: `int freertos::task<freertos::static_task_allocator<512ul> >::notify_wait<long, std::ratio<1l, 1000l> >(unsigned int, unsigned int, unsigned int&, std::chrono::duration<long, std::ratio<1l, 1000l> >)`
-
-```cpp
-    */
-    template <typename Rep, typename Period>
->>> BaseType_t notify_wait(uint32_t ulBitsToClearOnEntry,
-    uint32_t ulBitsToClearOnExit,
-    uint32_t &notification_value,
-```
-
-**Uncovered Area 9**: freertos_sw_timer.hpp:218
+**Uncovered Area 5**: freertos_sw_timer.hpp:218
 *Line*: 218
 
 ```cpp
@@ -1177,7 +1137,7 @@ The following sections provide specific references to uncovered code areas and e
     m_started = true;
 ```
 
-**Uncovered Area 10**: freertos_sw_timer.hpp:219
+**Uncovered Area 6**: freertos_sw_timer.hpp:219
 *Line*: 219
 
 ```cpp
@@ -1188,7 +1148,7 @@ The following sections provide specific references to uncovered code areas and e
     }
 ```
 
-**Uncovered Area 11**: freertos_sw_timer.hpp:220
+**Uncovered Area 7**: freertos_sw_timer.hpp:220
 *Line*: 220
 
 ```cpp
@@ -1204,7 +1164,7 @@ The following sections provide specific references to uncovered code areas and e
 
 **Reason for exclusion:** These are safety checks and defensive programming patterns that are difficult to trigger in controlled test conditions
 
-**Uncovered Area 12**: freertos_task.hpp:275
+**Uncovered Area 8**: freertos_task.hpp:275
 *Function*: `freertos::task<freertos::static_task_allocator<0ul> >::suspend()`
 
 ```cpp
@@ -1215,7 +1175,7 @@ The following sections provide specific references to uncovered code areas and e
     * @brief Resume the task.
 ```
 
-**Uncovered Area 13**: freertos_task.hpp:275
+**Uncovered Area 9**: freertos_task.hpp:275
 *Function*: `freertos::task<freertos::dynamic_task_allocator<2048ul> >::suspend()`
 
 ```cpp
@@ -1226,7 +1186,7 @@ The following sections provide specific references to uncovered code areas and e
     * @brief Resume the task.
 ```
 
-**Uncovered Area 14**: freertos_task.hpp:616
+**Uncovered Area 10**: freertos_task.hpp:616
 *Function*: `freertos::periodic_task<freertos::static_task_allocator<1024ul> >::periodic_task<double, std::ratio<1l, 1000l> >(char const*, unsigned int, std::function<void ()>&&, std::function<void ()>&&, std::function<void ()>&&, std::chrono::duration<double, std::ratio<1l, 1000l> > const&, bool)::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -1237,7 +1197,7 @@ The following sections provide specific references to uncovered code areas and e
     * @brief Construct a new periodic task object
 ```
 
-**Uncovered Area 15**: freertos_task.hpp:616
+**Uncovered Area 11**: freertos_task.hpp:616
 *Function*: `freertos::periodic_task<freertos::static_task_allocator<1024ul> >::periodic_task<long, std::ratio<1l, 1000l> >(char const*, unsigned int, std::function<void ()>&&, std::function<void ()>&&, std::function<void ()>&&, std::chrono::duration<long, std::ratio<1l, 1000l> > const&, bool)::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -1248,7 +1208,7 @@ The following sections provide specific references to uncovered code areas and e
     * @brief Construct a new periodic task object
 ```
 
-**Uncovered Area 16**: FreeRTOS.h:163
+**Uncovered Area 12**: FreeRTOS.h:163
 *Function*: `FreeRTOSMock::~FreeRTOSMock()`
 
 ```cpp
@@ -1259,7 +1219,7 @@ The following sections provide specific references to uncovered code areas and e
     // Task creation and deletion
 ```
 
-**Uncovered Area 17**: FreeRTOS.h:323
+**Uncovered Area 13**: FreeRTOS.h:323
 *Function*: `FreeRTOSMock::xMessageBufferSendFromISR(void*, void const*, unsigned long, int*)`
 
 ```cpp
@@ -1270,7 +1230,7 @@ The following sections provide specific references to uncovered code areas and e
     MOCK_METHOD(size_t, xMessageBufferReceiveFromISR, (MessageBufferHandle_t xMessageBuffer, void* pvRxData, size_t xBufferLengthBytes, BaseType_t* pxHigherPriorityTaskWoken));
 ```
 
-**Uncovered Area 18**: FreeRTOS.h:325
+**Uncovered Area 14**: FreeRTOS.h:325
 *Function*: `FreeRTOSMock::xMessageBufferReceiveFromISR(void*, void*, unsigned long, int*)`
 
 ```cpp
@@ -1281,7 +1241,7 @@ The following sections provide specific references to uncovered code areas and e
     MOCK_METHOD(BaseType_t, xMessageBufferReset, (MessageBufferHandle_t xMessageBuffer));
 ```
 
-**Uncovered Area 19**: enhanced_timer_mocks.cpp:159-164
+**Uncovered Area 15**: enhanced_timer_mocks.cpp:159-164
 *Function*: `freertos_mocks::TimerServiceSimulator::changePeriodFromISR(void*, unsigned int, int*)`
 
 ```cpp
@@ -1292,7 +1252,7 @@ The following sections provide specific references to uncovered code areas and e
     *higher_priority_task_woken = pdFALSE;  // Simulate no high priority task woken for testing
 ```
 
-**Uncovered Area 20**: enhanced_timer_mocks.cpp:198-202
+**Uncovered Area 16**: enhanced_timer_mocks.cpp:198-202
 *Function*: `freertos_mocks::TimerServiceSimulator::setReloadMode(void*, unsigned int)`
 
 ```cpp
@@ -1303,7 +1263,7 @@ The following sections provide specific references to uncovered code areas and e
     timers_[timer]->auto_reload = auto_reload;
 ```
 
-**Uncovered Area 21**: enhanced_timer_mocks.cpp:360-368
+**Uncovered Area 17**: enhanced_timer_mocks.cpp:360-368
 *Function*: `freertos_mocks::TimerServiceSimulator::getActiveTimerCount() const`
 
 ```cpp
@@ -1314,7 +1274,7 @@ The following sections provide specific references to uncovered code areas and e
     for (const auto& pair : timers_) {
 ```
 
-**Uncovered Area 22**: enhanced_timer_mocks.cpp:374-376
+**Uncovered Area 18**: enhanced_timer_mocks.cpp:374-376
 *Function*: `freertos_mocks::TimerServiceSimulator::hasTimer(void*) const`
 
 ```cpp
@@ -1325,7 +1285,7 @@ The following sections provide specific references to uncovered code areas and e
     }
 ```
 
-**Uncovered Area 23**: enhanced_timer_mocks.cpp:378-381
+**Uncovered Area 19**: enhanced_timer_mocks.cpp:378-381
 *Function*: `freertos_mocks::TimerServiceSimulator::getCallbackCount(void*) const`
 
 ```cpp
@@ -1336,7 +1296,7 @@ The following sections provide specific references to uncovered code areas and e
     return it != callback_counts_.end() ? it->second : 0;
 ```
 
-**Uncovered Area 24**: enhanced_timer_mocks.cpp:383-385
+**Uncovered Area 20**: enhanced_timer_mocks.cpp:383-385
 *Function*: `freertos_mocks::TimerServiceSimulator::clearCallbackHistory()`
 
 ```cpp
@@ -1347,7 +1307,7 @@ The following sections provide specific references to uncovered code areas and e
     }
 ```
 
-**Uncovered Area 25**: enhanced_timer_mocks.hpp:172-180
+**Uncovered Area 21**: enhanced_timer_mocks.hpp:172-180
 *Function*: `freertos_mocks::EnhancedTimerMock::simulateTaskDelay(unsigned int)`
 
 ```cpp
@@ -1358,21 +1318,21 @@ The following sections provide specific references to uncovered code areas and e
     // In enhanced simulation mode, vTaskDelay just advances simulated time
 ```
 
-**Uncovered Area 26**: freertos_mocks.cpp:896-901
+**Uncovered Area 22**: freertos_mocks.cpp:896-901
 *Function*: `xMessageBufferSendFromISR`
 
 ```cpp
 
 ```
 
-**Uncovered Area 27**: freertos_mocks.cpp:910-915
+**Uncovered Area 23**: freertos_mocks.cpp:910-915
 *Function*: `xMessageBufferReceiveFromISR`
 
 ```cpp
 
 ```
 
-**Uncovered Area 28**: stl_semaphore_mocks.hpp:165
+**Uncovered Area 24**: stl_semaphore_mocks.hpp:165
 *Function*: `freertos_test::stl_counting_semaphore::take(unsigned int)::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -1383,7 +1343,7 @@ The following sections provide specific references to uncovered code areas and e
     return pdTRUE;
 ```
 
-**Uncovered Area 29**: stl_semaphore_mocks.hpp:77
+**Uncovered Area 25**: stl_semaphore_mocks.hpp:77
 *Function*: `freertos_test::stl_binary_semaphore::take(unsigned int)::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -1394,7 +1354,7 @@ The following sections provide specific references to uncovered code areas and e
     return pdTRUE;
 ```
 
-**Uncovered Area 30**: test_enhanced_cpp17_features.cpp:115
+**Uncovered Area 26**: test_enhanced_cpp17_features.cpp:115
 *Function*: `Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -1405,7 +1365,7 @@ The following sections provide specific references to uncovered code areas and e
     auto periodic = [&periodic_count]() { periodic_count++; };
 ```
 
-**Uncovered Area 31**: test_enhanced_cpp17_features.cpp:116
+**Uncovered Area 27**: test_enhanced_cpp17_features.cpp:116
 *Function*: `Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test::TestBody()::{lambda()#2}::operator()() const`
 
 ```cpp
@@ -1416,7 +1376,7 @@ The following sections provide specific references to uncovered code areas and e
     
 ```
 
-**Uncovered Area 32**: test_enhanced_cpp17_features.cpp:117
+**Uncovered Area 28**: test_enhanced_cpp17_features.cpp:117
 *Function*: `Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test::TestBody()::{lambda()#3}::operator()() const`
 
 ```cpp
@@ -1427,7 +1387,7 @@ The following sections provide specific references to uncovered code areas and e
     // Test move with different chrono duration types - using static allocation
 ```
 
-**Uncovered Area 33**: test_enhanced_cpp17_features.cpp:127
+**Uncovered Area 29**: test_enhanced_cpp17_features.cpp:127
 *Function*: `Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test::TestBody()::{lambda()#4}::operator()() const`
 
 ```cpp
@@ -1438,7 +1398,7 @@ The following sections provide specific references to uncovered code areas and e
     [&periodic_count]() { periodic_count++; });
 ```
 
-**Uncovered Area 34**: test_enhanced_cpp17_features.cpp:128
+**Uncovered Area 30**: test_enhanced_cpp17_features.cpp:128
 *Function*: `Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test::TestBody()::{lambda()#5}::operator()() const`
 
 ```cpp
@@ -1449,7 +1409,7 @@ The following sections provide specific references to uncovered code areas and e
     
 ```
 
-**Uncovered Area 35**: test_enhanced_cpp17_features.cpp:129
+**Uncovered Area 31**: test_enhanced_cpp17_features.cpp:129
 *Function*: `Cpp17FeaturesTest_PeriodicTaskMoveWithChronoTypes_Test::TestBody()::{lambda()#6}::operator()() const`
 
 ```cpp
@@ -1460,7 +1420,7 @@ The following sections provide specific references to uncovered code areas and e
     // Test move construction instead of assignment (which is deleted)
 ```
 
-**Uncovered Area 36**: test_enhanced_cpp17_features.cpp:152-154
+**Uncovered Area 32**: test_enhanced_cpp17_features.cpp:152-154
 *Function*: `Cpp17FeaturesTest_LambdaCaptureVarieties_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -1471,7 +1431,7 @@ The following sections provide specific references to uncovered code areas and e
     });
 ```
 
-**Uncovered Area 37**: test_enhanced_cpp17_features.cpp:157-159
+**Uncovered Area 33**: test_enhanced_cpp17_features.cpp:157-159
 *Function*: `Cpp17FeaturesTest_LambdaCaptureVarieties_Test::TestBody()::{lambda()#2}::operator()() const`
 
 ```cpp
@@ -1482,7 +1442,7 @@ The following sections provide specific references to uncovered code areas and e
     });
 ```
 
-**Uncovered Area 38**: test_enhanced_cpp17_features.cpp:162-164
+**Uncovered Area 34**: test_enhanced_cpp17_features.cpp:162-164
 *Function*: `Cpp17FeaturesTest_LambdaCaptureVarieties_Test::TestBody()::{lambda()#3}::operator()() const`
 
 ```cpp
@@ -1493,7 +1453,7 @@ The following sections provide specific references to uncovered code areas and e
     });
 ```
 
-**Uncovered Area 39**: test_enhanced_cpp17_features.cpp:172
+**Uncovered Area 35**: test_enhanced_cpp17_features.cpp:172
 *Function*: `Cpp17FeaturesTest_FunctionObjectVarieties_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -1504,7 +1464,7 @@ The following sections provide specific references to uncovered code areas and e
     
 ```
 
-**Uncovered Area 40**: test_enhanced_cpp17_features.cpp:178
+**Uncovered Area 36**: test_enhanced_cpp17_features.cpp:178
 *Function*: `Cpp17FeaturesTest_FunctionObjectVarieties_Test::TestBody()::CustomCallable::operator()() const`
 
 ```cpp
@@ -1515,7 +1475,7 @@ The following sections provide specific references to uncovered code areas and e
     
 ```
 
-**Uncovered Area 41**: test_enhanced_cpp17_features.cpp:185
+**Uncovered Area 37**: test_enhanced_cpp17_features.cpp:185
 *Function*: `Cpp17FeaturesTest_FunctionObjectVarieties_Test::TestBody()::{lambda()#2}::operator()() const`
 
 ```cpp
@@ -1526,7 +1486,7 @@ The following sections provide specific references to uncovered code areas and e
     
 ```
 
-**Uncovered Area 42**: test_enhanced_cpp17_features.cpp:292
+**Uncovered Area 38**: test_enhanced_cpp17_features.cpp:292
 *Function*: `Cpp17FeaturesTest_CompileTimeConstants_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -1537,7 +1497,7 @@ The following sections provide specific references to uncovered code areas and e
     
 ```
 
-**Uncovered Area 43**: test_enhanced_cpp17_features.cpp:313
+**Uncovered Area 39**: test_enhanced_cpp17_features.cpp:313
 *Function*: `Cpp17FeaturesTest_ChronoTypesIntegration_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -1548,7 +1508,7 @@ The following sections provide specific references to uncovered code areas and e
     []() { /* periodic */ },
 ```
 
-**Uncovered Area 44**: test_enhanced_cpp17_features.cpp:314
+**Uncovered Area 40**: test_enhanced_cpp17_features.cpp:314
 *Function*: `Cpp17FeaturesTest_ChronoTypesIntegration_Test::TestBody()::{lambda()#2}::operator()() const`
 
 ```cpp
@@ -1559,7 +1519,7 @@ The following sections provide specific references to uncovered code areas and e
     500ms);
 ```
 
-**Uncovered Area 45**: test_enhanced_cpp17_features.cpp:315
+**Uncovered Area 41**: test_enhanced_cpp17_features.cpp:315
 *Function*: `Cpp17FeaturesTest_ChronoTypesIntegration_Test::TestBody()::{lambda()#3}::operator()() const`
 
 ```cpp
@@ -1570,7 +1530,7 @@ The following sections provide specific references to uncovered code areas and e
     
 ```
 
-**Uncovered Area 46**: test_enhanced_cpp17_features.cpp:319
+**Uncovered Area 42**: test_enhanced_cpp17_features.cpp:319
 *Function*: `Cpp17FeaturesTest_ChronoTypesIntegration_Test::TestBody()::{lambda()#4}::operator()() const`
 
 ```cpp
@@ -1581,7 +1541,7 @@ The following sections provide specific references to uncovered code areas and e
     []() { /* periodic */ },
 ```
 
-**Uncovered Area 47**: test_enhanced_cpp17_features.cpp:320
+**Uncovered Area 43**: test_enhanced_cpp17_features.cpp:320
 *Function*: `Cpp17FeaturesTest_ChronoTypesIntegration_Test::TestBody()::{lambda()#5}::operator()() const`
 
 ```cpp
@@ -1592,7 +1552,7 @@ The following sections provide specific references to uncovered code areas and e
     750ms);
 ```
 
-**Uncovered Area 48**: test_enhanced_cpp17_features.cpp:321
+**Uncovered Area 44**: test_enhanced_cpp17_features.cpp:321
 *Function*: `Cpp17FeaturesTest_ChronoTypesIntegration_Test::TestBody()::{lambda()#6}::operator()() const`
 
 ```cpp
@@ -1603,7 +1563,7 @@ The following sections provide specific references to uncovered code areas and e
     
 ```
 
-**Uncovered Area 49**: test_enhanced_cpp17_features.cpp:325
+**Uncovered Area 45**: test_enhanced_cpp17_features.cpp:325
 *Function*: `Cpp17FeaturesTest_ChronoTypesIntegration_Test::TestBody()::{lambda()#7}::operator()() const`
 
 ```cpp
@@ -1614,7 +1574,7 @@ The following sections provide specific references to uncovered code areas and e
     []() { /* periodic */ },
 ```
 
-**Uncovered Area 50**: test_enhanced_cpp17_features.cpp:326
+**Uncovered Area 46**: test_enhanced_cpp17_features.cpp:326
 *Function*: `Cpp17FeaturesTest_ChronoTypesIntegration_Test::TestBody()::{lambda()#8}::operator()() const`
 
 ```cpp
@@ -1625,7 +1585,7 @@ The following sections provide specific references to uncovered code areas and e
     duration<double, std::milli>(123.456));
 ```
 
-**Uncovered Area 51**: test_enhanced_cpp17_features.cpp:327
+**Uncovered Area 47**: test_enhanced_cpp17_features.cpp:327
 *Function*: `Cpp17FeaturesTest_ChronoTypesIntegration_Test::TestBody()::{lambda()#9}::operator()() const`
 
 ```cpp
@@ -1636,7 +1596,7 @@ The following sections provide specific references to uncovered code areas and e
     
 ```
 
-**Uncovered Area 52**: test_enhanced_cpp17_features.cpp:350
+**Uncovered Area 48**: test_enhanced_cpp17_features.cpp:350
 *Function*: `Cpp17FeaturesTest_STLContainerIntegration_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -1647,7 +1607,7 @@ The following sections provide specific references to uncovered code areas and e
     tasks.emplace_back("VectorTask3", 3, []() { /* test */ });
 ```
 
-**Uncovered Area 53**: test_enhanced_cpp17_features.cpp:351
+**Uncovered Area 49**: test_enhanced_cpp17_features.cpp:351
 *Function*: `Cpp17FeaturesTest_STLContainerIntegration_Test::TestBody()::{lambda()#2}::operator()() const`
 
 ```cpp
@@ -1658,7 +1618,7 @@ The following sections provide specific references to uncovered code areas and e
     
 ```
 
-**Uncovered Area 54**: test_enhanced_cpp17_features.cpp:352
+**Uncovered Area 50**: test_enhanced_cpp17_features.cpp:352
 *Function*: `Cpp17FeaturesTest_STLContainerIntegration_Test::TestBody()::{lambda()#3}::operator()() const`
 
 ```cpp
@@ -1669,7 +1629,7 @@ The following sections provide specific references to uncovered code areas and e
     EXPECT_EQ(tasks.size(), 3);
 ```
 
-**Uncovered Area 55**: test_enhanced_cpp17_features.cpp:369
+**Uncovered Area 51**: test_enhanced_cpp17_features.cpp:369
 *Function*: `Cpp17FeaturesTest_UniquePtrIntegration_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -1680,7 +1640,7 @@ The following sections provide specific references to uncovered code areas and e
     
 ```
 
-**Uncovered Area 56**: test_enhanced_cpp17_features.cpp:370
+**Uncovered Area 52**: test_enhanced_cpp17_features.cpp:370
 *Function*: `Cpp17FeaturesTest_UniquePtrIntegration_Test::TestBody()::{lambda()#2}::operator()() const`
 
 ```cpp
@@ -1691,7 +1651,7 @@ The following sections provide specific references to uncovered code areas and e
     EXPECT_NE(task1->handle(), nullptr);
 ```
 
-**Uncovered Area 57**: test_enhanced_cpp17_features.cpp:69
+**Uncovered Area 53**: test_enhanced_cpp17_features.cpp:69
 *Function*: `Cpp17FeaturesTest_TaskMoveSemanticsPerfectForwarding_Test::TestBody()::{lambda()#1}::operator()()`
 
 ```cpp
@@ -1702,7 +1662,7 @@ The following sections provide specific references to uncovered code areas and e
     
 ```
 
-**Uncovered Area 58**: test_enhanced_cpp17_features.cpp:70
+**Uncovered Area 54**: test_enhanced_cpp17_features.cpp:70
 *Function*: `Cpp17FeaturesTest_TaskMoveSemanticsPerfectForwarding_Test::TestBody()::{lambda()#2}::operator()() const`
 
 ```cpp
@@ -1713,7 +1673,7 @@ The following sections provide specific references to uncovered code areas and e
     EXPECT_CALL(*mock, xTaskCreateStatic(_, _, _, _, _, _, _))
 ```
 
-**Uncovered Area 59**: test_enhanced_cpp17_features.cpp:92
+**Uncovered Area 55**: test_enhanced_cpp17_features.cpp:92
 *Function*: `Cpp17FeaturesTest_TaskMoveAssignmentChaining_Test::TestBody()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -1724,7 +1684,7 @@ The following sections provide specific references to uncovered code areas and e
     // Create multiple tasks
 ```
 
-**Uncovered Area 60**: test_enhanced_cpp17_features.cpp:95
+**Uncovered Area 56**: test_enhanced_cpp17_features.cpp:95
 *Function*: `Cpp17FeaturesTest_TaskMoveAssignmentChaining_Test::TestBody()::{lambda()#2}::operator()() const`
 
 ```cpp
@@ -1735,7 +1695,7 @@ The following sections provide specific references to uncovered code areas and e
     sa::task<1024> task3("ToMove2", 3, task_func);
 ```
 
-**Uncovered Area 61**: test_enhanced_freertos_sw_timer.cpp:379
+**Uncovered Area 57**: test_enhanced_freertos_sw_timer.cpp:379
 *Function*: `EnhancedFreeRTOSSwTimerTest_ZeroPeriodTimer_Test::TestBody()::{lambda(void*)#1}::operator()(void*) const`
 
 ```cpp
@@ -1746,7 +1706,7 @@ The following sections provide specific references to uncovered code areas and e
     }
 ```
 
-**Uncovered Area 62**: test_freertos_sw_timer.cpp:90
+**Uncovered Area 58**: test_freertos_sw_timer.cpp:90
 *Function*: `FreeRTOSSwTimerTest::createTestCallback()::{lambda()#1}::operator()() const`
 
 ```cpp
@@ -1757,7 +1717,7 @@ The following sections provide specific references to uncovered code areas and e
     
 ```
 
-**Uncovered Area 63**: freertos_queue.hpp:489
+**Uncovered Area 59**: freertos_queue.hpp:489
 *Line*: 489
 
 ```cpp
@@ -1768,7 +1728,7 @@ The following sections provide specific references to uncovered code areas and e
     /**
 ```
 
-**Uncovered Area 64**: freertos_queue.hpp:628
+**Uncovered Area 60**: freertos_queue.hpp:628
 *Line*: 628
 
 ```cpp
@@ -1780,7 +1740,7 @@ The following sections provide specific references to uncovered code areas and e
 ```
 
 
-**Summary:** 64 uncovered code areas identified across 4 categories.
+**Summary:** 60 uncovered code areas identified across 4 categories.
 
 **Note:** These uncovered areas represent code that by design cannot be easily tested in a unit test environment. They require either integration testing with the actual FreeRTOS kernel, specific hardware configurations, or are defensive programming measures for edge cases that are difficult to reproduce.
 
@@ -1810,7 +1770,7 @@ The high coverage percentage indicates:
 
 ### Performance Characteristics
 - **Fastest Test**: 0.000 seconds
-- **Slowest Test**: 0.413 seconds
+- **Slowest Test**: 0.402 seconds
 - **Performance Distribution**:
   - Very Fast (< 0.01s): 418 tests
   - Fast (0.01-0.05s): 8 tests
@@ -1826,7 +1786,7 @@ The high coverage percentage indicates:
 
 ### ✅ Code Quality Validation
 - **High Coverage**: 97.0% line coverage demonstrates thorough validation
-- **API Completeness**: 98.1% function coverage shows comprehensive API testing
+- **API Completeness**: 98.2% function coverage shows comprehensive API testing
 - **Production Ready**: Test results indicate code is ready for production use
 
 ### 🔄 Continuous Validation
@@ -1842,11 +1802,57 @@ This report is automatically generated with each test execution to ensure:
 3. **Performance Monitoring**: Monitor test execution times to detect performance regressions
 4. **Failure Analysis**: When failures occur, this report will provide detailed failure information
 
+## Failed Test Analysis
+
+The following 1 test(s) failed during execution:
+
+1. `EnhancedMultitaskingTest.MultiplePeriodicTasksCoordination`
+
+
+### Failed Test Context Analysis
+
+The following sections provide specific code snippets and explanations for the contexts where test cases failed, helping to understand the failure reasons and debugging approaches.
+
+
+**Failed Test Context: `EnhancedMultitaskingTest.MultiplePeriodicTasksCoordination`**
+
+*Test Type*: Enhanced Timer Behavior Test
+*Failure Pattern*: Timer simulation and callback execution issues
+
+```cpp
+// General test context
+// This test failed during execution with timing or simulation issues
+// Check the enhanced timer mock implementation for proper integration
+// with the FreeRTOS timer wrapper and vTaskDelay simulation
+```
+
+**General Debugging Steps:**
+- Verify enhanced timer simulation is enabled during test setup
+- Check vTaskDelay integration with timer time advancement
+- Ensure command processing mode (immediate vs queued) is appropriate for test
+- Review timer expiry calculation and callback execution logic
+
+
+**Specific Error Messages:**
+```
+8: /home/runner/work/freertos_cpp_wrappers/freertos_cpp_wrappers/tests/test_enhanced_multitasking.cpp:491: Failure
+8: Expected: (slow_count.load()) > (0), actual: 0 vs 0  # Show first 5 error lines
+```
+
+
+
+**Test Execution Details:**
+- CTest Return Code: 8
+- Total Execution Time: 1.96 seconds
+- Failed Tests: 1/439 (0.2%)
+
+**Note:** This report includes failed test cases as requested. The failures provide important debugging information for addressing any issues in the codebase.
+
 
 ---
 
-*Report Generated*: July 25, 2025 at 12:01:34  
+*Report Generated*: July 25, 2025 at 12:25:51  
 *Test Framework*: GoogleTest/GoogleMock  
 *Coverage Tool*: LCOV/GCOV  
-*Total Test Execution Time*: 1.98 seconds  
-*Validation Status*: ✅ **All tests passing - System validated for production use**
+*Total Test Execution Time*: 1.96 seconds  
+*Validation Status*: ❌ **1 tests failing - System requires attention**
