@@ -350,6 +350,7 @@ void TimerServiceSimulator::reset() {
     current_time_ = 0;
     next_handle_ = reinterpret_cast<TimerHandle_t>(0x1000);
     callback_counts_.clear();
+    immediate_processing_ = true;  // Reset to default immediate processing mode
 }
 
 size_t TimerServiceSimulator::getTotalTimerCount() const {
