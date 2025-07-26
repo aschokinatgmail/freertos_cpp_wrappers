@@ -25,7 +25,7 @@ doxygen Doxyfile
 ## Features
 
 - Modern C++17 RAII wrappers for FreeRTOS APIs
-- Comprehensive test coverage (421+ tests)
+- Comprehensive test coverage (439 tests)
 - Comprehensive static analysis with clang-tidy + enhanced cppcheck (all rules)
 - MISRA C++ compliance analysis with detailed rule descriptions
 - Automated code formatting with clang-format (LLVM-based style)
@@ -36,19 +36,20 @@ doxygen Doxyfile
 
 ## Testing
 
-The project includes comprehensive test coverage with 421 automated tests covering all major functionality:
+The project includes comprehensive test coverage with 439 automated tests covering all major functionality:
 
 - **Task Module**: 81 tests (lifecycle, periodic tasks, move semantics)
-- **Semaphore Module**: 68 tests (binary, counting, mutexes, lock guards)  
+- **Semaphore Module**: 81 tests (binary, counting, mutexes, lock guards)  
 - **Queue Module**: 49 tests (send/receive operations, state management)
 - **Event Group Module**: 30 tests (bit operations, wait conditions)
 - **Stream Buffer Module**: 47 tests (buffer operations, ISR variants)
 - **Message Buffer Module**: 32 tests (variable-length messages, allocators)
 - **Timer Module**: 50 tests (duration types, callback functionality, move semantics)
 - **Enhanced Multitasking**: 12 tests (advanced scenarios, racing conditions)
-- **STL Integration**: 10 tests (STL compatibility, performance analysis)
+- **STL Integration**: 15 tests (STL compatibility, performance analysis)
 - **Timeout Precision**: 11 tests (chrono support, sub-millisecond delays)
 - **C++17 Features**: 13 tests (move semantics, template metaprogramming, RAII)
+- **Enhanced SW Timer**: 18 tests (enhanced timer behavior and coordination)
 
 ### Running Tests
 
@@ -78,7 +79,7 @@ The project automatically generates three comprehensive quality reports that are
 - **Content**: 
   - Complete test execution results with pass/fail status
   - Individual test performance metrics
-  - Code coverage analysis (96.8% line coverage, 95.7% function coverage)
+  - Code coverage analysis (97.0% line coverage, 98.2% function coverage)
   - Detailed explanation of uncovered code areas
   - Test categorization and quality metrics
 - **Purpose**: Demonstrates system validation and production readiness
@@ -93,7 +94,7 @@ make validation-verification-report
 
 # This command will:
 # 1. Build the project with coverage enabled
-# 2. Run all 421 tests
+# 2. Run all 439 tests
 # 3. Generate coverage data
 # 4. Run comprehensive static analysis (clang-tidy + enhanced cppcheck + MISRA C++)
 # 5. Generate all reports with current results
@@ -167,7 +168,7 @@ cat ../VALIDATION_VERIFICATION_REPORT.md
 
 ## Project Status
 
-- ✅ **All 421 tests passing** (100% success rate)
-- ✅ **96.6% line coverage** and **94.9% function coverage**
+- ✅ **All 439 tests passing** (100% success rate)
+- ✅ **97.0% line coverage** and **98.2% function coverage**
 - ✅ **Comprehensive static analysis** with clang-tidy + enhanced cppcheck (all rules) + MISRA C++
 - ✅ **Production ready** with comprehensive validation
