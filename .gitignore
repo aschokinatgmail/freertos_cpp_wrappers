@@ -4,7 +4,11 @@ out/
 .vscode/
 .vs/
 
-# Note: Generated documentation is now included in repository
+# Documentation build output
+site/
+docs_old/
+
+# Note: Generated documentation site is excluded (built from source)
 
 # CMake
 CMakeCache.txt
