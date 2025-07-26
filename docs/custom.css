@@ -104,8 +104,22 @@ code, pre, .fragment {
 #titlearea {
   background: linear-gradient(135deg, var(--apple-blue) 0%, var(--apple-blue-dark) 100%);
   color: white;
-  padding: var(--space-2xl) var(--space-2xl) var(--space-xl) var(--space-2xl);
+  padding: var(--space-2xl) var(--space-xl) var(--space-xl) var(--space-xl);
   border-radius: 0;
+  max-width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+#titlearea table {
+  width: 100%;
+  max-width: 100%;
+  table-layout: fixed;
+}
+
+#titlearea td {
+  width: 100%;
+  box-sizing: border-box;
 }
 
 #projectname {
@@ -114,6 +128,8 @@ code, pre, .fragment {
   margin: 0;
   letter-spacing: -0.015em;
   line-height: 1.0625;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 #projectbrief {
@@ -123,6 +139,8 @@ code, pre, .fragment {
   opacity: 0.92;
   letter-spacing: -0.003em;
   line-height: 1.31579;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 /* Apple-inspired navigation styling */
@@ -189,11 +207,15 @@ code, pre, .fragment {
   z-index: 100;
   overflow-y: auto;
   overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 #nav-tree {
   padding: var(--space-xl);
   margin-top: 180px; /* Account for header */
+  flex: 1;
+  min-height: 0; /* Allow flex shrinking */
 }
 
 #nav-tree .children_ul {
@@ -203,7 +225,7 @@ code, pre, .fragment {
 }
 
 #nav-tree a {
-  color: var(--text-secondary);
+  color: var(--text-primary);
   text-decoration: none;
   padding: var(--space-sm) var(--space-md);
   border-radius: var(--radius-sm);
@@ -232,6 +254,7 @@ code, pre, .fragment {
 /* Improve tree navigation icons */
 #nav-tree .item {
   margin: 0;
+  color: var(--text-primary);
 }
 
 #nav-tree .children_ul .item {
