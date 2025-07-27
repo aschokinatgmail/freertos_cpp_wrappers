@@ -1,0 +1,255 @@
+\doxysection{freertos\+::event\+\_\+group\texorpdfstring{$<$}{<} Event\+Group\+Allocator \texorpdfstring{$>$}{>} Class Template Reference}
+\hypertarget{classfreertos_1_1event__group}{}\label{classfreertos_1_1event__group}\index{freertos::event\_group$<$ EventGroupAllocator $>$@{freertos::event\_group$<$ EventGroupAllocator $>$}}
+
+
+A wrapper for the Free\+RTOS event group.  
+
+
+
+
+{\ttfamily \#include $<$freertos\+\_\+event\+\_\+group.\+hpp$>$}
+
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{classfreertos_1_1event__group_a87f2b552f330f80dad11cf4f5045613e}\label{classfreertos_1_1event__group_a87f2b552f330f80dad11cf4f5045613e} 
+{\bfseries event\+\_\+group} (void)
+\begin{DoxyCompactList}\small\item\em Construct a new event group object. \end{DoxyCompactList}\item 
+\Hypertarget{classfreertos_1_1event__group_a0221dd4ea3f75247b0ddb245f9a197dc}\label{classfreertos_1_1event__group_a0221dd4ea3f75247b0ddb245f9a197dc} 
+{\bfseries event\+\_\+group} (const \mbox{\hyperlink{classfreertos_1_1event__group}{event\+\_\+group}} \&)=delete
+\item 
+\Hypertarget{classfreertos_1_1event__group_ad158fe9dd5e772e52df852939aefe90a}\label{classfreertos_1_1event__group_ad158fe9dd5e772e52df852939aefe90a} 
+{\bfseries event\+\_\+group} (\mbox{\hyperlink{classfreertos_1_1event__group}{event\+\_\+group}} \&\&other)=delete
+\item 
+\Hypertarget{classfreertos_1_1event__group_a26e2dfa374407947265a5976078f7a1a}\label{classfreertos_1_1event__group_a26e2dfa374407947265a5976078f7a1a} 
+{\bfseries \texorpdfstring{$\sim$}{\string~}event\+\_\+group} (void)
+\begin{DoxyCompactList}\small\item\em Destruct the event group object and delete the event group instance if it was created. \end{DoxyCompactList}\item 
+\Hypertarget{classfreertos_1_1event__group_ae0708385bf99abd78edfc3ae36144230}\label{classfreertos_1_1event__group_ae0708385bf99abd78edfc3ae36144230} 
+\mbox{\hyperlink{classfreertos_1_1event__group}{event\+\_\+group}} \& {\bfseries operator=} (const \mbox{\hyperlink{classfreertos_1_1event__group}{event\+\_\+group}} \&)=delete
+\item 
+\Hypertarget{classfreertos_1_1event__group_a8ae1e5b9a8e406b406686ac76368e0d2}\label{classfreertos_1_1event__group_a8ae1e5b9a8e406b406686ac76368e0d2} 
+\mbox{\hyperlink{classfreertos_1_1event__group}{event\+\_\+group}} \& {\bfseries operator=} (\mbox{\hyperlink{classfreertos_1_1event__group}{event\+\_\+group}} \&\&other)=delete
+\item 
+Event\+Group\+Handle\+\_\+t \mbox{\hyperlink{classfreertos_1_1event__group_aa82fcc488cb20255a3c4fcd4075cbc22}{handle}} (void) const
+\begin{DoxyCompactList}\small\item\em Method to get the handle of the event group. \href{https://www.freertos.org/xEventGroupGetHandle.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Event\+Group\+Get\+Handle.\+html}}. \end{DoxyCompactList}\item 
+Event\+Bits\+\_\+t \mbox{\hyperlink{classfreertos_1_1event__group_a0b2b00c1160e0d9e3499545ee750a219}{set\+\_\+bits}} (const Event\+Bits\+\_\+t bits\+\_\+to\+\_\+set)
+\begin{DoxyCompactList}\small\item\em Method to set bits in the event group. \href{https://www.freertos.org/xEventGroupSetBits.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Event\+Group\+Set\+Bits.\+html}}. \end{DoxyCompactList}\item 
+Event\+Bits\+\_\+t \mbox{\hyperlink{classfreertos_1_1event__group_a74a089c2f245c902a010c0fee6187f73}{set\+\_\+bits\+\_\+isr}} (const Event\+Bits\+\_\+t bits\+\_\+to\+\_\+set)
+\begin{DoxyCompactList}\small\item\em Method to set bits in the event group from an ISR. \href{https://www.freertos.org/xEventGroupSetBitsFromISR.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Event\+Group\+Set\+Bits\+From\+ISR.\+html}}. \end{DoxyCompactList}\item 
+Event\+Bits\+\_\+t \mbox{\hyperlink{classfreertos_1_1event__group_ad82e8b26b3ebd87078b0d4e3e02f9890}{clear\+\_\+bits}} (const Event\+Bits\+\_\+t bits\+\_\+to\+\_\+clear)
+\begin{DoxyCompactList}\small\item\em Method to clear bits in the event group. \href{https://www.freertos.org/xEventGroupClearBits.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Event\+Group\+Clear\+Bits.\+html}}. \end{DoxyCompactList}\item 
+Event\+Bits\+\_\+t \mbox{\hyperlink{classfreertos_1_1event__group_a7e5f4d035c7f0acb49bbe1f3d8a3306f}{wait\+\_\+bits}} (const Event\+Bits\+\_\+t bits\+\_\+to\+\_\+wait\+\_\+for, const Base\+Type\+\_\+t clear\+\_\+on\+\_\+exit, const Base\+Type\+\_\+t wait\+\_\+for\+\_\+all\+\_\+bits, const Tick\+Type\+\_\+t ticks\+\_\+to\+\_\+wait)
+\begin{DoxyCompactList}\small\item\em Method waiting for the bits or group of bits to be set. \href{https://www.freertos.org/xEventGroupWaitBits.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Event\+Group\+Wait\+Bits.\+html}}. \end{DoxyCompactList}\item 
+{\footnotesize template$<$typename Rep , typename Period $>$ }\\Event\+Bits\+\_\+t \mbox{\hyperlink{classfreertos_1_1event__group_a3679404448bbf8890b49e73d8217a74d}{wait\+\_\+bits}} (const Event\+Bits\+\_\+t bits\+\_\+to\+\_\+wait\+\_\+for, const Base\+Type\+\_\+t clear\+\_\+on\+\_\+exit, const Base\+Type\+\_\+t wait\+\_\+for\+\_\+all\+\_\+bits, const std\+::chrono\+::duration$<$ Rep, Period $>$ \&timeout)
+\begin{DoxyCompactList}\small\item\em Method waiting for the bits or group of bits to be set compliant to the C++ std\+::chrono library. \href{https://www.freertos.org/xEventGroupWaitBits.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Event\+Group\+Wait\+Bits.\+html}}. \end{DoxyCompactList}\item 
+Event\+Bits\+\_\+t \mbox{\hyperlink{classfreertos_1_1event__group_a9ac310e75fb7181b746688750e2e6b0a}{get\+\_\+bits}} (void) const
+\begin{DoxyCompactList}\small\item\em Method to get the bits of the event group. \href{https://www.freertos.org/xEventGroupGetBits.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Event\+Group\+Get\+Bits.\+html}}. \end{DoxyCompactList}\item 
+Event\+Bits\+\_\+t \mbox{\hyperlink{classfreertos_1_1event__group_a272afb801b31060db8ee3d58ff1554d3}{get\+\_\+bits\+\_\+isr}} (void) const
+\begin{DoxyCompactList}\small\item\em Method to get the bits of the event group from an ISR. \href{https://www.freertos.org/xEventGroupGetBitsFromISR.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Event\+Group\+Get\+Bits\+From\+ISR.\+html}}. \end{DoxyCompactList}\item 
+Event\+Bits\+\_\+t \mbox{\hyperlink{classfreertos_1_1event__group_adb80263f86a04c955c7c5778f56028f4}{sync}} (const Event\+Bits\+\_\+t bits\+\_\+to\+\_\+set, const Event\+Bits\+\_\+t bits\+\_\+to\+\_\+wait\+\_\+for, const Tick\+Type\+\_\+t ticks\+\_\+to\+\_\+wait)
+\begin{DoxyCompactList}\small\item\em Method to synchronize the event group. \href{https://www.freertos.org/xEventGroupSync.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Event\+Group\+Sync.\+html}}. \end{DoxyCompactList}\item 
+\Hypertarget{classfreertos_1_1event__group_ad3cdb8d8076b093d1b8d5f21309f9a06}\label{classfreertos_1_1event__group_ad3cdb8d8076b093d1b8d5f21309f9a06} 
+{\footnotesize template$<$typename Rep , typename Period $>$ }\\Event\+Bits\+\_\+t {\bfseries sync} (const Event\+Bits\+\_\+t bits\+\_\+to\+\_\+set, const Event\+Bits\+\_\+t bits\+\_\+to\+\_\+wait\+\_\+for, const std\+::chrono\+::duration$<$ Rep, Period $>$ \&timeout)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\subsubsection*{template$<$typename Event\+Group\+Allocator$>$\newline
+class freertos\+::event\+\_\+group$<$ Event\+Group\+Allocator $>$}
+A wrapper for the Free\+RTOS event group. 
+
+
+\begin{DoxyTemplParams}{Template Parameters}
+{\em Event\+Group\+Allocator} & type of the event group allocator \\
+\hline
+\end{DoxyTemplParams}
+\begin{Desc}
+\item[Examples]\par
+\mbox{\hyperlink{synchronization_example_8cpp-example}{synchronization\+\_\+example.\+cpp}}.\end{Desc}
+
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classfreertos_1_1event__group_ad82e8b26b3ebd87078b0d4e3e02f9890}\label{classfreertos_1_1event__group_ad82e8b26b3ebd87078b0d4e3e02f9890} 
+\index{freertos::event\_group$<$ EventGroupAllocator $>$@{freertos::event\_group$<$ EventGroupAllocator $>$}!clear\_bits@{clear\_bits}}
+\index{clear\_bits@{clear\_bits}!freertos::event\_group$<$ EventGroupAllocator $>$@{freertos::event\_group$<$ EventGroupAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{clear\_bits()}{clear\_bits()}}
+{\footnotesize\ttfamily template$<$typename Event\+Group\+Allocator $>$ \\
+Event\+Bits\+\_\+t \mbox{\hyperlink{classfreertos_1_1event__group}{freertos\+::event\+\_\+group}}$<$ Event\+Group\+Allocator $>$\+::clear\+\_\+bits (\begin{DoxyParamCaption}\item[{const Event\+Bits\+\_\+t}]{bits\+\_\+to\+\_\+clear }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Method to clear bits in the event group. \href{https://www.freertos.org/xEventGroupClearBits.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Event\+Group\+Clear\+Bits.\+html}}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em bits\+\_\+to\+\_\+clear} & bits to clear \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Event\+Bits\+\_\+t bits cleared 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1event__group_a9ac310e75fb7181b746688750e2e6b0a}\label{classfreertos_1_1event__group_a9ac310e75fb7181b746688750e2e6b0a} 
+\index{freertos::event\_group$<$ EventGroupAllocator $>$@{freertos::event\_group$<$ EventGroupAllocator $>$}!get\_bits@{get\_bits}}
+\index{get\_bits@{get\_bits}!freertos::event\_group$<$ EventGroupAllocator $>$@{freertos::event\_group$<$ EventGroupAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{get\_bits()}{get\_bits()}}
+{\footnotesize\ttfamily template$<$typename Event\+Group\+Allocator $>$ \\
+Event\+Bits\+\_\+t \mbox{\hyperlink{classfreertos_1_1event__group}{freertos\+::event\+\_\+group}}$<$ Event\+Group\+Allocator $>$\+::get\+\_\+bits (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Method to get the bits of the event group. \href{https://www.freertos.org/xEventGroupGetBits.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Event\+Group\+Get\+Bits.\+html}}. 
+
+\begin{DoxyReturn}{Returns}
+Event\+Bits\+\_\+t Current value of the event group bits 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1event__group_a272afb801b31060db8ee3d58ff1554d3}\label{classfreertos_1_1event__group_a272afb801b31060db8ee3d58ff1554d3} 
+\index{freertos::event\_group$<$ EventGroupAllocator $>$@{freertos::event\_group$<$ EventGroupAllocator $>$}!get\_bits\_isr@{get\_bits\_isr}}
+\index{get\_bits\_isr@{get\_bits\_isr}!freertos::event\_group$<$ EventGroupAllocator $>$@{freertos::event\_group$<$ EventGroupAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{get\_bits\_isr()}{get\_bits\_isr()}}
+{\footnotesize\ttfamily template$<$typename Event\+Group\+Allocator $>$ \\
+Event\+Bits\+\_\+t \mbox{\hyperlink{classfreertos_1_1event__group}{freertos\+::event\+\_\+group}}$<$ Event\+Group\+Allocator $>$\+::get\+\_\+bits\+\_\+isr (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Method to get the bits of the event group from an ISR. \href{https://www.freertos.org/xEventGroupGetBitsFromISR.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Event\+Group\+Get\+Bits\+From\+ISR.\+html}}. 
+
+\begin{DoxyReturn}{Returns}
+Event\+Bits\+\_\+t Current value of the event group bits 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1event__group_aa82fcc488cb20255a3c4fcd4075cbc22}\label{classfreertos_1_1event__group_aa82fcc488cb20255a3c4fcd4075cbc22} 
+\index{freertos::event\_group$<$ EventGroupAllocator $>$@{freertos::event\_group$<$ EventGroupAllocator $>$}!handle@{handle}}
+\index{handle@{handle}!freertos::event\_group$<$ EventGroupAllocator $>$@{freertos::event\_group$<$ EventGroupAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{handle()}{handle()}}
+{\footnotesize\ttfamily template$<$typename Event\+Group\+Allocator $>$ \\
+Event\+Group\+Handle\+\_\+t \mbox{\hyperlink{classfreertos_1_1event__group}{freertos\+::event\+\_\+group}}$<$ Event\+Group\+Allocator $>$\+::handle (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Method to get the handle of the event group. \href{https://www.freertos.org/xEventGroupGetHandle.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Event\+Group\+Get\+Handle.\+html}}. 
+
+\begin{DoxyReturn}{Returns}
+Event\+Group\+Handle\+\_\+t event group handle 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1event__group_a0b2b00c1160e0d9e3499545ee750a219}\label{classfreertos_1_1event__group_a0b2b00c1160e0d9e3499545ee750a219} 
+\index{freertos::event\_group$<$ EventGroupAllocator $>$@{freertos::event\_group$<$ EventGroupAllocator $>$}!set\_bits@{set\_bits}}
+\index{set\_bits@{set\_bits}!freertos::event\_group$<$ EventGroupAllocator $>$@{freertos::event\_group$<$ EventGroupAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{set\_bits()}{set\_bits()}}
+{\footnotesize\ttfamily template$<$typename Event\+Group\+Allocator $>$ \\
+Event\+Bits\+\_\+t \mbox{\hyperlink{classfreertos_1_1event__group}{freertos\+::event\+\_\+group}}$<$ Event\+Group\+Allocator $>$\+::set\+\_\+bits (\begin{DoxyParamCaption}\item[{const Event\+Bits\+\_\+t}]{bits\+\_\+to\+\_\+set }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Method to set bits in the event group. \href{https://www.freertos.org/xEventGroupSetBits.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Event\+Group\+Set\+Bits.\+html}}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em bits\+\_\+to\+\_\+set} & bits to set \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Event\+Bits\+\_\+t bits set 
+\end{DoxyReturn}
+\begin{Desc}
+\item[Examples]\par
+\mbox{\hyperlink{synchronization_example_8cpp-example}{synchronization\+\_\+example.\+cpp}}.\end{Desc}
+\Hypertarget{classfreertos_1_1event__group_a74a089c2f245c902a010c0fee6187f73}\label{classfreertos_1_1event__group_a74a089c2f245c902a010c0fee6187f73} 
+\index{freertos::event\_group$<$ EventGroupAllocator $>$@{freertos::event\_group$<$ EventGroupAllocator $>$}!set\_bits\_isr@{set\_bits\_isr}}
+\index{set\_bits\_isr@{set\_bits\_isr}!freertos::event\_group$<$ EventGroupAllocator $>$@{freertos::event\_group$<$ EventGroupAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{set\_bits\_isr()}{set\_bits\_isr()}}
+{\footnotesize\ttfamily template$<$typename Event\+Group\+Allocator $>$ \\
+Event\+Bits\+\_\+t \mbox{\hyperlink{classfreertos_1_1event__group}{freertos\+::event\+\_\+group}}$<$ Event\+Group\+Allocator $>$\+::set\+\_\+bits\+\_\+isr (\begin{DoxyParamCaption}\item[{const Event\+Bits\+\_\+t}]{bits\+\_\+to\+\_\+set }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Method to set bits in the event group from an ISR. \href{https://www.freertos.org/xEventGroupSetBitsFromISR.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Event\+Group\+Set\+Bits\+From\+ISR.\+html}}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em bits\+\_\+to\+\_\+set} & bits to set \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Event\+Bits\+\_\+t bits set 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1event__group_adb80263f86a04c955c7c5778f56028f4}\label{classfreertos_1_1event__group_adb80263f86a04c955c7c5778f56028f4} 
+\index{freertos::event\_group$<$ EventGroupAllocator $>$@{freertos::event\_group$<$ EventGroupAllocator $>$}!sync@{sync}}
+\index{sync@{sync}!freertos::event\_group$<$ EventGroupAllocator $>$@{freertos::event\_group$<$ EventGroupAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{sync()}{sync()}}
+{\footnotesize\ttfamily template$<$typename Event\+Group\+Allocator $>$ \\
+Event\+Bits\+\_\+t \mbox{\hyperlink{classfreertos_1_1event__group}{freertos\+::event\+\_\+group}}$<$ Event\+Group\+Allocator $>$\+::sync (\begin{DoxyParamCaption}\item[{const Event\+Bits\+\_\+t}]{bits\+\_\+to\+\_\+set,  }\item[{const Event\+Bits\+\_\+t}]{bits\+\_\+to\+\_\+wait\+\_\+for,  }\item[{const Tick\+Type\+\_\+t}]{ticks\+\_\+to\+\_\+wait }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Method to synchronize the event group. \href{https://www.freertos.org/xEventGroupSync.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Event\+Group\+Sync.\+html}}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em bits\+\_\+to\+\_\+set} & bits to set \\
+\hline
+{\em bits\+\_\+to\+\_\+wait\+\_\+for} & bits to wait for \\
+\hline
+{\em ticks\+\_\+to\+\_\+wait} & timeout in ticks to wait for the bits \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Event\+Bits\+\_\+t value of the event group after the call returns 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1event__group_a3679404448bbf8890b49e73d8217a74d}\label{classfreertos_1_1event__group_a3679404448bbf8890b49e73d8217a74d} 
+\index{freertos::event\_group$<$ EventGroupAllocator $>$@{freertos::event\_group$<$ EventGroupAllocator $>$}!wait\_bits@{wait\_bits}}
+\index{wait\_bits@{wait\_bits}!freertos::event\_group$<$ EventGroupAllocator $>$@{freertos::event\_group$<$ EventGroupAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{wait\_bits()}{wait\_bits()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily template$<$typename Event\+Group\+Allocator $>$ \\
+template$<$typename Rep , typename Period $>$ \\
+Event\+Bits\+\_\+t \mbox{\hyperlink{classfreertos_1_1event__group}{freertos\+::event\+\_\+group}}$<$ Event\+Group\+Allocator $>$\+::wait\+\_\+bits (\begin{DoxyParamCaption}\item[{const Event\+Bits\+\_\+t}]{bits\+\_\+to\+\_\+wait\+\_\+for,  }\item[{const Base\+Type\+\_\+t}]{clear\+\_\+on\+\_\+exit,  }\item[{const Base\+Type\+\_\+t}]{wait\+\_\+for\+\_\+all\+\_\+bits,  }\item[{const std\+::chrono\+::duration$<$ Rep, Period $>$ \&}]{timeout }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Method waiting for the bits or group of bits to be set compliant to the C++ std\+::chrono library. \href{https://www.freertos.org/xEventGroupWaitBits.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Event\+Group\+Wait\+Bits.\+html}}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em bits\+\_\+to\+\_\+wait\+\_\+for} & bits to wait for \\
+\hline
+{\em clear\+\_\+on\+\_\+exit} & clear bits on exit \\
+\hline
+{\em wait\+\_\+for\+\_\+all\+\_\+bits} & wait for all bits \\
+\hline
+{\em timeout} & timeout to wait for the bits \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Event\+Bits\+\_\+t value of the event group after the call returns 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1event__group_a7e5f4d035c7f0acb49bbe1f3d8a3306f}\label{classfreertos_1_1event__group_a7e5f4d035c7f0acb49bbe1f3d8a3306f} 
+\index{freertos::event\_group$<$ EventGroupAllocator $>$@{freertos::event\_group$<$ EventGroupAllocator $>$}!wait\_bits@{wait\_bits}}
+\index{wait\_bits@{wait\_bits}!freertos::event\_group$<$ EventGroupAllocator $>$@{freertos::event\_group$<$ EventGroupAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{wait\_bits()}{wait\_bits()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily template$<$typename Event\+Group\+Allocator $>$ \\
+Event\+Bits\+\_\+t \mbox{\hyperlink{classfreertos_1_1event__group}{freertos\+::event\+\_\+group}}$<$ Event\+Group\+Allocator $>$\+::wait\+\_\+bits (\begin{DoxyParamCaption}\item[{const Event\+Bits\+\_\+t}]{bits\+\_\+to\+\_\+wait\+\_\+for,  }\item[{const Base\+Type\+\_\+t}]{clear\+\_\+on\+\_\+exit,  }\item[{const Base\+Type\+\_\+t}]{wait\+\_\+for\+\_\+all\+\_\+bits,  }\item[{const Tick\+Type\+\_\+t}]{ticks\+\_\+to\+\_\+wait }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Method waiting for the bits or group of bits to be set. \href{https://www.freertos.org/xEventGroupWaitBits.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Event\+Group\+Wait\+Bits.\+html}}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em bits\+\_\+to\+\_\+wait\+\_\+for} & bits to wait for \\
+\hline
+{\em clear\+\_\+on\+\_\+exit} & clear bits on exit \\
+\hline
+{\em wait\+\_\+for\+\_\+all\+\_\+bits} & wait for all bits \\
+\hline
+{\em ticks\+\_\+to\+\_\+wait} & timeout in ticks to wait for the bits \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Event\+Bits\+\_\+t value of the event group after the call returns 
+\end{DoxyReturn}
+\begin{Desc}
+\item[Examples]\par
+\mbox{\hyperlink{synchronization_example_8cpp-example}{synchronization\+\_\+example.\+cpp}}.\end{Desc}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+include/freertos\+\_\+event\+\_\+group.\+hpp\end{DoxyCompactItemize}

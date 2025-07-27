@@ -1,0 +1,929 @@
+\doxysection{freertos\+::queue\texorpdfstring{$<$}{<} Queue\+Length, T, Queue\+Allocator \texorpdfstring{$>$}{>} Class Template Reference}
+\hypertarget{classfreertos_1_1queue}{}\label{classfreertos_1_1queue}\index{freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}}
+
+
+A modern C++ wrapper for Free\+RTOS queues with type safety.  
+
+
+
+
+{\ttfamily \#include $<$freertos\+\_\+queue.\+hpp$>$}
+
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classfreertos_1_1queue_ad7a7ba3e594156a7a9dab385290a0aeb}{queue}} (const char \texorpdfstring{$\ast$}{*}registred\+\_\+name=nullptr)
+\begin{DoxyCompactList}\small\item\em Construct a new queue object. \end{DoxyCompactList}\item 
+\Hypertarget{classfreertos_1_1queue_a154e1fb10c98847e3ca7af8aa5c8fc29}\label{classfreertos_1_1queue_a154e1fb10c98847e3ca7af8aa5c8fc29} 
+{\bfseries queue} (const \mbox{\hyperlink{classfreertos_1_1queue}{queue}} \&)=delete
+\item 
+\Hypertarget{classfreertos_1_1queue_a7226d200508bd2ca5e6d425fa5a92700}\label{classfreertos_1_1queue_a7226d200508bd2ca5e6d425fa5a92700} 
+{\bfseries queue} (\mbox{\hyperlink{classfreertos_1_1queue}{queue}} \&\&src)=delete
+\item 
+\Hypertarget{classfreertos_1_1queue_af12b1fa365d2d5b93e278d90d55bdc4c}\label{classfreertos_1_1queue_af12b1fa365d2d5b93e278d90d55bdc4c} 
+\mbox{\hyperlink{classfreertos_1_1queue}{queue}} \& {\bfseries operator=} (const \mbox{\hyperlink{classfreertos_1_1queue}{queue}} \&)=delete
+\item 
+\Hypertarget{classfreertos_1_1queue_a0f069872c0755ee6eb4a8f14eb11cfee}\label{classfreertos_1_1queue_a0f069872c0755ee6eb4a8f14eb11cfee} 
+\mbox{\hyperlink{classfreertos_1_1queue}{queue}} \& {\bfseries operator=} (\mbox{\hyperlink{classfreertos_1_1queue}{queue}} \&\&src)=delete
+\item 
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue_a603f78c5925a6faa1866371acddcb321}{send}} (const T \&item, Tick\+Type\+\_\+t ticks\+\_\+to\+\_\+wait)
+\begin{DoxyCompactList}\small\item\em Posts an item to the back of a queue. \href{https://www.freertos.org/a00117.html}{\texttt{ https\+://www.\+freertos.\+org/a00117.\+html}}. \end{DoxyCompactList}\item 
+{\footnotesize template$<$typename Rep , typename Period $>$ }\\Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue_a7d6f58c72807450314b49380520cbfaa}{send}} (const T \&item, const std\+::chrono\+::duration$<$ Rep, Period $>$ \&timeout)
+\begin{DoxyCompactList}\small\item\em Posts an item to the back of a queue. \href{https://www.freertos.org/a00117.html}{\texttt{ https\+://www.\+freertos.\+org/a00117.\+html}}. \end{DoxyCompactList}\item 
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue_a34d5c5b86b9fc81a728f7dfea968d7b5}{send\+\_\+isr}} (const T \&item, Base\+Type\+\_\+t \&higher\+\_\+priority\+\_\+task\+\_\+woken)
+\begin{DoxyCompactList}\small\item\em Posts an item to the back of a queue from an ISR. \href{https://www.freertos.org/a00119.html}{\texttt{ https\+://www.\+freertos.\+org/a00119.\+html}}. \end{DoxyCompactList}\item 
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue_ac29369b7da29863881d171ba7737df2d}{send\+\_\+isr}} (const T \&item)
+\begin{DoxyCompactList}\small\item\em Posts an item to the back of a queue from an ISR. \href{https://www.freertos.org/a00119.html}{\texttt{ https\+://www.\+freertos.\+org/a00119.\+html}}. \end{DoxyCompactList}\item 
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue_a5082a40a1e47a8155925cac7e5ef94e1}{send\+\_\+back}} (const T \&item, Tick\+Type\+\_\+t ticks\+\_\+to\+\_\+wait)
+\begin{DoxyCompactList}\small\item\em Posts an item to the back of a queue. \href{https://www.freertos.org/xQueueSendToBack.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Queue\+Send\+To\+Back.\+html}}. \end{DoxyCompactList}\item 
+{\footnotesize template$<$typename Rep , typename Period $>$ }\\Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue_a3e075075339dec5dbeec7ec7590f2327}{send\+\_\+back}} (const T \&item, const std\+::chrono\+::duration$<$ Rep, Period $>$ \&timeout)
+\begin{DoxyCompactList}\small\item\em Posts an item to the back of a queue. \href{https://www.freertos.org/xQueueSendToBack.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Queue\+Send\+To\+Back.\+html}}. \end{DoxyCompactList}\item 
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue_aa3e1c604aedbc9bbcc89c5660c463381}{send\+\_\+back\+\_\+isr}} (const T \&item, Base\+Type\+\_\+t \&higher\+\_\+priority\+\_\+task\+\_\+woken)
+\begin{DoxyCompactList}\small\item\em Posts an item to the back of a queue from an ISR. \href{https://www.freertos.org/xQueueSendToBackFromISR.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Queue\+Send\+To\+Back\+From\+ISR.\+html}}. \end{DoxyCompactList}\item 
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue_ae69ba56a4bfd58dbc9dbaa916d87e3c5}{send\+\_\+back\+\_\+isr}} (const T \&item)
+\begin{DoxyCompactList}\small\item\em Posts an item to the back of a queue from an ISR. \href{https://www.freertos.org/xQueueSendToBackFromISR.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Queue\+Send\+To\+Back\+From\+ISR.\+html}}. \end{DoxyCompactList}\item 
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue_adcf986f60288a5b738cfc8b3c694f5ac}{send\+\_\+front}} (const T \&item, Tick\+Type\+\_\+t ticks\+\_\+to\+\_\+wait)
+\begin{DoxyCompactList}\small\item\em Posts an item to the front of a queue. \href{https://www.freertos.org/xQueueSendToFront.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Queue\+Send\+To\+Front.\+html}}. \end{DoxyCompactList}\item 
+{\footnotesize template$<$typename Rep , typename Period $>$ }\\Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue_a63063ed3b52b9cc303494a7644523579}{send\+\_\+front}} (const T \&item, const std\+::chrono\+::duration$<$ Rep, Period $>$ \&timeout)
+\begin{DoxyCompactList}\small\item\em Posts an item to the front of a queue. \href{https://www.freertos.org/xQueueSendToFront.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Queue\+Send\+To\+Front.\+html}}. \end{DoxyCompactList}\item 
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue_a6dcd49a8e8d379e9da4494fa6e06d1bb}{send\+\_\+front\+\_\+isr}} (const T \&item, Base\+Type\+\_\+t \&higher\+\_\+priority\+\_\+task\+\_\+woken)
+\begin{DoxyCompactList}\small\item\em Posts an item to the front of a queue from an ISR. \href{https://www.freertos.org/xQueueSendToFrontFromISR.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Queue\+Send\+To\+Front\+From\+ISR.\+html}}. \end{DoxyCompactList}\item 
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue_ae8c445358e467bf20808e66ef9eaa3fa}{send\+\_\+front\+\_\+isr}} (const T \&item)
+\begin{DoxyCompactList}\small\item\em Posts an item to the front of a queue from an ISR. \href{https://www.freertos.org/xQueueSendToFrontFromISR.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Queue\+Send\+To\+Front\+From\+ISR.\+html}}. \end{DoxyCompactList}\item 
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue_a25fa1fd799780bcfb82731bf2a16e5fc}{receive}} (T \&item, Tick\+Type\+\_\+t ticks\+\_\+to\+\_\+wait)
+\begin{DoxyCompactList}\small\item\em Receive an item from a queue. \href{https://www.freertos.org/a00118.html}{\texttt{ https\+://www.\+freertos.\+org/a00118.\+html}}. \end{DoxyCompactList}\item 
+optional$<$ T $>$ \mbox{\hyperlink{classfreertos_1_1queue_ae09c48130ce1bdf0ab6128cd98f279b5}{receive}} (Tick\+Type\+\_\+t ticks\+\_\+to\+\_\+wait)
+\begin{DoxyCompactList}\small\item\em Receive an item from a queue. \href{https://www.freertos.org/a00118.html}{\texttt{ https\+://www.\+freertos.\+org/a00118.\+html}}. \end{DoxyCompactList}\item 
+{\footnotesize template$<$typename Rep , typename Period $>$ }\\Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue_a43e013e00fdd839d3784ccf37a971226}{receive}} (T \&item, const std\+::chrono\+::duration$<$ Rep, Period $>$ \&timeout)
+\begin{DoxyCompactList}\small\item\em Receive an item from a queue. \href{https://www.freertos.org/a00118.html}{\texttt{ https\+://www.\+freertos.\+org/a00118.\+html}}. \end{DoxyCompactList}\item 
+{\footnotesize template$<$typename Rep , typename Period $>$ }\\optional$<$ T $>$ \mbox{\hyperlink{classfreertos_1_1queue_a5e307df30c7df09bd4687b7dce1471a6}{receive}} (const std\+::chrono\+::duration$<$ Rep, Period $>$ \&timeout)
+\begin{DoxyCompactList}\small\item\em Receive an item from a queue. \href{https://www.freertos.org/a00118.html}{\texttt{ https\+://www.\+freertos.\+org/a00118.\+html}}. \end{DoxyCompactList}\item 
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue_aea41fe95f95e1f21d0c9e3842e88f9a3}{receive\+\_\+isr}} (T \&item, Base\+Type\+\_\+t \&higher\+\_\+priority\+\_\+task\+\_\+woken)
+\begin{DoxyCompactList}\small\item\em Receive an item from a queue from an ISR. \href{https://www.freertos.org/a00120.html}{\texttt{ https\+://www.\+freertos.\+org/a00120.\+html}}. \end{DoxyCompactList}\item 
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue_a7869a75c6a2cdfa8793d76233c2cccd5}{receive\+\_\+isr}} (T \&item)
+\begin{DoxyCompactList}\small\item\em Receive an item from a queue from an ISR. \href{https://www.freertos.org/a00120.html}{\texttt{ https\+://www.\+freertos.\+org/a00120.\+html}}. \end{DoxyCompactList}\item 
+optional$<$ T $>$ \mbox{\hyperlink{classfreertos_1_1queue_ace91840cdbac2e1816825a41420ee632}{receive\+\_\+isr}} (void)
+\begin{DoxyCompactList}\small\item\em Receive an item from a queue from an ISR. \href{https://www.freertos.org/a00120.html}{\texttt{ https\+://www.\+freertos.\+org/a00120.\+html}}. \end{DoxyCompactList}\item 
+UBase\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue_a2d10f4c8f8cb5d98743a226f0e771a71}{messages\+\_\+waiting}} (void)
+\begin{DoxyCompactList}\small\item\em Return the number of items stored in the queue. \href{https://www.freertos.org/a00018.html\#uxQueueMessagesWaiting}{\texttt{ https\+://www.\+freertos.\+org/a00018.\+html\#ux\+Queue\+Messages\+Waiting}}. \end{DoxyCompactList}\item 
+UBase\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue_a48b35445cee13cb70394faf6f2bf2870}{messages\+\_\+waiting\+\_\+isr}} (void)
+\begin{DoxyCompactList}\small\item\em Return the number of items stored in the queue from an ISR. \href{https://www.freertos.org/a00018.html\#uxQueueMessagesWaitingFromISR}{\texttt{ https\+://www.\+freertos.\+org/a00018.\+html\#ux\+Queue\+Messages\+Waiting\+From\+ISR}}. \end{DoxyCompactList}\item 
+UBase\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue_a83b3b6efefc86c9629f3b71e645e8dbf}{spaces\+\_\+available}} (void)
+\begin{DoxyCompactList}\small\item\em Return the number of spaces available in the queue. \href{https://www.freertos.org/a00018.html\#uxQueueSpacesAvailable}{\texttt{ https\+://www.\+freertos.\+org/a00018.\+html\#ux\+Queue\+Spaces\+Available}}. \end{DoxyCompactList}\item 
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue_ac61937b8d0cef8e3e738fb4658148afe}{reset}} (void)
+\begin{DoxyCompactList}\small\item\em Resets the queue to the empty state. \href{https://www.freertos.org/a00018.html\#xQueueReset}{\texttt{ https\+://www.\+freertos.\+org/a00018.\+html\#x\+Queue\+Reset}}. \end{DoxyCompactList}\item 
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue_aa2d26c4eabbdaabc20969afb7f3b3241}{overwrite}} (const T \&item)
+\begin{DoxyCompactList}\small\item\em A version of send\+\_\+back method that overwrites the items in the queue if it is full. \href{https://www.freertos.org/xQueueOverwrite.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Queue\+Overwrite.\+html}}. \end{DoxyCompactList}\item 
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue_a36dd34162ebadafe270cf41f8ed07434}{overwrite\+\_\+isr}} (const T \&item, Base\+Type\+\_\+t \&higher\+\_\+priority\+\_\+task\+\_\+woken)
+\begin{DoxyCompactList}\small\item\em A version of send\+\_\+back method that overwrites the items in the queue from an ISR. \href{https://www.freertos.org/xQueueOverwriteFromISR.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Queue\+Overwrite\+From\+ISR.\+html}}. \end{DoxyCompactList}\item 
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue_a2e47f094e81258eba46c9e777bc0eb0e}{overwrite\+\_\+isr}} (const T \&item)
+\begin{DoxyCompactList}\small\item\em A version of send\+\_\+back method that overwrites the items in the queue from an ISR. \href{https://www.freertos.org/xQueueOverwriteFromISR.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Queue\+Overwrite\+From\+ISR.\+html}}. \end{DoxyCompactList}\item 
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue_ac3230471095b57846845bb17e2cb68c6}{peek}} (T \&item, Tick\+Type\+\_\+t ticks\+\_\+to\+\_\+wait)
+\begin{DoxyCompactList}\small\item\em Peek an item from a queue. The item is not removed from the queue. \href{https://www.freertos.org/xQueuePeek.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Queue\+Peek.\+html}}. \end{DoxyCompactList}\item 
+{\footnotesize template$<$typename Rep , typename Period $>$ }\\Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue_a06c009b6a9a9f5aae6e3529a94fca4cc}{peek}} (T \&item, const std\+::chrono\+::duration$<$ Rep, Period $>$ \&timeout)
+\begin{DoxyCompactList}\small\item\em Peek an item from a queue. The item is not removed from the queue. \href{https://www.freertos.org/xQueuePeek.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Queue\+Peek.\+html}}. \end{DoxyCompactList}\item 
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue_ab7797f3ca193976aabde257eb9dd6672}{peek\+\_\+isr}} (T \&item, Base\+Type\+\_\+t \&higher\+\_\+priority\+\_\+task\+\_\+woken)
+\begin{DoxyCompactList}\small\item\em Peek an item from a queue from an ISR. The item is not removed from the queue. \href{https://www.freertos.org/xQueuePeekFromISR.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Queue\+Peek\+From\+ISR.\+html}}. \end{DoxyCompactList}\item 
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue_aaed8bd6d67d7ca45c49decdc2122c5ca}{peek\+\_\+isr}} (T \&item)
+\begin{DoxyCompactList}\small\item\em Peek an item from a queue from an ISR. The item is not removed from the queue. \href{https://www.freertos.org/xQueuePeekFromISR.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Queue\+Peek\+From\+ISR.\+html}}. \end{DoxyCompactList}\item 
+optional$<$ T $>$ \mbox{\hyperlink{classfreertos_1_1queue_a89b54fe4d37e47b30ad18b80a7b799db}{peek}} (Tick\+Type\+\_\+t ticks\+\_\+to\+\_\+wait)
+\begin{DoxyCompactList}\small\item\em Peek an item from a queue. The item is not removed from the queue. \href{https://www.freertos.org/xQueuePeek.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Queue\+Peek.\+html}}. \end{DoxyCompactList}\item 
+{\footnotesize template$<$typename Rep , typename Period $>$ }\\optional$<$ T $>$ \mbox{\hyperlink{classfreertos_1_1queue_aeaca86af1501dcdb6fdbf834f904e9f2}{peek}} (const std\+::chrono\+::duration$<$ Rep, Period $>$ \&timeout)
+\begin{DoxyCompactList}\small\item\em Peek an item from a queue. The item is not removed from the queue. \href{https://www.freertos.org/xQueuePeek.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Queue\+Peek.\+html}}. \end{DoxyCompactList}\item 
+optional$<$ T $>$ \mbox{\hyperlink{classfreertos_1_1queue_a7d29a96569f970fc7dc279f9d9d19536}{peek\+\_\+isr}} (void)
+\begin{DoxyCompactList}\small\item\em Peek an item from a queue from an ISR. The item is not removed from the queue. \href{https://www.freertos.org/xQueuePeekFromISR.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Queue\+Peek\+From\+ISR.\+html}}. \end{DoxyCompactList}\item 
+const char \texorpdfstring{$\ast$}{*} \mbox{\hyperlink{classfreertos_1_1queue_a78bb3c04a8e21b31b50bd499ceaef983}{name}} (void) const
+\begin{DoxyCompactList}\small\item\em Return the name of the queue. \href{https://www.freertos.org/a00018.html\#pcQueueGetName}{\texttt{ https\+://www.\+freertos.\+org/a00018.\+html\#pc\+Queue\+Get\+Name}}. \end{DoxyCompactList}\item 
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue_a12164212be7d0ce39a2b91525c6ac1d5}{full\+\_\+isr}} (void) const
+\begin{DoxyCompactList}\small\item\em Method checking if the queue is full from an ISR. \href{https://www.freertos.org/a00018.html\#xQueueIsQueueFullFromISR}{\texttt{ https\+://www.\+freertos.\+org/a00018.\+html\#x\+Queue\+Is\+Queue\+Full\+From\+ISR}}. \end{DoxyCompactList}\item 
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue_a35d97dd4e37365dcd19ebe0cc6e994af}{empty\+\_\+isr}} (void) const
+\begin{DoxyCompactList}\small\item\em Method checking if the queue is empty from an ISR. \href{https://www.freertos.org/a00018.html\#xQueueIsQueueEmptyFromISR}{\texttt{ https\+://www.\+freertos.\+org/a00018.\+html\#x\+Queue\+Is\+Queue\+Empty\+From\+ISR}}. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\subsubsection*{template$<$size\+\_\+t Queue\+Length, typename T, typename Queue\+Allocator$>$\newline
+class freertos\+::queue$<$ Queue\+Length, T, Queue\+Allocator $>$}
+A modern C++ wrapper for Free\+RTOS queues with type safety. 
+
+This class provides a type-\/safe, RAII wrapper around Free\+RTOS queues for inter-\/task communication. It supports compile-\/time type checking, automatic resource management, and std\+::chrono timeout support.
+
+
+\begin{DoxyTemplParams}{Template Parameters}
+{\em Queue\+Length} & The maximum number of items that the queue can hold \\
+\hline
+{\em T} & The type of items stored in the queue (must be copyable) \\
+\hline
+{\em Queue\+Allocator} & The allocator type (static or dynamic)\\
+\hline
+\end{DoxyTemplParams}
+\hypertarget{classfreertos_1_1queue_autotoc_md0}{}\doxysubsubsection{\texorpdfstring{Features\+:}{Features:}}\label{classfreertos_1_1queue_autotoc_md0}
+
+\begin{DoxyItemize}
+\item Type-\/safe item storage and retrieval
+\item RAII automatic resource management
+\item std\+::chrono timeout support
+\item ISR-\/safe operations
+\item Optional queue registry integration
+\item Move semantics prevention for safety
+\end{DoxyItemize}\hypertarget{classfreertos_1_1queue_autotoc_md1}{}\doxysubsubsection{\texorpdfstring{Usage Examples\+:}{Usage Examples:}}\label{classfreertos_1_1queue_autotoc_md1}
+\hypertarget{classfreertos_1_1queue_autotoc_md2}{}\doxysubsubsubsection{\texorpdfstring{Basic Message Passing\+:}{Basic Message Passing:}}\label{classfreertos_1_1queue_autotoc_md2}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{comment}{//\ Create\ a\ queue\ for\ 10\ integers}}
+\DoxyCodeLine{\mbox{\hyperlink{classfreertos_1_1queue}{freertos::queue<10,\ int>}}\ int\_queue;}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{//\ Producer\ task}}
+\DoxyCodeLine{\mbox{\hyperlink{classfreertos_1_1task}{freertos::task<512>}}\ producer(\textcolor{stringliteral}{"{}Producer"{}},\ 3,\ [\&]()\ \{}
+\DoxyCodeLine{\ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i\ =\ 0;\ i\ <\ 20;\ ++i)\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (int\_queue.\mbox{\hyperlink{classfreertos_1_1queue_a603f78c5925a6faa1866371acddcb321}{send}}(i,\ std::chrono::milliseconds(100)))\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}Sent:\ \%d\(\backslash\)\(\backslash\)n"{}},\ i);}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}Failed\ to\ send:\ \%d\(\backslash\)\(\backslash\)n"{}},\ i);}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ vTaskDelay(pdMS\_TO\_TICKS(500));}
+\DoxyCodeLine{\ \ \ \ \}}
+\DoxyCodeLine{\});}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{//\ Consumer\ task}}
+\DoxyCodeLine{\mbox{\hyperlink{classfreertos_1_1task}{freertos::task<512>}}\ consumer(\textcolor{stringliteral}{"{}Consumer"{}},\ 2,\ [\&]()\ \{}
+\DoxyCodeLine{\ \ \ \ \textcolor{keywordflow}{while}\ (\textcolor{keyword}{true})\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ value;}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (int\_queue.\mbox{\hyperlink{classfreertos_1_1queue_a25fa1fd799780bcfb82731bf2a16e5fc}{receive}}(value,\ std::chrono::seconds(1)))\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}Received:\ \%d\(\backslash\)\(\backslash\)n"{}},\ value);}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ printf(\textcolor{stringliteral}{"{}Timeout\ -\/\ no\ data\(\backslash\)\(\backslash\)n"{}});}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\ \ \ \ \}}
+\DoxyCodeLine{\});}
+
+\end{DoxyCode}
+\hypertarget{classfreertos_1_1queue_autotoc_md3}{}\doxysubsubsubsection{\texorpdfstring{Complex Data Types\+:}{Complex Data Types:}}\label{classfreertos_1_1queue_autotoc_md3}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{keyword}{struct\ }SensorData\ \{}
+\DoxyCodeLine{\ \ \ \ \textcolor{keywordtype}{float}\ temperature;}
+\DoxyCodeLine{\ \ \ \ \textcolor{keywordtype}{float}\ humidity;}
+\DoxyCodeLine{\ \ \ \ uint32\_t\ timestamp;}
+\DoxyCodeLine{\};}
+\DoxyCodeLine{}
+\DoxyCodeLine{\mbox{\hyperlink{classfreertos_1_1queue}{freertos::queue<5,\ SensorData>}}\ sensor\_queue(\textcolor{stringliteral}{"{}SensorQueue"{}});}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{//\ Send\ sensor\ data}}
+\DoxyCodeLine{SensorData\ data\{25.5f,\ 60.2f,\ xTaskGetTickCount()\};}
+\DoxyCodeLine{\textcolor{keywordflow}{if}\ (sensor\_queue.send(data,\ 100ms))\ \{}
+\DoxyCodeLine{\ \ \ \ printf(\textcolor{stringliteral}{"{}Sensor\ data\ sent\(\backslash\)\(\backslash\)n"{}});}
+\DoxyCodeLine{\}}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{//\ Receive\ sensor\ data}}
+\DoxyCodeLine{SensorData\ received;}
+\DoxyCodeLine{\textcolor{keywordflow}{if}\ (sensor\_queue.receive(received,\ 1s))\ \{}
+\DoxyCodeLine{\ \ \ \ printf(\textcolor{stringliteral}{"{}Temperature:\ \%.1f°C,\ Humidity:\ \%.1f\%\%\(\backslash\)\(\backslash\)n"{}},}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ received.temperature,\ received.humidity);}
+\DoxyCodeLine{\}}
+
+\end{DoxyCode}
+\hypertarget{classfreertos_1_1queue_autotoc_md4}{}\doxysubsubsubsection{\texorpdfstring{ISR Communication\+:}{ISR Communication:}}\label{classfreertos_1_1queue_autotoc_md4}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\mbox{\hyperlink{classfreertos_1_1queue}{freertos::queue<32,\ uint8\_t>}}\ isr\_queue;}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{keywordtype}{void}\ uart\_interrupt\_handler()\ \{}
+\DoxyCodeLine{\ \ \ \ uint8\_t\ received\_byte\ =\ read\_uart\_register();}
+\DoxyCodeLine{\ \ \ \ BaseType\_t\ task\_woken\ =\ pdFALSE;}
+\DoxyCodeLine{}
+\DoxyCodeLine{\ \ \ \ \textcolor{keywordflow}{if}\ (isr\_queue.\mbox{\hyperlink{classfreertos_1_1queue_a34d5c5b86b9fc81a728f7dfea968d7b5}{send\_isr}}(received\_byte,\ task\_woken))\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ portYIELD\_FROM\_ISR(task\_woken);}
+\DoxyCodeLine{\ \ \ \ \}}
+\DoxyCodeLine{\}}
+\DoxyCodeLine{}
+\DoxyCodeLine{\mbox{\hyperlink{classfreertos_1_1task}{freertos::task<1024>}}\ uart\_handler(\textcolor{stringliteral}{"{}UartHandler"{}},\ 4,\ [\&]()\ \{}
+\DoxyCodeLine{\ \ \ \ \textcolor{keywordflow}{while}\ (\textcolor{keyword}{true})\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ uint8\_t\ byte;}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (isr\_queue.\mbox{\hyperlink{classfreertos_1_1queue_a25fa1fd799780bcfb82731bf2a16e5fc}{receive}}(\textcolor{keywordtype}{byte}))\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ process\_received\_byte(byte);}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\ \ \ \ \}}
+\DoxyCodeLine{\});}
+
+\end{DoxyCode}
+\hypertarget{classfreertos_1_1queue_autotoc_md5}{}\doxysubsubsubsection{\texorpdfstring{Static Allocation\+:}{Static Allocation:}}\label{classfreertos_1_1queue_autotoc_md5}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\mbox{\hyperlink{classfreertos_1_1queue}{freertos::queue<16,\ float,\ freertos::static\_queue\_allocator<16,\ float>}}>}
+\DoxyCodeLine{static\_queue;}
+
+\end{DoxyCode}
+ \begin{Desc}
+\item[Examples]\par
+\mbox{\hyperlink{producer_consumer_example_8cpp-example}{producer\+\_\+consumer\+\_\+example.\+cpp}}, and \mbox{\hyperlink{static_allocation_example_8cpp-example}{static\+\_\+allocation\+\_\+example.\+cpp}}.\end{Desc}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\Hypertarget{classfreertos_1_1queue_ad7a7ba3e594156a7a9dab385290a0aeb}\label{classfreertos_1_1queue_ad7a7ba3e594156a7a9dab385290a0aeb} 
+\index{freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}!queue@{queue}}
+\index{queue@{queue}!freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{queue()}{queue()}}
+{\footnotesize\ttfamily template$<$size\+\_\+t Queue\+Length, typename T , typename Queue\+Allocator $>$ \\
+\mbox{\hyperlink{classfreertos_1_1queue}{freertos\+::queue}}$<$ Queue\+Length, T, Queue\+Allocator $>$\+::queue (\begin{DoxyParamCaption}\item[{const char \texorpdfstring{$\ast$}{*}}]{registred\+\_\+name = {\ttfamily nullptr} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [explicit]}}
+
+
+
+Construct a new queue object. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em registred\+\_\+name} & Name of the queue, which will be used to register it in the queue registry. If nullptr, the queue will not be registered. \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classfreertos_1_1queue_a35d97dd4e37365dcd19ebe0cc6e994af}\label{classfreertos_1_1queue_a35d97dd4e37365dcd19ebe0cc6e994af} 
+\index{freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}!empty\_isr@{empty\_isr}}
+\index{empty\_isr@{empty\_isr}!freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{empty\_isr()}{empty\_isr()}}
+{\footnotesize\ttfamily template$<$size\+\_\+t Queue\+Length, typename T , typename Queue\+Allocator $>$ \\
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue}{freertos\+::queue}}$<$ Queue\+Length, T, Queue\+Allocator $>$\+::empty\+\_\+isr (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Method checking if the queue is empty from an ISR. \href{https://www.freertos.org/a00018.html\#xQueueIsQueueEmptyFromISR}{\texttt{ https\+://www.\+freertos.\+org/a00018.\+html\#x\+Queue\+Is\+Queue\+Empty\+From\+ISR}}. 
+
+\begin{DoxyReturn}{Returns}
+Base\+Type\+\_\+t pd\+TRUE if the queue is empty, pd\+FALSE otherwise. 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1queue_a12164212be7d0ce39a2b91525c6ac1d5}\label{classfreertos_1_1queue_a12164212be7d0ce39a2b91525c6ac1d5} 
+\index{freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}!full\_isr@{full\_isr}}
+\index{full\_isr@{full\_isr}!freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{full\_isr()}{full\_isr()}}
+{\footnotesize\ttfamily template$<$size\+\_\+t Queue\+Length, typename T , typename Queue\+Allocator $>$ \\
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue}{freertos\+::queue}}$<$ Queue\+Length, T, Queue\+Allocator $>$\+::full\+\_\+isr (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Method checking if the queue is full from an ISR. \href{https://www.freertos.org/a00018.html\#xQueueIsQueueFullFromISR}{\texttt{ https\+://www.\+freertos.\+org/a00018.\+html\#x\+Queue\+Is\+Queue\+Full\+From\+ISR}}. 
+
+\begin{DoxyReturn}{Returns}
+Base\+Type\+\_\+t pd\+TRUE if the queue is full, pd\+FALSE otherwise. 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1queue_a2d10f4c8f8cb5d98743a226f0e771a71}\label{classfreertos_1_1queue_a2d10f4c8f8cb5d98743a226f0e771a71} 
+\index{freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}!messages\_waiting@{messages\_waiting}}
+\index{messages\_waiting@{messages\_waiting}!freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{messages\_waiting()}{messages\_waiting()}}
+{\footnotesize\ttfamily template$<$size\+\_\+t Queue\+Length, typename T , typename Queue\+Allocator $>$ \\
+UBase\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue}{freertos\+::queue}}$<$ Queue\+Length, T, Queue\+Allocator $>$\+::messages\+\_\+waiting (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Return the number of items stored in the queue. \href{https://www.freertos.org/a00018.html\#uxQueueMessagesWaiting}{\texttt{ https\+://www.\+freertos.\+org/a00018.\+html\#ux\+Queue\+Messages\+Waiting}}. 
+
+\begin{DoxyReturn}{Returns}
+UBase\+Type\+\_\+t The number of items stored in the queue. 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1queue_a48b35445cee13cb70394faf6f2bf2870}\label{classfreertos_1_1queue_a48b35445cee13cb70394faf6f2bf2870} 
+\index{freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}!messages\_waiting\_isr@{messages\_waiting\_isr}}
+\index{messages\_waiting\_isr@{messages\_waiting\_isr}!freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{messages\_waiting\_isr()}{messages\_waiting\_isr()}}
+{\footnotesize\ttfamily template$<$size\+\_\+t Queue\+Length, typename T , typename Queue\+Allocator $>$ \\
+UBase\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue}{freertos\+::queue}}$<$ Queue\+Length, T, Queue\+Allocator $>$\+::messages\+\_\+waiting\+\_\+isr (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Return the number of items stored in the queue from an ISR. \href{https://www.freertos.org/a00018.html\#uxQueueMessagesWaitingFromISR}{\texttt{ https\+://www.\+freertos.\+org/a00018.\+html\#ux\+Queue\+Messages\+Waiting\+From\+ISR}}. 
+
+\begin{DoxyReturn}{Returns}
+UBase\+Type\+\_\+t The number of items stored in the queue. 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1queue_a78bb3c04a8e21b31b50bd499ceaef983}\label{classfreertos_1_1queue_a78bb3c04a8e21b31b50bd499ceaef983} 
+\index{freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}!name@{name}}
+\index{name@{name}!freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{name()}{name()}}
+{\footnotesize\ttfamily template$<$size\+\_\+t Queue\+Length, typename T , typename Queue\+Allocator $>$ \\
+const char \texorpdfstring{$\ast$}{*} \mbox{\hyperlink{classfreertos_1_1queue}{freertos\+::queue}}$<$ Queue\+Length, T, Queue\+Allocator $>$\+::name (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Return the name of the queue. \href{https://www.freertos.org/a00018.html\#pcQueueGetName}{\texttt{ https\+://www.\+freertos.\+org/a00018.\+html\#pc\+Queue\+Get\+Name}}. 
+
+\begin{DoxyReturn}{Returns}
+const char\texorpdfstring{$\ast$}{*} The name of the queue. 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1queue_aa2d26c4eabbdaabc20969afb7f3b3241}\label{classfreertos_1_1queue_aa2d26c4eabbdaabc20969afb7f3b3241} 
+\index{freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}!overwrite@{overwrite}}
+\index{overwrite@{overwrite}!freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{overwrite()}{overwrite()}}
+{\footnotesize\ttfamily template$<$size\+\_\+t Queue\+Length, typename T , typename Queue\+Allocator $>$ \\
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue}{freertos\+::queue}}$<$ Queue\+Length, T, Queue\+Allocator $>$\+::overwrite (\begin{DoxyParamCaption}\item[{const T \&}]{item }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+A version of send\+\_\+back method that overwrites the items in the queue if it is full. \href{https://www.freertos.org/xQueueOverwrite.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Queue\+Overwrite.\+html}}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em item} & An item to be posted on the queue. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Base\+Type\+\_\+t pd\+PASS returned always. 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1queue_a2e47f094e81258eba46c9e777bc0eb0e}\label{classfreertos_1_1queue_a2e47f094e81258eba46c9e777bc0eb0e} 
+\index{freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}!overwrite\_isr@{overwrite\_isr}}
+\index{overwrite\_isr@{overwrite\_isr}!freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{overwrite\_isr()}{overwrite\_isr()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily template$<$size\+\_\+t Queue\+Length, typename T , typename Queue\+Allocator $>$ \\
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue}{freertos\+::queue}}$<$ Queue\+Length, T, Queue\+Allocator $>$\+::overwrite\+\_\+isr (\begin{DoxyParamCaption}\item[{const T \&}]{item }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+A version of send\+\_\+back method that overwrites the items in the queue from an ISR. \href{https://www.freertos.org/xQueueOverwriteFromISR.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Queue\+Overwrite\+From\+ISR.\+html}}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em item} & An item to be posted on the queue. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Base\+Type\+\_\+t pd\+PASS returned always. 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1queue_a36dd34162ebadafe270cf41f8ed07434}\label{classfreertos_1_1queue_a36dd34162ebadafe270cf41f8ed07434} 
+\index{freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}!overwrite\_isr@{overwrite\_isr}}
+\index{overwrite\_isr@{overwrite\_isr}!freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{overwrite\_isr()}{overwrite\_isr()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily template$<$size\+\_\+t Queue\+Length, typename T , typename Queue\+Allocator $>$ \\
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue}{freertos\+::queue}}$<$ Queue\+Length, T, Queue\+Allocator $>$\+::overwrite\+\_\+isr (\begin{DoxyParamCaption}\item[{const T \&}]{item,  }\item[{Base\+Type\+\_\+t \&}]{higher\+\_\+priority\+\_\+task\+\_\+woken }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+A version of send\+\_\+back method that overwrites the items in the queue from an ISR. \href{https://www.freertos.org/xQueueOverwriteFromISR.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Queue\+Overwrite\+From\+ISR.\+html}}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em item} & An item to be posted on the queue. \\
+\hline
+{\em higher\+\_\+priority\+\_\+task\+\_\+woken} & A variable to set to pd\+TRUE if the action unblocked a task of higher priority. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Base\+Type\+\_\+t pd\+PASS returned always. 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1queue_aeaca86af1501dcdb6fdbf834f904e9f2}\label{classfreertos_1_1queue_aeaca86af1501dcdb6fdbf834f904e9f2} 
+\index{freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}!peek@{peek}}
+\index{peek@{peek}!freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{peek()}{peek()}\hspace{0.1cm}{\footnotesize\ttfamily [1/4]}}
+{\footnotesize\ttfamily template$<$size\+\_\+t Queue\+Length, typename T , typename Queue\+Allocator $>$ \\
+template$<$typename Rep , typename Period $>$ \\
+optional$<$ T $>$ \mbox{\hyperlink{classfreertos_1_1queue}{freertos\+::queue}}$<$ Queue\+Length, T, Queue\+Allocator $>$\+::peek (\begin{DoxyParamCaption}\item[{const std\+::chrono\+::duration$<$ Rep, Period $>$ \&}]{timeout }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Peek an item from a queue. The item is not removed from the queue. \href{https://www.freertos.org/xQueuePeek.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Queue\+Peek.\+html}}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em timeout} & Timeout to wait for the item to become available. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+optional$<$\+T$>$ The item peeked from the queue or std\+::nullopt if the queue is empty. 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1queue_a06c009b6a9a9f5aae6e3529a94fca4cc}\label{classfreertos_1_1queue_a06c009b6a9a9f5aae6e3529a94fca4cc} 
+\index{freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}!peek@{peek}}
+\index{peek@{peek}!freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{peek()}{peek()}\hspace{0.1cm}{\footnotesize\ttfamily [2/4]}}
+{\footnotesize\ttfamily template$<$size\+\_\+t Queue\+Length, typename T , typename Queue\+Allocator $>$ \\
+template$<$typename Rep , typename Period $>$ \\
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue}{freertos\+::queue}}$<$ Queue\+Length, T, Queue\+Allocator $>$\+::peek (\begin{DoxyParamCaption}\item[{T \&}]{item,  }\item[{const std\+::chrono\+::duration$<$ Rep, Period $>$ \&}]{timeout }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Peek an item from a queue. The item is not removed from the queue. \href{https://www.freertos.org/xQueuePeek.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Queue\+Peek.\+html}}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em item} & An item placeholder for the item to be peeked from the queue. \\
+\hline
+{\em timeout} & Timeout to wait for the item to become available. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Base\+Type\+\_\+t pd\+PASS if the item was successfully peeked, otherwise pd\+FALSE. 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1queue_ac3230471095b57846845bb17e2cb68c6}\label{classfreertos_1_1queue_ac3230471095b57846845bb17e2cb68c6} 
+\index{freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}!peek@{peek}}
+\index{peek@{peek}!freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{peek()}{peek()}\hspace{0.1cm}{\footnotesize\ttfamily [3/4]}}
+{\footnotesize\ttfamily template$<$size\+\_\+t Queue\+Length, typename T , typename Queue\+Allocator $>$ \\
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue}{freertos\+::queue}}$<$ Queue\+Length, T, Queue\+Allocator $>$\+::peek (\begin{DoxyParamCaption}\item[{T \&}]{item,  }\item[{Tick\+Type\+\_\+t}]{ticks\+\_\+to\+\_\+wait }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Peek an item from a queue. The item is not removed from the queue. \href{https://www.freertos.org/xQueuePeek.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Queue\+Peek.\+html}}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em item} & An item placeholder for the item to be peeked from the queue. \\
+\hline
+{\em ticks\+\_\+to\+\_\+wait} & Timeout in ticks to wait for the item to become available. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Base\+Type\+\_\+t pd\+PASS if the item was successfully peeked, otherwise pd\+FALSE. 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1queue_a89b54fe4d37e47b30ad18b80a7b799db}\label{classfreertos_1_1queue_a89b54fe4d37e47b30ad18b80a7b799db} 
+\index{freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}!peek@{peek}}
+\index{peek@{peek}!freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{peek()}{peek()}\hspace{0.1cm}{\footnotesize\ttfamily [4/4]}}
+{\footnotesize\ttfamily template$<$size\+\_\+t Queue\+Length, typename T , typename Queue\+Allocator $>$ \\
+optional$<$ T $>$ \mbox{\hyperlink{classfreertos_1_1queue}{freertos\+::queue}}$<$ Queue\+Length, T, Queue\+Allocator $>$\+::peek (\begin{DoxyParamCaption}\item[{Tick\+Type\+\_\+t}]{ticks\+\_\+to\+\_\+wait }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Peek an item from a queue. The item is not removed from the queue. \href{https://www.freertos.org/xQueuePeek.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Queue\+Peek.\+html}}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em ticks\+\_\+to\+\_\+wait} & Timeout in ticks to wait for the item to become available. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+optional$<$\+T$>$ The item peeked from the queue or std\+::nullopt if the queue is empty. 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1queue_aaed8bd6d67d7ca45c49decdc2122c5ca}\label{classfreertos_1_1queue_aaed8bd6d67d7ca45c49decdc2122c5ca} 
+\index{freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}!peek\_isr@{peek\_isr}}
+\index{peek\_isr@{peek\_isr}!freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{peek\_isr()}{peek\_isr()}\hspace{0.1cm}{\footnotesize\ttfamily [1/3]}}
+{\footnotesize\ttfamily template$<$size\+\_\+t Queue\+Length, typename T , typename Queue\+Allocator $>$ \\
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue}{freertos\+::queue}}$<$ Queue\+Length, T, Queue\+Allocator $>$\+::peek\+\_\+isr (\begin{DoxyParamCaption}\item[{T \&}]{item }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Peek an item from a queue from an ISR. The item is not removed from the queue. \href{https://www.freertos.org/xQueuePeekFromISR.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Queue\+Peek\+From\+ISR.\+html}}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em item} & An item placeholder for the item to be peeked from the queue. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Base\+Type\+\_\+t pd\+PASS if the item was successfully peeked, otherwise pd\+FALSE. 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1queue_ab7797f3ca193976aabde257eb9dd6672}\label{classfreertos_1_1queue_ab7797f3ca193976aabde257eb9dd6672} 
+\index{freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}!peek\_isr@{peek\_isr}}
+\index{peek\_isr@{peek\_isr}!freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{peek\_isr()}{peek\_isr()}\hspace{0.1cm}{\footnotesize\ttfamily [2/3]}}
+{\footnotesize\ttfamily template$<$size\+\_\+t Queue\+Length, typename T , typename Queue\+Allocator $>$ \\
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue}{freertos\+::queue}}$<$ Queue\+Length, T, Queue\+Allocator $>$\+::peek\+\_\+isr (\begin{DoxyParamCaption}\item[{T \&}]{item,  }\item[{Base\+Type\+\_\+t \&}]{higher\+\_\+priority\+\_\+task\+\_\+woken }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Peek an item from a queue from an ISR. The item is not removed from the queue. \href{https://www.freertos.org/xQueuePeekFromISR.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Queue\+Peek\+From\+ISR.\+html}}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em item} & An item placeholder for the item to be peeked from the queue. \\
+\hline
+{\em higher\+\_\+priority\+\_\+task\+\_\+woken} & A variable to set to pd\+TRUE if the action unblocked a task of higher priority. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Base\+Type\+\_\+t pd\+PASS if the item was successfully peeked, otherwise pd\+FALSE. 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1queue_a7d29a96569f970fc7dc279f9d9d19536}\label{classfreertos_1_1queue_a7d29a96569f970fc7dc279f9d9d19536} 
+\index{freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}!peek\_isr@{peek\_isr}}
+\index{peek\_isr@{peek\_isr}!freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{peek\_isr()}{peek\_isr()}\hspace{0.1cm}{\footnotesize\ttfamily [3/3]}}
+{\footnotesize\ttfamily template$<$size\+\_\+t Queue\+Length, typename T , typename Queue\+Allocator $>$ \\
+optional$<$ T $>$ \mbox{\hyperlink{classfreertos_1_1queue}{freertos\+::queue}}$<$ Queue\+Length, T, Queue\+Allocator $>$\+::peek\+\_\+isr (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Peek an item from a queue from an ISR. The item is not removed from the queue. \href{https://www.freertos.org/xQueuePeekFromISR.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Queue\+Peek\+From\+ISR.\+html}}. 
+
+\begin{DoxyReturn}{Returns}
+optional$<$\+T$>$ The item peeked from the queue or std\+::nullopt if the queue is empty. 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1queue_a5e307df30c7df09bd4687b7dce1471a6}\label{classfreertos_1_1queue_a5e307df30c7df09bd4687b7dce1471a6} 
+\index{freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}!receive@{receive}}
+\index{receive@{receive}!freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{receive()}{receive()}\hspace{0.1cm}{\footnotesize\ttfamily [1/4]}}
+{\footnotesize\ttfamily template$<$size\+\_\+t Queue\+Length, typename T , typename Queue\+Allocator $>$ \\
+template$<$typename Rep , typename Period $>$ \\
+optional$<$ T $>$ \mbox{\hyperlink{classfreertos_1_1queue}{freertos\+::queue}}$<$ Queue\+Length, T, Queue\+Allocator $>$\+::receive (\begin{DoxyParamCaption}\item[{const std\+::chrono\+::duration$<$ Rep, Period $>$ \&}]{timeout }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Receive an item from a queue. \href{https://www.freertos.org/a00118.html}{\texttt{ https\+://www.\+freertos.\+org/a00118.\+html}}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em timeout} & Timeout to wait for the item to become available. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+optional$<$\+T$>$ The item received from the queue or std\+::nullopt if the queue is empty. 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1queue_a43e013e00fdd839d3784ccf37a971226}\label{classfreertos_1_1queue_a43e013e00fdd839d3784ccf37a971226} 
+\index{freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}!receive@{receive}}
+\index{receive@{receive}!freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{receive()}{receive()}\hspace{0.1cm}{\footnotesize\ttfamily [2/4]}}
+{\footnotesize\ttfamily template$<$size\+\_\+t Queue\+Length, typename T , typename Queue\+Allocator $>$ \\
+template$<$typename Rep , typename Period $>$ \\
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue}{freertos\+::queue}}$<$ Queue\+Length, T, Queue\+Allocator $>$\+::receive (\begin{DoxyParamCaption}\item[{T \&}]{item,  }\item[{const std\+::chrono\+::duration$<$ Rep, Period $>$ \&}]{timeout }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Receive an item from a queue. \href{https://www.freertos.org/a00118.html}{\texttt{ https\+://www.\+freertos.\+org/a00118.\+html}}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em item} & An item placeholder for the item to be received from the queue. \\
+\hline
+{\em timeout} & Timeout to wait for the item to become available. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Base\+Type\+\_\+t pd\+PASS if the item was successfully received, otherwise pd\+FALSE. 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1queue_a25fa1fd799780bcfb82731bf2a16e5fc}\label{classfreertos_1_1queue_a25fa1fd799780bcfb82731bf2a16e5fc} 
+\index{freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}!receive@{receive}}
+\index{receive@{receive}!freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{receive()}{receive()}\hspace{0.1cm}{\footnotesize\ttfamily [3/4]}}
+{\footnotesize\ttfamily template$<$size\+\_\+t Queue\+Length, typename T , typename Queue\+Allocator $>$ \\
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue}{freertos\+::queue}}$<$ Queue\+Length, T, Queue\+Allocator $>$\+::receive (\begin{DoxyParamCaption}\item[{T \&}]{item,  }\item[{Tick\+Type\+\_\+t}]{ticks\+\_\+to\+\_\+wait }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Receive an item from a queue. \href{https://www.freertos.org/a00118.html}{\texttt{ https\+://www.\+freertos.\+org/a00118.\+html}}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em item} & An item placeholder for the item to be received from the queue. \\
+\hline
+{\em ticks\+\_\+to\+\_\+wait} & Timeout in ticks to wait for the item to become available. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Base\+Type\+\_\+t pd\+PASS if the item was successfully received, otherwise pd\+FALSE. 
+\end{DoxyReturn}
+\begin{Desc}
+\item[Examples]\par
+\mbox{\hyperlink{static_allocation_example_8cpp-example}{static\+\_\+allocation\+\_\+example.\+cpp}}.\end{Desc}
+\Hypertarget{classfreertos_1_1queue_ae09c48130ce1bdf0ab6128cd98f279b5}\label{classfreertos_1_1queue_ae09c48130ce1bdf0ab6128cd98f279b5} 
+\index{freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}!receive@{receive}}
+\index{receive@{receive}!freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{receive()}{receive()}\hspace{0.1cm}{\footnotesize\ttfamily [4/4]}}
+{\footnotesize\ttfamily template$<$size\+\_\+t Queue\+Length, typename T , typename Queue\+Allocator $>$ \\
+optional$<$ T $>$ \mbox{\hyperlink{classfreertos_1_1queue}{freertos\+::queue}}$<$ Queue\+Length, T, Queue\+Allocator $>$\+::receive (\begin{DoxyParamCaption}\item[{Tick\+Type\+\_\+t}]{ticks\+\_\+to\+\_\+wait }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Receive an item from a queue. \href{https://www.freertos.org/a00118.html}{\texttt{ https\+://www.\+freertos.\+org/a00118.\+html}}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em timeout} & Timeout to wait for the item to become available. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+optional$<$\+T$>$ The item received from the queue or std\+::nullopt if the queue is empty. 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1queue_a7869a75c6a2cdfa8793d76233c2cccd5}\label{classfreertos_1_1queue_a7869a75c6a2cdfa8793d76233c2cccd5} 
+\index{freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}!receive\_isr@{receive\_isr}}
+\index{receive\_isr@{receive\_isr}!freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{receive\_isr()}{receive\_isr()}\hspace{0.1cm}{\footnotesize\ttfamily [1/3]}}
+{\footnotesize\ttfamily template$<$size\+\_\+t Queue\+Length, typename T , typename Queue\+Allocator $>$ \\
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue}{freertos\+::queue}}$<$ Queue\+Length, T, Queue\+Allocator $>$\+::receive\+\_\+isr (\begin{DoxyParamCaption}\item[{T \&}]{item }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Receive an item from a queue from an ISR. \href{https://www.freertos.org/a00120.html}{\texttt{ https\+://www.\+freertos.\+org/a00120.\+html}}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em item} & An item placeholder for the item to be received from the queue. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Base\+Type\+\_\+t pd\+PASS if the item was successfully received, otherwise pd\+FALSE. 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1queue_aea41fe95f95e1f21d0c9e3842e88f9a3}\label{classfreertos_1_1queue_aea41fe95f95e1f21d0c9e3842e88f9a3} 
+\index{freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}!receive\_isr@{receive\_isr}}
+\index{receive\_isr@{receive\_isr}!freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{receive\_isr()}{receive\_isr()}\hspace{0.1cm}{\footnotesize\ttfamily [2/3]}}
+{\footnotesize\ttfamily template$<$size\+\_\+t Queue\+Length, typename T , typename Queue\+Allocator $>$ \\
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue}{freertos\+::queue}}$<$ Queue\+Length, T, Queue\+Allocator $>$\+::receive\+\_\+isr (\begin{DoxyParamCaption}\item[{T \&}]{item,  }\item[{Base\+Type\+\_\+t \&}]{higher\+\_\+priority\+\_\+task\+\_\+woken }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Receive an item from a queue from an ISR. \href{https://www.freertos.org/a00120.html}{\texttt{ https\+://www.\+freertos.\+org/a00120.\+html}}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em item} & An item placeholder for the item to be received from the queue. \\
+\hline
+{\em higher\+\_\+priority\+\_\+task\+\_\+woken} & A variable to set to pd\+TRUE if the action unblocked a task of higher priority. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Base\+Type\+\_\+t pd\+PASS if the item was successfully received, otherwise pd\+FALSE. 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1queue_ace91840cdbac2e1816825a41420ee632}\label{classfreertos_1_1queue_ace91840cdbac2e1816825a41420ee632} 
+\index{freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}!receive\_isr@{receive\_isr}}
+\index{receive\_isr@{receive\_isr}!freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{receive\_isr()}{receive\_isr()}\hspace{0.1cm}{\footnotesize\ttfamily [3/3]}}
+{\footnotesize\ttfamily template$<$size\+\_\+t Queue\+Length, typename T , typename Queue\+Allocator $>$ \\
+optional$<$ T $>$ \mbox{\hyperlink{classfreertos_1_1queue}{freertos\+::queue}}$<$ Queue\+Length, T, Queue\+Allocator $>$\+::receive\+\_\+isr (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Receive an item from a queue from an ISR. \href{https://www.freertos.org/a00120.html}{\texttt{ https\+://www.\+freertos.\+org/a00120.\+html}}. 
+
+\begin{DoxyReturn}{Returns}
+optional$<$\+T$>$ The item received from the queue or std\+::nullopt if the queue is empty. 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1queue_ac61937b8d0cef8e3e738fb4658148afe}\label{classfreertos_1_1queue_ac61937b8d0cef8e3e738fb4658148afe} 
+\index{freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}!reset@{reset}}
+\index{reset@{reset}!freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{reset()}{reset()}}
+{\footnotesize\ttfamily template$<$size\+\_\+t Queue\+Length, typename T , typename Queue\+Allocator $>$ \\
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue}{freertos\+::queue}}$<$ Queue\+Length, T, Queue\+Allocator $>$\+::reset (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Resets the queue to the empty state. \href{https://www.freertos.org/a00018.html\#xQueueReset}{\texttt{ https\+://www.\+freertos.\+org/a00018.\+html\#x\+Queue\+Reset}}. 
+
+\begin{DoxyReturn}{Returns}
+Base\+Type\+\_\+t pd\+PASS if the queue was reset, pd\+FAIL otherwise. 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1queue_a7d6f58c72807450314b49380520cbfaa}\label{classfreertos_1_1queue_a7d6f58c72807450314b49380520cbfaa} 
+\index{freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}!send@{send}}
+\index{send@{send}!freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{send()}{send()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily template$<$size\+\_\+t Queue\+Length, typename T , typename Queue\+Allocator $>$ \\
+template$<$typename Rep , typename Period $>$ \\
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue}{freertos\+::queue}}$<$ Queue\+Length, T, Queue\+Allocator $>$\+::send (\begin{DoxyParamCaption}\item[{const T \&}]{item,  }\item[{const std\+::chrono\+::duration$<$ Rep, Period $>$ \&}]{timeout }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Posts an item to the back of a queue. \href{https://www.freertos.org/a00117.html}{\texttt{ https\+://www.\+freertos.\+org/a00117.\+html}}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em item} & An item to be posted on the queue. \\
+\hline
+{\em timeout} & Timeout to wait for the space to become available. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Base\+Type\+\_\+t pd\+PASS if the item was successfully posted, otherwise err\+QUEUE\+\_\+\+FULL. 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1queue_a603f78c5925a6faa1866371acddcb321}\label{classfreertos_1_1queue_a603f78c5925a6faa1866371acddcb321} 
+\index{freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}!send@{send}}
+\index{send@{send}!freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{send()}{send()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily template$<$size\+\_\+t Queue\+Length, typename T , typename Queue\+Allocator $>$ \\
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue}{freertos\+::queue}}$<$ Queue\+Length, T, Queue\+Allocator $>$\+::send (\begin{DoxyParamCaption}\item[{const T \&}]{item,  }\item[{Tick\+Type\+\_\+t}]{ticks\+\_\+to\+\_\+wait }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Posts an item to the back of a queue. \href{https://www.freertos.org/a00117.html}{\texttt{ https\+://www.\+freertos.\+org/a00117.\+html}}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em item} & An item to be posted on the queue. \\
+\hline
+{\em ticks\+\_\+to\+\_\+wait} & Timeout in ticks to wait for the space to become available. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Base\+Type\+\_\+t pd\+PASS if the item was successfully posted, otherwise err\+QUEUE\+\_\+\+FULL. 
+\end{DoxyReturn}
+\begin{Desc}
+\item[Examples]\par
+\mbox{\hyperlink{static_allocation_example_8cpp-example}{static\+\_\+allocation\+\_\+example.\+cpp}}.\end{Desc}
+\Hypertarget{classfreertos_1_1queue_a3e075075339dec5dbeec7ec7590f2327}\label{classfreertos_1_1queue_a3e075075339dec5dbeec7ec7590f2327} 
+\index{freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}!send\_back@{send\_back}}
+\index{send\_back@{send\_back}!freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{send\_back()}{send\_back()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily template$<$size\+\_\+t Queue\+Length, typename T , typename Queue\+Allocator $>$ \\
+template$<$typename Rep , typename Period $>$ \\
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue}{freertos\+::queue}}$<$ Queue\+Length, T, Queue\+Allocator $>$\+::send\+\_\+back (\begin{DoxyParamCaption}\item[{const T \&}]{item,  }\item[{const std\+::chrono\+::duration$<$ Rep, Period $>$ \&}]{timeout }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Posts an item to the back of a queue. \href{https://www.freertos.org/xQueueSendToBack.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Queue\+Send\+To\+Back.\+html}}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em item} & An item to be posted on the queue. \\
+\hline
+{\em timeout} & Timeout to wait for the space to become available. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Base\+Type\+\_\+t pd\+PASS if the item was successfully posted, otherwise err\+QUEUE\+\_\+\+FULL. 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1queue_a5082a40a1e47a8155925cac7e5ef94e1}\label{classfreertos_1_1queue_a5082a40a1e47a8155925cac7e5ef94e1} 
+\index{freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}!send\_back@{send\_back}}
+\index{send\_back@{send\_back}!freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{send\_back()}{send\_back()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily template$<$size\+\_\+t Queue\+Length, typename T , typename Queue\+Allocator $>$ \\
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue}{freertos\+::queue}}$<$ Queue\+Length, T, Queue\+Allocator $>$\+::send\+\_\+back (\begin{DoxyParamCaption}\item[{const T \&}]{item,  }\item[{Tick\+Type\+\_\+t}]{ticks\+\_\+to\+\_\+wait }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Posts an item to the back of a queue. \href{https://www.freertos.org/xQueueSendToBack.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Queue\+Send\+To\+Back.\+html}}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em item} & An item to be posted on the queue. \\
+\hline
+{\em ticks\+\_\+to\+\_\+wait} & Timeout in ticks to wait for the space to become available. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Base\+Type\+\_\+t pd\+PASS if the item was successfully posted, otherwise err\+QUEUE\+\_\+\+FULL. 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1queue_ae69ba56a4bfd58dbc9dbaa916d87e3c5}\label{classfreertos_1_1queue_ae69ba56a4bfd58dbc9dbaa916d87e3c5} 
+\index{freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}!send\_back\_isr@{send\_back\_isr}}
+\index{send\_back\_isr@{send\_back\_isr}!freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{send\_back\_isr()}{send\_back\_isr()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily template$<$size\+\_\+t Queue\+Length, typename T , typename Queue\+Allocator $>$ \\
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue}{freertos\+::queue}}$<$ Queue\+Length, T, Queue\+Allocator $>$\+::send\+\_\+back\+\_\+isr (\begin{DoxyParamCaption}\item[{const T \&}]{item }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Posts an item to the back of a queue from an ISR. \href{https://www.freertos.org/xQueueSendToBackFromISR.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Queue\+Send\+To\+Back\+From\+ISR.\+html}}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em item} & An item to be posted on the queue. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Base\+Type\+\_\+t pd\+PASS if the item was successfully posted, otherwise err\+QUEUE\+\_\+\+FULL. 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1queue_aa3e1c604aedbc9bbcc89c5660c463381}\label{classfreertos_1_1queue_aa3e1c604aedbc9bbcc89c5660c463381} 
+\index{freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}!send\_back\_isr@{send\_back\_isr}}
+\index{send\_back\_isr@{send\_back\_isr}!freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{send\_back\_isr()}{send\_back\_isr()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily template$<$size\+\_\+t Queue\+Length, typename T , typename Queue\+Allocator $>$ \\
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue}{freertos\+::queue}}$<$ Queue\+Length, T, Queue\+Allocator $>$\+::send\+\_\+back\+\_\+isr (\begin{DoxyParamCaption}\item[{const T \&}]{item,  }\item[{Base\+Type\+\_\+t \&}]{higher\+\_\+priority\+\_\+task\+\_\+woken }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Posts an item to the back of a queue from an ISR. \href{https://www.freertos.org/xQueueSendToBackFromISR.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Queue\+Send\+To\+Back\+From\+ISR.\+html}}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em item} & An item to be posted on the queue. \\
+\hline
+{\em higher\+\_\+priority\+\_\+task\+\_\+woken} & A variable to set to pd\+TRUE if the action unblocked a task of higher priority. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Base\+Type\+\_\+t pd\+PASS if the item was successfully posted, otherwise err\+QUEUE\+\_\+\+FULL. 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1queue_a63063ed3b52b9cc303494a7644523579}\label{classfreertos_1_1queue_a63063ed3b52b9cc303494a7644523579} 
+\index{freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}!send\_front@{send\_front}}
+\index{send\_front@{send\_front}!freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{send\_front()}{send\_front()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily template$<$size\+\_\+t Queue\+Length, typename T , typename Queue\+Allocator $>$ \\
+template$<$typename Rep , typename Period $>$ \\
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue}{freertos\+::queue}}$<$ Queue\+Length, T, Queue\+Allocator $>$\+::send\+\_\+front (\begin{DoxyParamCaption}\item[{const T \&}]{item,  }\item[{const std\+::chrono\+::duration$<$ Rep, Period $>$ \&}]{timeout }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Posts an item to the front of a queue. \href{https://www.freertos.org/xQueueSendToFront.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Queue\+Send\+To\+Front.\+html}}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em item} & An item to be posted on the queue. \\
+\hline
+{\em timeout} & Timeout to wait for the space to become available. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Base\+Type\+\_\+t pd\+PASS if the item was successfully posted, otherwise err\+QUEUE\+\_\+\+FULL. 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1queue_adcf986f60288a5b738cfc8b3c694f5ac}\label{classfreertos_1_1queue_adcf986f60288a5b738cfc8b3c694f5ac} 
+\index{freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}!send\_front@{send\_front}}
+\index{send\_front@{send\_front}!freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{send\_front()}{send\_front()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily template$<$size\+\_\+t Queue\+Length, typename T , typename Queue\+Allocator $>$ \\
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue}{freertos\+::queue}}$<$ Queue\+Length, T, Queue\+Allocator $>$\+::send\+\_\+front (\begin{DoxyParamCaption}\item[{const T \&}]{item,  }\item[{Tick\+Type\+\_\+t}]{ticks\+\_\+to\+\_\+wait }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Posts an item to the front of a queue. \href{https://www.freertos.org/xQueueSendToFront.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Queue\+Send\+To\+Front.\+html}}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em item} & An item to be posted on the queue. \\
+\hline
+{\em ticks\+\_\+to\+\_\+wait} & Timeout in ticks to wait for the space to become available. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Base\+Type\+\_\+t pd\+PASS if the item was successfully posted, otherwise err\+QUEUE\+\_\+\+FULL. 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1queue_ae8c445358e467bf20808e66ef9eaa3fa}\label{classfreertos_1_1queue_ae8c445358e467bf20808e66ef9eaa3fa} 
+\index{freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}!send\_front\_isr@{send\_front\_isr}}
+\index{send\_front\_isr@{send\_front\_isr}!freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{send\_front\_isr()}{send\_front\_isr()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily template$<$size\+\_\+t Queue\+Length, typename T , typename Queue\+Allocator $>$ \\
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue}{freertos\+::queue}}$<$ Queue\+Length, T, Queue\+Allocator $>$\+::send\+\_\+front\+\_\+isr (\begin{DoxyParamCaption}\item[{const T \&}]{item }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Posts an item to the front of a queue from an ISR. \href{https://www.freertos.org/xQueueSendToFrontFromISR.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Queue\+Send\+To\+Front\+From\+ISR.\+html}}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em item} & An item to be posted on the queue. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Base\+Type\+\_\+t pd\+PASS if the item was successfully posted, otherwise err\+QUEUE\+\_\+\+FULL. 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1queue_a6dcd49a8e8d379e9da4494fa6e06d1bb}\label{classfreertos_1_1queue_a6dcd49a8e8d379e9da4494fa6e06d1bb} 
+\index{freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}!send\_front\_isr@{send\_front\_isr}}
+\index{send\_front\_isr@{send\_front\_isr}!freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{send\_front\_isr()}{send\_front\_isr()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily template$<$size\+\_\+t Queue\+Length, typename T , typename Queue\+Allocator $>$ \\
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue}{freertos\+::queue}}$<$ Queue\+Length, T, Queue\+Allocator $>$\+::send\+\_\+front\+\_\+isr (\begin{DoxyParamCaption}\item[{const T \&}]{item,  }\item[{Base\+Type\+\_\+t \&}]{higher\+\_\+priority\+\_\+task\+\_\+woken }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Posts an item to the front of a queue from an ISR. \href{https://www.freertos.org/xQueueSendToFrontFromISR.html}{\texttt{ https\+://www.\+freertos.\+org/x\+Queue\+Send\+To\+Front\+From\+ISR.\+html}}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em item} & An item to be posted on the queue. \\
+\hline
+{\em higher\+\_\+priority\+\_\+task\+\_\+woken} & A variable to set to pd\+TRUE if the action unblocked a task of higher priority. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Base\+Type\+\_\+t pd\+PASS if the item was successfully posted, otherwise err\+QUEUE\+\_\+\+FULL. 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1queue_ac29369b7da29863881d171ba7737df2d}\label{classfreertos_1_1queue_ac29369b7da29863881d171ba7737df2d} 
+\index{freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}!send\_isr@{send\_isr}}
+\index{send\_isr@{send\_isr}!freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{send\_isr()}{send\_isr()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily template$<$size\+\_\+t Queue\+Length, typename T , typename Queue\+Allocator $>$ \\
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue}{freertos\+::queue}}$<$ Queue\+Length, T, Queue\+Allocator $>$\+::send\+\_\+isr (\begin{DoxyParamCaption}\item[{const T \&}]{item }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Posts an item to the back of a queue from an ISR. \href{https://www.freertos.org/a00119.html}{\texttt{ https\+://www.\+freertos.\+org/a00119.\+html}}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em item} & An item to be posted on the queue. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Base\+Type\+\_\+t pd\+PASS if the item was successfully posted, otherwise err\+QUEUE\+\_\+\+FULL. 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1queue_a34d5c5b86b9fc81a728f7dfea968d7b5}\label{classfreertos_1_1queue_a34d5c5b86b9fc81a728f7dfea968d7b5} 
+\index{freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}!send\_isr@{send\_isr}}
+\index{send\_isr@{send\_isr}!freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{send\_isr()}{send\_isr()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily template$<$size\+\_\+t Queue\+Length, typename T , typename Queue\+Allocator $>$ \\
+Base\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue}{freertos\+::queue}}$<$ Queue\+Length, T, Queue\+Allocator $>$\+::send\+\_\+isr (\begin{DoxyParamCaption}\item[{const T \&}]{item,  }\item[{Base\+Type\+\_\+t \&}]{higher\+\_\+priority\+\_\+task\+\_\+woken }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Posts an item to the back of a queue from an ISR. \href{https://www.freertos.org/a00119.html}{\texttt{ https\+://www.\+freertos.\+org/a00119.\+html}}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em item} & An item to be posted on the queue. \\
+\hline
+{\em higher\+\_\+priority\+\_\+task\+\_\+woken} & A variable to set to pd\+TRUE if the action unblocked a task of higher priority. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Base\+Type\+\_\+t pd\+PASS if the item was successfully posted, otherwise err\+QUEUE\+\_\+\+FULL. 
+\end{DoxyReturn}
+\Hypertarget{classfreertos_1_1queue_a83b3b6efefc86c9629f3b71e645e8dbf}\label{classfreertos_1_1queue_a83b3b6efefc86c9629f3b71e645e8dbf} 
+\index{freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}!spaces\_available@{spaces\_available}}
+\index{spaces\_available@{spaces\_available}!freertos::queue$<$ QueueLength, T, QueueAllocator $>$@{freertos::queue$<$ QueueLength, T, QueueAllocator $>$}}
+\doxysubsubsection{\texorpdfstring{spaces\_available()}{spaces\_available()}}
+{\footnotesize\ttfamily template$<$size\+\_\+t Queue\+Length, typename T , typename Queue\+Allocator $>$ \\
+UBase\+Type\+\_\+t \mbox{\hyperlink{classfreertos_1_1queue}{freertos\+::queue}}$<$ Queue\+Length, T, Queue\+Allocator $>$\+::spaces\+\_\+available (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Return the number of spaces available in the queue. \href{https://www.freertos.org/a00018.html\#uxQueueSpacesAvailable}{\texttt{ https\+://www.\+freertos.\+org/a00018.\+html\#ux\+Queue\+Spaces\+Available}}. 
+
+\begin{DoxyReturn}{Returns}
+UBase\+Type\+\_\+t The number of spaces available in the queue. 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+include/freertos\+\_\+queue.\+hpp\end{DoxyCompactItemize}

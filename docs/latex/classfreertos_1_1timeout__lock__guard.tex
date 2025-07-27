@@ -1,0 +1,109 @@
+\doxysection{freertos\+::timeout\+\_\+lock\+\_\+guard\texorpdfstring{$<$}{<} Mutex \texorpdfstring{$>$}{>} Class Template Reference}
+\hypertarget{classfreertos_1_1timeout__lock__guard}{}\label{classfreertos_1_1timeout__lock__guard}\index{freertos::timeout\_lock\_guard$<$ Mutex $>$@{freertos::timeout\_lock\_guard$<$ Mutex $>$}}
+
+
+Lock guard for the mutex with timeout. The mutex is locked in the constructor and unlocked in the destructor (RAII).  
+
+
+
+
+{\ttfamily \#include $<$freertos\+\_\+semaphore.\+hpp$>$}
+
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classfreertos_1_1timeout__lock__guard_a6194a77fdb07d2b52977a393dfd2311d}{timeout\+\_\+lock\+\_\+guard}} (Mutex \&\mbox{\hyperlink{classfreertos_1_1mutex}{mutex}}, Tick\+Type\+\_\+t ticks\+\_\+to\+\_\+wait)
+\begin{DoxyCompactList}\small\item\em Construct a new timeout lock guard object. \end{DoxyCompactList}\item 
+{\footnotesize template$<$typename Rep , typename Period $>$ }\\\mbox{\hyperlink{classfreertos_1_1timeout__lock__guard_a1e807fedd780a126608d57924472f121}{timeout\+\_\+lock\+\_\+guard}} (Mutex \&\mbox{\hyperlink{classfreertos_1_1mutex}{mutex}}, const std\+::chrono\+::duration$<$ Rep, Period $>$ \&timeout)
+\begin{DoxyCompactList}\small\item\em Construct a new timeout lock guard object. \end{DoxyCompactList}\item 
+\Hypertarget{classfreertos_1_1timeout__lock__guard_a6c2adfd05626569df6c17190de6bb01f}\label{classfreertos_1_1timeout__lock__guard_a6c2adfd05626569df6c17190de6bb01f} 
+{\bfseries \texorpdfstring{$\sim$}{\string~}timeout\+\_\+lock\+\_\+guard} (void)
+\begin{DoxyCompactList}\small\item\em Destruct the timeout lock guard object and unlock the mutex. \end{DoxyCompactList}\item 
+\Hypertarget{classfreertos_1_1timeout__lock__guard_a688200755db25f74427cbd4adf454cba}\label{classfreertos_1_1timeout__lock__guard_a688200755db25f74427cbd4adf454cba} 
+{\bfseries timeout\+\_\+lock\+\_\+guard} (const \mbox{\hyperlink{classfreertos_1_1timeout__lock__guard}{timeout\+\_\+lock\+\_\+guard}} \&)=delete
+\item 
+\Hypertarget{classfreertos_1_1timeout__lock__guard_a96939a6d59b494e9bbba83481bec4815}\label{classfreertos_1_1timeout__lock__guard_a96939a6d59b494e9bbba83481bec4815} 
+{\bfseries timeout\+\_\+lock\+\_\+guard} (\mbox{\hyperlink{classfreertos_1_1timeout__lock__guard}{timeout\+\_\+lock\+\_\+guard}} \&\&)=delete
+\item 
+\Hypertarget{classfreertos_1_1timeout__lock__guard_a6eed9cc7f7bbb4efbb181c94702a82a8}\label{classfreertos_1_1timeout__lock__guard_a6eed9cc7f7bbb4efbb181c94702a82a8} 
+\mbox{\hyperlink{classfreertos_1_1timeout__lock__guard}{timeout\+\_\+lock\+\_\+guard}} \& {\bfseries operator=} (const \mbox{\hyperlink{classfreertos_1_1timeout__lock__guard}{timeout\+\_\+lock\+\_\+guard}} \&)=delete
+\item 
+\Hypertarget{classfreertos_1_1timeout__lock__guard_a250321ebe797f6c078c27f5a617cf2dd}\label{classfreertos_1_1timeout__lock__guard_a250321ebe797f6c078c27f5a617cf2dd} 
+\mbox{\hyperlink{classfreertos_1_1timeout__lock__guard}{timeout\+\_\+lock\+\_\+guard}} \& {\bfseries operator=} (\mbox{\hyperlink{classfreertos_1_1timeout__lock__guard}{timeout\+\_\+lock\+\_\+guard}} \&\&)=delete
+\item 
+bool \mbox{\hyperlink{classfreertos_1_1timeout__lock__guard_a0f514d8cf9abe0a1a40dc8c18ca313ee}{locked}} (void) const
+\begin{DoxyCompactList}\small\item\em Checks if the mutex is locked. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\subsubsection*{template$<$typename Mutex$>$\newline
+class freertos\+::timeout\+\_\+lock\+\_\+guard$<$ Mutex $>$}
+Lock guard for the mutex with timeout. The mutex is locked in the constructor and unlocked in the destructor (RAII). 
+
+
+\begin{DoxyTemplParams}{Template Parameters}
+{\em Mutex} & type of the mutex to guard. \\
+\hline
+\end{DoxyTemplParams}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\Hypertarget{classfreertos_1_1timeout__lock__guard_a6194a77fdb07d2b52977a393dfd2311d}\label{classfreertos_1_1timeout__lock__guard_a6194a77fdb07d2b52977a393dfd2311d} 
+\index{freertos::timeout\_lock\_guard$<$ Mutex $>$@{freertos::timeout\_lock\_guard$<$ Mutex $>$}!timeout\_lock\_guard@{timeout\_lock\_guard}}
+\index{timeout\_lock\_guard@{timeout\_lock\_guard}!freertos::timeout\_lock\_guard$<$ Mutex $>$@{freertos::timeout\_lock\_guard$<$ Mutex $>$}}
+\doxysubsubsection{\texorpdfstring{timeout\_lock\_guard()}{timeout\_lock\_guard()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily template$<$typename Mutex $>$ \\
+\mbox{\hyperlink{classfreertos_1_1timeout__lock__guard}{freertos\+::timeout\+\_\+lock\+\_\+guard}}$<$ Mutex $>$\+::timeout\+\_\+lock\+\_\+guard (\begin{DoxyParamCaption}\item[{Mutex \&}]{mutex,  }\item[{Tick\+Type\+\_\+t}]{ticks\+\_\+to\+\_\+wait }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Construct a new timeout lock guard object. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em mutex} & mutex to guard \\
+\hline
+{\em ticks\+\_\+to\+\_\+wait} & timeout in ticks to wait for the mutex. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{classfreertos_1_1timeout__lock__guard_a1e807fedd780a126608d57924472f121}\label{classfreertos_1_1timeout__lock__guard_a1e807fedd780a126608d57924472f121} 
+\index{freertos::timeout\_lock\_guard$<$ Mutex $>$@{freertos::timeout\_lock\_guard$<$ Mutex $>$}!timeout\_lock\_guard@{timeout\_lock\_guard}}
+\index{timeout\_lock\_guard@{timeout\_lock\_guard}!freertos::timeout\_lock\_guard$<$ Mutex $>$@{freertos::timeout\_lock\_guard$<$ Mutex $>$}}
+\doxysubsubsection{\texorpdfstring{timeout\_lock\_guard()}{timeout\_lock\_guard()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily template$<$typename Mutex $>$ \\
+template$<$typename Rep , typename Period $>$ \\
+\mbox{\hyperlink{classfreertos_1_1timeout__lock__guard}{freertos\+::timeout\+\_\+lock\+\_\+guard}}$<$ Mutex $>$\+::timeout\+\_\+lock\+\_\+guard (\begin{DoxyParamCaption}\item[{Mutex \&}]{mutex,  }\item[{const std\+::chrono\+::duration$<$ Rep, Period $>$ \&}]{timeout }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Construct a new timeout lock guard object. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em mutex} & mutex to guard \\
+\hline
+{\em timeout} & timeout to wait for the mutex. \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classfreertos_1_1timeout__lock__guard_a0f514d8cf9abe0a1a40dc8c18ca313ee}\label{classfreertos_1_1timeout__lock__guard_a0f514d8cf9abe0a1a40dc8c18ca313ee} 
+\index{freertos::timeout\_lock\_guard$<$ Mutex $>$@{freertos::timeout\_lock\_guard$<$ Mutex $>$}!locked@{locked}}
+\index{locked@{locked}!freertos::timeout\_lock\_guard$<$ Mutex $>$@{freertos::timeout\_lock\_guard$<$ Mutex $>$}}
+\doxysubsubsection{\texorpdfstring{locked()}{locked()}}
+{\footnotesize\ttfamily template$<$typename Mutex $>$ \\
+bool \mbox{\hyperlink{classfreertos_1_1timeout__lock__guard}{freertos\+::timeout\+\_\+lock\+\_\+guard}}$<$ Mutex $>$\+::locked (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Checks if the mutex is locked. 
+
+\begin{DoxyReturn}{Returns}
+true if the mutex is locked, otherwise false. 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+include/freertos\+\_\+semaphore.\+hpp\end{DoxyCompactItemize}
