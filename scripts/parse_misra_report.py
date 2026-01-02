@@ -66,7 +66,7 @@ def parse_misra_output(input_file, source_dir):
                 continue
                 
             # Parse issue lines: file:line:column: severity: message [id]
-            match = re.match(r'^([^:]+):(\d+):(\d+):\s+(\w+):\s+(.+?)\s+\[([^\]]+)\]$', line)
+            match = re.match(r'^(.+?):(\d+):(\d+):\s+(\w+):\s+(.+?)\s+\[([^\]]+)\]$', line)
             if match:
                 file_path, line_num, col_num, severity, message, check_id = match.groups()
                 
