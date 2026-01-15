@@ -5,23 +5,29 @@ This directory contains comprehensive unit tests for the FreeRTOS C++ wrapper li
 ## Test Structure
 
 ### Completed Modules ✅
-- **Task Module** (`test_freertos_task.cpp`) - 46 tests
-- **Semaphore Module** (`test_freertos_semaphore.cpp`) - 68 tests
+- **Task Module** (`test_freertos_task.cpp`) - 81 tests
+- **Semaphore Module** (`test_freertos_semaphore.cpp`) - 81 tests
 - **Queue Module** (`test_freertos_queue.cpp`) - 49 tests
 - **Stream Buffer Module** (`test_freertos_stream_buffer.cpp`) - 47 tests
 - **Event Group Module** (`test_freertos_event_group.cpp`) - 30 tests
 - **Message Buffer Module** (`test_freertos_message_buffer.cpp`) - 32 tests
 - **Software Timer Module** (`test_freertos_sw_timer.cpp`) - 50 tests
+- **Enhanced Multitasking** (`test_enhanced_multitasking.cpp`) - 12 tests
+- **Enhanced STL Integration** (`test_freertos_semaphore_stl.cpp`) - 15 tests
+- **Enhanced Timeout Precision** (`test_enhanced_timeout_precision.cpp`) - 11 tests
+- **Enhanced C++17 Features** (`test_enhanced_cpp17_features.cpp`) - 13 tests
+- **Enhanced SW Timer** (`test_enhanced_freertos_sw_timer.cpp`) - 18 tests
+- **Enhanced Debug** (`test_enhanced_debug.cpp`) - included in suite
 
 **All major FreeRTOS modules are now fully tested!** 🎉
 
 ## Test Coverage
 
-**Overall Coverage: 92.4%** (1,425 of 1,542 lines)
+**Overall Coverage: 97.0%** (7395 of 7620 lines)
 
-**Total Tests: 322** (Task: 46, Semaphore: 68, Queue: 49, Stream Buffer: 47, Event Group: 30, Message Buffer: 32, Timer: 50)
+**Total Tests: 439** (Task: 81, Semaphore: 81, Queue: 49, Stream Buffer: 47, Event Group: 30, Message Buffer: 32, Timer: 50, Enhanced Multitasking: 12, STL Integration: 15, Timeout Precision: 11, C++17 Features: 13, Enhanced SW Timer: 18)
 
-See [COVERAGE_REPORT.md](../COVERAGE_REPORT.md) for detailed coverage analysis.
+See [VALIDATION_VERIFICATION_REPORT.md](../VALIDATION_VERIFICATION_REPORT.md) for detailed coverage analysis.
 
 ## Building and Running Tests
 
@@ -211,22 +217,22 @@ When all tests pass, you should see:
 
 ```
 # Task Tests
-[==========] Running 46 tests from 1 test suite.
+[==========] Running 81 tests from 1 test suite.
 [----------] Global test environment set-up.
-[----------] 46 tests from FreeRTOSTaskTest
+[----------] 81 tests from FreeRTOSTaskTest
 [       OK ] All tests completed successfully
-[----------] 46 tests from FreeRTOSTaskTest (X ms total)
-[==========] 46 tests from 1 test suite ran. (X ms total)
-[  PASSED  ] 46 tests.
+[----------] 81 tests from FreeRTOSTaskTest (X ms total)
+[==========] 81 tests from 1 test suite ran. (X ms total)
+[  PASSED  ] 81 tests.
 
 # Semaphore Tests  
-[==========] Running 68 tests from 1 test suite.
+[==========] Running 81 tests from 1 test suite.
 [----------] Global test environment set-up.
-[----------] 68 tests from FreeRTOSSemaphoreTest
+[----------] 81 tests from FreeRTOSSemaphoreTest
 [       OK ] All tests completed successfully
-[----------] 68 tests from FreeRTOSSemaphoreTest (X ms total)
-[==========] 68 tests from 1 test suite ran. (X ms total)
-[  PASSED  ] 68 tests.
+[----------] 81 tests from FreeRTOSSemaphoreTest (X ms total)
+[==========] 81 tests from 1 test suite ran. (X ms total)
+[  PASSED  ] 81 tests.
 
 # Queue Tests
 [==========] Running 49 tests from 1 test suite.
@@ -263,6 +269,16 @@ When all tests pass, you should see:
 [----------] 50 tests from FreeRTOSSwTimerTest (X ms total)
 [==========] 50 tests from 1 test suite ran. (X ms total)
 [  PASSED  ] 50 tests.
+
+# Enhanced Test Suites
+# Enhanced Multitasking: 12 tests
+# Enhanced STL Integration: 15 tests 
+# Enhanced Timeout Precision: 11 tests
+# Enhanced C++17 Features: 13 tests
+# Enhanced SW Timer: 18 tests
+# Enhanced Debug: included in suite
+
+Total: 439 tests across all modules (100% pass rate)
 ```
 
 ## Integration with CI/CD
