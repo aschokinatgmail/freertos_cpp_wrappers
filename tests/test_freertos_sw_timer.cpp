@@ -90,6 +90,10 @@ protected:
         return [this]() { callback_count++; };
     }
     
+    // LCOV_EXCL_START - Helper function for allocator testing (never executes)
+    static void test_timer_callback(TimerHandle_t) { /* test callback */ }
+    // LCOV_EXCL_STOP
+    
     // Helper function to set up standard destructor expectations
     void expectDestructor(TimerHandle_t timer_handle = nullptr) {
         TimerHandle_t handle = timer_handle ? timer_handle : mock_timer_handle;
@@ -152,7 +156,7 @@ TEST_F(FreeRTOSSwTimerTest, StaticTimerAllocatorCreate) {
     )).WillOnce(Return(mock_timer_handle));
     
     TimerHandle_t handle = allocator.create("TestTimer", 100, pdTRUE, &allocator, 
-                                          [](TimerHandle_t){});
+                                          test_timer_callback);
     
     EXPECT_EQ(handle, mock_timer_handle);
 }
@@ -165,7 +169,7 @@ TEST_F(FreeRTOSSwTimerTest, StaticTimerAllocatorCreateNullReturn) {
         .WillOnce(Return(nullptr));
     
     TimerHandle_t handle = allocator.create("TestTimer", 100, pdTRUE, nullptr,
-                                          [](TimerHandle_t){});
+                                          test_timer_callback);
     
     EXPECT_EQ(handle, nullptr);
 }
@@ -200,7 +204,7 @@ TEST_F(FreeRTOSSwTimerTest, DynamicTimerAllocatorCreate) {
     )).WillOnce(Return(mock_timer_handle));
     
     TimerHandle_t handle = allocator.create("TestTimer", 200, pdFALSE, &allocator,
-                                          [](TimerHandle_t){});
+                                          test_timer_callback);
     
     EXPECT_EQ(handle, mock_timer_handle);
 }
@@ -213,7 +217,7 @@ TEST_F(FreeRTOSSwTimerTest, DynamicTimerAllocatorCreateNullReturn) {
         .WillOnce(Return(nullptr));
     
     TimerHandle_t handle = allocator.create("TestTimer", 200, pdFALSE, nullptr,
-                                          [](TimerHandle_t){});
+                                          test_timer_callback);
     
     EXPECT_EQ(handle, nullptr);
 }
