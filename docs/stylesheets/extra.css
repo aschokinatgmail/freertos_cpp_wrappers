@@ -1,0 +1,297 @@
+/* GitHub-inspired styling for FreeRTOS C++ Wrappers documentation */
+
+/* Hero section */
+.hero {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 4rem 2rem;
+  margin: -1rem -1rem 2rem -1rem;
+  text-align: center;
+  border-radius: 0 0 8px 8px;
+}
+
+.hero-content h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  line-height: 1.2;
+}
+
+.hero-description {
+  font-size: 1.2rem;
+  opacity: 0.9;
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.5;
+}
+
+/* Feature grid */
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+.feature-card {
+  background: var(--md-default-bg-color);
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 8px;
+  padding: 1.5rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.feature-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  border-color: var(--md-primary-fg-color);
+}
+
+.feature-icon {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.feature-content h3 {
+  margin: 0 0 0.5rem 0;
+  color: var(--md-default-fg-color);
+  font-weight: 600;
+}
+
+.feature-content p {
+  margin: 0;
+  color: var(--md-default-fg-color--light);
+  line-height: 1.5;
+}
+
+/* Example preview */
+.example-preview {
+  margin: 2rem 0;
+}
+
+.example-preview h3 {
+  color: var(--md-primary-fg-color);
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+/* Metrics grid */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin: 2rem 0;
+}
+
+.metric-card {
+  background: var(--md-default-bg-color);
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 8px;
+  padding: 1.5rem;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.metric-card:hover {
+  border-color: var(--md-primary-fg-color);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.metric-number {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--md-primary-fg-color);
+  line-height: 1;
+}
+
+.metric-label {
+  font-weight: 600;
+  margin: 0.5rem 0 0.25rem 0;
+  color: var(--md-default-fg-color);
+}
+
+.metric-description {
+  font-size: 0.875rem;
+  color: var(--md-default-fg-color--light);
+}
+
+/* API grid */
+.api-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  margin: 2rem 0;
+}
+
+.api-card {
+  display: block;
+  background: var(--md-default-bg-color);
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 8px;
+  padding: 1.5rem;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.2s ease;
+}
+
+.api-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  border-color: var(--md-primary-fg-color);
+  text-decoration: none;
+}
+
+.api-icon {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.api-title {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--md-default-fg-color);
+}
+
+.api-description {
+  color: var(--md-default-fg-color--light);
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+/* Footer links */
+.footer-links {
+  text-align: center;
+  margin: 3rem 0 2rem 0;
+  padding: 2rem 0;
+  border-top: 1px solid var(--md-default-fg-color--lightest);
+}
+
+.footer-links a {
+  color: var(--md-primary-fg-color);
+  text-decoration: none;
+  margin: 0 0.5rem;
+}
+
+.footer-links a:hover {
+  text-decoration: underline;
+}
+
+/* Code blocks improvements */
+.highlight {
+  margin: 1rem 0;
+}
+
+/* Buttons */
+.md-button {
+  background-color: var(--md-primary-fg-color);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  text-decoration: none;
+  display: inline-block;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  margin: 0.5rem 0.5rem 0.5rem 0;
+}
+
+.md-button:hover {
+  background-color: var(--md-primary-fg-color--dark);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  text-decoration: none;
+}
+
+.md-button--primary {
+  background-color: var(--md-accent-fg-color);
+}
+
+.md-button--primary:hover {
+  background-color: var(--md-accent-fg-color--transparent);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .hero-content h1 {
+    font-size: 2rem;
+  }
+  
+  .hero-description {
+    font-size: 1rem;
+  }
+  
+  .feature-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .api-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Dark theme adjustments */
+[data-md-color-scheme="slate"] .feature-card,
+[data-md-color-scheme="slate"] .metric-card,
+[data-md-color-scheme="slate"] .api-card {
+  background: var(--md-code-bg-color);
+  border-color: var(--md-default-fg-color--lightest);
+}
+
+[data-md-color-scheme="slate"] .feature-card:hover,
+[data-md-color-scheme="slate"] .metric-card:hover,
+[data-md-color-scheme="slate"] .api-card:hover {
+  border-color: var(--md-primary-fg-color);
+  box-shadow: 0 4px 12px rgba(255,255,255,0.1);
+}
+
+/* Tabs styling */
+.tabbed-set {
+  margin: 1rem 0;
+}
+
+.tabbed-labels > label {
+  font-weight: 500;
+}
+
+/* Admonitions */
+.admonition {
+  margin: 1.5rem 0;
+}
+
+/* Tables */
+.md-typeset table:not([class]) {
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.md-typeset table:not([class]) th {
+  background-color: var(--md-default-fg-color--lightest);
+  font-weight: 600;
+}
+
+/* Navigation improvements */
+.md-tabs__item {
+  font-weight: 500;
+}
+
+.md-nav__item--active > .md-nav__link {
+  font-weight: 600;
+}
+
+/* Search improvements */
+.md-search__input {
+  border-radius: 6px;
+}
+
+/* Content spacing */
+.md-content__inner {
+  padding-bottom: 2rem;
+}

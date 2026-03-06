@@ -276,7 +276,7 @@ add_custom_target(validation-verification-report
     COMMAND ${CMAKE_COMMAND} -E echo "=== Reports Generated ==="
     COMMAND ${CMAKE_COMMAND} -E echo "1. STATIC_ANALYSIS_REPORT.md - Integrated static analysis (clang-tidy + MISRA C++)"
     COMMAND ${CMAKE_COMMAND} -E echo "2. VALIDATION_VERIFICATION_REPORT.md - Test execution and coverage analysis"
-    COMMAND ${CMAKE_COMMAND} -E echo "3. docs/html/index.html - Updated project documentation"
+    COMMAND ${CMAKE_COMMAND} -E echo "3. site/index.html - Updated project documentation"
     COMMAND ${CMAKE_COMMAND} -E echo ""
     
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
@@ -298,30 +298,30 @@ message(STATUS "Run 'make validation-verification-report' to generate both requi
 option(GENERATE_DOCS "Generate documentation" ON)
 
 if(GENERATE_DOCS)
-    # Find doxygen executable
-    find_program(DOXYGEN_EXE NAMES doxygen)
+    # Find mkdocs executable
+    find_program(MKDOCS_EXE NAMES mkdocs)
     
-    if(DOXYGEN_EXE)
-        message(STATUS "doxygen found: ${DOXYGEN_EXE}")
+    if(MKDOCS_EXE)
+        message(STATUS "mkdocs found: ${MKDOCS_EXE}")
         
         # Add custom target for generating documentation
         add_custom_target(docs
-            # Generate documentation with dynamic version
-            COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/scripts/generate_documentation.sh
+            # Generate documentation with MkDocs
+            COMMAND ${MKDOCS_EXE} build --clean --site-dir ${CMAKE_CURRENT_SOURCE_DIR}/site
             
             # Status messages
             COMMAND ${CMAKE_COMMAND} -E echo ""
             COMMAND ${CMAKE_COMMAND} -E echo "=== Documentation Generated ==="
-            COMMAND ${CMAKE_COMMAND} -E echo "Documentation available at: ${CMAKE_CURRENT_SOURCE_DIR}/docs/html/index.html"
+            COMMAND ${CMAKE_COMMAND} -E echo "Documentation available at: ${CMAKE_CURRENT_SOURCE_DIR}/site/index.html"
             COMMAND ${CMAKE_COMMAND} -E echo ""
             
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-            COMMENT "Generating project documentation with dynamic version"
+            COMMENT "Generating modern documentation with MkDocs Material theme"
         )
         
         message(STATUS "Run 'make docs' to generate documentation")
     else()
-        message(WARNING "doxygen not found! Documentation generation will be skipped. Install doxygen to enable documentation generation.")
+        message(WARNING "mkdocs not found! Documentation generation will be skipped. Install mkdocs to enable documentation generation.")
     endif()
 else()
     message(STATUS "Documentation generation disabled via GENERATE_DOCS=OFF")
