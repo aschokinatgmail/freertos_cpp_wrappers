@@ -103,12 +103,22 @@ def parse_misra_output(input_file, source_dir):
                 continue
                 
             # Parse issue lines: file:line:column: severity: message [id]
-            match = re.match(r'^([^:]+):(\d+):(\d+):\s+(\w+):\s+(.+?)\s+\[([^\]]+)\]$', line)
+            match = re.match(r'^(.+?):(\d+):(\d+):\s+(\w+):\s+(.+?)\s+\[([^\]]+)\]$', line)
             if match:
                 file_path, line_num, col_num, severity, message, check_id = match.groups()
                 
                 # Extract file name from path
                 file_name = os.path.basename(file_path)
+                
+                # Skip files from test directories and mocks
+                if '/mocks/' in file_path or 'test_' in file_name or '/tests/' in file_path:
+                    continue
+                
+                # Only include files from src/ and include/ directories
+                if not ('/src/' in file_path or '/include/' in file_path or 
+                        file_path.endswith('.hpp') or file_path.endswith('.cc') or file_path.endswith('.cpp')):
+                    continue
+                
                 stats['files_analyzed'].add(file_name)
                 
                 # Check if this is a MISRA violation
@@ -162,7 +172,6 @@ def print_misra_report(stats):
     print(f"- **Total MISRA Violations**: {stats['total_violations']}")
     print(f"- **Unique Rules Violated**: {len(stats['misra_rules'])}")
     print(f"- **Files Analyzed**: {len(stats['files_analyzed'])}")
-    print(f"- **Analysis Errors**: {len(stats['analysis_errors'])}")
     print(f"- **Other Issues**: {stats['other_issues']}")
     print()
     
@@ -228,15 +237,15 @@ def print_misra_report(stats):
                 print("```")
                 print()
     
-    if stats['analysis_errors']:
-        print("### Analysis Errors")
+    if stats.get('analysis_errors'):
+        print("### Tooling / Analysis Errors")
         print()
-        print("Some files could not be fully analyzed:")
+        print("The following issues were reported by the analysis tooling. These are not MISRA violations,")
+        print("but they may indicate that some files could not be analyzed or that the tool encountered")
+        print("internal errors. Review them to ensure the analysis coverage is as expected.")
         print()
-        print("```")
         for error in stats['analysis_errors']:
-            print(error)
-        print("```")
+            print(f"- {error}")
         print()
     
     print("### Analysis Notes")

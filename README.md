@@ -62,50 +62,45 @@ ctest --verbose
 
 ## Quality Assurance Reports
 
-The project automatically generates three comprehensive quality reports that are updated with each test execution:
+The project generates a single comprehensive validation and verification report combining all quality assurance activities. Reports are timestamped and stored in the `VnV/` directory.
 
-### 1. Static Analysis Report
-- **File**: `STATIC_ANALYSIS_REPORT.md`
-- **Content**: Comprehensive static analysis with clang-tidy + enhanced cppcheck (all rules) + MISRA C++
-- **Scope**: Library code only (src/, include/) - test harness excluded
+### Combined Validation and Verification Report
+- **Location**: `VnV/VALIDATION_VERIFICATION_REPORT_<YYYYMMDD_HHMMSS>.md/.html`
+- **Content**:
+  - **Static Code Analysis**: clang-tidy + Enhanced cppcheck (all rules) + MISRA C++ results with code context
+  - **Test Execution Results**: Complete Google Test results with pass/fail status per test
+  - **Code Coverage Analysis**: Line and function coverage with uncovered areas explanation
+  - **Validation Conclusions**: Production readiness assessment and recommendations
 - **Tools**: 
   - **clang-tidy**: cppcoreguidelines-*, cert-*, google-*, hicpp-*
   - **Enhanced cppcheck**: All rules (style, performance, portability, security, unused code, const correctness)
   - **MISRA C++**: MISRA C 2012 rules applicable to C++ with detailed descriptions
-- **Purpose**: Comprehensive code quality analysis covering standards compliance and best practices
-
-### 2. Validation and Verification Report
-- **File**: `VALIDATION_VERIFICATION_REPORT.md`
-- **Content**: 
-  - Complete test execution results with pass/fail status
-  - Individual test performance metrics
-  - Code coverage analysis (97.0% line coverage, 98.2% function coverage)
-  - Detailed explanation of uncovered code areas
-  - Test categorization and quality metrics
-- **Purpose**: Demonstrates system validation and production readiness
+- **Google Test/Mock**: Unit testing with FreeRTOS API mocking
+  - **LCOV/GCOV**: Code coverage analysis
+- **Scope**: Library code only (src/, include/) - test harness excluded
 
 ### Automated Report Generation
 
-All reports are automatically regenerated to reflect the current state of development:
+Reports are automatically generated with timestamps to track validation history:
 
 ```bash
-# Generate all reports with single command
+# Generate combined V&V report with single command
 make validation-verification-report
 
-# This command will:
+# Or run the script directly
+./scripts/generate_validation_verification_report.sh
+
+# This will:
 # 1. Build the project with coverage enabled
-# 2. Run all 439 tests
+# 2. Run all tests via Google Test harness
 # 3. Generate coverage data
 # 4. Run comprehensive static analysis (clang-tidy + enhanced cppcheck + MISRA C++)
-# 5. Generate all reports with current results
+# 5. Generate combined timestamped report in VnV/ directory
 ```
 
 ### Manual Report Generation
 
 ```bash
-# Generate comprehensive static analysis report (clang-tidy + enhanced cppcheck + MISRA C++)
-make static-analysis-report
-
 # Generate validation report manually
 ./scripts/run_tests_and_generate_reports.sh
 ```
@@ -161,9 +156,8 @@ mkdir build && cd build
 cmake -DENABLE_COVERAGE=ON ..
 make validation-verification-report
 
-# View results
-cat ../STATIC_ANALYSIS_REPORT.md
-cat ../VALIDATION_VERIFICATION_REPORT.md
+# View results (timestamped reports in VnV/ directory)
+ls ../VnV/
 ```
 
 ## Project Status

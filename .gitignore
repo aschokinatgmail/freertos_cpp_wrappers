@@ -60,5 +60,8 @@ Thumbs.db
 *.dump
 *.ctu-info
 
-# Static analysis reports (optional - generated automatically)
-# STATIC_ANALYSIS_REPORT.md
+# Old root-level report files (now generated in VnV/ directory)
+STATIC_ANALYSIS_REPORT.md
+STATIC_ANALYSIS_REPORT.html
+VALIDATION_VERIFICATION_REPORT.md
+VALIDATION_VERIFICATION_REPORT.html
