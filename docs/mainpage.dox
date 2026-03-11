@@ -1,12 +1,27 @@
 /**
  * @mainpage FreeRTOS C++ Wrappers Documentation
  * 
+ * @htmlonly
+ * <div class="hero-section">
+ *   <div class="hero-title">FreeRTOS C++ Wrappers</div>
+ *   <div class="hero-subtitle">Modern C++17 RAII wrappers for FreeRTOS APIs &mdash; lightweight, type-safe, and production-ready.</div>
+ * </div>
+ *
+ * <div class="stats-grid">
+ *   <div class="stat-card"><div class="stat-value">439</div><div class="stat-label">Tests Passing</div></div>
+ *   <div class="stat-card"><div class="stat-value">97%</div><div class="stat-label">Line Coverage</div></div>
+ *   <div class="stat-card"><div class="stat-value">C++17</div><div class="stat-label">Standard</div></div>
+ *   <div class="stat-card"><div class="stat-value">8</div><div class="stat-label">Modules</div></div>
+ * </div>
+ * @endhtmlonly
+ * 
  * @section intro_sec Introduction
  * 
  * Welcome to the **FreeRTOS C++ Wrappers** library documentation! This modern C++17 library provides 
  * lightweight, RAII-compliant wrappers for FreeRTOS APIs, making it easier and safer to use FreeRTOS 
  * in C++ applications.
  * 
+ * @htmlonly
  * <div class="feature-grid">
  * <div class="feature-card">
  *   <div class="feature-icon">🛡️</div>
@@ -26,7 +41,7 @@
  * <div class="feature-card">
  *   <div class="feature-icon">🧪</div>
  *   <div class="feature-title">Well Tested</div>
- *   <div class="feature-description">377+ comprehensive tests covering all functionality</div>
+ *   <div class="feature-description">439 comprehensive tests covering all functionality</div>
  * </div>
  * <div class="feature-card">
  *   <div class="feature-icon">📱</div>
@@ -39,11 +54,12 @@
  *   <div class="feature-description">Full std::chrono compatibility for timeout handling</div>
  * </div>
  * </div>
+ * @endhtmlonly
  * 
  * @section features_sec Key Features
  * 
  * - **Modern C++17 RAII wrappers** for all major FreeRTOS APIs
- * - **Comprehensive test coverage** with 377+ automated tests
+ * - **Comprehensive test coverage** with 439 automated tests
  * - **Static analysis integration** with clang-tidy
  * - **Dual allocation support** for both static and dynamic strategies
  * - **std::chrono compatibility** for intuitive timeout handling
@@ -306,8 +322,8 @@
  * 
  * The library includes comprehensive testing with:
  * 
- * - **377+ automated tests** covering all functionality
- * - **96.8% line coverage** and **95.7% function coverage**
+ * - **439 automated tests** covering all functionality
+ * - **97.0% line coverage** and **98.2% function coverage**
  * - **Static analysis** with clang-tidy integration
  * - **Continuous integration** with automated validation
  * 

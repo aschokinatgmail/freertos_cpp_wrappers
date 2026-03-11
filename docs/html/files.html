@@ -1,11 +1,23 @@
+<!-- HTML header for doxygen 1.9.8 - Glassmorphism Theme -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en-US">
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
-<meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>FreeRTOS C++ Wrappers: File List</title>
+<script type="text/javascript">
+/* Default to dark mode before styles load to prevent flash of light content */
+try {
+    if (!localStorage.getItem('prefers-light-mode-in-dark-mode') &&
+        !localStorage.getItem('prefers-dark-mode-in-light-mode')) {
+        document.documentElement.classList.add('dark-mode');
+    }
+} catch (e) {
+    /* localStorage unavailable (privacy mode / sandboxed iframe) - default to dark */
+    document.documentElement.classList.add('dark-mode');
+}
+</script>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -17,7 +29,33 @@
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
-<link href="custom.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only-darkmode-toggle.css" rel="stylesheet" type="text/css"/>
+<link href="glassmorphism.css" rel="stylesheet" type="text/css"/>
+<!-- Doxygen Awesome Extensions -->
+<script type="text/javascript" src="doxygen-awesome-darkmode-toggle.js"></script>
+<script type="text/javascript">
+/* Re-apply dark mode default after toggle _staticConstructor ran */
+try {
+    if (!localStorage.getItem('prefers-light-mode-in-dark-mode') &&
+        !localStorage.getItem('prefers-dark-mode-in-light-mode')) {
+        DoxygenAwesomeDarkModeToggle.enableDarkMode(true);
+    }
+} catch (e) {
+    /* localStorage unavailable - default to dark */
+    DoxygenAwesomeDarkModeToggle.enableDarkMode(true);
+}
+</script>
+<script type="text/javascript" src="doxygen-awesome-fragment-copy-button.js"></script>
+<script type="text/javascript" src="doxygen-awesome-interactive-toc.js"></script>
+<script type="text/javascript" src="doxygen-awesome-paragraph-link.js"></script>
+<script type="text/javascript">
+    DoxygenAwesomeDarkModeToggle.init()
+    DoxygenAwesomeFragmentCopyButton.init()
+    DoxygenAwesomeInteractiveToc.init()
+    DoxygenAwesomeParagraphLink.init()
+</script>
 </head>
 <body>
 <div id="top"><!-- do not remove this div, it is closed by doxygen! -->
@@ -26,7 +64,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FreeRTOS C++ Wrappers<span id="projectnumber">&#160;v0.1.0-e0f4c37</span>
+   <div id="projectname">FreeRTOS C++ Wrappers<span id="projectnumber">&#160;v0.1.0-d008e9b</span>
    </div>
    <div id="projectbrief">Modern C++17 RAII wrappers for FreeRTOS APIs</div>
   </td>
