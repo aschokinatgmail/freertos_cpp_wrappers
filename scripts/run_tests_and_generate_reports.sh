@@ -128,11 +128,7 @@ PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 BUILD_DIR="$PROJECT_ROOT/build"
 
 # Variables to track execution status
-TEST_STATUS=0
-BUILD_STATUS=0
-COVERAGE_STATUS=0
 DOCS_STATUS=0
-STATIC_ANALYSIS_STATUS=0
 
 log_message "=== FreeRTOS C++ Wrappers - Test Execution and Report Generation ==="
 log_message "Project Root: $PROJECT_ROOT"
@@ -155,78 +151,27 @@ else
     log_message "Warning: .clang-format file not found or clang-format not available. Skipping code formatting."
 fi
 
-# Check if build directory exists, create if needed
-if [ ! -d "$BUILD_DIR" ]; then
-    log_message "Creating build directory..."
-    mkdir -p "$BUILD_DIR"
+# Generate combined validation and verification report
+# (handles build, test execution, coverage, static analysis, and report generation)
+log_message "Generating combined validation and verification report..."
+"$SCRIPT_DIR/generate_validation_verification_report.sh" "$BUILD_DIR"
+REPORT_STATUS=$?
+
+if [ $REPORT_STATUS -eq 0 ]; then
+    log_message "Combined validation and verification report generated successfully"
+else
+    log_message "WARNING: Combined validation and verification report generation encountered failures"
 fi
 
-# Configure with coverage
-log_message "Configuring project with coverage enabled..."
+# Generate documentation (optional, does not affect the V&V report)
 cd "$BUILD_DIR"
-if cmake -DENABLE_COVERAGE=ON ..; then
-    log_message "CMake configuration successful"
-else
-    log_message "ERROR: CMake configuration failed"
-    BUILD_STATUS=1
-fi
-
-# Build the project
-log_message "Building project..."
-if make -j$(nproc); then
-    log_message "Build successful"
-else
-    log_message "ERROR: Build failed"
-    BUILD_STATUS=1
-fi
-
-# Run tests (continue even if some tests fail)
-log_message "Running all tests..."
-if ctest --verbose; then
-    log_message "All tests passed successfully"
-    TEST_STATUS=0
-else
-    TEST_STATUS=$?
-    log_message "Some tests failed (exit code: $TEST_STATUS), but continuing with report generation"
-fi
-
-# Generate coverage data (even if tests failed)
-log_message "Generating coverage data..."
-if command_exists lcov; then
-    if lcov --capture --directory . --output-file coverage.info --ignore-errors mismatch,negative,gcov,source; then
-        if lcov --remove coverage.info '/usr/*' --output-file coverage_filtered.info; then
-            log_message "Coverage data generated successfully"
-            lcov --summary coverage_filtered.info
-            COVERAGE_STATUS=0
-        else
-            log_message "WARNING: Coverage filtering failed"
-            COVERAGE_STATUS=1
-        fi
-    else
-        log_message "WARNING: Coverage capture failed"
-        COVERAGE_STATUS=1
-    fi
-else
-    log_message "WARNING: lcov not available, skipping coverage generation"
-    COVERAGE_STATUS=1
-fi
-
-# Generate documentation after tests (even if tests failed)
 log_message "Generating project documentation..."
-if command_exists doxygen && make docs; then
+if command_exists doxygen && cmake --build "$BUILD_DIR" --target docs 2>/dev/null; then
     log_message "Documentation generated successfully"
     DOCS_STATUS=0
 else
     log_message "WARNING: Documentation generation failed or doxygen not available"
     DOCS_STATUS=1
-fi
-
-# Generate validation and verification report (combined: test results + static analysis)
-log_message "Generating combined validation and verification report..."
-if "$SCRIPT_DIR/generate_validation_verification_report.sh" "$BUILD_DIR"; then
-    log_message "Combined validation and verification report generated successfully"
-else
-    log_message "WARNING: Combined validation and verification report generation failed, but continuing"
 fi
 
 log_message ""
@@ -249,18 +194,6 @@ else
 fi
 
 log_message ""
-log_message "=== Execution Summary ==="
-log_message "Build Status: $([ $BUILD_STATUS -eq 0 ] && echo "✅ SUCCESS" || echo "❌ FAILED")"
-log_message "Test Status: $([ $TEST_STATUS -eq 0 ] && echo "✅ ALL PASSED" || echo "❌ SOME FAILED")"
-log_message "Coverage Status: $([ $COVERAGE_STATUS -eq 0 ] && echo "✅ SUCCESS" || echo "❌ FAILED")"
-log_message "Documentation Status: $([ $DOCS_STATUS -eq 0 ] && echo "✅ SUCCESS" || echo "❌ FAILED")"
-
-# Show test summary regardless of failures
-log_message ""
-log_message "Test summary:"
-ctest | grep -E "(tests passed|Total Test time|% tests failed)" || true
-
-log_message ""
 log_message "Reports are located in: $VNV_DIR"
 log_message "To view reports:"
 if ls "$VNV_DIR"/VALIDATION_VERIFICATION_REPORT_*.html 1>/dev/null 2>&1; then
@@ -269,20 +202,8 @@ if ls "$VNV_DIR"/VALIDATION_VERIFICATION_REPORT_*.html 1>/dev/null 2>&1; then
 fi
 log_message "  Documentation: open $PROJECT_ROOT/docs/html/index.html"
 
-# Final status - don't exit with error even if some components failed
-# The important thing is that reports are generated
-if [ $BUILD_STATUS -ne 0 ]; then
-    log_message ""
-    log_message "WARNING: Build failed, but reports were generated with available data"
-fi
-
-if [ $TEST_STATUS -ne 0 ]; then
-    log_message ""
-    log_message "WARNING: Some tests failed, but reports include failure details"
-fi
-
 log_message ""
 log_message "=== Report Generation Script Completed ==="
 
-# Exit successfully since reports were generated (even if tests failed)
-exit 0
+# Propagate exit status from the unified report script
+exit $REPORT_STATUS

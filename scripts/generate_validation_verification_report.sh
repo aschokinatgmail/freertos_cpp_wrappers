@@ -71,7 +71,7 @@ else
     BUILD_STATUS=1
 fi
 
-if make -j"$(nproc)" > build_output.txt 2>&1; then
+if cmake --build "$BUILD_DIR" --parallel > build_output.txt 2>&1; then
     log_message "Build successful"
 else
     log_message "ERROR: Build failed"
@@ -164,16 +164,30 @@ fi
 MISRA_REPORT="$BUILD_DIR/misra_analysis_output.txt"
 if [ -x "$SCRIPT_DIR/run_misra_analysis.sh" ]; then
     log_message "Running MISRA C++ analysis..."
-    "$SCRIPT_DIR/run_misra_analysis.sh" "$PROJECT_ROOT" "$MISRA_REPORT" > /dev/null 2>&1 || true
-    log_message "MISRA analysis complete"
+    if "$SCRIPT_DIR/run_misra_analysis.sh" "$PROJECT_ROOT" "$MISRA_REPORT" > /dev/null 2>&1; then
+        log_message "MISRA analysis complete"
+    else
+        log_message "WARNING: MISRA analysis returned non-zero exit code"
+        STATIC_ANALYSIS_STATUS=1
+    fi
+else
+    log_message "WARNING: run_misra_analysis.sh not found"
+    STATIC_ANALYSIS_STATUS=1
 fi
 
 # 4c: Enhanced cppcheck analysis
 ENHANCED_CPPCHECK_REPORT="$BUILD_DIR/enhanced_cppcheck_output.txt"
 if [ -x "$SCRIPT_DIR/run_enhanced_cppcheck_analysis.sh" ]; then
     log_message "Running enhanced cppcheck analysis..."
-    "$SCRIPT_DIR/run_enhanced_cppcheck_analysis.sh" "$PROJECT_ROOT" "$ENHANCED_CPPCHECK_REPORT" > /dev/null 2>&1 || true
-    log_message "Enhanced cppcheck analysis complete"
+    if "$SCRIPT_DIR/run_enhanced_cppcheck_analysis.sh" "$PROJECT_ROOT" "$ENHANCED_CPPCHECK_REPORT" > /dev/null 2>&1; then
+        log_message "Enhanced cppcheck analysis complete"
+    else
+        log_message "WARNING: Enhanced cppcheck analysis returned non-zero exit code"
+        STATIC_ANALYSIS_STATUS=1
+    fi
+else
+    log_message "WARNING: run_enhanced_cppcheck_analysis.sh not found"
+    STATIC_ANALYSIS_STATUS=1
 fi
 
 log_message "--- Stage 4 complete ---"
@@ -248,7 +262,7 @@ fi
             # Print static analysis section marker
             print "---"
             print ""
-            print "# Static Code Analysis"
+            print "## Static Code Analysis"
             print ""
             print "**Static Analysis Tools**: clang-tidy + Enhanced cppcheck (all rules) + MISRA C++ (cppcheck)"
             print "**Analysis Scope**: Library modules only - src/ include/"
@@ -280,7 +294,7 @@ fi
         echo ""
         echo "---"
         echo ""
-        echo "# Static Code Analysis"
+        echo "## Static Code Analysis"
         echo ""
         echo "**Static Analysis Tools**: clang-tidy + Enhanced cppcheck (all rules) + MISRA C++ (cppcheck)"
         echo "**Analysis Scope**: Library modules only - src/ include/"
