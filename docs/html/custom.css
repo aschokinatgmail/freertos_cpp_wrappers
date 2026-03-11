@@ -1,14 +1,12 @@
 /**
- * Apple Developer-inspired theme for FreeRTOS C++ Wrappers documentation
+ * Apple Developer-inspired light theme for FreeRTOS C++ Wrappers documentation
  * Clean, sophisticated design with refined typography and subtle interactions
+ * Optimized for light theme with modern, responsive design
  */
 
-/* Import Apple-style fonts */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=SF+Mono:wght@400;500;600&family=Menlo:wght@400;500&display=swap');
-
-/* Root variables for Apple Developer-inspired theming */
+/* Root variables for Apple Developer-inspired light theming */
 :root {
-  /* Core Apple-inspired colors */
+  /* Core Apple-inspired colors - Light theme only */
   --apple-blue: #007AFF;
   --apple-blue-dark: #0056CC;
   --apple-blue-light: #34AADC;
@@ -16,7 +14,7 @@
   --apple-gray-light: #F2F2F7;
   --apple-gray-dark: #1C1C1E;
   
-  /* Primary color palette */
+  /* Primary color palette - Light theme optimized */
   --primary-color: #007AFF;
   --primary-hover: #0056CC;
   --accent-color: #34C759;
@@ -25,7 +23,7 @@
   --surface-elevated: #ffffff;
   --surface-hover: #f5f5f7;
   
-  /* Typography colors */
+  /* Typography colors - Light theme optimized */
   --text-primary: #1d1d1f;
   --text-secondary: #86868b;
   --text-tertiary: #a1a1a6;
@@ -66,9 +64,9 @@
   --space-3xl: 3rem;
 }
 
-/* Base typography with Apple-inspired styling */
+/* Base typography with Apple system fonts - optimized for light theme */
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', 'Segoe UI', Roboto, system-ui, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
   font-size: 17px;
   line-height: 1.47059;
   color: var(--text-primary);
@@ -78,11 +76,12 @@ body {
   font-feature-settings: "kern" 1;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-weight: 400;
 }
 
-/* Code elements with Apple monospace fonts */
+/* Code elements with system monospace fonts */
 code, pre, .fragment {
-  font-family: 'SF Mono', 'Menlo', 'Monaco', 'Cascadia Code', 'Roboto Mono', 'Courier New', monospace;
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Consolas', 'Menlo', 'Cascadia Code', 'Roboto Mono', 'Courier New', monospace;
   font-size: 14px;
   line-height: 1.45;
   font-variant-ligatures: none;
@@ -176,22 +175,30 @@ code, pre, .fragment {
   font-weight: 600;
 }
 
-/* Refined sidebar navigation */
+/* Modern, simplistic sidebar navigation */
 #side-nav {
   background: var(--surface);
   border-right: 1px solid var(--separator);
   width: 300px;
   backdrop-filter: saturate(180%) blur(20px);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 #nav-tree {
   padding: var(--space-xl);
+  margin-top: 180px; /* Account for header */
 }
 
 #nav-tree .children_ul {
   margin-left: var(--space-lg);
-  border-left: 2px solid var(--border-light);
+  border-left: 1px solid var(--border-light);
   padding-left: var(--space-lg);
 }
 
@@ -205,6 +212,7 @@ code, pre, .fragment {
   font-size: 15px;
   font-weight: 500;
   letter-spacing: -0.003em;
+  margin-bottom: 2px;
 }
 
 #nav-tree a:hover {
@@ -213,17 +221,42 @@ code, pre, .fragment {
   transform: translateX(2px);
 }
 
-#nav-tree a.current {
+#nav-tree a.current, #nav-tree a.selected {
   background: rgba(0, 122, 255, 0.1);
   color: var(--primary-color);
   font-weight: 600;
+  border-left: 3px solid var(--primary-color);
+  margin-left: -3px;
 }
 
-/* Main content area with Apple-inspired layout */
+/* Improve tree navigation icons */
+#nav-tree .item {
+  margin: 0;
+}
+
+#nav-tree .children_ul .item {
+  position: relative;
+}
+
+#nav-tree .children_ul .item::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  top: 50%;
+  width: 6px;
+  height: 1px;
+  background: var(--border);
+  transform: translateY(-50%);
+}
+
+/* Main content area with responsive layout */
 #doc-content {
   background: var(--background);
   padding: var(--space-3xl) var(--space-2xl);
   max-width: none;
+  margin-left: 300px; /* Account for fixed sidebar */
+  min-height: 100vh;
+  position: relative;
 }
 
 .contents {
@@ -419,13 +452,13 @@ table tr:last-child td {
   color: var(--primary-color);
   font-weight: 600;
   font-size: 17px;
-  font-family: 'SF Mono', 'Menlo', monospace;
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Consolas', 'Menlo', monospace;
 }
 
 .paramname {
   color: var(--accent-color);
   font-weight: 500;
-  font-family: 'SF Mono', 'Menlo', monospace;
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Consolas', 'Menlo', monospace;
 }
 
 /* Enhanced list styling */
@@ -521,13 +554,14 @@ a:hover {
   line-height: 1.4;
 }
 
-/* Apple-inspired responsive design */
-@media (max-width: 1024px) {
+/* Enhanced responsive design for all screen sizes */
+@media (max-width: 1200px) {
   #side-nav {
     width: 280px;
   }
   
   #doc-content {
+    margin-left: 280px;
     padding: var(--space-2xl) var(--space-xl);
   }
   
@@ -540,10 +574,41 @@ a:hover {
   }
 }
 
+@media (max-width: 1024px) {
+  #side-nav {
+    width: 260px;
+  }
+  
+  #doc-content {
+    margin-left: 260px;
+    padding: var(--space-2xl) var(--space-lg);
+  }
+  
+  .title {
+    font-size: 36px;
+  }
+  
+  #projectname {
+    font-size: 26px;
+  }
+  
+  .tablist {
+    padding: 0 var(--space-lg);
+  }
+}
+
 @media (max-width: 768px) {
   #side-nav {
     width: 100%;
-    position: static;
+    position: fixed;
+    left: -100%;
+    transition: left 0.3s ease-in-out;
+    z-index: 1000;
+    box-shadow: var(--shadow-xl);
+  }
+  
+  #side-nav.open {
+    left: 0;
   }
   
   #doc-content {
@@ -562,11 +627,45 @@ a:hover {
   .tablist {
     flex-direction: column;
     padding: 0 var(--space-lg);
+    gap: 0;
+  }
+  
+  .tablist li {
+    width: 100%;
+  }
+  
+  .tablist a {
+    padding: var(--space-lg);
+    border-radius: 0;
+    border-bottom: 1px solid var(--separator);
+  }
+  
+  /* Add mobile menu toggle */
+  .mobile-nav-toggle {
+    display: block;
+    position: fixed;
+    top: var(--space-lg);
+    left: var(--space-lg);
+    z-index: 1001;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: var(--space-sm);
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-size: 18px;
+    box-shadow: var(--shadow-lg);
   }
   
   h1 { font-size: 32px; }
   h2 { font-size: 28px; }
   h3 { font-size: 22px; }
+  
+  /* Improve feature grid on mobile */
+  .feature-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-lg);
+  }
 }
 
 @media (max-width: 480px) {
@@ -584,6 +683,39 @@ a:hover {
   
   #projectname {
     font-size: 22px;
+  }
+  
+  #projectbrief {
+    font-size: 17px;
+  }
+  
+  .tablist a {
+    font-size: 16px;
+    padding: var(--space-md);
+  }
+  
+  /* Adjust code blocks for mobile */
+  .fragment {
+    padding: var(--space-md);
+    font-size: 13px;
+    overflow-x: auto;
+  }
+  
+  .feature-card {
+    padding: var(--space-lg);
+  }
+  
+  .feature-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 24px;
+  }
+}
+
+/* Desktop-only styles */
+@media (min-width: 769px) {
+  .mobile-nav-toggle {
+    display: none;
   }
 }
 
@@ -765,40 +897,6 @@ a:hover {
   letter-spacing: -0.003em;
 }
 
-/* Dark mode support for enhanced accessibility */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #000000;
-    --surface: #1c1c1e;
-    --surface-elevated: #2c2c2e;
-    --surface-hover: #3a3a3c;
-    --text-primary: #ffffff;
-    --text-secondary: #ebebf5;
-    --text-tertiary: #ebebf599;
-    --text-muted: #ebebf54d;
-    --border: #38383a;
-    --border-light: #48484a;
-    --separator: #38383a;
-  }
-  
-  .feature-card {
-    background: var(--surface-elevated);
-    border-color: var(--separator);
-  }
-  
-  code {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.2);
-  }
-  
-  /* Dark mode syntax highlighting */
-  .keyword { color: #ff7ab2; }
-  .comment { color: #7f8c8d; }
-  .preprocessor { color: #dabaff; }
-  .stringliteral { color: #fc6a5d; }
-  .charliteral { color: #fc6a5d; }
-}
-
 /* Accessibility enhancements */
 @media (prefers-reduced-motion: reduce) {
   * {
@@ -831,5 +929,39 @@ a:hover {
   
   .feature-card, .quickstart, .example {
     border-width: 2px;
+  }
+}
+
+/* Additional modern enhancements */
+.nav-toggle-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
+@media (max-width: 768px) {
+  .nav-toggle-overlay.active {
+    display: block;
+  }
+}
+
+/* Improve scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Enhanced table responsiveness */
+@media (max-width: 768px) {
+  table {
+    font-size: 14px;
+  }
+  
+  table th, table td {
+    padding: var(--space-sm);
   }
 }

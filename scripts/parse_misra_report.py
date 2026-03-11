@@ -20,6 +20,43 @@ except ImportError:
     def format_rule_description(rule_id, include_rationale=True):
         return "Rule description not available"
 
+def format_violation_description(severity, message):
+    """Format violation description to be more meaningful."""
+    # Map common severity types to more descriptive names
+    severity_mapping = {
+        'style': 'Coding Style',
+        'warning': 'Warning',
+        'error': 'Error', 
+        'information': 'Information',
+        'performance': 'Performance',
+        'portability': 'Portability'
+    }
+    
+    # Extract violation type from message if possible
+    if 'should not be used' in message.lower():
+        violation_type = 'Usage Restriction'
+    elif 'should' in message.lower() or 'shall' in message.lower():
+        violation_type = 'Compliance Requirement'
+    elif 'conversion' in message.lower() or 'operand' in message.lower():
+        violation_type = 'Type Safety'
+    elif 'function' in message.lower() and ('declare' in message.lower() or 'implicit' in message.lower()):
+        violation_type = 'Function Declaration'
+    elif 'parameter' in message.lower() and 'modif' in message.lower():
+        violation_type = 'Parameter Handling'
+    elif 'break' in message.lower() or 'switch' in message.lower():
+        violation_type = 'Control Flow'
+    elif 'exit' in message.lower() or 'return' in message.lower():
+        violation_type = 'Function Exit'
+    elif 'comma' in message.lower() and 'operator' in message.lower():
+        violation_type = 'Operator Usage'
+    elif 'assignment' in message.lower() and 'result' in message.lower():
+        violation_type = 'Assignment Usage'
+    else:
+        # Use severity as fallback
+        violation_type = severity_mapping.get(severity.lower(), severity.title())
+    
+    return f"Reason: {violation_type}"
+
 def get_code_context(file_path, line_number, context_lines=3):
     """Get code context around a specific line."""
     try:
@@ -66,7 +103,7 @@ def parse_misra_output(input_file, source_dir):
                 continue
                 
             # Parse issue lines: file:line:column: severity: message [id]
-            match = re.match(r'^([^:]+):(\d+):(\d+):\s+(\w+):\s+(.+?)\s+\[([^\]]+)\]$', line)
+            match = re.match(r'^(.+?):(\d+):(\d+):\s+(\w+):\s+(.+?)\s+\[([^\]]+)\]$', line)
             if match:
                 file_path, line_num, col_num, severity, message, check_id = match.groups()
                 
@@ -192,7 +229,8 @@ def print_misra_report(stats):
             
             for i, violation in enumerate(violations, 1):
                 print(f"**Violation {i}**: {violation['file']}:{violation['line']}:{violation['column']}")
-                print(f"*Severity*: {violation['severity'].title()}")
+                violation_desc = format_violation_description(violation['severity'], violation['message'])
+                print(f"*{violation_desc}*")
                 print()
                 print("```cpp")
                 print(violation['context'])

@@ -58,26 +58,20 @@ if [ -n "$ENHANCED_CPPCHECK_REPORT_TXT" ] && [ -f "$ENHANCED_CPPCHECK_REPORT_TXT
 " >> "$CLANG_TIDY_REPORT_MD"
 fi
 
-# Add detailed clang-tidy analysis with violations and code snippets
-if [ -f "$CLANG_TIDY_REPORT_TXT" ]; then
-    echo "### Detailed clang-tidy Analysis" >> "$CLANG_TIDY_REPORT_MD"
-    echo "" >> "$CLANG_TIDY_REPORT_MD"
-    
-    # Generate detailed clang-tidy violations with code context
-    python3 "${SOURCE_DIR}/scripts/parse_clang_tidy_violations.py" "$CLANG_TIDY_REPORT_TXT" "$SOURCE_DIR" >> "$CLANG_TIDY_REPORT_MD" 2>/dev/null || echo "### Detailed clang-tidy Analysis
+# Add detailed clang-tidy analysis
+echo "## Detailed clang-tidy Analysis" >> "$CLANG_TIDY_REPORT_MD"
+echo "" >> "$CLANG_TIDY_REPORT_MD"
 
-*Detailed clang-tidy analysis not available.*
-
-" >> "$CLANG_TIDY_REPORT_MD"
-else
-    echo "### Detailed clang-tidy Analysis" >> "$CLANG_TIDY_REPORT_MD"
+# Generate formatted clang-tidy detailed analysis with code context
+python3 "${SOURCE_DIR}/scripts/parse_clang_tidy_detailed.py" "$CLANG_TIDY_REPORT_TXT" "$SOURCE_DIR" >> "$CLANG_TIDY_REPORT_MD" 2>/dev/null || {
+    echo "### Raw Output" >> "$CLANG_TIDY_REPORT_MD"
     echo "" >> "$CLANG_TIDY_REPORT_MD"
-    echo "*clang-tidy report not available.*" >> "$CLANG_TIDY_REPORT_MD"
-    echo "" >> "$CLANG_TIDY_REPORT_MD"
-fi
+    echo "\`\`\`" >> "$CLANG_TIDY_REPORT_MD"
+    cat "$CLANG_TIDY_REPORT_TXT" >> "$CLANG_TIDY_REPORT_MD" 2>/dev/null || echo "No detailed output available" >> "$CLANG_TIDY_REPORT_MD"
+    echo "\`\`\`" >> "$CLANG_TIDY_REPORT_MD"
+}
 
 echo "" >> "$CLANG_TIDY_REPORT_MD"
-echo "---" >> "$CLANG_TIDY_REPORT_MD"
 
 # Add footer with date
 date +"*Generated: %B %d, %Y*" >> "$CLANG_TIDY_REPORT_MD"
