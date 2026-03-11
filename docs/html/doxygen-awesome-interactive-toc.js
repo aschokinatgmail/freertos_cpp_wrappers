@@ -54,9 +54,10 @@ class DoxygenAwesomeInteractiveToc {
                         node: node,
                         headerNode: document.getElementById(id)
                     })
-
-                    document.getElementById("doc-content")?.addEventListener("scroll",this.throttle(DoxygenAwesomeInteractiveToc.update, 100))
                 })
+
+                const scrollHandler = this.throttle(DoxygenAwesomeInteractiveToc.update, 100)
+                document.getElementById("doc-content")?.addEventListener("scroll", scrollHandler)
                 DoxygenAwesomeInteractiveToc.update()
             }
         })

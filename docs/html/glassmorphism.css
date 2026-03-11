@@ -51,8 +51,8 @@ html {
 
     --tablehead-background: rgba(102, 126, 234, 0.06);
 
-    --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-    --font-family-monospace: 'JetBrains Mono', 'SF Mono', 'Fira Code', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    --font-family-monospace: 'SF Mono', 'Fira Code', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
     --border-radius-large: 16px;
     --border-radius-medium: 12px;
@@ -116,11 +116,6 @@ html.dark-mode {
         --tablehead-background: rgba(102, 126, 234, 0.1);
     }
 }
-
-/* ============================================
-   Web Font Import
-   ============================================ */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 /* ============================================
    Background - Mesh Gradient
