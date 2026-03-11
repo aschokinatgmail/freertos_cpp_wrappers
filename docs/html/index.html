@@ -1,3 +1,4 @@
+<!-- HTML header for doxygen 1.9.8 - Glassmorphism Theme -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en-US">
 <head>
@@ -17,7 +18,21 @@
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
-<link href="custom.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only-darkmode-toggle.css" rel="stylesheet" type="text/css"/>
+<link href="glassmorphism.css" rel="stylesheet" type="text/css"/>
+<!-- Doxygen Awesome Extensions -->
+<script type="text/javascript" src="doxygen-awesome-darkmode-toggle.js"></script>
+<script type="text/javascript" src="doxygen-awesome-fragment-copy-button.js"></script>
+<script type="text/javascript" src="doxygen-awesome-interactive-toc.js"></script>
+<script type="text/javascript" src="doxygen-awesome-paragraph-link.js"></script>
+<script type="text/javascript">
+    DoxygenAwesomeDarkModeToggle.init()
+    DoxygenAwesomeFragmentCopyButton.init()
+    DoxygenAwesomeInteractiveToc.init()
+    DoxygenAwesomeParagraphLink.init()
+</script>
 </head>
 <body>
 <div id="top"><!-- do not remove this div, it is closed by doxygen! -->
@@ -94,7 +109,7 @@ $(document).ready(function(){initNavTree('index.html',''); initResizable(); });
   <div class="headertitle"><div class="title">FreeRTOS C++ Wrappers Documentation </div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><h1><a class="anchor" id="intro_sec"></a>
+<div class="textblock"><div class="hero-section"> <div class="hero-title">FreeRTOS C++ Wrappers</div> <div class="hero-subtitle">Modern C++17 RAII wrappers for FreeRTOS APIs &mdash; lightweight, type-safe, and production-ready.</div> </div><div class="stats-grid"> <div class="stat-card"><div class="stat-value">439</div><div class="stat-label">Tests Passing</div></div> <div class="stat-card"><div class="stat-value">97%</div><div class="stat-label">Line Coverage</div></div> <div class="stat-card"><div class="stat-value">C++17</div><div class="stat-label">Standard</div></div> <div class="stat-card"><div class="stat-value">8</div><div class="stat-label">Modules</div></div> </div><h1><a class="anchor" id="intro_sec"></a>
 Introduction</h1>
 <p>Welcome to the <b>FreeRTOS C++ Wrappers</b> library documentation! This modern C++17 library provides lightweight, RAII-compliant wrappers for FreeRTOS APIs, making it easier and safer to use FreeRTOS in C++ applications.</p>
 <div class="feature-grid"> <div class="feature-card"> <div class="feature-icon">🛡️</div> <div class="feature-title">Type Safety</div> <div class="feature-description">Modern C++17 RAII wrappers ensure proper resource management and type safety</div> </div> <div class="feature-card"> <div class="feature-icon">⚡</div> <div class="feature-title">High Performance</div> <div class="feature-description">Zero-overhead abstractions that don't compromise on performance</div> </div> <div class="feature-card"> <div class="feature-icon">🔧</div> <div class="feature-title">Easy to Use</div> <div class="feature-description">Intuitive API design that leverages modern C++ features</div> </div> <div class="feature-card"> <div class="feature-icon">🧪</div> <div class="feature-title">Well Tested</div> <div class="feature-description">439 comprehensive tests covering all functionality</div> </div> <div class="feature-card"> <div class="feature-icon">📱</div> <div class="feature-title">Flexible Allocation</div> <div class="feature-description">Support for both static and dynamic memory allocation strategies</div> </div> <div class="feature-card"> <div class="feature-icon">⏱️</div> <div class="feature-title">Chrono Support</div> <div class="feature-description">Full std::chrono compatibility for timeout handling</div> </div> </div><h1><a class="anchor" id="features_sec"></a>
