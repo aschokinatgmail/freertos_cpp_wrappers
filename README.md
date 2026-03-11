@@ -75,7 +75,7 @@ The project generates a single comprehensive validation and verification report 
   - **clang-tidy**: cppcoreguidelines-*, cert-*, google-*, hicpp-*
   - **Enhanced cppcheck**: All rules (style, performance, portability, security, unused code, const correctness)
   - **MISRA C++**: MISRA C 2012 rules applicable to C++ with detailed descriptions
-- **Google Test/Mock**: Unit testing with FreeRTOS API mocking
+  - **Google Test/Mock**: Unit testing with FreeRTOS API mocking
   - **LCOV/GCOV**: Code coverage analysis
 - **Scope**: Library code only (src/, include/) - test harness excluded
 
