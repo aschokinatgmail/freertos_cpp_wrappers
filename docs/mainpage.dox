@@ -323,7 +323,7 @@
  * The library includes comprehensive testing with:
  * 
  * - **439 automated tests** covering all functionality
- * - **96.8% line coverage** and **95.7% function coverage**
+ * - **97.0% line coverage** and **98.2% function coverage**
  * - **Static analysis** with clang-tidy integration
  * - **Continuous integration** with automated validation
  * 

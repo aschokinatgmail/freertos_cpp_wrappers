@@ -601,21 +601,43 @@ span.mlabel {
 }
 
 /* ============================================
-   Smooth Transitions
+   Smooth Transitions - Scoped to specific components
    ============================================ */
-*, *::before, *::after {
-    transition-property: background-color, border-color, color, box-shadow, opacity;
-    transition-duration: 0.15s;
-    transition-timing-function: ease;
+
+/* Cards and containers */
+.feature-card,
+.stat-card,
+.example,
+.quickstart,
+div.memitem,
+div.memdoc {
+    transition: background-color 0.15s ease, border-color 0.15s ease,
+                box-shadow 0.15s ease, opacity 0.15s ease;
 }
 
-a, a * {
-    transition-duration: 0.2s !important;
+/* Links */
+a, .navtab a, #nav-tree a, .tablist a {
+    transition: color 0.2s ease, background-color 0.2s ease, opacity 0.2s ease;
 }
 
-/* Override for elements that shouldn't transition */
-div.fragment *, pre.fragment *, #nav-tree *, .arrow {
-    transition-property: none !important;
+/* Buttons and interactive controls */
+button, .doxygen-awesome-dark-mode-toggle, input[type="text"],
+#MSearchBox, #MSearchField {
+    transition: background-color 0.15s ease, border-color 0.15s ease,
+                box-shadow 0.15s ease, color 0.15s ease;
+}
+
+/* Header and sidebar background (for theme toggle) */
+#top, #side-nav, #nav-tree {
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+/* Respect user preference for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+    }
 }
 
 /* ============================================
