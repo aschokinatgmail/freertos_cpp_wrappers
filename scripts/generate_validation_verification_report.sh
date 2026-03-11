@@ -337,4 +337,10 @@ log_message "Reports:"
 log_message ""
 log_message "=== Done ==="
 
-exit 0
+# Exit with non-zero status if any step failed
+EXIT_CODE=0
+if [ "$BUILD_STATUS" -ne 0 ] || [ "$TEST_STATUS" -ne 0 ] || [ "$COVERAGE_STATUS" -ne 0 ] || [ "$STATIC_ANALYSIS_STATUS" -ne 0 ]; then
+    EXIT_CODE=1
+fi
+
+exit "$EXIT_CODE"
