@@ -1,17 +1,19 @@
 /**
  * @mainpage FreeRTOS C++ Wrappers Documentation
  * 
+ * @htmlonly
  * <div class="hero-section">
  *   <div class="hero-title">FreeRTOS C++ Wrappers</div>
  *   <div class="hero-subtitle">Modern C++17 RAII wrappers for FreeRTOS APIs &mdash; lightweight, type-safe, and production-ready.</div>
  * </div>
- * 
+ *
  * <div class="stats-grid">
  *   <div class="stat-card"><div class="stat-value">439</div><div class="stat-label">Tests Passing</div></div>
  *   <div class="stat-card"><div class="stat-value">97%</div><div class="stat-label">Line Coverage</div></div>
  *   <div class="stat-card"><div class="stat-value">C++17</div><div class="stat-label">Standard</div></div>
  *   <div class="stat-card"><div class="stat-value">8</div><div class="stat-label">Modules</div></div>
  * </div>
+ * @endhtmlonly
  * 
  * @section intro_sec Introduction
  * 
@@ -19,6 +21,7 @@
  * lightweight, RAII-compliant wrappers for FreeRTOS APIs, making it easier and safer to use FreeRTOS 
  * in C++ applications.
  * 
+ * @htmlonly
  * <div class="feature-grid">
  * <div class="feature-card">
  *   <div class="feature-icon">🛡️</div>
@@ -51,6 +54,7 @@
  *   <div class="feature-description">Full std::chrono compatibility for timeout handling</div>
  * </div>
  * </div>
+ * @endhtmlonly
  * 
  * @section features_sec Key Features
  * 
