@@ -211,16 +211,6 @@ else
     COVERAGE_STATUS=1
 fi
 
-# Generate static analysis report (even if previous steps failed)
-log_message "Generating static analysis report..."
-if make static-analysis-report; then
-    log_message "Static analysis report generated successfully"
-    STATIC_ANALYSIS_STATUS=0
-else
-    log_message "WARNING: Static analysis report generation failed"
-    STATIC_ANALYSIS_STATUS=1
-fi
-
 # Generate documentation after tests (even if tests failed)
 log_message "Generating project documentation..."
 if command_exists doxygen && make docs; then
@@ -231,20 +221,12 @@ else
     DOCS_STATUS=1
 fi
 
-# Generate validation and verification report (always generate, even with failures)
-log_message "Generating validation and verification report..."
-if python3 "$SCRIPT_DIR/generate_validation_verification_report.py" "$BUILD_DIR" "$PROJECT_ROOT/VALIDATION_VERIFICATION_REPORT.md"; then
-    log_message "Validation and verification report generated successfully"
+# Generate validation and verification report (combined: test results + static analysis)
+log_message "Generating combined validation and verification report..."
+if "$SCRIPT_DIR/generate_validation_verification_report.sh" "$BUILD_DIR"; then
+    log_message "Combined validation and verification report generated successfully"
 else
-    log_message "WARNING: Validation and verification report generation failed, but continuing"
-fi
-
-# Generate HTML version of validation and verification report
-log_message "Generating validation and verification HTML report..."
-if python3 "$SCRIPT_DIR/generate_html_report.py" "Validation and Verification Report" "$PROJECT_ROOT/VALIDATION_VERIFICATION_REPORT.md" "$PROJECT_ROOT/VALIDATION_VERIFICATION_REPORT.html" "$SCRIPT_DIR/report_template.html"; then
-    log_message "HTML validation and verification report generated successfully"
-else
-    log_message "WARNING: HTML validation and verification report generation failed"
+    log_message "WARNING: Combined validation and verification report generation failed, but continuing"
 fi
 
 log_message ""
@@ -252,16 +234,12 @@ log_message "=== Report Generation Complete ==="
 
 # Report generation status
 log_message "Generated reports:"
-if [ -f "$PROJECT_ROOT/STATIC_ANALYSIS_REPORT.md" ]; then
-    log_message "  ✅ STATIC_ANALYSIS_REPORT.md/.html - Static code analysis"
+VNV_DIR="$PROJECT_ROOT/VnV"
+if ls "$VNV_DIR"/VALIDATION_VERIFICATION_REPORT_*.md 1>/dev/null 2>&1; then
+    LATEST_REPORT=$(ls -t "$VNV_DIR"/VALIDATION_VERIFICATION_REPORT_*.md | head -1)
+    log_message "  ✅ $(basename "$LATEST_REPORT") - Combined V&V report (static analysis + test results)"
 else
-    log_message "  ❌ STATIC_ANALYSIS_REPORT.md/.html - Failed to generate"
-fi
-
-if [ -f "$PROJECT_ROOT/VALIDATION_VERIFICATION_REPORT.md" ]; then
-    log_message "  ✅ VALIDATION_VERIFICATION_REPORT.md/.html - Test execution and coverage analysis"
-else
-    log_message "  ❌ VALIDATION_VERIFICATION_REPORT.md/.html - Failed to generate"
+    log_message "  ❌ Combined V&V report - Failed to generate"
 fi
 
 if [ -d "$PROJECT_ROOT/docs/html" ]; then
@@ -276,7 +254,6 @@ log_message "Build Status: $([ $BUILD_STATUS -eq 0 ] && echo "✅ SUCCESS" || ec
 log_message "Test Status: $([ $TEST_STATUS -eq 0 ] && echo "✅ ALL PASSED" || echo "❌ SOME FAILED")"
 log_message "Coverage Status: $([ $COVERAGE_STATUS -eq 0 ] && echo "✅ SUCCESS" || echo "❌ FAILED")"
 log_message "Documentation Status: $([ $DOCS_STATUS -eq 0 ] && echo "✅ SUCCESS" || echo "❌ FAILED")"
-log_message "Static Analysis Status: $([ $STATIC_ANALYSIS_STATUS -eq 0 ] && echo "✅ SUCCESS" || echo "❌ FAILED")"
 
 # Show test summary regardless of failures
 log_message ""
@@ -284,10 +261,12 @@ log_message "Test summary:"
 ctest | grep -E "(tests passed|Total Test time|% tests failed)" || true
 
 log_message ""
-log_message "Reports are located in: $PROJECT_ROOT"
+log_message "Reports are located in: $VNV_DIR"
 log_message "To view reports:"
-log_message "  Static Analysis: open $PROJECT_ROOT/STATIC_ANALYSIS_REPORT.html"
-log_message "  Validation & Verification: open $PROJECT_ROOT/VALIDATION_VERIFICATION_REPORT.html"
+if ls "$VNV_DIR"/VALIDATION_VERIFICATION_REPORT_*.html 1>/dev/null 2>&1; then
+    LATEST_HTML=$(ls -t "$VNV_DIR"/VALIDATION_VERIFICATION_REPORT_*.html | head -1)
+    log_message "  Combined V&V Report: open $LATEST_HTML"
+fi
 log_message "  Documentation: open $PROJECT_ROOT/docs/html/index.html"
 
 # Final status - don't exit with error even if some components failed
