@@ -8,8 +8,13 @@
 <title>FreeRTOS C++ Wrappers: include/freertos_stream_buffer.hpp Source File</title>
 <script type="text/javascript">
 /* Default to dark mode before styles load to prevent flash of light content */
-if (!localStorage.getItem('prefers-light-mode-in-dark-mode') &&
-    !localStorage.getItem('prefers-dark-mode-in-light-mode')) {
+try {
+    if (!localStorage.getItem('prefers-light-mode-in-dark-mode') &&
+        !localStorage.getItem('prefers-dark-mode-in-light-mode')) {
+        document.documentElement.classList.add('dark-mode');
+    }
+} catch (e) {
+    /* localStorage unavailable (privacy mode / sandboxed iframe) - default to dark */
     document.documentElement.classList.add('dark-mode');
 }
 </script>
@@ -32,8 +37,13 @@ if (!localStorage.getItem('prefers-light-mode-in-dark-mode') &&
 <script type="text/javascript" src="doxygen-awesome-darkmode-toggle.js"></script>
 <script type="text/javascript">
 /* Re-apply dark mode default after toggle _staticConstructor ran */
-if (!localStorage.getItem('prefers-light-mode-in-dark-mode') &&
-    !localStorage.getItem('prefers-dark-mode-in-light-mode')) {
+try {
+    if (!localStorage.getItem('prefers-light-mode-in-dark-mode') &&
+        !localStorage.getItem('prefers-dark-mode-in-light-mode')) {
+        DoxygenAwesomeDarkModeToggle.enableDarkMode(true);
+    }
+} catch (e) {
+    /* localStorage unavailable - default to dark */
     DoxygenAwesomeDarkModeToggle.enableDarkMode(true);
 }
 </script>
@@ -54,7 +64,7 @@ if (!localStorage.getItem('prefers-light-mode-in-dark-mode') &&
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FreeRTOS C++ Wrappers<span id="projectnumber">&#160;v0.1.0-b8a539c</span>
+   <div id="projectname">FreeRTOS C++ Wrappers<span id="projectnumber">&#160;v0.1.0-95e5038</span>
    </div>
    <div id="projectbrief">Modern C++17 RAII wrappers for FreeRTOS APIs</div>
   </td>
