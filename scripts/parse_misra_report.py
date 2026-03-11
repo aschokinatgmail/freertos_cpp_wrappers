@@ -237,8 +237,16 @@ def print_misra_report(stats):
                 print("```")
                 print()
     
-    # Skip analysis errors section as they are caused by missing dependencies
-    # and are not actual code quality issues
+    if stats.get('analysis_errors'):
+        print("### Tooling / Analysis Errors")
+        print()
+        print("The following issues were reported by the analysis tooling. These are not MISRA violations,")
+        print("but they may indicate that some files could not be analyzed or that the tool encountered")
+        print("internal errors. Review them to ensure the analysis coverage is as expected.")
+        print()
+        for error in stats['analysis_errors']:
+            print(f"- {error}")
+        print()
     
     print("### Analysis Notes")
     print()
