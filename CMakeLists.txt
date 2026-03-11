@@ -105,7 +105,8 @@ if(ENABLE_CLANG_TIDY)
         
         # Set up clang-tidy command with report generation
         if(GENERATE_CLANG_TIDY_REPORT)
-            set(CLANG_TIDY_REPORT_FILE "${CMAKE_SOURCE_DIR}/STATIC_ANALYSIS_REPORT.md")
+            set(CLANG_TIDY_REPORT_FILE "${CMAKE_SOURCE_DIR}/VnV/STATIC_ANALYSIS_REPORT.md")
+            file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/VnV")
             message(STATUS "clang-tidy report will be generated at: ${CLANG_TIDY_REPORT_FILE}")
         endif()
         
@@ -243,44 +244,14 @@ endif()
 # VALIDATION AND VERIFICATION REPORT GENERATION
 # =============================================================================
 
-# Add custom target for generating validation and verification report
+# Add custom target for generating combined validation and verification report
+# Output: VnV/VALIDATION_VERIFICATION_REPORT_<YYYYMMDD_HHMMSS>.md/.html
 add_custom_target(validation-verification-report
-    # Clean previous coverage data
-    COMMAND find . -name "*.gcda" -delete || true
+    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/scripts/generate_validation_verification_report.sh
+        ${CMAKE_BINARY_DIR}
     
-    # Build project (ensure latest code is compiled)
-    COMMAND ${CMAKE_COMMAND} --build . --target freertos_cpp_wrappers
-    COMMAND ${CMAKE_COMMAND} --build . --target freertos_mocks
-    COMMAND ${CMAKE_COMMAND} --build . --parallel
-    
-    # Run all tests
-    COMMAND ctest --verbose --output-on-failure
-    
-    # Generate coverage data
-    COMMAND lcov --capture --directory . --output-file coverage.info --ignore-errors mismatch,negative,gcov
-    COMMAND lcov --remove coverage.info '/usr/*' --output-file coverage_filtered.info
-    
-    # Generate static analysis report (includes MISRA if enabled)
-    COMMAND ${CMAKE_COMMAND} --build . --target static-analysis-report
-    
-    # Generate documentation (after successful tests)
-    COMMAND ${CMAKE_COMMAND} --build . --target docs
-    
-    # Generate validation and verification report
-    COMMAND python3 ${CMAKE_CURRENT_SOURCE_DIR}/scripts/generate_validation_verification_report.py 
-        ${CMAKE_BINARY_DIR} 
-        ${CMAKE_CURRENT_SOURCE_DIR}/VALIDATION_VERIFICATION_REPORT.md
-    
-    # Status messages
-    COMMAND ${CMAKE_COMMAND} -E echo ""
-    COMMAND ${CMAKE_COMMAND} -E echo "=== Reports Generated ==="
-    COMMAND ${CMAKE_COMMAND} -E echo "1. STATIC_ANALYSIS_REPORT.md - Integrated static analysis (clang-tidy + MISRA C++)"
-    COMMAND ${CMAKE_COMMAND} -E echo "2. VALIDATION_VERIFICATION_REPORT.md - Test execution and coverage analysis"
-    COMMAND ${CMAKE_COMMAND} -E echo "3. docs/html/index.html - Updated project documentation"
-    COMMAND ${CMAKE_COMMAND} -E echo ""
-    
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    COMMENT "Running tests, generating reports, and updating documentation"
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMENT "Generating combined validation and verification report in VnV/ directory"
 )
 
 # Make the reports depend on having coverage enabled
@@ -288,7 +259,7 @@ if(NOT ENABLE_COVERAGE)
     message(WARNING "Coverage not enabled. Run with -DENABLE_COVERAGE=ON for complete validation reports.")
 endif()
 
-message(STATUS "Run 'make validation-verification-report' to generate both required reports automatically")
+message(STATUS "Run 'make validation-verification-report' to generate combined V&V report in VnV/ directory")
 
 # =============================================================================
 # DOCUMENTATION GENERATION
