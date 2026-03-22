@@ -2,7 +2,7 @@
 
 [![Tests](https://img.shields.io/badge/Tests-439%20passing-brightgreen)]()
 [![Coverage](https://img.shields.io/badge/Coverage-97%25-brightgreen)]()
-[![MISRA](https://img.shields.io/badge/MISRA%20C++-Compliant-blue)]()
+[![MISRA C 2012](https://img.shields.io/badge/MISRA%20C++-Compliant-blue)]()
 [![C++17](https://img.shields.io/badge/C%2B%2B-17-blue)]()
 [![License](https://img.shields.io/badge/License-MIT-yellow)]()
 [![Platform](https://img.shields.io/badge/Platform-FreeRTOS-orange)]()
@@ -13,7 +13,7 @@ Lightweight collection of FreeRTOS API wrappers compliant to modern C++ standard
 
 | Feature | Benefit |
 |---------|---------|
-| **Safety-Critical Ready** | MISRA C++ compliant, suitable for IEC60730, ISO 26262 applications |
+| **Safety-Critical Ready** | MISRA 2012 C compliant, suitable for functonaly safe applications |
 | **Modern C++17** | RAII wrappers with move semantics, no raw pointers |
 | **Production Tested** | 439 tests, 97% coverage, used in commercial BMS systems |
 | **Zero Overhead** | Thin wrappers compile to efficient FreeRTOS calls |
@@ -25,7 +25,7 @@ Lightweight collection of FreeRTOS API wrappers compliant to modern C++ standard
 | Feature | This Library | Raw FreeRTOS | Other Wrappers |
 |---------|--------------|--------------|-----------------|
 | RAII Support | ✅ | ❌ | Varies |
-| MISRA Compliant | ✅ | N/A | ❌ |
+| MISRA C 2012 Rulles Compliant | ✅ | N/A | ❌ |
 | Test Coverage | 97% | N/A | Unknown |
 | C++17 Features | ✅ | ❌ | Limited |
 | Documentation | Comprehensive | Reference | Basic |
@@ -34,18 +34,13 @@ Lightweight collection of FreeRTOS API wrappers compliant to modern C++ standard
 
 This library is ideal for:
 
-- **Battery Management Systems (BMS)** - Safety-critical monitoring with IEC60730 compliance
 - **Industrial IoT Devices** - Reliable real-time data collection and transmission
-- **Automotive Embedded Systems** - ISO 26262 functional safety applications
 - **Medical Devices** - Safety certification requirements
 - **Any FreeRTOS Project** - Modern C++ interface for existing FreeRTOS codebases
 
 ### Industry Applications
 
-- Electric vehicle battery management
 - Industrial automation controllers
-- Medical monitoring equipment
-- Aerospace embedded systems
 - Consumer electronics with safety requirements
 
 ## Quick Integration
