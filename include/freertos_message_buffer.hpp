@@ -149,8 +149,9 @@ public:
               const std::chrono::duration<Rep, Period> &xTicksToWait) {
     return send(
         pvTxData, xDataLengthBytes,
-        std::chrono::duration_cast<std::chrono::milliseconds>(xTicksToWait)
-            .count());
+        pdMS_TO_TICKS(
+            std::chrono::duration_cast<std::chrono::milliseconds>(xTicksToWait)
+                .count()));
   }
   /**
    * @brief Method receives a discret message from the message buffer.
@@ -182,7 +183,9 @@ public:
                  const std::chrono::duration<Rep, Period> &timeout) {
     return receive(
         pvRxData, xBufferLengthBytes,
-        std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count());
+        pdMS_TO_TICKS(
+            std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
+                .count()));
   }
   /**
    * @brief Method returning the number of bytes available in the buffer.

@@ -9,6 +9,19 @@
 
 Lightweight collection of FreeRTOS API wrappers compliant to modern C++ standards
 
+## Versioning
+
+This project follows [Semantic Versioning](https://semver.org/). The version is defined in `CMakeLists.txt` and is the single source of truth.
+
+| Macro | Description |
+|---|---|
+| `FREERTOS_CPP_WRAPPERS_VERSION_MAJOR` | Major version (breaking changes) |
+| `FREERTOS_CPP_WRAPPERS_VERSION_MINOR` | Minor version (new features) |
+| `FREERTOS_CPP_WRAPPERS_VERSION_PATCH` | Patch version (bug fixes) |
+| `FREERTOS_CPP_WRAPPERS_VERSION` | Full version string (e.g. `"1.0.2"`) |
+
+Include `<freertos.hpp>` to access version macros at compile time.
+
 ## Why Use This Library?
 
 | Feature | Benefit |
@@ -52,7 +65,7 @@ Include(FetchContent)
 FetchContent_Declare(
   freertos_cpp_wrappers
   GIT_REPOSITORY https://github.com/aschokinatgmail/freertos_cpp_wrappers.git
-  GIT_TAG v1.0.1
+  GIT_TAG v1.0.2
 )
 FetchContent_MakeAvailable(freertos_cpp_wrappers)
 
@@ -311,6 +324,24 @@ The formatting configuration ensures:
 - Include sorting and organization
 
 ## Quick Start
+
+### Using Docker (Recommended for CI)
+
+```bash
+# Build and run tests
+docker compose up test
+
+# Run with coverage report
+docker compose up coverage
+
+# Generate full validation & verification report
+docker compose up validation
+
+# Generate documentation
+docker compose up docs
+```
+
+### Native Build
 
 ```bash
 # Clone and build with full validation

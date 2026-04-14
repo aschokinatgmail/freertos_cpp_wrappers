@@ -270,8 +270,9 @@ public:
    */
   template <typename Rep, typename Period>
   BaseType_t take(const std::chrono::duration<Rep, Period> &timeout) {
-    return take(
-        std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count());
+    return take(pdMS_TO_TICKS(
+        std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
+            .count()));
   }
 };
 
@@ -392,8 +393,9 @@ public:
    */
   template <typename Rep, typename Period>
   BaseType_t take(const std::chrono::duration<Rep, Period> &timeout) {
-    return take(
-        std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count());
+    return take(pdMS_TO_TICKS(
+        std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
+            .count()));
   }
   /**
    * @brief Give the counting semaphore.
@@ -585,8 +587,9 @@ public:
    */
   template <typename Rep, typename Period>
   BaseType_t lock(const std::chrono::duration<Rep, Period> &timeout) {
-    return lock(
-        std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count());
+    return lock(pdMS_TO_TICKS(
+        std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
+            .count()));
   }
   /**
    * @brief Try to lock the mutex.
@@ -658,35 +661,7 @@ public:
     }
     return rc;
   }
-  /**
-   * @brief Unlock the recursive mutex from an ISR.
-   * @ref https://www.freertos.org/a00124.html
-   *
-   * @param high_priority_task_woken pdTRUE if the high priority task was woken
-   * by the recursive mutex unlock.
-   * @return BaseType_t pdTRUE if the recursive mutex was successfully unlocked,
-   */
-  BaseType_t unlock_isr(BaseType_t &high_priority_task_woken) {
-    auto rc = xSemaphoreGiveFromISR(m_semaphore, &high_priority_task_woken);
-    if (rc && m_recursions_count > 0) {
-      m_recursions_count--;
-    }
-    return rc;
-  }
-  /**
-   * @brief Unlock the recursive mutex from an ISR.
-   * @ref https://www.freertos.org/a00124.html
-   *
-   * @return BaseType_t pdTRUE if the recursive mutex was successfully unlocked,
-   */
-  BaseType_t unlock_isr(void) {
-    BaseType_t high_priority_task_woken = pdFALSE;
-    auto rc = xSemaphoreGiveFromISR(m_semaphore, &high_priority_task_woken);
-    if (rc && m_recursions_count > 0) {
-      m_recursions_count--;
-    }
-    return rc;
-  }
+
   /**
    * @brief Lock the recursive mutex.
    * @ref https://www.freertos.org/a00122.html
@@ -701,35 +676,7 @@ public:
     }
     return rc;
   }
-  /**
-   * @brief Lock the recursive mutex from an ISR.
-   * @ref https://www.freertos.org/xSemaphoreTakeFromISR.html
-   *
-   * @param high_priority_task_woken pdTRUE if the high priority task was woken
-   * by the recursive mutex lock.
-   * @return BaseType_t pdTRUE if the recursive mutex was successfully locked,
-   */
-  BaseType_t lock_isr(BaseType_t &high_priority_task_woken) {
-    auto rc = xSemaphoreTakeFromISR(m_semaphore, &high_priority_task_woken);
-    if (rc) {
-      m_recursions_count++;
-    }
-    return rc;
-  }
-  /**
-   * @brief Lock the recursive mutex from an ISR.
-   * @ref https://www.freertos.org/xSemaphoreTakeFromISR.html
-   *
-   * @return BaseType_t pdTRUE if the recursive mutex was successfully locked,
-   */
-  BaseType_t lock_isr(void) {
-    BaseType_t high_priority_task_woken = pdFALSE;
-    auto rc = xSemaphoreTakeFromISR(m_semaphore, &high_priority_task_woken);
-    if (rc) {
-      m_recursions_count++;
-    }
-    return rc;
-  }
+
   /**
    * @brief Lock the recursive mutex.
    *
@@ -738,8 +685,9 @@ public:
    */
   template <typename Rep, typename Period>
   BaseType_t lock(const std::chrono::duration<Rep, Period> &timeout) {
-    return lock(
-        std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count());
+    return lock(pdMS_TO_TICKS(
+        std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
+            .count()));
   }
   /**
    * @brief Try to lock the recursive mutex.
@@ -930,9 +878,9 @@ public:
   timeout_lock_guard(Mutex &mutex,
                      const std::chrono::duration<Rep, Period> &timeout)
       : m_mutex{mutex},
-        m_lock_acquired{static_cast<bool>(m_mutex.lock(
+        m_lock_acquired{static_cast<bool>(m_mutex.lock(pdMS_TO_TICKS(
             std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
-                .count()))} {}
+                .count())))} {}
   /**
    * @brief Destruct the timeout lock guard object and unlock the mutex.
    *

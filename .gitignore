@@ -1,8 +1,10 @@
 # Build directories
 build/
+build-test/
 out/
 .vscode/
 .vs/
+docker-build/
 
 # Documentation build output
 site/
@@ -65,3 +67,5 @@ STATIC_ANALYSIS_REPORT.md
 STATIC_ANALYSIS_REPORT.html
 VALIDATION_VERIFICATION_REPORT.md
 VALIDATION_VERIFICATION_REPORT.html
+session-tag.local
+.gitignore_check

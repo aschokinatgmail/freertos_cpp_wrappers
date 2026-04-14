@@ -158,7 +158,9 @@ public:
                   const std::chrono::duration<Rep, Period> &timeout) {
     return send(
         data, data_size,
-        std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count());
+        pdMS_TO_TICKS(
+            std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
+                .count()));
   }
   /**
    * @brief Send data to the stream buffer.
@@ -296,7 +298,9 @@ public:
                  const std::chrono::duration<Rep, Period> &timeout) {
     return receive(
         data, data_size,
-        std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count());
+        pdMS_TO_TICKS(
+            std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
+                .count()));
   }
   /**
    * @brief Receive data from the stream buffer from an ISR.
