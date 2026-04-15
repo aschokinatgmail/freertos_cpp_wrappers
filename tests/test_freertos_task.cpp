@@ -1832,3 +1832,119 @@ TEST_F(FreeRTOSTaskTest, PriorityInheritanceScenario) {
   EXPECT_CALL(*mock, vTaskDelete(low_prio_handle));
   EXPECT_CALL(*mock, vTaskDelete(high_prio_handle));
 }
+
+TEST_F(FreeRTOSTaskTest, DelayChrono_BranchCoverage) {
+  EXPECT_CALL(*mock, vTaskDelay(pdMS_TO_TICKS(500)));
+  freertos::delay(std::chrono::milliseconds(500));
+}
+
+TEST_F(FreeRTOSTaskTest, DelayUntilChrono_BranchCoverage) {
+  TickType_t wake_time = 1000;
+  EXPECT_CALL(*mock, vTaskDelayUntil(&wake_time, pdMS_TO_TICKS(100)));
+  freertos::delay_until(wake_time, std::chrono::milliseconds(100));
+}
+
+TEST_F(FreeRTOSTaskTest, DelayUntilFutureSystemClock_BranchCoverage) {
+  auto now = std::chrono::system_clock::now();
+  auto future_time = now + std::chrono::milliseconds(200);
+  EXPECT_CALL(*mock, vTaskDelay(AllOf(Ge(199), Le(201))));
+  freertos::delay_until(future_time);
+}
+
+TEST_F(FreeRTOSTaskTest, DelayUntilFutureSteadyClock_BranchCoverage) {
+  auto now = std::chrono::steady_clock::now();
+  auto future_time = now + std::chrono::milliseconds(300);
+  EXPECT_CALL(*mock, vTaskDelay(AllOf(Ge(299), Le(301))));
+  freertos::delay_until(future_time);
+}
+
+TEST_F(FreeRTOSTaskTest, NotifyTakeChrono_BranchCoverage) {
+  EXPECT_CALL(*mock, xTaskCreateStatic(_, _, _, _, _, _, _))
+      .WillOnce(Return(mock_task_handle));
+
+  sa::task<1024> test_task("NotifyTakeTask", 2, empty_task_routine);
+
+  EXPECT_CALL(*mock, ulTaskNotifyTake(pdTRUE, pdMS_TO_TICKS(200)))
+      .WillOnce(Return(1U));
+
+  uint32_t result =
+      test_task.notify_take(pdTRUE, std::chrono::milliseconds(200));
+  EXPECT_EQ(result, 1U);
+
+  EXPECT_CALL(*mock, vTaskDelete(mock_task_handle));
+}
+
+TEST_F(FreeRTOSTaskTest, NotifyWaitChrono_BranchCoverage) {
+  EXPECT_CALL(*mock, xTaskCreateStatic(_, _, _, _, _, _, _))
+      .WillOnce(Return(mock_task_handle));
+
+  sa::task<1024> test_task("NotifyWaitTask", 2, empty_task_routine);
+
+  uint32_t notification_value;
+  EXPECT_CALL(*mock, xTaskNotifyWait(0xFF, 0xFF00, _, pdMS_TO_TICKS(150)))
+      .WillOnce(DoAll(SetArgPointee<2>(0xABCD), Return(pdTRUE)));
+
+  BaseType_t result = test_task.notify_wait(0xFF, 0xFF00, notification_value,
+                                            std::chrono::milliseconds(150));
+  EXPECT_EQ(result, pdTRUE);
+  EXPECT_EQ(notification_value, 0xABCD);
+
+  EXPECT_CALL(*mock, vTaskDelete(mock_task_handle));
+}
+
+TEST_F(FreeRTOSTaskTest, PeriodicTaskChronoConstructor_BranchCoverage) {
+  EXPECT_CALL(*mock,
+              xTaskCreateStatic(_, StrEq("PeriodicChrono"), _, _, 3, _, _))
+      .WillOnce(Return(mock_task_handle));
+  EXPECT_CALL(*mock, xTaskAbortDelay(mock_task_handle))
+      .WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, vTaskDelete(mock_task_handle));
+
+  sa::periodic_task<1024> pt("PeriodicChrono", 3, empty_task_routine,
+                             empty_task_routine, empty_periodic_routine,
+                             std::chrono::milliseconds(500));
+}
+
+TEST_F(FreeRTOSTaskTest,
+       PeriodicTaskStringNameChronoConstructor_BranchCoverage) {
+  EXPECT_CALL(*mock,
+              xTaskCreateStatic(_, StrEq("PeriodicChrono2"), _, _, 2, _, _))
+      .WillOnce(Return(mock_task_handle));
+  EXPECT_CALL(*mock, xTaskAbortDelay(mock_task_handle))
+      .WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, vTaskDelete(mock_task_handle));
+
+  std::string name = "PeriodicChrono2";
+  sa::periodic_task<1024> pt(name, 2, empty_task_routine, empty_task_routine,
+                             empty_periodic_routine,
+                             std::chrono::milliseconds(250));
+}
+
+TEST_F(FreeRTOSTaskTest, DynamicAllocatorTaskCreationFailure_BranchCoverage) {
+  EXPECT_CALL(*mock, xTaskCreate(_, _, _, _, _, _)).WillOnce(Return(pdFAIL));
+
+  freertos::da::task<512> dyn_task("FailTask", 1, empty_task_routine);
+  EXPECT_EQ(dyn_task.handle(), nullptr);
+}
+
+#if configSUPPORT_STATIC_ALLOCATION
+TEST_F(FreeRTOSTaskTest, StaticAllocatorTaskCreationFailure_BranchCoverage) {
+  EXPECT_CALL(*mock, xTaskCreateStatic(_, _, _, _, _, _, _))
+      .WillOnce(Return(nullptr));
+
+  freertos::sa::task<256> static_task("FailStaticTask", 1, empty_task_routine);
+  EXPECT_EQ(static_task.handle(), nullptr);
+}
+#endif
+
+TEST_F(FreeRTOSTaskTest, DelayUntilPastSystemClock_BranchCoverage) {
+  auto past_time = std::chrono::system_clock::now() - std::chrono::hours(1);
+  EXPECT_CALL(*mock, vTaskDelay(_)).Times(0);
+  delay_until(past_time);
+}
+
+TEST_F(FreeRTOSTaskTest, DelayUntilPastSteadyClock_BranchCoverage) {
+  auto past_time = std::chrono::steady_clock::now() - std::chrono::hours(1);
+  EXPECT_CALL(*mock, vTaskDelay(_)).Times(0);
+  delay_until(past_time);
+}

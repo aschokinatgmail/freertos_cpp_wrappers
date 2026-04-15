@@ -22,6 +22,9 @@ graph TD
         P3_09["#86 P3-09<br/>Expected API *_ex()"]
         P3_10["#87 P3-10<br/>Dual API std names"]
         P3_11["#88 P3-11<br/>Thread safety attrs"]
+        P3_28["#104 P3-28<br/>unique_lock / scoped_lock"]
+        P3_29["#105 P3-29<br/>call_once"]
+        P3_30["#106 P3-30<br/>atomic<T> / atomic_flag"]
     end
 
     subgraph Phase4["Phase 4: FreeRTOS Features"]
@@ -40,6 +43,10 @@ graph TD
         P5_21["#98 P5-21<br/>pend_call, shared_data"]
         P5_22["#99 P5-22<br/>callback SBO"]
         P5_23["#100 P5-23<br/>new/delete redirect"]
+        P5_31["#107 P5-31<br/>thread / jthread / stop_token"]
+        P5_32["#108 P5-32<br/>timed_mutex / recursive_timed_mutex"]
+        P5_33["#109 P5-33<br/>shared_mutex (RW lock)"]
+        P5_34["#110 P5-34<br/>latch"]
     end
 
     subgraph Phase6["Phase 6: QA"]
@@ -65,6 +72,13 @@ graph TD
 
     %% Phase 3 internal
     P3_10 --> P3_11
+
+    %% Phase 3 — new C++ std primitives
+    P3_10 --> P3_28
+    P2_06 --> P3_28
+    P1_01 --> P3_29
+    P1_01 --> P3_30
+    P1_05 --> P3_30
 
     %% Phase 1,2 → Phase 4
     P1_01 --> P4_12
@@ -93,6 +107,20 @@ graph TD
     P2_06 --> P5_22
     P1_01 --> P5_23
 
+    %% Phase 5 — new C++ std primitives
+    P3_28 --> P5_18
+    P5_19 --> P5_31
+    P1_05 --> P5_31
+    P5_22 --> P5_31
+    P3_10 --> P5_32
+    P1_04 --> P5_32
+    P2_07 --> P5_33
+    P3_10 --> P5_33
+    P3_11 --> P5_33
+    P1_04 --> P5_33
+    P1_01 --> P5_34
+    P1_05 --> P5_34
+
     %% All → Phase 6
     P4_12 --> P6_24
     P4_13 --> P6_24
@@ -106,9 +134,16 @@ graph TD
     P5_21 --> P6_24
     P5_22 --> P6_24
     P5_23 --> P6_24
+    P5_31 --> P6_24
+    P5_32 --> P6_24
+    P5_33 --> P6_24
+    P5_34 --> P6_24
     P3_09 --> P6_24
     P3_10 --> P6_24
     P3_11 --> P6_24
+    P3_28 --> P6_24
+    P3_29 --> P6_24
+    P3_30 --> P6_24
 
     P6_24 --> P6_26
     P6_24 --> P6_27
@@ -124,9 +159,9 @@ graph TD
 
     class P1_01,P1_02,P1_03,P1_04,P1_05 p1
     class P2_06,P2_07,P2_08 p2
-    class P3_09,P3_10,P3_11 p3
+    class P3_09,P3_10,P3_11,P3_28,P3_29,P3_30 p3
     class P4_12,P4_13,P4_14,P4_15,P4_16,P4_17 p4
-    class P5_18,P5_19,P5_20,P5_21,P5_22,P5_23 p5
+    class P5_18,P5_19,P5_20,P5_21,P5_22,P5_23,P5_31,P5_32,P5_33,P5_34 p5
     class P6_24,P6_26,P6_27 p6
 ```
 
@@ -145,6 +180,9 @@ graph TD
 | #86 | P3-09 Expected API *_ex() | 3 | #80, #83 |
 | #87 | P3-10 Dual API: std names | 3 | #81, #83 |
 | #88 | P3-11 Thread safety annotations | 3 | #78, #87 |
+| #104 | P3-28 unique_lock / scoped_lock | 3 | #87, #83 |
+| #105 | P3-29 call_once | 3 | #78 |
+| #106 | P3-30 atomic<T> / atomic_flag | 3 | #78, #82 |
 | #89 | P4-12 Indexed notifications | 4 | #78, #83 |
 | #90 | P4-13 SMP core affinity | 4 | #78, #83, #85 |
 | #91 | P4-14 Stream batching buffer | 4 | #78, #79, #83 |
@@ -157,6 +195,10 @@ graph TD
 | #98 | P5-21 pend_call, shared_data, claim | 5 | #87, #80, #83 |
 | #99 | P5-22 Fixed-capacity callback (SBO) | 5 | #82, #83 |
 | #100 | P5-23 new/delete redirect + static memory | 5 | #78 |
+| #107 | P5-31 thread / jthread / stop_token | 5 | #96, #82, #84, #98 |
+| #108 | P5-32 timed_mutex / recursive_timed_mutex | 5 | #87, #81 |
+| #109 | P5-33 shared_mutex (RW lock) | 5 | #84, #87, #88, #81 |
+| #110 | P5-34 latch | 5 | #78, #82 |
 | #101 | P6-24 Update & add tests | 6 | All P1-P5 |
 | #102 | P6-26 Documentation update | 6 | All P1-P5 |
 | #103 | P6-27 V&V report | 6 | #101, #102 |
@@ -167,12 +209,14 @@ The longest dependency chain determines the minimum implementation time:
 
 ```
 #78 → #83 → #87 → #88 (5 steps: Phase 1→2→3)
-#78 → #83 → #87 → #95 (4 steps: Phase 1→2→3→5)
-#78 → #83 → #86 → tests (4 steps: Phase 1→2→3→6)
+#78 → #83 → #87 → #104 → #95 (5 steps: Phase 1→2→3→3→5)  ← NEW LONGEST
+#78 → #83 → #87 → #109 (5 steps: Phase 1→2→3→5)
 #80 → #86 → tests (3 steps: Phase 1→3→6)
 ```
 
-**Critical path**: `P1-01 → P2-06 → P3-10 → P5-18` (4 issues, 3 dependencies)
+**Critical path**: `P1-01 → P2-06 → P3-10 → P3-28 → P5-18` (5 issues, 4 dependencies)
+
+The `unique_lock` (P3-28) is now on the critical path because `condition_variable_any` (#95) depends on it.
 
 ## Parallelization Opportunities
 
@@ -180,7 +224,7 @@ Issues with no mutual dependencies can be worked on in parallel within each phas
 
 - **Phase 1**: All 5 issues are independent (maximum parallelism)
 - **Phase 2**: P2-08 is independent of P2-06 and P2-07
-- **Phase 3**: P3-09 and P3-10 are independent of each other (but both need P2-06)
+- **Phase 3**: P3-09, P3-10, P3-28, P3-29, P3-30 are mostly independent of each other (P3-28 needs P3-10 and P2-06)
 - **Phase 4**: P4-12 through P4-17 are independent of each other
-- **Phase 5**: All 6 issues are independent of each other
+- **Phase 5**: All 10 issues have partial dependencies but can be parallelized within groups
 - **Phase 6**: P6-24 and P6-26 can partially overlap

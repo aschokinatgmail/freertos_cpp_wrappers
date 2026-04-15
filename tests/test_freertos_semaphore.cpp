@@ -2005,3 +2005,518 @@ TEST_F(FreeRTOSSemaphoreTest, SemaphoreAPICompleteness) {
    */
   EXPECT_TRUE(true); // Placeholder for documentation
 }
+// =============================================================================
+// Branch Coverage Tests
+// =============================================================================
+
+TEST_F(FreeRTOSSemaphoreTest, MutexUnlockFails_BranchCoverage) {
+  EXPECT_CALL(*mock, xSemaphoreCreateMutex())
+      .WillOnce(Return(mock_mutex_handle));
+  EXPECT_CALL(*mock, xSemaphoreTake(mock_mutex_handle, portMAX_DELAY))
+      .WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, xSemaphoreGive(mock_mutex_handle))
+      .WillOnce(Return(pdFAIL));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex_handle));
+
+  freertos::mutex<freertos::dynamic_semaphore_allocator> m;
+  m.lock();
+  EXPECT_EQ(m.unlock(), pdFAIL);
+  EXPECT_TRUE(m.locked());
+}
+
+TEST_F(FreeRTOSSemaphoreTest, MutexLockWithTimeoutFails_BranchCoverage) {
+  EXPECT_CALL(*mock, xSemaphoreCreateMutex())
+      .WillOnce(Return(mock_mutex_handle));
+  EXPECT_CALL(*mock, xSemaphoreTake(mock_mutex_handle, 100))
+      .WillOnce(Return(pdFALSE));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex_handle));
+
+  freertos::mutex<freertos::dynamic_semaphore_allocator> m;
+  EXPECT_EQ(m.lock(100), pdFALSE);
+  EXPECT_FALSE(m.locked());
+}
+
+TEST_F(FreeRTOSSemaphoreTest, MutexLockIsrFails_BranchCoverage) {
+  EXPECT_CALL(*mock, xSemaphoreCreateMutex())
+      .WillOnce(Return(mock_mutex_handle));
+  EXPECT_CALL(*mock, xSemaphoreTakeFromISR(mock_mutex_handle, _))
+      .WillOnce(Return(pdFAIL));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex_handle));
+
+  freertos::mutex<freertos::dynamic_semaphore_allocator> m;
+  BaseType_t woken = pdFALSE;
+  EXPECT_EQ(m.lock_isr(woken), pdFALSE);
+}
+
+TEST_F(FreeRTOSSemaphoreTest, MutexUnlockIsrFails_BranchCoverage) {
+  EXPECT_CALL(*mock, xSemaphoreCreateMutex())
+      .WillOnce(Return(mock_mutex_handle));
+  EXPECT_CALL(*mock, xSemaphoreTake(mock_mutex_handle, portMAX_DELAY))
+      .WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, xSemaphoreGiveFromISR(mock_mutex_handle, _))
+      .WillOnce(Return(pdFAIL));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex_handle));
+
+  freertos::mutex<freertos::dynamic_semaphore_allocator> m;
+  m.lock();
+  BaseType_t woken = pdFALSE;
+  EXPECT_EQ(m.unlock_isr(woken), pdFAIL);
+}
+
+TEST_F(FreeRTOSSemaphoreTest, MutexLockIsrNoWoken_BranchCoverage) {
+  EXPECT_CALL(*mock, xSemaphoreCreateMutex())
+      .WillOnce(Return(mock_mutex_handle));
+  EXPECT_CALL(*mock, xSemaphoreTakeFromISR(mock_mutex_handle, _))
+      .WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex_handle));
+
+  freertos::mutex<freertos::dynamic_semaphore_allocator> m;
+  EXPECT_EQ(m.lock_isr(), pdTRUE);
+}
+
+TEST_F(FreeRTOSSemaphoreTest, MutexUnlockIsrNoWoken_BranchCoverage) {
+  EXPECT_CALL(*mock, xSemaphoreCreateMutex())
+      .WillOnce(Return(mock_mutex_handle));
+  EXPECT_CALL(*mock, xSemaphoreTake(mock_mutex_handle, portMAX_DELAY))
+      .WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, xSemaphoreGiveFromISR(mock_mutex_handle, _))
+      .WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex_handle));
+
+  freertos::mutex<freertos::dynamic_semaphore_allocator> m;
+  m.lock();
+  EXPECT_EQ(m.unlock_isr(), pdTRUE);
+}
+
+TEST_F(FreeRTOSSemaphoreTest, MutexTimeoutLockGuardChrono_BranchCoverage) {
+  EXPECT_CALL(*mock, xSemaphoreCreateMutex())
+      .WillOnce(Return(mock_mutex_handle));
+  EXPECT_CALL(*mock, xSemaphoreTake(mock_mutex_handle, pdMS_TO_TICKS(100)))
+      .WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, xSemaphoreGive(mock_mutex_handle))
+      .WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex_handle));
+
+  freertos::mutex<freertos::dynamic_semaphore_allocator> mtx;
+  {
+    freertos::timeout_lock_guard<
+        freertos::mutex<freertos::dynamic_semaphore_allocator>>
+        guard(mtx, std::chrono::milliseconds(100));
+    EXPECT_TRUE(guard.locked());
+    EXPECT_TRUE(mtx.locked());
+  }
+  EXPECT_FALSE(mtx.locked());
+}
+
+TEST_F(FreeRTOSSemaphoreTest, RecursiveMutexLockFails_BranchCoverage) {
+  EXPECT_CALL(*mock, xSemaphoreCreateRecursiveMutex())
+      .WillOnce(Return(mock_mutex_handle));
+  EXPECT_CALL(*mock, xSemaphoreTakeRecursive(mock_mutex_handle, portMAX_DELAY))
+      .WillOnce(Return(pdFALSE));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex_handle));
+
+  freertos::recursive_mutex<freertos::dynamic_semaphore_allocator> rm;
+  EXPECT_EQ(rm.lock(), pdFALSE);
+  EXPECT_EQ(rm.recursions_count(), 0);
+}
+
+TEST_F(FreeRTOSSemaphoreTest, CountingSemaphoreGiveIsrNoWoken_BranchCoverage) {
+  EXPECT_CALL(*mock, xSemaphoreCreateCounting(5, 5))
+      .WillOnce(Return(mock_semaphore_handle));
+  EXPECT_CALL(*mock, xSemaphoreGiveFromISR(mock_semaphore_handle, _))
+      .WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
+
+  freertos::counting_semaphore<freertos::dynamic_semaphore_allocator> sem(5);
+  EXPECT_EQ(sem.give_isr(), pdTRUE);
+}
+
+TEST_F(FreeRTOSSemaphoreTest,
+       CountingSemaphoreTakeIsrWithWoken_BranchCoverage) {
+  EXPECT_CALL(*mock, xSemaphoreCreateCounting(5, 5))
+      .WillOnce(Return(mock_semaphore_handle));
+  EXPECT_CALL(*mock, xSemaphoreTakeFromISR(mock_semaphore_handle, _))
+      .WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
+
+  BaseType_t woken = pdFALSE;
+  freertos::counting_semaphore<freertos::dynamic_semaphore_allocator> sem(5);
+  EXPECT_EQ(sem.take_isr(woken), pdTRUE);
+}
+
+TEST_F(FreeRTOSSemaphoreTest, CountingSemaphoreTakeIsrNoWoken_BranchCoverage) {
+  EXPECT_CALL(*mock, xSemaphoreCreateCounting(5, 5))
+      .WillOnce(Return(mock_semaphore_handle));
+  EXPECT_CALL(*mock, xSemaphoreTakeFromISR(mock_semaphore_handle, _))
+      .WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
+
+  freertos::counting_semaphore<freertos::dynamic_semaphore_allocator> sem(5);
+  EXPECT_EQ(sem.take_isr(), pdTRUE);
+}
+
+TEST_F(FreeRTOSSemaphoreTest,
+       CountingSemaphoreTakeIsrWithWoken_Fail_BranchCoverage) {
+  EXPECT_CALL(*mock, xSemaphoreCreateCounting(5, 5))
+      .WillOnce(Return(mock_semaphore_handle));
+  EXPECT_CALL(*mock, xSemaphoreTakeFromISR(mock_semaphore_handle, _))
+      .WillOnce(Return(pdFALSE));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
+
+  BaseType_t woken = pdFALSE;
+  freertos::counting_semaphore<freertos::dynamic_semaphore_allocator> sem(5);
+  EXPECT_EQ(sem.take_isr(woken), pdFALSE);
+}
+
+TEST_F(FreeRTOSSemaphoreTest,
+       CountingSemaphoreTakeIsrNoWoken_Fail_BranchCoverage) {
+  EXPECT_CALL(*mock, xSemaphoreCreateCounting(5, 5))
+      .WillOnce(Return(mock_semaphore_handle));
+  EXPECT_CALL(*mock, xSemaphoreTakeFromISR(mock_semaphore_handle, _))
+      .WillOnce(Return(pdFALSE));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
+
+  freertos::counting_semaphore<freertos::dynamic_semaphore_allocator> sem(5);
+  EXPECT_EQ(sem.take_isr(), pdFALSE);
+}
+
+TEST_F(FreeRTOSSemaphoreTest,
+       CountingSemaphoreDestructionNullHandle_BranchCoverage) {
+  EXPECT_CALL(*mock, xSemaphoreCreateCounting(1, 1)).WillOnce(Return(nullptr));
+  // No vSemaphoreDelete call expected for null handle
+
+  {
+    freertos::counting_semaphore<freertos::dynamic_semaphore_allocator> sem;
+  }
+}
+
+TEST_F(FreeRTOSSemaphoreTest,
+       CountingSemaphoreGiveIsrWithWoken_BranchCoverage) {
+  EXPECT_CALL(*mock, xSemaphoreCreateCounting(3, 3))
+      .WillOnce(Return(mock_semaphore_handle));
+  EXPECT_CALL(*mock, xSemaphoreGiveFromISR(mock_semaphore_handle, _))
+      .WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
+
+  freertos::counting_semaphore<freertos::dynamic_semaphore_allocator> sem(3);
+  BaseType_t woken = pdFALSE;
+  EXPECT_EQ(sem.give_isr(woken), pdTRUE);
+}
+
+TEST_F(FreeRTOSSemaphoreTest, CountingSemaphoreTakeChrono_BranchCoverage) {
+  EXPECT_CALL(*mock, xSemaphoreCreateCounting(5, 5))
+      .WillOnce(Return(mock_semaphore_handle));
+  EXPECT_CALL(*mock, xSemaphoreTake(mock_semaphore_handle, pdMS_TO_TICKS(100)))
+      .WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
+
+  freertos::counting_semaphore<freertos::dynamic_semaphore_allocator> sem(5);
+  auto result = sem.take(std::chrono::milliseconds(100));
+  EXPECT_EQ(result, pdTRUE);
+}
+
+TEST_F(FreeRTOSSemaphoreTest, MutexDestructionNullHandle_BranchCoverage) {
+  EXPECT_CALL(*mock, xSemaphoreCreateMutex()).WillOnce(Return(nullptr));
+  // No vSemaphoreDelete expected for null handle
+
+  {
+    freertos::mutex<freertos::dynamic_semaphore_allocator> mtx;
+  }
+}
+
+TEST_F(FreeRTOSSemaphoreTest, MutexUnlockIsrNoWokenFailure_BranchCoverage) {
+  EXPECT_CALL(*mock, xSemaphoreCreateMutex())
+      .WillOnce(Return(mock_mutex_handle));
+  EXPECT_CALL(*mock, xSemaphoreTake(mock_mutex_handle, portMAX_DELAY))
+      .WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, xSemaphoreGiveFromISR(mock_mutex_handle, _))
+      .WillOnce(Return(pdFALSE));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex_handle));
+
+  freertos::mutex<freertos::dynamic_semaphore_allocator> mtx;
+  mtx.lock();
+  EXPECT_EQ(mtx.unlock_isr(), pdFALSE);
+  EXPECT_TRUE(mtx.locked());
+}
+
+TEST_F(FreeRTOSSemaphoreTest, MutexLockIsrNoWokenFailure_BranchCoverage) {
+  EXPECT_CALL(*mock, xSemaphoreCreateMutex())
+      .WillOnce(Return(mock_mutex_handle));
+  EXPECT_CALL(*mock, xSemaphoreTakeFromISR(mock_mutex_handle, _))
+      .WillOnce(Return(pdFALSE));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex_handle));
+
+  freertos::mutex<freertos::dynamic_semaphore_allocator> mtx;
+  EXPECT_EQ(mtx.lock_isr(), pdFALSE);
+  EXPECT_FALSE(mtx.locked());
+}
+
+TEST_F(FreeRTOSSemaphoreTest, MutexLockChrono_BranchCoverage) {
+  EXPECT_CALL(*mock, xSemaphoreCreateMutex())
+      .WillOnce(Return(mock_mutex_handle));
+  EXPECT_CALL(*mock, xSemaphoreTake(mock_mutex_handle, pdMS_TO_TICKS(200)))
+      .WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex_handle));
+
+  freertos::mutex<freertos::dynamic_semaphore_allocator> mtx;
+  EXPECT_EQ(mtx.lock(std::chrono::milliseconds(200)), pdTRUE);
+  EXPECT_TRUE(mtx.locked());
+}
+
+TEST_F(FreeRTOSSemaphoreTest, BinarySemaphoreGiveIsrWithWoken_BranchCoverage) {
+  EXPECT_CALL(*mock, xSemaphoreCreateBinary())
+      .WillOnce(Return(mock_semaphore_handle));
+  EXPECT_CALL(*mock, xSemaphoreGiveFromISR(mock_semaphore_handle, _))
+      .WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
+
+  freertos::binary_semaphore<freertos::dynamic_semaphore_allocator> sem;
+  BaseType_t woken = pdFALSE;
+  EXPECT_EQ(sem.give_isr(woken), pdTRUE);
+}
+
+TEST_F(FreeRTOSSemaphoreTest, BinarySemaphoreTakeIsrWithWoken_BranchCoverage) {
+  EXPECT_CALL(*mock, xSemaphoreCreateBinary())
+      .WillOnce(Return(mock_semaphore_handle));
+  EXPECT_CALL(*mock, xSemaphoreTakeFromISR(mock_semaphore_handle, _))
+      .WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
+
+  freertos::binary_semaphore<freertos::dynamic_semaphore_allocator> sem;
+  BaseType_t woken = pdFALSE;
+  EXPECT_EQ(sem.take_isr(woken), pdTRUE);
+}
+
+TEST_F(FreeRTOSSemaphoreTest, MutexUnlockIsrNoArg_BranchCoverage) {
+  EXPECT_CALL(*mock, xSemaphoreCreateMutex())
+      .WillOnce(Return(mock_mutex_handle));
+  EXPECT_CALL(*mock, xSemaphoreTakeFromISR(mock_mutex_handle, _))
+      .WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, xSemaphoreGiveFromISR(mock_mutex_handle, _))
+      .WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex_handle));
+
+  freertos::mutex<freertos::dynamic_semaphore_allocator> mtx;
+  auto result = mtx.lock_isr();
+  EXPECT_EQ(result, pdTRUE);
+  EXPECT_TRUE(mtx.locked());
+  result = mtx.unlock_isr();
+  EXPECT_EQ(result, pdTRUE);
+  EXPECT_FALSE(mtx.locked());
+}
+
+TEST_F(FreeRTOSSemaphoreTest,
+       TryLockGuardLockedFalseMutexLockedTrue_BranchCoverage) {
+  // Test: try_lock_guard where m_lock_acquired is false but m_mutex.locked() is
+  // true This covers the && branch in locked() where m_lock_acquired is false
+  EXPECT_CALL(*mock, xSemaphoreCreateMutex())
+      .WillOnce(Return(mock_mutex_handle));
+  EXPECT_CALL(*mock, xSemaphoreTake(mock_mutex_handle, 0))
+      .WillOnce(Return(pdFALSE));
+  // Another thread locks it
+  EXPECT_CALL(*mock, xSemaphoreTake(mock_mutex_handle, portMAX_DELAY))
+      .WillOnce(Return(pdTRUE));
+  // Unlock by "other thread"
+  EXPECT_CALL(*mock, xSemaphoreGive(mock_mutex_handle))
+      .WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex_handle));
+
+  freertos::mutex<freertos::dynamic_semaphore_allocator> mtx;
+
+  {
+    freertos::try_lock_guard<
+        freertos::mutex<freertos::dynamic_semaphore_allocator>>
+        guard(mtx);
+    EXPECT_FALSE(guard.locked());
+    EXPECT_FALSE(mtx.locked());
+
+    // "Another thread" locks it
+    mtx.lock();
+    EXPECT_TRUE(mtx.locked());
+    EXPECT_FALSE(guard.locked()); // guard didn't acquire it
+    mtx.unlock();
+  }
+  EXPECT_FALSE(mtx.locked());
+}
+
+TEST_F(FreeRTOSSemaphoreTest,
+       TimeoutLockGuardLockedFalseMutexLockedTrue_BranchCoverage) {
+  // Test: timeout_lock_guard where m_lock_acquired is false but
+  // m_mutex.locked() is true
+  EXPECT_CALL(*mock, xSemaphoreCreateMutex())
+      .WillOnce(Return(mock_mutex_handle));
+  EXPECT_CALL(*mock, xSemaphoreTake(mock_mutex_handle, 50))
+      .WillOnce(Return(pdFALSE));
+  // Another thread locks it
+  EXPECT_CALL(*mock, xSemaphoreTake(mock_mutex_handle, portMAX_DELAY))
+      .WillOnce(Return(pdTRUE));
+  // Unlock by "other thread"
+  EXPECT_CALL(*mock, xSemaphoreGive(mock_mutex_handle))
+      .WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex_handle));
+
+  freertos::mutex<freertos::dynamic_semaphore_allocator> mtx;
+
+  {
+    freertos::timeout_lock_guard<
+        freertos::mutex<freertos::dynamic_semaphore_allocator>>
+        guard(mtx, 50);
+    EXPECT_FALSE(guard.locked());
+    EXPECT_FALSE(mtx.locked());
+
+    // "Another thread" locks it
+    mtx.lock();
+    EXPECT_TRUE(mtx.locked());
+    EXPECT_FALSE(
+        guard.locked()); // guard didn't acquire it, even though mutex is locked
+    mtx.unlock();
+  }
+  EXPECT_FALSE(mtx.locked());
+}
+
+TEST_F(FreeRTOSSemaphoreTest,
+       BinarySemaphoreDestructionNullHandle_BranchCoverage) {
+  EXPECT_CALL(*mock, xSemaphoreCreateBinary()).WillOnce(Return(nullptr));
+  // No vSemaphoreDelete expected for null handle
+
+  {
+    freertos::binary_semaphore<freertos::dynamic_semaphore_allocator> sem;
+  }
+}
+
+TEST_F(FreeRTOSSemaphoreTest, BinarySemaphoreGiveIsrNoWoken_BranchCoverage) {
+  EXPECT_CALL(*mock, xSemaphoreCreateBinary())
+      .WillOnce(Return(mock_semaphore_handle));
+  EXPECT_CALL(*mock, xSemaphoreGiveFromISR(mock_semaphore_handle, _))
+      .WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
+
+  freertos::binary_semaphore<freertos::dynamic_semaphore_allocator> sem;
+  auto result = sem.give_isr();
+  EXPECT_EQ(result, pdTRUE);
+}
+
+TEST_F(FreeRTOSSemaphoreTest, BinarySemaphoreTakeIsrNoWoken_BranchCoverage) {
+  EXPECT_CALL(*mock, xSemaphoreCreateBinary())
+      .WillOnce(Return(mock_semaphore_handle));
+  EXPECT_CALL(*mock, xSemaphoreTakeFromISR(mock_semaphore_handle, _))
+      .WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
+
+  freertos::binary_semaphore<freertos::dynamic_semaphore_allocator> sem;
+  auto result = sem.take_isr();
+  EXPECT_EQ(result, pdTRUE);
+}
+
+TEST_F(FreeRTOSSemaphoreTest, BinarySemaphoreTakeChrono_BranchCoverage) {
+  EXPECT_CALL(*mock, xSemaphoreCreateBinary())
+      .WillOnce(Return(mock_semaphore_handle));
+  EXPECT_CALL(*mock, xSemaphoreTake(mock_semaphore_handle, pdMS_TO_TICKS(500)))
+      .WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
+
+  freertos::binary_semaphore<freertos::dynamic_semaphore_allocator> sem;
+  auto result = sem.take(std::chrono::milliseconds(500));
+  EXPECT_EQ(result, pdTRUE);
+}
+
+TEST_F(FreeRTOSSemaphoreTest, MutexUnlockIsrFailure_BranchCoverage) {
+  EXPECT_CALL(*mock, xSemaphoreCreateMutex())
+      .WillOnce(Return(mock_mutex_handle));
+  EXPECT_CALL(*mock, xSemaphoreGiveFromISR(mock_mutex_handle, _))
+      .WillOnce(Return(pdFALSE));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex_handle));
+
+  freertos::mutex<freertos::dynamic_semaphore_allocator> mtx;
+  auto result = mtx.unlock_isr();
+  EXPECT_EQ(result, pdFALSE);
+  EXPECT_FALSE(mtx.locked());
+}
+
+TEST_F(FreeRTOSSemaphoreTest, MutexLockIsrNoArg_BranchCoverage) {
+  EXPECT_CALL(*mock, xSemaphoreCreateMutex())
+      .WillOnce(Return(mock_mutex_handle));
+  EXPECT_CALL(*mock, xSemaphoreTakeFromISR(mock_mutex_handle, _))
+      .WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex_handle));
+
+  freertos::mutex<freertos::dynamic_semaphore_allocator> mtx;
+  auto result = mtx.lock_isr();
+  EXPECT_EQ(result, pdTRUE);
+  EXPECT_TRUE(mtx.locked());
+}
+
+TEST_F(FreeRTOSSemaphoreTest, MutexLockIsrNoArgFailure_BranchCoverage) {
+  EXPECT_CALL(*mock, xSemaphoreCreateMutex())
+      .WillOnce(Return(mock_mutex_handle));
+  EXPECT_CALL(*mock, xSemaphoreTakeFromISR(mock_mutex_handle, _))
+      .WillOnce(Return(pdFALSE));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex_handle));
+
+  freertos::mutex<freertos::dynamic_semaphore_allocator> mtx;
+  auto result = mtx.lock_isr();
+  EXPECT_EQ(result, pdFALSE);
+  EXPECT_FALSE(mtx.locked());
+}
+
+TEST_F(FreeRTOSSemaphoreTest, MutexChronoLock_BranchCoverage) {
+  EXPECT_CALL(*mock, xSemaphoreCreateMutex())
+      .WillOnce(Return(mock_mutex_handle));
+  EXPECT_CALL(*mock, xSemaphoreTake(mock_mutex_handle, pdMS_TO_TICKS(250)))
+      .WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex_handle));
+
+  freertos::mutex<freertos::dynamic_semaphore_allocator> mtx;
+  auto result = mtx.lock(std::chrono::milliseconds(250));
+  EXPECT_EQ(result, pdTRUE);
+  EXPECT_TRUE(mtx.locked());
+}
+
+TEST_F(FreeRTOSSemaphoreTest, TryLockGuardLockedFalse_BranchCoverage) {
+  EXPECT_CALL(*mock, xSemaphoreCreateMutex())
+      .WillOnce(Return(mock_mutex_handle));
+  EXPECT_CALL(*mock, xSemaphoreTake(mock_mutex_handle, 0))
+      .WillOnce(Return(pdFALSE));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex_handle));
+
+  freertos::mutex<freertos::dynamic_semaphore_allocator> mtx;
+  {
+    freertos::try_lock_guard<
+        freertos::mutex<freertos::dynamic_semaphore_allocator>>
+        guard(mtx);
+    EXPECT_FALSE(guard.locked());
+    EXPECT_FALSE(mtx.locked());
+  }
+}
+
+TEST_F(FreeRTOSSemaphoreTest,
+       RecursiveMutexUnlockWithZeroRecursions_BranchCoverage) {
+  EXPECT_CALL(*mock, xSemaphoreCreateRecursiveMutex())
+      .WillOnce(Return(mock_mutex_handle));
+  EXPECT_CALL(*mock, xSemaphoreGiveRecursive(mock_mutex_handle))
+      .WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex_handle));
+
+  freertos::recursive_mutex<freertos::dynamic_semaphore_allocator> rm;
+  EXPECT_EQ(rm.recursions_count(), 0);
+  auto result = rm.unlock();
+  EXPECT_EQ(result, pdTRUE);
+  EXPECT_EQ(rm.recursions_count(), 0);
+}
+
+TEST_F(FreeRTOSSemaphoreTest, TimeoutLockGuardLockedFalse_BranchCoverage) {
+  EXPECT_CALL(*mock, xSemaphoreCreateMutex())
+      .WillOnce(Return(mock_mutex_handle));
+  EXPECT_CALL(*mock, xSemaphoreTake(mock_mutex_handle, pdMS_TO_TICKS(100)))
+      .WillOnce(Return(pdFALSE));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex_handle));
+
+  freertos::mutex<freertos::dynamic_semaphore_allocator> mtx;
+  {
+    freertos::timeout_lock_guard<
+        freertos::mutex<freertos::dynamic_semaphore_allocator>>
+        guard(mtx, std::chrono::milliseconds(100));
+    EXPECT_FALSE(guard.locked());
+    EXPECT_FALSE(mtx.locked());
+  }
+}

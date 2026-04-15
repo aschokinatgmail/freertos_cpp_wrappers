@@ -220,7 +220,8 @@ public:
    */
   BaseType_t give_isr(void) {
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-    return xSemaphoreGiveFromISR(m_semaphore, &xHigherPriorityTaskWoken);
+    return xSemaphoreGiveFromISR(
+        m_semaphore, &xHigherPriorityTaskWoken);
   }
   /**
    * @brief Take the binary semaphore.
@@ -258,7 +259,8 @@ public:
    */
   BaseType_t take_isr(void) {
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-    return xSemaphoreTakeFromISR(m_semaphore, &xHigherPriorityTaskWoken);
+    return xSemaphoreTakeFromISR(
+        m_semaphore, &xHigherPriorityTaskWoken);
   }
   /**
    * @brief Take the binary semaphore.
@@ -343,7 +345,8 @@ public:
    */
   BaseType_t give_isr(void) {
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-    return xSemaphoreGiveFromISR(m_semaphore, &xHigherPriorityTaskWoken);
+    return xSemaphoreGiveFromISR(
+        m_semaphore, &xHigherPriorityTaskWoken);
   }
   /**
    * @brief Take the counting semaphore.
@@ -381,7 +384,8 @@ public:
    */
   BaseType_t take_isr(void) {
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-    return xSemaphoreTakeFromISR(m_semaphore, &xHigherPriorityTaskWoken);
+    return xSemaphoreTakeFromISR(
+        m_semaphore, &xHigherPriorityTaskWoken);
   }
   /**
    * @brief Take the counting semaphore.
@@ -878,9 +882,10 @@ public:
   timeout_lock_guard(Mutex &mutex,
                      const std::chrono::duration<Rep, Period> &timeout)
       : m_mutex{mutex},
-        m_lock_acquired{static_cast<bool>(m_mutex.lock(pdMS_TO_TICKS(
-            std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
-                .count())))} {}
+        m_lock_acquired{
+            static_cast<bool>(m_mutex.lock(pdMS_TO_TICKS(
+                std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
+                    .count())))} {}
   /**
    * @brief Destruct the timeout lock guard object and unlock the mutex.
    *

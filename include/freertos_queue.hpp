@@ -271,7 +271,8 @@ public:
    */
   BaseType_t send_isr(const T &item) {
     BaseType_t higher_priority_task_woken = pdFALSE;
-    return xQueueSendFromISR(m_queue, &item, &higher_priority_task_woken);
+    return xQueueSendFromISR(m_queue, &item,
+                             &higher_priority_task_woken);
   }
   /**
    * @brief Posts an item to the back of a queue.

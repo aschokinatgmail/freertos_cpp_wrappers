@@ -76,6 +76,11 @@ add_library(freertos_cpp_wrappers
 # Add include directories to the library target
 target_include_directories(freertos_cpp_wrappers PRIVATE tests/mocks)
 
+# For coverage builds, disable exceptions for library code to reduce GCC artifact branches
+if(ENABLE_COVERAGE)
+    target_compile_options(freertos_cpp_wrappers PRIVATE -fno-exceptions)
+endif()
+
 # =============================================================================
 # CODE FORMATTING CONFIGURATION (clang-format)
 # =============================================================================
