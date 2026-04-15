@@ -70,3 +70,4 @@ VALIDATION_VERIFICATION_REPORT.html
 session-tag.local
 .gitignore_check
 coverage.info
+cov_task*.info

@@ -1948,3 +1948,47 @@ TEST_F(FreeRTOSTaskTest, DelayUntilPastSteadyClock_BranchCoverage) {
   EXPECT_CALL(*mock, vTaskDelay(_)).Times(0);
   delay_until(past_time);
 }
+
+#if configSUPPORT_STATIC_ALLOCATION
+TEST_F(FreeRTOSTaskTest,
+       StaticTaskZeroStackSize_SuspendResume_FunctionCoverage) {
+  EXPECT_CALL(*mock, xTaskCreateStatic(_, _, _, _, _, _, _))
+      .WillOnce(Return(mock_task_handle));
+
+  freertos::sa::task<0> test_task("ZeroStackTask", 1, empty_task_routine);
+
+  EXPECT_CALL(*mock, vTaskSuspend(mock_task_handle));
+  test_task.suspend();
+
+  EXPECT_CALL(*mock, vTaskResume(mock_task_handle));
+  test_task.resume();
+
+  EXPECT_CALL(*mock, vTaskDelete(mock_task_handle));
+}
+#endif
+
+#if configSUPPORT_DYNAMIC_ALLOCATION
+TEST_F(FreeRTOSTaskTest, DynamicTask512_SuspendResume_FunctionCoverage) {
+  EXPECT_CALL(*mock, xTaskCreate(_, _, _, _, _, _)).WillOnce(Return(pdPASS));
+
+  freertos::da::task<512> test_task("DynTask512", 1, empty_task_routine);
+
+  EXPECT_CALL(*mock, vTaskSuspend(_));
+  test_task.suspend();
+
+  EXPECT_CALL(*mock, vTaskResume(_));
+  test_task.resume();
+}
+
+TEST_F(FreeRTOSTaskTest, DynamicTask2048_SuspendResume_FunctionCoverage) {
+  EXPECT_CALL(*mock, xTaskCreate(_, _, _, _, _, _)).WillOnce(Return(pdPASS));
+
+  freertos::da::task<2048> test_task("DynTask2048", 1, empty_task_routine);
+
+  EXPECT_CALL(*mock, vTaskSuspend(_));
+  test_task.suspend();
+
+  EXPECT_CALL(*mock, vTaskResume(_));
+  test_task.resume();
+}
+#endif

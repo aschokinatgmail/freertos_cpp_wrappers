@@ -1,0 +1,10 @@
+---
+Checks: >
+  cppcoreguidelines-*,
+  cert-*,
+  google-*,
+  hicpp-*
+HeaderFilterRegex: '^include/.*'
+FormatStyle: file
+SystemHeaders: false
+...
