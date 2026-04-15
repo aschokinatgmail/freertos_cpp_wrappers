@@ -2,39 +2,56 @@ services:
   build:
     build: .
     image: freertos-cpp-wrappers:latest
-    command: ["make", "-j$(nproc)"]
+    command: ["bash", "-c", "cmake -B build -S /project && cmake --build build -j$(nproc)"]
+    volumes:
+      - build-artifacts:/project/build
+      - .:/project-src
 
   test:
-    build: .
     image: freertos-cpp-wrappers:latest
-    command: ["ctest", "--verbose", "--output-on-failure"]
+    command: ["bash", "-c", "cd /project/build && ctest --verbose --output-on-failure"]
+    volumes:
+      - build-artifacts:/project/build
     depends_on:
-      - build
+      build:
+        condition: service_completed_successfully
 
   coverage:
-    build: .
     image: freertos-cpp-wrappers:latest
-    command: ["bash", "-c", "cmake -DENABLE_COVERAGE=ON .. && make -j$(nproc) && ctest --verbose --output-on-failure && lcov --rc lcov_branch_coverage=1 --capture --directory . --output-file coverage.info && lcov --rc lcov_branch_coverage=1 --remove coverage.info '/usr/*' '*/tests/*' '*/mocks/*' --output-file coverage.info && python3 /project/scripts/filter_coverage.py coverage.info coverage.info && genhtml --branch-coverage coverage.info --output-directory coverage_report"]
+    command: ["bash", "-c", "cd /project/build && cmake -DENABLE_COVERAGE=ON .. && make -j$(nproc) && ctest --verbose --output-on-failure && lcov --rc lcov_branch_coverage=1 --capture --directory . --output-file coverage.info && lcov --rc lcov_branch_coverage=1 --remove coverage.info '/usr/*' '/project/tests/*' '/project/mocks/*' --output-file coverage.info && python3 /project/scripts/filter_coverage.py coverage.info coverage.info && genhtml --branch-coverage coverage.info --output-directory coverage_report"]
+    volumes:
+      - build-artifacts:/project/build
+      - .:/project-src
     depends_on:
-      - build
+      build:
+        condition: service_completed_successfully
 
   static-analysis:
-    build: .
     image: freertos-cpp-wrappers:latest
-    command: ["bash", "-c", "cmake --build . --target static-analysis-report"]
+    command: ["bash", "-c", "cd /project/build && cmake --build . --target static-analysis-report"]
+    volumes:
+      - build-artifacts:/project/build
     depends_on:
-      - build
+      build:
+        condition: service_completed_successfully
 
   validation:
-    build: .
     image: freertos-cpp-wrappers:latest
     command: ["bash", "/project/scripts/generate_validation_verification_report.sh", "/project/build"]
+    volumes:
+      - build-artifacts:/project/build
     depends_on:
-      - build
+      build:
+        condition: service_completed_successfully
 
   docs:
-    build: .
     image: freertos-cpp-wrappers:latest
-    command: ["bash", "-c", "cmake --build . --target docs"]
+    command: ["bash", "-c", "cd /project/build && cmake --build . --target docs"]
+    volumes:
+      - build-artifacts:/project/build
     depends_on:
-      - build
+      build:
+        condition: service_completed_successfully
+
+volumes:
+  build-artifacts:

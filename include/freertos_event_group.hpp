@@ -91,7 +91,9 @@ public:
    * @brief Construct a new event group object
    *
    */
-  event_group(void) : m_event_group(m_allocator.create()) {}
+  event_group(void) : m_event_group(m_allocator.create()) {
+    configASSERT(m_event_group);
+  }
   event_group(const event_group &) = delete;
   event_group(event_group &&other) = delete;
   /**

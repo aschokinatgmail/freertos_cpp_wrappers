@@ -23,11 +23,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /project
 
-COPY . .
+# Copy dependency specs first for better layer caching
+COPY CMakeLists.txt .
+COPY include/ include/
+COPY src/ src/
+COPY tests/ tests/
 
 RUN mkdir -p build && cd build && \
     cmake -DENABLE_COVERAGE=ON .. && \
     make -j$(nproc)
+
+# Copy scripts after build (changes less often)
+COPY scripts/ scripts/
 
 WORKDIR /project/build
 

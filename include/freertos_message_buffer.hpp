@@ -101,7 +101,7 @@ public:
    * @brief Construct a new message buffer object
    *
    */
-  explicit message_buffer() : m_message_buffer{m_allocator.create()} {
+  message_buffer() : m_message_buffer{m_allocator.create()} {
     configASSERT(m_message_buffer);
   }
   message_buffer(const message_buffer &) = delete;

@@ -1,4 +1,4 @@
-#include "../include/freertos_task.hpp"
+#include "freertos_task.hpp"
 
 /**********************************************************************************
 @file freertos_task.cc
