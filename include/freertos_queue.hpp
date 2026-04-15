@@ -193,14 +193,14 @@ public:
   /**
    * @brief Construct a new queue object
    *
-   * @param registred_name Name of the queue, which will be used to register it
+   * @param registered_name Name of the queue, which will be used to register it
    * in the queue registry. If nullptr, the queue will not be registered.
    */
-  explicit queue(const char *registred_name = nullptr)
+  explicit queue(const char *registered_name = nullptr)
       : m_queue{m_allocator.create()} {
     configASSERT(m_queue);
-    if (registred_name != nullptr) {
-      vQueueAddToRegistry(m_queue, registred_name);
+    if (registered_name != nullptr) {
+      vQueueAddToRegistry(m_queue, registered_name);
     }
   }
   queue(const queue &) = delete;
@@ -271,8 +271,7 @@ public:
    */
   BaseType_t send_isr(const T &item) {
     BaseType_t higher_priority_task_woken = pdFALSE;
-    return xQueueSendFromISR(m_queue, &item,
-                             &higher_priority_task_woken);
+    return xQueueSendFromISR(m_queue, &item, &higher_priority_task_woken);
   }
   /**
    * @brief Posts an item to the back of a queue.
