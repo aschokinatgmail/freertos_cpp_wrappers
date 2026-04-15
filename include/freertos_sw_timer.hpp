@@ -149,7 +149,7 @@ public:
                  const std::chrono::duration<Rep, Period> &period,
                  UBaseType_t auto_reload, timer_callback_t &&callback)
       : timer{name,
-              static_cast<TickType_t>(
+              pdMS_TO_TICKS(
                   std::chrono::duration_cast<std::chrono::milliseconds>(period)
                       .count()),
               auto_reload, std::move(callback)} {}
@@ -181,12 +181,8 @@ public:
    */
   ~timer(void) {
     if (m_timer) {
-      auto rc = xTimerDelete(m_timer, portMAX_DELAY);
-      if (rc == pdPASS) {
-        while (xTimerIsTimerActive(m_timer) != pdFALSE) {
-          vTaskDelay(pdMS_TO_TICKS(1));
-        }
-      }
+      xTimerDelete(m_timer, portMAX_DELAY);
+      m_timer = nullptr;
     }
   }
 
@@ -195,26 +191,23 @@ public:
     if (this != &src) {
       if (m_timer) {
         xTimerDelete(m_timer, portMAX_DELAY);
+        m_timer = nullptr;
       }
-      auto rc = xTimerStop(src.m_timer, portMAX_DELAY);
-      if (rc == pdPASS) {
-        while (xTimerIsTimerActive(src.m_timer) != pdFALSE) {
-          vTaskDelay(pdMS_TO_TICKS(1));
-        }
-        auto name = pcTimerGetName(src.m_timer);
-        auto period = xTimerGetPeriod(src.m_timer);
-        auto auto_reload = uxTimerGetReloadMode(src.m_timer);
-        rc = xTimerDelete(src.m_timer, portMAX_DELAY);
+      if (src.m_timer) {
+        auto rc = xTimerStop(src.m_timer, portMAX_DELAY);
         if (rc == pdPASS) {
-          while (xTimerIsTimerActive(src.m_timer) != pdFALSE) {
-            vTaskDelay(pdMS_TO_TICKS(1));
-          }
+          auto name = pcTimerGetName(src.m_timer);
+          auto period = xTimerGetPeriod(src.m_timer);
+          auto auto_reload = uxTimerGetReloadMode(src.m_timer);
+          bool was_started = src.m_started;
+          xTimerDelete(src.m_timer, portMAX_DELAY);
           src.m_timer = nullptr;
           m_callback = std::move(src.m_callback);
+          m_started = false;
           m_timer = m_allocator.create(name, period, auto_reload, this,
                                        callback_wrapper);
           if (m_timer) {
-            if (src.m_started) {
+            if (was_started) {
               rc = xTimerStart(m_timer, portMAX_DELAY);
               if (rc == pdPASS) {
                 m_started = true;
@@ -255,8 +248,9 @@ public:
    */
   template <typename Rep, typename Period>
   BaseType_t start(const std::chrono::duration<Rep, Period> &timeout) {
-    return start(
-        std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count());
+    return start(pdMS_TO_TICKS(
+        std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
+            .count()));
   }
   /**
    * @brief Method to start the timer from an ISR.
@@ -314,8 +308,9 @@ public:
    */
   template <typename Rep, typename Period>
   BaseType_t stop(const std::chrono::duration<Rep, Period> &timeout) {
-    return stop(
-        std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count());
+    return stop(pdMS_TO_TICKS(
+        std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
+            .count()));
   }
   /**
    * @brief Method to stop the timer from an ISR.
@@ -369,8 +364,9 @@ public:
    */
   template <typename Rep, typename Period>
   BaseType_t reset(const std::chrono::duration<Rep, Period> &timeout) {
-    return reset(
-        std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count());
+    return reset(pdMS_TO_TICKS(
+        std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
+            .count()));
   }
   /**
    * @brief Method to reset the timer from an ISR.
@@ -432,9 +428,12 @@ public:
   period(const std::chrono::duration<RepPeriod, PeriodPeriod> &new_period,
          const std::chrono::duration<RepTimeout, PeriodTimeout> &timeout) {
     return period(
-        std::chrono::duration_cast<std::chrono::milliseconds>(new_period)
-            .count(),
-        std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count());
+        pdMS_TO_TICKS(
+            std::chrono::duration_cast<std::chrono::milliseconds>(new_period)
+                .count()),
+        pdMS_TO_TICKS(
+            std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
+                .count()));
   }
   /**
    * @brief Method to change the period of the timer from an ISR.
@@ -470,8 +469,9 @@ public:
   BaseType_t period_isr(const std::chrono::duration<Rep, Period> &new_period,
                         BaseType_t &high_priority_task_woken) {
     return period_isr(
-        std::chrono::duration_cast<std::chrono::milliseconds>(new_period)
-            .count(),
+        pdMS_TO_TICKS(
+            std::chrono::duration_cast<std::chrono::milliseconds>(new_period)
+                .count()),
         high_priority_task_woken);
   }
   /**
@@ -498,9 +498,9 @@ public:
    */
   template <typename Rep, typename Period>
   BaseType_t period_isr(const std::chrono::duration<Rep, Period> &new_period) {
-    return period_isr(
+    return period_isr(pdMS_TO_TICKS(
         std::chrono::duration_cast<std::chrono::milliseconds>(new_period)
-            .count());
+            .count()));
   }
   /**
    * @brief Method to change the period of the timer from an ISR.

@@ -185,7 +185,7 @@ public:
                         const std::chrono::duration<Rep, Period> &timeout) {
     return wait_bits(
         bits_to_wait_for, clear_on_exit, wait_for_all_bits,
-        static_cast<TickType_t>(
+        pdMS_TO_TICKS(
             std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
                 .count()));
   }
@@ -226,7 +226,7 @@ public:
                    const std::chrono::duration<Rep, Period> &timeout) {
     return sync(
         bits_to_set, bits_to_wait_for,
-        static_cast<TickType_t>(
+        pdMS_TO_TICKS(
             std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
                 .count()));
   }

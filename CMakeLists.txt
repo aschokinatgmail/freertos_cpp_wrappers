@@ -1,9 +1,26 @@
 cmake_minimum_required(VERSION 3.14)
-project(freertos_cpp_wrappers)
+project(freertos_cpp_wrappers
+    VERSION 1.0.2
+    LANGUAGES CXX
+)
 
-# Set C++ standard
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Compiler warning flags
+add_compile_options(
+    -Wall -Wextra -Wpedantic
+    -Wshadow -Wconversion -Wsign-conversion
+    -Wold-style-cast -Wnull-dereference
+    -Wdouble-promotion -Wformat=2
+    -Wundef -Werror=return-type
+)
+
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/freertos_version.hpp.in
+    ${CMAKE_CURRENT_BINARY_DIR}/include/freertos_version.hpp
+    @ONLY
+)
 
 # Add option for coverage
 option(ENABLE_COVERAGE "Enable code coverage" OFF)
@@ -40,6 +57,7 @@ enable_testing()
 
 # Include directories
 include_directories(include)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
 # Note: mocks directory will be added only to test targets to avoid clang-tidy issues
 
 # Add the library source files - include all modules for static analysis
@@ -57,6 +75,11 @@ add_library(freertos_cpp_wrappers
 
 # Add include directories to the library target
 target_include_directories(freertos_cpp_wrappers PRIVATE tests/mocks)
+
+# For coverage builds, disable exceptions for library code to reduce GCC artifact branches
+if(ENABLE_COVERAGE)
+    target_compile_options(freertos_cpp_wrappers PRIVATE -fno-exceptions)
+endif()
 
 # =============================================================================
 # CODE FORMATTING CONFIGURATION (clang-format)

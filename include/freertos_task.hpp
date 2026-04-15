@@ -305,7 +305,10 @@ public:
    * @brief Terminates the task.
    *
    */
-  void terminate(void) { vTaskDelete(m_hTask); }
+  void terminate(void) {
+    vTaskDelete(m_hTask);
+    m_hTask = nullptr;
+  }
 #if INCLUDE_xTaskAbortDelay
   /**
    * @brief Abort the delay of the task.
@@ -452,8 +455,9 @@ public:
                        std::chrono::duration<Rep, Period> duration) {
     return notify_take(
         clearCountOnExit,
-        std::chrono::duration_cast<std::chrono::milliseconds>(duration)
-            .count());
+        pdMS_TO_TICKS(
+            std::chrono::duration_cast<std::chrono::milliseconds>(duration)
+                .count()));
   }
   /**
    * @brief Notify the task.
@@ -537,8 +541,9 @@ public:
                          std::chrono::duration<Rep, Period> duration) {
     return notify_wait(
         ulBitsToClearOnEntry, ulBitsToClearOnExit, notification_value,
-        std::chrono::duration_cast<std::chrono::milliseconds>(duration)
-            .count());
+        pdMS_TO_TICKS(
+            std::chrono::duration_cast<std::chrono::milliseconds>(duration)
+                .count()));
   }
   /**
    * @brief Clear the notification state.
@@ -882,8 +887,9 @@ public:
                        std::chrono::duration<Rep, Period> duration) {
     return notify_take(
         clearCountOnExit,
-        std::chrono::duration_cast<std::chrono::milliseconds>(duration)
-            .count());
+        pdMS_TO_TICKS(
+            std::chrono::duration_cast<std::chrono::milliseconds>(duration)
+                .count()));
   }
   /**
    * @brief Notify the task.
@@ -991,8 +997,9 @@ public:
                          std::chrono::duration<Rep, Period> duration) {
     return notify_wait(
         ulBitsToClearOnEntry, ulBitsToClearOnExit, notification_value,
-        std::chrono::duration_cast<std::chrono::milliseconds>(duration)
-            .count());
+        pdMS_TO_TICKS(
+            std::chrono::duration_cast<std::chrono::milliseconds>(duration)
+                .count()));
   }
   /**
    * @brief Clear the notification state.
@@ -1031,8 +1038,8 @@ void delay(TickType_t ticks);
  */
 template <typename Rep, typename Period>
 void delay(std::chrono::duration<Rep, Period> duration) {
-  delay(
-      std::chrono::duration_cast<std::chrono::milliseconds>(duration).count());
+  delay(pdMS_TO_TICKS(
+      std::chrono::duration_cast<std::chrono::milliseconds>(duration).count()));
 }
 
 /**
@@ -1059,9 +1066,10 @@ void delay_until(TickType_t &previousWakeTime, TickType_t period);
 template <typename Rep, typename Period>
 void delay_until(TickType_t &previousWakeTime,
                  std::chrono::duration<Rep, Period> period) {
-  delay_until(
-      previousWakeTime,
-      std::chrono::duration_cast<std::chrono::milliseconds>(period).count());
+  delay_until(previousWakeTime,
+              pdMS_TO_TICKS(
+                  std::chrono::duration_cast<std::chrono::milliseconds>(period)
+                      .count()));
 }
 
 /**

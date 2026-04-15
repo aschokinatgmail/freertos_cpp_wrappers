@@ -2,7 +2,7 @@
 @file freertos.hpp
 @author Andrey V. Shchekin <aschokin@gmail.com>
 @brief FreeRTOS C++ Wrappers Library main header
-@version 0.1
+@version 1.0.2
 @date 2024-04-12
 
 The MIT License (MIT)
@@ -35,6 +35,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #ifndef __cplusplus
 #error "This header is for C++ only"
 #endif
+
+#include "freertos_version.hpp"
 
 #include "freertos_event_group.hpp"
 #include "freertos_message_buffer.hpp"
