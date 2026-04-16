@@ -38,6 +38,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // Include the module under test
 #include "freertos_event_group.hpp"
 
+#include "../include/freertos_isr_result.hpp"
+
 using ::testing::_;
 using ::testing::InSequence;
 using ::testing::NotNull;
@@ -180,13 +182,12 @@ TEST_F(FreeRTOSEventGroupTest, EventGroupSetBitsISR) {
   EXPECT_CALL(*mock, xEventGroupSetBitsFromISR(mock_event_group_handle, 0x0A,
                                                NotNull()))
       .WillOnce(Return(0x0A));
-  EXPECT_CALL(*mock, portYIELD_FROM_ISR(_));
   EXPECT_CALL(*mock, vEventGroupDelete(mock_event_group_handle));
 
   freertos::da::event_group event_group;
 
-  auto result = event_group.set_bits_isr(0x0A);
-  EXPECT_EQ(result, 0x0A);
+  auto r = event_group.set_bits_isr(0x0A);
+  EXPECT_EQ(r.result, 0x0A);
 }
 
 TEST_F(FreeRTOSEventGroupTest, EventGroupClearBits) {
@@ -562,12 +563,11 @@ TEST_F(FreeRTOSEventGroupTest, EventGroupSetBitsIsrNoArg_BranchCoverage) {
   EXPECT_CALL(*mock, xEventGroupSetBitsFromISR(mock_event_group_handle, 0x0F,
                                                NotNull()))
       .WillOnce(Return(0x0F));
-  EXPECT_CALL(*mock, portYIELD_FROM_ISR(_));
   EXPECT_CALL(*mock, vEventGroupDelete(mock_event_group_handle));
 
   freertos::da::event_group event_group;
-  auto result = event_group.set_bits_isr(0x0F);
-  EXPECT_EQ(result, 0x0F);
+  auto r = event_group.set_bits_isr(0x0F);
+  EXPECT_EQ(r.result, 0x0F);
 }
 
 TEST_F(FreeRTOSEventGroupTest, EventGroupWaitBitsChronoOnly_BranchCoverage) {
@@ -603,12 +603,11 @@ TEST_F(FreeRTOSEventGroupTest, EventGroupSetBitsIsrNoWoken_BranchCoverage) {
   EXPECT_CALL(*mock,
               xEventGroupSetBitsFromISR(mock_event_group_handle, 0x0F, _))
       .WillOnce(Return(pdTRUE));
-  EXPECT_CALL(*mock, portYIELD_FROM_ISR(_));
   EXPECT_CALL(*mock, vEventGroupDelete(mock_event_group_handle));
 
   freertos::da::event_group event_group;
-  auto result = event_group.set_bits_isr(0x0F);
-  EXPECT_EQ(result, pdTRUE);
+  auto r = event_group.set_bits_isr(0x0F);
+  EXPECT_EQ(r.result, pdTRUE);
 }
 
 TEST_F(FreeRTOSEventGroupTest, EventGroupWaitBitsChronoFail_BranchCoverage) {
@@ -623,4 +622,48 @@ TEST_F(FreeRTOSEventGroupTest, EventGroupWaitBitsChronoFail_BranchCoverage) {
   auto result = event_group.wait_bits(0xFF, pdTRUE, pdFALSE,
                                       std::chrono::milliseconds(500));
   EXPECT_EQ(result, 0x00);
+}
+
+// =============================================================================
+// Move and Swap Tests
+// =============================================================================
+
+TEST_F(FreeRTOSEventGroupTest, EventGroupMoveConstruction) {
+  EXPECT_CALL(*mock, xEventGroupCreate())
+      .WillOnce(Return(mock_event_group_handle));
+  EXPECT_CALL(*mock, vEventGroupDelete(mock_event_group_handle));
+
+  freertos::event_group<freertos::dynamic_event_group_allocator> eg1;
+  freertos::event_group<freertos::dynamic_event_group_allocator> eg2(
+      std::move(eg1));
+}
+
+TEST_F(FreeRTOSEventGroupTest, EventGroupMoveAssignment) {
+  EventGroupHandle_t handle1 = reinterpret_cast<EventGroupHandle_t>(0x1111);
+  EventGroupHandle_t handle2 = reinterpret_cast<EventGroupHandle_t>(0x2222);
+
+  EXPECT_CALL(*mock, xEventGroupCreate())
+      .WillOnce(Return(handle1))
+      .WillOnce(Return(handle2));
+  EXPECT_CALL(*mock, vEventGroupDelete(handle1));
+  EXPECT_CALL(*mock, vEventGroupDelete(handle2));
+
+  freertos::event_group<freertos::dynamic_event_group_allocator> eg1;
+  freertos::event_group<freertos::dynamic_event_group_allocator> eg2;
+  eg1 = std::move(eg2);
+}
+
+TEST_F(FreeRTOSEventGroupTest, EventGroupSwap) {
+  EventGroupHandle_t handle1 = reinterpret_cast<EventGroupHandle_t>(0x1111);
+  EventGroupHandle_t handle2 = reinterpret_cast<EventGroupHandle_t>(0x2222);
+
+  EXPECT_CALL(*mock, xEventGroupCreate())
+      .WillOnce(Return(handle1))
+      .WillOnce(Return(handle2));
+  EXPECT_CALL(*mock, vEventGroupDelete(handle1));
+  EXPECT_CALL(*mock, vEventGroupDelete(handle2));
+
+  freertos::event_group<freertos::dynamic_event_group_allocator> eg1;
+  freertos::event_group<freertos::dynamic_event_group_allocator> eg2;
+  eg1.swap(eg2);
 }

@@ -36,10 +36,12 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #error "This header is for C++ only"
 #endif
 
+#include "freertos_isr_result.hpp"
 #include <FreeRTOS.h>
 #include <array>
 #include <chrono>
 #include <message_buffer.h>
+#include <utility>
 
 namespace freertos {
 
@@ -105,7 +107,10 @@ public:
     configASSERT(m_message_buffer);
   }
   message_buffer(const message_buffer &) = delete;
-  message_buffer(message_buffer &&src) = delete;
+  message_buffer(message_buffer &&src) noexcept
+      : m_message_buffer(src.m_message_buffer) {
+    src.m_message_buffer = nullptr;
+  }
   /**
    * @brief Destruct the message buffer object and delete the message buffer
    * kernel object instance if it was created.
@@ -118,7 +123,19 @@ public:
   }
 
   message_buffer &operator=(const message_buffer &) = delete;
-  message_buffer &operator=(message_buffer &&src) = delete;
+  message_buffer &operator=(message_buffer &&src) noexcept {
+    if (this != &src) {
+      swap(src);
+    }
+    return *this;
+  }
+
+  void swap(message_buffer &other) noexcept {
+    using std::swap;
+    swap(m_message_buffer, other.m_message_buffer);
+  }
+
+  friend void swap(message_buffer &a, message_buffer &b) noexcept { a.swap(b); }
 
   /**
    * @brief Method sends a discret message to the message buffer.
@@ -186,6 +203,39 @@ public:
         pdMS_TO_TICKS(
             std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
                 .count()));
+  }
+  /**
+   * @brief Send a discrete message to the message buffer from an ISR.
+   * @ref https://www.freertos.org/xMessageBufferSendFromISR.html
+   *
+   * @param data A pointer to the message data to be copied into the message
+   * buffer.
+   * @param data_size The number of bytes to copy into the message buffer.
+   * @return isr_result<size_t> result containing the number of bytes sent and
+   * the higher_priority_task_woken flag.
+   */
+  isr_result<size_t> send_isr(const void *data, size_t data_size) {
+    isr_result<size_t> result{0, pdFALSE};
+    result.result = xMessageBufferSendFromISR(
+        m_message_buffer, data, data_size, &result.higher_priority_task_woken);
+    return result;
+  }
+  /**
+   * @brief Receive a discrete message from the message buffer from an ISR.
+   * @ref https://www.freertos.org/xMessageBufferReceiveFromISR.html
+   *
+   * @param data A pointer to the buffer into which the received message will be
+   * copied.
+   * @param buffer_size The size of the buffer pointed to by the data parameter.
+   * @return isr_result<size_t> result containing the number of bytes received
+   * and the higher_priority_task_woken flag.
+   */
+  isr_result<size_t> receive_isr(void *data, size_t buffer_size) {
+    isr_result<size_t> result{0, pdFALSE};
+    result.result =
+        xMessageBufferReceiveFromISR(m_message_buffer, data, buffer_size,
+                                     &result.higher_priority_task_woken);
+    return result;
   }
   /**
    * @brief Method returning the number of bytes available in the buffer.

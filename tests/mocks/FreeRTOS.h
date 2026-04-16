@@ -415,6 +415,8 @@ public:
               (TimerHandle_t xTimer, UBaseType_t uxAutoReload));
   MOCK_METHOD(const char *, pcTimerGetName, (TimerHandle_t xTimer));
   MOCK_METHOD(void *, pvTimerGetTimerID, (TimerHandle_t xTimer));
+  MOCK_METHOD(void, vTimerSetTimerID,
+              (TimerHandle_t xTimer, void *pvNewTimerID));
 
   // Message Buffer operations
   MOCK_METHOD(MessageBufferHandle_t, xMessageBufferCreate,
@@ -651,6 +653,7 @@ UBaseType_t uxTimerGetReloadMode(TimerHandle_t xTimer);
 void vTimerSetReloadMode(TimerHandle_t xTimer, UBaseType_t uxAutoReload);
 const char *pcTimerGetName(TimerHandle_t xTimer);
 void *pvTimerGetTimerID(TimerHandle_t xTimer);
+void vTimerSetTimerID(TimerHandle_t xTimer, void *pvNewTimerID);
 
 // Message Buffer functions
 MessageBufferHandle_t xMessageBufferCreate(size_t xBufferSizeBytes);

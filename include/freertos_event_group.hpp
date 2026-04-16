@@ -36,9 +36,11 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #error "This header is for C++ only"
 #endif
 
+#include "freertos_isr_result.hpp"
 #include <FreeRTOS.h>
 #include <chrono>
 #include <event_groups.h>
+#include <utility>
 
 namespace freertos {
 
@@ -95,7 +97,10 @@ public:
     configASSERT(m_event_group);
   }
   event_group(const event_group &) = delete;
-  event_group(event_group &&other) = delete;
+  event_group(event_group &&other) noexcept
+      : m_event_group(other.m_event_group) {
+    other.m_event_group = nullptr;
+  }
   /**
    * @brief Destruct the event group object and delete the event group instance
    * if it was created.
@@ -108,7 +113,19 @@ public:
   }
 
   event_group &operator=(const event_group &) = delete;
-  event_group &operator=(event_group &&other) = delete;
+  event_group &operator=(event_group &&other) noexcept {
+    if (this != &other) {
+      swap(other);
+    }
+    return *this;
+  }
+
+  void swap(event_group &other) noexcept {
+    using std::swap;
+    swap(m_event_group, other.m_event_group);
+  }
+
+  friend void swap(event_group &a, event_group &b) noexcept { a.swap(b); }
 
   /**
    * @brief Method to get the handle of the event group.
@@ -133,14 +150,14 @@ public:
    * @ref https://www.freertos.org/xEventGroupSetBitsFromISR.html
    *
    * @param bits_to_set bits to set
-   * @return EventBits_t bits set
+   * @return isr_result<EventBits_t> result with bits set and higher priority
+   * task woken flag
    */
-  EventBits_t set_bits_isr(const EventBits_t bits_to_set) {
-    BaseType_t higher_priority_task_woken = pdFALSE;
-    const EventBits_t bits_set = xEventGroupSetBitsFromISR(
-        m_event_group, bits_to_set, &higher_priority_task_woken);
-    portYIELD_FROM_ISR(higher_priority_task_woken);
-    return bits_set;
+  isr_result<EventBits_t> set_bits_isr(const EventBits_t bits_to_set) {
+    isr_result<EventBits_t> result{0, pdFALSE};
+    result.result = xEventGroupSetBitsFromISR(
+        m_event_group, bits_to_set, &result.higher_priority_task_woken);
+    return result;
   }
   /**
    * @brief Method to clear bits in the event group.

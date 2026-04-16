@@ -43,6 +43,7 @@
 #include <vector>
 
 // Include mocks before the actual headers
+#include "../include/freertos_isr_result.hpp"
 #include "FreeRTOS.h"
 #include "freertos_stream_buffer.hpp"
 
@@ -307,10 +308,9 @@ TEST_F(FreeRTOSStreamBufferTest, StreamBufferSendISR) {
 
   freertos::da::stream_buffer<128> buffer;
   uint8_t data[8] = {0xA1, 0xB2, 0xC3, 0xD4, 0xE5, 0xF6, 0x07, 0x18};
-  BaseType_t higher_priority_task_woken = pdFALSE;
 
-  auto result = buffer.send_isr(data, sizeof(data), higher_priority_task_woken);
-  EXPECT_EQ(result, 8);
+  auto result = buffer.send_isr(data, sizeof(data));
+  EXPECT_EQ(result.result, 8);
 }
 
 TEST_F(FreeRTOSStreamBufferTest, StreamBufferSendISRWithoutWoken) {
@@ -325,7 +325,7 @@ TEST_F(FreeRTOSStreamBufferTest, StreamBufferSendISRWithoutWoken) {
   uint32_t data = 0x12345678;
 
   auto result = buffer.send_isr(&data, sizeof(data));
-  EXPECT_EQ(result, 4);
+  EXPECT_EQ(result.result, 4);
 }
 
 TEST_F(FreeRTOSStreamBufferTest, StreamBufferSendISRIterators) {
@@ -338,11 +338,9 @@ TEST_F(FreeRTOSStreamBufferTest, StreamBufferSendISRIterators) {
 
   freertos::da::stream_buffer<512> buffer;
   std::string data = "Hello World!";
-  BaseType_t higher_priority_task_woken = pdFALSE;
 
-  auto result =
-      buffer.send_isr(data.begin(), data.end(), higher_priority_task_woken);
-  EXPECT_EQ(result, 12);
+  auto result = buffer.send_isr(data.begin(), data.end());
+  EXPECT_EQ(result.result, 12);
 }
 
 // =============================================================================
@@ -424,11 +422,9 @@ TEST_F(FreeRTOSStreamBufferTest, StreamBufferReceiveISR) {
 
   freertos::da::stream_buffer<128> buffer;
   uint8_t data[8];
-  BaseType_t higher_priority_task_woken = pdFALSE;
 
-  auto result =
-      buffer.receive_isr(data, sizeof(data), higher_priority_task_woken);
-  EXPECT_EQ(result, 8);
+  auto result = buffer.receive_isr(data, sizeof(data));
+  EXPECT_EQ(result.result, 8);
 }
 
 TEST_F(FreeRTOSStreamBufferTest, StreamBufferReceiveISRWithoutWoken) {
@@ -443,7 +439,7 @@ TEST_F(FreeRTOSStreamBufferTest, StreamBufferReceiveISRWithoutWoken) {
   uint32_t data;
 
   auto result = buffer.receive_isr(&data, sizeof(data));
-  EXPECT_EQ(result, 4);
+  EXPECT_EQ(result.result, 4);
 }
 
 // =============================================================================
@@ -833,17 +829,15 @@ TEST_F(FreeRTOSStreamBufferTest, StreamBufferAPICompleteness) {
   uint8_t receive_data[10];
   uint8_t isr_data[5] = {0xA, 0xB, 0xC, 0xD, 0xE};
   uint8_t isr_receive[5];
-  BaseType_t higher_priority_task_woken = pdFALSE;
 
   // Test all API methods
   EXPECT_EQ(buffer.send(send_data, sizeof(send_data)), 10);
   EXPECT_EQ(buffer.receive(receive_data, sizeof(receive_data)), 10);
-  EXPECT_EQ(
-      buffer.send_isr(isr_data, sizeof(isr_data), higher_priority_task_woken),
-      5);
-  EXPECT_EQ(buffer.receive_isr(isr_receive, sizeof(isr_receive),
-                               higher_priority_task_woken),
-            5);
+  auto send_isr_result = buffer.send_isr(isr_data, sizeof(isr_data));
+  EXPECT_EQ(send_isr_result.result, 5);
+  auto receive_isr_result =
+      buffer.receive_isr(isr_receive, sizeof(isr_receive));
+  EXPECT_EQ(receive_isr_result.result, 5);
   EXPECT_EQ(buffer.available(), 100);
   EXPECT_EQ(buffer.free(), 924);
   EXPECT_EQ(buffer.empty(), pdFALSE);
@@ -868,7 +862,7 @@ TEST_F(FreeRTOSStreamBufferTest, StreamBufferSendIsrNoArg_BranchCoverage) {
   freertos::da::stream_buffer<128> buffer;
   uint32_t data = 0xDEADBEEF;
   auto result = buffer.send_isr(&data, sizeof(data));
-  EXPECT_EQ(result, 4);
+  EXPECT_EQ(result.result, 4);
 }
 
 TEST_F(FreeRTOSStreamBufferTest, StreamBufferReceiveIsrNoArg_BranchCoverage) {
@@ -882,7 +876,7 @@ TEST_F(FreeRTOSStreamBufferTest, StreamBufferReceiveIsrNoArg_BranchCoverage) {
   freertos::da::stream_buffer<256> buffer;
   uint8_t data[8];
   auto result = buffer.receive_isr(data, sizeof(data));
-  EXPECT_EQ(result, 8);
+  EXPECT_EQ(result.result, 8);
 }
 
 TEST_F(FreeRTOSStreamBufferTest,
@@ -897,7 +891,7 @@ TEST_F(FreeRTOSStreamBufferTest,
   freertos::da::stream_buffer<512> buffer;
   std::string data = "Hello";
   auto result = buffer.send_isr(data.begin(), data.end());
-  EXPECT_EQ(result, 5);
+  EXPECT_EQ(result.result, 5);
 }
 
 TEST_F(FreeRTOSStreamBufferTest,
@@ -957,7 +951,7 @@ TEST_F(FreeRTOSStreamBufferTest, StreamBufferSendIsrNoWoken_BranchCoverage) {
 
   freertos::da::stream_buffer<64> buffer;
   auto result = buffer.send_isr(data, 4);
-  EXPECT_EQ(result, 4);
+  EXPECT_EQ(result.result, 4);
 }
 
 TEST_F(FreeRTOSStreamBufferTest,
@@ -972,7 +966,7 @@ TEST_F(FreeRTOSStreamBufferTest,
   freertos::da::stream_buffer<64> buffer;
   std::vector<uint8_t> data = {1, 2, 3};
   auto result = buffer.send_isr(data.begin(), data.end());
-  EXPECT_EQ(result, 3);
+  EXPECT_EQ(result.result, 3);
 }
 
 TEST_F(FreeRTOSStreamBufferTest, StreamBufferReceiveIsrNoWoken_BranchCoverage) {
@@ -986,7 +980,7 @@ TEST_F(FreeRTOSStreamBufferTest, StreamBufferReceiveIsrNoWoken_BranchCoverage) {
   freertos::da::stream_buffer<64> buffer;
   uint32_t data;
   auto result = buffer.receive_isr(&data, sizeof(data));
-  EXPECT_EQ(result, 4);
+  EXPECT_EQ(result.result, 4);
 }
 
 TEST_F(FreeRTOSStreamBufferTest, StreamBufferSendChrono_BranchCoverage) {
@@ -1016,4 +1010,53 @@ TEST_F(FreeRTOSStreamBufferTest, StreamBufferReceiveChrono_BranchCoverage) {
   auto result =
       buffer.receive(&data, sizeof(data), std::chrono::milliseconds(200));
   EXPECT_EQ(result, 4);
+}
+
+// =============================================================================
+// Move and Swap Tests
+// =============================================================================
+
+TEST_F(FreeRTOSStreamBufferTest, StreamBufferMoveConstruction) {
+  EXPECT_CALL(*mock, xStreamBufferCreate(64, 1))
+      .WillOnce(Return(mock_stream_buffer_handle));
+  EXPECT_CALL(*mock, vStreamBufferDelete(mock_stream_buffer_handle));
+
+  freertos::stream_buffer<64, freertos::dynamic_stream_buffer_allocator<64>>
+      sb1;
+  freertos::stream_buffer<64, freertos::dynamic_stream_buffer_allocator<64>>
+      sb2(std::move(sb1));
+}
+
+TEST_F(FreeRTOSStreamBufferTest, StreamBufferMoveAssignment) {
+  StreamBufferHandle_t handle1 = reinterpret_cast<StreamBufferHandle_t>(0x1111);
+  StreamBufferHandle_t handle2 = reinterpret_cast<StreamBufferHandle_t>(0x2222);
+
+  EXPECT_CALL(*mock, xStreamBufferCreate(64, 1))
+      .WillOnce(Return(handle1))
+      .WillOnce(Return(handle2));
+  EXPECT_CALL(*mock, vStreamBufferDelete(handle1));
+  EXPECT_CALL(*mock, vStreamBufferDelete(handle2));
+
+  freertos::stream_buffer<64, freertos::dynamic_stream_buffer_allocator<64>>
+      sb1;
+  freertos::stream_buffer<64, freertos::dynamic_stream_buffer_allocator<64>>
+      sb2;
+  sb1 = std::move(sb2);
+}
+
+TEST_F(FreeRTOSStreamBufferTest, StreamBufferSwap) {
+  StreamBufferHandle_t handle1 = reinterpret_cast<StreamBufferHandle_t>(0x1111);
+  StreamBufferHandle_t handle2 = reinterpret_cast<StreamBufferHandle_t>(0x2222);
+
+  EXPECT_CALL(*mock, xStreamBufferCreate(64, 1))
+      .WillOnce(Return(handle1))
+      .WillOnce(Return(handle2));
+  EXPECT_CALL(*mock, vStreamBufferDelete(handle1));
+  EXPECT_CALL(*mock, vStreamBufferDelete(handle2));
+
+  freertos::stream_buffer<64, freertos::dynamic_stream_buffer_allocator<64>>
+      sb1;
+  freertos::stream_buffer<64, freertos::dynamic_stream_buffer_allocator<64>>
+      sb2;
+  sb1.swap(sb2);
 }

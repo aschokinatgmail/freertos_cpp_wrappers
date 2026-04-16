@@ -38,6 +38,7 @@
 
 // Include mocks before the actual headers
 #include "FreeRTOS.h"
+#include "freertos_isr_result.hpp"
 #include "freertos_queue.hpp"
 
 using ::testing::_;
@@ -269,10 +270,9 @@ TEST_F(FreeRTOSQueueTest, QueueSendISR) {
       queue;
 
   uint32_t test_value = 0xDEADBEEF;
-  BaseType_t higher_priority_task_woken = pdFALSE;
 
-  auto result = queue.send_isr(test_value, higher_priority_task_woken);
-  EXPECT_EQ(result, pdPASS);
+  auto result = queue.send_isr(test_value);
+  EXPECT_EQ(result.result, pdPASS);
 }
 
 TEST_F(FreeRTOSQueueTest, QueueSendChronoTimeout) {
@@ -358,10 +358,9 @@ TEST_F(FreeRTOSQueueTest, QueueReceiveISR) {
   freertos::queue<6, float, freertos::dynamic_queue_allocator<6, float>> queue;
 
   float received_value;
-  BaseType_t higher_priority_task_woken = pdFALSE;
 
-  auto result = queue.receive_isr(received_value, higher_priority_task_woken);
-  EXPECT_EQ(result, pdPASS);
+  auto result = queue.receive_isr(received_value);
+  EXPECT_EQ(result.result, pdPASS);
 }
 
 TEST_F(FreeRTOSQueueTest, QueueReceiveChronoTimeout) {
@@ -432,10 +431,9 @@ TEST_F(FreeRTOSQueueTest, QueuePeekISR) {
       queue;
 
   double peeked_value;
-  BaseType_t higher_priority_task_woken = pdFALSE;
 
-  auto result = queue.peek_isr(peeked_value, higher_priority_task_woken);
-  EXPECT_EQ(result, pdPASS);
+  auto result = queue.peek_isr(peeked_value);
+  EXPECT_EQ(result.result, pdPASS);
 }
 
 // =============================================================================
@@ -576,10 +574,9 @@ TEST_F(FreeRTOSQueueTest, QueueOverwriteISR) {
       queue;
 
   uint16_t test_value = 0xFFFF;
-  BaseType_t higher_priority_task_woken = pdFALSE;
 
-  auto result = queue.overwrite_isr(test_value, higher_priority_task_woken);
-  EXPECT_EQ(result, pdPASS);
+  auto result = queue.overwrite_isr(test_value);
+  EXPECT_EQ(result.result, pdPASS);
 }
 
 // =============================================================================
@@ -954,21 +951,19 @@ TEST_F(FreeRTOSQueueTest, QueueISROperationsWithDifferentTypes) {
       queue;
 
   uint16_t test_value = 0xABCD;
-  BaseType_t higher_priority_task_woken = pdFALSE;
 
-  // Test send_isr with reference parameter
-  auto send_result = queue.send_isr(test_value, higher_priority_task_woken);
-  EXPECT_EQ(send_result, pdPASS);
+  // Test send_isr without reference parameter
+  auto send_result = queue.send_isr(test_value);
+  EXPECT_EQ(send_result.result, pdPASS);
 
   // Test receive_isr with reference parameter
   uint16_t received_value;
-  auto receive_result =
-      queue.receive_isr(received_value, higher_priority_task_woken);
-  EXPECT_EQ(receive_result, pdPASS);
+  auto receive_result = queue.receive_isr(received_value);
+  EXPECT_EQ(receive_result.result, pdPASS);
 
   // Test receive_isr returning optional (no reference parameter)
   auto optional_result = queue.receive_isr();
-  EXPECT_TRUE(optional_result.has_value());
+  EXPECT_TRUE(optional_result.result.has_value());
 }
 
 // =============================================================================
@@ -991,15 +986,14 @@ TEST_F(FreeRTOSQueueTest, QueueSendBackISROperations) {
       queue;
 
   uint32_t test_value = 0x12345678;
-  BaseType_t higher_priority_task_woken = pdFALSE;
 
-  // Test send_back_isr with reference parameter
-  auto result1 = queue.send_back_isr(test_value, higher_priority_task_woken);
-  EXPECT_EQ(result1, pdPASS);
+  // Test send_back_isr without reference parameter
+  auto result1 = queue.send_back_isr(test_value);
+  EXPECT_EQ(result1.result, pdPASS);
 
-  // Test send_back_isr without reference parameter (internal temp variable)
+  // Test send_back_isr without reference parameter (same overload now)
   auto result2 = queue.send_back_isr(test_value);
-  EXPECT_EQ(result2, pdPASS);
+  EXPECT_EQ(result2.result, pdPASS);
 }
 
 TEST_F(FreeRTOSQueueTest, QueueSendFrontISROperations) {
@@ -1007,9 +1001,7 @@ TEST_F(FreeRTOSQueueTest, QueueSendFrontISROperations) {
       .WillOnce(Return(mock_queue_handle));
   EXPECT_CALL(*mock,
               xQueueSendToFrontFromISR(mock_queue_handle, NotNull(), NotNull()))
-      .Times(2) // Called twice - once with ref param, once without (but with
-                // internal temp var)
-      .WillRepeatedly(Return(pdPASS));
+      .WillOnce(Return(pdPASS));
   EXPECT_CALL(*mock, pcQueueGetName(mock_queue_handle))
       .WillOnce(Return(nullptr));
   EXPECT_CALL(*mock, vQueueDelete(mock_queue_handle));
@@ -1018,15 +1010,10 @@ TEST_F(FreeRTOSQueueTest, QueueSendFrontISROperations) {
       queue;
 
   uint16_t test_value = 0xABCD;
-  BaseType_t higher_priority_task_woken = pdFALSE;
 
-  // Test send_front_isr with reference parameter
-  auto result1 = queue.send_front_isr(test_value, higher_priority_task_woken);
-  EXPECT_EQ(result1, pdPASS);
-
-  // Test send_front_isr without reference parameter (internal temp variable)
-  auto result2 = queue.send_front_isr(test_value);
-  EXPECT_EQ(result2, pdPASS);
+  // Test send_front_isr
+  auto result = queue.send_front_isr(test_value);
+  EXPECT_EQ(result.result, pdPASS);
 }
 
 TEST_F(FreeRTOSQueueTest, QueueMessagesWaitingISR) {
@@ -1066,7 +1053,7 @@ TEST_F(FreeRTOSQueueTest, ReceiveIsrOptionalEmptyOnFail_BranchCoverage) {
 
   freertos::queue<1, int, freertos::dynamic_queue_allocator<1, int>> q;
   auto result = q.receive_isr();
-  EXPECT_FALSE(result.has_value());
+  EXPECT_FALSE(result.result.has_value());
 }
 
 TEST_F(FreeRTOSQueueTest, ReceiveIsrOptionalWithValue_BranchCoverage) {
@@ -1080,7 +1067,7 @@ TEST_F(FreeRTOSQueueTest, ReceiveIsrOptionalWithValue_BranchCoverage) {
 
   freertos::queue<1, int, freertos::dynamic_queue_allocator<1, int>> q;
   auto result = q.receive_isr();
-  EXPECT_TRUE(result.has_value());
+  EXPECT_TRUE(result.result.has_value());
 }
 
 TEST_F(FreeRTOSQueueTest, PeekTickTimeoutFails_BranchCoverage) {
@@ -1136,7 +1123,7 @@ TEST_F(FreeRTOSQueueTest, PeekIsrEmpty_BranchCoverage) {
 
   freertos::queue<1, int, freertos::dynamic_queue_allocator<1, int>> q;
   auto result = q.peek_isr();
-  EXPECT_FALSE(result.has_value());
+  EXPECT_FALSE(result.result.has_value());
 }
 
 TEST_F(FreeRTOSQueueTest, PeekIsrWithValue_BranchCoverage) {
@@ -1150,7 +1137,7 @@ TEST_F(FreeRTOSQueueTest, PeekIsrWithValue_BranchCoverage) {
 
   freertos::queue<1, int, freertos::dynamic_queue_allocator<1, int>> q;
   auto result = q.peek_isr();
-  EXPECT_TRUE(result.has_value());
+  EXPECT_TRUE(result.result.has_value());
 }
 
 TEST_F(FreeRTOSQueueTest, OverwriteIsrNoWoken_BranchCoverage) {
@@ -1165,7 +1152,7 @@ TEST_F(FreeRTOSQueueTest, OverwriteIsrNoWoken_BranchCoverage) {
 
   freertos::queue<1, int, freertos::dynamic_queue_allocator<1, int>> q;
   auto rc = q.overwrite_isr(val);
-  EXPECT_EQ(rc, pdPASS);
+  EXPECT_EQ(rc.result, pdPASS);
 }
 
 TEST_F(FreeRTOSQueueTest, SendBackChrono_BranchCoverage) {
@@ -1251,9 +1238,8 @@ TEST_F(FreeRTOSQueueTest, PeekIsrWithRefFails_BranchCoverage) {
 
   freertos::queue<1, int, freertos::dynamic_queue_allocator<1, int>> q;
   int item = 0;
-  BaseType_t woken = pdFALSE;
-  auto rc = q.peek_isr(item, woken);
-  EXPECT_EQ(rc, pdFALSE);
+  auto rc = q.peek_isr(item);
+  EXPECT_EQ(rc.result, pdFALSE);
 }
 
 TEST_F(FreeRTOSQueueTest, ReceiveIsrWithRefOnly_BranchCoverage) {
@@ -1268,7 +1254,7 @@ TEST_F(FreeRTOSQueueTest, ReceiveIsrWithRefOnly_BranchCoverage) {
   freertos::queue<1, int, freertos::dynamic_queue_allocator<1, int>> q;
   int item = 0;
   auto rc = q.receive_isr(item);
-  EXPECT_EQ(rc, pdPASS);
+  EXPECT_EQ(rc.result, pdPASS);
 }
 
 TEST_F(FreeRTOSQueueTest, PeekIsrNoWoken_BranchCoverage) {
@@ -1283,7 +1269,7 @@ TEST_F(FreeRTOSQueueTest, PeekIsrNoWoken_BranchCoverage) {
   freertos::queue<1, int, freertos::dynamic_queue_allocator<1, int>> q;
   int item = 0;
   auto rc = q.peek_isr(item);
-  EXPECT_EQ(rc, pdPASS);
+  EXPECT_EQ(rc.result, pdPASS);
 }
 
 TEST_F(FreeRTOSQueueTest, SendChrono_BranchCoverage) {
@@ -1341,7 +1327,7 @@ TEST_F(FreeRTOSQueueTest, SendIsrNoWoken_BranchCoverage) {
   freertos::queue<1, int, freertos::dynamic_queue_allocator<1, int>> q;
   int val = 42;
   auto result = q.send_isr(val);
-  EXPECT_EQ(result, pdPASS);
+  EXPECT_EQ(result.result, pdPASS);
 }
 
 TEST_F(FreeRTOSQueueTest, SendBackIsrNoWoken_BranchCoverage) {
@@ -1356,7 +1342,7 @@ TEST_F(FreeRTOSQueueTest, SendBackIsrNoWoken_BranchCoverage) {
   freertos::queue<1, int, freertos::dynamic_queue_allocator<1, int>> q;
   int val = 42;
   auto result = q.send_back_isr(val);
-  EXPECT_EQ(result, pdPASS);
+  EXPECT_EQ(result.result, pdPASS);
 }
 
 TEST_F(FreeRTOSQueueTest, SendFrontIsrNoWoken_BranchCoverage) {
@@ -1371,7 +1357,7 @@ TEST_F(FreeRTOSQueueTest, SendFrontIsrNoWoken_BranchCoverage) {
   freertos::queue<1, int, freertos::dynamic_queue_allocator<1, int>> q;
   int val = 42;
   auto result = q.send_front_isr(val);
-  EXPECT_EQ(result, pdPASS);
+  EXPECT_EQ(result.result, pdPASS);
 }
 
 TEST_F(FreeRTOSQueueTest, OverwriteIsrNoArg_BranchCoverage) {
@@ -1386,7 +1372,7 @@ TEST_F(FreeRTOSQueueTest, OverwriteIsrNoArg_BranchCoverage) {
   freertos::queue<1, int, freertos::dynamic_queue_allocator<1, int>> q;
   int val = 42;
   auto result = q.overwrite_isr(val);
-  EXPECT_EQ(result, pdPASS);
+  EXPECT_EQ(result.result, pdPASS);
 }
 
 TEST_F(FreeRTOSQueueTest, ReceiveIsrNoWokenEmpty_BranchCoverage) {
@@ -1400,7 +1386,7 @@ TEST_F(FreeRTOSQueueTest, ReceiveIsrNoWokenEmpty_BranchCoverage) {
 
   freertos::queue<1, int, freertos::dynamic_queue_allocator<1, int>> q;
   auto result = q.receive_isr();
-  EXPECT_FALSE(result.has_value());
+  EXPECT_FALSE(result.result.has_value());
 }
 
 TEST_F(FreeRTOSQueueTest, ReceiveIsrNoWokenSuccess_BranchCoverage) {
@@ -1414,7 +1400,7 @@ TEST_F(FreeRTOSQueueTest, ReceiveIsrNoWokenSuccess_BranchCoverage) {
 
   freertos::queue<1, int, freertos::dynamic_queue_allocator<1, int>> q;
   auto result = q.receive_isr();
-  EXPECT_TRUE(result.has_value());
+  EXPECT_TRUE(result.result.has_value());
 }
 
 TEST_F(FreeRTOSQueueTest, ReceiveIsrItemNoWoken_BranchCoverage) {
@@ -1429,7 +1415,7 @@ TEST_F(FreeRTOSQueueTest, ReceiveIsrItemNoWoken_BranchCoverage) {
   freertos::queue<1, int, freertos::dynamic_queue_allocator<1, int>> q;
   int val;
   auto result = q.receive_isr(val);
-  EXPECT_EQ(result, pdPASS);
+  EXPECT_EQ(result.result, pdPASS);
 }
 
 TEST_F(FreeRTOSQueueTest, PeekOptionalFail_BranchCoverage) {
@@ -1486,7 +1472,7 @@ TEST_F(FreeRTOSQueueTest, PeekIsrItemNoWoken_BranchCoverage) {
   freertos::queue<1, int, freertos::dynamic_queue_allocator<1, int>> q;
   int val;
   auto result = q.peek_isr(val);
-  EXPECT_EQ(result, pdPASS);
+  EXPECT_EQ(result.result, pdPASS);
 }
 
 TEST_F(FreeRTOSQueueTest, PeekIsrOptionalSuccess_BranchCoverage) {
@@ -1500,7 +1486,7 @@ TEST_F(FreeRTOSQueueTest, PeekIsrOptionalSuccess_BranchCoverage) {
 
   freertos::queue<1, int, freertos::dynamic_queue_allocator<1, int>> q;
   auto result = q.peek_isr();
-  EXPECT_TRUE(result.has_value());
+  EXPECT_TRUE(result.result.has_value());
 }
 
 TEST_F(FreeRTOSQueueTest, PeekIsrOptionalFail_BranchCoverage) {
@@ -1514,7 +1500,7 @@ TEST_F(FreeRTOSQueueTest, PeekIsrOptionalFail_BranchCoverage) {
 
   freertos::queue<1, int, freertos::dynamic_queue_allocator<1, int>> q;
   auto result = q.peek_isr();
-  EXPECT_FALSE(result.has_value());
+  EXPECT_FALSE(result.result.has_value());
 }
 
 TEST_F(FreeRTOSQueueTest, SendChronoOverload_BranchCoverage) {
@@ -1605,5 +1591,55 @@ TEST_F(FreeRTOSQueueTest, OverwriteIsrNoWokenExisting_BranchCoverage) {
 
   freertos::queue<1, int, freertos::dynamic_queue_allocator<1, int>> q;
   auto result = q.overwrite_isr(val);
-  EXPECT_EQ(result, pdPASS);
+  EXPECT_EQ(result.result, pdPASS);
+}
+
+// =============================================================================
+// Move and Swap Tests
+// =============================================================================
+
+TEST_F(FreeRTOSQueueTest, QueueMoveConstruction) {
+  EXPECT_CALL(*mock, xQueueCreate(1, sizeof(int)))
+      .WillOnce(Return(mock_queue_handle));
+  EXPECT_CALL(*mock, pcQueueGetName(mock_queue_handle))
+      .WillOnce(Return(nullptr));
+  EXPECT_CALL(*mock, vQueueDelete(mock_queue_handle));
+
+  freertos::queue<1, int, freertos::dynamic_queue_allocator<1, int>> q1;
+  freertos::queue<1, int, freertos::dynamic_queue_allocator<1, int>> q2(
+      std::move(q1));
+}
+
+TEST_F(FreeRTOSQueueTest, QueueMoveAssignment) {
+  QueueHandle_t handle1 = reinterpret_cast<QueueHandle_t>(0x1111);
+  QueueHandle_t handle2 = reinterpret_cast<QueueHandle_t>(0x2222);
+
+  EXPECT_CALL(*mock, xQueueCreate(1, sizeof(int)))
+      .WillOnce(Return(handle1))
+      .WillOnce(Return(handle2));
+  EXPECT_CALL(*mock, pcQueueGetName(handle1)).WillOnce(Return(nullptr));
+  EXPECT_CALL(*mock, pcQueueGetName(handle2)).WillOnce(Return(nullptr));
+  EXPECT_CALL(*mock, vQueueDelete(handle1));
+  EXPECT_CALL(*mock, vQueueDelete(handle2));
+
+  freertos::queue<1, int, freertos::dynamic_queue_allocator<1, int>> q1;
+  freertos::queue<1, int, freertos::dynamic_queue_allocator<1, int>> q2;
+  q1 = std::move(q2);
+}
+
+TEST_F(FreeRTOSQueueTest, QueueSwap) {
+  QueueHandle_t handle1 = reinterpret_cast<QueueHandle_t>(0x1111);
+  QueueHandle_t handle2 = reinterpret_cast<QueueHandle_t>(0x2222);
+
+  EXPECT_CALL(*mock, xQueueCreate(1, sizeof(int)))
+      .WillOnce(Return(handle1))
+      .WillOnce(Return(handle2));
+  EXPECT_CALL(*mock, pcQueueGetName(handle1)).WillOnce(Return(nullptr));
+  EXPECT_CALL(*mock, pcQueueGetName(handle2)).WillOnce(Return(nullptr));
+  EXPECT_CALL(*mock, vQueueDelete(handle1));
+  EXPECT_CALL(*mock, vQueueDelete(handle2));
+
+  freertos::queue<1, int, freertos::dynamic_queue_allocator<1, int>> q1;
+  freertos::queue<1, int, freertos::dynamic_queue_allocator<1, int>> q2;
+  q1.swap(q2);
 }

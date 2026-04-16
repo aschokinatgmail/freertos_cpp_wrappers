@@ -66,6 +66,7 @@
 #include "FreeRTOS.h"
 
 // Include the actual FreeRTOS software timer wrapper
+#include "../include/freertos_isr_result.hpp"
 #include "../include/freertos_sw_timer.hpp"
 
 using namespace testing;
@@ -239,7 +240,6 @@ TEST_F(FreeRTOSSwTimerTest, StaticTimerConstruction) {
   EXPECT_CALL(*mock, xTimerCreateStatic(_, _, _, _, _, _))
       .WillOnce(Return(mock_timer_handle));
 
-  // Expectations for destructor
   EXPECT_CALL(*mock, xTimerDelete(mock_timer_handle, portMAX_DELAY))
       .WillOnce(Return(pdPASS));
 
@@ -521,9 +521,8 @@ TEST_F(FreeRTOSSwTimerTest, StaticTimerStartFromISR) {
   EXPECT_CALL(*mock, xTimerStartFromISR(mock_timer_handle, NotNull()))
       .WillOnce(Return(pdPASS));
 
-  BaseType_t high_priority_woken = pdFALSE;
-  BaseType_t result = test_timer.start_isr(high_priority_woken);
-  EXPECT_EQ(result, pdPASS);
+  auto result = test_timer.start_isr();
+  EXPECT_EQ(result.result, pdPASS);
 }
 
 TEST_F(FreeRTOSSwTimerTest, StaticTimerStartFromISRNoParam) {
@@ -537,8 +536,8 @@ TEST_F(FreeRTOSSwTimerTest, StaticTimerStartFromISRNoParam) {
   EXPECT_CALL(*mock, xTimerStartFromISR(mock_timer_handle, NotNull()))
       .WillOnce(Return(pdPASS));
 
-  BaseType_t result = test_timer.start_isr();
-  EXPECT_EQ(result, pdPASS);
+  auto result = test_timer.start_isr();
+  EXPECT_EQ(result.result, pdPASS);
 }
 
 TEST_F(FreeRTOSSwTimerTest, StaticTimerStopFromISR) {
@@ -552,9 +551,8 @@ TEST_F(FreeRTOSSwTimerTest, StaticTimerStopFromISR) {
   EXPECT_CALL(*mock, xTimerStopFromISR(mock_timer_handle, NotNull()))
       .WillOnce(Return(pdPASS));
 
-  BaseType_t high_priority_woken = pdFALSE;
-  BaseType_t result = test_timer.stop_isr(high_priority_woken);
-  EXPECT_EQ(result, pdPASS);
+  auto result = test_timer.stop_isr();
+  EXPECT_EQ(result.result, pdPASS);
 }
 
 TEST_F(FreeRTOSSwTimerTest, StaticTimerResetFromISR) {
@@ -568,9 +566,8 @@ TEST_F(FreeRTOSSwTimerTest, StaticTimerResetFromISR) {
   EXPECT_CALL(*mock, xTimerResetFromISR(mock_timer_handle, NotNull()))
       .WillOnce(Return(pdPASS));
 
-  BaseType_t high_priority_woken = pdFALSE;
-  BaseType_t result = test_timer.reset_isr(high_priority_woken);
-  EXPECT_EQ(result, pdPASS);
+  auto result = test_timer.reset_isr();
+  EXPECT_EQ(result.result, pdPASS);
 }
 
 TEST_F(FreeRTOSSwTimerTest, StaticTimerPeriodFromISR) {
@@ -585,9 +582,8 @@ TEST_F(FreeRTOSSwTimerTest, StaticTimerPeriodFromISR) {
               xTimerChangePeriodFromISR(mock_timer_handle, 2000, NotNull()))
       .WillOnce(Return(pdPASS));
 
-  BaseType_t high_priority_woken = pdFALSE;
-  BaseType_t result = test_timer.period_isr(2000, high_priority_woken);
-  EXPECT_EQ(result, pdPASS);
+  auto result = test_timer.period_isr(2000);
+  EXPECT_EQ(result.result, pdPASS);
 }
 
 #endif // configSUPPORT_STATIC_ALLOCATION
@@ -657,10 +653,10 @@ TEST_F(FreeRTOSSwTimerTest, TimerOperationsWithNullHandle) {
   EXPECT_EQ(test_timer.stop(), pdFAIL);
   EXPECT_EQ(test_timer.reset(), pdFAIL);
   EXPECT_EQ(test_timer.period(2000), pdFAIL);
-  EXPECT_EQ(test_timer.start_isr(), pdFAIL);
-  EXPECT_EQ(test_timer.stop_isr(), pdFAIL);
-  EXPECT_EQ(test_timer.reset_isr(), pdFAIL);
-  EXPECT_EQ(test_timer.period_isr(2000), pdFAIL);
+  EXPECT_EQ(test_timer.start_isr().result, pdFAIL);
+  EXPECT_EQ(test_timer.stop_isr().result, pdFAIL);
+  EXPECT_EQ(test_timer.reset_isr().result, pdFAIL);
+  EXPECT_EQ(test_timer.period_isr(2000).result, pdFAIL);
   EXPECT_EQ(test_timer.running(), pdFALSE);
   EXPECT_EQ(test_timer.period_ticks(), 0);
   EXPECT_EQ(test_timer.name(), nullptr);
@@ -710,6 +706,8 @@ TEST_F(FreeRTOSSwTimerTest, TimerMoveConstructionIssueScenario) {
   EXPECT_CALL(*mock, xTimerCreateStatic(_, _, _, _, _, _))
       .WillOnce(Return(mock_timer_handle));
 
+  EXPECT_CALL(*mock, vTimerSetTimerID(mock_timer_handle, _));
+
   // With the fix, only one delete should occur when container goes out of scope
   EXPECT_CALL(*mock, xTimerDelete(mock_timer_handle, portMAX_DELAY))
       .Times(1) // Should only be called once from container destructor
@@ -731,6 +729,8 @@ TEST_F(FreeRTOSSwTimerTest, TimerMoveConstructionIssueScenario) {
 TEST_F(FreeRTOSSwTimerTest, TimerMoveConstruction) {
   EXPECT_CALL(*mock, xTimerCreateStatic(_, _, _, _, _, _))
       .WillOnce(Return(mock_timer_handle));
+
+  EXPECT_CALL(*mock, vTimerSetTimerID(mock_timer_handle, _));
 
   EXPECT_CALL(*mock, xTimerStart(mock_timer_handle, _))
       .WillOnce(Return(pdPASS));
@@ -761,6 +761,8 @@ TEST_F(FreeRTOSSwTimerTest, MovedFromTimerIsInvalidated) {
 
   auto callback = createTestCallback();
   sa::timer source_timer("TestTimer", 1000, pdTRUE, std::move(callback));
+
+  EXPECT_CALL(*mock, vTimerSetTimerID(mock_timer_handle, _));
 
   // Move the timer
   sa::timer moved_timer = std::move(source_timer);
@@ -874,13 +876,14 @@ TEST_F(FreeRTOSSwTimerTest, ChronoCompatibility) {
   EXPECT_CALL(*mock,
               xTimerChangePeriodFromISR(mock_timer_handle, 1500, NotNull()))
       .WillOnce(Return(pdPASS));
-  BaseType_t high_priority_woken = pdFALSE;
-  EXPECT_EQ(test_timer.period_isr(1500ms, high_priority_woken), pdPASS);
+  auto period_isr_result = test_timer.period_isr(1500ms);
+  EXPECT_EQ(period_isr_result.result, pdPASS);
 
   EXPECT_CALL(*mock,
               xTimerChangePeriodFromISR(mock_timer_handle, 800, NotNull()))
       .WillOnce(Return(pdPASS));
-  EXPECT_EQ(test_timer.period_isr(800ms), pdPASS);
+  auto period_isr_result2 = test_timer.period_isr(800ms);
+  EXPECT_EQ(period_isr_result2.result, pdPASS);
 }
 
 #endif // configSUPPORT_STATIC_ALLOCATION
@@ -1120,31 +1123,27 @@ TEST_F(FreeRTOSSwTimerTest, ISRFunctionsWithMixedDurationTypes) {
   auto callback = createTestCallback();
   sa::timer test_timer("TestTimer", 1000, pdTRUE, std::move(callback));
 
-  // Test period_isr with seconds
   EXPECT_CALL(*mock, xTimerChangePeriodFromISR(mock_timer_handle, 5000,
                                                NotNull())) // 5 seconds = 5000ms
       .WillOnce(Return(pdPASS));
-  BaseType_t high_priority_woken = pdFALSE;
-  BaseType_t result1 = test_timer.period_isr(5s, high_priority_woken);
-  EXPECT_EQ(result1, pdPASS);
+  auto result1 = test_timer.period_isr(5s);
+  EXPECT_EQ(result1.result, pdPASS);
 
   // Test period_isr with microseconds (no high_priority_woken parameter)
   EXPECT_CALL(*mock, xTimerChangePeriodFromISR(
                          mock_timer_handle, 3000,
                          NotNull())) // 3000000 microseconds = 3000ms
       .WillOnce(Return(pdPASS));
-  BaseType_t result2 =
-      test_timer.period_isr(std::chrono::microseconds(3000000));
-  EXPECT_EQ(result2, pdPASS);
+  auto result2 = test_timer.period_isr(std::chrono::microseconds(3000000));
+  EXPECT_EQ(result2.result, pdPASS);
 
   // Test period_isr with floating point duration
   EXPECT_CALL(*mock,
               xTimerChangePeriodFromISR(mock_timer_handle, 7500,
                                         NotNull())) // 7.5 seconds = 7500ms
       .WillOnce(Return(pdPASS));
-  BaseType_t result3 =
-      test_timer.period_isr(std::chrono::duration<double>(7.5));
-  EXPECT_EQ(result3, pdPASS);
+  auto result3 = test_timer.period_isr(std::chrono::duration<double>(7.5));
+  EXPECT_EQ(result3.result, pdPASS);
 
   expectDestructor();
 }
@@ -1308,8 +1307,7 @@ TEST_F(FreeRTOSSwTimerTest, StartIsrFailurePath_BranchCoverage) {
       .WillOnce(Return(pdFAIL));
 
   sa::timer t("test", 100, pdFALSE, nullptr);
-  BaseType_t woken = pdFALSE;
-  EXPECT_EQ(t.start_isr(woken), pdFAIL);
+  EXPECT_EQ(t.start_isr().result, pdFAIL);
 
   EXPECT_CALL(*mock, xTimerDelete(mock_timer_handle, portMAX_DELAY))
       .WillOnce(Return(pdPASS));
@@ -1322,7 +1320,7 @@ TEST_F(FreeRTOSSwTimerTest, StartIsrNoWoken_BranchCoverage) {
       .WillOnce(Return(pdPASS));
 
   sa::timer t("test", 100, pdFALSE, nullptr);
-  EXPECT_EQ(t.start_isr(), pdPASS);
+  EXPECT_EQ(t.start_isr().result, pdPASS);
 
   EXPECT_CALL(*mock, xTimerDelete(mock_timer_handle, portMAX_DELAY))
       .WillOnce(Return(pdPASS));
@@ -1353,8 +1351,7 @@ TEST_F(FreeRTOSSwTimerTest, StopIsrFailurePath_BranchCoverage) {
 
   sa::timer t("test", 100, pdFALSE, nullptr);
   t.start(0);
-  BaseType_t woken = pdFALSE;
-  EXPECT_EQ(t.stop_isr(woken), pdFAIL);
+  EXPECT_EQ(t.stop_isr().result, pdFAIL);
 
   EXPECT_CALL(*mock, xTimerDelete(mock_timer_handle, portMAX_DELAY))
       .WillOnce(Return(pdPASS));
@@ -1370,7 +1367,7 @@ TEST_F(FreeRTOSSwTimerTest, StopIsrNoWoken_BranchCoverage) {
 
   sa::timer t("test", 100, pdFALSE, nullptr);
   t.start(0);
-  EXPECT_EQ(t.stop_isr(), pdPASS);
+  EXPECT_EQ(t.stop_isr().result, pdPASS);
 
   EXPECT_CALL(*mock, xTimerDelete(mock_timer_handle, portMAX_DELAY))
       .WillOnce(Return(pdPASS));
@@ -1386,7 +1383,7 @@ TEST_F(FreeRTOSSwTimerTest, ResetIsrNoWoken_BranchCoverage) {
 
   sa::timer t("test", 100, pdFALSE, nullptr);
   t.start(0);
-  EXPECT_EQ(t.reset_isr(), pdPASS);
+  EXPECT_EQ(t.reset_isr().result, pdPASS);
 
   EXPECT_CALL(*mock, xTimerDelete(mock_timer_handle, portMAX_DELAY))
       .WillOnce(Return(pdPASS));
@@ -1402,7 +1399,7 @@ TEST_F(FreeRTOSSwTimerTest, PeriodIsrNoWoken_BranchCoverage) {
 
   sa::timer t("test", 100, pdFALSE, nullptr);
   t.start(0);
-  EXPECT_EQ(t.period_isr(200), pdPASS);
+  EXPECT_EQ(t.period_isr(200).result, pdPASS);
 
   EXPECT_CALL(*mock, xTimerDelete(mock_timer_handle, portMAX_DELAY))
       .WillOnce(Return(pdPASS));
@@ -1419,7 +1416,7 @@ TEST_F(FreeRTOSSwTimerTest, PeriodIsrChronoNoWoken_BranchCoverage) {
 
   sa::timer t("test", 100, pdFALSE, nullptr);
   t.start(0);
-  EXPECT_EQ(t.period_isr(std::chrono::milliseconds(200)), pdPASS);
+  EXPECT_EQ(t.period_isr(std::chrono::milliseconds(200)).result, pdPASS);
 
   EXPECT_CALL(*mock, xTimerDelete(mock_timer_handle, portMAX_DELAY))
       .WillOnce(Return(pdPASS));
@@ -1555,8 +1552,7 @@ TEST_F(FreeRTOSSwTimerTest, PeriodIsrChronoWithWoken_BranchCoverage) {
       .WillOnce(Return(pdPASS));
 
   sa::timer t("test", 100, pdFALSE, nullptr);
-  BaseType_t woken = pdFALSE;
-  EXPECT_EQ(t.period_isr(std::chrono::milliseconds(1500), woken), pdPASS);
+  EXPECT_EQ(t.period_isr(std::chrono::milliseconds(1500)).result, pdPASS);
 }
 
 TEST_F(FreeRTOSSwTimerTest, PeriodIsrNoWokenTick_BranchCoverage) {
@@ -1568,7 +1564,7 @@ TEST_F(FreeRTOSSwTimerTest, PeriodIsrNoWokenTick_BranchCoverage) {
       .WillOnce(Return(pdPASS));
 
   sa::timer t("test", 100, pdFALSE, nullptr);
-  EXPECT_EQ(t.period_isr(200), pdPASS);
+  EXPECT_EQ(t.period_isr(200).result, pdPASS);
 }
 
 TEST_F(FreeRTOSSwTimerTest, ReloadModeNullHandle_BranchCoverage) {
@@ -1589,3 +1585,82 @@ TEST_F(FreeRTOSSwTimerTest, ChronoConstructor_BranchCoverage) {
 }
 
 #endif // configSUPPORT_STATIC_ALLOCATION
+
+// =============================================================================
+// DYNAMIC TIMER MOVE AND SWAP TESTS
+// =============================================================================
+
+#if configSUPPORT_DYNAMIC_ALLOCATION
+
+TEST_F(FreeRTOSSwTimerTest, DynamicTimerMoveConstruction) {
+  TimerHandle_t handle1 = reinterpret_cast<TimerHandle_t>(0x1111);
+
+  EXPECT_CALL(*mock, xTimerCreate(_, _, _, _, _)).WillOnce(Return(handle1));
+  EXPECT_CALL(*mock, vTimerSetTimerID(handle1, _));
+  EXPECT_CALL(*mock, xTimerDelete(handle1, portMAX_DELAY))
+      .WillOnce(Return(pdPASS));
+
+  auto callback = createTestCallback();
+  freertos::timer<freertos::dynamic_sw_timer_allocator> t1(
+      "Timer1", 1000, pdTRUE, std::move(callback));
+  freertos::timer<freertos::dynamic_sw_timer_allocator> t2(std::move(t1));
+}
+
+TEST_F(FreeRTOSSwTimerTest, DynamicTimerMoveAssignment) {
+  TimerHandle_t handle1 = reinterpret_cast<TimerHandle_t>(0x1111);
+  TimerHandle_t handle2 = reinterpret_cast<TimerHandle_t>(0x2222);
+  TimerHandle_t new_handle = reinterpret_cast<TimerHandle_t>(0x3333);
+
+  EXPECT_CALL(*mock, xTimerCreate(_, _, _, _, _))
+      .WillOnce(Return(handle1))
+      .WillOnce(Return(handle2));
+
+  auto callback1 = createTestCallback();
+  auto callback2 = createTestCallback();
+  freertos::timer<freertos::dynamic_sw_timer_allocator> t1(
+      "Timer1", 1000, pdTRUE, std::move(callback1));
+  freertos::timer<freertos::dynamic_sw_timer_allocator> t2(
+      "Timer2", 2000, pdFALSE, std::move(callback2));
+
+  EXPECT_CALL(*mock, xTimerDelete(handle2, portMAX_DELAY))
+      .WillOnce(Return(pdPASS));
+  EXPECT_CALL(*mock, xTimerStop(handle1, portMAX_DELAY))
+      .WillOnce(Return(pdPASS));
+  EXPECT_CALL(*mock, pcTimerGetName(handle1)).WillOnce(Return("Timer1"));
+  EXPECT_CALL(*mock, xTimerGetPeriod(handle1)).WillOnce(Return(1000));
+  EXPECT_CALL(*mock, uxTimerGetReloadMode(handle1)).WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, xTimerDelete(handle1, portMAX_DELAY))
+      .WillOnce(Return(pdPASS));
+  EXPECT_CALL(*mock, xTimerCreate(_, _, _, _, _)).WillOnce(Return(new_handle));
+  EXPECT_CALL(*mock, xTimerDelete(new_handle, portMAX_DELAY))
+      .WillOnce(Return(pdPASS));
+
+  t2 = std::move(t1);
+}
+
+TEST_F(FreeRTOSSwTimerTest, DynamicTimerSwap) {
+  TimerHandle_t handle1 = reinterpret_cast<TimerHandle_t>(0x1111);
+  TimerHandle_t handle2 = reinterpret_cast<TimerHandle_t>(0x2222);
+
+  EXPECT_CALL(*mock, xTimerCreate(_, _, _, _, _))
+      .WillOnce(Return(handle1))
+      .WillOnce(Return(handle2));
+
+  auto callback1 = createTestCallback();
+  auto callback2 = createTestCallback();
+  freertos::timer<freertos::dynamic_sw_timer_allocator> t1(
+      "Timer1", 1000, pdTRUE, std::move(callback1));
+  freertos::timer<freertos::dynamic_sw_timer_allocator> t2(
+      "Timer2", 2000, pdFALSE, std::move(callback2));
+
+  EXPECT_CALL(*mock, vTimerSetTimerID(handle2, _)).Times(1);
+  EXPECT_CALL(*mock, vTimerSetTimerID(handle1, _)).Times(1);
+  EXPECT_CALL(*mock, xTimerDelete(handle1, portMAX_DELAY))
+      .WillOnce(Return(pdPASS));
+  EXPECT_CALL(*mock, xTimerDelete(handle2, portMAX_DELAY))
+      .WillOnce(Return(pdPASS));
+
+  t1.swap(t2);
+}
+
+#endif // configSUPPORT_DYNAMIC_ALLOCATION

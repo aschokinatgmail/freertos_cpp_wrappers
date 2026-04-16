@@ -36,11 +36,13 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #error "This header is for C++ only"
 #endif
 
+#include "freertos_isr_result.hpp"
 #include <FreeRTOS.h>
 #include <chrono>
 #include <ctime>
 #include <semphr.h>
 #include <task.h>
+#include <utility>
 
 namespace freertos {
 
@@ -175,7 +177,10 @@ public:
     configASSERT(m_semaphore);
   }
   binary_semaphore(const binary_semaphore &) = delete;
-  binary_semaphore(binary_semaphore &&src) = delete;
+  binary_semaphore(binary_semaphore &&src) noexcept
+      : m_semaphore(src.m_semaphore) {
+    src.m_semaphore = nullptr;
+  }
   /**
    * @brief Destruct the binary semaphore object and
    * delete the binary semaphore instance if it was created.
@@ -188,7 +193,21 @@ public:
   }
 
   binary_semaphore &operator=(const binary_semaphore &) = delete;
-  binary_semaphore &operator=(binary_semaphore &&src) = delete;
+  binary_semaphore &operator=(binary_semaphore &&src) noexcept {
+    if (this != &src) {
+      swap(src);
+    }
+    return *this;
+  }
+
+  void swap(binary_semaphore &other) noexcept {
+    using std::swap;
+    swap(m_semaphore, other.m_semaphore);
+  }
+
+  friend void swap(binary_semaphore &a, binary_semaphore &b) noexcept {
+    a.swap(b);
+  }
 
   /**
    * @brief Give the binary semaphore.
@@ -203,25 +222,14 @@ public:
    * @brief Give the binary semaphore from an ISR.
    * @ref https://www.freertos.org/a00124.html
    *
-   * @param high_priority_task_woken pdTRUE if the high priority task was woken
-   * by the semaphore give.
-   * @return BaseType_t pdTRUE if the semaphore was successfully given,
-   *
+   * @return isr_result<BaseType_t> containing the result and whether a
+   * higher priority task was woken.
    */
-  BaseType_t give_isr(BaseType_t &high_priority_task_woken) {
-    return xSemaphoreGiveFromISR(m_semaphore, &high_priority_task_woken);
-  }
-  /**
-   * @brief Give the binary semaphore from an ISR.
-   * @ref https://www.freertos.org/a00124.html
-   *
-   * @return BaseType_t pdTRUE if the semaphore was successfully given,
-   *
-   */
-  BaseType_t give_isr(void) {
-    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-    return xSemaphoreGiveFromISR(
-        m_semaphore, &xHigherPriorityTaskWoken);
+  isr_result<BaseType_t> give_isr(void) {
+    isr_result<BaseType_t> result{pdFALSE, pdFALSE};
+    result.result =
+        xSemaphoreGiveFromISR(m_semaphore, &result.higher_priority_task_woken);
+    return result;
   }
   /**
    * @brief Take the binary semaphore.
@@ -239,28 +247,14 @@ public:
    * @brief Take the binary semaphore from an ISR.
    * @ref https://www.freertos.org/xSemaphoreTakeFromISR.html
    *
-   * @param high_priority_task_woken pdTRUE if the high priority task was woken
-   * by the semaphore take.
-   *
-   * @return BaseType_t pdTRUE if the semaphore was successfully taken,
-   * otherwise pdFALSE.
-   *
+   * @return isr_result<BaseType_t> containing the result and whether a
+   * higher priority task was woken.
    */
-  BaseType_t take_isr(BaseType_t &high_priority_task_woken) {
-    return xSemaphoreTakeFromISR(m_semaphore, &high_priority_task_woken);
-  }
-  /**
-   * @brief Take the binary semaphore from an ISR.
-   * @ref https://www.freertos.org/xSemaphoreTakeFromISR.html
-   *
-   * @return BaseType_t pdTRUE if the semaphore was successfully taken,
-   * otherwise pdFALSE.
-   *
-   */
-  BaseType_t take_isr(void) {
-    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-    return xSemaphoreTakeFromISR(
-        m_semaphore, &xHigherPriorityTaskWoken);
+  isr_result<BaseType_t> take_isr(void) {
+    isr_result<BaseType_t> result{pdFALSE, pdFALSE};
+    result.result =
+        xSemaphoreTakeFromISR(m_semaphore, &result.higher_priority_task_woken);
+    return result;
   }
   /**
    * @brief Take the binary semaphore.
@@ -300,7 +294,10 @@ public:
     configASSERT(m_semaphore);
   }
   counting_semaphore(const counting_semaphore &) = delete;
-  counting_semaphore(counting_semaphore &&src) = delete;
+  counting_semaphore(counting_semaphore &&src) noexcept
+      : m_semaphore(src.m_semaphore) {
+    src.m_semaphore = nullptr;
+  }
   /**
    * @brief Destruct the counting semaphore object and
    * delete the counting semaphore instance if it was created.
@@ -313,7 +310,21 @@ public:
   }
 
   counting_semaphore &operator=(const counting_semaphore &) = delete;
-  counting_semaphore &operator=(counting_semaphore &&src) = delete;
+  counting_semaphore &operator=(counting_semaphore &&src) noexcept {
+    if (this != &src) {
+      swap(src);
+    }
+    return *this;
+  }
+
+  void swap(counting_semaphore &other) noexcept {
+    using std::swap;
+    swap(m_semaphore, other.m_semaphore);
+  }
+
+  friend void swap(counting_semaphore &a, counting_semaphore &b) noexcept {
+    a.swap(b);
+  }
 
   /**
    * @brief Give the counting semaphore.
@@ -328,25 +339,14 @@ public:
    * @brief Give the counting semaphore from an ISR.
    * @ref https://www.freertos.org/a00124.html
    *
-   * @param high_priority_task_woken pdTRUE if the high priority task was woken
-   * by the semaphore give.
-   * @return BaseType_t pdTRUE if the semaphore was successfully given,
-   *
+   * @return isr_result<BaseType_t> containing the result and whether a
+   * higher priority task was woken.
    */
-  BaseType_t give_isr(BaseType_t &high_priority_task_woken) {
-    return xSemaphoreGiveFromISR(m_semaphore, &high_priority_task_woken);
-  }
-  /**
-   * @brief Give the counting semaphore from an ISR.
-   * @ref https://www.freertos.org/a00124.html
-   *
-   * @return BaseType_t pdTRUE if the semaphore was successfully given,
-   *
-   */
-  BaseType_t give_isr(void) {
-    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-    return xSemaphoreGiveFromISR(
-        m_semaphore, &xHigherPriorityTaskWoken);
+  isr_result<BaseType_t> give_isr(void) {
+    isr_result<BaseType_t> result{pdFALSE, pdFALSE};
+    result.result =
+        xSemaphoreGiveFromISR(m_semaphore, &result.higher_priority_task_woken);
+    return result;
   }
   /**
    * @brief Take the counting semaphore.
@@ -364,28 +364,14 @@ public:
    * @brief Take the counting semaphore from an ISR.
    * @ref https://www.freertos.org/xSemaphoreTakeFromISR.html
    *
-   * @param high_priority_task_woken pdTRUE if the high priority task was woken
-   * by the semaphore take.
-   *
-   * @return BaseType_t pdTRUE if the semaphore was successfully taken,
-   * otherwise pdFALSE.
-   *
+   * @return isr_result<BaseType_t> containing the result and whether a
+   * higher priority task was woken.
    */
-  BaseType_t take_isr(BaseType_t &high_priority_task_woken) {
-    return xSemaphoreTakeFromISR(m_semaphore, &high_priority_task_woken);
-  }
-  /**
-   * @brief Take the counting semaphore from an ISR.
-   * @ref https://www.freertos.org/xSemaphoreTakeFromISR.html
-   *
-   * @return BaseType_t pdTRUE if the semaphore was successfully taken,
-   * otherwise pdFALSE.
-   *
-   */
-  BaseType_t take_isr(void) {
-    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-    return xSemaphoreTakeFromISR(
-        m_semaphore, &xHigherPriorityTaskWoken);
+  isr_result<BaseType_t> take_isr(void) {
+    isr_result<BaseType_t> result{pdFALSE, pdFALSE};
+    result.result =
+        xSemaphoreTakeFromISR(m_semaphore, &result.higher_priority_task_woken);
+    return result;
   }
   /**
    * @brief Take the counting semaphore.
@@ -483,7 +469,12 @@ public:
     configASSERT(m_semaphore);
   }
   mutex(const mutex &) = delete;
-  mutex(mutex &&src) = delete;
+  mutex(mutex &&src) noexcept
+      : m_semaphore(src.m_semaphore), m_locked(src.m_locked) {
+    configASSERT(!src.m_locked);
+    src.m_semaphore = nullptr;
+    src.m_locked = false;
+  }
   /**
    * @brief Destruct the mutex object and delete the mutex instance if it was
    * created.
@@ -496,7 +487,24 @@ public:
   }
 
   mutex &operator=(const mutex &) = delete;
-  mutex &operator=(mutex &&src) = delete;
+  mutex &operator=(mutex &&src) noexcept {
+    configASSERT(!m_locked);
+    configASSERT(!src.m_locked);
+    if (this != &src) {
+      swap(src);
+    }
+    return *this;
+  }
+
+  void swap(mutex &other) noexcept {
+    using std::swap;
+    swap(m_semaphore, other.m_semaphore);
+    const uint8_t locked_tmp = m_locked;
+    m_locked = other.m_locked;
+    other.m_locked = locked_tmp;
+  }
+
+  friend void swap(mutex &a, mutex &b) noexcept { a.swap(b); }
 
   /**
    * @brief Unlock the mutex.
@@ -515,30 +523,17 @@ public:
    * @brief Unlock the mutex from an ISR.
    * @ref https://www.freertos.org/a00124.html
    *
-   * @param high_priority_task_woken pdTRUE if the high priority task was woken
-   * by the mutex unlock.
-   * @return BaseType_t pdTRUE if the mutex was successfully unlocked,
+   * @return isr_result<BaseType_t> containing the result and whether a
+   * higher priority task was woken.
    */
-  BaseType_t unlock_isr(BaseType_t &high_priority_task_woken) {
-    auto rc = xSemaphoreGiveFromISR(m_semaphore, &high_priority_task_woken);
-    if (rc) {
+  isr_result<BaseType_t> unlock_isr(void) {
+    isr_result<BaseType_t> result{pdFALSE, pdFALSE};
+    result.result =
+        xSemaphoreGiveFromISR(m_semaphore, &result.higher_priority_task_woken);
+    if (result.result) {
       m_locked = false;
     }
-    return rc;
-  }
-  /**
-   * @brief Unlock the mutex from an ISR.
-   * @ref https://www.freertos.org/a00124.html
-   *
-   * @return BaseType_t pdTRUE if the mutex was successfully unlocked,
-   */
-  BaseType_t unlock_isr(void) {
-    BaseType_t high_priority_task_woken = pdFALSE;
-    auto rc = xSemaphoreGiveFromISR(m_semaphore, &high_priority_task_woken);
-    if (rc) {
-      m_locked = false;
-    }
-    return rc;
+    return result;
   }
   /**
    * @brief Lock the mutex.
@@ -558,30 +553,17 @@ public:
    * @brief Lock the mutex from an ISR.
    * @ref https://www.freertos.org/xSemaphoreTakeFromISR.html
    *
-   * @param high_priority_task_woken pdTRUE if the high priority task was woken
-   * by the mutex lock.
-   * @return BaseType_t pdTRUE if the mutex was successfully locked,
+   * @return isr_result<BaseType_t> containing the result and whether a
+   * higher priority task was woken.
    */
-  BaseType_t lock_isr(BaseType_t &high_priority_task_woken) {
-    auto rc = xSemaphoreTakeFromISR(m_semaphore, &high_priority_task_woken);
-    if (rc) {
+  isr_result<BaseType_t> lock_isr(void) {
+    isr_result<BaseType_t> result{pdFALSE, pdFALSE};
+    result.result =
+        xSemaphoreTakeFromISR(m_semaphore, &result.higher_priority_task_woken);
+    if (result.result) {
       m_locked = true;
     }
-    return rc;
-  }
-  /**
-   * @brief Lock the mutex from an ISR.
-   * @ref https://www.freertos.org/xSemaphoreTakeFromISR.html
-   *
-   * @return BaseType_t pdTRUE if the mutex was successfully locked,
-   */
-  BaseType_t lock_isr(void) {
-    BaseType_t high_priority_task_woken = pdFALSE;
-    auto rc = xSemaphoreTakeFromISR(m_semaphore, &high_priority_task_woken);
-    if (rc) {
-      m_locked = true;
-    }
-    return rc;
+    return result;
   }
   /**
    * @brief Lock the mutex.
@@ -636,7 +618,13 @@ public:
     configASSERT(m_semaphore);
   }
   recursive_mutex(const recursive_mutex &) = delete;
-  recursive_mutex(recursive_mutex &&src) = delete;
+  recursive_mutex(recursive_mutex &&src) noexcept
+      : m_semaphore(src.m_semaphore),
+        m_recursions_count(src.m_recursions_count) {
+    configASSERT(src.m_recursions_count == 0);
+    src.m_semaphore = nullptr;
+    src.m_recursions_count = 0;
+  }
   /**
    * @brief Destruct the recursive mutex object and delete the recursive mutex
    * instance if it was created.
@@ -649,7 +637,24 @@ public:
   }
 
   recursive_mutex &operator=(const recursive_mutex &) = delete;
-  recursive_mutex &operator=(recursive_mutex &&src) = delete;
+  recursive_mutex &operator=(recursive_mutex &&src) noexcept {
+    configASSERT(m_recursions_count == 0);
+    configASSERT(src.m_recursions_count == 0);
+    if (this != &src) {
+      swap(src);
+    }
+    return *this;
+  }
+
+  void swap(recursive_mutex &other) noexcept {
+    using std::swap;
+    swap(m_semaphore, other.m_semaphore);
+    swap(m_recursions_count, other.m_recursions_count);
+  }
+
+  friend void swap(recursive_mutex &a, recursive_mutex &b) noexcept {
+    a.swap(b);
+  }
 
   /**
    * @brief Unlock the recursive mutex.
@@ -820,13 +825,17 @@ public:
    * @param mutex mutex to guard
    */
   explicit lock_guard_isr(Mutex &mutex) : m_mutex{mutex} {
-    m_mutex.lock_isr(m_high_priority_task_woken);
+    auto result = m_mutex.lock_isr();
+    m_high_priority_task_woken = result.higher_priority_task_woken;
   }
   /**
    * @brief Destruct the lock guard object and unlock the mutex.
    *
    */
-  ~lock_guard_isr(void) { m_mutex.unlock_isr(m_high_priority_task_woken); }
+  ~lock_guard_isr(void) {
+    auto result = m_mutex.unlock_isr();
+    m_high_priority_task_woken = result.higher_priority_task_woken;
+  }
 
   // Delete copy and move operations for RAII safety
   lock_guard_isr(const lock_guard_isr &) = delete;
@@ -882,10 +891,9 @@ public:
   timeout_lock_guard(Mutex &mutex,
                      const std::chrono::duration<Rep, Period> &timeout)
       : m_mutex{mutex},
-        m_lock_acquired{
-            static_cast<bool>(m_mutex.lock(pdMS_TO_TICKS(
-                std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
-                    .count())))} {}
+        m_lock_acquired{static_cast<bool>(m_mutex.lock(pdMS_TO_TICKS(
+            std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
+                .count())))} {}
   /**
    * @brief Destruct the timeout lock guard object and unlock the mutex.
    *

@@ -36,6 +36,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #error "This header is for C++ only"
 #endif
 
+#include "freertos_isr_result.hpp"
 #include <FreeRTOS.h>
 #include <array>
 #include <cassert>
@@ -44,10 +45,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <semphr.h>
 #include <string>
 #include <task.h>
+#include <utility>
 
 namespace freertos {
-
-using namespace std::chrono_literals;
 
 #if configSUPPORT_STATIC_ALLOCATION
 /**
@@ -235,15 +235,13 @@ public:
 #endif
   task(const task &) = delete;
   task(task &&other) noexcept
-      : m_allocator(std::move(other.m_allocator)), m_hTask(other.m_hTask),
-        m_taskRoutine(std::move(other.m_taskRoutine))
+      : m_hTask(other.m_hTask), m_taskRoutine(std::move(other.m_taskRoutine))
 #if INCLUDE_vTaskSuspend
         ,
         m_start_suspended(other.m_start_suspended)
 #endif
   {
-    other.m_hTask = nullptr; // Transfer ownership - moved-from object should
-                             // not delete the task
+    other.m_hTask = nullptr;
   }
   /**
    * @brief Destruct the task object and delete the task instance if it was
@@ -259,7 +257,29 @@ public:
   }
 
   task &operator=(const task &) = delete;
-  task &operator=(task &&other) = delete;
+  task &operator=(task &&other) noexcept {
+#if INCLUDE_vTaskDelete
+    if (m_hTask) {
+      vTaskDelete(m_hTask);
+    }
+#endif
+    m_hTask = nullptr;
+    swap(other);
+    return *this;
+  }
+
+  void swap(task &other) noexcept {
+    using std::swap;
+    swap(m_hTask, other.m_hTask);
+    swap(m_taskRoutine, other.m_taskRoutine);
+#if INCLUDE_vTaskSuspend
+    const uint8_t start_suspended_tmp = m_start_suspended;
+    m_start_suspended = other.m_start_suspended;
+    other.m_start_suspended = start_suspended_tmp;
+#endif
+  }
+
+  friend void swap(task &a, task &b) noexcept { a.swap(b); }
 
   /**
    * @brief Return the handle of the task.
@@ -295,11 +315,15 @@ public:
     case eRunning:
     case eReady:
     case eBlocked:
-    case eSuspended:
       return true;
     default:
       return false;
     }
+  }
+  bool is_suspended(void) const { return state() == eSuspended; }
+  bool is_alive(void) const {
+    eTaskState s = state();
+    return s != eDeleted && s != eInvalid;
   }
   /**
    * @brief Terminates the task.
@@ -481,33 +505,19 @@ public:
                               uint32_t &prev_value) {
     return xTaskNotifyAndQuery(m_hTask, val, action, &prev_value);
   }
-  /**
-   * @brief Notify the task from an ISR.
-   *
-   * @param val notification value
-   * @param action notification action
-   * @param higherPriorityTaskWoken higher priority task woken
-   * @return BaseType_t pdTRUE if the notification was given, pdFALSE otherwise
-   */
-  BaseType_t notify_isr(const uint32_t val, eNotifyAction action,
-                        BaseType_t *higherPriorityTaskWoken = nullptr) {
-    return xTaskNotifyFromISR(m_hTask, val, action, higherPriorityTaskWoken);
+  isr_result<BaseType_t> notify_isr(const uint32_t val, eNotifyAction action) {
+    isr_result<BaseType_t> result{pdFALSE, pdFALSE};
+    result.result = xTaskNotifyFromISR(m_hTask, val, action,
+                                       &result.higher_priority_task_woken);
+    return result;
   }
-  /**
-   * @brief Notify the task from an ISR and query the previous value.
-   *
-   * @param val notification value
-   * @param action notification action
-   * @param prev_value previous value
-   * @param higherPriorityTaskWoken higher priority task woken
-   * @return BaseType_t pdTRUE if the notification was given, pdFALSE otherwise
-   */
-  BaseType_t
-  notify_and_query_isr(const uint32_t val, eNotifyAction action,
-                       uint32_t &prev_value,
-                       BaseType_t *higherPriorityTaskWoken = nullptr) {
-    return xTaskNotifyAndQueryFromISR(m_hTask, val, action, &prev_value,
-                                      higherPriorityTaskWoken);
+  isr_result<BaseType_t> notify_and_query_isr(const uint32_t val,
+                                              eNotifyAction action,
+                                              uint32_t &prev_value) {
+    isr_result<BaseType_t> result{pdFALSE, pdFALSE};
+    result.result = xTaskNotifyAndQueryFromISR(
+        m_hTask, val, action, &prev_value, &result.higher_priority_task_woken);
+    return result;
   }
   /**
    * @brief Wait for the notification.
@@ -580,7 +590,7 @@ template <typename TaskAllocator> class periodic_task {
   // kernel
   void run() {
     m_on_start();
-    while (is_running()) {
+    while (is_alive()) {
       if (0 != m_period.count()) {
 #if configUSE_TASK_NOTIFICATIONS
         uint32_t notification_value = 0;
@@ -704,7 +714,24 @@ public:
   }
 
   periodic_task &operator=(const periodic_task &) = delete;
-  periodic_task &operator=(periodic_task &&other) = delete;
+  periodic_task &operator=(periodic_task &&other) noexcept {
+#if INCLUDE_xTaskAbortDelay
+    m_task.abort_delay();
+#endif
+    swap(other);
+    return *this;
+  }
+
+  void swap(periodic_task &other) noexcept {
+    using std::swap;
+    swap(m_period, other.m_period);
+    swap(m_on_start, other.m_on_start);
+    swap(m_on_stop, other.m_on_stop);
+    swap(m_periodic_routine, other.m_periodic_routine);
+    m_task.swap(other.m_task);
+  }
+
+  friend void swap(periodic_task &a, periodic_task &b) noexcept { a.swap(b); }
 
   /**
    * @brief Return the handle of the task.
@@ -740,11 +767,15 @@ public:
     case eRunning:
     case eReady:
     case eBlocked:
-    case eSuspended:
       return true;
     default:
       return false;
     }
+  }
+  bool is_suspended(void) const { return m_task.state() == eSuspended; }
+  bool is_alive(void) const {
+    eTaskState s = m_task.state();
+    return s != eDeleted && s != eInvalid;
   }
   /**
    * @brief Terminate the task.
@@ -913,57 +944,13 @@ public:
                               uint32_t &prev_value) {
     return m_task.notify_and_query(val, action, prev_value);
   }
-  /**
-   * @brief Notify the task from an ISR.
-   *
-   * @param val  notification value
-   * @param action  notification action
-   * @param higherPriorityTaskWoken  higher priority task woken
-   * @return BaseType_t  pdTRUE if the notification was given, pdFALSE otherwise
-   */
-  BaseType_t notify_isr(const uint32_t val, eNotifyAction action,
-                        BaseType_t &higherPriorityTaskWoken) {
-    return m_task.notify_isr(val, action, higherPriorityTaskWoken);
+  isr_result<BaseType_t> notify_isr(const uint32_t val, eNotifyAction action) {
+    return m_task.notify_isr(val, action);
   }
-  /**
-   * @brief Notify the task from an ISR and query the previous value.
-   *
-   * @param val  notification value
-   * @param action  notification action
-   * @return BaseType_t  pdTRUE if the notification was given, pdFALSE otherwise
-   */
-  BaseType_t notify_isr(const uint32_t val, eNotifyAction action) {
-    BaseType_t higherPriorityTaskWoken = pdFALSE;
-    return m_task.notify_isr(val, action, higherPriorityTaskWoken);
-  }
-  /**
-   * @brief Notify the task from an ISR and query the previous value.
-   *
-   * @param val  notification value
-   * @param action  notification action
-   * @param prev_value  previous value
-   * @param higherPriorityTaskWoken  higher priority task woken
-   * @return BaseType_t  pdTRUE if the notification was given, pdFALSE otherwise
-   */
-  BaseType_t notify_and_query_isr(const uint32_t val, eNotifyAction action,
-                                  uint32_t &prev_value,
-                                  BaseType_t &higherPriorityTaskWoken) {
-    return m_task.notify_and_query_isr(val, action, prev_value,
-                                       higherPriorityTaskWoken);
-  }
-  /**
-   * @brief Notify the task from an ISR and query the previous value.
-   *
-   * @param val  notification value
-   * @param action  notification action
-   * @param prev_value  previous value
-   * @return BaseType_t  pdTRUE if the notification was given, pdFALSE otherwise
-   */
-  BaseType_t notify_and_query_isr(const uint32_t val, eNotifyAction action,
-                                  uint32_t &prev_value) {
-    BaseType_t higherPriorityTaskWoken = pdFALSE;
-    return m_task.notify_and_query_isr(val, action, prev_value,
-                                       higherPriorityTaskWoken);
+  isr_result<BaseType_t> notify_and_query_isr(const uint32_t val,
+                                              eNotifyAction action,
+                                              uint32_t &prev_value) {
+    return m_task.notify_and_query_isr(val, action, prev_value);
   }
   /**
    * @brief Wait for the notification.

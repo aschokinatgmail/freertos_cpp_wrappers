@@ -36,11 +36,13 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #error "This header is for C++ only"
 #endif
 
+#include "freertos_isr_result.hpp"
 #include <FreeRTOS.h>
 #include <array>
 #include <chrono>
 #include <optional>
 #include <stream_buffer.h>
+#include <utility>
 
 namespace freertos {
 
@@ -110,7 +112,10 @@ public:
     configASSERT(m_stream_buffer);
   }
   stream_buffer(const stream_buffer &) = delete;
-  stream_buffer(stream_buffer &&src) = delete;
+  stream_buffer(stream_buffer &&src) noexcept
+      : m_stream_buffer(src.m_stream_buffer) {
+    src.m_stream_buffer = nullptr;
+  }
   /**
    * @brief Destruct the stream buffer object and delete the stream buffer
    * instance if it was created.
@@ -123,7 +128,19 @@ public:
   }
 
   stream_buffer &operator=(const stream_buffer &) = delete;
-  stream_buffer &operator=(stream_buffer &&src) = delete;
+  stream_buffer &operator=(stream_buffer &&src) noexcept {
+    if (this != &src) {
+      swap(src);
+    }
+    return *this;
+  }
+
+  void swap(stream_buffer &other) noexcept {
+    using std::swap;
+    swap(m_stream_buffer, other.m_stream_buffer);
+  }
+
+  friend void swap(stream_buffer &a, stream_buffer &b) noexcept { a.swap(b); }
 
   /**
    * @brief Send data to the stream buffer.
@@ -204,32 +221,17 @@ public:
    *
    * @param data A pointer to the data to be copied into the stream buffer.
    * @param data_size Maximum number of bytes to copy into the stream buffer.
-   * @param higher_priority_task_woken A pointer to a variable that will be set
-   * to pdTRUE if sending the data unblocked a task that was waiting to receive
-   * data from the stream buffer, otherwise it will be set to pdFALSE.
-   * @return BaseType_t pdPASS if the data was successfully copied into the
-   * stream buffer, otherwise errCOULD_NOT_ALLOCATE_REQUIRED_MEMORY if there was
-   * insufficient memory available to copy the data into the stream buffer.
-   */
-  BaseType_t send_isr(const void *data, size_t data_size,
-                      BaseType_t &higher_priority_task_woken) {
-    return xStreamBufferSendFromISR(m_stream_buffer, data, data_size,
-                                    &higher_priority_task_woken);
-  }
-  /**
-   * @brief Send data to the stream buffer from an ISR.
-   * @ref https://www.freertos.org/xStreamBufferSendFromISR.html
-   *
-   * @param data A pointer to the data to be copied into the stream buffer.
-   * @param data_size Maximum number of bytes to copy into the stream buffer.
-   * @return BaseType_t pdPASS if the data
-   * was successfully copied into the stream buffer, otherwise
+   * @return isr_result<BaseType_t> result containing pdPASS if the data was
+   * successfully copied into the stream buffer, otherwise
    * errCOULD_NOT_ALLOCATE_REQUIRED_MEMORY if there was insufficient memory
-   * available to copy the data into the stream buffer.
+   * available to copy the data into the stream buffer, and the
+   * higher_priority_task_woken flag.
    */
-  BaseType_t send_isr(const void *data, size_t data_size) {
-    BaseType_t higher_priority_task_woken = pdFALSE;
-    return send_isr(data, data_size, higher_priority_task_woken);
+  isr_result<BaseType_t> send_isr(const void *data, size_t data_size) {
+    isr_result<BaseType_t> result{pdFALSE, pdFALSE};
+    result.result = xStreamBufferSendFromISR(
+        m_stream_buffer, data, data_size, &result.higher_priority_task_woken);
+    return result;
   }
   /**
    * @brief Send data to the stream buffer from an ISR.
@@ -238,35 +240,15 @@ public:
    * @tparam Iterator Const iterator type
    * @param begin Iterator to the beginning of the data
    * @param end Iterator to the end of the data
-   * @param higher_priority_task_woken A pointer to a variable that will be set
-   * to pdTRUE if sending the data unblocked a task that was waiting to receive
-   * data from the stream buffer, otherwise it will be set to pdFALSE.
-   * @return BaseType_t pdPASS if the data was successfully copied into the
-   * stream buffer, otherwise errCOULD_NOT_ALLOCATE_REQUIRED_MEMORY if there was
-   * insufficient memory available to copy the data into the stream buffer.
+   * @return isr_result<BaseType_t> result containing pdPASS if the data was
+   * successfully copied into the stream buffer, otherwise
+   * errCOULD_NOT_ALLOCATE_REQUIRED_MEMORY if there was insufficient memory
+   * available to copy the data into the stream buffer, and the
+   * higher_priority_task_woken flag.
    */
   template <typename Iterator>
-  BaseType_t send_isr(Iterator begin, Iterator end,
-                      BaseType_t &higher_priority_task_woken) {
-    return send_isr(&*begin, std::distance(begin, end),
-                    higher_priority_task_woken);
-  }
-  /**
-   * @brief Send data to the stream buffer from an ISR.
-   * @ref https://www.freertos.org/xStreamBufferSendFromISR.html
-   *
-   * @tparam Iterator Const iterator type
-   * @param begin Iterator to the beginning of the data
-   * @param end Iterator to the end of the data
-   * @return BaseType_t pdPASS if the data was successfully copied into the
-   * stream buffer, otherwise errCOULD_NOT_ALLOCATE_REQUIRED_MEMORY if there was
-   * insufficient memory available to copy the data into the stream buffer.
-   */
-  template <typename Iterator>
-  BaseType_t send_isr(Iterator begin, Iterator end) {
-    BaseType_t higher_priority_task_woken = pdFALSE;
-    return send_isr(&*begin, std::distance(begin, end),
-                    higher_priority_task_woken);
+  isr_result<BaseType_t> send_isr(Iterator begin, Iterator end) {
+    return send_isr(&*begin, std::distance(begin, end));
   }
   /**
    * @brief Receive data from the stream buffer.
@@ -309,28 +291,14 @@ public:
    * @param data A pointer to the buffer into which the received data will be
    * copied.
    * @param data_size Maximum number of bytes to copy into the buffer.
-   * @param higher_priority_task_woken A pointer to a variable that will be set
-   * to pdTRUE if sending the data unblocked a task that was waiting to receive
-   * data from the stream buffer, otherwise it will be set to pdFALSE.
-   * @return size_t Number of bytes received.
+   * @return isr_result<size_t> result containing the number of bytes received
+   * and the higher_priority_task_woken flag.
    */
-  size_t receive_isr(void *data, size_t data_size,
-                     BaseType_t &higher_priority_task_woken) {
-    return xStreamBufferReceiveFromISR(m_stream_buffer, data, data_size,
-                                       &higher_priority_task_woken);
-  }
-  /**
-   * @brief Receive data from the stream buffer from an ISR.
-   * @ref https://www.freertos.org/xStreamBufferReceiveFromISR.html
-   *
-   * @param data A pointer to the buffer into which the received data will be
-   * copied.
-   * @param data_size Maximum number of bytes to copy into the buffer.
-   * @return size_t Number of bytes received.
-   */
-  size_t receive_isr(void *data, size_t data_size) {
-    BaseType_t higher_priority_task_woken = pdFALSE;
-    return receive_isr(data, data_size, higher_priority_task_woken);
+  isr_result<size_t> receive_isr(void *data, size_t data_size) {
+    isr_result<size_t> result{0, pdFALSE};
+    result.result = xStreamBufferReceiveFromISR(
+        m_stream_buffer, data, data_size, &result.higher_priority_task_woken);
+    return result;
   }
   /**
    * @brief Number of bytes available in the stream buffer.
