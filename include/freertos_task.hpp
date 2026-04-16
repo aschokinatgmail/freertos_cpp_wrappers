@@ -45,6 +45,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <semphr.h>
 #include <string>
 #include <task.h>
+#include <type_traits>
 #include <utility>
 
 namespace freertos {
@@ -198,6 +199,14 @@ public:
       : m_allocator{}, m_taskRoutine{std::move(task_routine)},
         m_start_suspended{start_suspended},
         m_hTask{m_allocator.create(task_exec, name, priority, this)} {}
+  template <typename... AllocatorArgs,
+            typename std::enable_if_t<(sizeof...(AllocatorArgs) > 0), int> = 0>
+  task(const char *name, UBaseType_t priority, task_routine_t &&task_routine,
+       bool start_suspended, AllocatorArgs &&...args)
+      : m_allocator{std::forward<AllocatorArgs>(args)...},
+        m_taskRoutine{std::move(task_routine)},
+        m_start_suspended{start_suspended},
+        m_hTask{m_allocator.create(task_exec, name, priority, this)} {}
   /**
    * @brief Construct a new task object
    *
@@ -220,6 +229,13 @@ public:
    */
   task(const char *name, UBaseType_t priority, task_routine_t &&task_routine)
       : m_allocator{}, m_taskRoutine{task_routine},
+        m_hTask{m_allocator.create(task_exec, name, priority, this)} {}
+  template <typename... AllocatorArgs,
+            typename std::enable_if_t<(sizeof...(AllocatorArgs) > 0), int> = 0>
+  task(const char *name, UBaseType_t priority, task_routine_t &&task_routine,
+       AllocatorArgs &&...args)
+      : m_allocator{std::forward<AllocatorArgs>(args)...},
+        m_taskRoutine{task_routine},
         m_hTask{m_allocator.create(task_exec, name, priority, this)} {}
   /**
    * @brief Construct a new task object
@@ -629,6 +645,18 @@ public:
         m_on_start{std::move(on_start)}, m_on_stop{std::move(on_stop)},
         m_periodic_routine{std::move(periodic_routine)},
         m_task{name, priority, [this]() { run(); }, start_suspended} {}
+  template <typename Rep, typename Period, typename... AllocatorArgs,
+            typename std::enable_if_t<(sizeof...(AllocatorArgs) > 0), int> = 0>
+  periodic_task(const char *name, UBaseType_t priority,
+                task_routine_t &&on_start, task_routine_t &&on_stop,
+                task_routine_t &&periodic_routine,
+                const std::chrono::duration<Rep, Period> &period,
+                bool start_suspended, AllocatorArgs &&...args)
+      : m_period{std::chrono::duration_cast<std::chrono::milliseconds>(period)},
+        m_on_start{std::move(on_start)}, m_on_stop{std::move(on_stop)},
+        m_periodic_routine{std::move(periodic_routine)},
+        m_task{name, priority, [this]() { run(); }, start_suspended,
+               std::forward<AllocatorArgs>(args)...} {}
   /**
    * @brief Construct a new periodic task object
    *
@@ -655,6 +683,21 @@ public:
                       std::move(periodic_routine),
                       period,
                       start_suspended} {}
+  template <typename Rep, typename Period, typename... AllocatorArgs,
+            typename std::enable_if_t<(sizeof...(AllocatorArgs) > 0), int> = 0>
+  periodic_task(const std::string &name, UBaseType_t priority,
+                task_routine_t &&on_start, task_routine_t &&on_stop,
+                task_routine_t &&periodic_routine,
+                const std::chrono::duration<Rep, Period> &period,
+                bool start_suspended, AllocatorArgs &&...args)
+      : periodic_task{name.c_str(),
+                      priority,
+                      std::move(on_start),
+                      std::move(on_stop),
+                      std::move(periodic_routine),
+                      period,
+                      start_suspended,
+                      std::forward<AllocatorArgs>(args)...} {}
   /**
    * @brief Construct a new periodic task object
    *
@@ -675,6 +718,20 @@ public:
                       std::move(periodic_routine),
                       std::chrono::milliseconds{0},
                       start_suspended} {}
+  template <typename... AllocatorArgs,
+            typename std::enable_if_t<(sizeof...(AllocatorArgs) > 0), int> = 0>
+  periodic_task(const char *name, UBaseType_t priority,
+                task_routine_t &&on_start, task_routine_t &&on_stop,
+                task_routine_t &&periodic_routine, bool start_suspended,
+                AllocatorArgs &&...args)
+      : periodic_task{name,
+                      priority,
+                      std::move(on_start),
+                      std::move(on_stop),
+                      std::move(periodic_routine),
+                      std::chrono::milliseconds{0},
+                      start_suspended,
+                      std::forward<AllocatorArgs>(args)...} {}
   /**
    * @brief Construct a new periodic task object
    *
@@ -694,6 +751,19 @@ public:
                       std::move(on_stop),
                       std::move(periodic_routine),
                       start_suspended} {}
+  template <typename... AllocatorArgs,
+            typename std::enable_if_t<(sizeof...(AllocatorArgs) > 0), int> = 0>
+  periodic_task(const std::string &name, UBaseType_t priority,
+                task_routine_t &&on_start, task_routine_t &&on_stop,
+                task_routine_t &&periodic_routine, bool start_suspended,
+                AllocatorArgs &&...args)
+      : periodic_task{name.c_str(),
+                      priority,
+                      std::move(on_start),
+                      std::move(on_stop),
+                      std::move(periodic_routine),
+                      start_suspended,
+                      std::forward<AllocatorArgs>(args)...} {}
   periodic_task(const periodic_task &) = delete;
   periodic_task(periodic_task &&other) noexcept
       : m_period(other.m_period), m_on_start(std::move(other.m_on_start)),

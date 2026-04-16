@@ -36,6 +36,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #error "This header is for C++ only"
 #endif
 
+#include "freertos_expected.hpp"
 #include "freertos_isr_result.hpp"
 #include <FreeRTOS.h>
 #include <chrono>
@@ -44,6 +45,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <functional>
 #include <task.h>
 #include <timers.h>
+#include <type_traits>
 #include <utility>
 
 namespace freertos {
@@ -136,6 +138,17 @@ public:
                                    callback_wrapper)} {
     configASSERT(m_timer);
   }
+  template <typename... AllocatorArgs,
+            typename std::enable_if_t<(sizeof...(AllocatorArgs) > 0), int> = 0>
+  explicit timer(const char *name, const TickType_t period_ticks,
+                 UBaseType_t auto_reload, timer_callback_t &&callback,
+                 AllocatorArgs &&...args)
+      : m_allocator{std::forward<AllocatorArgs>(args)...},
+        m_callback{std::move(callback)}, m_started{false},
+        m_timer{m_allocator.create(name, period_ticks, auto_reload, this,
+                                   callback_wrapper)} {
+    configASSERT(m_timer);
+  }
   /**
    * @brief Construct a new timer object
    *
@@ -155,6 +168,18 @@ public:
                   std::chrono::duration_cast<std::chrono::milliseconds>(period)
                       .count()),
               auto_reload, std::move(callback)} {}
+  template <typename Rep, typename Period, typename... AllocatorArgs,
+            typename std::enable_if_t<(sizeof...(AllocatorArgs) > 0), int> = 0>
+  explicit timer(const char *name,
+                 const std::chrono::duration<Rep, Period> &period,
+                 UBaseType_t auto_reload, timer_callback_t &&callback,
+                 AllocatorArgs &&...args)
+      : timer{name,
+              pdMS_TO_TICKS(
+                  std::chrono::duration_cast<std::chrono::milliseconds>(period)
+                      .count()),
+              auto_reload, std::move(callback),
+              std::forward<AllocatorArgs>(args)...} {}
   timer(const timer &) = delete;
   /**
    * @brief Move constructor that properly transfers timer ownership.
@@ -553,6 +578,122 @@ public:
       return nullptr;
     }
     return pcTimerGetName(m_timer);
+  }
+
+  [[nodiscard]] expected<void, error>
+  start_ex(const TickType_t ticks_to_wait = portMAX_DELAY) {
+    auto rc = start(ticks_to_wait);
+    if (rc == pdPASS) {
+      return {};
+    }
+    return unexpected<error>(error::invalid_handle);
+  }
+  template <typename Rep, typename Period>
+  [[nodiscard]] expected<void, error>
+  start_ex(const std::chrono::duration<Rep, Period> &timeout) {
+    return start_ex(pdMS_TO_TICKS(
+        std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
+            .count()));
+  }
+  [[nodiscard]] isr_result<expected<void, error>> start_ex_isr(void) {
+    auto result = start_isr();
+    isr_result<expected<void, error>> ret{
+        unexpected<error>(error::invalid_handle),
+        result.higher_priority_task_woken};
+    if (result.result == pdPASS) {
+      ret.result = {};
+    }
+    return ret;
+  }
+  [[nodiscard]] expected<void, error>
+  stop_ex(const TickType_t ticks_to_wait = portMAX_DELAY) {
+    auto rc = stop(ticks_to_wait);
+    if (rc == pdPASS) {
+      return {};
+    }
+    return unexpected<error>(error::invalid_handle);
+  }
+  template <typename Rep, typename Period>
+  [[nodiscard]] expected<void, error>
+  stop_ex(const std::chrono::duration<Rep, Period> &timeout) {
+    return stop_ex(pdMS_TO_TICKS(
+        std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
+            .count()));
+  }
+  [[nodiscard]] isr_result<expected<void, error>> stop_ex_isr(void) {
+    auto result = stop_isr();
+    isr_result<expected<void, error>> ret{
+        unexpected<error>(error::invalid_handle),
+        result.higher_priority_task_woken};
+    if (result.result == pdPASS) {
+      ret.result = {};
+    }
+    return ret;
+  }
+  [[nodiscard]] expected<void, error>
+  reset_ex(const TickType_t ticks_to_wait = portMAX_DELAY) {
+    auto rc = reset(ticks_to_wait);
+    if (rc == pdPASS) {
+      return {};
+    }
+    return unexpected<error>(error::invalid_handle);
+  }
+  template <typename Rep, typename Period>
+  [[nodiscard]] expected<void, error>
+  reset_ex(const std::chrono::duration<Rep, Period> &timeout) {
+    return reset_ex(pdMS_TO_TICKS(
+        std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
+            .count()));
+  }
+  [[nodiscard]] isr_result<expected<void, error>> reset_ex_isr(void) {
+    auto result = reset_isr();
+    isr_result<expected<void, error>> ret{
+        unexpected<error>(error::invalid_handle),
+        result.higher_priority_task_woken};
+    if (result.result == pdPASS) {
+      ret.result = {};
+    }
+    return ret;
+  }
+  [[nodiscard]] expected<void, error>
+  period_ex(const TickType_t new_period_ticks,
+            const TickType_t ticks_to_wait = portMAX_DELAY) {
+    auto rc = period(new_period_ticks, ticks_to_wait);
+    if (rc == pdPASS) {
+      return {};
+    }
+    return unexpected<error>(error::invalid_handle);
+  }
+  template <typename RepPeriod, typename PeriodPeriod, typename RepTimeout,
+            typename PeriodTimeout>
+  [[nodiscard]] expected<void, error>
+  period_ex(const std::chrono::duration<RepPeriod, PeriodPeriod> &new_period,
+            const std::chrono::duration<RepTimeout, PeriodTimeout> &timeout) {
+    return period_ex(
+        pdMS_TO_TICKS(
+            std::chrono::duration_cast<std::chrono::milliseconds>(new_period)
+                .count()),
+        pdMS_TO_TICKS(
+            std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
+                .count()));
+  }
+  [[nodiscard]] isr_result<expected<void, error>>
+  period_ex_isr(const TickType_t new_period_ticks) {
+    auto result = period_isr(new_period_ticks);
+    isr_result<expected<void, error>> ret{
+        unexpected<error>(error::invalid_handle),
+        result.higher_priority_task_woken};
+    if (result.result == pdPASS) {
+      ret.result = {};
+    }
+    return ret;
+  }
+  template <typename Rep, typename Period>
+  [[nodiscard]] isr_result<expected<void, error>>
+  period_ex_isr(const std::chrono::duration<Rep, Period> &new_period) {
+    return period_ex_isr(pdMS_TO_TICKS(
+        std::chrono::duration_cast<std::chrono::milliseconds>(new_period)
+            .count()));
   }
 };
 

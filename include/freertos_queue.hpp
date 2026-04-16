@@ -36,12 +36,14 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #error "This header is for C++ only"
 #endif
 
+#include "freertos_expected.hpp"
 #include "freertos_isr_result.hpp"
 #include <FreeRTOS.h>
 #include <array>
 #include <chrono>
 #include <optional>
 #include <queue.h>
+#include <type_traits>
 #include <utility>
 
 namespace freertos {
@@ -198,6 +200,16 @@ public:
    */
   explicit queue(const char *registered_name = nullptr)
       : m_queue{m_allocator.create()} {
+    configASSERT(m_queue);
+    if (registered_name != nullptr) {
+      vQueueAddToRegistry(m_queue, registered_name);
+    }
+  }
+  template <typename... AllocatorArgs,
+            typename std::enable_if_t<(sizeof...(AllocatorArgs) > 0), int> = 0>
+  explicit queue(const char *registered_name, AllocatorArgs &&...args)
+      : m_allocator{std::forward<AllocatorArgs>(args)...},
+        m_queue{m_allocator.create()} {
     configASSERT(m_queue);
     if (registered_name != nullptr) {
       vQueueAddToRegistry(m_queue, registered_name);
@@ -633,6 +645,152 @@ public:
    */
   BaseType_t empty_isr(void) const {
     return xQueueIsQueueEmptyFromISR(m_queue);
+  }
+
+  [[nodiscard]] expected<void, error> send_ex(const T &item,
+                                              TickType_t ticks_to_wait) {
+    auto rc = send(item, ticks_to_wait);
+    if (rc == pdPASS) {
+      return {};
+    }
+    return unexpected<error>(ticks_to_wait == 0 ? error::queue_full
+                                                : error::timeout);
+  }
+  template <typename Rep, typename Period>
+  [[nodiscard]] expected<void, error>
+  send_ex(const T &item, const std::chrono::duration<Rep, Period> &timeout) {
+    return send_ex(
+        item, pdMS_TO_TICKS(
+                  std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
+                      .count()));
+  }
+  [[nodiscard]] isr_result<expected<void, error>> send_ex_isr(const T &item) {
+    auto result = send_isr(item);
+    isr_result<expected<void, error>> ret{unexpected<error>(error::queue_full),
+                                          result.higher_priority_task_woken};
+    if (result.result == pdPASS) {
+      ret.result = {};
+    }
+    return ret;
+  }
+  [[nodiscard]] expected<void, error> send_back_ex(const T &item,
+                                                   TickType_t ticks_to_wait) {
+    auto rc = send_back(item, ticks_to_wait);
+    if (rc == pdPASS) {
+      return {};
+    }
+    return unexpected<error>(ticks_to_wait == 0 ? error::queue_full
+                                                : error::timeout);
+  }
+  template <typename Rep, typename Period>
+  [[nodiscard]] expected<void, error>
+  send_back_ex(const T &item,
+               const std::chrono::duration<Rep, Period> &timeout) {
+    return send_back_ex(
+        item, pdMS_TO_TICKS(
+                  std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
+                      .count()));
+  }
+  [[nodiscard]] isr_result<expected<void, error>>
+  send_back_ex_isr(const T &item) {
+    auto result = send_back_isr(item);
+    isr_result<expected<void, error>> ret{unexpected<error>(error::queue_full),
+                                          result.higher_priority_task_woken};
+    if (result.result == pdPASS) {
+      ret.result = {};
+    }
+    return ret;
+  }
+  [[nodiscard]] expected<void, error> send_front_ex(const T &item,
+                                                    TickType_t ticks_to_wait) {
+    auto rc = send_front(item, ticks_to_wait);
+    if (rc == pdPASS) {
+      return {};
+    }
+    return unexpected<error>(ticks_to_wait == 0 ? error::queue_full
+                                                : error::timeout);
+  }
+  template <typename Rep, typename Period>
+  [[nodiscard]] expected<void, error>
+  send_front_ex(const T &item,
+                const std::chrono::duration<Rep, Period> &timeout) {
+    return send_front_ex(
+        item, pdMS_TO_TICKS(
+                  std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
+                      .count()));
+  }
+  [[nodiscard]] isr_result<expected<void, error>>
+  send_front_ex_isr(const T &item) {
+    auto result = send_front_isr(item);
+    isr_result<expected<void, error>> ret{unexpected<error>(error::queue_full),
+                                          result.higher_priority_task_woken};
+    if (result.result == pdPASS) {
+      ret.result = {};
+    }
+    return ret;
+  }
+  [[nodiscard]] expected<void, error> receive_ex(T &item,
+                                                 TickType_t ticks_to_wait) {
+    auto rc = receive(item, ticks_to_wait);
+    if (rc == pdPASS) {
+      return {};
+    }
+    return unexpected<error>(ticks_to_wait == 0 ? error::queue_empty
+                                                : error::timeout);
+  }
+  template <typename Rep, typename Period>
+  [[nodiscard]] expected<void, error>
+  receive_ex(T &item, const std::chrono::duration<Rep, Period> &timeout) {
+    return receive_ex(
+        item, pdMS_TO_TICKS(
+                  std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
+                      .count()));
+  }
+  [[nodiscard]] expected<T, error> receive_ex(TickType_t ticks_to_wait) {
+    auto opt = receive(ticks_to_wait);
+    if (opt.has_value()) {
+      return opt.value();
+    }
+    return unexpected<error>(ticks_to_wait == 0 ? error::queue_empty
+                                                : error::timeout);
+  }
+  template <typename Rep, typename Period>
+  [[nodiscard]] expected<T, error>
+  receive_ex(const std::chrono::duration<Rep, Period> &timeout) {
+    return receive_ex(pdMS_TO_TICKS(
+        std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
+            .count()));
+  }
+  [[nodiscard]] expected<void, error> reset_ex() {
+    auto rc = reset();
+    if (rc == pdPASS) {
+      return {};
+    }
+    return unexpected<error>(error::invalid_handle);
+  }
+  [[nodiscard]] expected<void, error> overwrite_ex(const T &item) {
+    auto rc = overwrite(item);
+    if (rc == pdPASS) {
+      return {};
+    }
+    return unexpected<error>(error::queue_full);
+  }
+  [[nodiscard]] expected<void, error> peek_ex(T &item,
+                                              TickType_t ticks_to_wait) {
+    auto rc = peek(item, ticks_to_wait);
+    if (rc == pdPASS) {
+      return {};
+    }
+    return unexpected<error>(ticks_to_wait == 0 ? error::queue_empty
+                                                : error::timeout);
+  }
+  template <typename Rep, typename Period>
+  [[nodiscard]] expected<void, error>
+  peek_ex(T &item, const std::chrono::duration<Rep, Period> &timeout) {
+    return peek_ex(
+        item, pdMS_TO_TICKS(
+                  std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
+                      .count()));
   }
 };
 

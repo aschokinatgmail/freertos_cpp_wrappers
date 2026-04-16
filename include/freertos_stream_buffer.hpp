@@ -36,12 +36,14 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #error "This header is for C++ only"
 #endif
 
+#include "freertos_expected.hpp"
 #include "freertos_isr_result.hpp"
 #include <FreeRTOS.h>
 #include <array>
 #include <chrono>
 #include <optional>
 #include <stream_buffer.h>
+#include <type_traits>
 #include <utility>
 
 namespace freertos {
@@ -109,6 +111,13 @@ public:
    */
   explicit stream_buffer(size_t trigger_level_bytes = 1)
       : m_stream_buffer{m_allocator.create(trigger_level_bytes)} {
+    configASSERT(m_stream_buffer);
+  }
+  template <typename... AllocatorArgs,
+            typename std::enable_if_t<(sizeof...(AllocatorArgs) > 0), int> = 0>
+  explicit stream_buffer(size_t trigger_level_bytes, AllocatorArgs &&...args)
+      : m_allocator{std::forward<AllocatorArgs>(args)...},
+        m_stream_buffer{m_allocator.create(trigger_level_bytes)} {
     configASSERT(m_stream_buffer);
   }
   stream_buffer(const stream_buffer &) = delete;
@@ -340,6 +349,99 @@ public:
    * @return BaseType_t pdTRUE if the stream buffer is full, pdFALSE otherwise.
    */
   BaseType_t full(void) { return xStreamBufferIsFull(m_stream_buffer); }
+
+  [[nodiscard]] expected<size_t, error>
+  send_ex(const void *data, size_t data_size,
+          TickType_t timeout = portMAX_DELAY) {
+    auto rc = send(data, data_size, timeout);
+    if (rc > 0) {
+      return rc;
+    }
+    return unexpected<error>(timeout == 0 ? error::would_block
+                                          : error::timeout);
+  }
+  template <typename Rep, typename Period>
+  [[nodiscard]] expected<size_t, error>
+  send_ex(const void *data, size_t data_size,
+          const std::chrono::duration<Rep, Period> &timeout) {
+    return send_ex(
+        data, data_size,
+        pdMS_TO_TICKS(
+            std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
+                .count()));
+  }
+  template <typename Iterator>
+  [[nodiscard]] expected<size_t, error>
+  send_ex(Iterator begin, Iterator end, TickType_t timeout = portMAX_DELAY) {
+    return send_ex(&*begin, std::distance(begin, end), timeout);
+  }
+  template <typename Iterator, typename Rep, typename Period>
+  [[nodiscard]] expected<size_t, error>
+  send_ex(Iterator begin, Iterator end,
+          const std::chrono::duration<Rep, Period> &timeout) {
+    return send_ex(&*begin, std::distance(begin, end), timeout);
+  }
+  [[nodiscard]] isr_result<expected<size_t, error>>
+  send_ex_isr(const void *data, size_t data_size) {
+    auto result = send_isr(data, data_size);
+    isr_result<expected<size_t, error>> ret{
+        unexpected<error>(error::would_block),
+        result.higher_priority_task_woken};
+    if (result.result > 0) {
+      ret.result = result.result;
+    }
+    return ret;
+  }
+  template <typename Iterator>
+  [[nodiscard]] isr_result<expected<size_t, error>> send_ex_isr(Iterator begin,
+                                                                Iterator end) {
+    return send_ex_isr(&*begin, std::distance(begin, end));
+  }
+  [[nodiscard]] expected<size_t, error>
+  receive_ex(void *data, size_t data_size, TickType_t timeout = portMAX_DELAY) {
+    auto rc = receive(data, data_size, timeout);
+    if (rc > 0) {
+      return rc;
+    }
+    return unexpected<error>(timeout == 0 ? error::would_block
+                                          : error::timeout);
+  }
+  template <typename Rep, typename Period>
+  [[nodiscard]] expected<size_t, error>
+  receive_ex(void *data, size_t data_size,
+             const std::chrono::duration<Rep, Period> &timeout) {
+    return receive_ex(
+        data, data_size,
+        pdMS_TO_TICKS(
+            std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
+                .count()));
+  }
+  [[nodiscard]] isr_result<expected<size_t, error>>
+  receive_ex_isr(void *data, size_t data_size) {
+    auto result = receive_isr(data, data_size);
+    isr_result<expected<size_t, error>> ret{
+        unexpected<error>(error::would_block),
+        result.higher_priority_task_woken};
+    if (result.result > 0) {
+      ret.result = result.result;
+    }
+    return ret;
+  }
+  [[nodiscard]] expected<void, error> reset_ex() {
+    auto rc = reset();
+    if (rc == pdPASS) {
+      return {};
+    }
+    return unexpected<error>(error::invalid_handle);
+  }
+  [[nodiscard]] expected<void, error>
+  set_trigger_level_ex(size_t trigger_level_bytes) {
+    auto rc = set_trigger_level(trigger_level_bytes);
+    if (rc == pdPASS) {
+      return {};
+    }
+    return unexpected<error>(error::invalid_parameter);
+  }
 };
 
 #if configSUPPORT_STATIC_ALLOCATION

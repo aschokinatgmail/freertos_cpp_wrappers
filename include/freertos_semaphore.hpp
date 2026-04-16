@@ -36,12 +36,14 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #error "This header is for C++ only"
 #endif
 
+#include "freertos_expected.hpp"
 #include "freertos_isr_result.hpp"
 #include <FreeRTOS.h>
 #include <chrono>
 #include <ctime>
 #include <semphr.h>
 #include <task.h>
+#include <type_traits>
 #include <utility>
 
 namespace freertos {
@@ -176,6 +178,13 @@ public:
   binary_semaphore() : m_semaphore{m_allocator.create_binary()} {
     configASSERT(m_semaphore);
   }
+  template <typename... AllocatorArgs,
+            typename std::enable_if_t<(sizeof...(AllocatorArgs) > 0), int> = 0>
+  explicit binary_semaphore(AllocatorArgs &&...args)
+      : m_allocator{std::forward<AllocatorArgs>(args)...},
+        m_semaphore{m_allocator.create_binary()} {
+    configASSERT(m_semaphore);
+  }
   binary_semaphore(const binary_semaphore &) = delete;
   binary_semaphore(binary_semaphore &&src) noexcept
       : m_semaphore(src.m_semaphore) {
@@ -270,6 +279,49 @@ public:
         std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
             .count()));
   }
+
+  [[nodiscard]] expected<void, error> give_ex() {
+    auto rc = give();
+    if (rc == pdTRUE) {
+      return {};
+    }
+    return unexpected<error>(error::semaphore_not_owned);
+  }
+  [[nodiscard]] isr_result<expected<void, error>> give_ex_isr() {
+    auto result = give_isr();
+    isr_result<expected<void, error>> ret{
+        unexpected<error>(error::semaphore_not_owned),
+        result.higher_priority_task_woken};
+    if (result.result == pdTRUE) {
+      ret.result = {};
+    }
+    return ret;
+  }
+  [[nodiscard]] expected<void, error>
+  take_ex(const TickType_t ticks_to_wait = portMAX_DELAY) {
+    auto rc = take(ticks_to_wait);
+    if (rc == pdTRUE) {
+      return {};
+    }
+    return unexpected<error>(ticks_to_wait == 0 ? error::would_block
+                                                : error::timeout);
+  }
+  [[nodiscard]] isr_result<expected<void, error>> take_ex_isr() {
+    auto result = take_isr();
+    isr_result<expected<void, error>> ret{unexpected<error>(error::would_block),
+                                          result.higher_priority_task_woken};
+    if (result.result == pdTRUE) {
+      ret.result = {};
+    }
+    return ret;
+  }
+  template <typename Rep, typename Period>
+  [[nodiscard]] expected<void, error>
+  take_ex(const std::chrono::duration<Rep, Period> &timeout) {
+    return take_ex(pdMS_TO_TICKS(
+        std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
+            .count()));
+  }
 };
 
 /**
@@ -291,6 +343,13 @@ public:
    */
   explicit counting_semaphore(UBaseType_t max_count = 1)
       : m_semaphore{m_allocator.create_counting(max_count)} {
+    configASSERT(m_semaphore);
+  }
+  template <typename... AllocatorArgs,
+            typename std::enable_if_t<(sizeof...(AllocatorArgs) > 0), int> = 0>
+  explicit counting_semaphore(UBaseType_t max_count, AllocatorArgs &&...args)
+      : m_allocator{std::forward<AllocatorArgs>(args)...},
+        m_semaphore{m_allocator.create_counting(max_count)} {
     configASSERT(m_semaphore);
   }
   counting_semaphore(const counting_semaphore &) = delete;
@@ -387,6 +446,50 @@ public:
         std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
             .count()));
   }
+
+  [[nodiscard]] expected<void, error> give_ex() {
+    auto rc = give();
+    if (rc == pdTRUE) {
+      return {};
+    }
+    return unexpected<error>(error::semaphore_not_owned);
+  }
+  [[nodiscard]] isr_result<expected<void, error>> give_ex_isr() {
+    auto result = give_isr();
+    isr_result<expected<void, error>> ret{
+        unexpected<error>(error::semaphore_not_owned),
+        result.higher_priority_task_woken};
+    if (result.result == pdTRUE) {
+      ret.result = {};
+    }
+    return ret;
+  }
+  [[nodiscard]] expected<void, error>
+  take_ex(const TickType_t ticks_to_wait = portMAX_DELAY) {
+    auto rc = take(ticks_to_wait);
+    if (rc == pdTRUE) {
+      return {};
+    }
+    return unexpected<error>(ticks_to_wait == 0 ? error::would_block
+                                                : error::timeout);
+  }
+  [[nodiscard]] isr_result<expected<void, error>> take_ex_isr() {
+    auto result = take_isr();
+    isr_result<expected<void, error>> ret{unexpected<error>(error::would_block),
+                                          result.higher_priority_task_woken};
+    if (result.result == pdTRUE) {
+      ret.result = {};
+    }
+    return ret;
+  }
+  template <typename Rep, typename Period>
+  [[nodiscard]] expected<void, error>
+  take_ex(const std::chrono::duration<Rep, Period> &timeout) {
+    return take_ex(pdMS_TO_TICKS(
+        std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
+            .count()));
+  }
+
   /**
    * @brief Give the counting semaphore.
    *
@@ -466,6 +569,13 @@ public:
    *
    */
   mutex() : m_semaphore{m_allocator.create_mutex()}, m_locked{false} {
+    configASSERT(m_semaphore);
+  }
+  template <typename... AllocatorArgs,
+            typename std::enable_if_t<(sizeof...(AllocatorArgs) > 0), int> = 0>
+  explicit mutex(AllocatorArgs &&...args)
+      : m_allocator{std::forward<AllocatorArgs>(args)...},
+        m_semaphore{m_allocator.create_mutex()}, m_locked{false} {
     configASSERT(m_semaphore);
   }
   mutex(const mutex &) = delete;
@@ -590,6 +700,57 @@ public:
     }
     return rc;
   }
+
+  [[nodiscard]] expected<void, error>
+  lock_ex(const TickType_t ticks_to_wait = portMAX_DELAY) {
+    auto rc = lock(ticks_to_wait);
+    if (rc == pdTRUE) {
+      return {};
+    }
+    return unexpected<error>(ticks_to_wait == 0 ? error::would_block
+                                                : error::timeout);
+  }
+  [[nodiscard]] isr_result<expected<void, error>> lock_ex_isr() {
+    auto result = lock_isr();
+    isr_result<expected<void, error>> ret{unexpected<error>(error::would_block),
+                                          result.higher_priority_task_woken};
+    if (result.result == pdTRUE) {
+      ret.result = {};
+    }
+    return ret;
+  }
+  [[nodiscard]] expected<void, error> unlock_ex() {
+    auto rc = unlock();
+    if (rc == pdTRUE) {
+      return {};
+    }
+    return unexpected<error>(error::semaphore_not_owned);
+  }
+  [[nodiscard]] isr_result<expected<void, error>> unlock_ex_isr() {
+    auto result = unlock_isr();
+    isr_result<expected<void, error>> ret{
+        unexpected<error>(error::semaphore_not_owned),
+        result.higher_priority_task_woken};
+    if (result.result == pdTRUE) {
+      ret.result = {};
+    }
+    return ret;
+  }
+  [[nodiscard]] expected<void, error> try_lock_ex() {
+    auto rc = try_lock();
+    if (rc == pdTRUE) {
+      return {};
+    }
+    return unexpected<error>(error::would_block);
+  }
+  template <typename Rep, typename Period>
+  [[nodiscard]] expected<void, error>
+  lock_ex(const std::chrono::duration<Rep, Period> &timeout) {
+    return lock_ex(pdMS_TO_TICKS(
+        std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
+            .count()));
+  }
+
   /**
    * @brief Get the lock status of the mutex.
    *
@@ -615,6 +776,13 @@ public:
    *
    */
   recursive_mutex() : m_semaphore{m_allocator.create_recursive_mutex()} {
+    configASSERT(m_semaphore);
+  }
+  template <typename... AllocatorArgs,
+            typename std::enable_if_t<(sizeof...(AllocatorArgs) > 0), int> = 0>
+  explicit recursive_mutex(AllocatorArgs &&...args)
+      : m_allocator{std::forward<AllocatorArgs>(args)...},
+        m_semaphore{m_allocator.create_recursive_mutex()} {
     configASSERT(m_semaphore);
   }
   recursive_mutex(const recursive_mutex &) = delete;
@@ -711,6 +879,38 @@ public:
     }
     return rc;
   }
+
+  [[nodiscard]] expected<void, error>
+  lock_ex(const TickType_t ticks_to_wait = portMAX_DELAY) {
+    auto rc = lock(ticks_to_wait);
+    if (rc == pdTRUE) {
+      return {};
+    }
+    return unexpected<error>(ticks_to_wait == 0 ? error::would_block
+                                                : error::timeout);
+  }
+  [[nodiscard]] expected<void, error> unlock_ex() {
+    auto rc = unlock();
+    if (rc == pdTRUE) {
+      return {};
+    }
+    return unexpected<error>(error::semaphore_not_owned);
+  }
+  [[nodiscard]] expected<void, error> try_lock_ex() {
+    auto rc = try_lock();
+    if (rc == pdTRUE) {
+      return {};
+    }
+    return unexpected<error>(error::would_block);
+  }
+  template <typename Rep, typename Period>
+  [[nodiscard]] expected<void, error>
+  lock_ex(const std::chrono::duration<Rep, Period> &timeout) {
+    return lock_ex(pdMS_TO_TICKS(
+        std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
+            .count()));
+  }
+
   /**
    * @brief Get the lock status of the recursive mutex.
    *

@@ -107,6 +107,21 @@ add_executable(
     test_freertos_expected.cpp
 )
 
+add_executable(
+    test_freertos_external_allocator
+    test_freertos_external_allocator.cpp
+)
+
+add_executable(
+    test_freertos_strong_types
+    test_freertos_strong_types.cpp
+)
+
+add_executable(
+    test_freertos_expected_api
+    test_freertos_expected_api.cpp
+)
+
 target_link_libraries(
     test_freertos_task
     freertos_cpp_wrappers
@@ -234,6 +249,30 @@ target_link_libraries(
     pthread
 )
 
+target_link_libraries(
+    test_freertos_external_allocator
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
+target_link_libraries(
+    test_freertos_strong_types
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
+target_link_libraries(
+    test_freertos_expected_api
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
 # Apply compile options if using PkgConfig
 if(GTEST_COMPILE_OPTIONS)
     target_compile_options(test_freertos_task PRIVATE ${GTEST_COMPILE_OPTIONS})
@@ -252,6 +291,9 @@ if(GTEST_COMPILE_OPTIONS)
     target_compile_options(test_freertos_config PRIVATE ${GTEST_COMPILE_OPTIONS})
     target_compile_options(test_freertos_span PRIVATE ${GTEST_COMPILE_OPTIONS})
     target_compile_options(test_freertos_expected PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_external_allocator PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_strong_types PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_expected_api PRIVATE ${GTEST_COMPILE_OPTIONS})
 endif()
 
 # Add tests - run complete test executables to ensure proper failure detection
@@ -272,3 +314,6 @@ add_test(NAME test_enhanced_debug COMMAND test_enhanced_debug)
 add_test(NAME test_freertos_config COMMAND test_freertos_config)
 add_test(NAME test_freertos_span COMMAND test_freertos_span)
 add_test(NAME test_freertos_expected COMMAND test_freertos_expected)
+add_test(NAME test_freertos_external_allocator COMMAND test_freertos_external_allocator)
+add_test(NAME test_freertos_strong_types COMMAND test_freertos_strong_types)
+add_test(NAME test_freertos_expected_api COMMAND test_freertos_expected_api)
