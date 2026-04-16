@@ -38,6 +38,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "freertos_version.hpp"
 
+#include "freertos_config.hpp"
+
 #include "freertos_event_group.hpp"
 #include "freertos_message_buffer.hpp"
 #include "freertos_queue.hpp"

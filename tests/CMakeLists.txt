@@ -92,6 +92,21 @@ add_executable(
     test_enhanced_debug.cpp
 )
 
+add_executable(
+    test_freertos_config
+    test_freertos_config.cpp
+)
+
+add_executable(
+    test_freertos_span
+    test_freertos_span.cpp
+)
+
+add_executable(
+    test_freertos_expected
+    test_freertos_expected.cpp
+)
+
 target_link_libraries(
     test_freertos_task
     freertos_cpp_wrappers
@@ -196,6 +211,29 @@ target_link_libraries(
     pthread
 )
 
+target_link_libraries(
+    test_freertos_config
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
+target_link_libraries(
+    test_freertos_span
+    freertos_cpp_wrappers
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
+target_link_libraries(
+    test_freertos_expected
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
 # Apply compile options if using PkgConfig
 if(GTEST_COMPILE_OPTIONS)
     target_compile_options(test_freertos_task PRIVATE ${GTEST_COMPILE_OPTIONS})
@@ -211,6 +249,9 @@ if(GTEST_COMPILE_OPTIONS)
     target_compile_options(test_enhanced_cpp17_features PRIVATE ${GTEST_COMPILE_OPTIONS})
     target_compile_options(test_enhanced_freertos_sw_timer PRIVATE ${GTEST_COMPILE_OPTIONS})
     target_compile_options(test_enhanced_debug PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_config PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_span PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_expected PRIVATE ${GTEST_COMPILE_OPTIONS})
 endif()
 
 # Add tests - run complete test executables to ensure proper failure detection
@@ -228,3 +269,6 @@ add_test(NAME test_enhanced_timeout_precision COMMAND test_enhanced_timeout_prec
 add_test(NAME test_enhanced_cpp17_features COMMAND test_enhanced_cpp17_features)
 add_test(NAME test_enhanced_freertos_sw_timer COMMAND test_enhanced_freertos_sw_timer)
 add_test(NAME test_enhanced_debug COMMAND test_enhanced_debug)
+add_test(NAME test_freertos_config COMMAND test_freertos_config)
+add_test(NAME test_freertos_span COMMAND test_freertos_span)
+add_test(NAME test_freertos_expected COMMAND test_freertos_expected)
