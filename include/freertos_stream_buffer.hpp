@@ -150,12 +150,10 @@ public:
    * @param data_size Maximum number of bytes to copy into the stream buffer.
    * @param timeout Number of ticks to wait for the data to be copied into the
    * stream buffer.
-   * @return BaseType_t pdPASS if the data was successfully copied into the
-   * stream buffer, otherwise errCOULD_NOT_ALLOCATE_REQUIRED_MEMORY if there was
-   * insufficient memory available to copy the data into the stream buffer.
+   * @return size_t Number of bytes written to the stream buffer.
    */
-  BaseType_t send(const void *data, size_t data_size,
-                  TickType_t timeout = portMAX_DELAY) {
+  size_t send(const void *data, size_t data_size,
+              TickType_t timeout = portMAX_DELAY) {
     return xStreamBufferSend(m_stream_buffer, data, data_size, timeout);
   }
   /**
@@ -166,13 +164,11 @@ public:
    * @param data_size Maximum number of bytes to copy into the stream buffer.
    * @param timeout Duration to wait for the data to be copied into the stream
    * buffer.
-   * @return BaseType_t pdPASS if the data was successfully copied into the
-   * stream buffer, otherwise errCOULD_NOT_ALLOCATE_REQUIRED_MEMORY if there was
-   * insufficient memory available to copy the data into the stream buffer.
+   * @return size_t Number of bytes written to the stream buffer.
    */
   template <typename Rep, typename Period>
-  BaseType_t send(const void *data, size_t data_size,
-                  const std::chrono::duration<Rep, Period> &timeout) {
+  size_t send(const void *data, size_t data_size,
+              const std::chrono::duration<Rep, Period> &timeout) {
     return send(
         data, data_size,
         pdMS_TO_TICKS(
@@ -188,13 +184,11 @@ public:
    * @param end Iterator to the end of the data
    * @param timeout Number of ticks to wait for the data to be copied into the
    * stream buffer.
-   * @return BaseType_t pdPASS if the data was successfully copied into the
-   * stream buffer, otherwise errCOULD_NOT_ALLOCATE_REQUIRED_MEMORY if there was
-   * insufficient memory available to copy the data into the stream buffer.
+   * @return size_t Number of bytes written to the stream buffer.
    */
   template <typename Iterator>
-  BaseType_t send(Iterator begin, Iterator end,
-                  TickType_t timeout = portMAX_DELAY) {
+  size_t send(Iterator begin, Iterator end,
+              TickType_t timeout = portMAX_DELAY) {
     return send(&*begin, std::distance(begin, end), timeout);
   }
   /**
@@ -206,13 +200,11 @@ public:
    * @param end Iterator to the end of the data
    * @param timeout Duration to wait for the data to be copied into the stream
    * buffer.
-   * @return BaseType_t pdPASS if the data was successfully copied into the
-   * stream buffer, otherwise errCOULD_NOT_ALLOCATE_REQUIRED_MEMORY if there was
-   * insufficient memory available to copy the data into the stream buffer.
+   * @return size_t Number of bytes written to the stream buffer.
    */
   template <typename Iterator, typename Rep, typename Period>
-  BaseType_t send(Iterator begin, Iterator end,
-                  const std::chrono::duration<Rep, Period> &timeout) {
+  size_t send(Iterator begin, Iterator end,
+              const std::chrono::duration<Rep, Period> &timeout) {
     return send(&*begin, std::distance(begin, end), timeout);
   }
   /**
@@ -221,14 +213,11 @@ public:
    *
    * @param data A pointer to the data to be copied into the stream buffer.
    * @param data_size Maximum number of bytes to copy into the stream buffer.
-   * @return isr_result<BaseType_t> result containing pdPASS if the data was
-   * successfully copied into the stream buffer, otherwise
-   * errCOULD_NOT_ALLOCATE_REQUIRED_MEMORY if there was insufficient memory
-   * available to copy the data into the stream buffer, and the
-   * higher_priority_task_woken flag.
+   * @return isr_result<size_t> result containing the number of bytes written
+   * and the higher_priority_task_woken flag.
    */
-  isr_result<BaseType_t> send_isr(const void *data, size_t data_size) {
-    isr_result<BaseType_t> result{pdFALSE, pdFALSE};
+  isr_result<size_t> send_isr(const void *data, size_t data_size) {
+    isr_result<size_t> result{0, pdFALSE};
     result.result = xStreamBufferSendFromISR(
         m_stream_buffer, data, data_size, &result.higher_priority_task_woken);
     return result;
@@ -240,14 +229,11 @@ public:
    * @tparam Iterator Const iterator type
    * @param begin Iterator to the beginning of the data
    * @param end Iterator to the end of the data
-   * @return isr_result<BaseType_t> result containing pdPASS if the data was
-   * successfully copied into the stream buffer, otherwise
-   * errCOULD_NOT_ALLOCATE_REQUIRED_MEMORY if there was insufficient memory
-   * available to copy the data into the stream buffer, and the
-   * higher_priority_task_woken flag.
+   * @return isr_result<size_t> result containing the number of bytes written
+   * and the higher_priority_task_woken flag.
    */
   template <typename Iterator>
-  isr_result<BaseType_t> send_isr(Iterator begin, Iterator end) {
+  isr_result<size_t> send_isr(Iterator begin, Iterator end) {
     return send_isr(&*begin, std::distance(begin, end));
   }
   /**

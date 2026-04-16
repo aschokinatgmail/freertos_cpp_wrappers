@@ -62,6 +62,21 @@ else()
     set(GTEST_LIBRARIES GTest::gtest GTest::gtest_main GTest::gmock GTest::gmock_main)
 endif()
 
+set(SIM_COMPILE_OPTIONS
+    -Wno-old-style-cast
+    -Wno-sign-conversion
+    -Wno-conversion
+    -Wno-pedantic
+    -Wno-undef
+    -Wno-missing-field-initializers
+    -Wno-cast-qual
+    -Wno-missing-braces
+    -Wno-shadow
+    -Wno-unused-variable
+    -fno-exceptions
+)
+
+# --- Smoke tests (raw C API) ---
 add_executable(simulation_smoke
     test_sim_smoke.cpp
 )
@@ -73,12 +88,7 @@ target_link_libraries(simulation_smoke
 )
 
 target_compile_options(simulation_smoke PRIVATE
-    -Wno-old-style-cast
-    -Wno-sign-conversion
-    -Wno-conversion
-    -Wno-pedantic
-    -Wno-undef
-    -fno-exceptions
+    ${SIM_COMPILE_OPTIONS}
 )
 
 add_test(
@@ -88,5 +98,36 @@ add_test(
 
 set_tests_properties(simulation_smoke PROPERTIES
     TIMEOUT 60
+    LABELS "simulation"
+)
+
+# --- System tests (C++ wrappers) ---
+add_executable(simulation_system
+    test_sim_system.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../src/freertos_task.cc
+)
+
+target_include_directories(simulation_system PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../include
+    ${CMAKE_CURRENT_BINARY_DIR}/../../include
+)
+
+target_link_libraries(simulation_system
+    freertos_kernel_sim
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
+target_compile_options(simulation_system PRIVATE
+    ${SIM_COMPILE_OPTIONS}
+)
+
+add_test(
+    NAME simulation_system
+    COMMAND simulation_system
+)
+
+set_tests_properties(simulation_system PROPERTIES
+    TIMEOUT 120
     LABELS "simulation"
 )
