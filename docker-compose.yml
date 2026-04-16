@@ -53,5 +53,12 @@ services:
       build:
         condition: service_completed_successfully
 
+  simulation:
+    build:
+      context: .
+      dockerfile: Dockerfile.simulation
+    image: freertos-cpp-wrappers:simulation
+    command: ["bash", "-c", "cd /project/build-sim && ctest --verbose --output-on-failure -L simulation"]
+
 volumes:
   build-artifacts:

@@ -1,10 +1,12 @@
 # Build directories
 build/
 build-test/
+build-sim/
 out/
 .vscode/
 .vs/
 docker-build/
+cmake-build/
 
 # Documentation build output
 site/
