@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.14)
 project(freertos_cpp_wrappers
-    VERSION 2.0.3
+    VERSION 3.0.0
     LANGUAGES C CXX
 )
 
