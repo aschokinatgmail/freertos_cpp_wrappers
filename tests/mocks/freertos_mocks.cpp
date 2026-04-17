@@ -101,6 +101,13 @@ UBaseType_t uxTaskPriorityGetFromISR(TaskHandle_t xTask) {
   return 0;
 }
 
+UBaseType_t uxTaskBasePriorityGet(TaskHandle_t xTask) {
+  if (g_freertos_mock) {
+    return g_freertos_mock->uxTaskBasePriorityGet(xTask);
+  }
+  return 0;
+}
+
 void vTaskPrioritySet(TaskHandle_t xTask, UBaseType_t uxNewPriority) {
   if (g_freertos_mock) {
     g_freertos_mock->vTaskPrioritySet(xTask, uxNewPriority);
@@ -190,6 +197,26 @@ void vTaskDelayUntil(TickType_t *pxPreviousWakeTime,
   }
 }
 
+BaseType_t xPortIsInsideInterrupt(void) {
+  if (g_freertos_mock) {
+    return g_freertos_mock->xPortIsInsideInterrupt();
+  }
+  return pdFALSE;
+}
+
+void xTaskCatchUpTicks(TickType_t xTicksToCatchUp) {
+  if (g_freertos_mock) {
+    g_freertos_mock->xTaskCatchUpTicks(xTicksToCatchUp);
+  }
+}
+
+TaskHandle_t xTimerGetTimerDaemonTaskHandle(void) {
+  if (g_freertos_mock) {
+    return g_freertos_mock->xTimerGetTimerDaemonTaskHandle();
+  }
+  return nullptr;
+}
+
 BaseType_t xTaskNotifyGive(TaskHandle_t xTaskToNotify) {
   if (g_freertos_mock) {
     return g_freertos_mock->xTaskNotifyGive(xTaskToNotify);
@@ -271,6 +298,97 @@ uint32_t ulTaskNotifyValueClear(TaskHandle_t xTask, uint32_t ulBitsToClear) {
   return 0;
 }
 
+BaseType_t xTaskNotifyGiveIndexed(TaskHandle_t xTaskToNotify,
+                                  UBaseType_t uxIndex) {
+  if (g_freertos_mock) {
+    return g_freertos_mock->xTaskNotifyGiveIndexed(xTaskToNotify, uxIndex);
+  }
+  return pdFALSE;
+}
+
+uint32_t ulTaskNotifyTakeIndexed(UBaseType_t uxIndex,
+                                 BaseType_t xClearCountOnExit,
+                                 TickType_t xTicksToWait) {
+  if (g_freertos_mock) {
+    return g_freertos_mock->ulTaskNotifyTakeIndexed(uxIndex, xClearCountOnExit,
+                                                    xTicksToWait);
+  }
+  return 0;
+}
+
+BaseType_t xTaskNotifyIndexed(TaskHandle_t xTaskToNotify, UBaseType_t uxIndex,
+                              uint32_t ulValue, eNotifyAction eAction) {
+  if (g_freertos_mock) {
+    return g_freertos_mock->xTaskNotifyIndexed(xTaskToNotify, uxIndex, ulValue,
+                                               eAction);
+  }
+  return pdFALSE;
+}
+
+BaseType_t xTaskNotifyAndQueryIndexed(TaskHandle_t xTaskToNotify,
+                                      UBaseType_t uxIndex, uint32_t ulValue,
+                                      eNotifyAction eAction,
+                                      uint32_t *pulPreviousNotifyValue) {
+  if (g_freertos_mock) {
+    return g_freertos_mock->xTaskNotifyAndQueryIndexed(
+        xTaskToNotify, uxIndex, ulValue, eAction, pulPreviousNotifyValue);
+  }
+  return pdFALSE;
+}
+
+BaseType_t xTaskNotifyIndexedFromISR(TaskHandle_t xTaskToNotify,
+                                     UBaseType_t uxIndex, uint32_t ulValue,
+                                     eNotifyAction eAction,
+                                     BaseType_t *pxHigherPriorityTaskWoken) {
+  if (g_freertos_mock) {
+    return g_freertos_mock->xTaskNotifyIndexedFromISR(
+        xTaskToNotify, uxIndex, ulValue, eAction, pxHigherPriorityTaskWoken);
+  }
+  return pdFALSE;
+}
+
+BaseType_t xTaskNotifyAndQueryIndexedFromISR(
+    TaskHandle_t xTaskToNotify, UBaseType_t uxIndex, uint32_t ulValue,
+    eNotifyAction eAction, uint32_t *pulPreviousNotifyValue,
+    BaseType_t *pxHigherPriorityTaskWoken) {
+  if (g_freertos_mock) {
+    return g_freertos_mock->xTaskNotifyAndQueryIndexedFromISR(
+        xTaskToNotify, uxIndex, ulValue, eAction, pulPreviousNotifyValue,
+        pxHigherPriorityTaskWoken);
+  }
+  return pdFALSE;
+}
+
+BaseType_t xTaskNotifyWaitIndexed(UBaseType_t uxIndex,
+                                  uint32_t ulBitsToClearOnEntry,
+                                  uint32_t ulBitsToClearOnExit,
+                                  uint32_t *pulNotificationValue,
+                                  TickType_t xTicksToWait) {
+  if (g_freertos_mock) {
+    return g_freertos_mock->xTaskNotifyWaitIndexed(
+        uxIndex, ulBitsToClearOnEntry, ulBitsToClearOnExit,
+        pulNotificationValue, xTicksToWait);
+  }
+  return pdFALSE;
+}
+
+BaseType_t xTaskNotifyStateClearIndexed(TaskHandle_t xTask,
+                                        UBaseType_t uxIndex) {
+  if (g_freertos_mock) {
+    return g_freertos_mock->xTaskNotifyStateClearIndexed(xTask, uxIndex);
+  }
+  return pdFALSE;
+}
+
+uint32_t ulTaskNotifyValueClearIndexed(TaskHandle_t xTask, UBaseType_t uxIndex,
+                                       uint32_t ulBitsToClear) {
+  if (g_freertos_mock) {
+    return g_freertos_mock->ulTaskNotifyValueClearIndexed(xTask, uxIndex,
+                                                          ulBitsToClear);
+  }
+  return 0;
+}
+
 void vTaskGetInfo(TaskHandle_t xTask, TaskStatus_t *pxTaskStatus,
                   BaseType_t xGetFreeStackSpace, eTaskState eState) {
   if (g_freertos_mock) {
@@ -308,6 +426,33 @@ TaskHookFunction_t ulTaskGetApplicationTaskTagFromISR(TaskHandle_t xTask) {
     return g_freertos_mock->ulTaskGetApplicationTaskTagFromISR(xTask);
   }
   return nullptr;
+}
+
+void vTaskCoreAffinitySet(TaskHandle_t xTask, UBaseType_t uxCoreAffinityMask) {
+  if (g_freertos_mock) {
+    g_freertos_mock->vTaskCoreAffinitySet(xTask, uxCoreAffinityMask);
+  }
+}
+
+void vTaskCoreAffinityClear(TaskHandle_t xTask,
+                            UBaseType_t uxCoreAffinityMask) {
+  if (g_freertos_mock) {
+    g_freertos_mock->vTaskCoreAffinityClear(xTask, uxCoreAffinityMask);
+  }
+}
+
+UBaseType_t ulTaskCoreAffinityGet(TaskHandle_t xTask) {
+  if (g_freertos_mock) {
+    return g_freertos_mock->ulTaskCoreAffinityGet(xTask);
+  }
+  return 0;
+}
+
+UBaseType_t ulTaskCoreAffinityGetFromISR(TaskHandle_t xTask) {
+  if (g_freertos_mock) {
+    return g_freertos_mock->ulTaskCoreAffinityGetFromISR(xTask);
+  }
+  return 0;
 }
 
 // Semaphore API implementations
@@ -625,6 +770,48 @@ void vQueueUnregisterQueue(QueueHandle_t xQueue) {
 const char *pcQueueGetName(QueueHandle_t xQueue) {
   if (g_freertos_mock) {
     return g_freertos_mock->pcQueueGetName(xQueue);
+  }
+  return nullptr;
+}
+
+// Queue Set function implementations
+QueueSetHandle_t xQueueCreateSet(UBaseType_t uxEventQueueLength) {
+  if (g_freertos_mock) {
+    return g_freertos_mock->xQueueCreateSet(uxEventQueueLength);
+  }
+  return nullptr;
+}
+
+BaseType_t xQueueAddToSet(QueueSetMemberHandle_t xQueueOrSemaphore,
+                          QueueSetHandle_t xQueueSet) {
+  if (g_freertos_mock) {
+    return g_freertos_mock->xQueueAddToSet(xQueueOrSemaphore, xQueueSet);
+  }
+  return pdFAIL;
+}
+
+BaseType_t xQueueRemoveFromSet(QueueSetMemberHandle_t xQueueOrSemaphore,
+                               QueueSetHandle_t xQueueSet) {
+  if (g_freertos_mock) {
+    return g_freertos_mock->xQueueRemoveFromSet(xQueueOrSemaphore, xQueueSet);
+  }
+  return pdFAIL;
+}
+
+QueueSetMemberHandle_t xQueueSelectFromSet(QueueSetHandle_t xQueueSet,
+                                           TickType_t xTicksToWait) {
+  if (g_freertos_mock) {
+    return g_freertos_mock->xQueueSelectFromSet(xQueueSet, xTicksToWait);
+  }
+  return nullptr;
+}
+
+QueueSetMemberHandle_t
+xQueueSelectFromSetFromISR(QueueSetHandle_t xQueueSet,
+                           BaseType_t *pxHigherPriorityTaskWoken) {
+  if (g_freertos_mock) {
+    return g_freertos_mock->xQueueSelectFromSetFromISR(
+        xQueueSet, pxHigherPriorityTaskWoken);
   }
   return nullptr;
 }

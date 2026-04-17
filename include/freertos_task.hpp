@@ -37,6 +37,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #endif
 
 #include "freertos_isr_result.hpp"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wshadow"
+#include "freertos_strong_types.hpp"
+#pragma GCC diagnostic pop
 #include <FreeRTOS.h>
 #include <array>
 #include <cassert>
@@ -360,19 +364,12 @@ public:
   }
 #endif
 #if INCLUDE_uxTaskPriorityGet && configUSE_MUTEXES
-  /**
-   * @brief Get the priority of the task.
-   *
-   * @return UBaseType_t task priority
-   */
   UBaseType_t priority(void) const { return uxTaskPriorityGet(m_hTask); }
-  /**
-   * @brief Get the priority of the task from an ISR.
-   *
-   * @return UBaseType_t task priority
-   */
   UBaseType_t priority_isr(void) const {
     return uxTaskPriorityGetFromISR(m_hTask);
+  }
+  UBaseType_t base_priority(void) const {
+    return uxTaskBasePriorityGet(m_hTask);
   }
 #endif
 #if INCLUDE_vTaskPrioritySet
@@ -586,6 +583,88 @@ public:
    */
   uint32_t notify_value_clear(uint32_t ulBitsToClear) {
     return ulTaskNotifyValueClear(m_hTask, ulBitsToClear);
+  }
+#if configTASK_NOTIFICATION_ARRAY_ENTRIES > 1
+  BaseType_t notify_give(UBaseType_t index) {
+    return xTaskNotifyGiveIndexed(m_hTask, index);
+  }
+  uint32_t notify_take(UBaseType_t index, BaseType_t clearCountOnExit,
+                       TickType_t ticksToWait) {
+    return ulTaskNotifyTakeIndexed(index, clearCountOnExit, ticksToWait);
+  }
+  template <typename Rep, typename Period>
+  uint32_t notify_take(UBaseType_t index, BaseType_t clearCountOnExit,
+                       std::chrono::duration<Rep, Period> duration) {
+    return notify_take(
+        index, clearCountOnExit,
+        pdMS_TO_TICKS(
+            std::chrono::duration_cast<std::chrono::milliseconds>(duration)
+                .count()));
+  }
+  BaseType_t notify(UBaseType_t index, const uint32_t val,
+                    eNotifyAction action) {
+    return xTaskNotifyIndexed(m_hTask, index, val, action);
+  }
+  BaseType_t notify_and_query(UBaseType_t index, const uint32_t val,
+                              eNotifyAction action, uint32_t &prev_value) {
+    return xTaskNotifyAndQueryIndexed(m_hTask, index, val, action, &prev_value);
+  }
+  isr_result<BaseType_t> notify_isr(UBaseType_t index, const uint32_t val,
+                                    eNotifyAction action) {
+    isr_result<BaseType_t> result{pdFALSE, pdFALSE};
+    result.result = xTaskNotifyIndexedFromISR(
+        m_hTask, index, val, action, &result.higher_priority_task_woken);
+    return result;
+  }
+  isr_result<BaseType_t> notify_and_query_isr(UBaseType_t index,
+                                              const uint32_t val,
+                                              eNotifyAction action,
+                                              uint32_t &prev_value) {
+    isr_result<BaseType_t> result{pdFALSE, pdFALSE};
+    result.result = xTaskNotifyAndQueryIndexedFromISR(
+        m_hTask, index, val, action, &prev_value,
+        &result.higher_priority_task_woken);
+    return result;
+  }
+  BaseType_t notify_wait(UBaseType_t index, uint32_t ulBitsToClearOnEntry,
+                         uint32_t ulBitsToClearOnExit,
+                         uint32_t &notification_value,
+                         TickType_t xTicksToWait) {
+    return xTaskNotifyWaitIndexed(index, ulBitsToClearOnEntry,
+                                  ulBitsToClearOnExit, &notification_value,
+                                  xTicksToWait);
+  }
+  template <typename Rep, typename Period>
+  BaseType_t notify_wait(UBaseType_t index, uint32_t ulBitsToClearOnEntry,
+                         uint32_t ulBitsToClearOnExit,
+                         uint32_t &notification_value,
+                         std::chrono::duration<Rep, Period> duration) {
+    return notify_wait(
+        index, ulBitsToClearOnEntry, ulBitsToClearOnExit, notification_value,
+        pdMS_TO_TICKS(
+            std::chrono::duration_cast<std::chrono::milliseconds>(duration)
+                .count()));
+  }
+  BaseType_t notify_state_clear(UBaseType_t index) {
+    return xTaskNotifyStateClearIndexed(m_hTask, index);
+  }
+  uint32_t notify_value_clear(UBaseType_t index, uint32_t ulBitsToClear) {
+    return ulTaskNotifyValueClearIndexed(m_hTask, index, ulBitsToClear);
+  }
+#endif
+#endif
+#if configNUMBER_OF_CORES > 1 && (configUSE_CORE_AFFINITY == 1)
+  void set_affinity(freertos::core_affinity_mask mask) {
+    vTaskCoreAffinitySet(m_hTask, mask.value());
+  }
+  void clear_affinity(freertos::core_affinity_mask mask) {
+    vTaskCoreAffinityClear(m_hTask, mask.value());
+  }
+  [[nodiscard]] freertos::core_affinity_mask affinity(void) const {
+    return freertos::core_affinity_mask(ulTaskCoreAffinityGet(m_hTask));
+  }
+  [[nodiscard]] freertos::core_affinity_mask affinity_isr(void) const {
+    return freertos::core_affinity_mask(ulTaskCoreAffinityGetFromISR(m_hTask));
   }
 #endif
 };
@@ -861,18 +940,9 @@ public:
   BaseType_t abort_delay(void) { return m_task.abort_delay(); }
 #endif
 #if INCLUDE_uxTaskPriorityGet && configUSE_MUTEXES
-  /**
-   * @brief Return the priority of the task.
-   *
-   * @return UBaseType_t  task priority
-   */
   UBaseType_t priority(void) const { return m_task.priority(); }
-  /**
-   * @brief Return the priority of the task from an ISR.
-   *
-   * @return UBaseType_t  task priority
-   */
   UBaseType_t priority_isr(void) const { return m_task.priority_isr(); }
+  UBaseType_t base_priority(void) const { return m_task.base_priority(); }
 #endif
 #if INCLUDE_vTaskPrioritySet
   /**
@@ -1074,6 +1144,73 @@ public:
   uint32_t notify_value_clear(uint32_t ulBitsToClear) {
     return m_task.notify_value_clear(ulBitsToClear);
   }
+#if configTASK_NOTIFICATION_ARRAY_ENTRIES > 1
+  BaseType_t notify_give(UBaseType_t index) {
+    return m_task.notify_give(index);
+  }
+  uint32_t notify_take(UBaseType_t index, BaseType_t clearCountOnExit,
+                       TickType_t ticksToWait) {
+    return m_task.notify_take(index, clearCountOnExit, ticksToWait);
+  }
+  template <typename Rep, typename Period>
+  uint32_t notify_take(UBaseType_t index, BaseType_t clearCountOnExit,
+                       std::chrono::duration<Rep, Period> duration) {
+    return m_task.notify_take(index, clearCountOnExit, duration);
+  }
+  BaseType_t notify(UBaseType_t index, const uint32_t val,
+                    eNotifyAction action) {
+    return m_task.notify(index, val, action);
+  }
+  BaseType_t notify_and_query(UBaseType_t index, const uint32_t val,
+                              eNotifyAction action, uint32_t &prev_value) {
+    return m_task.notify_and_query(index, val, action, prev_value);
+  }
+  isr_result<BaseType_t> notify_isr(UBaseType_t index, const uint32_t val,
+                                    eNotifyAction action) {
+    return m_task.notify_isr(index, val, action);
+  }
+  isr_result<BaseType_t> notify_and_query_isr(UBaseType_t index,
+                                              const uint32_t val,
+                                              eNotifyAction action,
+                                              uint32_t &prev_value) {
+    return m_task.notify_and_query_isr(index, val, action, prev_value);
+  }
+  BaseType_t notify_wait(UBaseType_t index, uint32_t ulBitsToClearOnEntry,
+                         uint32_t ulBitsToClearOnExit,
+                         uint32_t &notification_value,
+                         TickType_t xTicksToWait) {
+    return m_task.notify_wait(index, ulBitsToClearOnEntry, ulBitsToClearOnExit,
+                              notification_value, xTicksToWait);
+  }
+  template <typename Rep, typename Period>
+  BaseType_t notify_wait(UBaseType_t index, uint32_t ulBitsToClearOnEntry,
+                         uint32_t ulBitsToClearOnExit,
+                         uint32_t &notification_value,
+                         std::chrono::duration<Rep, Period> duration) {
+    return m_task.notify_wait(index, ulBitsToClearOnEntry, ulBitsToClearOnExit,
+                              notification_value, duration);
+  }
+  BaseType_t notify_state_clear(UBaseType_t index) {
+    return m_task.notify_state_clear(index);
+  }
+  uint32_t notify_value_clear(UBaseType_t index, uint32_t ulBitsToClear) {
+    return m_task.notify_value_clear(index, ulBitsToClear);
+  }
+#endif
+#endif
+#if configNUMBER_OF_CORES > 1 && (configUSE_CORE_AFFINITY == 1)
+  void set_affinity(freertos::core_affinity_mask mask) {
+    m_task.set_affinity(mask);
+  }
+  void clear_affinity(freertos::core_affinity_mask mask) {
+    m_task.clear_affinity(mask);
+  }
+  [[nodiscard]] freertos::core_affinity_mask affinity(void) const {
+    return m_task.affinity();
+  }
+  [[nodiscard]] freertos::core_affinity_mask affinity_isr(void) const {
+    return m_task.affinity_isr();
+  }
 #endif
 };
 
@@ -1260,6 +1397,16 @@ UBaseType_t task_count(void);
  */
 void yield(void);
 
+bool is_isr(void);
+
+#if configUSE_TICKLESS_IDLE
+void catch_up_ticks(TickType_t ticks);
+#endif
+
+#if configUSE_TIMERS
+TaskHandle_t timer_daemon_task_handle(void);
+#endif
+
 /**
  * @brief Critical section guard for the scheduler (RAII). Enter a critical
  * section on construction and exits it on destruction.
@@ -1355,7 +1502,7 @@ public:
    * @brief Destroy the scheduler barrier object
    *
    */
-  ~scheduler_barrier(void) { xTaskResumeAll(); }
+  ~scheduler_barrier(void) { (void)xTaskResumeAll(); }
 
   // Delete copy and move operations for RAII safety
   scheduler_barrier(const scheduler_barrier &) = delete;

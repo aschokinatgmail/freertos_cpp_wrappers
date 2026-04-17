@@ -122,6 +122,36 @@ add_executable(
     test_freertos_expected_api.cpp
 )
 
+add_executable(
+    test_freertos_indexed_notifications
+    test_freertos_indexed_notifications.cpp
+)
+
+add_executable(
+    test_freertos_misc_api
+    test_freertos_misc_api.cpp
+)
+
+add_executable(
+    test_freertos_smp_affinity
+    test_freertos_smp_affinity.cpp
+)
+
+add_executable(
+    test_freertos_queue_set
+    test_freertos_queue_set.cpp
+)
+
+add_executable(
+    test_freertos_dual_api
+    test_freertos_dual_api.cpp
+)
+
+add_executable(
+    test_freertos_thread_safety
+    test_freertos_thread_safety.cpp
+)
+
 target_link_libraries(
     test_freertos_task
     freertos_cpp_wrappers
@@ -273,6 +303,53 @@ target_link_libraries(
     pthread
 )
 
+target_link_libraries(
+    test_freertos_indexed_notifications
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
+target_link_libraries(
+    test_freertos_misc_api
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
+target_link_libraries(
+    test_freertos_smp_affinity
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
+target_link_libraries(
+    test_freertos_queue_set
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
+target_link_libraries(
+    test_freertos_dual_api
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
+target_link_libraries(
+    test_freertos_thread_safety
+    freertos_cpp_wrappers
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
 # Apply compile options if using PkgConfig
 if(GTEST_COMPILE_OPTIONS)
     target_compile_options(test_freertos_task PRIVATE ${GTEST_COMPILE_OPTIONS})
@@ -294,6 +371,12 @@ if(GTEST_COMPILE_OPTIONS)
     target_compile_options(test_freertos_external_allocator PRIVATE ${GTEST_COMPILE_OPTIONS})
     target_compile_options(test_freertos_strong_types PRIVATE ${GTEST_COMPILE_OPTIONS})
     target_compile_options(test_freertos_expected_api PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_indexed_notifications PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_misc_api PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_smp_affinity PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_queue_set PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_dual_api PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_thread_safety PRIVATE ${GTEST_COMPILE_OPTIONS})
 endif()
 
 # Add tests - run complete test executables to ensure proper failure detection
@@ -317,3 +400,9 @@ add_test(NAME test_freertos_expected COMMAND test_freertos_expected)
 add_test(NAME test_freertos_external_allocator COMMAND test_freertos_external_allocator)
 add_test(NAME test_freertos_strong_types COMMAND test_freertos_strong_types)
 add_test(NAME test_freertos_expected_api COMMAND test_freertos_expected_api)
+add_test(NAME test_freertos_indexed_notifications COMMAND test_freertos_indexed_notifications)
+add_test(NAME test_freertos_misc_api COMMAND test_freertos_misc_api)
+add_test(NAME test_freertos_smp_affinity COMMAND test_freertos_smp_affinity)
+add_test(NAME test_freertos_queue_set COMMAND test_freertos_queue_set)
+add_test(NAME test_freertos_dual_api COMMAND test_freertos_dual_api)
+add_test(NAME test_freertos_thread_safety COMMAND test_freertos_thread_safety)

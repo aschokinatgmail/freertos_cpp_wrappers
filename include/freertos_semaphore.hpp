@@ -38,6 +38,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "freertos_expected.hpp"
 #include "freertos_isr_result.hpp"
+#include "freertos_thread_safety.hpp"
 #include <FreeRTOS.h>
 #include <chrono>
 #include <ctime>
@@ -166,7 +167,8 @@ public:
  * freertos::binary_semaphore<freertos::static_semaphore_allocator> static_sem;
  * ```
  */
-template <typename SemaphoreAllocator> class binary_semaphore {
+template <typename SemaphoreAllocator>
+class FREERTOS_CAPABILITY("binary_semaphore") binary_semaphore {
   SemaphoreAllocator m_allocator{};
   SemaphoreHandle_t m_semaphore{nullptr};
 
@@ -226,7 +228,7 @@ public:
    * otherwise pdFALSE.
    *
    */
-  BaseType_t give() { return xSemaphoreGive(m_semaphore); }
+  BaseType_t give() FREERTOS_RELEASE() { return xSemaphoreGive(m_semaphore); }
   /**
    * @brief Give the binary semaphore from an ISR.
    * @ref https://www.freertos.org/a00124.html
@@ -249,7 +251,8 @@ public:
    * otherwise pdFALSE.
    *
    */
-  BaseType_t take(const TickType_t ticks_to_wait = portMAX_DELAY) {
+  BaseType_t take(const TickType_t ticks_to_wait = portMAX_DELAY)
+      FREERTOS_ACQUIRE() {
     return xSemaphoreTake(m_semaphore, ticks_to_wait);
   }
   /**
@@ -322,6 +325,21 @@ public:
         std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
             .count()));
   }
+
+  void acquire(const TickType_t ticks_to_wait = portMAX_DELAY)
+      FREERTOS_ACQUIRE() {
+    take(ticks_to_wait);
+  }
+  template <typename Rep, typename Period>
+  void acquire(const std::chrono::duration<Rep, Period> &timeout)
+      FREERTOS_ACQUIRE() {
+    take(timeout);
+  }
+  [[nodiscard]] bool try_acquire() FREERTOS_TRY_ACQUIRE(true) {
+    return take(0) == pdTRUE;
+  }
+  void release() FREERTOS_RELEASE() { give(); }
+  isr_result<BaseType_t> release_isr() { return give_isr(); }
 };
 
 /**
@@ -330,7 +348,8 @@ public:
  * @tparam SemaphoreAllocator type of the semaphore allocator to use for memory
  * allocation.
  */
-template <typename SemaphoreAllocator> class counting_semaphore {
+template <typename SemaphoreAllocator>
+class FREERTOS_CAPABILITY("counting_semaphore") counting_semaphore {
   SemaphoreAllocator m_allocator{};
   SemaphoreHandle_t m_semaphore{nullptr};
 
@@ -393,7 +412,7 @@ public:
    * otherwise pdFALSE.
    *
    */
-  BaseType_t give() { return xSemaphoreGive(m_semaphore); }
+  BaseType_t give() FREERTOS_RELEASE() { return xSemaphoreGive(m_semaphore); }
   /**
    * @brief Give the counting semaphore from an ISR.
    * @ref https://www.freertos.org/a00124.html
@@ -416,7 +435,8 @@ public:
    * otherwise pdFALSE.
    *
    */
-  BaseType_t take(const TickType_t ticks_to_wait = portMAX_DELAY) {
+  BaseType_t take(const TickType_t ticks_to_wait = portMAX_DELAY)
+      FREERTOS_ACQUIRE() {
     return xSemaphoreTake(m_semaphore, ticks_to_wait);
   }
   /**
@@ -490,6 +510,21 @@ public:
             .count()));
   }
 
+  void acquire(const TickType_t ticks_to_wait = portMAX_DELAY)
+      FREERTOS_ACQUIRE() {
+    take(ticks_to_wait);
+  }
+  template <typename Rep, typename Period>
+  void acquire(const std::chrono::duration<Rep, Period> &timeout)
+      FREERTOS_ACQUIRE() {
+    take(timeout);
+  }
+  [[nodiscard]] bool try_acquire() FREERTOS_TRY_ACQUIRE(true) {
+    return take(0) == pdTRUE;
+  }
+  void release() FREERTOS_RELEASE() { give(); }
+  isr_result<BaseType_t> release_isr() { return give_isr(); }
+
   /**
    * @brief Give the counting semaphore.
    *
@@ -558,7 +593,8 @@ public:
  * @tparam SemaphoreAllocator type of the semaphore allocator to use for memory
  * allocation.
  */
-template <typename SemaphoreAllocator> class mutex {
+template <typename SemaphoreAllocator>
+class FREERTOS_CAPABILITY("mutex") mutex {
   SemaphoreAllocator m_allocator{};
   SemaphoreHandle_t m_semaphore{nullptr};
   uint8_t m_locked : 1;
@@ -622,7 +658,7 @@ public:
    *
    * @return BaseType_t pdTRUE if the mutex was successfully unlocked,
    */
-  BaseType_t unlock() {
+  BaseType_t unlock() FREERTOS_RELEASE() {
     auto rc = xSemaphoreGive(m_semaphore);
     if (rc) {
       m_locked = false;
@@ -652,7 +688,8 @@ public:
    * @param ticks_to_wait timeout in ticks to wait for the mutex.
    * @return BaseType_t pdTRUE if the mutex was successfully locked,
    */
-  BaseType_t lock(const TickType_t ticks_to_wait = portMAX_DELAY) {
+  BaseType_t lock(const TickType_t ticks_to_wait = portMAX_DELAY)
+      FREERTOS_ACQUIRE() {
     auto rc = xSemaphoreTake(m_semaphore, ticks_to_wait);
     if (rc) {
       m_locked = true;
@@ -693,7 +730,7 @@ public:
    *
    * @return BaseType_t pdTRUE if the mutex was successfully locked,
    */
-  BaseType_t try_lock() {
+  BaseType_t try_lock() FREERTOS_TRY_ACQUIRE(true) {
     auto rc = xSemaphoreTake(m_semaphore, 0);
     if (rc) {
       m_locked = true;
@@ -751,6 +788,20 @@ public:
             .count()));
   }
 
+  template <typename Rep, typename Period>
+  bool try_lock_for(const std::chrono::duration<Rep, Period> &timeout) {
+    return lock(timeout) == pdTRUE;
+  }
+  template <typename Clock, typename Duration>
+  bool try_lock_until(const std::chrono::time_point<Clock, Duration> &tp) {
+    auto now = Clock::now();
+    if (tp <= now) {
+      return try_lock();
+    }
+    return lock(std::chrono::duration_cast<std::chrono::milliseconds>(
+               tp - now)) == pdTRUE;
+  }
+
   /**
    * @brief Get the lock status of the mutex.
    *
@@ -765,7 +816,8 @@ public:
  * @tparam SemaphoreAllocator type of the semaphore allocator to use for memory
  * allocation.
  */
-template <typename SemaphoreAllocator> class recursive_mutex {
+template <typename SemaphoreAllocator>
+class FREERTOS_SCOPED_CAPABILITY recursive_mutex {
   SemaphoreAllocator m_allocator{};
   SemaphoreHandle_t m_semaphore{nullptr};
   uint8_t m_recursions_count{0};
@@ -831,7 +883,7 @@ public:
    * @return BaseType_t pdTRUE if the recursive mutex was successfully unlocked,
    * otherwise pdFALSE.
    */
-  BaseType_t unlock() {
+  BaseType_t unlock() FREERTOS_RELEASE() {
     auto rc = xSemaphoreGiveRecursive(m_semaphore);
     if (rc && m_recursions_count > 0) {
       m_recursions_count--;
@@ -846,7 +898,8 @@ public:
    * @param ticks_to_wait timeout in ticks to wait for the recursive mutex.
    * @return BaseType_t pdTRUE if the recursive mutex was successfully locked,
    */
-  BaseType_t lock(const TickType_t ticks_to_wait = portMAX_DELAY) {
+  BaseType_t lock(const TickType_t ticks_to_wait = portMAX_DELAY)
+      FREERTOS_ACQUIRE() {
     auto rc = xSemaphoreTakeRecursive(m_semaphore, ticks_to_wait);
     if (rc) {
       m_recursions_count++;
@@ -861,7 +914,8 @@ public:
    * @return BaseType_t pdTRUE if the recursive mutex was successfully locked,
    */
   template <typename Rep, typename Period>
-  BaseType_t lock(const std::chrono::duration<Rep, Period> &timeout) {
+  BaseType_t lock(const std::chrono::duration<Rep, Period> &timeout)
+      FREERTOS_ACQUIRE() {
     return lock(pdMS_TO_TICKS(
         std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
             .count()));
@@ -872,7 +926,7 @@ public:
    *
    * @return BaseType_t pdTRUE if the recursive mutex was successfully locked,
    */
-  BaseType_t try_lock() {
+  BaseType_t try_lock() FREERTOS_TRY_ACQUIRE(true) {
     auto rc = xSemaphoreTakeRecursive(m_semaphore, 0);
     if (rc) {
       m_recursions_count++;
@@ -911,6 +965,20 @@ public:
             .count()));
   }
 
+  template <typename Rep, typename Period>
+  bool try_lock_for(const std::chrono::duration<Rep, Period> &timeout) {
+    return lock(timeout) == pdTRUE;
+  }
+  template <typename Clock, typename Duration>
+  bool try_lock_until(const std::chrono::time_point<Clock, Duration> &tp) {
+    auto now = Clock::now();
+    if (tp <= now) {
+      return try_lock();
+    }
+    return lock(std::chrono::duration_cast<std::chrono::milliseconds>(
+               tp - now)) == pdTRUE;
+  }
+
   /**
    * @brief Get the lock status of the recursive mutex.
    *
@@ -931,7 +999,7 @@ public:
  *
  * @tparam Mutex type of the mutex to guard.
  */
-template <typename Mutex> class lock_guard {
+template <typename Mutex> class FREERTOS_SCOPED_CAPABILITY lock_guard {
   Mutex &m_mutex; // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members):
                   // RAII design requires reference
 
@@ -941,13 +1009,15 @@ public:
    *
    * @param mutex mutex to guard
    */
-  explicit lock_guard(Mutex &mutex) : m_mutex{mutex} { m_mutex.lock(); }
+  explicit lock_guard(Mutex &mutex) FREERTOS_ACQUIRE("mutex") : m_mutex{mutex} {
+    m_mutex.lock();
+  }
 
   /**
    * @brief Destruct the lock guard object and unlock the mutex.
    *
    */
-  ~lock_guard(void) { m_mutex.unlock(); }
+  ~lock_guard(void) FREERTOS_RELEASE() { m_mutex.unlock(); }
 
   // Delete copy and move operations for RAII safety
   lock_guard(const lock_guard &) = delete;
@@ -969,7 +1039,7 @@ public:
  *
  * @tparam Mutex type of the mutex to guard.
  */
-template <typename Mutex> class try_lock_guard {
+template <typename Mutex> class FREERTOS_SCOPED_CAPABILITY try_lock_guard {
   Mutex &m_mutex; // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members):
                   // RAII design requires reference
   bool m_lock_acquired{false};
@@ -980,14 +1050,14 @@ public:
    *
    * @param mutex mutex to guard
    */
-  explicit try_lock_guard(Mutex &mutex)
+  explicit try_lock_guard(Mutex &mutex) FREERTOS_TRY_ACQUIRE(true)
       : m_mutex{mutex}, m_lock_acquired{static_cast<bool>(m_mutex.try_lock())} {
   }
   /**
    * @brief Destruct the try lock guard object and unlock the mutex.
    *
    */
-  ~try_lock_guard(void) {
+  ~try_lock_guard(void) FREERTOS_RELEASE() {
     if (m_lock_acquired) {
       m_mutex.unlock();
     }
@@ -1013,7 +1083,7 @@ public:
  *
  * @tparam Mutex type of the mutex to guard.
  */
-template <typename Mutex> class lock_guard_isr {
+template <typename Mutex> class FREERTOS_SCOPED_CAPABILITY lock_guard_isr {
   Mutex &m_mutex; // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members):
                   // RAII design requires reference
   BaseType_t m_high_priority_task_woken{pdFALSE};
@@ -1024,7 +1094,8 @@ public:
    *
    * @param mutex mutex to guard
    */
-  explicit lock_guard_isr(Mutex &mutex) : m_mutex{mutex} {
+  explicit lock_guard_isr(Mutex &mutex) FREERTOS_ACQUIRE("mutex")
+      : m_mutex{mutex} {
     auto result = m_mutex.lock_isr();
     m_high_priority_task_woken = result.higher_priority_task_woken;
   }
@@ -1032,7 +1103,7 @@ public:
    * @brief Destruct the lock guard object and unlock the mutex.
    *
    */
-  ~lock_guard_isr(void) {
+  ~lock_guard_isr(void) FREERTOS_RELEASE() {
     auto result = m_mutex.unlock_isr();
     m_high_priority_task_woken = result.higher_priority_task_woken;
   }
@@ -1066,7 +1137,7 @@ public:
  *
  * @tparam Mutex type of the mutex to guard.
  */
-template <typename Mutex> class timeout_lock_guard {
+template <typename Mutex> class FREERTOS_SCOPED_CAPABILITY timeout_lock_guard {
   Mutex &m_mutex; // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members):
                   // RAII design requires reference
   bool m_lock_acquired{false};
@@ -1079,6 +1150,7 @@ public:
    * @param ticks_to_wait timeout in ticks to wait for the mutex.
    */
   timeout_lock_guard(Mutex &mutex, TickType_t ticks_to_wait)
+      FREERTOS_TRY_ACQUIRE(true)
       : m_mutex{mutex},
         m_lock_acquired{static_cast<bool>(m_mutex.lock(ticks_to_wait))} {}
   /**
@@ -1090,6 +1162,7 @@ public:
   template <typename Rep, typename Period>
   timeout_lock_guard(Mutex &mutex,
                      const std::chrono::duration<Rep, Period> &timeout)
+      FREERTOS_TRY_ACQUIRE(true)
       : m_mutex{mutex},
         m_lock_acquired{static_cast<bool>(m_mutex.lock(pdMS_TO_TICKS(
             std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
@@ -1098,7 +1171,7 @@ public:
    * @brief Destruct the timeout lock guard object and unlock the mutex.
    *
    */
-  ~timeout_lock_guard(void) {
+  ~timeout_lock_guard(void) FREERTOS_RELEASE() {
     if (m_lock_acquired) {
       m_mutex.unlock();
     }

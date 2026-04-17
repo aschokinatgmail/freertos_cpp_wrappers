@@ -69,5 +69,14 @@ BaseType_t get_scheduler_state(void) { return xTaskGetSchedulerState(); }
 #endif
 UBaseType_t task_count(void) { return uxTaskGetNumberOfTasks(); }
 void yield(void) { taskYIELD(); }
+bool is_isr(void) { return xPortIsInsideInterrupt() != 0; }
+#if configUSE_TICKLESS_IDLE
+void catch_up_ticks(TickType_t ticks) { xTaskCatchUpTicks(ticks); }
+#endif
+#if configUSE_TIMERS
+TaskHandle_t timer_daemon_task_handle(void) {
+  return xTimerGetTimerDaemonTaskHandle();
+}
+#endif
 
 } // namespace freertos

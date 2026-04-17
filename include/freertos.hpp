@@ -45,11 +45,13 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "freertos_isr_result.hpp"
 #include "freertos_message_buffer.hpp"
 #include "freertos_queue.hpp"
+#include "freertos_queue_set.hpp"
 #include "freertos_semaphore.hpp"
 #include "freertos_stream_buffer.hpp"
 #include "freertos_strong_types.hpp"
 #include "freertos_sw_timer.hpp"
 #include "freertos_task.hpp"
+#include "freertos_thread_safety.hpp"
 
 namespace freertos {
 
