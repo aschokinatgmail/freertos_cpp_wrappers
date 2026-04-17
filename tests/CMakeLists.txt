@@ -152,6 +152,11 @@ add_executable(
     test_freertos_thread_safety.cpp
 )
 
+add_executable(
+    test_freertos_move_semantics
+    test_freertos_move_semantics.cpp
+)
+
 target_link_libraries(
     test_freertos_task
     freertos_cpp_wrappers
@@ -350,6 +355,14 @@ target_link_libraries(
     pthread
 )
 
+target_link_libraries(
+    test_freertos_move_semantics
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
 # Apply compile options if using PkgConfig
 if(GTEST_COMPILE_OPTIONS)
     target_compile_options(test_freertos_task PRIVATE ${GTEST_COMPILE_OPTIONS})
@@ -377,6 +390,7 @@ if(GTEST_COMPILE_OPTIONS)
     target_compile_options(test_freertos_queue_set PRIVATE ${GTEST_COMPILE_OPTIONS})
     target_compile_options(test_freertos_dual_api PRIVATE ${GTEST_COMPILE_OPTIONS})
     target_compile_options(test_freertos_thread_safety PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_move_semantics PRIVATE ${GTEST_COMPILE_OPTIONS})
 endif()
 
 # Add tests - run complete test executables to ensure proper failure detection
@@ -406,3 +420,4 @@ add_test(NAME test_freertos_smp_affinity COMMAND test_freertos_smp_affinity)
 add_test(NAME test_freertos_queue_set COMMAND test_freertos_queue_set)
 add_test(NAME test_freertos_dual_api COMMAND test_freertos_dual_api)
 add_test(NAME test_freertos_thread_safety COMMAND test_freertos_thread_safety)
+add_test(NAME test_freertos_move_semantics COMMAND test_freertos_move_semantics)
