@@ -157,6 +157,21 @@ add_executable(
     test_freertos_move_semantics.cpp
 )
 
+add_executable(
+    test_freertos_coverage_semaphores
+    test_freertos_coverage_semaphores.cpp
+)
+
+add_executable(
+    test_freertos_coverage_api
+    test_freertos_coverage_api.cpp
+)
+
+add_executable(
+    test_freertos_coverage_branches
+    test_freertos_coverage_branches.cpp
+)
+
 target_link_libraries(
     test_freertos_task
     freertos_cpp_wrappers
@@ -363,6 +378,30 @@ target_link_libraries(
     pthread
 )
 
+target_link_libraries(
+    test_freertos_coverage_semaphores
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
+target_link_libraries(
+    test_freertos_coverage_api
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
+target_link_libraries(
+    test_freertos_coverage_branches
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
 # Apply compile options if using PkgConfig
 if(GTEST_COMPILE_OPTIONS)
     target_compile_options(test_freertos_task PRIVATE ${GTEST_COMPILE_OPTIONS})
@@ -391,6 +430,9 @@ if(GTEST_COMPILE_OPTIONS)
     target_compile_options(test_freertos_dual_api PRIVATE ${GTEST_COMPILE_OPTIONS})
     target_compile_options(test_freertos_thread_safety PRIVATE ${GTEST_COMPILE_OPTIONS})
     target_compile_options(test_freertos_move_semantics PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_coverage_semaphores PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_coverage_api PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_coverage_branches PRIVATE ${GTEST_COMPILE_OPTIONS})
 endif()
 
 # Add tests - run complete test executables to ensure proper failure detection
@@ -421,3 +463,6 @@ add_test(NAME test_freertos_queue_set COMMAND test_freertos_queue_set)
 add_test(NAME test_freertos_dual_api COMMAND test_freertos_dual_api)
 add_test(NAME test_freertos_thread_safety COMMAND test_freertos_thread_safety)
 add_test(NAME test_freertos_move_semantics COMMAND test_freertos_move_semantics)
+add_test(NAME test_freertos_coverage_semaphores COMMAND test_freertos_coverage_semaphores)
+add_test(NAME test_freertos_coverage_api COMMAND test_freertos_coverage_api)
+add_test(NAME test_freertos_coverage_branches COMMAND test_freertos_coverage_branches)
