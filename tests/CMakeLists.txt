@@ -172,6 +172,21 @@ add_executable(
     test_freertos_coverage_branches.cpp
 )
 
+add_executable(
+    test_freertos_coverage_gaps
+    test_freertos_coverage_gaps.cpp
+)
+
+add_executable(
+    test_freertos_expected_monadic
+    test_freertos_expected_monadic.cpp
+)
+
+add_executable(
+    test_freertos_coverage_branches2
+    test_freertos_coverage_branches2.cpp
+)
+
 target_link_libraries(
     test_freertos_task
     freertos_cpp_wrappers
@@ -402,6 +417,30 @@ target_link_libraries(
     pthread
 )
 
+target_link_libraries(
+    test_freertos_coverage_gaps
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
+target_link_libraries(
+    test_freertos_expected_monadic
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
+target_link_libraries(
+    test_freertos_coverage_branches2
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
 # Apply compile options if using PkgConfig
 if(GTEST_COMPILE_OPTIONS)
     target_compile_options(test_freertos_task PRIVATE ${GTEST_COMPILE_OPTIONS})
@@ -433,6 +472,9 @@ if(GTEST_COMPILE_OPTIONS)
     target_compile_options(test_freertos_coverage_semaphores PRIVATE ${GTEST_COMPILE_OPTIONS})
     target_compile_options(test_freertos_coverage_api PRIVATE ${GTEST_COMPILE_OPTIONS})
     target_compile_options(test_freertos_coverage_branches PRIVATE ${GTEST_COMPILE_OPTIONS})
+target_compile_options(test_freertos_coverage_gaps PRIVATE ${GTEST_COMPILE_OPTIONS})
+target_compile_options(test_freertos_expected_monadic PRIVATE ${GTEST_COMPILE_OPTIONS})
+target_compile_options(test_freertos_coverage_branches2 PRIVATE ${GTEST_COMPILE_OPTIONS})
 endif()
 
 # Add tests - run complete test executables to ensure proper failure detection
@@ -466,3 +508,6 @@ add_test(NAME test_freertos_move_semantics COMMAND test_freertos_move_semantics)
 add_test(NAME test_freertos_coverage_semaphores COMMAND test_freertos_coverage_semaphores)
 add_test(NAME test_freertos_coverage_api COMMAND test_freertos_coverage_api)
 add_test(NAME test_freertos_coverage_branches COMMAND test_freertos_coverage_branches)
+add_test(NAME test_freertos_coverage_gaps COMMAND test_freertos_coverage_gaps)
+add_test(NAME test_freertos_expected_monadic COMMAND test_freertos_expected_monadic)
+add_test(NAME test_freertos_coverage_branches2 COMMAND test_freertos_coverage_branches2)
