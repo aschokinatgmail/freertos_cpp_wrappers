@@ -1,10 +1,12 @@
 # Build directories
 build/
 build-test/
+build-sim/
 out/
 .vscode/
 .vs/
 docker-build/
+cmake-build/
 
 # Documentation build output
 site/
@@ -71,3 +73,13 @@ session-tag.local
 .gitignore_check
 coverage.info
 cov_task*.info
+
+# Coverage artifacts
+.filtered.info
+.coverage_raw.info
+.cov_docker/
+tmp_verbose.txt
+
+# Build directories (additional)
+cmake-build-coverage/
+build-span-test/

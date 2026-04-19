@@ -36,9 +36,13 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #error "This header is for C++ only"
 #endif
 
+#include "freertos_expected.hpp"
+#include "freertos_isr_result.hpp"
 #include <FreeRTOS.h>
 #include <chrono>
 #include <event_groups.h>
+#include <type_traits>
+#include <utility>
 
 namespace freertos {
 
@@ -94,8 +98,18 @@ public:
   event_group(void) : m_event_group(m_allocator.create()) {
     configASSERT(m_event_group);
   }
+  template <typename... AllocatorArgs,
+            typename std::enable_if_t<(sizeof...(AllocatorArgs) > 0), int> = 0>
+  explicit event_group(AllocatorArgs &&...args)
+      : m_allocator{std::forward<AllocatorArgs>(args)...},
+        m_event_group(m_allocator.create()) {
+    configASSERT(m_event_group);
+  }
   event_group(const event_group &) = delete;
-  event_group(event_group &&other) = delete;
+  event_group(event_group &&other) noexcept
+      : m_event_group(other.m_event_group) {
+    other.m_event_group = nullptr;
+  }
   /**
    * @brief Destruct the event group object and delete the event group instance
    * if it was created.
@@ -108,7 +122,19 @@ public:
   }
 
   event_group &operator=(const event_group &) = delete;
-  event_group &operator=(event_group &&other) = delete;
+  event_group &operator=(event_group &&other) noexcept {
+    if (this != &other) {
+      swap(other);
+    }
+    return *this;
+  }
+
+  void swap(event_group &other) noexcept {
+    using std::swap;
+    swap(m_event_group, other.m_event_group);
+  }
+
+  friend void swap(event_group &a, event_group &b) noexcept { a.swap(b); }
 
   /**
    * @brief Method to get the handle of the event group.
@@ -133,14 +159,14 @@ public:
    * @ref https://www.freertos.org/xEventGroupSetBitsFromISR.html
    *
    * @param bits_to_set bits to set
-   * @return EventBits_t bits set
+   * @return isr_result<EventBits_t> result with bits set and higher priority
+   * task woken flag
    */
-  EventBits_t set_bits_isr(const EventBits_t bits_to_set) {
-    BaseType_t higher_priority_task_woken = pdFALSE;
-    const EventBits_t bits_set = xEventGroupSetBitsFromISR(
-        m_event_group, bits_to_set, &higher_priority_task_woken);
-    portYIELD_FROM_ISR(higher_priority_task_woken);
-    return bits_set;
+  isr_result<EventBits_t> set_bits_isr(const EventBits_t bits_to_set) {
+    isr_result<EventBits_t> result{0, pdFALSE};
+    result.result = xEventGroupSetBitsFromISR(
+        m_event_group, bits_to_set, &result.higher_priority_task_woken);
+    return result;
   }
   /**
    * @brief Method to clear bits in the event group.
@@ -227,6 +253,65 @@ public:
                    const EventBits_t bits_to_wait_for,
                    const std::chrono::duration<Rep, Period> &timeout) {
     return sync(
+        bits_to_set, bits_to_wait_for,
+        pdMS_TO_TICKS(
+            std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
+                .count()));
+  }
+
+  [[nodiscard]] expected<EventBits_t, error>
+  set_bits_ex(const EventBits_t bits_to_set) {
+    return set_bits(bits_to_set);
+  }
+  [[nodiscard]] isr_result<expected<EventBits_t, error>>
+  set_bits_ex_isr(const EventBits_t bits_to_set) {
+    auto result = set_bits_isr(bits_to_set);
+    isr_result<expected<EventBits_t, error>> ret{
+        result.result, result.higher_priority_task_woken};
+    return ret;
+  }
+  [[nodiscard]] expected<EventBits_t, error>
+  clear_bits_ex(const EventBits_t bits_to_clear) {
+    return clear_bits(bits_to_clear);
+  }
+  [[nodiscard]] expected<EventBits_t, error> wait_bits_ex(
+      const EventBits_t bits_to_wait_for, const BaseType_t clear_on_exit,
+      const BaseType_t wait_for_all_bits, const TickType_t ticks_to_wait) {
+    auto rc = wait_bits(bits_to_wait_for, clear_on_exit, wait_for_all_bits,
+                        ticks_to_wait);
+    if (rc & bits_to_wait_for) {
+      return rc;
+    }
+    return unexpected<error>(ticks_to_wait == 0 ? error::would_block
+                                                : error::timeout);
+  }
+  template <typename Rep, typename Period>
+  [[nodiscard]] expected<EventBits_t, error>
+  wait_bits_ex(const EventBits_t bits_to_wait_for,
+               const BaseType_t clear_on_exit,
+               const BaseType_t wait_for_all_bits,
+               const std::chrono::duration<Rep, Period> &timeout) {
+    return wait_bits_ex(
+        bits_to_wait_for, clear_on_exit, wait_for_all_bits,
+        pdMS_TO_TICKS(
+            std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
+                .count()));
+  }
+  [[nodiscard]] expected<EventBits_t, error>
+  sync_ex(const EventBits_t bits_to_set, const EventBits_t bits_to_wait_for,
+          const TickType_t ticks_to_wait) {
+    auto rc = sync(bits_to_set, bits_to_wait_for, ticks_to_wait);
+    if ((rc & bits_to_wait_for) == bits_to_wait_for) {
+      return rc;
+    }
+    return unexpected<error>(ticks_to_wait == 0 ? error::would_block
+                                                : error::timeout);
+  }
+  template <typename Rep, typename Period>
+  [[nodiscard]] expected<EventBits_t, error>
+  sync_ex(const EventBits_t bits_to_set, const EventBits_t bits_to_wait_for,
+          const std::chrono::duration<Rep, Period> &timeout) {
+    return sync_ex(
         bits_to_set, bits_to_wait_for,
         pdMS_TO_TICKS(
             std::chrono::duration_cast<std::chrono::milliseconds>(timeout)

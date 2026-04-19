@@ -101,6 +101,10 @@ typedef struct {
 // Queue types
 typedef void *QueueHandle_t;
 
+// Queue Set types
+typedef void *QueueSetHandle_t;
+typedef void *QueueSetMemberHandle_t;
+
 // Queue static allocation structure (opaque for mock)
 typedef struct {
   uint8_t dummy[128]; // Placeholder size
@@ -117,10 +121,15 @@ typedef struct {
 #define INCLUDE_xTaskGetSchedulerState 1
 
 #define configUSE_MUTEXES 1
+#define configUSE_QUEUE_SETS 1
 #define configUSE_TRACE_FACILITY 1
 #define configUSE_APPLICATION_TASK_TAG 1
 #define configUSE_TASK_NOTIFICATIONS 1
+#define configTASK_NOTIFICATION_ARRAY_ENTRIES 2
 #define configUSE_TIMERS 1
+#define configUSE_TICKLESS_IDLE 1
+#define configNUMBER_OF_CORES 2
+#define configUSE_CORE_AFFINITY 1
 
 // Task status structure for trace facility
 typedef struct {
@@ -194,6 +203,7 @@ public:
   MOCK_METHOD(const char *, pcTaskGetName, (TaskHandle_t xTaskToQuery));
   MOCK_METHOD(UBaseType_t, uxTaskPriorityGet, (TaskHandle_t xTask));
   MOCK_METHOD(UBaseType_t, uxTaskPriorityGetFromISR, (TaskHandle_t xTask));
+  MOCK_METHOD(UBaseType_t, uxTaskBasePriorityGet, (TaskHandle_t xTask));
   MOCK_METHOD(void, vTaskPrioritySet,
               (TaskHandle_t xTask, UBaseType_t uxNewPriority));
 
@@ -204,6 +214,15 @@ public:
   MOCK_METHOD(TickType_t, xTaskGetTickCountFromISR, ());
   MOCK_METHOD(BaseType_t, xTaskGetSchedulerState, ());
   MOCK_METHOD(UBaseType_t, uxTaskGetNumberOfTasks, ());
+
+  // ISR detection
+  MOCK_METHOD(BaseType_t, xPortIsInsideInterrupt, ());
+
+  // Tickless idle
+  MOCK_METHOD(void, xTaskCatchUpTicks, (TickType_t xTicksToCatchUp));
+
+  // Timer daemon
+  MOCK_METHOD(TaskHandle_t, xTimerGetTimerDaemonTaskHandle, ());
 
   // Stack monitoring
   MOCK_METHOD(UBaseType_t, uxTaskGetStackHighWaterMark, (TaskHandle_t xTask));
@@ -238,6 +257,38 @@ public:
   MOCK_METHOD(uint32_t, ulTaskNotifyValueClear,
               (TaskHandle_t xTask, uint32_t ulBitsToClear));
 
+  // Indexed task notifications
+  MOCK_METHOD(BaseType_t, xTaskNotifyGiveIndexed,
+              (TaskHandle_t xTaskToNotify, UBaseType_t uxIndex));
+  MOCK_METHOD(uint32_t, ulTaskNotifyTakeIndexed,
+              (UBaseType_t uxIndex, BaseType_t xClearCountOnExit,
+               TickType_t xTicksToWait));
+  MOCK_METHOD(BaseType_t, xTaskNotifyIndexed,
+              (TaskHandle_t xTaskToNotify, UBaseType_t uxIndex,
+               uint32_t ulValue, eNotifyAction eAction));
+  MOCK_METHOD(BaseType_t, xTaskNotifyAndQueryIndexed,
+              (TaskHandle_t xTaskToNotify, UBaseType_t uxIndex,
+               uint32_t ulValue, eNotifyAction eAction,
+               uint32_t *pulPreviousNotifyValue));
+  MOCK_METHOD(BaseType_t, xTaskNotifyIndexedFromISR,
+              (TaskHandle_t xTaskToNotify, UBaseType_t uxIndex,
+               uint32_t ulValue, eNotifyAction eAction,
+               BaseType_t *pxHigherPriorityTaskWoken));
+  MOCK_METHOD(BaseType_t, xTaskNotifyAndQueryIndexedFromISR,
+              (TaskHandle_t xTaskToNotify, UBaseType_t uxIndex,
+               uint32_t ulValue, eNotifyAction eAction,
+               uint32_t *pulPreviousNotifyValue,
+               BaseType_t *pxHigherPriorityTaskWoken));
+  MOCK_METHOD(BaseType_t, xTaskNotifyWaitIndexed,
+              (UBaseType_t uxIndex, uint32_t ulBitsToClearOnEntry,
+               uint32_t ulBitsToClearOnExit, uint32_t *pulNotificationValue,
+               TickType_t xTicksToWait));
+  MOCK_METHOD(BaseType_t, xTaskNotifyStateClearIndexed,
+              (TaskHandle_t xTask, UBaseType_t uxIndex));
+  MOCK_METHOD(uint32_t, ulTaskNotifyValueClearIndexed,
+              (TaskHandle_t xTask, UBaseType_t uxIndex,
+               uint32_t ulBitsToClear));
+
   // Trace facility
   MOCK_METHOD(void, vTaskGetInfo,
               (TaskHandle_t xTask, TaskStatus_t *pxTaskStatus,
@@ -253,6 +304,14 @@ public:
               (TaskHandle_t xTask));
   MOCK_METHOD(TaskHookFunction_t, ulTaskGetApplicationTaskTagFromISR,
               (TaskHandle_t xTask));
+
+  // Core affinity SMP operations
+  MOCK_METHOD(void, vTaskCoreAffinitySet,
+              (TaskHandle_t xTask, UBaseType_t uxCoreAffinityMask));
+  MOCK_METHOD(void, vTaskCoreAffinityClear,
+              (TaskHandle_t xTask, UBaseType_t uxCoreAffinityMask));
+  MOCK_METHOD(UBaseType_t, ulTaskCoreAffinityGet, (TaskHandle_t xTask));
+  MOCK_METHOD(UBaseType_t, ulTaskCoreAffinityGetFromISR, (TaskHandle_t xTask));
 
   // Semaphore creation
   MOCK_METHOD(SemaphoreHandle_t, xSemaphoreCreateBinary, ());
@@ -352,6 +411,21 @@ public:
   MOCK_METHOD(void, vQueueUnregisterQueue, (QueueHandle_t xQueue));
   MOCK_METHOD(const char *, pcQueueGetName, (QueueHandle_t xQueue));
 
+  // Queue Set operations
+  MOCK_METHOD(QueueSetHandle_t, xQueueCreateSet,
+              (UBaseType_t uxEventQueueLength));
+  MOCK_METHOD(BaseType_t, xQueueAddToSet,
+              (QueueSetMemberHandle_t xQueueOrSemaphore,
+               QueueSetHandle_t xQueueSet));
+  MOCK_METHOD(BaseType_t, xQueueRemoveFromSet,
+              (QueueSetMemberHandle_t xQueueOrSemaphore,
+               QueueSetHandle_t xQueueSet));
+  MOCK_METHOD(QueueSetMemberHandle_t, xQueueSelectFromSet,
+              (QueueSetHandle_t xQueueSet, TickType_t xTicksToWait));
+  MOCK_METHOD(QueueSetMemberHandle_t, xQueueSelectFromSetFromISR,
+              (QueueSetHandle_t xQueueSet,
+               BaseType_t *pxHigherPriorityTaskWoken));
+
   // Event Group operations
   MOCK_METHOD(EventGroupHandle_t, xEventGroupCreate, ());
   MOCK_METHOD(EventGroupHandle_t, xEventGroupCreateStatic,
@@ -415,6 +489,8 @@ public:
               (TimerHandle_t xTimer, UBaseType_t uxAutoReload));
   MOCK_METHOD(const char *, pcTimerGetName, (TimerHandle_t xTimer));
   MOCK_METHOD(void *, pvTimerGetTimerID, (TimerHandle_t xTimer));
+  MOCK_METHOD(void, vTimerSetTimerID,
+              (TimerHandle_t xTimer, void *pvNewTimerID));
 
   // Message Buffer operations
   MOCK_METHOD(MessageBufferHandle_t, xMessageBufferCreate,
@@ -506,6 +582,7 @@ eTaskState eTaskGetState(TaskHandle_t xTask);
 const char *pcTaskGetName(TaskHandle_t xTaskToQuery);
 UBaseType_t uxTaskPriorityGet(TaskHandle_t xTask);
 UBaseType_t uxTaskPriorityGetFromISR(TaskHandle_t xTask);
+UBaseType_t uxTaskBasePriorityGet(TaskHandle_t xTask);
 void vTaskPrioritySet(TaskHandle_t xTask, UBaseType_t uxNewPriority);
 TaskHandle_t xTaskGetCurrentTaskHandle(void);
 TaskHandle_t xTaskGetIdleTaskHandle(void);
@@ -517,6 +594,9 @@ UBaseType_t uxTaskGetStackHighWaterMark(TaskHandle_t xTask);
 UBaseType_t uxTaskGetStackHighWaterMark2(TaskHandle_t xTask);
 void vTaskDelay(TickType_t xTicksToDelay);
 void vTaskDelayUntil(TickType_t *pxPreviousWakeTime, TickType_t xTimeIncrement);
+BaseType_t xPortIsInsideInterrupt(void);
+void xTaskCatchUpTicks(TickType_t xTicksToCatchUp);
+TaskHandle_t xTimerGetTimerDaemonTaskHandle(void);
 BaseType_t xTaskNotifyGive(TaskHandle_t xTaskToNotify);
 uint32_t ulTaskNotifyTake(BaseType_t xClearCountOnExit,
                           TickType_t xTicksToWait);
@@ -538,6 +618,34 @@ BaseType_t xTaskNotifyWait(uint32_t ulBitsToClearOnEntry,
                            TickType_t xTicksToWait);
 BaseType_t xTaskNotifyStateClear(TaskHandle_t xTask);
 uint32_t ulTaskNotifyValueClear(TaskHandle_t xTask, uint32_t ulBitsToClear);
+BaseType_t xTaskNotifyGiveIndexed(TaskHandle_t xTaskToNotify,
+                                  UBaseType_t uxIndex);
+uint32_t ulTaskNotifyTakeIndexed(UBaseType_t uxIndex,
+                                 BaseType_t xClearCountOnExit,
+                                 TickType_t xTicksToWait);
+BaseType_t xTaskNotifyIndexed(TaskHandle_t xTaskToNotify, UBaseType_t uxIndex,
+                              uint32_t ulValue, eNotifyAction eAction);
+BaseType_t xTaskNotifyAndQueryIndexed(TaskHandle_t xTaskToNotify,
+                                      UBaseType_t uxIndex, uint32_t ulValue,
+                                      eNotifyAction eAction,
+                                      uint32_t *pulPreviousNotifyValue);
+BaseType_t xTaskNotifyIndexedFromISR(TaskHandle_t xTaskToNotify,
+                                     UBaseType_t uxIndex, uint32_t ulValue,
+                                     eNotifyAction eAction,
+                                     BaseType_t *pxHigherPriorityTaskWoken);
+BaseType_t xTaskNotifyAndQueryIndexedFromISR(
+    TaskHandle_t xTaskToNotify, UBaseType_t uxIndex, uint32_t ulValue,
+    eNotifyAction eAction, uint32_t *pulPreviousNotifyValue,
+    BaseType_t *pxHigherPriorityTaskWoken);
+BaseType_t xTaskNotifyWaitIndexed(UBaseType_t uxIndex,
+                                  uint32_t ulBitsToClearOnEntry,
+                                  uint32_t ulBitsToClearOnExit,
+                                  uint32_t *pulNotificationValue,
+                                  TickType_t xTicksToWait);
+BaseType_t xTaskNotifyStateClearIndexed(TaskHandle_t xTask,
+                                        UBaseType_t uxIndex);
+uint32_t ulTaskNotifyValueClearIndexed(TaskHandle_t xTask, UBaseType_t uxIndex,
+                                       uint32_t ulBitsToClear);
 void vTaskGetInfo(TaskHandle_t xTask, TaskStatus_t *pxTaskStatus,
                   BaseType_t xGetFreeStackSpace, eTaskState eState);
 UBaseType_t uxTaskGetSystemState(TaskStatus_t *pxTaskStatusArray,
@@ -547,6 +655,10 @@ void vTaskSetApplicationTaskTag(TaskHandle_t xTask,
                                 TaskHookFunction_t pxHookFunction);
 TaskHookFunction_t ulTaskGetApplicationTaskTag(TaskHandle_t xTask);
 TaskHookFunction_t ulTaskGetApplicationTaskTagFromISR(TaskHandle_t xTask);
+void vTaskCoreAffinitySet(TaskHandle_t xTask, UBaseType_t uxCoreAffinityMask);
+void vTaskCoreAffinityClear(TaskHandle_t xTask, UBaseType_t uxCoreAffinityMask);
+UBaseType_t ulTaskCoreAffinityGet(TaskHandle_t xTask);
+UBaseType_t ulTaskCoreAffinityGetFromISR(TaskHandle_t xTask);
 
 // Semaphore functions
 SemaphoreHandle_t xSemaphoreCreateBinary(void);
@@ -619,6 +731,18 @@ void vQueueAddToRegistry(QueueHandle_t xQueue, const char *pcQueueName);
 void vQueueUnregisterQueue(QueueHandle_t xQueue);
 const char *pcQueueGetName(QueueHandle_t xQueue);
 
+// Queue Set functions
+QueueSetHandle_t xQueueCreateSet(UBaseType_t uxEventQueueLength);
+BaseType_t xQueueAddToSet(QueueSetMemberHandle_t xQueueOrSemaphore,
+                          QueueSetHandle_t xQueueSet);
+BaseType_t xQueueRemoveFromSet(QueueSetMemberHandle_t xQueueOrSemaphore,
+                               QueueSetHandle_t xQueueSet);
+QueueSetMemberHandle_t xQueueSelectFromSet(QueueSetHandle_t xQueueSet,
+                                           TickType_t xTicksToWait);
+QueueSetMemberHandle_t
+xQueueSelectFromSetFromISR(QueueSetHandle_t xQueueSet,
+                           BaseType_t *pxHigherPriorityTaskWoken);
+
 // Timer functions
 TimerHandle_t xTimerCreate(const char *pcTimerName,
                            TickType_t xTimerPeriodInTicks,
@@ -651,6 +775,7 @@ UBaseType_t uxTimerGetReloadMode(TimerHandle_t xTimer);
 void vTimerSetReloadMode(TimerHandle_t xTimer, UBaseType_t uxAutoReload);
 const char *pcTimerGetName(TimerHandle_t xTimer);
 void *pvTimerGetTimerID(TimerHandle_t xTimer);
+void vTimerSetTimerID(TimerHandle_t xTimer, void *pvNewTimerID);
 
 // Message Buffer functions
 MessageBufferHandle_t xMessageBufferCreate(size_t xBufferSizeBytes);

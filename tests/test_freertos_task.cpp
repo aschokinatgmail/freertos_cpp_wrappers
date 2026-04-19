@@ -30,6 +30,7 @@
 #include "FreeRTOS.h"
 
 // Include the actual FreeRTOS task wrapper
+#include "../include/freertos_isr_result.hpp"
 #include "../include/freertos_task.hpp"
 
 using namespace testing;
@@ -526,34 +527,33 @@ TEST_F(FreeRTOSTaskTest, TaskNotificationsExtended) {
   EXPECT_EQ(prev_value, 0x11111111);
 
   // Test notify_isr
-  EXPECT_CALL(*mock, xTaskNotifyFromISR(mock_task_handle, 0xDEADBEEF, eSetBits,
-                                        nullptr))
-      .WillOnce(Return(pdTRUE));
-  result = test_task.notify_isr(0xDEADBEEF, eSetBits);
-  EXPECT_EQ(result, pdTRUE);
+  EXPECT_CALL(*mock,
+              xTaskNotifyFromISR(mock_task_handle, 0xDEADBEEF, eSetBits, _))
+      .WillOnce(DoAll(SetArgPointee<3>(pdFALSE), Return(pdTRUE)));
+  auto isr_res = test_task.notify_isr(0xDEADBEEF, eSetBits);
+  EXPECT_EQ(isr_res.result, pdTRUE);
+  EXPECT_EQ(isr_res.higher_priority_task_woken, pdFALSE);
 
   // Test notify_isr with higher priority task woken
-  BaseType_t higher_priority_woken = pdFALSE;
-  EXPECT_CALL(*mock, xTaskNotifyFromISR(mock_task_handle, 0xCAFEBABE, eNoAction,
-                                        &higher_priority_woken))
+  EXPECT_CALL(*mock,
+              xTaskNotifyFromISR(mock_task_handle, 0xCAFEBABE, eNoAction, _))
       .WillOnce(DoAll(SetArgPointee<3>(pdTRUE), Return(pdTRUE)));
-  result = test_task.notify_isr(0xCAFEBABE, eNoAction, &higher_priority_woken);
-  EXPECT_EQ(result, pdTRUE);
-  EXPECT_EQ(higher_priority_woken, pdTRUE);
+  isr_res = test_task.notify_isr(0xCAFEBABE, eNoAction);
+  EXPECT_EQ(isr_res.result, pdTRUE);
+  EXPECT_EQ(isr_res.higher_priority_task_woken, pdTRUE);
 
   // Test notify_and_query_isr
   uint32_t prev_val_isr;
-  BaseType_t higher_prio_woken = pdFALSE;
-  EXPECT_CALL(*mock, xTaskNotifyAndQueryFromISR(mock_task_handle, 0x12AB34CD,
-                                                eSetValueWithoutOverwrite, _,
-                                                &higher_prio_woken))
+  EXPECT_CALL(*mock,
+              xTaskNotifyAndQueryFromISR(mock_task_handle, 0x12AB34CD,
+                                         eSetValueWithoutOverwrite, _, _))
       .WillOnce(DoAll(SetArgPointee<3>(0x56EF78AB), SetArgPointee<4>(pdTRUE),
                       Return(pdTRUE)));
-  result = test_task.notify_and_query_isr(0x12AB34CD, eSetValueWithoutOverwrite,
-                                          prev_val_isr, &higher_prio_woken);
-  EXPECT_EQ(result, pdTRUE);
+  auto isr_q_res = test_task.notify_and_query_isr(
+      0x12AB34CD, eSetValueWithoutOverwrite, prev_val_isr);
+  EXPECT_EQ(isr_q_res.result, pdTRUE);
   EXPECT_EQ(prev_val_isr, 0x56EF78AB);
-  EXPECT_EQ(higher_prio_woken, pdTRUE);
+  EXPECT_EQ(isr_q_res.higher_priority_task_woken, pdTRUE);
 
   // Test notify_state_clear
   EXPECT_CALL(*mock, xTaskNotifyStateClear(mock_task_handle))
@@ -689,7 +689,7 @@ TEST_F(FreeRTOSTaskTest, PeriodicTaskIsRunning) {
 
   EXPECT_CALL(*mock, eTaskGetState(mock_task_handle))
       .WillOnce(Return(eSuspended));
-  EXPECT_TRUE(periodic_task.is_running());
+  EXPECT_FALSE(periodic_task.is_running());
 
   EXPECT_CALL(*mock, eTaskGetState(mock_task_handle))
       .WillOnce(Return(eDeleted));
@@ -698,6 +698,171 @@ TEST_F(FreeRTOSTaskTest, PeriodicTaskIsRunning) {
   EXPECT_CALL(*mock, eTaskGetState(mock_task_handle))
       .WillOnce(Return(eInvalid));
   EXPECT_FALSE(periodic_task.is_running());
+}
+
+TEST_F(FreeRTOSTaskTest, PeriodicTaskIsSuspended) {
+  EXPECT_CALL(*mock, xTaskCreateStatic(_, _, _, _, _, _, _))
+      .WillOnce(Return(mock_task_handle));
+
+  EXPECT_CALL(*mock, xTaskAbortDelay(mock_task_handle))
+      .WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, vTaskDelete(mock_task_handle));
+
+  sa::periodic_task<1024> periodic_task("SuspendedTask", 2, empty_task_routine,
+                                        empty_task_routine, empty_task_routine,
+                                        100ms);
+
+  EXPECT_CALL(*mock, eTaskGetState(mock_task_handle))
+      .WillOnce(Return(eSuspended));
+  EXPECT_TRUE(periodic_task.is_suspended());
+
+  EXPECT_CALL(*mock, eTaskGetState(mock_task_handle))
+      .WillOnce(Return(eRunning));
+  EXPECT_FALSE(periodic_task.is_suspended());
+
+  EXPECT_CALL(*mock, eTaskGetState(mock_task_handle)).WillOnce(Return(eReady));
+  EXPECT_FALSE(periodic_task.is_suspended());
+
+  EXPECT_CALL(*mock, eTaskGetState(mock_task_handle))
+      .WillOnce(Return(eBlocked));
+  EXPECT_FALSE(periodic_task.is_suspended());
+
+  EXPECT_CALL(*mock, eTaskGetState(mock_task_handle))
+      .WillOnce(Return(eDeleted));
+  EXPECT_FALSE(periodic_task.is_suspended());
+
+  EXPECT_CALL(*mock, eTaskGetState(mock_task_handle))
+      .WillOnce(Return(eInvalid));
+  EXPECT_FALSE(periodic_task.is_suspended());
+}
+
+TEST_F(FreeRTOSTaskTest, PeriodicTaskIsAlive) {
+  EXPECT_CALL(*mock, xTaskCreateStatic(_, _, _, _, _, _, _))
+      .WillOnce(Return(mock_task_handle));
+
+  EXPECT_CALL(*mock, xTaskAbortDelay(mock_task_handle))
+      .WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, vTaskDelete(mock_task_handle));
+
+  sa::periodic_task<1024> periodic_task("AliveTask", 2, empty_task_routine,
+                                        empty_task_routine, empty_task_routine,
+                                        100ms);
+
+  EXPECT_CALL(*mock, eTaskGetState(mock_task_handle))
+      .WillOnce(Return(eRunning));
+  EXPECT_TRUE(periodic_task.is_alive());
+
+  EXPECT_CALL(*mock, eTaskGetState(mock_task_handle)).WillOnce(Return(eReady));
+  EXPECT_TRUE(periodic_task.is_alive());
+
+  EXPECT_CALL(*mock, eTaskGetState(mock_task_handle))
+      .WillOnce(Return(eBlocked));
+  EXPECT_TRUE(periodic_task.is_alive());
+
+  EXPECT_CALL(*mock, eTaskGetState(mock_task_handle))
+      .WillOnce(Return(eSuspended));
+  EXPECT_TRUE(periodic_task.is_alive());
+
+  EXPECT_CALL(*mock, eTaskGetState(mock_task_handle))
+      .WillOnce(Return(eDeleted));
+  EXPECT_FALSE(periodic_task.is_alive());
+
+  EXPECT_CALL(*mock, eTaskGetState(mock_task_handle))
+      .WillOnce(Return(eInvalid));
+  EXPECT_FALSE(periodic_task.is_alive());
+}
+
+TEST_F(FreeRTOSTaskTest, TaskIsRunning) {
+  EXPECT_CALL(*mock, xTaskCreateStatic(_, _, _, _, _, _, _))
+      .WillOnce(Return(mock_task_handle));
+  EXPECT_CALL(*mock, vTaskDelete(mock_task_handle));
+
+  sa::task<1024> test_task("RunningTask", 2, empty_task_routine);
+
+  EXPECT_CALL(*mock, eTaskGetState(mock_task_handle))
+      .WillOnce(Return(eRunning));
+  EXPECT_TRUE(test_task.is_running());
+
+  EXPECT_CALL(*mock, eTaskGetState(mock_task_handle)).WillOnce(Return(eReady));
+  EXPECT_TRUE(test_task.is_running());
+
+  EXPECT_CALL(*mock, eTaskGetState(mock_task_handle))
+      .WillOnce(Return(eBlocked));
+  EXPECT_TRUE(test_task.is_running());
+
+  EXPECT_CALL(*mock, eTaskGetState(mock_task_handle))
+      .WillOnce(Return(eSuspended));
+  EXPECT_FALSE(test_task.is_running());
+
+  EXPECT_CALL(*mock, eTaskGetState(mock_task_handle))
+      .WillOnce(Return(eDeleted));
+  EXPECT_FALSE(test_task.is_running());
+
+  EXPECT_CALL(*mock, eTaskGetState(mock_task_handle))
+      .WillOnce(Return(eInvalid));
+  EXPECT_FALSE(test_task.is_running());
+}
+
+TEST_F(FreeRTOSTaskTest, TaskIsSuspended) {
+  EXPECT_CALL(*mock, xTaskCreateStatic(_, _, _, _, _, _, _))
+      .WillOnce(Return(mock_task_handle));
+  EXPECT_CALL(*mock, vTaskDelete(mock_task_handle));
+
+  sa::task<1024> test_task("SuspendedTask", 2, empty_task_routine);
+
+  EXPECT_CALL(*mock, eTaskGetState(mock_task_handle))
+      .WillOnce(Return(eSuspended));
+  EXPECT_TRUE(test_task.is_suspended());
+
+  EXPECT_CALL(*mock, eTaskGetState(mock_task_handle))
+      .WillOnce(Return(eRunning));
+  EXPECT_FALSE(test_task.is_suspended());
+
+  EXPECT_CALL(*mock, eTaskGetState(mock_task_handle)).WillOnce(Return(eReady));
+  EXPECT_FALSE(test_task.is_suspended());
+
+  EXPECT_CALL(*mock, eTaskGetState(mock_task_handle))
+      .WillOnce(Return(eBlocked));
+  EXPECT_FALSE(test_task.is_suspended());
+
+  EXPECT_CALL(*mock, eTaskGetState(mock_task_handle))
+      .WillOnce(Return(eDeleted));
+  EXPECT_FALSE(test_task.is_suspended());
+
+  EXPECT_CALL(*mock, eTaskGetState(mock_task_handle))
+      .WillOnce(Return(eInvalid));
+  EXPECT_FALSE(test_task.is_suspended());
+}
+
+TEST_F(FreeRTOSTaskTest, TaskIsAlive) {
+  EXPECT_CALL(*mock, xTaskCreateStatic(_, _, _, _, _, _, _))
+      .WillOnce(Return(mock_task_handle));
+  EXPECT_CALL(*mock, vTaskDelete(mock_task_handle));
+
+  sa::task<1024> test_task("AliveTask", 2, empty_task_routine);
+
+  EXPECT_CALL(*mock, eTaskGetState(mock_task_handle))
+      .WillOnce(Return(eRunning));
+  EXPECT_TRUE(test_task.is_alive());
+
+  EXPECT_CALL(*mock, eTaskGetState(mock_task_handle)).WillOnce(Return(eReady));
+  EXPECT_TRUE(test_task.is_alive());
+
+  EXPECT_CALL(*mock, eTaskGetState(mock_task_handle))
+      .WillOnce(Return(eBlocked));
+  EXPECT_TRUE(test_task.is_alive());
+
+  EXPECT_CALL(*mock, eTaskGetState(mock_task_handle))
+      .WillOnce(Return(eSuspended));
+  EXPECT_TRUE(test_task.is_alive());
+
+  EXPECT_CALL(*mock, eTaskGetState(mock_task_handle))
+      .WillOnce(Return(eDeleted));
+  EXPECT_FALSE(test_task.is_alive());
+
+  EXPECT_CALL(*mock, eTaskGetState(mock_task_handle))
+      .WillOnce(Return(eInvalid));
+  EXPECT_FALSE(test_task.is_alive());
 }
 
 TEST_F(FreeRTOSTaskTest, PeriodicTaskTerminate) {
@@ -1407,15 +1572,13 @@ TEST_F(FreeRTOSTaskTest, NotificationRacingConditions) {
   }
 
   // ISR notifications mixed with regular notifications
-  BaseType_t higher_priority_task_woken;
   EXPECT_CALL(*mock, xTaskNotifyFromISR(mock_task_handle, 0x1000,
                                         eSetValueWithOverwrite, _))
       .WillOnce(DoAll(SetArgPointee<3>(pdTRUE), Return(pdTRUE)));
 
-  BaseType_t isr_result = test_task.notify_isr(0x1000, eSetValueWithOverwrite,
-                                               &higher_priority_task_woken);
-  EXPECT_EQ(isr_result, pdTRUE);
-  EXPECT_EQ(higher_priority_task_woken, pdTRUE);
+  auto isr_res2 = test_task.notify_isr(0x1000, eSetValueWithOverwrite);
+  EXPECT_EQ(isr_res2.result, pdTRUE);
+  EXPECT_EQ(isr_res2.higher_priority_task_woken, pdTRUE);
 
   EXPECT_CALL(*mock, vTaskDelete(mock_task_handle));
 }
@@ -1990,5 +2153,98 @@ TEST_F(FreeRTOSTaskTest, DynamicTask2048_SuspendResume_FunctionCoverage) {
 
   EXPECT_CALL(*mock, vTaskResume(_));
   test_task.resume();
+}
+
+TEST_F(FreeRTOSTaskTest, TaskMoveAssignment) {
+  TaskHandle_t handle1 = reinterpret_cast<TaskHandle_t>(0x1111);
+  TaskHandle_t handle2 = reinterpret_cast<TaskHandle_t>(0x2222);
+
+  EXPECT_CALL(*mock, xTaskCreateStatic(_, _, _, _, _, _, _))
+      .WillOnce(Return(handle1))
+      .WillOnce(Return(handle2));
+
+  sa::task<1024> task1("Task1", 2, empty_task_routine);
+  sa::task<1024> task2("Task2", 2, empty_task_routine);
+
+  EXPECT_CALL(*mock, vTaskDelete(handle1)).Times(1);
+  EXPECT_CALL(*mock, vTaskDelete(handle2)).Times(1);
+
+  task1 = std::move(task2);
+}
+
+TEST_F(FreeRTOSTaskTest, TaskSwap) {
+  TaskHandle_t handle1 = reinterpret_cast<TaskHandle_t>(0x1111);
+  TaskHandle_t handle2 = reinterpret_cast<TaskHandle_t>(0x2222);
+
+  EXPECT_CALL(*mock, xTaskCreateStatic(_, _, _, _, _, _, _))
+      .WillOnce(Return(handle1))
+      .WillOnce(Return(handle2));
+
+  sa::task<1024> task1("Task1", 2, empty_task_routine);
+  sa::task<1024> task2("Task2", 2, empty_task_routine);
+
+  EXPECT_CALL(*mock, vTaskDelete(handle1)).Times(1);
+  EXPECT_CALL(*mock, vTaskDelete(handle2)).Times(1);
+
+  task1.swap(task2);
+}
+
+TEST_F(FreeRTOSTaskTest, TaskADLSwap) {
+  TaskHandle_t handle1 = reinterpret_cast<TaskHandle_t>(0x1111);
+  TaskHandle_t handle2 = reinterpret_cast<TaskHandle_t>(0x2222);
+
+  EXPECT_CALL(*mock, xTaskCreateStatic(_, _, _, _, _, _, _))
+      .WillOnce(Return(handle1))
+      .WillOnce(Return(handle2));
+
+  sa::task<1024> task1("Task1", 2, empty_task_routine);
+  sa::task<1024> task2("Task2", 2, empty_task_routine);
+
+  EXPECT_CALL(*mock, vTaskDelete(handle1)).Times(1);
+  EXPECT_CALL(*mock, vTaskDelete(handle2)).Times(1);
+
+  swap(task1, task2);
+}
+
+TEST_F(FreeRTOSTaskTest, PeriodicTaskMoveAssignment) {
+  TaskHandle_t handle1 = reinterpret_cast<TaskHandle_t>(0x1111);
+  TaskHandle_t handle2 = reinterpret_cast<TaskHandle_t>(0x2222);
+
+  EXPECT_CALL(*mock, xTaskCreateStatic(_, _, _, _, _, _, _))
+      .WillOnce(Return(handle1))
+      .WillOnce(Return(handle2));
+
+  sa::periodic_task<1024> ptask1("P1", 2, empty_task_routine,
+                                 empty_task_routine, empty_task_routine, 100ms);
+  sa::periodic_task<1024> ptask2("P2", 2, empty_task_routine,
+                                 empty_task_routine, empty_task_routine, 200ms);
+
+  EXPECT_CALL(*mock, xTaskAbortDelay(handle1)).Times(2);
+  EXPECT_CALL(*mock, xTaskAbortDelay(handle2)).WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, vTaskDelete(handle1)).Times(1);
+  EXPECT_CALL(*mock, vTaskDelete(handle2)).Times(1);
+
+  ptask1 = std::move(ptask2);
+}
+
+TEST_F(FreeRTOSTaskTest, PeriodicTaskSwap) {
+  TaskHandle_t handle1 = reinterpret_cast<TaskHandle_t>(0x1111);
+  TaskHandle_t handle2 = reinterpret_cast<TaskHandle_t>(0x2222);
+
+  EXPECT_CALL(*mock, xTaskCreateStatic(_, _, _, _, _, _, _))
+      .WillOnce(Return(handle1))
+      .WillOnce(Return(handle2));
+
+  sa::periodic_task<1024> ptask1("P1", 2, empty_task_routine,
+                                 empty_task_routine, empty_task_routine, 100ms);
+  sa::periodic_task<1024> ptask2("P2", 2, empty_task_routine,
+                                 empty_task_routine, empty_task_routine, 200ms);
+
+  EXPECT_CALL(*mock, xTaskAbortDelay(handle1)).WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, xTaskAbortDelay(handle2)).WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, vTaskDelete(handle1)).Times(1);
+  EXPECT_CALL(*mock, vTaskDelete(handle2)).Times(1);
+
+  ptask1.swap(ptask2);
 }
 #endif

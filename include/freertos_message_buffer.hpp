@@ -36,10 +36,14 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #error "This header is for C++ only"
 #endif
 
+#include "freertos_expected.hpp"
+#include "freertos_isr_result.hpp"
 #include <FreeRTOS.h>
 #include <array>
 #include <chrono>
 #include <message_buffer.h>
+#include <type_traits>
+#include <utility>
 
 namespace freertos {
 
@@ -104,8 +108,18 @@ public:
   message_buffer() : m_message_buffer{m_allocator.create()} {
     configASSERT(m_message_buffer);
   }
+  template <typename... AllocatorArgs,
+            typename std::enable_if_t<(sizeof...(AllocatorArgs) > 0), int> = 0>
+  explicit message_buffer(AllocatorArgs &&...args)
+      : m_allocator{std::forward<AllocatorArgs>(args)...},
+        m_message_buffer{m_allocator.create()} {
+    configASSERT(m_message_buffer);
+  }
   message_buffer(const message_buffer &) = delete;
-  message_buffer(message_buffer &&src) = delete;
+  message_buffer(message_buffer &&src) noexcept
+      : m_message_buffer(src.m_message_buffer) {
+    src.m_message_buffer = nullptr;
+  }
   /**
    * @brief Destruct the message buffer object and delete the message buffer
    * kernel object instance if it was created.
@@ -118,7 +132,19 @@ public:
   }
 
   message_buffer &operator=(const message_buffer &) = delete;
-  message_buffer &operator=(message_buffer &&src) = delete;
+  message_buffer &operator=(message_buffer &&src) noexcept {
+    if (this != &src) {
+      swap(src);
+    }
+    return *this;
+  }
+
+  void swap(message_buffer &other) noexcept {
+    using std::swap;
+    swap(m_message_buffer, other.m_message_buffer);
+  }
+
+  friend void swap(message_buffer &a, message_buffer &b) noexcept { a.swap(b); }
 
   /**
    * @brief Method sends a discret message to the message buffer.
@@ -188,6 +214,39 @@ public:
                 .count()));
   }
   /**
+   * @brief Send a discrete message to the message buffer from an ISR.
+   * @ref https://www.freertos.org/xMessageBufferSendFromISR.html
+   *
+   * @param data A pointer to the message data to be copied into the message
+   * buffer.
+   * @param data_size The number of bytes to copy into the message buffer.
+   * @return isr_result<size_t> result containing the number of bytes sent and
+   * the higher_priority_task_woken flag.
+   */
+  isr_result<size_t> send_isr(const void *data, size_t data_size) {
+    isr_result<size_t> result{0, pdFALSE};
+    result.result = xMessageBufferSendFromISR(
+        m_message_buffer, data, data_size, &result.higher_priority_task_woken);
+    return result;
+  }
+  /**
+   * @brief Receive a discrete message from the message buffer from an ISR.
+   * @ref https://www.freertos.org/xMessageBufferReceiveFromISR.html
+   *
+   * @param data A pointer to the buffer into which the received message will be
+   * copied.
+   * @param buffer_size The size of the buffer pointed to by the data parameter.
+   * @return isr_result<size_t> result containing the number of bytes received
+   * and the higher_priority_task_woken flag.
+   */
+  isr_result<size_t> receive_isr(void *data, size_t buffer_size) {
+    isr_result<size_t> result{0, pdFALSE};
+    result.result =
+        xMessageBufferReceiveFromISR(m_message_buffer, data, buffer_size,
+                                     &result.higher_priority_task_woken);
+    return result;
+  }
+  /**
    * @brief Method returning the number of bytes available in the buffer.
    * @ref https://www.freertos.org/xMessageBufferSpaceAvailable.html
    *
@@ -217,6 +276,76 @@ public:
    * @return BaseType_t pdTRUE if the message buffer is full, pdFALSE otherwise
    */
   BaseType_t full(void) { return xMessageBufferIsFull(m_message_buffer); }
+
+  [[nodiscard]] expected<size_t, error> send_ex(const void *pvTxData,
+                                                size_t xDataLengthBytes,
+                                                TickType_t xTicksToWait) {
+    auto rc = send(pvTxData, xDataLengthBytes, xTicksToWait);
+    if (rc > 0) {
+      return rc;
+    }
+    return unexpected<error>(xTicksToWait == 0 ? error::would_block
+                                               : error::timeout);
+  }
+  template <typename Rep, typename Period>
+  [[nodiscard]] expected<size_t, error>
+  send_ex(const void *pvTxData, size_t xDataLengthBytes,
+          const std::chrono::duration<Rep, Period> &xTicksToWait) {
+    return send_ex(
+        pvTxData, xDataLengthBytes,
+        pdMS_TO_TICKS(
+            std::chrono::duration_cast<std::chrono::milliseconds>(xTicksToWait)
+                .count()));
+  }
+  [[nodiscard]] isr_result<expected<size_t, error>>
+  send_ex_isr(const void *data, size_t data_size) {
+    auto result = send_isr(data, data_size);
+    isr_result<expected<size_t, error>> ret{
+        unexpected<error>(error::would_block),
+        result.higher_priority_task_woken};
+    if (result.result > 0) {
+      ret.result = result.result;
+    }
+    return ret;
+  }
+  [[nodiscard]] expected<size_t, error> receive_ex(void *pvRxData,
+                                                   size_t xBufferLengthBytes,
+                                                   TickType_t xTicksToWait) {
+    auto rc = receive(pvRxData, xBufferLengthBytes, xTicksToWait);
+    if (rc > 0) {
+      return rc;
+    }
+    return unexpected<error>(xTicksToWait == 0 ? error::would_block
+                                               : error::timeout);
+  }
+  template <typename Rep, typename Period>
+  [[nodiscard]] expected<size_t, error>
+  receive_ex(void *pvRxData, size_t xBufferLengthBytes,
+             const std::chrono::duration<Rep, Period> &timeout) {
+    return receive_ex(
+        pvRxData, xBufferLengthBytes,
+        pdMS_TO_TICKS(
+            std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
+                .count()));
+  }
+  [[nodiscard]] isr_result<expected<size_t, error>>
+  receive_ex_isr(void *data, size_t buffer_size) {
+    auto result = receive_isr(data, buffer_size);
+    isr_result<expected<size_t, error>> ret{
+        unexpected<error>(error::would_block),
+        result.higher_priority_task_woken};
+    if (result.result > 0) {
+      ret.result = result.result;
+    }
+    return ret;
+  }
+  [[nodiscard]] expected<void, error> reset_ex() {
+    auto rc = reset();
+    if (rc == pdPASS) {
+      return {};
+    }
+    return unexpected<error>(error::invalid_handle);
+  }
 };
 
 #if configSUPPORT_STATIC_ALLOCATION

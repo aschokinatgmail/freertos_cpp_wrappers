@@ -36,15 +36,17 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #error "This header is for C++ only"
 #endif
 
+#include "freertos_expected.hpp"
+#include "freertos_isr_result.hpp"
 #include <FreeRTOS.h>
 #include <array>
 #include <chrono>
 #include <optional>
 #include <queue.h>
+#include <type_traits>
+#include <utility>
 
 namespace freertos {
-
-using std::optional;
 
 #if configSUPPORT_STATIC_ALLOCATION
 /**
@@ -203,8 +205,18 @@ public:
       vQueueAddToRegistry(m_queue, registered_name);
     }
   }
+  template <typename... AllocatorArgs,
+            typename std::enable_if_t<(sizeof...(AllocatorArgs) > 0), int> = 0>
+  explicit queue(const char *registered_name, AllocatorArgs &&...args)
+      : m_allocator{std::forward<AllocatorArgs>(args)...},
+        m_queue{m_allocator.create()} {
+    configASSERT(m_queue);
+    if (registered_name != nullptr) {
+      vQueueAddToRegistry(m_queue, registered_name);
+    }
+  }
   queue(const queue &) = delete;
-  queue(queue &&src) = delete;
+  queue(queue &&src) noexcept : m_queue(src.m_queue) { src.m_queue = nullptr; }
   ~queue(void) {
     if (m_queue) {
       auto n = pcQueueGetName(m_queue);
@@ -216,7 +228,19 @@ public:
   }
 
   queue &operator=(const queue &) = delete;
-  queue &operator=(queue &&src) = delete;
+  queue &operator=(queue &&src) noexcept {
+    if (this != &src) {
+      swap(src);
+    }
+    return *this;
+  }
+
+  void swap(queue &other) noexcept {
+    using std::swap;
+    swap(m_queue, other.m_queue);
+  }
+
+  friend void swap(queue &a, queue &b) noexcept { a.swap(b); }
 
   /**
    * @brief Posts an item to the back of a queue.
@@ -253,25 +277,15 @@ public:
    * @ref https://www.freertos.org/a00119.html
    *
    * @param item An item to be posted on the queue.
-   * @param higher_priority_task_woken A variable to set to pdTRUE if the action
-   * unblocked a task of higher priority.
-   * @return BaseType_t pdPASS if the item was successfully posted, otherwise
-   * errQUEUE_FULL.
+   * @return isr_result<BaseType_t> Result containing pdPASS if the item was
+   * successfully posted (otherwise errQUEUE_FULL), and the higher priority task
+   * woken flag.
    */
-  BaseType_t send_isr(const T &item, BaseType_t &higher_priority_task_woken) {
-    return xQueueSendFromISR(m_queue, &item, &higher_priority_task_woken);
-  }
-  /**
-   * @brief Posts an item to the back of a queue from an ISR.
-   * @ref https://www.freertos.org/a00119.html
-   *
-   * @param item  An item to be posted on the queue.
-   * @return BaseType_t  pdPASS if the item was successfully posted, otherwise
-   * errQUEUE_FULL.
-   */
-  BaseType_t send_isr(const T &item) {
-    BaseType_t higher_priority_task_woken = pdFALSE;
-    return xQueueSendFromISR(m_queue, &item, &higher_priority_task_woken);
+  isr_result<BaseType_t> send_isr(const T &item) {
+    isr_result<BaseType_t> result{pdFALSE, pdFALSE};
+    result.result =
+        xQueueSendFromISR(m_queue, &item, &result.higher_priority_task_woken);
+    return result;
   }
   /**
    * @brief Posts an item to the back of a queue.
@@ -308,26 +322,15 @@ public:
    * @ref https://www.freertos.org/xQueueSendToBackFromISR.html
    *
    * @param item An item to be posted on the queue.
-   * @param higher_priority_task_woken A variable to set to pdTRUE if the action
-   * unblocked a task of higher priority.
-   * @return BaseType_t pdPASS if the item
-   * was successfully posted, otherwise errQUEUE_FULL.
+   * @return isr_result<BaseType_t> Result containing pdPASS if the item was
+   * successfully posted (otherwise errQUEUE_FULL), and the higher priority task
+   * woken flag.
    */
-  BaseType_t send_back_isr(const T &item,
-                           BaseType_t &higher_priority_task_woken) {
-    return xQueueSendToBackFromISR(m_queue, &item, &higher_priority_task_woken);
-  }
-  /**
-   * @brief Posts an item to the back of a queue from an ISR.
-   * @ref https://www.freertos.org/xQueueSendToBackFromISR.html
-   *
-   * @param item An item to be posted on the queue.
-   * @return BaseType_t pdPASS if the item was successfully posted, otherwise
-   * errQUEUE_FULL.
-   */
-  BaseType_t send_back_isr(const T &item) {
-    BaseType_t higher_priority_task_woken = pdFALSE;
-    return xQueueSendToBackFromISR(m_queue, &item, &higher_priority_task_woken);
+  isr_result<BaseType_t> send_back_isr(const T &item) {
+    isr_result<BaseType_t> result{pdFALSE, pdFALSE};
+    result.result = xQueueSendToBackFromISR(m_queue, &item,
+                                            &result.higher_priority_task_woken);
+    return result;
   }
   /**
    * @brief Posts an item to the front of a queue.
@@ -364,28 +367,15 @@ public:
    * @ref https://www.freertos.org/xQueueSendToFrontFromISR.html
    *
    * @param item An item to be posted on the queue.
-   * @param higher_priority_task_woken A variable to set to pdTRUE if the action
-   * unblocked a task of higher priority.
-   * @return BaseType_t pdPASS if the item
-   * was successfully posted, otherwise errQUEUE_FULL.
+   * @return isr_result<BaseType_t> Result containing pdPASS if the item was
+   * successfully posted (otherwise errQUEUE_FULL), and the higher priority task
+   * woken flag.
    */
-  BaseType_t send_front_isr(const T &item,
-                            BaseType_t &higher_priority_task_woken) {
-    return xQueueSendToFrontFromISR(m_queue, &item,
-                                    &higher_priority_task_woken);
-  }
-  /**
-   * @brief Posts an item to the front of a queue from an ISR.
-   * @ref https://www.freertos.org/xQueueSendToFrontFromISR.html
-   *
-   * @param item An item to be posted on the queue.
-   * @return BaseType_t pdPASS if the item
-   * was successfully posted, otherwise errQUEUE_FULL.
-   */
-  BaseType_t send_front_isr(const T &item) {
-    BaseType_t higher_priority_task_woken = pdFALSE;
-    return xQueueSendToFrontFromISR(m_queue, &item,
-                                    &higher_priority_task_woken);
+  isr_result<BaseType_t> send_front_isr(const T &item) {
+    isr_result<BaseType_t> result{pdFALSE, pdFALSE};
+    result.result = xQueueSendToFrontFromISR(
+        m_queue, &item, &result.higher_priority_task_woken);
+    return result;
   }
   /**
    * @brief Receive an item from a queue.
@@ -405,10 +395,10 @@ public:
    * @ref https://www.freertos.org/a00118.html
    *
    * @param timeout Timeout to wait for the item to become available.
-   * @return optional<T> The item received from the queue or std::nullopt if the
-   * queue is empty.
+   * @return std::optional<T> The item received from the queue or std::nullopt
+   * if the queue is empty.
    */
-  optional<T> receive(TickType_t ticks_to_wait) {
+  std::optional<T> receive(TickType_t ticks_to_wait) {
     T item;
     if (xQueueReceive(m_queue, &item, ticks_to_wait) == pdPASS) {
       return item;
@@ -437,11 +427,11 @@ public:
    * @ref https://www.freertos.org/a00118.html
    *
    * @param timeout Timeout to wait for the item to become available.
-   * @return optional<T> The item received from the queue or std::nullopt if the
-   * queue is empty.
+   * @return std::optional<T> The item received from the queue or std::nullopt
+   * if the queue is empty.
    */
   template <typename Rep, typename Period>
-  optional<T> receive(const std::chrono::duration<Rep, Period> &timeout) {
+  std::optional<T> receive(const std::chrono::duration<Rep, Period> &timeout) {
     return receive(pdMS_TO_TICKS(
         std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
             .count()));
@@ -451,42 +441,35 @@ public:
    * @ref https://www.freertos.org/a00120.html
    *
    * @param item An item placeholder for the item to be received from the queue.
-   * @param higher_priority_task_woken  A variable to set to pdTRUE if the
-   * action unblocked a task of higher priority.
-   * @return BaseType_t pdPASS if the item was successfully received, otherwise
-   * pdFALSE.
+   * @return isr_result<BaseType_t> Result containing pdPASS if the item was
+   * successfully received (otherwise pdFALSE), and the higher priority task
+   * woken flag.
    */
-  BaseType_t receive_isr(T &item, BaseType_t &higher_priority_task_woken) {
-    return xQueueReceiveFromISR(m_queue, &item, &higher_priority_task_woken);
-  }
-  /**
-   * @brief Receive an item from a queue from an ISR.
-   * @ref https://www.freertos.org/a00120.html
-   *
-   * @param item An item placeholder for the item to be received from the queue.
-   * @return BaseType_t pdPASS if the item was successfully received, otherwise
-   * pdFALSE.
-   */
-  BaseType_t receive_isr(T &item) {
-    BaseType_t higher_priority_task_woken = pdFALSE;
-    return xQueueReceiveFromISR(m_queue, &item, &higher_priority_task_woken);
+  isr_result<BaseType_t> receive_isr(T &item) {
+    isr_result<BaseType_t> result{pdFALSE, pdFALSE};
+    result.result = xQueueReceiveFromISR(m_queue, &item,
+                                         &result.higher_priority_task_woken);
+    return result;
   }
 
   /**
    * @brief Receive an item from a queue from an ISR.
    * @ref https://www.freertos.org/a00120.html
    *
-   * @return optional<T> The item received from the queue or std::nullopt if the
-   * queue is empty.
+   * @return isr_result<std::optional<T>> Result containing the item received
+   * from the queue (or std::nullopt if empty), and the higher priority task
+   * woken flag.
    */
-  optional<T> receive_isr(void) {
+  isr_result<std::optional<T>> receive_isr(void) {
+    isr_result<std::optional<T>> result{{}, pdFALSE};
     T item;
     BaseType_t higher_priority_task_woken = pdFALSE;
     if (xQueueReceiveFromISR(m_queue, &item, &higher_priority_task_woken) ==
         pdPASS) {
-      return item;
+      result.result = item;
     }
-    return {};
+    result.higher_priority_task_woken = higher_priority_task_woken;
+    return result;
   }
   /**
    * @brief Return the number of items stored in the queue.
@@ -535,25 +518,14 @@ public:
    * @ref https://www.freertos.org/xQueueOverwriteFromISR.html
    *
    * @param item An item to be posted on the queue.
-   * @param higher_priority_task_woken A variable to set to pdTRUE if the action
-   * unblocked a task of higher priority.
-   * @return BaseType_t pdPASS returned always.
+   * @return isr_result<BaseType_t> Result containing pdPASS (returned always),
+   * and the higher priority task woken flag.
    */
-  BaseType_t overwrite_isr(const T &item,
-                           BaseType_t &higher_priority_task_woken) {
-    return xQueueOverwriteFromISR(m_queue, &item, &higher_priority_task_woken);
-  }
-  /**
-   * @brief A version of send_back method that overwrites the items in the queue
-   * from an ISR.
-   * @ref https://www.freertos.org/xQueueOverwriteFromISR.html
-   *
-   * @param item An item to be posted on the queue.
-   * @return BaseType_t pdPASS returned always.
-   */
-  BaseType_t overwrite_isr(const T &item) {
-    BaseType_t higher_priority_task_woken = pdFALSE;
-    return xQueueOverwriteFromISR(m_queue, &item, &higher_priority_task_woken);
+  isr_result<BaseType_t> overwrite_isr(const T &item) {
+    isr_result<BaseType_t> result{pdFALSE, pdFALSE};
+    result.result = xQueueOverwriteFromISR(m_queue, &item,
+                                           &result.higher_priority_task_woken);
+    return result;
   }
   /**
    * @brief Peek an item from a queue. The item is not removed from the queue.
@@ -590,26 +562,15 @@ public:
    * @ref https://www.freertos.org/xQueuePeekFromISR.html
    *
    * @param item An item placeholder for the item to be peeked from the queue.
-   * @param higher_priority_task_woken A variable to set to pdTRUE if the action
-   * unblocked a task of higher priority.
-   * @return BaseType_t pdPASS if the item
-   * was successfully peeked, otherwise pdFALSE.
+   * @return isr_result<BaseType_t> Result containing pdPASS if the item was
+   * successfully peeked (otherwise pdFALSE), and the higher priority task woken
+   * flag.
    */
-  BaseType_t peek_isr(T &item, BaseType_t &higher_priority_task_woken) {
-    return xQueuePeekFromISR(m_queue, &item, &higher_priority_task_woken);
-  }
-  /**
-   * @brief Peek an item from a queue from an ISR. The item is not removed from
-   * the queue.
-   * @ref https://www.freertos.org/xQueuePeekFromISR.html
-   *
-   * @param item An item placeholder for the item to be peeked from the queue.
-   * @return BaseType_t pdPASS if the item was successfully peeked, otherwise
-   * pdFALSE.
-   */
-  BaseType_t peek_isr(T &item) {
-    BaseType_t higher_priority_task_woken = pdFALSE;
-    return xQueuePeekFromISR(m_queue, &item, &higher_priority_task_woken);
+  isr_result<BaseType_t> peek_isr(T &item) {
+    isr_result<BaseType_t> result{pdFALSE, pdFALSE};
+    result.result =
+        xQueuePeekFromISR(m_queue, &item, &result.higher_priority_task_woken);
+    return result;
   }
   /**
    * @brief Peek an item from a queue. The item is not removed from the queue.
@@ -617,10 +578,10 @@ public:
    *
    * @param ticks_to_wait Timeout in ticks to wait for the item to become
    * available.
-   * @return optional<T> The item peeked from the queue or std::nullopt if the
-   * queue is empty.
+   * @return std::optional<T> The item peeked from the queue or std::nullopt if
+   * the queue is empty.
    */
-  optional<T> peek(TickType_t ticks_to_wait) {
+  std::optional<T> peek(TickType_t ticks_to_wait) {
     T item;
     if (xQueuePeek(m_queue, &item, ticks_to_wait) == pdPASS) {
       return item;
@@ -632,11 +593,11 @@ public:
    * @ref https://www.freertos.org/xQueuePeek.html
    *
    * @param timeout Timeout to wait for the item to become available.
-   * @return optional<T> The item peeked from the queue or std::nullopt if the
-   * queue is empty.
+   * @return std::optional<T> The item peeked from the queue or std::nullopt if
+   * the queue is empty.
    */
   template <typename Rep, typename Period>
-  optional<T> peek(const std::chrono::duration<Rep, Period> &timeout) {
+  std::optional<T> peek(const std::chrono::duration<Rep, Period> &timeout) {
     return peek(pdMS_TO_TICKS(
         std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
             .count()));
@@ -647,17 +608,20 @@ public:
    * the queue.
    * @ref https://www.freertos.org/xQueuePeekFromISR.html
    *
-   * @return optional<T> The item peeked from the queue or std::nullopt if the
-   * queue is empty.
+   * @return isr_result<std::optional<T>> Result containing the item peeked from
+   * the queue (or std::nullopt if empty), and the higher priority task woken
+   * flag.
    */
-  optional<T> peek_isr(void) {
+  isr_result<std::optional<T>> peek_isr(void) {
+    isr_result<std::optional<T>> result{{}, pdFALSE};
     T item;
     BaseType_t higher_priority_task_woken = pdFALSE;
     if (xQueuePeekFromISR(m_queue, &item, &higher_priority_task_woken) ==
         pdPASS) {
-      return item;
+      result.result = item;
     }
-    return {};
+    result.higher_priority_task_woken = higher_priority_task_woken;
+    return result;
   }
   /**
    * @brief Return the name of the queue.
@@ -681,6 +645,152 @@ public:
    */
   BaseType_t empty_isr(void) const {
     return xQueueIsQueueEmptyFromISR(m_queue);
+  }
+
+  [[nodiscard]] expected<void, error> send_ex(const T &item,
+                                              TickType_t ticks_to_wait) {
+    auto rc = send(item, ticks_to_wait);
+    if (rc == pdPASS) {
+      return {};
+    }
+    return unexpected<error>(ticks_to_wait == 0 ? error::queue_full
+                                                : error::timeout);
+  }
+  template <typename Rep, typename Period>
+  [[nodiscard]] expected<void, error>
+  send_ex(const T &item, const std::chrono::duration<Rep, Period> &timeout) {
+    return send_ex(
+        item, pdMS_TO_TICKS(
+                  std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
+                      .count()));
+  }
+  [[nodiscard]] isr_result<expected<void, error>> send_ex_isr(const T &item) {
+    auto result = send_isr(item);
+    isr_result<expected<void, error>> ret{unexpected<error>(error::queue_full),
+                                          result.higher_priority_task_woken};
+    if (result.result == pdPASS) {
+      ret.result = {};
+    }
+    return ret;
+  }
+  [[nodiscard]] expected<void, error> send_back_ex(const T &item,
+                                                   TickType_t ticks_to_wait) {
+    auto rc = send_back(item, ticks_to_wait);
+    if (rc == pdPASS) {
+      return {};
+    }
+    return unexpected<error>(ticks_to_wait == 0 ? error::queue_full
+                                                : error::timeout);
+  }
+  template <typename Rep, typename Period>
+  [[nodiscard]] expected<void, error>
+  send_back_ex(const T &item,
+               const std::chrono::duration<Rep, Period> &timeout) {
+    return send_back_ex(
+        item, pdMS_TO_TICKS(
+                  std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
+                      .count()));
+  }
+  [[nodiscard]] isr_result<expected<void, error>>
+  send_back_ex_isr(const T &item) {
+    auto result = send_back_isr(item);
+    isr_result<expected<void, error>> ret{unexpected<error>(error::queue_full),
+                                          result.higher_priority_task_woken};
+    if (result.result == pdPASS) {
+      ret.result = {};
+    }
+    return ret;
+  }
+  [[nodiscard]] expected<void, error> send_front_ex(const T &item,
+                                                    TickType_t ticks_to_wait) {
+    auto rc = send_front(item, ticks_to_wait);
+    if (rc == pdPASS) {
+      return {};
+    }
+    return unexpected<error>(ticks_to_wait == 0 ? error::queue_full
+                                                : error::timeout);
+  }
+  template <typename Rep, typename Period>
+  [[nodiscard]] expected<void, error>
+  send_front_ex(const T &item,
+                const std::chrono::duration<Rep, Period> &timeout) {
+    return send_front_ex(
+        item, pdMS_TO_TICKS(
+                  std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
+                      .count()));
+  }
+  [[nodiscard]] isr_result<expected<void, error>>
+  send_front_ex_isr(const T &item) {
+    auto result = send_front_isr(item);
+    isr_result<expected<void, error>> ret{unexpected<error>(error::queue_full),
+                                          result.higher_priority_task_woken};
+    if (result.result == pdPASS) {
+      ret.result = {};
+    }
+    return ret;
+  }
+  [[nodiscard]] expected<void, error> receive_ex(T &item,
+                                                 TickType_t ticks_to_wait) {
+    auto rc = receive(item, ticks_to_wait);
+    if (rc == pdPASS) {
+      return {};
+    }
+    return unexpected<error>(ticks_to_wait == 0 ? error::queue_empty
+                                                : error::timeout);
+  }
+  template <typename Rep, typename Period>
+  [[nodiscard]] expected<void, error>
+  receive_ex(T &item, const std::chrono::duration<Rep, Period> &timeout) {
+    return receive_ex(
+        item, pdMS_TO_TICKS(
+                  std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
+                      .count()));
+  }
+  [[nodiscard]] expected<T, error> receive_ex(TickType_t ticks_to_wait) {
+    auto opt = receive(ticks_to_wait);
+    if (opt.has_value()) {
+      return opt.value();
+    }
+    return unexpected<error>(ticks_to_wait == 0 ? error::queue_empty
+                                                : error::timeout);
+  }
+  template <typename Rep, typename Period>
+  [[nodiscard]] expected<T, error>
+  receive_ex(const std::chrono::duration<Rep, Period> &timeout) {
+    return receive_ex(pdMS_TO_TICKS(
+        std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
+            .count()));
+  }
+  [[nodiscard]] expected<void, error> reset_ex() {
+    auto rc = reset();
+    if (rc == pdPASS) {
+      return {};
+    }
+    return unexpected<error>(error::invalid_handle);
+  }
+  [[nodiscard]] expected<void, error> overwrite_ex(const T &item) {
+    auto rc = overwrite(item);
+    if (rc == pdPASS) {
+      return {};
+    }
+    return unexpected<error>(error::queue_full);
+  }
+  [[nodiscard]] expected<void, error> peek_ex(T &item,
+                                              TickType_t ticks_to_wait) {
+    auto rc = peek(item, ticks_to_wait);
+    if (rc == pdPASS) {
+      return {};
+    }
+    return unexpected<error>(ticks_to_wait == 0 ? error::queue_empty
+                                                : error::timeout);
+  }
+  template <typename Rep, typename Period>
+  [[nodiscard]] expected<void, error>
+  peek_ex(T &item, const std::chrono::duration<Rep, Period> &timeout) {
+    return peek_ex(
+        item, pdMS_TO_TICKS(
+                  std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
+                      .count()));
   }
 };
 

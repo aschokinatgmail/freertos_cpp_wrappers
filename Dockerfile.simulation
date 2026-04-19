@@ -1,0 +1,32 @@
+FROM ubuntu:22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    cmake \
+    g++ \
+    libgtest-dev \
+    libgmock-dev \
+    pkg-config \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN cd /usr/src/gtest && cmake . && make -j$(nproc) && cp lib/*.a /usr/lib/ || true
+RUN cd /usr/src/gmock && cmake . && make -j$(nproc) && cp lib/*.a /usr/lib/ || true
+
+WORKDIR /project
+
+COPY CMakeLists.txt .
+COPY include/ include/
+COPY src/ src/
+COPY tests/ tests/
+COPY third_party/ third_party/
+
+RUN mkdir -p build-sim && cd build-sim && \
+    cmake -DENABLE_SIMULATION=ON .. && \
+    make -j$(nproc)
+
+WORKDIR /project/build-sim
+
+CMD ["ctest", "--verbose", "--output-on-failure", "-L", "simulation"]

@@ -36,11 +36,16 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #error "This header is for C++ only"
 #endif
 
+#include "freertos_expected.hpp"
+#include "freertos_isr_result.hpp"
+#include "freertos_thread_safety.hpp"
 #include <FreeRTOS.h>
 #include <chrono>
 #include <ctime>
 #include <semphr.h>
 #include <task.h>
+#include <type_traits>
+#include <utility>
 
 namespace freertos {
 
@@ -162,7 +167,8 @@ public:
  * freertos::binary_semaphore<freertos::static_semaphore_allocator> static_sem;
  * ```
  */
-template <typename SemaphoreAllocator> class binary_semaphore {
+template <typename SemaphoreAllocator>
+class FREERTOS_CAPABILITY("binary_semaphore") binary_semaphore {
   SemaphoreAllocator m_allocator{};
   SemaphoreHandle_t m_semaphore{nullptr};
 
@@ -174,8 +180,18 @@ public:
   binary_semaphore() : m_semaphore{m_allocator.create_binary()} {
     configASSERT(m_semaphore);
   }
+  template <typename... AllocatorArgs,
+            typename std::enable_if_t<(sizeof...(AllocatorArgs) > 0), int> = 0>
+  explicit binary_semaphore(AllocatorArgs &&...args)
+      : m_allocator{std::forward<AllocatorArgs>(args)...},
+        m_semaphore{m_allocator.create_binary()} {
+    configASSERT(m_semaphore);
+  }
   binary_semaphore(const binary_semaphore &) = delete;
-  binary_semaphore(binary_semaphore &&src) = delete;
+  binary_semaphore(binary_semaphore &&src) noexcept
+      : m_semaphore(src.m_semaphore) {
+    src.m_semaphore = nullptr;
+  }
   /**
    * @brief Destruct the binary semaphore object and
    * delete the binary semaphore instance if it was created.
@@ -188,7 +204,21 @@ public:
   }
 
   binary_semaphore &operator=(const binary_semaphore &) = delete;
-  binary_semaphore &operator=(binary_semaphore &&src) = delete;
+  binary_semaphore &operator=(binary_semaphore &&src) noexcept {
+    if (this != &src) {
+      swap(src);
+    }
+    return *this;
+  }
+
+  void swap(binary_semaphore &other) noexcept {
+    using std::swap;
+    swap(m_semaphore, other.m_semaphore);
+  }
+
+  friend void swap(binary_semaphore &a, binary_semaphore &b) noexcept {
+    a.swap(b);
+  }
 
   /**
    * @brief Give the binary semaphore.
@@ -198,30 +228,19 @@ public:
    * otherwise pdFALSE.
    *
    */
-  BaseType_t give() { return xSemaphoreGive(m_semaphore); }
+  BaseType_t give() FREERTOS_RELEASE() { return xSemaphoreGive(m_semaphore); }
   /**
    * @brief Give the binary semaphore from an ISR.
    * @ref https://www.freertos.org/a00124.html
    *
-   * @param high_priority_task_woken pdTRUE if the high priority task was woken
-   * by the semaphore give.
-   * @return BaseType_t pdTRUE if the semaphore was successfully given,
-   *
+   * @return isr_result<BaseType_t> containing the result and whether a
+   * higher priority task was woken.
    */
-  BaseType_t give_isr(BaseType_t &high_priority_task_woken) {
-    return xSemaphoreGiveFromISR(m_semaphore, &high_priority_task_woken);
-  }
-  /**
-   * @brief Give the binary semaphore from an ISR.
-   * @ref https://www.freertos.org/a00124.html
-   *
-   * @return BaseType_t pdTRUE if the semaphore was successfully given,
-   *
-   */
-  BaseType_t give_isr(void) {
-    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-    return xSemaphoreGiveFromISR(
-        m_semaphore, &xHigherPriorityTaskWoken);
+  isr_result<BaseType_t> give_isr(void) {
+    isr_result<BaseType_t> result{pdFALSE, pdFALSE};
+    result.result =
+        xSemaphoreGiveFromISR(m_semaphore, &result.higher_priority_task_woken);
+    return result;
   }
   /**
    * @brief Take the binary semaphore.
@@ -232,35 +251,22 @@ public:
    * otherwise pdFALSE.
    *
    */
-  BaseType_t take(const TickType_t ticks_to_wait = portMAX_DELAY) {
+  BaseType_t take(const TickType_t ticks_to_wait = portMAX_DELAY)
+      FREERTOS_ACQUIRE() {
     return xSemaphoreTake(m_semaphore, ticks_to_wait);
   }
   /**
    * @brief Take the binary semaphore from an ISR.
    * @ref https://www.freertos.org/xSemaphoreTakeFromISR.html
    *
-   * @param high_priority_task_woken pdTRUE if the high priority task was woken
-   * by the semaphore take.
-   *
-   * @return BaseType_t pdTRUE if the semaphore was successfully taken,
-   * otherwise pdFALSE.
-   *
+   * @return isr_result<BaseType_t> containing the result and whether a
+   * higher priority task was woken.
    */
-  BaseType_t take_isr(BaseType_t &high_priority_task_woken) {
-    return xSemaphoreTakeFromISR(m_semaphore, &high_priority_task_woken);
-  }
-  /**
-   * @brief Take the binary semaphore from an ISR.
-   * @ref https://www.freertos.org/xSemaphoreTakeFromISR.html
-   *
-   * @return BaseType_t pdTRUE if the semaphore was successfully taken,
-   * otherwise pdFALSE.
-   *
-   */
-  BaseType_t take_isr(void) {
-    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-    return xSemaphoreTakeFromISR(
-        m_semaphore, &xHigherPriorityTaskWoken);
+  isr_result<BaseType_t> take_isr(void) {
+    isr_result<BaseType_t> result{pdFALSE, pdFALSE};
+    result.result =
+        xSemaphoreTakeFromISR(m_semaphore, &result.higher_priority_task_woken);
+    return result;
   }
   /**
    * @brief Take the binary semaphore.
@@ -276,6 +282,64 @@ public:
         std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
             .count()));
   }
+
+  [[nodiscard]] expected<void, error> give_ex() {
+    auto rc = give();
+    if (rc == pdTRUE) {
+      return {};
+    }
+    return unexpected<error>(error::semaphore_not_owned);
+  }
+  [[nodiscard]] isr_result<expected<void, error>> give_ex_isr() {
+    auto result = give_isr();
+    isr_result<expected<void, error>> ret{
+        unexpected<error>(error::semaphore_not_owned),
+        result.higher_priority_task_woken};
+    if (result.result == pdTRUE) {
+      ret.result = {};
+    }
+    return ret;
+  }
+  [[nodiscard]] expected<void, error>
+  take_ex(const TickType_t ticks_to_wait = portMAX_DELAY) {
+    auto rc = take(ticks_to_wait);
+    if (rc == pdTRUE) {
+      return {};
+    }
+    return unexpected<error>(ticks_to_wait == 0 ? error::would_block
+                                                : error::timeout);
+  }
+  [[nodiscard]] isr_result<expected<void, error>> take_ex_isr() {
+    auto result = take_isr();
+    isr_result<expected<void, error>> ret{unexpected<error>(error::would_block),
+                                          result.higher_priority_task_woken};
+    if (result.result == pdTRUE) {
+      ret.result = {};
+    }
+    return ret;
+  }
+  template <typename Rep, typename Period>
+  [[nodiscard]] expected<void, error>
+  take_ex(const std::chrono::duration<Rep, Period> &timeout) {
+    return take_ex(pdMS_TO_TICKS(
+        std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
+            .count()));
+  }
+
+  void acquire(const TickType_t ticks_to_wait = portMAX_DELAY)
+      FREERTOS_ACQUIRE() {
+    take(ticks_to_wait);
+  }
+  template <typename Rep, typename Period>
+  void acquire(const std::chrono::duration<Rep, Period> &timeout)
+      FREERTOS_ACQUIRE() {
+    take(timeout);
+  }
+  [[nodiscard]] bool try_acquire() FREERTOS_TRY_ACQUIRE(true) {
+    return take(0) == pdTRUE;
+  }
+  void release() FREERTOS_RELEASE() { give(); }
+  isr_result<BaseType_t> release_isr() { return give_isr(); }
 };
 
 /**
@@ -284,7 +348,8 @@ public:
  * @tparam SemaphoreAllocator type of the semaphore allocator to use for memory
  * allocation.
  */
-template <typename SemaphoreAllocator> class counting_semaphore {
+template <typename SemaphoreAllocator>
+class FREERTOS_CAPABILITY("counting_semaphore") counting_semaphore {
   SemaphoreAllocator m_allocator{};
   SemaphoreHandle_t m_semaphore{nullptr};
 
@@ -299,8 +364,18 @@ public:
       : m_semaphore{m_allocator.create_counting(max_count)} {
     configASSERT(m_semaphore);
   }
+  template <typename... AllocatorArgs,
+            typename std::enable_if_t<(sizeof...(AllocatorArgs) > 0), int> = 0>
+  explicit counting_semaphore(UBaseType_t max_count, AllocatorArgs &&...args)
+      : m_allocator{std::forward<AllocatorArgs>(args)...},
+        m_semaphore{m_allocator.create_counting(max_count)} {
+    configASSERT(m_semaphore);
+  }
   counting_semaphore(const counting_semaphore &) = delete;
-  counting_semaphore(counting_semaphore &&src) = delete;
+  counting_semaphore(counting_semaphore &&src) noexcept
+      : m_semaphore(src.m_semaphore) {
+    src.m_semaphore = nullptr;
+  }
   /**
    * @brief Destruct the counting semaphore object and
    * delete the counting semaphore instance if it was created.
@@ -313,7 +388,21 @@ public:
   }
 
   counting_semaphore &operator=(const counting_semaphore &) = delete;
-  counting_semaphore &operator=(counting_semaphore &&src) = delete;
+  counting_semaphore &operator=(counting_semaphore &&src) noexcept {
+    if (this != &src) {
+      swap(src);
+    }
+    return *this;
+  }
+
+  void swap(counting_semaphore &other) noexcept {
+    using std::swap;
+    swap(m_semaphore, other.m_semaphore);
+  }
+
+  friend void swap(counting_semaphore &a, counting_semaphore &b) noexcept {
+    a.swap(b);
+  }
 
   /**
    * @brief Give the counting semaphore.
@@ -323,30 +412,19 @@ public:
    * otherwise pdFALSE.
    *
    */
-  BaseType_t give() { return xSemaphoreGive(m_semaphore); }
+  BaseType_t give() FREERTOS_RELEASE() { return xSemaphoreGive(m_semaphore); }
   /**
    * @brief Give the counting semaphore from an ISR.
    * @ref https://www.freertos.org/a00124.html
    *
-   * @param high_priority_task_woken pdTRUE if the high priority task was woken
-   * by the semaphore give.
-   * @return BaseType_t pdTRUE if the semaphore was successfully given,
-   *
+   * @return isr_result<BaseType_t> containing the result and whether a
+   * higher priority task was woken.
    */
-  BaseType_t give_isr(BaseType_t &high_priority_task_woken) {
-    return xSemaphoreGiveFromISR(m_semaphore, &high_priority_task_woken);
-  }
-  /**
-   * @brief Give the counting semaphore from an ISR.
-   * @ref https://www.freertos.org/a00124.html
-   *
-   * @return BaseType_t pdTRUE if the semaphore was successfully given,
-   *
-   */
-  BaseType_t give_isr(void) {
-    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-    return xSemaphoreGiveFromISR(
-        m_semaphore, &xHigherPriorityTaskWoken);
+  isr_result<BaseType_t> give_isr(void) {
+    isr_result<BaseType_t> result{pdFALSE, pdFALSE};
+    result.result =
+        xSemaphoreGiveFromISR(m_semaphore, &result.higher_priority_task_woken);
+    return result;
   }
   /**
    * @brief Take the counting semaphore.
@@ -357,35 +435,22 @@ public:
    * otherwise pdFALSE.
    *
    */
-  BaseType_t take(const TickType_t ticks_to_wait = portMAX_DELAY) {
+  BaseType_t take(const TickType_t ticks_to_wait = portMAX_DELAY)
+      FREERTOS_ACQUIRE() {
     return xSemaphoreTake(m_semaphore, ticks_to_wait);
   }
   /**
    * @brief Take the counting semaphore from an ISR.
    * @ref https://www.freertos.org/xSemaphoreTakeFromISR.html
    *
-   * @param high_priority_task_woken pdTRUE if the high priority task was woken
-   * by the semaphore take.
-   *
-   * @return BaseType_t pdTRUE if the semaphore was successfully taken,
-   * otherwise pdFALSE.
-   *
+   * @return isr_result<BaseType_t> containing the result and whether a
+   * higher priority task was woken.
    */
-  BaseType_t take_isr(BaseType_t &high_priority_task_woken) {
-    return xSemaphoreTakeFromISR(m_semaphore, &high_priority_task_woken);
-  }
-  /**
-   * @brief Take the counting semaphore from an ISR.
-   * @ref https://www.freertos.org/xSemaphoreTakeFromISR.html
-   *
-   * @return BaseType_t pdTRUE if the semaphore was successfully taken,
-   * otherwise pdFALSE.
-   *
-   */
-  BaseType_t take_isr(void) {
-    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-    return xSemaphoreTakeFromISR(
-        m_semaphore, &xHigherPriorityTaskWoken);
+  isr_result<BaseType_t> take_isr(void) {
+    isr_result<BaseType_t> result{pdFALSE, pdFALSE};
+    result.result =
+        xSemaphoreTakeFromISR(m_semaphore, &result.higher_priority_task_woken);
+    return result;
   }
   /**
    * @brief Take the counting semaphore.
@@ -401,6 +466,65 @@ public:
         std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
             .count()));
   }
+
+  [[nodiscard]] expected<void, error> give_ex() {
+    auto rc = give();
+    if (rc == pdTRUE) {
+      return {};
+    }
+    return unexpected<error>(error::semaphore_not_owned);
+  }
+  [[nodiscard]] isr_result<expected<void, error>> give_ex_isr() {
+    auto result = give_isr();
+    isr_result<expected<void, error>> ret{
+        unexpected<error>(error::semaphore_not_owned),
+        result.higher_priority_task_woken};
+    if (result.result == pdTRUE) {
+      ret.result = {};
+    }
+    return ret;
+  }
+  [[nodiscard]] expected<void, error>
+  take_ex(const TickType_t ticks_to_wait = portMAX_DELAY) {
+    auto rc = take(ticks_to_wait);
+    if (rc == pdTRUE) {
+      return {};
+    }
+    return unexpected<error>(ticks_to_wait == 0 ? error::would_block
+                                                : error::timeout);
+  }
+  [[nodiscard]] isr_result<expected<void, error>> take_ex_isr() {
+    auto result = take_isr();
+    isr_result<expected<void, error>> ret{unexpected<error>(error::would_block),
+                                          result.higher_priority_task_woken};
+    if (result.result == pdTRUE) {
+      ret.result = {};
+    }
+    return ret;
+  }
+  template <typename Rep, typename Period>
+  [[nodiscard]] expected<void, error>
+  take_ex(const std::chrono::duration<Rep, Period> &timeout) {
+    return take_ex(pdMS_TO_TICKS(
+        std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
+            .count()));
+  }
+
+  void acquire(const TickType_t ticks_to_wait = portMAX_DELAY)
+      FREERTOS_ACQUIRE() {
+    take(ticks_to_wait);
+  }
+  template <typename Rep, typename Period>
+  void acquire(const std::chrono::duration<Rep, Period> &timeout)
+      FREERTOS_ACQUIRE() {
+    take(timeout);
+  }
+  [[nodiscard]] bool try_acquire() FREERTOS_TRY_ACQUIRE(true) {
+    return take(0) == pdTRUE;
+  }
+  void release() FREERTOS_RELEASE() { give(); }
+  isr_result<BaseType_t> release_isr() { return give_isr(); }
+
   /**
    * @brief Give the counting semaphore.
    *
@@ -469,7 +593,8 @@ public:
  * @tparam SemaphoreAllocator type of the semaphore allocator to use for memory
  * allocation.
  */
-template <typename SemaphoreAllocator> class mutex {
+template <typename SemaphoreAllocator>
+class FREERTOS_CAPABILITY("mutex") mutex {
   SemaphoreAllocator m_allocator{};
   SemaphoreHandle_t m_semaphore{nullptr};
   uint8_t m_locked : 1;
@@ -482,8 +607,20 @@ public:
   mutex() : m_semaphore{m_allocator.create_mutex()}, m_locked{false} {
     configASSERT(m_semaphore);
   }
+  template <typename... AllocatorArgs,
+            typename std::enable_if_t<(sizeof...(AllocatorArgs) > 0), int> = 0>
+  explicit mutex(AllocatorArgs &&...args)
+      : m_allocator{std::forward<AllocatorArgs>(args)...},
+        m_semaphore{m_allocator.create_mutex()}, m_locked{false} {
+    configASSERT(m_semaphore);
+  }
   mutex(const mutex &) = delete;
-  mutex(mutex &&src) = delete;
+  mutex(mutex &&src) noexcept
+      : m_semaphore(src.m_semaphore), m_locked(src.m_locked) {
+    configASSERT(!src.m_locked);
+    src.m_semaphore = nullptr;
+    src.m_locked = false;
+  }
   /**
    * @brief Destruct the mutex object and delete the mutex instance if it was
    * created.
@@ -496,7 +633,24 @@ public:
   }
 
   mutex &operator=(const mutex &) = delete;
-  mutex &operator=(mutex &&src) = delete;
+  mutex &operator=(mutex &&src) noexcept {
+    configASSERT(!m_locked);
+    configASSERT(!src.m_locked);
+    if (this != &src) {
+      swap(src);
+    }
+    return *this;
+  }
+
+  void swap(mutex &other) noexcept {
+    using std::swap;
+    swap(m_semaphore, other.m_semaphore);
+    const uint8_t locked_tmp = m_locked;
+    m_locked = other.m_locked;
+    other.m_locked = locked_tmp;
+  }
+
+  friend void swap(mutex &a, mutex &b) noexcept { a.swap(b); }
 
   /**
    * @brief Unlock the mutex.
@@ -504,7 +658,7 @@ public:
    *
    * @return BaseType_t pdTRUE if the mutex was successfully unlocked,
    */
-  BaseType_t unlock() {
+  BaseType_t unlock() FREERTOS_RELEASE() {
     auto rc = xSemaphoreGive(m_semaphore);
     if (rc) {
       m_locked = false;
@@ -515,30 +669,17 @@ public:
    * @brief Unlock the mutex from an ISR.
    * @ref https://www.freertos.org/a00124.html
    *
-   * @param high_priority_task_woken pdTRUE if the high priority task was woken
-   * by the mutex unlock.
-   * @return BaseType_t pdTRUE if the mutex was successfully unlocked,
+   * @return isr_result<BaseType_t> containing the result and whether a
+   * higher priority task was woken.
    */
-  BaseType_t unlock_isr(BaseType_t &high_priority_task_woken) {
-    auto rc = xSemaphoreGiveFromISR(m_semaphore, &high_priority_task_woken);
-    if (rc) {
+  isr_result<BaseType_t> unlock_isr(void) {
+    isr_result<BaseType_t> result{pdFALSE, pdFALSE};
+    result.result =
+        xSemaphoreGiveFromISR(m_semaphore, &result.higher_priority_task_woken);
+    if (result.result) {
       m_locked = false;
     }
-    return rc;
-  }
-  /**
-   * @brief Unlock the mutex from an ISR.
-   * @ref https://www.freertos.org/a00124.html
-   *
-   * @return BaseType_t pdTRUE if the mutex was successfully unlocked,
-   */
-  BaseType_t unlock_isr(void) {
-    BaseType_t high_priority_task_woken = pdFALSE;
-    auto rc = xSemaphoreGiveFromISR(m_semaphore, &high_priority_task_woken);
-    if (rc) {
-      m_locked = false;
-    }
-    return rc;
+    return result;
   }
   /**
    * @brief Lock the mutex.
@@ -547,7 +688,8 @@ public:
    * @param ticks_to_wait timeout in ticks to wait for the mutex.
    * @return BaseType_t pdTRUE if the mutex was successfully locked,
    */
-  BaseType_t lock(const TickType_t ticks_to_wait = portMAX_DELAY) {
+  BaseType_t lock(const TickType_t ticks_to_wait = portMAX_DELAY)
+      FREERTOS_ACQUIRE() {
     auto rc = xSemaphoreTake(m_semaphore, ticks_to_wait);
     if (rc) {
       m_locked = true;
@@ -558,30 +700,17 @@ public:
    * @brief Lock the mutex from an ISR.
    * @ref https://www.freertos.org/xSemaphoreTakeFromISR.html
    *
-   * @param high_priority_task_woken pdTRUE if the high priority task was woken
-   * by the mutex lock.
-   * @return BaseType_t pdTRUE if the mutex was successfully locked,
+   * @return isr_result<BaseType_t> containing the result and whether a
+   * higher priority task was woken.
    */
-  BaseType_t lock_isr(BaseType_t &high_priority_task_woken) {
-    auto rc = xSemaphoreTakeFromISR(m_semaphore, &high_priority_task_woken);
-    if (rc) {
+  isr_result<BaseType_t> lock_isr(void) {
+    isr_result<BaseType_t> result{pdFALSE, pdFALSE};
+    result.result =
+        xSemaphoreTakeFromISR(m_semaphore, &result.higher_priority_task_woken);
+    if (result.result) {
       m_locked = true;
     }
-    return rc;
-  }
-  /**
-   * @brief Lock the mutex from an ISR.
-   * @ref https://www.freertos.org/xSemaphoreTakeFromISR.html
-   *
-   * @return BaseType_t pdTRUE if the mutex was successfully locked,
-   */
-  BaseType_t lock_isr(void) {
-    BaseType_t high_priority_task_woken = pdFALSE;
-    auto rc = xSemaphoreTakeFromISR(m_semaphore, &high_priority_task_woken);
-    if (rc) {
-      m_locked = true;
-    }
-    return rc;
+    return result;
   }
   /**
    * @brief Lock the mutex.
@@ -601,13 +730,78 @@ public:
    *
    * @return BaseType_t pdTRUE if the mutex was successfully locked,
    */
-  BaseType_t try_lock() {
+  BaseType_t try_lock() FREERTOS_TRY_ACQUIRE(true) {
     auto rc = xSemaphoreTake(m_semaphore, 0);
     if (rc) {
       m_locked = true;
     }
     return rc;
   }
+
+  [[nodiscard]] expected<void, error>
+  lock_ex(const TickType_t ticks_to_wait = portMAX_DELAY) {
+    auto rc = lock(ticks_to_wait);
+    if (rc == pdTRUE) {
+      return {};
+    }
+    return unexpected<error>(ticks_to_wait == 0 ? error::would_block
+                                                : error::timeout);
+  }
+  [[nodiscard]] isr_result<expected<void, error>> lock_ex_isr() {
+    auto result = lock_isr();
+    isr_result<expected<void, error>> ret{unexpected<error>(error::would_block),
+                                          result.higher_priority_task_woken};
+    if (result.result == pdTRUE) {
+      ret.result = {};
+    }
+    return ret;
+  }
+  [[nodiscard]] expected<void, error> unlock_ex() {
+    auto rc = unlock();
+    if (rc == pdTRUE) {
+      return {};
+    }
+    return unexpected<error>(error::semaphore_not_owned);
+  }
+  [[nodiscard]] isr_result<expected<void, error>> unlock_ex_isr() {
+    auto result = unlock_isr();
+    isr_result<expected<void, error>> ret{
+        unexpected<error>(error::semaphore_not_owned),
+        result.higher_priority_task_woken};
+    if (result.result == pdTRUE) {
+      ret.result = {};
+    }
+    return ret;
+  }
+  [[nodiscard]] expected<void, error> try_lock_ex() {
+    auto rc = try_lock();
+    if (rc == pdTRUE) {
+      return {};
+    }
+    return unexpected<error>(error::would_block);
+  }
+  template <typename Rep, typename Period>
+  [[nodiscard]] expected<void, error>
+  lock_ex(const std::chrono::duration<Rep, Period> &timeout) {
+    return lock_ex(pdMS_TO_TICKS(
+        std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
+            .count()));
+  }
+
+  template <typename Rep, typename Period>
+  bool try_lock_for(const std::chrono::duration<Rep, Period> &timeout) {
+    return lock(timeout) == pdTRUE;
+  }
+  template <typename Clock, typename Duration>
+  bool try_lock_until(const std::chrono::time_point<Clock, Duration> &tp) {
+    auto now = Clock::now();
+    if (tp <= now) {
+      return try_lock();
+    }
+    return lock(std::chrono::duration_cast<std::chrono::milliseconds>(
+               tp - now)) == pdTRUE;
+  }
+
   /**
    * @brief Get the lock status of the mutex.
    *
@@ -622,7 +816,8 @@ public:
  * @tparam SemaphoreAllocator type of the semaphore allocator to use for memory
  * allocation.
  */
-template <typename SemaphoreAllocator> class recursive_mutex {
+template <typename SemaphoreAllocator>
+class FREERTOS_SCOPED_CAPABILITY recursive_mutex {
   SemaphoreAllocator m_allocator{};
   SemaphoreHandle_t m_semaphore{nullptr};
   uint8_t m_recursions_count{0};
@@ -635,8 +830,21 @@ public:
   recursive_mutex() : m_semaphore{m_allocator.create_recursive_mutex()} {
     configASSERT(m_semaphore);
   }
+  template <typename... AllocatorArgs,
+            typename std::enable_if_t<(sizeof...(AllocatorArgs) > 0), int> = 0>
+  explicit recursive_mutex(AllocatorArgs &&...args)
+      : m_allocator{std::forward<AllocatorArgs>(args)...},
+        m_semaphore{m_allocator.create_recursive_mutex()} {
+    configASSERT(m_semaphore);
+  }
   recursive_mutex(const recursive_mutex &) = delete;
-  recursive_mutex(recursive_mutex &&src) = delete;
+  recursive_mutex(recursive_mutex &&src) noexcept
+      : m_semaphore(src.m_semaphore),
+        m_recursions_count(src.m_recursions_count) {
+    configASSERT(src.m_recursions_count == 0);
+    src.m_semaphore = nullptr;
+    src.m_recursions_count = 0;
+  }
   /**
    * @brief Destruct the recursive mutex object and delete the recursive mutex
    * instance if it was created.
@@ -649,7 +857,24 @@ public:
   }
 
   recursive_mutex &operator=(const recursive_mutex &) = delete;
-  recursive_mutex &operator=(recursive_mutex &&src) = delete;
+  recursive_mutex &operator=(recursive_mutex &&src) noexcept {
+    configASSERT(m_recursions_count == 0);
+    configASSERT(src.m_recursions_count == 0);
+    if (this != &src) {
+      swap(src);
+    }
+    return *this;
+  }
+
+  void swap(recursive_mutex &other) noexcept {
+    using std::swap;
+    swap(m_semaphore, other.m_semaphore);
+    swap(m_recursions_count, other.m_recursions_count);
+  }
+
+  friend void swap(recursive_mutex &a, recursive_mutex &b) noexcept {
+    a.swap(b);
+  }
 
   /**
    * @brief Unlock the recursive mutex.
@@ -658,7 +883,7 @@ public:
    * @return BaseType_t pdTRUE if the recursive mutex was successfully unlocked,
    * otherwise pdFALSE.
    */
-  BaseType_t unlock() {
+  BaseType_t unlock() FREERTOS_RELEASE() {
     auto rc = xSemaphoreGiveRecursive(m_semaphore);
     if (rc && m_recursions_count > 0) {
       m_recursions_count--;
@@ -673,7 +898,8 @@ public:
    * @param ticks_to_wait timeout in ticks to wait for the recursive mutex.
    * @return BaseType_t pdTRUE if the recursive mutex was successfully locked,
    */
-  BaseType_t lock(const TickType_t ticks_to_wait = portMAX_DELAY) {
+  BaseType_t lock(const TickType_t ticks_to_wait = portMAX_DELAY)
+      FREERTOS_ACQUIRE() {
     auto rc = xSemaphoreTakeRecursive(m_semaphore, ticks_to_wait);
     if (rc) {
       m_recursions_count++;
@@ -688,7 +914,8 @@ public:
    * @return BaseType_t pdTRUE if the recursive mutex was successfully locked,
    */
   template <typename Rep, typename Period>
-  BaseType_t lock(const std::chrono::duration<Rep, Period> &timeout) {
+  BaseType_t lock(const std::chrono::duration<Rep, Period> &timeout)
+      FREERTOS_ACQUIRE() {
     return lock(pdMS_TO_TICKS(
         std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
             .count()));
@@ -699,13 +926,59 @@ public:
    *
    * @return BaseType_t pdTRUE if the recursive mutex was successfully locked,
    */
-  BaseType_t try_lock() {
+  BaseType_t try_lock() FREERTOS_TRY_ACQUIRE(true) {
     auto rc = xSemaphoreTakeRecursive(m_semaphore, 0);
     if (rc) {
       m_recursions_count++;
     }
     return rc;
   }
+
+  [[nodiscard]] expected<void, error>
+  lock_ex(const TickType_t ticks_to_wait = portMAX_DELAY) {
+    auto rc = lock(ticks_to_wait);
+    if (rc == pdTRUE) {
+      return {};
+    }
+    return unexpected<error>(ticks_to_wait == 0 ? error::would_block
+                                                : error::timeout);
+  }
+  [[nodiscard]] expected<void, error> unlock_ex() {
+    auto rc = unlock();
+    if (rc == pdTRUE) {
+      return {};
+    }
+    return unexpected<error>(error::semaphore_not_owned);
+  }
+  [[nodiscard]] expected<void, error> try_lock_ex() {
+    auto rc = try_lock();
+    if (rc == pdTRUE) {
+      return {};
+    }
+    return unexpected<error>(error::would_block);
+  }
+  template <typename Rep, typename Period>
+  [[nodiscard]] expected<void, error>
+  lock_ex(const std::chrono::duration<Rep, Period> &timeout) {
+    return lock_ex(pdMS_TO_TICKS(
+        std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
+            .count()));
+  }
+
+  template <typename Rep, typename Period>
+  bool try_lock_for(const std::chrono::duration<Rep, Period> &timeout) {
+    return lock(timeout) == pdTRUE;
+  }
+  template <typename Clock, typename Duration>
+  bool try_lock_until(const std::chrono::time_point<Clock, Duration> &tp) {
+    auto now = Clock::now();
+    if (tp <= now) {
+      return try_lock();
+    }
+    return lock(std::chrono::duration_cast<std::chrono::milliseconds>(
+               tp - now)) == pdTRUE;
+  }
+
   /**
    * @brief Get the lock status of the recursive mutex.
    *
@@ -726,7 +999,7 @@ public:
  *
  * @tparam Mutex type of the mutex to guard.
  */
-template <typename Mutex> class lock_guard {
+template <typename Mutex> class FREERTOS_SCOPED_CAPABILITY lock_guard {
   Mutex &m_mutex; // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members):
                   // RAII design requires reference
 
@@ -736,13 +1009,15 @@ public:
    *
    * @param mutex mutex to guard
    */
-  explicit lock_guard(Mutex &mutex) : m_mutex{mutex} { m_mutex.lock(); }
+  explicit lock_guard(Mutex &mutex) FREERTOS_ACQUIRE("mutex") : m_mutex{mutex} {
+    m_mutex.lock();
+  }
 
   /**
    * @brief Destruct the lock guard object and unlock the mutex.
    *
    */
-  ~lock_guard(void) { m_mutex.unlock(); }
+  ~lock_guard(void) FREERTOS_RELEASE() { m_mutex.unlock(); }
 
   // Delete copy and move operations for RAII safety
   lock_guard(const lock_guard &) = delete;
@@ -764,7 +1039,7 @@ public:
  *
  * @tparam Mutex type of the mutex to guard.
  */
-template <typename Mutex> class try_lock_guard {
+template <typename Mutex> class FREERTOS_SCOPED_CAPABILITY try_lock_guard {
   Mutex &m_mutex; // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members):
                   // RAII design requires reference
   bool m_lock_acquired{false};
@@ -775,14 +1050,14 @@ public:
    *
    * @param mutex mutex to guard
    */
-  explicit try_lock_guard(Mutex &mutex)
+  explicit try_lock_guard(Mutex &mutex) FREERTOS_TRY_ACQUIRE(true)
       : m_mutex{mutex}, m_lock_acquired{static_cast<bool>(m_mutex.try_lock())} {
   }
   /**
    * @brief Destruct the try lock guard object and unlock the mutex.
    *
    */
-  ~try_lock_guard(void) {
+  ~try_lock_guard(void) FREERTOS_RELEASE() {
     if (m_lock_acquired) {
       m_mutex.unlock();
     }
@@ -808,7 +1083,7 @@ public:
  *
  * @tparam Mutex type of the mutex to guard.
  */
-template <typename Mutex> class lock_guard_isr {
+template <typename Mutex> class FREERTOS_SCOPED_CAPABILITY lock_guard_isr {
   Mutex &m_mutex; // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members):
                   // RAII design requires reference
   BaseType_t m_high_priority_task_woken{pdFALSE};
@@ -819,14 +1094,19 @@ public:
    *
    * @param mutex mutex to guard
    */
-  explicit lock_guard_isr(Mutex &mutex) : m_mutex{mutex} {
-    m_mutex.lock_isr(m_high_priority_task_woken);
+  explicit lock_guard_isr(Mutex &mutex) FREERTOS_ACQUIRE("mutex")
+      : m_mutex{mutex} {
+    auto result = m_mutex.lock_isr();
+    m_high_priority_task_woken = result.higher_priority_task_woken;
   }
   /**
    * @brief Destruct the lock guard object and unlock the mutex.
    *
    */
-  ~lock_guard_isr(void) { m_mutex.unlock_isr(m_high_priority_task_woken); }
+  ~lock_guard_isr(void) FREERTOS_RELEASE() {
+    auto result = m_mutex.unlock_isr();
+    m_high_priority_task_woken = result.higher_priority_task_woken;
+  }
 
   // Delete copy and move operations for RAII safety
   lock_guard_isr(const lock_guard_isr &) = delete;
@@ -857,7 +1137,7 @@ public:
  *
  * @tparam Mutex type of the mutex to guard.
  */
-template <typename Mutex> class timeout_lock_guard {
+template <typename Mutex> class FREERTOS_SCOPED_CAPABILITY timeout_lock_guard {
   Mutex &m_mutex; // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members):
                   // RAII design requires reference
   bool m_lock_acquired{false};
@@ -870,6 +1150,7 @@ public:
    * @param ticks_to_wait timeout in ticks to wait for the mutex.
    */
   timeout_lock_guard(Mutex &mutex, TickType_t ticks_to_wait)
+      FREERTOS_TRY_ACQUIRE(true)
       : m_mutex{mutex},
         m_lock_acquired{static_cast<bool>(m_mutex.lock(ticks_to_wait))} {}
   /**
@@ -881,16 +1162,16 @@ public:
   template <typename Rep, typename Period>
   timeout_lock_guard(Mutex &mutex,
                      const std::chrono::duration<Rep, Period> &timeout)
+      FREERTOS_TRY_ACQUIRE(true)
       : m_mutex{mutex},
-        m_lock_acquired{
-            static_cast<bool>(m_mutex.lock(pdMS_TO_TICKS(
-                std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
-                    .count())))} {}
+        m_lock_acquired{static_cast<bool>(m_mutex.lock(pdMS_TO_TICKS(
+            std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
+                .count())))} {}
   /**
    * @brief Destruct the timeout lock guard object and unlock the mutex.
    *
    */
-  ~timeout_lock_guard(void) {
+  ~timeout_lock_guard(void) FREERTOS_RELEASE() {
     if (m_lock_acquired) {
       m_mutex.unlock();
     }

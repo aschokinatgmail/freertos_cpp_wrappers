@@ -801,16 +801,129 @@ TEST_F(FreeRTOSMessageBufferTest, MessageBufferAPICompleteness) {
 
   EXPECT_CALL(*mock, vMessageBufferDelete(mock_message_buffer_handle));
 
-  // Note: ISR variants of functions are available in FreeRTOS but not exposed
-  // in the C++ wrapper interface as they require different calling contexts
-  // (interrupt service routines) which are not applicable to typical C++ usage
-  // patterns. Host-based testing cannot properly simulate ISR behavior anyway.
+  // Note: ISR variants of functions are available in the C++ wrapper
+  // and return isr_result<T>
 }
 
 // Test entry point
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
+}
+
+// =============================================================================
+// ISR METHOD TESTS
+// =============================================================================
+
+TEST_F(FreeRTOSMessageBufferTest, MessageBufferSendIsr) {
+  EXPECT_CALL(*mock, xMessageBufferCreateStatic(_, _, _))
+      .WillOnce(Return(mock_message_buffer_handle));
+
+  sa::message_buffer<256> test_buffer;
+
+  const char test_data[] = "ISR message";
+  const size_t data_length = strlen(test_data);
+
+  EXPECT_CALL(*mock,
+              xMessageBufferSendFromISR(mock_message_buffer_handle, test_data,
+                                        data_length, NotNull()))
+      .WillOnce(DoAll(WithArg<3>([](BaseType_t *woken) { *woken = pdTRUE; }),
+                      Return(data_length)));
+
+  auto result = test_buffer.send_isr(test_data, data_length);
+  EXPECT_EQ(result.result, data_length);
+  EXPECT_EQ(result.higher_priority_task_woken, pdTRUE);
+
+  EXPECT_CALL(*mock, vMessageBufferDelete(mock_message_buffer_handle));
+}
+
+TEST_F(FreeRTOSMessageBufferTest, MessageBufferSendIsrNoYield) {
+  EXPECT_CALL(*mock, xMessageBufferCreateStatic(_, _, _))
+      .WillOnce(Return(mock_message_buffer_handle));
+
+  sa::message_buffer<256> test_buffer;
+
+  const char test_data[] = "No yield";
+  const size_t data_length = strlen(test_data);
+
+  EXPECT_CALL(*mock,
+              xMessageBufferSendFromISR(mock_message_buffer_handle, test_data,
+                                        data_length, NotNull()))
+      .WillOnce(DoAll(WithArg<3>([](BaseType_t *woken) { *woken = pdFALSE; }),
+                      Return(data_length)));
+
+  auto result = test_buffer.send_isr(test_data, data_length);
+  EXPECT_EQ(result.result, data_length);
+  EXPECT_EQ(result.higher_priority_task_woken, pdFALSE);
+
+  EXPECT_CALL(*mock, vMessageBufferDelete(mock_message_buffer_handle));
+}
+
+TEST_F(FreeRTOSMessageBufferTest, MessageBufferSendIsrFailure) {
+  EXPECT_CALL(*mock, xMessageBufferCreateStatic(_, _, _))
+      .WillOnce(Return(mock_message_buffer_handle));
+
+  sa::message_buffer<256> test_buffer;
+
+  const char test_data[] = "Full buffer";
+
+  EXPECT_CALL(*mock,
+              xMessageBufferSendFromISR(mock_message_buffer_handle, test_data,
+                                        strlen(test_data), NotNull()))
+      .WillOnce(DoAll(WithArg<3>([](BaseType_t *woken) { *woken = pdFALSE; }),
+                      Return(0)));
+
+  auto result = test_buffer.send_isr(test_data, strlen(test_data));
+  EXPECT_EQ(result.result, size_t(0));
+  EXPECT_EQ(result.higher_priority_task_woken, pdFALSE);
+
+  EXPECT_CALL(*mock, vMessageBufferDelete(mock_message_buffer_handle));
+}
+
+TEST_F(FreeRTOSMessageBufferTest, MessageBufferReceiveIsr) {
+  EXPECT_CALL(*mock, xMessageBufferCreateStatic(_, _, _))
+      .WillOnce(Return(mock_message_buffer_handle));
+
+  sa::message_buffer<256> test_buffer;
+
+  char receive_buffer[64];
+  const size_t expected_length = 5;
+
+  EXPECT_CALL(*mock, xMessageBufferReceiveFromISR(
+                         mock_message_buffer_handle, receive_buffer,
+                         sizeof(receive_buffer), NotNull()))
+      .WillOnce(
+          DoAll(Invoke([](MessageBufferHandle_t, void *pvRxData, size_t,
+                          BaseType_t *) { memcpy(pvRxData, "Hello", 5); }),
+                WithArg<3>([](BaseType_t *woken) { *woken = pdTRUE; }),
+                Return(expected_length)));
+
+  auto result = test_buffer.receive_isr(receive_buffer, sizeof(receive_buffer));
+  EXPECT_EQ(result.result, expected_length);
+  EXPECT_EQ(result.higher_priority_task_woken, pdTRUE);
+
+  EXPECT_CALL(*mock, vMessageBufferDelete(mock_message_buffer_handle));
+}
+
+TEST_F(FreeRTOSMessageBufferTest, MessageBufferReceiveIsrNoYield) {
+  EXPECT_CALL(*mock, xMessageBufferCreateStatic(_, _, _))
+      .WillOnce(Return(mock_message_buffer_handle));
+
+  sa::message_buffer<256> test_buffer;
+
+  char receive_buffer[64];
+
+  EXPECT_CALL(*mock, xMessageBufferReceiveFromISR(
+                         mock_message_buffer_handle, receive_buffer,
+                         sizeof(receive_buffer), NotNull()))
+      .WillOnce(DoAll(WithArg<3>([](BaseType_t *woken) { *woken = pdFALSE; }),
+                      Return(size_t(0))));
+
+  auto result = test_buffer.receive_isr(receive_buffer, sizeof(receive_buffer));
+  EXPECT_EQ(result.result, size_t(0));
+  EXPECT_EQ(result.higher_priority_task_woken, pdFALSE);
+
+  EXPECT_CALL(*mock, vMessageBufferDelete(mock_message_buffer_handle));
 }
 
 // =============================================================================
@@ -889,4 +1002,57 @@ TEST_F(FreeRTOSMessageBufferTest,
   EXPECT_EQ(bytes_sent, strlen(data));
 
   EXPECT_CALL(*mock, vMessageBufferDelete(mock_message_buffer_handle));
+}
+
+// =============================================================================
+// Move and Swap Tests
+// =============================================================================
+
+TEST_F(FreeRTOSMessageBufferTest, MessageBufferMoveConstruction) {
+  EXPECT_CALL(*mock, xMessageBufferCreate(512))
+      .WillOnce(Return(mock_message_buffer_handle));
+  EXPECT_CALL(*mock, vMessageBufferDelete(mock_message_buffer_handle));
+
+  freertos::message_buffer<512, freertos::dynamic_message_buffer_allocator<512>>
+      mb1;
+  freertos::message_buffer<512, freertos::dynamic_message_buffer_allocator<512>>
+      mb2(std::move(mb1));
+}
+
+TEST_F(FreeRTOSMessageBufferTest, MessageBufferMoveAssignment) {
+  MessageBufferHandle_t handle1 =
+      reinterpret_cast<MessageBufferHandle_t>(0x1111);
+  MessageBufferHandle_t handle2 =
+      reinterpret_cast<MessageBufferHandle_t>(0x2222);
+
+  EXPECT_CALL(*mock, xMessageBufferCreate(512))
+      .WillOnce(Return(handle1))
+      .WillOnce(Return(handle2));
+  EXPECT_CALL(*mock, vMessageBufferDelete(handle1));
+  EXPECT_CALL(*mock, vMessageBufferDelete(handle2));
+
+  freertos::message_buffer<512, freertos::dynamic_message_buffer_allocator<512>>
+      mb1;
+  freertos::message_buffer<512, freertos::dynamic_message_buffer_allocator<512>>
+      mb2;
+  mb1 = std::move(mb2);
+}
+
+TEST_F(FreeRTOSMessageBufferTest, MessageBufferSwap) {
+  MessageBufferHandle_t handle1 =
+      reinterpret_cast<MessageBufferHandle_t>(0x1111);
+  MessageBufferHandle_t handle2 =
+      reinterpret_cast<MessageBufferHandle_t>(0x2222);
+
+  EXPECT_CALL(*mock, xMessageBufferCreate(512))
+      .WillOnce(Return(handle1))
+      .WillOnce(Return(handle2));
+  EXPECT_CALL(*mock, vMessageBufferDelete(handle1));
+  EXPECT_CALL(*mock, vMessageBufferDelete(handle2));
+
+  freertos::message_buffer<512, freertos::dynamic_message_buffer_allocator<512>>
+      mb1;
+  freertos::message_buffer<512, freertos::dynamic_message_buffer_allocator<512>>
+      mb2;
+  mb1.swap(mb2);
 }

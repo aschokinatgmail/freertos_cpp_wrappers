@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.14)
 project(freertos_cpp_wrappers
-    VERSION 2.0.3
-    LANGUAGES CXX
+    VERSION 3.0.0
+    LANGUAGES C CXX
 )
 
 set(CMAKE_CXX_STANDARD 17)
@@ -336,4 +336,12 @@ if(GTEST_FOUND)
     add_subdirectory(tests)
 else()
     message(WARNING "GoogleTest not found - skipping tests. Install libgtest-dev and libgmock-dev to enable testing.")
+endif()
+
+# Simulation tests with real FreeRTOS kernel
+option(ENABLE_SIMULATION "Enable FreeRTOS+POSIX simulation system tests" OFF)
+
+if(ENABLE_SIMULATION)
+    message(STATUS "Simulation tests enabled - building with FreeRTOS+POSIX kernel")
+    add_subdirectory(tests/simulation)
 endif()

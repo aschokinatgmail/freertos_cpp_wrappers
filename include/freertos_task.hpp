@@ -36,6 +36,11 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #error "This header is for C++ only"
 #endif
 
+#include "freertos_isr_result.hpp"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wshadow"
+#include "freertos_strong_types.hpp"
+#pragma GCC diagnostic pop
 #include <FreeRTOS.h>
 #include <array>
 #include <cassert>
@@ -44,10 +49,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <semphr.h>
 #include <string>
 #include <task.h>
+#include <type_traits>
+#include <utility>
 
 namespace freertos {
-
-using namespace std::chrono_literals;
 
 #if configSUPPORT_STATIC_ALLOCATION
 /**
@@ -198,6 +203,14 @@ public:
       : m_allocator{}, m_taskRoutine{std::move(task_routine)},
         m_start_suspended{start_suspended},
         m_hTask{m_allocator.create(task_exec, name, priority, this)} {}
+  template <typename... AllocatorArgs,
+            typename std::enable_if_t<(sizeof...(AllocatorArgs) > 0), int> = 0>
+  task(const char *name, UBaseType_t priority, task_routine_t &&task_routine,
+       bool start_suspended, AllocatorArgs &&...args)
+      : m_allocator{std::forward<AllocatorArgs>(args)...},
+        m_taskRoutine{std::move(task_routine)},
+        m_start_suspended{start_suspended},
+        m_hTask{m_allocator.create(task_exec, name, priority, this)} {}
   /**
    * @brief Construct a new task object
    *
@@ -221,6 +234,13 @@ public:
   task(const char *name, UBaseType_t priority, task_routine_t &&task_routine)
       : m_allocator{}, m_taskRoutine{task_routine},
         m_hTask{m_allocator.create(task_exec, name, priority, this)} {}
+  template <typename... AllocatorArgs,
+            typename std::enable_if_t<(sizeof...(AllocatorArgs) > 0), int> = 0>
+  task(const char *name, UBaseType_t priority, task_routine_t &&task_routine,
+       AllocatorArgs &&...args)
+      : m_allocator{std::forward<AllocatorArgs>(args)...},
+        m_taskRoutine{task_routine},
+        m_hTask{m_allocator.create(task_exec, name, priority, this)} {}
   /**
    * @brief Construct a new task object
    *
@@ -235,15 +255,13 @@ public:
 #endif
   task(const task &) = delete;
   task(task &&other) noexcept
-      : m_allocator(std::move(other.m_allocator)), m_hTask(other.m_hTask),
-        m_taskRoutine(std::move(other.m_taskRoutine))
+      : m_hTask(other.m_hTask), m_taskRoutine(std::move(other.m_taskRoutine))
 #if INCLUDE_vTaskSuspend
         ,
         m_start_suspended(other.m_start_suspended)
 #endif
   {
-    other.m_hTask = nullptr; // Transfer ownership - moved-from object should
-                             // not delete the task
+    other.m_hTask = nullptr;
   }
   /**
    * @brief Destruct the task object and delete the task instance if it was
@@ -259,7 +277,29 @@ public:
   }
 
   task &operator=(const task &) = delete;
-  task &operator=(task &&other) = delete;
+  task &operator=(task &&other) noexcept {
+#if INCLUDE_vTaskDelete
+    if (m_hTask) {
+      vTaskDelete(m_hTask);
+    }
+#endif
+    m_hTask = nullptr;
+    swap(other);
+    return *this;
+  }
+
+  void swap(task &other) noexcept {
+    using std::swap;
+    swap(m_hTask, other.m_hTask);
+    swap(m_taskRoutine, other.m_taskRoutine);
+#if INCLUDE_vTaskSuspend
+    const uint8_t start_suspended_tmp = m_start_suspended;
+    m_start_suspended = other.m_start_suspended;
+    other.m_start_suspended = start_suspended_tmp;
+#endif
+  }
+
+  friend void swap(task &a, task &b) noexcept { a.swap(b); }
 
   /**
    * @brief Return the handle of the task.
@@ -295,11 +335,15 @@ public:
     case eRunning:
     case eReady:
     case eBlocked:
-    case eSuspended:
       return true;
     default:
       return false;
     }
+  }
+  bool is_suspended(void) const { return state() == eSuspended; }
+  bool is_alive(void) const {
+    eTaskState s = state();
+    return s != eDeleted && s != eInvalid;
   }
   /**
    * @brief Terminates the task.
@@ -320,19 +364,12 @@ public:
   }
 #endif
 #if INCLUDE_uxTaskPriorityGet && configUSE_MUTEXES
-  /**
-   * @brief Get the priority of the task.
-   *
-   * @return UBaseType_t task priority
-   */
   UBaseType_t priority(void) const { return uxTaskPriorityGet(m_hTask); }
-  /**
-   * @brief Get the priority of the task from an ISR.
-   *
-   * @return UBaseType_t task priority
-   */
   UBaseType_t priority_isr(void) const {
     return uxTaskPriorityGetFromISR(m_hTask);
+  }
+  UBaseType_t base_priority(void) const {
+    return uxTaskBasePriorityGet(m_hTask);
   }
 #endif
 #if INCLUDE_vTaskPrioritySet
@@ -481,33 +518,19 @@ public:
                               uint32_t &prev_value) {
     return xTaskNotifyAndQuery(m_hTask, val, action, &prev_value);
   }
-  /**
-   * @brief Notify the task from an ISR.
-   *
-   * @param val notification value
-   * @param action notification action
-   * @param higherPriorityTaskWoken higher priority task woken
-   * @return BaseType_t pdTRUE if the notification was given, pdFALSE otherwise
-   */
-  BaseType_t notify_isr(const uint32_t val, eNotifyAction action,
-                        BaseType_t *higherPriorityTaskWoken = nullptr) {
-    return xTaskNotifyFromISR(m_hTask, val, action, higherPriorityTaskWoken);
+  isr_result<BaseType_t> notify_isr(const uint32_t val, eNotifyAction action) {
+    isr_result<BaseType_t> result{pdFALSE, pdFALSE};
+    result.result = xTaskNotifyFromISR(m_hTask, val, action,
+                                       &result.higher_priority_task_woken);
+    return result;
   }
-  /**
-   * @brief Notify the task from an ISR and query the previous value.
-   *
-   * @param val notification value
-   * @param action notification action
-   * @param prev_value previous value
-   * @param higherPriorityTaskWoken higher priority task woken
-   * @return BaseType_t pdTRUE if the notification was given, pdFALSE otherwise
-   */
-  BaseType_t
-  notify_and_query_isr(const uint32_t val, eNotifyAction action,
-                       uint32_t &prev_value,
-                       BaseType_t *higherPriorityTaskWoken = nullptr) {
-    return xTaskNotifyAndQueryFromISR(m_hTask, val, action, &prev_value,
-                                      higherPriorityTaskWoken);
+  isr_result<BaseType_t> notify_and_query_isr(const uint32_t val,
+                                              eNotifyAction action,
+                                              uint32_t &prev_value) {
+    isr_result<BaseType_t> result{pdFALSE, pdFALSE};
+    result.result = xTaskNotifyAndQueryFromISR(
+        m_hTask, val, action, &prev_value, &result.higher_priority_task_woken);
+    return result;
   }
   /**
    * @brief Wait for the notification.
@@ -561,6 +584,88 @@ public:
   uint32_t notify_value_clear(uint32_t ulBitsToClear) {
     return ulTaskNotifyValueClear(m_hTask, ulBitsToClear);
   }
+#if configTASK_NOTIFICATION_ARRAY_ENTRIES > 1
+  BaseType_t notify_give(UBaseType_t index) {
+    return xTaskNotifyGiveIndexed(m_hTask, index);
+  }
+  uint32_t notify_take(UBaseType_t index, BaseType_t clearCountOnExit,
+                       TickType_t ticksToWait) {
+    return ulTaskNotifyTakeIndexed(index, clearCountOnExit, ticksToWait);
+  }
+  template <typename Rep, typename Period>
+  uint32_t notify_take(UBaseType_t index, BaseType_t clearCountOnExit,
+                       std::chrono::duration<Rep, Period> duration) {
+    return notify_take(
+        index, clearCountOnExit,
+        pdMS_TO_TICKS(
+            std::chrono::duration_cast<std::chrono::milliseconds>(duration)
+                .count()));
+  }
+  BaseType_t notify(UBaseType_t index, const uint32_t val,
+                    eNotifyAction action) {
+    return xTaskNotifyIndexed(m_hTask, index, val, action);
+  }
+  BaseType_t notify_and_query(UBaseType_t index, const uint32_t val,
+                              eNotifyAction action, uint32_t &prev_value) {
+    return xTaskNotifyAndQueryIndexed(m_hTask, index, val, action, &prev_value);
+  }
+  isr_result<BaseType_t> notify_isr(UBaseType_t index, const uint32_t val,
+                                    eNotifyAction action) {
+    isr_result<BaseType_t> result{pdFALSE, pdFALSE};
+    result.result = xTaskNotifyIndexedFromISR(
+        m_hTask, index, val, action, &result.higher_priority_task_woken);
+    return result;
+  }
+  isr_result<BaseType_t> notify_and_query_isr(UBaseType_t index,
+                                              const uint32_t val,
+                                              eNotifyAction action,
+                                              uint32_t &prev_value) {
+    isr_result<BaseType_t> result{pdFALSE, pdFALSE};
+    result.result = xTaskNotifyAndQueryIndexedFromISR(
+        m_hTask, index, val, action, &prev_value,
+        &result.higher_priority_task_woken);
+    return result;
+  }
+  BaseType_t notify_wait(UBaseType_t index, uint32_t ulBitsToClearOnEntry,
+                         uint32_t ulBitsToClearOnExit,
+                         uint32_t &notification_value,
+                         TickType_t xTicksToWait) {
+    return xTaskNotifyWaitIndexed(index, ulBitsToClearOnEntry,
+                                  ulBitsToClearOnExit, &notification_value,
+                                  xTicksToWait);
+  }
+  template <typename Rep, typename Period>
+  BaseType_t notify_wait(UBaseType_t index, uint32_t ulBitsToClearOnEntry,
+                         uint32_t ulBitsToClearOnExit,
+                         uint32_t &notification_value,
+                         std::chrono::duration<Rep, Period> duration) {
+    return notify_wait(
+        index, ulBitsToClearOnEntry, ulBitsToClearOnExit, notification_value,
+        pdMS_TO_TICKS(
+            std::chrono::duration_cast<std::chrono::milliseconds>(duration)
+                .count()));
+  }
+  BaseType_t notify_state_clear(UBaseType_t index) {
+    return xTaskNotifyStateClearIndexed(m_hTask, index);
+  }
+  uint32_t notify_value_clear(UBaseType_t index, uint32_t ulBitsToClear) {
+    return ulTaskNotifyValueClearIndexed(m_hTask, index, ulBitsToClear);
+  }
+#endif
+#endif
+#if configNUMBER_OF_CORES > 1 && (configUSE_CORE_AFFINITY == 1)
+  void set_affinity(freertos::core_affinity_mask mask) {
+    vTaskCoreAffinitySet(m_hTask, mask.value());
+  }
+  void clear_affinity(freertos::core_affinity_mask mask) {
+    vTaskCoreAffinityClear(m_hTask, mask.value());
+  }
+  [[nodiscard]] freertos::core_affinity_mask affinity(void) const {
+    return freertos::core_affinity_mask(ulTaskCoreAffinityGet(m_hTask));
+  }
+  [[nodiscard]] freertos::core_affinity_mask affinity_isr(void) const {
+    return freertos::core_affinity_mask(ulTaskCoreAffinityGetFromISR(m_hTask));
+  }
 #endif
 };
 
@@ -580,7 +685,7 @@ template <typename TaskAllocator> class periodic_task {
   // kernel
   void run() {
     m_on_start();
-    while (is_running()) {
+    while (is_alive()) {
       if (0 != m_period.count()) {
 #if configUSE_TASK_NOTIFICATIONS
         uint32_t notification_value = 0;
@@ -619,6 +724,18 @@ public:
         m_on_start{std::move(on_start)}, m_on_stop{std::move(on_stop)},
         m_periodic_routine{std::move(periodic_routine)},
         m_task{name, priority, [this]() { run(); }, start_suspended} {}
+  template <typename Rep, typename Period, typename... AllocatorArgs,
+            typename std::enable_if_t<(sizeof...(AllocatorArgs) > 0), int> = 0>
+  periodic_task(const char *name, UBaseType_t priority,
+                task_routine_t &&on_start, task_routine_t &&on_stop,
+                task_routine_t &&periodic_routine,
+                const std::chrono::duration<Rep, Period> &period,
+                bool start_suspended, AllocatorArgs &&...args)
+      : m_period{std::chrono::duration_cast<std::chrono::milliseconds>(period)},
+        m_on_start{std::move(on_start)}, m_on_stop{std::move(on_stop)},
+        m_periodic_routine{std::move(periodic_routine)},
+        m_task{name, priority, [this]() { run(); }, start_suspended,
+               std::forward<AllocatorArgs>(args)...} {}
   /**
    * @brief Construct a new periodic task object
    *
@@ -645,6 +762,21 @@ public:
                       std::move(periodic_routine),
                       period,
                       start_suspended} {}
+  template <typename Rep, typename Period, typename... AllocatorArgs,
+            typename std::enable_if_t<(sizeof...(AllocatorArgs) > 0), int> = 0>
+  periodic_task(const std::string &name, UBaseType_t priority,
+                task_routine_t &&on_start, task_routine_t &&on_stop,
+                task_routine_t &&periodic_routine,
+                const std::chrono::duration<Rep, Period> &period,
+                bool start_suspended, AllocatorArgs &&...args)
+      : periodic_task{name.c_str(),
+                      priority,
+                      std::move(on_start),
+                      std::move(on_stop),
+                      std::move(periodic_routine),
+                      period,
+                      start_suspended,
+                      std::forward<AllocatorArgs>(args)...} {}
   /**
    * @brief Construct a new periodic task object
    *
@@ -665,6 +797,20 @@ public:
                       std::move(periodic_routine),
                       std::chrono::milliseconds{0},
                       start_suspended} {}
+  template <typename... AllocatorArgs,
+            typename std::enable_if_t<(sizeof...(AllocatorArgs) > 0), int> = 0>
+  periodic_task(const char *name, UBaseType_t priority,
+                task_routine_t &&on_start, task_routine_t &&on_stop,
+                task_routine_t &&periodic_routine, bool start_suspended,
+                AllocatorArgs &&...args)
+      : periodic_task{name,
+                      priority,
+                      std::move(on_start),
+                      std::move(on_stop),
+                      std::move(periodic_routine),
+                      std::chrono::milliseconds{0},
+                      start_suspended,
+                      std::forward<AllocatorArgs>(args)...} {}
   /**
    * @brief Construct a new periodic task object
    *
@@ -684,6 +830,19 @@ public:
                       std::move(on_stop),
                       std::move(periodic_routine),
                       start_suspended} {}
+  template <typename... AllocatorArgs,
+            typename std::enable_if_t<(sizeof...(AllocatorArgs) > 0), int> = 0>
+  periodic_task(const std::string &name, UBaseType_t priority,
+                task_routine_t &&on_start, task_routine_t &&on_stop,
+                task_routine_t &&periodic_routine, bool start_suspended,
+                AllocatorArgs &&...args)
+      : periodic_task{name.c_str(),
+                      priority,
+                      std::move(on_start),
+                      std::move(on_stop),
+                      std::move(periodic_routine),
+                      start_suspended,
+                      std::forward<AllocatorArgs>(args)...} {}
   periodic_task(const periodic_task &) = delete;
   periodic_task(periodic_task &&other) noexcept
       : m_period(other.m_period), m_on_start(std::move(other.m_on_start)),
@@ -704,7 +863,24 @@ public:
   }
 
   periodic_task &operator=(const periodic_task &) = delete;
-  periodic_task &operator=(periodic_task &&other) = delete;
+  periodic_task &operator=(periodic_task &&other) noexcept {
+#if INCLUDE_xTaskAbortDelay
+    m_task.abort_delay();
+#endif
+    swap(other);
+    return *this;
+  }
+
+  void swap(periodic_task &other) noexcept {
+    using std::swap;
+    swap(m_period, other.m_period);
+    swap(m_on_start, other.m_on_start);
+    swap(m_on_stop, other.m_on_stop);
+    swap(m_periodic_routine, other.m_periodic_routine);
+    m_task.swap(other.m_task);
+  }
+
+  friend void swap(periodic_task &a, periodic_task &b) noexcept { a.swap(b); }
 
   /**
    * @brief Return the handle of the task.
@@ -740,11 +916,15 @@ public:
     case eRunning:
     case eReady:
     case eBlocked:
-    case eSuspended:
       return true;
     default:
       return false;
     }
+  }
+  bool is_suspended(void) const { return m_task.state() == eSuspended; }
+  bool is_alive(void) const {
+    eTaskState s = m_task.state();
+    return s != eDeleted && s != eInvalid;
   }
   /**
    * @brief Terminate the task.
@@ -760,18 +940,9 @@ public:
   BaseType_t abort_delay(void) { return m_task.abort_delay(); }
 #endif
 #if INCLUDE_uxTaskPriorityGet && configUSE_MUTEXES
-  /**
-   * @brief Return the priority of the task.
-   *
-   * @return UBaseType_t  task priority
-   */
   UBaseType_t priority(void) const { return m_task.priority(); }
-  /**
-   * @brief Return the priority of the task from an ISR.
-   *
-   * @return UBaseType_t  task priority
-   */
   UBaseType_t priority_isr(void) const { return m_task.priority_isr(); }
+  UBaseType_t base_priority(void) const { return m_task.base_priority(); }
 #endif
 #if INCLUDE_vTaskPrioritySet
   /**
@@ -913,57 +1084,13 @@ public:
                               uint32_t &prev_value) {
     return m_task.notify_and_query(val, action, prev_value);
   }
-  /**
-   * @brief Notify the task from an ISR.
-   *
-   * @param val  notification value
-   * @param action  notification action
-   * @param higherPriorityTaskWoken  higher priority task woken
-   * @return BaseType_t  pdTRUE if the notification was given, pdFALSE otherwise
-   */
-  BaseType_t notify_isr(const uint32_t val, eNotifyAction action,
-                        BaseType_t &higherPriorityTaskWoken) {
-    return m_task.notify_isr(val, action, higherPriorityTaskWoken);
+  isr_result<BaseType_t> notify_isr(const uint32_t val, eNotifyAction action) {
+    return m_task.notify_isr(val, action);
   }
-  /**
-   * @brief Notify the task from an ISR and query the previous value.
-   *
-   * @param val  notification value
-   * @param action  notification action
-   * @return BaseType_t  pdTRUE if the notification was given, pdFALSE otherwise
-   */
-  BaseType_t notify_isr(const uint32_t val, eNotifyAction action) {
-    BaseType_t higherPriorityTaskWoken = pdFALSE;
-    return m_task.notify_isr(val, action, higherPriorityTaskWoken);
-  }
-  /**
-   * @brief Notify the task from an ISR and query the previous value.
-   *
-   * @param val  notification value
-   * @param action  notification action
-   * @param prev_value  previous value
-   * @param higherPriorityTaskWoken  higher priority task woken
-   * @return BaseType_t  pdTRUE if the notification was given, pdFALSE otherwise
-   */
-  BaseType_t notify_and_query_isr(const uint32_t val, eNotifyAction action,
-                                  uint32_t &prev_value,
-                                  BaseType_t &higherPriorityTaskWoken) {
-    return m_task.notify_and_query_isr(val, action, prev_value,
-                                       higherPriorityTaskWoken);
-  }
-  /**
-   * @brief Notify the task from an ISR and query the previous value.
-   *
-   * @param val  notification value
-   * @param action  notification action
-   * @param prev_value  previous value
-   * @return BaseType_t  pdTRUE if the notification was given, pdFALSE otherwise
-   */
-  BaseType_t notify_and_query_isr(const uint32_t val, eNotifyAction action,
-                                  uint32_t &prev_value) {
-    BaseType_t higherPriorityTaskWoken = pdFALSE;
-    return m_task.notify_and_query_isr(val, action, prev_value,
-                                       higherPriorityTaskWoken);
+  isr_result<BaseType_t> notify_and_query_isr(const uint32_t val,
+                                              eNotifyAction action,
+                                              uint32_t &prev_value) {
+    return m_task.notify_and_query_isr(val, action, prev_value);
   }
   /**
    * @brief Wait for the notification.
@@ -1016,6 +1143,73 @@ public:
    */
   uint32_t notify_value_clear(uint32_t ulBitsToClear) {
     return m_task.notify_value_clear(ulBitsToClear);
+  }
+#if configTASK_NOTIFICATION_ARRAY_ENTRIES > 1
+  BaseType_t notify_give(UBaseType_t index) {
+    return m_task.notify_give(index);
+  }
+  uint32_t notify_take(UBaseType_t index, BaseType_t clearCountOnExit,
+                       TickType_t ticksToWait) {
+    return m_task.notify_take(index, clearCountOnExit, ticksToWait);
+  }
+  template <typename Rep, typename Period>
+  uint32_t notify_take(UBaseType_t index, BaseType_t clearCountOnExit,
+                       std::chrono::duration<Rep, Period> duration) {
+    return m_task.notify_take(index, clearCountOnExit, duration);
+  }
+  BaseType_t notify(UBaseType_t index, const uint32_t val,
+                    eNotifyAction action) {
+    return m_task.notify(index, val, action);
+  }
+  BaseType_t notify_and_query(UBaseType_t index, const uint32_t val,
+                              eNotifyAction action, uint32_t &prev_value) {
+    return m_task.notify_and_query(index, val, action, prev_value);
+  }
+  isr_result<BaseType_t> notify_isr(UBaseType_t index, const uint32_t val,
+                                    eNotifyAction action) {
+    return m_task.notify_isr(index, val, action);
+  }
+  isr_result<BaseType_t> notify_and_query_isr(UBaseType_t index,
+                                              const uint32_t val,
+                                              eNotifyAction action,
+                                              uint32_t &prev_value) {
+    return m_task.notify_and_query_isr(index, val, action, prev_value);
+  }
+  BaseType_t notify_wait(UBaseType_t index, uint32_t ulBitsToClearOnEntry,
+                         uint32_t ulBitsToClearOnExit,
+                         uint32_t &notification_value,
+                         TickType_t xTicksToWait) {
+    return m_task.notify_wait(index, ulBitsToClearOnEntry, ulBitsToClearOnExit,
+                              notification_value, xTicksToWait);
+  }
+  template <typename Rep, typename Period>
+  BaseType_t notify_wait(UBaseType_t index, uint32_t ulBitsToClearOnEntry,
+                         uint32_t ulBitsToClearOnExit,
+                         uint32_t &notification_value,
+                         std::chrono::duration<Rep, Period> duration) {
+    return m_task.notify_wait(index, ulBitsToClearOnEntry, ulBitsToClearOnExit,
+                              notification_value, duration);
+  }
+  BaseType_t notify_state_clear(UBaseType_t index) {
+    return m_task.notify_state_clear(index);
+  }
+  uint32_t notify_value_clear(UBaseType_t index, uint32_t ulBitsToClear) {
+    return m_task.notify_value_clear(index, ulBitsToClear);
+  }
+#endif
+#endif
+#if configNUMBER_OF_CORES > 1 && (configUSE_CORE_AFFINITY == 1)
+  void set_affinity(freertos::core_affinity_mask mask) {
+    m_task.set_affinity(mask);
+  }
+  void clear_affinity(freertos::core_affinity_mask mask) {
+    m_task.clear_affinity(mask);
+  }
+  [[nodiscard]] freertos::core_affinity_mask affinity(void) const {
+    return m_task.affinity();
+  }
+  [[nodiscard]] freertos::core_affinity_mask affinity_isr(void) const {
+    return m_task.affinity_isr();
   }
 #endif
 };
@@ -1203,6 +1397,16 @@ UBaseType_t task_count(void);
  */
 void yield(void);
 
+bool is_isr(void);
+
+#if configUSE_TICKLESS_IDLE
+void catch_up_ticks(TickType_t ticks);
+#endif
+
+#if configUSE_TIMERS
+TaskHandle_t timer_daemon_task_handle(void);
+#endif
+
 /**
  * @brief Critical section guard for the scheduler (RAII). Enter a critical
  * section on construction and exits it on destruction.
@@ -1298,7 +1502,7 @@ public:
    * @brief Destroy the scheduler barrier object
    *
    */
-  ~scheduler_barrier(void) { xTaskResumeAll(); }
+  ~scheduler_barrier(void) { (void)xTaskResumeAll(); }
 
   // Delete copy and move operations for RAII safety
   scheduler_barrier(const scheduler_barrier &) = delete;

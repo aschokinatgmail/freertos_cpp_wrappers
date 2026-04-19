@@ -36,6 +36,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #error "This header is for C++ only"
 #endif
 
+#include "freertos_expected.hpp"
+#include "freertos_isr_result.hpp"
 #include <FreeRTOS.h>
 #include <chrono>
 #include <cstdbool>
@@ -43,6 +45,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <functional>
 #include <task.h>
 #include <timers.h>
+#include <type_traits>
+#include <utility>
 
 namespace freertos {
 
@@ -134,6 +138,17 @@ public:
                                    callback_wrapper)} {
     configASSERT(m_timer);
   }
+  template <typename... AllocatorArgs,
+            typename std::enable_if_t<(sizeof...(AllocatorArgs) > 0), int> = 0>
+  explicit timer(const char *name, const TickType_t period_ticks,
+                 UBaseType_t auto_reload, timer_callback_t &&callback,
+                 AllocatorArgs &&...args)
+      : m_allocator{std::forward<AllocatorArgs>(args)...},
+        m_callback{std::move(callback)}, m_started{false},
+        m_timer{m_allocator.create(name, period_ticks, auto_reload, this,
+                                   callback_wrapper)} {
+    configASSERT(m_timer);
+  }
   /**
    * @brief Construct a new timer object
    *
@@ -153,6 +168,18 @@ public:
                   std::chrono::duration_cast<std::chrono::milliseconds>(period)
                       .count()),
               auto_reload, std::move(callback)} {}
+  template <typename Rep, typename Period, typename... AllocatorArgs,
+            typename std::enable_if_t<(sizeof...(AllocatorArgs) > 0), int> = 0>
+  explicit timer(const char *name,
+                 const std::chrono::duration<Rep, Period> &period,
+                 UBaseType_t auto_reload, timer_callback_t &&callback,
+                 AllocatorArgs &&...args)
+      : timer{name,
+              pdMS_TO_TICKS(
+                  std::chrono::duration_cast<std::chrono::milliseconds>(period)
+                      .count()),
+              auto_reload, std::move(callback),
+              std::forward<AllocatorArgs>(args)...} {}
   timer(const timer &) = delete;
   /**
    * @brief Move constructor that properly transfers timer ownership.
@@ -166,13 +193,13 @@ public:
    * @param src The source timer to move from (will be invalidated)
    */
   timer(timer &&src) noexcept
-      : m_allocator(std::move(src.m_allocator)),
-        m_callback(std::move(src.m_callback)), m_started(src.m_started),
+      : m_callback(std::move(src.m_callback)), m_started(src.m_started),
         m_timer(src.m_timer) {
-    // Transfer ownership: clear the source timer handle to prevent double
-    // deletion
     src.m_timer = nullptr;
     src.m_started = false;
+    if (m_timer) {
+      vTimerSetTimerID(m_timer, this);
+    }
   }
   /**
    * @brief Destruct the timer object and delete the software timer kernel
@@ -220,6 +247,23 @@ public:
     return *this;
   }
 
+  void swap(timer &other) noexcept {
+    using std::swap;
+    swap(m_callback, other.m_callback);
+    const uint8_t started_tmp = m_started;
+    m_started = other.m_started;
+    other.m_started = started_tmp;
+    swap(m_timer, other.m_timer);
+    if (m_timer) {
+      vTimerSetTimerID(m_timer, this);
+    }
+    if (other.m_timer) {
+      vTimerSetTimerID(other.m_timer, &other);
+    }
+  }
+
+  friend void swap(timer &a, timer &b) noexcept { a.swap(b); }
+
   /**
    * @brief Method to start the timer.
    * @ref https://www.freertos.org/xTimerStart.html
@@ -256,29 +300,20 @@ public:
    * @brief Method to start the timer from an ISR.
    * @ref https://www.freertos.org/xTimerStartFromISR.html
    *
-   * @param high_priority_task_woken flag to indicate if a high priority task
-   * was woken
-   * @return BaseType_t pdPASS if the timer was started successfully else pdFAIL
+   * @return isr_result<BaseType_t> result containing pdPASS if the timer was
+   * started successfully else pdFAIL, and the higher_priority_task_woken flag.
    */
-  BaseType_t start_isr(BaseType_t &high_priority_task_woken) {
+  isr_result<BaseType_t> start_isr(void) {
+    isr_result<BaseType_t> result{pdFAIL, pdFALSE};
     if (!m_timer) {
-      return pdFAIL;
+      return result;
     }
-    auto rc = xTimerStartFromISR(m_timer, &high_priority_task_woken);
-    if (rc) {
+    result.result =
+        xTimerStartFromISR(m_timer, &result.higher_priority_task_woken);
+    if (result.result) {
       m_started = true;
     }
-    return rc;
-  }
-  /**
-   * @brief Method to start the timer from an ISR.
-   * @ref https://www.freertos.org/xTimerStartFromISR.html
-   *
-   * @return BaseType_t pdPASS if the timer was started successfully else pdFAIL
-   */
-  BaseType_t start_isr(void) {
-    BaseType_t high_priority_task_woken = pdFALSE;
-    return start_isr(high_priority_task_woken);
+    return result;
   }
   /**
    * @brief Method to stop the timer.
@@ -316,29 +351,20 @@ public:
    * @brief Method to stop the timer from an ISR.
    * @ref https://www.freertos.org/xTimerStopFromISR.html
    *
-   * @param high_priority_task_woken flag to indicate if a high priority task
-   * was woken
-   * @return BaseType_t pdPASS if the timer was stopped successfully else pdFAIL
+   * @return isr_result<BaseType_t> result containing pdPASS if the timer was
+   * stopped successfully else pdFAIL, and the higher_priority_task_woken flag.
    */
-  BaseType_t stop_isr(BaseType_t &high_priority_task_woken) {
+  isr_result<BaseType_t> stop_isr(void) {
+    isr_result<BaseType_t> result{pdFAIL, pdFALSE};
     if (!m_timer) {
-      return pdFAIL;
+      return result;
     }
-    auto rc = xTimerStopFromISR(m_timer, &high_priority_task_woken);
-    if (rc) {
+    result.result =
+        xTimerStopFromISR(m_timer, &result.higher_priority_task_woken);
+    if (result.result) {
       m_started = false;
     }
-    return rc;
-  }
-  /**
-   * @brief Method to stop the timer from an ISR.
-   * @ref https://www.freertos.org/xTimerStopFromISR.html
-   *
-   * @return BaseType_t pdPASS if the timer was stopped successfully else pdFAIL
-   */
-  BaseType_t stop_isr(void) {
-    BaseType_t high_priority_task_woken = pdFALSE;
-    return stop_isr(high_priority_task_woken);
+    return result;
   }
   /**
    * @brief Method to reset the timer.
@@ -372,25 +398,17 @@ public:
    * @brief Method to reset the timer from an ISR.
    * @ref https://www.freertos.org/xTimerResetFromISR.html
    *
-   * @param high_priority_task_woken flag to indicate if a high priority task
-   * was woken
-   * @return BaseType_t pdPASS if the timer was reset successfully else pdFAIL
+   * @return isr_result<BaseType_t> result containing pdPASS if the timer was
+   * reset successfully else pdFAIL, and the higher_priority_task_woken flag.
    */
-  BaseType_t reset_isr(BaseType_t &high_priority_task_woken) {
+  isr_result<BaseType_t> reset_isr(void) {
+    isr_result<BaseType_t> result{pdFAIL, pdFALSE};
     if (!m_timer) {
-      return pdFAIL;
+      return result;
     }
-    return xTimerResetFromISR(m_timer, &high_priority_task_woken);
-  }
-  /**
-   * @brief Method to reset the timer from an ISR.
-   * @ref https://www.freertos.org/xTimerResetFromISR.html
-   *
-   * @return BaseType_t pdPASS if the timer was reset successfully else pdFAIL
-   */
-  BaseType_t reset_isr(void) {
-    BaseType_t high_priority_task_woken = pdFALSE;
-    return reset_isr(high_priority_task_woken);
+    result.result =
+        xTimerResetFromISR(m_timer, &result.higher_priority_task_woken);
+    return result;
   }
   /**
    * @brief Method to change the period of the timer.
@@ -440,18 +458,18 @@ public:
    * @ref https://www.freertos.org/xTimerChangePeriodFromISR.html
    *
    * @param new_period_ticks new period of the timer in ticks
-   * @param high_priority_task_woken flag to indicate if a high priority task
-   * was woken
-   * @return BaseType_t pdPASS if the timer period was changed successfully else
-   * pdFAIL
+   * @return isr_result<BaseType_t> result containing pdPASS if the timer
+   * period was changed successfully else pdFAIL, and the
+   * higher_priority_task_woken flag.
    */
-  BaseType_t period_isr(const TickType_t new_period_ticks,
-                        BaseType_t &high_priority_task_woken) {
+  isr_result<BaseType_t> period_isr(const TickType_t new_period_ticks) {
+    isr_result<BaseType_t> result{pdFAIL, pdFALSE};
     if (!m_timer) {
-      return pdFAIL;
+      return result;
     }
-    return xTimerChangePeriodFromISR(m_timer, new_period_ticks,
-                                     &high_priority_task_woken);
+    result.result = xTimerChangePeriodFromISR(
+        m_timer, new_period_ticks, &result.higher_priority_task_woken);
+    return result;
   }
   /**
    * @brief Method to change the period of the timer from an ISR.
@@ -460,44 +478,13 @@ public:
    * @tparam Rep duration representation type
    * @tparam Period duration period type
    * @param new_period new period of the timer
-   * @param high_priority_task_woken flag to indicate if a high priority task
-   * was woken
-   * @return BaseType_t pdPASS if the timer period was changed successfully else
-   * pdFAIL
+   * @return isr_result<BaseType_t> result containing pdPASS if the timer
+   * period was changed successfully else pdFAIL, and the
+   * higher_priority_task_woken flag.
    */
   template <typename Rep, typename Period>
-  BaseType_t period_isr(const std::chrono::duration<Rep, Period> &new_period,
-                        BaseType_t &high_priority_task_woken) {
-    return period_isr(
-        pdMS_TO_TICKS(
-            std::chrono::duration_cast<std::chrono::milliseconds>(new_period)
-                .count()),
-        high_priority_task_woken);
-  }
-  /**
-   * @brief Method to change the period of the timer from an ISR.
-   * @ref https://www.freertos.org/xTimerChangePeriodFromISR.html
-   *
-   * @param new_period_ticks new period of the timer in ticks
-   * @return BaseType_t pdPASS if the timer period was changed successfully else
-   * pdFAIL
-   */
-  BaseType_t period_isr(const TickType_t new_period_ticks) {
-    BaseType_t high_priority_task_woken = pdFALSE;
-    return period_isr(new_period_ticks, high_priority_task_woken);
-  }
-  /**
-   * @brief Method to change the period of the timer from an ISR.
-   * @ref https://www.freertos.org/xTimerChangePeriodFromISR.html
-   *
-   * @tparam Rep duration representation type
-   * @tparam Period duration period type
-   * @param new_period new period of the timer
-   * @return BaseType_t pdPASS if the timer period was changed successfully else
-   * pdFAIL
-   */
-  template <typename Rep, typename Period>
-  BaseType_t period_isr(const std::chrono::duration<Rep, Period> &new_period) {
+  isr_result<BaseType_t>
+  period_isr(const std::chrono::duration<Rep, Period> &new_period) {
     return period_isr(pdMS_TO_TICKS(
         std::chrono::duration_cast<std::chrono::milliseconds>(new_period)
             .count()));
@@ -591,6 +578,122 @@ public:
       return nullptr;
     }
     return pcTimerGetName(m_timer);
+  }
+
+  [[nodiscard]] expected<void, error>
+  start_ex(const TickType_t ticks_to_wait = portMAX_DELAY) {
+    auto rc = start(ticks_to_wait);
+    if (rc == pdPASS) {
+      return {};
+    }
+    return unexpected<error>(error::invalid_handle);
+  }
+  template <typename Rep, typename Period>
+  [[nodiscard]] expected<void, error>
+  start_ex(const std::chrono::duration<Rep, Period> &timeout) {
+    return start_ex(pdMS_TO_TICKS(
+        std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
+            .count()));
+  }
+  [[nodiscard]] isr_result<expected<void, error>> start_ex_isr(void) {
+    auto result = start_isr();
+    isr_result<expected<void, error>> ret{
+        unexpected<error>(error::invalid_handle),
+        result.higher_priority_task_woken};
+    if (result.result == pdPASS) {
+      ret.result = {};
+    }
+    return ret;
+  }
+  [[nodiscard]] expected<void, error>
+  stop_ex(const TickType_t ticks_to_wait = portMAX_DELAY) {
+    auto rc = stop(ticks_to_wait);
+    if (rc == pdPASS) {
+      return {};
+    }
+    return unexpected<error>(error::invalid_handle);
+  }
+  template <typename Rep, typename Period>
+  [[nodiscard]] expected<void, error>
+  stop_ex(const std::chrono::duration<Rep, Period> &timeout) {
+    return stop_ex(pdMS_TO_TICKS(
+        std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
+            .count()));
+  }
+  [[nodiscard]] isr_result<expected<void, error>> stop_ex_isr(void) {
+    auto result = stop_isr();
+    isr_result<expected<void, error>> ret{
+        unexpected<error>(error::invalid_handle),
+        result.higher_priority_task_woken};
+    if (result.result == pdPASS) {
+      ret.result = {};
+    }
+    return ret;
+  }
+  [[nodiscard]] expected<void, error>
+  reset_ex(const TickType_t ticks_to_wait = portMAX_DELAY) {
+    auto rc = reset(ticks_to_wait);
+    if (rc == pdPASS) {
+      return {};
+    }
+    return unexpected<error>(error::invalid_handle);
+  }
+  template <typename Rep, typename Period>
+  [[nodiscard]] expected<void, error>
+  reset_ex(const std::chrono::duration<Rep, Period> &timeout) {
+    return reset_ex(pdMS_TO_TICKS(
+        std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
+            .count()));
+  }
+  [[nodiscard]] isr_result<expected<void, error>> reset_ex_isr(void) {
+    auto result = reset_isr();
+    isr_result<expected<void, error>> ret{
+        unexpected<error>(error::invalid_handle),
+        result.higher_priority_task_woken};
+    if (result.result == pdPASS) {
+      ret.result = {};
+    }
+    return ret;
+  }
+  [[nodiscard]] expected<void, error>
+  period_ex(const TickType_t new_period_ticks,
+            const TickType_t ticks_to_wait = portMAX_DELAY) {
+    auto rc = period(new_period_ticks, ticks_to_wait);
+    if (rc == pdPASS) {
+      return {};
+    }
+    return unexpected<error>(error::invalid_handle);
+  }
+  template <typename RepPeriod, typename PeriodPeriod, typename RepTimeout,
+            typename PeriodTimeout>
+  [[nodiscard]] expected<void, error>
+  period_ex(const std::chrono::duration<RepPeriod, PeriodPeriod> &new_period,
+            const std::chrono::duration<RepTimeout, PeriodTimeout> &timeout) {
+    return period_ex(
+        pdMS_TO_TICKS(
+            std::chrono::duration_cast<std::chrono::milliseconds>(new_period)
+                .count()),
+        pdMS_TO_TICKS(
+            std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
+                .count()));
+  }
+  [[nodiscard]] isr_result<expected<void, error>>
+  period_ex_isr(const TickType_t new_period_ticks) {
+    auto result = period_isr(new_period_ticks);
+    isr_result<expected<void, error>> ret{
+        unexpected<error>(error::invalid_handle),
+        result.higher_priority_task_woken};
+    if (result.result == pdPASS) {
+      ret.result = {};
+    }
+    return ret;
+  }
+  template <typename Rep, typename Period>
+  [[nodiscard]] isr_result<expected<void, error>>
+  period_ex_isr(const std::chrono::duration<Rep, Period> &new_period) {
+    return period_ex_isr(pdMS_TO_TICKS(
+        std::chrono::duration_cast<std::chrono::milliseconds>(new_period)
+            .count()));
   }
 };
 

@@ -34,6 +34,7 @@
 
 // Include mocks before the actual headers
 #include "FreeRTOS.h"
+#include "freertos_isr_result.hpp"
 #include "freertos_semaphore.hpp"
 
 using ::testing::_;
@@ -240,34 +241,18 @@ TEST_F(FreeRTOSSemaphoreTest, BinarySemaphoreISROperations) {
   EXPECT_CALL(*mock, xSemaphoreCreateBinary())
       .WillOnce(Return(mock_semaphore_handle));
   EXPECT_CALL(*mock, xSemaphoreGiveFromISR(mock_semaphore_handle, NotNull()))
-      .Times(2) // Called twice - once with ref param, once without (but with
-                // internal temp var)
-      .WillRepeatedly(Return(pdTRUE));
+      .WillOnce(Return(pdTRUE));
   EXPECT_CALL(*mock, xSemaphoreTakeFromISR(mock_semaphore_handle, NotNull()))
-      .Times(2) // Called twice - once with ref param, once without (but with
-                // internal temp var)
-      .WillRepeatedly(Return(pdTRUE));
+      .WillOnce(Return(pdTRUE));
   EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
 
   freertos::binary_semaphore<freertos::dynamic_semaphore_allocator> semaphore;
 
-  /*
-   * ISR Operations Testing Note:
-   * In a real FreeRTOS environment, these functions would be called from
-   * interrupt service routines. Here we test the API compatibility and
-   * parameter passing, but actual ISR context cannot be simulated in host
-   * testing.
-   */
-  BaseType_t high_priority_woken = pdFALSE;
-  auto result1 = semaphore.give_isr(high_priority_woken);
-  auto result2 = semaphore.give_isr();
-  auto result3 = semaphore.take_isr(high_priority_woken);
-  auto result4 = semaphore.take_isr();
+  auto give_result = semaphore.give_isr();
+  auto take_result = semaphore.take_isr();
 
-  EXPECT_EQ(result1, pdTRUE);
-  EXPECT_EQ(result2, pdTRUE);
-  EXPECT_EQ(result3, pdTRUE);
-  EXPECT_EQ(result4, pdTRUE);
+  EXPECT_EQ(give_result.result, pdTRUE);
+  EXPECT_EQ(take_result.result, pdTRUE);
 }
 
 TEST_F(FreeRTOSSemaphoreTest, BinarySemaphoreChronoTimeout) {
@@ -408,33 +393,18 @@ TEST_F(FreeRTOSSemaphoreTest, MutexISROperations) {
   EXPECT_CALL(*mock, xSemaphoreCreateMutex())
       .WillOnce(Return(mock_mutex_handle));
   EXPECT_CALL(*mock, xSemaphoreTakeFromISR(mock_mutex_handle, NotNull()))
-      .Times(2) // Called twice - once with ref param, once without (but with
-                // internal temp var)
-      .WillRepeatedly(Return(pdTRUE));
+      .WillOnce(Return(pdTRUE));
   EXPECT_CALL(*mock, xSemaphoreGiveFromISR(mock_mutex_handle, NotNull()))
-      .Times(2) // Called twice - once with ref param, once without (but with
-                // internal temp var)
-      .WillRepeatedly(Return(pdTRUE));
+      .WillOnce(Return(pdTRUE));
   EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex_handle));
 
   freertos::mutex<freertos::dynamic_semaphore_allocator> mutex;
 
-  /*
-   * ISR Mutex Operations Note:
-   * While FreeRTOS provides xSemaphoreTakeFromISR for semaphores, mutex usage
-   * in ISR context is generally not recommended. These APIs are tested for
-   * completeness but should be avoided in real applications.
-   */
-  BaseType_t high_priority_woken = pdFALSE;
-  auto lock_result1 = mutex.lock_isr(high_priority_woken);
-  auto lock_result2 = mutex.lock_isr();
-  auto unlock_result1 = mutex.unlock_isr(high_priority_woken);
-  auto unlock_result2 = mutex.unlock_isr();
+  auto lock_result = mutex.lock_isr();
+  auto unlock_result = mutex.unlock_isr();
 
-  EXPECT_EQ(lock_result1, pdTRUE);
-  EXPECT_EQ(lock_result2, pdTRUE);
-  EXPECT_EQ(unlock_result1, pdTRUE);
-  EXPECT_EQ(unlock_result2, pdTRUE);
+  EXPECT_EQ(lock_result.result, pdTRUE);
+  EXPECT_EQ(unlock_result.result, pdTRUE);
 }
 
 // =============================================================================
@@ -2044,8 +2014,7 @@ TEST_F(FreeRTOSSemaphoreTest, MutexLockIsrFails_BranchCoverage) {
   EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex_handle));
 
   freertos::mutex<freertos::dynamic_semaphore_allocator> m;
-  BaseType_t woken = pdFALSE;
-  EXPECT_EQ(m.lock_isr(woken), pdFALSE);
+  EXPECT_EQ(m.lock_isr().result, pdFALSE);
 }
 
 TEST_F(FreeRTOSSemaphoreTest, MutexUnlockIsrFails_BranchCoverage) {
@@ -2059,8 +2028,7 @@ TEST_F(FreeRTOSSemaphoreTest, MutexUnlockIsrFails_BranchCoverage) {
 
   freertos::mutex<freertos::dynamic_semaphore_allocator> m;
   m.lock();
-  BaseType_t woken = pdFALSE;
-  EXPECT_EQ(m.unlock_isr(woken), pdFAIL);
+  EXPECT_EQ(m.unlock_isr().result, pdFAIL);
 }
 
 TEST_F(FreeRTOSSemaphoreTest, MutexLockIsrNoWoken_BranchCoverage) {
@@ -2071,7 +2039,7 @@ TEST_F(FreeRTOSSemaphoreTest, MutexLockIsrNoWoken_BranchCoverage) {
   EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex_handle));
 
   freertos::mutex<freertos::dynamic_semaphore_allocator> m;
-  EXPECT_EQ(m.lock_isr(), pdTRUE);
+  EXPECT_EQ(m.lock_isr().result, pdTRUE);
 }
 
 TEST_F(FreeRTOSSemaphoreTest, MutexUnlockIsrNoWoken_BranchCoverage) {
@@ -2085,7 +2053,7 @@ TEST_F(FreeRTOSSemaphoreTest, MutexUnlockIsrNoWoken_BranchCoverage) {
 
   freertos::mutex<freertos::dynamic_semaphore_allocator> m;
   m.lock();
-  EXPECT_EQ(m.unlock_isr(), pdTRUE);
+  EXPECT_EQ(m.unlock_isr().result, pdTRUE);
 }
 
 TEST_F(FreeRTOSSemaphoreTest, MutexTimeoutLockGuardChrono_BranchCoverage) {
@@ -2128,7 +2096,7 @@ TEST_F(FreeRTOSSemaphoreTest, CountingSemaphoreGiveIsrNoWoken_BranchCoverage) {
   EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
 
   freertos::counting_semaphore<freertos::dynamic_semaphore_allocator> sem(5);
-  EXPECT_EQ(sem.give_isr(), pdTRUE);
+  EXPECT_EQ(sem.give_isr().result, pdTRUE);
 }
 
 TEST_F(FreeRTOSSemaphoreTest,
@@ -2139,9 +2107,8 @@ TEST_F(FreeRTOSSemaphoreTest,
       .WillOnce(Return(pdTRUE));
   EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
 
-  BaseType_t woken = pdFALSE;
   freertos::counting_semaphore<freertos::dynamic_semaphore_allocator> sem(5);
-  EXPECT_EQ(sem.take_isr(woken), pdTRUE);
+  EXPECT_EQ(sem.take_isr().result, pdTRUE);
 }
 
 TEST_F(FreeRTOSSemaphoreTest, CountingSemaphoreTakeIsrNoWoken_BranchCoverage) {
@@ -2152,7 +2119,7 @@ TEST_F(FreeRTOSSemaphoreTest, CountingSemaphoreTakeIsrNoWoken_BranchCoverage) {
   EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
 
   freertos::counting_semaphore<freertos::dynamic_semaphore_allocator> sem(5);
-  EXPECT_EQ(sem.take_isr(), pdTRUE);
+  EXPECT_EQ(sem.take_isr().result, pdTRUE);
 }
 
 TEST_F(FreeRTOSSemaphoreTest,
@@ -2163,9 +2130,8 @@ TEST_F(FreeRTOSSemaphoreTest,
       .WillOnce(Return(pdFALSE));
   EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
 
-  BaseType_t woken = pdFALSE;
   freertos::counting_semaphore<freertos::dynamic_semaphore_allocator> sem(5);
-  EXPECT_EQ(sem.take_isr(woken), pdFALSE);
+  EXPECT_EQ(sem.take_isr().result, pdFALSE);
 }
 
 TEST_F(FreeRTOSSemaphoreTest,
@@ -2177,7 +2143,7 @@ TEST_F(FreeRTOSSemaphoreTest,
   EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
 
   freertos::counting_semaphore<freertos::dynamic_semaphore_allocator> sem(5);
-  EXPECT_EQ(sem.take_isr(), pdFALSE);
+  EXPECT_EQ(sem.take_isr().result, pdFALSE);
 }
 
 TEST_F(FreeRTOSSemaphoreTest,
@@ -2199,8 +2165,7 @@ TEST_F(FreeRTOSSemaphoreTest,
   EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
 
   freertos::counting_semaphore<freertos::dynamic_semaphore_allocator> sem(3);
-  BaseType_t woken = pdFALSE;
-  EXPECT_EQ(sem.give_isr(woken), pdTRUE);
+  EXPECT_EQ(sem.give_isr().result, pdTRUE);
 }
 
 TEST_F(FreeRTOSSemaphoreTest, CountingSemaphoreTakeChrono_BranchCoverage) {
@@ -2235,7 +2200,7 @@ TEST_F(FreeRTOSSemaphoreTest, MutexUnlockIsrNoWokenFailure_BranchCoverage) {
 
   freertos::mutex<freertos::dynamic_semaphore_allocator> mtx;
   mtx.lock();
-  EXPECT_EQ(mtx.unlock_isr(), pdFALSE);
+  EXPECT_EQ(mtx.unlock_isr().result, pdFALSE);
   EXPECT_TRUE(mtx.locked());
 }
 
@@ -2247,7 +2212,7 @@ TEST_F(FreeRTOSSemaphoreTest, MutexLockIsrNoWokenFailure_BranchCoverage) {
   EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex_handle));
 
   freertos::mutex<freertos::dynamic_semaphore_allocator> mtx;
-  EXPECT_EQ(mtx.lock_isr(), pdFALSE);
+  EXPECT_EQ(mtx.lock_isr().result, pdFALSE);
   EXPECT_FALSE(mtx.locked());
 }
 
@@ -2271,8 +2236,7 @@ TEST_F(FreeRTOSSemaphoreTest, BinarySemaphoreGiveIsrWithWoken_BranchCoverage) {
   EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
 
   freertos::binary_semaphore<freertos::dynamic_semaphore_allocator> sem;
-  BaseType_t woken = pdFALSE;
-  EXPECT_EQ(sem.give_isr(woken), pdTRUE);
+  EXPECT_EQ(sem.give_isr().result, pdTRUE);
 }
 
 TEST_F(FreeRTOSSemaphoreTest, BinarySemaphoreTakeIsrWithWoken_BranchCoverage) {
@@ -2283,8 +2247,7 @@ TEST_F(FreeRTOSSemaphoreTest, BinarySemaphoreTakeIsrWithWoken_BranchCoverage) {
   EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
 
   freertos::binary_semaphore<freertos::dynamic_semaphore_allocator> sem;
-  BaseType_t woken = pdFALSE;
-  EXPECT_EQ(sem.take_isr(woken), pdTRUE);
+  EXPECT_EQ(sem.take_isr().result, pdTRUE);
 }
 
 TEST_F(FreeRTOSSemaphoreTest, MutexUnlockIsrNoArg_BranchCoverage) {
@@ -2298,10 +2261,10 @@ TEST_F(FreeRTOSSemaphoreTest, MutexUnlockIsrNoArg_BranchCoverage) {
 
   freertos::mutex<freertos::dynamic_semaphore_allocator> mtx;
   auto result = mtx.lock_isr();
-  EXPECT_EQ(result, pdTRUE);
+  EXPECT_EQ(result.result, pdTRUE);
   EXPECT_TRUE(mtx.locked());
   result = mtx.unlock_isr();
-  EXPECT_EQ(result, pdTRUE);
+  EXPECT_EQ(result.result, pdTRUE);
   EXPECT_FALSE(mtx.locked());
 }
 
@@ -2393,7 +2356,7 @@ TEST_F(FreeRTOSSemaphoreTest, BinarySemaphoreGiveIsrNoWoken_BranchCoverage) {
 
   freertos::binary_semaphore<freertos::dynamic_semaphore_allocator> sem;
   auto result = sem.give_isr();
-  EXPECT_EQ(result, pdTRUE);
+  EXPECT_EQ(result.result, pdTRUE);
 }
 
 TEST_F(FreeRTOSSemaphoreTest, BinarySemaphoreTakeIsrNoWoken_BranchCoverage) {
@@ -2405,7 +2368,7 @@ TEST_F(FreeRTOSSemaphoreTest, BinarySemaphoreTakeIsrNoWoken_BranchCoverage) {
 
   freertos::binary_semaphore<freertos::dynamic_semaphore_allocator> sem;
   auto result = sem.take_isr();
-  EXPECT_EQ(result, pdTRUE);
+  EXPECT_EQ(result.result, pdTRUE);
 }
 
 TEST_F(FreeRTOSSemaphoreTest, BinarySemaphoreTakeChrono_BranchCoverage) {
@@ -2429,7 +2392,7 @@ TEST_F(FreeRTOSSemaphoreTest, MutexUnlockIsrFailure_BranchCoverage) {
 
   freertos::mutex<freertos::dynamic_semaphore_allocator> mtx;
   auto result = mtx.unlock_isr();
-  EXPECT_EQ(result, pdFALSE);
+  EXPECT_EQ(result.result, pdFALSE);
   EXPECT_FALSE(mtx.locked());
 }
 
@@ -2442,7 +2405,7 @@ TEST_F(FreeRTOSSemaphoreTest, MutexLockIsrNoArg_BranchCoverage) {
 
   freertos::mutex<freertos::dynamic_semaphore_allocator> mtx;
   auto result = mtx.lock_isr();
-  EXPECT_EQ(result, pdTRUE);
+  EXPECT_EQ(result.result, pdTRUE);
   EXPECT_TRUE(mtx.locked());
 }
 
@@ -2455,7 +2418,7 @@ TEST_F(FreeRTOSSemaphoreTest, MutexLockIsrNoArgFailure_BranchCoverage) {
 
   freertos::mutex<freertos::dynamic_semaphore_allocator> mtx;
   auto result = mtx.lock_isr();
-  EXPECT_EQ(result, pdFALSE);
+  EXPECT_EQ(result.result, pdFALSE);
   EXPECT_FALSE(mtx.locked());
 }
 
@@ -2519,4 +2482,152 @@ TEST_F(FreeRTOSSemaphoreTest, TimeoutLockGuardLockedFalse_BranchCoverage) {
     EXPECT_FALSE(guard.locked());
     EXPECT_FALSE(mtx.locked());
   }
+}
+
+// =============================================================================
+// MOVE SEMANTICS AND SWAP TESTS
+// =============================================================================
+
+TEST_F(FreeRTOSSemaphoreTest, BinarySemaphoreMoveConstruction) {
+  EXPECT_CALL(*mock, xSemaphoreCreateBinary())
+      .WillOnce(Return(mock_semaphore_handle));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
+
+  freertos::binary_semaphore<freertos::dynamic_semaphore_allocator> sem1;
+  freertos::binary_semaphore<freertos::dynamic_semaphore_allocator> sem2(
+      std::move(sem1));
+}
+
+TEST_F(FreeRTOSSemaphoreTest, BinarySemaphoreMoveAssignment) {
+  SemaphoreHandle_t handle1 = reinterpret_cast<SemaphoreHandle_t>(0x1111);
+  SemaphoreHandle_t handle2 = reinterpret_cast<SemaphoreHandle_t>(0x2222);
+
+  EXPECT_CALL(*mock, xSemaphoreCreateBinary())
+      .WillOnce(Return(handle1))
+      .WillOnce(Return(handle2));
+  EXPECT_CALL(*mock, vSemaphoreDelete(handle1));
+  EXPECT_CALL(*mock, vSemaphoreDelete(handle2));
+
+  freertos::binary_semaphore<freertos::dynamic_semaphore_allocator> sem1;
+  freertos::binary_semaphore<freertos::dynamic_semaphore_allocator> sem2;
+  sem1 = std::move(sem2);
+}
+
+TEST_F(FreeRTOSSemaphoreTest, BinarySemaphoreSwap) {
+  SemaphoreHandle_t handle1 = reinterpret_cast<SemaphoreHandle_t>(0x1111);
+  SemaphoreHandle_t handle2 = reinterpret_cast<SemaphoreHandle_t>(0x2222);
+
+  EXPECT_CALL(*mock, xSemaphoreCreateBinary())
+      .WillOnce(Return(handle1))
+      .WillOnce(Return(handle2));
+  EXPECT_CALL(*mock, vSemaphoreDelete(handle1));
+  EXPECT_CALL(*mock, vSemaphoreDelete(handle2));
+
+  freertos::binary_semaphore<freertos::dynamic_semaphore_allocator> sem1;
+  freertos::binary_semaphore<freertos::dynamic_semaphore_allocator> sem2;
+  sem1.swap(sem2);
+}
+
+TEST_F(FreeRTOSSemaphoreTest, CountingSemaphoreMoveConstruction) {
+  EXPECT_CALL(*mock, xSemaphoreCreateCounting(5, 5))
+      .WillOnce(Return(mock_semaphore_handle));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
+
+  freertos::counting_semaphore<freertos::dynamic_semaphore_allocator> sem1(5);
+  freertos::counting_semaphore<freertos::dynamic_semaphore_allocator> sem2(
+      std::move(sem1));
+}
+
+TEST_F(FreeRTOSSemaphoreTest, CountingSemaphoreMoveAssignment) {
+  SemaphoreHandle_t handle1 = reinterpret_cast<SemaphoreHandle_t>(0x1111);
+  SemaphoreHandle_t handle2 = reinterpret_cast<SemaphoreHandle_t>(0x2222);
+
+  EXPECT_CALL(*mock, xSemaphoreCreateCounting(5, 5))
+      .WillOnce(Return(handle1))
+      .WillOnce(Return(handle2));
+  EXPECT_CALL(*mock, vSemaphoreDelete(handle1));
+  EXPECT_CALL(*mock, vSemaphoreDelete(handle2));
+
+  freertos::counting_semaphore<freertos::dynamic_semaphore_allocator> sem1(5);
+  freertos::counting_semaphore<freertos::dynamic_semaphore_allocator> sem2(5);
+  sem1 = std::move(sem2);
+}
+
+TEST_F(FreeRTOSSemaphoreTest, MutexMoveConstruction) {
+  EXPECT_CALL(*mock, xSemaphoreCreateMutex())
+      .WillOnce(Return(mock_mutex_handle));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex_handle));
+
+  freertos::mutex<freertos::dynamic_semaphore_allocator> mtx1;
+  freertos::mutex<freertos::dynamic_semaphore_allocator> mtx2(std::move(mtx1));
+}
+
+TEST_F(FreeRTOSSemaphoreTest, MutexMoveAssignment) {
+  SemaphoreHandle_t handle1 = reinterpret_cast<SemaphoreHandle_t>(0x1111);
+  SemaphoreHandle_t handle2 = reinterpret_cast<SemaphoreHandle_t>(0x2222);
+
+  EXPECT_CALL(*mock, xSemaphoreCreateMutex())
+      .WillOnce(Return(handle1))
+      .WillOnce(Return(handle2));
+  EXPECT_CALL(*mock, vSemaphoreDelete(handle1));
+  EXPECT_CALL(*mock, vSemaphoreDelete(handle2));
+
+  freertos::mutex<freertos::dynamic_semaphore_allocator> mtx1;
+  freertos::mutex<freertos::dynamic_semaphore_allocator> mtx2;
+  mtx1 = std::move(mtx2);
+}
+
+TEST_F(FreeRTOSSemaphoreTest, MutexSwap) {
+  SemaphoreHandle_t handle1 = reinterpret_cast<SemaphoreHandle_t>(0x1111);
+  SemaphoreHandle_t handle2 = reinterpret_cast<SemaphoreHandle_t>(0x2222);
+
+  EXPECT_CALL(*mock, xSemaphoreCreateMutex())
+      .WillOnce(Return(handle1))
+      .WillOnce(Return(handle2));
+  EXPECT_CALL(*mock, vSemaphoreDelete(handle1));
+  EXPECT_CALL(*mock, vSemaphoreDelete(handle2));
+
+  freertos::mutex<freertos::dynamic_semaphore_allocator> mtx1;
+  freertos::mutex<freertos::dynamic_semaphore_allocator> mtx2;
+  swap(mtx1, mtx2);
+}
+
+TEST_F(FreeRTOSSemaphoreTest, RecursiveMutexMoveConstruction) {
+  EXPECT_CALL(*mock, xSemaphoreCreateRecursiveMutex())
+      .WillOnce(Return(mock_recursive_mutex_handle));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_recursive_mutex_handle));
+
+  freertos::recursive_mutex<freertos::dynamic_semaphore_allocator> rmtx1;
+  freertos::recursive_mutex<freertos::dynamic_semaphore_allocator> rmtx2(
+      std::move(rmtx1));
+}
+
+TEST_F(FreeRTOSSemaphoreTest, RecursiveMutexMoveAssignment) {
+  SemaphoreHandle_t handle1 = reinterpret_cast<SemaphoreHandle_t>(0x1111);
+  SemaphoreHandle_t handle2 = reinterpret_cast<SemaphoreHandle_t>(0x2222);
+
+  EXPECT_CALL(*mock, xSemaphoreCreateRecursiveMutex())
+      .WillOnce(Return(handle1))
+      .WillOnce(Return(handle2));
+  EXPECT_CALL(*mock, vSemaphoreDelete(handle1));
+  EXPECT_CALL(*mock, vSemaphoreDelete(handle2));
+
+  freertos::recursive_mutex<freertos::dynamic_semaphore_allocator> rmtx1;
+  freertos::recursive_mutex<freertos::dynamic_semaphore_allocator> rmtx2;
+  rmtx1 = std::move(rmtx2);
+}
+
+TEST_F(FreeRTOSSemaphoreTest, RecursiveMutexSwap) {
+  SemaphoreHandle_t handle1 = reinterpret_cast<SemaphoreHandle_t>(0x1111);
+  SemaphoreHandle_t handle2 = reinterpret_cast<SemaphoreHandle_t>(0x2222);
+
+  EXPECT_CALL(*mock, xSemaphoreCreateRecursiveMutex())
+      .WillOnce(Return(handle1))
+      .WillOnce(Return(handle2));
+  EXPECT_CALL(*mock, vSemaphoreDelete(handle1));
+  EXPECT_CALL(*mock, vSemaphoreDelete(handle2));
+
+  freertos::recursive_mutex<freertos::dynamic_semaphore_allocator> rmtx1;
+  freertos::recursive_mutex<freertos::dynamic_semaphore_allocator> rmtx2;
+  swap(rmtx1, rmtx2);
 }
