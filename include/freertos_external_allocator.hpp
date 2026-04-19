@@ -79,7 +79,7 @@ public:
     other.m_region = nullptr;
   }
   ~external_semaphore_allocator() {
-    if (m_memory && m_region) {
+    if (m_memory) {
       m_region->deallocate(m_memory);
     }
   }
@@ -139,10 +139,10 @@ public:
     other.m_region = nullptr;
   }
   ~external_queue_allocator() {
-    if (m_struct_memory && m_region) {
+    if (m_struct_memory) {
       m_region->deallocate(m_struct_memory);
     }
-    if (m_storage_memory && m_region) {
+    if (m_storage_memory) {
       m_region->deallocate(m_storage_memory);
     }
   }
@@ -184,7 +184,7 @@ public:
     other.m_region = nullptr;
   }
   ~external_event_group_allocator() {
-    if (m_memory && m_region) {
+    if (m_memory) {
       m_region->deallocate(m_memory);
     }
   }
@@ -223,10 +223,10 @@ public:
     other.m_region = nullptr;
   }
   ~external_stream_buffer_allocator() {
-    if (m_struct_memory && m_region) {
+    if (m_struct_memory) {
       m_region->deallocate(m_struct_memory);
     }
-    if (m_storage_memory && m_region) {
+    if (m_storage_memory) {
       m_region->deallocate(m_storage_memory);
     }
   }
@@ -274,10 +274,10 @@ public:
     other.m_region = nullptr;
   }
   ~external_message_buffer_allocator() {
-    if (m_struct_memory && m_region) {
+    if (m_struct_memory) {
       m_region->deallocate(m_struct_memory);
     }
-    if (m_storage_memory && m_region) {
+    if (m_storage_memory) {
       m_region->deallocate(m_storage_memory);
     }
   }
@@ -317,7 +317,7 @@ public:
     other.m_region = nullptr;
   }
   ~external_sw_timer_allocator() {
-    if (m_memory && m_region) {
+    if (m_memory) {
       m_region->deallocate(m_memory);
     }
   }
@@ -353,10 +353,10 @@ public:
     other.m_region = nullptr;
   }
   ~external_task_allocator() {
-    if (m_task_memory && m_region) {
+    if (m_task_memory) {
       m_region->deallocate(m_task_memory);
     }
-    if (m_stack_memory && m_region) {
+    if (m_stack_memory) {
       m_region->deallocate(m_stack_memory);
     }
   }
