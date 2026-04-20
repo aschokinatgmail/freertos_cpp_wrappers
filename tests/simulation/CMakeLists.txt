@@ -45,9 +45,11 @@ target_compile_options(freertos_kernel_sim PRIVATE
 )
 
 target_compile_definitions(freertos_kernel_sim PUBLIC
-    SIMULATION
+    FREERTOS_CPP_WRAPPERS_SIMULATION
 )
 
+# PUBLIC: test executables that link freertos_kernel_sim transitively need
+# pthread (POSIX port uses pthreads for tasks) and rt (clock_nanosleep).
 target_link_libraries(freertos_kernel_sim PUBLIC
     pthread
 )
@@ -78,9 +80,13 @@ set(SIM_COMPILE_OPTIONS
     -fno-exceptions
 )
 
+set(SIM_APP_HOOKS ${CMAKE_CURRENT_SOURCE_DIR}/sim_app_hooks.cpp)
+set(SIM_TASK_CC ${CMAKE_CURRENT_SOURCE_DIR}/../../src/freertos_task.cc)
+
 # --- Smoke tests (raw C API) ---
 add_executable(simulation_smoke
     test_sim_smoke.cpp
+    ${SIM_APP_HOOKS}
 )
 
 target_link_libraries(simulation_smoke
@@ -106,7 +112,8 @@ set_tests_properties(simulation_smoke PROPERTIES
 # --- System tests (C++ wrappers) ---
 add_executable(simulation_system
     test_sim_system.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../src/freertos_task.cc
+    ${SIM_APP_HOOKS}
+    ${SIM_TASK_CC}
 )
 
 target_include_directories(simulation_system PRIVATE
@@ -136,9 +143,14 @@ set_tests_properties(simulation_system PROPERTIES
 
 # --- Helper function for simulation test targets ---
 function(add_sim_test TEST_NAME TEST_SOURCE)
+    cmake_parse_arguments(ARG "" "TIMEOUT" "" ${ARGN})
+    if(NOT ARG_TIMEOUT)
+        set(ARG_TIMEOUT 120)
+    endif()
     add_executable(${TEST_NAME}
         ${TEST_SOURCE}
-        ${CMAKE_CURRENT_SOURCE_DIR}/../../src/freertos_task.cc
+        ${SIM_APP_HOOKS}
+        ${SIM_TASK_CC}
     )
     target_include_directories(${TEST_NAME} PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/../../include
@@ -157,7 +169,7 @@ function(add_sim_test TEST_NAME TEST_SOURCE)
         COMMAND ${TEST_NAME}
     )
     set_tests_properties(${TEST_NAME} PROPERTIES
-        TIMEOUT 120
+        TIMEOUT ${ARG_TIMEOUT}
         LABELS "simulation"
     )
 endfunction()

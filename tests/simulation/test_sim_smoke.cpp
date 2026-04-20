@@ -2,42 +2,17 @@
 #include <semphr.h>
 #include <task.h>
 
+#include <atomic>
 #include <gtest/gtest.h>
-
-extern "C" {
-
-static StaticTask_t xIdleTaskTCB;
-static StackType_t uxIdleTaskStack[configMINIMAL_STACK_SIZE];
-
-void vApplicationGetIdleTaskMemory(
-    StaticTask_t **ppxIdleTaskTCBBuffer, StackType_t **ppxIdleTaskStackBuffer,
-    configSTACK_DEPTH_TYPE *pulIdleTaskStackSize) {
-  *ppxIdleTaskTCBBuffer = &xIdleTaskTCB;
-  *ppxIdleTaskStackBuffer = uxIdleTaskStack;
-  *pulIdleTaskStackSize = configMINIMAL_STACK_SIZE;
-}
-
-static StaticTask_t xTimerTaskTCB;
-static StackType_t uxTimerTaskStack[configTIMER_TASK_STACK_DEPTH];
-
-void vApplicationGetTimerTaskMemory(
-    StaticTask_t **ppxTimerTaskTCBBuffer, StackType_t **ppxTimerTaskStackBuffer,
-    configSTACK_DEPTH_TYPE *pulTimerTaskStackSize) {
-  *ppxTimerTaskTCBBuffer = &xTimerTaskTCB;
-  *ppxTimerTaskStackBuffer = uxTimerTaskStack;
-  *pulTimerTaskStackSize = configTIMER_TASK_STACK_DEPTH;
-}
-
-} // extern "C"
 
 namespace {
 
 struct SmokeTestResults {
-  volatile bool sem_give_ok;
-  volatile bool sem_take_ok;
-  volatile bool sem_second_take_ok;
-  volatile bool consumer_ran;
-  volatile bool all_done;
+  std::atomic<bool> sem_give_ok;
+  std::atomic<bool> sem_take_ok;
+  std::atomic<bool> sem_second_take_ok;
+  std::atomic<bool> consumer_ran;
+  std::atomic<bool> all_done;
 };
 
 void smoke_test_task(void *pvParams) {
@@ -45,32 +20,32 @@ void smoke_test_task(void *pvParams) {
 
   SemaphoreHandle_t sem = xSemaphoreCreateBinary();
   if (sem == nullptr) {
-    r->all_done = true;
+    r->all_done.store(true);
     vTaskEndScheduler();
     return;
   }
 
-  r->sem_give_ok = (xSemaphoreGive(sem) == pdTRUE);
-  r->sem_take_ok = (xSemaphoreTake(sem, pdMS_TO_TICKS(100)) == pdTRUE);
-  r->sem_second_take_ok = (xSemaphoreTake(sem, pdMS_TO_TICKS(100)) == pdFALSE);
+  r->sem_give_ok.store(xSemaphoreGive(sem) == pdTRUE);
+  r->sem_take_ok.store(xSemaphoreTake(sem, pdMS_TO_TICKS(100)) == pdTRUE);
+  r->sem_second_take_ok.store(xSemaphoreTake(sem, pdMS_TO_TICKS(100)) == pdFALSE);
   vSemaphoreDelete(sem);
 
   SemaphoreHandle_t sync_sem = xSemaphoreCreateBinary();
   if (sync_sem == nullptr) {
-    r->all_done = true;
+    r->all_done.store(true);
     vTaskEndScheduler();
     return;
   }
 
   struct ConsumerParams {
     SemaphoreHandle_t sem;
-    volatile bool *ran;
+    std::atomic<bool> *ran;
   } consumer_params{sync_sem, &r->consumer_ran};
 
   auto consumer_func = [](void *pvParams) {
     auto *p = static_cast<ConsumerParams *>(pvParams);
     xSemaphoreTake(p->sem, portMAX_DELAY);
-    *(p->ran) = true;
+    p->ran->store(true);
     vTaskDelete(nullptr);
   };
 
@@ -88,12 +63,17 @@ void smoke_test_task(void *pvParams) {
 
   vSemaphoreDelete(sync_sem);
 
-  r->all_done = true;
+  r->all_done.store(true);
   vTaskEndScheduler();
 }
 
 TEST(SimulationSmoke, AllSmokeTests) {
-  SmokeTestResults results = {};
+  SmokeTestResults results;
+  results.sem_give_ok.store(false);
+  results.sem_take_ok.store(false);
+  results.sem_second_take_ok.store(false);
+  results.consumer_ran.store(false);
+  results.all_done.store(false);
 
   ASSERT_EQ(xTaskCreate(smoke_test_task, "smoke", 256, &results, 1, nullptr),
             pdPASS);

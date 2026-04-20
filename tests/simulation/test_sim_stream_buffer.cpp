@@ -1,41 +1,36 @@
 #include <freertos.hpp>
 #include <gtest/gtest.h>
 
-extern "C" {
-static StaticTask_t xIdleTaskTCB;
-static StackType_t uxIdleTaskStack[configMINIMAL_STACK_SIZE];
-void vApplicationGetIdleTaskMemory(StaticTask_t **ppxIdleTaskTCBBuffer,
-                                    StackType_t **ppxIdleTaskStackBuffer,
-                                    configSTACK_DEPTH_TYPE *pulIdleTaskStackSize) {
-  *ppxIdleTaskTCBBuffer = &xIdleTaskTCB;
-  *ppxIdleTaskStackBuffer = uxIdleTaskStack;
-  *pulIdleTaskStackSize = configMINIMAL_STACK_SIZE;
-}
-static StaticTask_t xTimerTaskTCB;
-static StackType_t uxTimerTaskStack[configTIMER_TASK_STACK_DEPTH];
-void vApplicationGetTimerTaskMemory(StaticTask_t **ppxTimerTaskTCBBuffer,
-                                     StackType_t **ppxIdleTaskStackBuffer,
-                                     configSTACK_DEPTH_TYPE *pulTimerTaskStackSize) {
-  *ppxTimerTaskTCBBuffer = &xTimerTaskTCB;
-  *ppxIdleTaskStackBuffer = uxTimerTaskStack;
-  *pulTimerTaskStackSize = configTIMER_TASK_STACK_DEPTH;
-}
-}
+#include <atomic>
 
 struct SBData {
   freertos::da::stream_buffer<128> sb;
-  volatile bool send_ok;
-  volatile bool recv_ok;
-  volatile size_t recv_len;
+  std::atomic<bool> send_ok;
+  std::atomic<bool> recv_ok;
+  std::atomic<size_t> recv_len;
   uint8_t recv_buf[64];
+
+  void reset() {
+    send_ok.store(false);
+    recv_ok.store(false);
+    recv_len.store(0);
+  }
 };
 
 struct SBResults {
-  volatile bool send_receive;
-  volatile bool partial_read;
-  volatile bool blocking_on_empty;
-  volatile bool trigger_level;
-  volatile bool all_done;
+  std::atomic<bool> send_receive;
+  std::atomic<bool> partial_read;
+  std::atomic<bool> blocking_on_empty;
+  std::atomic<bool> trigger_level;
+  std::atomic<bool> all_done;
+
+  void reset() {
+    send_receive.store(false);
+    partial_read.store(false);
+    blocking_on_empty.store(false);
+    trigger_level.store(false);
+    all_done.store(false);
+  }
 };
 
 static SBData s_sb_data;
@@ -44,24 +39,24 @@ static SBResults s_sb;
 void sb_sender(void *param) {
   auto *d = static_cast<SBData *>(param);
   const uint8_t data[] = {0xDE, 0xAD, 0xBE, 0xEF};
-  d->send_ok = (d->sb.send(data, 4, pdMS_TO_TICKS(100)) > 0);
+  d->send_ok.store(d->sb.send(data, 4, pdMS_TO_TICKS(100)) > 0);
   vTaskDelete(nullptr);
 }
 
 void sb_receiver(void *param) {
   auto *d = static_cast<SBData *>(param);
-  d->recv_len = d->sb.receive(d->recv_buf, 64, pdMS_TO_TICKS(500));
-  d->recv_ok = (d->recv_len == 4);
+  d->recv_len.store(d->sb.receive(d->recv_buf, 64, pdMS_TO_TICKS(500)));
+  d->recv_ok.store(d->recv_len == 4);
   vTaskDelete(nullptr);
 }
 
 void sb_orchestrator(void *param) {
   auto *r = static_cast<SBResults *>(param);
 
-  r->send_receive = false;
-  r->partial_read = false;
-  r->blocking_on_empty = false;
-  r->trigger_level = false;
+  r->send_receive.store(false);
+  r->partial_read.store(false);
+  r->blocking_on_empty.store(false);
+  r->trigger_level.store(false);
 
   {
     freertos::da::stream_buffer<128> sb;
@@ -69,7 +64,7 @@ void sb_orchestrator(void *param) {
     sb.send(data, 4, pdMS_TO_TICKS(10));
     uint8_t buf[16] = {};
     size_t len = sb.receive(buf, 16, pdMS_TO_TICKS(10));
-    r->send_receive = (len == 4) && (buf[0] == 0x01) && (buf[3] == 0x04);
+    r->send_receive.store((len == 4) && (buf[0] == 0x01) && (buf[3] == 0x04));
   }
 
   {
@@ -78,25 +73,25 @@ void sb_orchestrator(void *param) {
     sb.send(data, 6, pdMS_TO_TICKS(10));
     uint8_t buf[16] = {};
     size_t len = sb.receive(buf, 3, pdMS_TO_TICKS(10));
-    r->partial_read = (len == 3) && (buf[0] == 0xAA) && (buf[2] == 0xCC);
+    r->partial_read.store((len == 3) && (buf[0] == 0xAA) && (buf[2] == 0xCC));
   }
 
   vTaskDelay(pdMS_TO_TICKS(500));
-  r->blocking_on_empty = s_sb_data.send_ok && s_sb_data.recv_ok &&
-                         (s_sb_data.recv_len == 4) &&
-                         (s_sb_data.recv_buf[0] == 0xDE) &&
-                         (s_sb_data.recv_buf[3] == 0xEF);
+  r->blocking_on_empty.store(s_sb_data.send_ok && s_sb_data.recv_ok &&
+                             (s_sb_data.recv_len == 4) &&
+                             (s_sb_data.recv_buf[0] == 0xDE) &&
+                             (s_sb_data.recv_buf[3] == 0xEF));
 
   {
     freertos::da::stream_buffer<128> sb;
-    volatile bool triggered = false;
-    struct P { freertos::da::stream_buffer<128> *sb; volatile bool *triggered; };
+    std::atomic<bool> triggered{false};
+    struct P { freertos::da::stream_buffer<128> *sb; std::atomic<bool> *triggered; };
     P p{&sb, &triggered};
     auto waiter = [](void *pv) {
       auto *pp = static_cast<P *>(pv);
       uint8_t buf[16] = {};
       size_t len = pp->sb->receive(buf, 16, pdMS_TO_TICKS(1000));
-      *pp->triggered = (len >= 3);
+      pp->triggered->store(len >= 3);
       vTaskDelete(nullptr);
     };
     sb.set_trigger_level(3);
@@ -105,15 +100,16 @@ void sb_orchestrator(void *param) {
     const uint8_t data[] = {0x10, 0x20, 0x30};
     sb.send(data, 3, pdMS_TO_TICKS(10));
     vTaskDelay(pdMS_TO_TICKS(100));
-    r->trigger_level = triggered;
+    r->trigger_level.store(triggered);
   }
 
-  r->all_done = true;
+  r->all_done.store(true);
   vTaskEndScheduler();
 }
 
 TEST(SimStreamBuffer, AllStreamBufferTests) {
-  memset(&s_sb, 0, sizeof(s_sb));
+  s_sb.reset();
+  s_sb_data.reset();
 
   xTaskCreate(sb_sender, "sbsnd", 512, &s_sb_data, 3, nullptr);
   xTaskCreate(sb_receiver, "sbrcv", 512, &s_sb_data, 2, nullptr);

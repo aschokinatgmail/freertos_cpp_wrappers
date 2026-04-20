@@ -1,82 +1,77 @@
+// FreeRTOS+POSIX cannot simulate hardware interrupts. These tests exercise
+// the ISR wrapper API surface (isr_result<T>, isr_result<void>, give_isr) from
+// task context only. Real ISR semantics are verified on target hardware via
+// mock-based unit tests.
+
 #include <freertos.hpp>
 #include <gtest/gtest.h>
 
-extern "C" {
-static StaticTask_t xIdleTaskTCB;
-static StackType_t uxIdleTaskStack[configMINIMAL_STACK_SIZE];
-void vApplicationGetIdleTaskMemory(StaticTask_t **ppxIdleTaskTCBBuffer,
-                                    StackType_t **ppxIdleTaskStackBuffer,
-                                    configSTACK_DEPTH_TYPE *pulIdleTaskStackSize) {
-  *ppxIdleTaskTCBBuffer = &xIdleTaskTCB;
-  *ppxIdleTaskStackBuffer = uxIdleTaskStack;
-  *pulIdleTaskStackSize = configMINIMAL_STACK_SIZE;
-}
-static StaticTask_t xTimerTaskTCB;
-static StackType_t uxTimerTaskStack[configTIMER_TASK_STACK_DEPTH];
-void vApplicationGetTimerTaskMemory(StaticTask_t **ppxTimerTaskTCBBuffer,
-                                     StackType_t **ppxIdleTaskStackBuffer,
-                                     configSTACK_DEPTH_TYPE *pulTimerTaskStackSize) {
-  *ppxTimerTaskTCBBuffer = &xTimerTaskTCB;
-  *ppxIdleTaskStackBuffer = uxTimerTaskStack;
-  *pulTimerTaskStackSize = configTIMER_TASK_STACK_DEPTH;
-}
-}
+#include <atomic>
 
 struct ISRResults {
-  volatile bool isr_result_struct;
-  volatile bool isr_result_bool;
-  volatile bool isr_result_void;
-  volatile bool isr_methods_exist;
-  volatile bool expected_isr;
-  volatile bool all_done;
+  std::atomic<bool> isr_result_struct;
+  std::atomic<bool> isr_result_bool;
+  std::atomic<bool> isr_result_void;
+  std::atomic<bool> isr_methods_exist;
+  std::atomic<bool> expected_isr;
+  std::atomic<bool> all_done;
+
+  void reset() {
+    isr_result_struct.store(false);
+    isr_result_bool.store(false);
+    isr_result_void.store(false);
+    isr_methods_exist.store(false);
+    expected_isr.store(false);
+    all_done.store(false);
+  }
 };
 
-static ISRResults s_isr{};
+static ISRResults s_isr;
 
 void isr_orchestrator(void *param) {
   auto *r = static_cast<ISRResults *>(param);
 
-  r->isr_result_struct = false;
-  r->isr_result_bool = false;
-  r->isr_result_void = false;
-  r->isr_methods_exist = false;
-  r->expected_isr = false;
+  r->isr_result_struct.store(false);
+  r->isr_result_bool.store(false);
+  r->isr_result_void.store(false);
+  r->isr_methods_exist.store(false);
+  r->expected_isr.store(false);
 
   {
     freertos::isr_result<int> ir{42, pdTRUE};
-    r->isr_result_struct = (ir.result == 42) && (ir.higher_priority_task_woken == pdTRUE);
+    r->isr_result_struct.store((ir.result == 42) && (ir.higher_priority_task_woken == pdTRUE));
   }
 
   {
     freertos::isr_result<BaseType_t> ir{pdTRUE, pdFALSE};
-    r->isr_result_bool = (ir.result == pdTRUE) && (ir.higher_priority_task_woken == pdFALSE);
+    r->isr_result_bool.store((ir.result == pdTRUE) && (ir.higher_priority_task_woken == pdFALSE));
   }
 
   {
     auto ir = freertos::isr_result<void>{};
-    r->isr_result_void = true;
+    r->isr_result_void.store(true);
     (void)ir;
   }
 
   {
     freertos::da::binary_semaphore bs;
     auto result = bs.give_isr();
-    r->isr_methods_exist = (result.result == pdTRUE || result.result == pdFALSE);
+    r->isr_methods_exist.store(result.result == pdTRUE || result.result == pdFALSE);
   }
 
   {
     freertos::da::binary_semaphore bs;
     bs.give();
     auto ex_result = bs.take_ex(pdMS_TO_TICKS(10));
-    r->expected_isr = ex_result.has_value();
+    r->expected_isr.store(ex_result.has_value());
   }
 
-  r->all_done = true;
+  r->all_done.store(true);
   vTaskEndScheduler();
 }
 
 TEST(SimISR, AllISRTests) {
-  s_isr = {};
+  s_isr.reset();
 
   xTaskCreate(isr_orchestrator, "isr", 2048, &s_isr, 1, nullptr);
   vTaskStartScheduler();

@@ -1,49 +1,43 @@
 #include <freertos.hpp>
 #include <gtest/gtest.h>
 
-extern "C" {
-static StaticTask_t xIdleTaskTCB;
-static StackType_t uxIdleTaskStack[configMINIMAL_STACK_SIZE];
-void vApplicationGetIdleTaskMemory(StaticTask_t **ppxIdleTaskTCBBuffer,
-                                    StackType_t **ppxIdleTaskStackBuffer,
-                                    configSTACK_DEPTH_TYPE *pulIdleTaskStackSize) {
-  *ppxIdleTaskTCBBuffer = &xIdleTaskTCB;
-  *ppxIdleTaskStackBuffer = uxIdleTaskStack;
-  *pulIdleTaskStackSize = configMINIMAL_STACK_SIZE;
-}
-static StaticTask_t xTimerTaskTCB;
-static StackType_t uxTimerTaskStack[configTIMER_TASK_STACK_DEPTH];
-void vApplicationGetTimerTaskMemory(StaticTask_t **ppxTimerTaskTCBBuffer,
-                                     StackType_t **ppxIdleTaskStackBuffer,
-                                     configSTACK_DEPTH_TYPE *pulTimerTaskStackSize) {
-  *ppxTimerTaskTCBBuffer = &xTimerTaskTCB;
-  *ppxIdleTaskStackBuffer = uxTimerTaskStack;
-  *pulTimerTaskStackSize = configTIMER_TASK_STACK_DEPTH;
-}
-}
+#include <atomic>
 
 struct EGData {
   freertos::da::event_group eg;
-  volatile bool t1_ok;
-  volatile bool t2_ok;
+  std::atomic<bool> t1_ok;
+  std::atomic<bool> t2_ok;
+
+  void reset() {
+    t1_ok.store(false);
+    t2_ok.store(false);
+  }
 };
 
 struct EGResults {
-  volatile bool set_wait_bits;
-  volatile bool sync_tasks;
-  volatile bool clear_on_exit;
-  volatile bool different_bits;
-  volatile bool all_done;
+  std::atomic<bool> set_wait_bits;
+  std::atomic<bool> sync_tasks;
+  std::atomic<bool> clear_on_exit;
+  std::atomic<bool> different_bits;
+  std::atomic<bool> all_done;
+
+  void reset() {
+    set_wait_bits.store(false);
+    sync_tasks.store(false);
+    clear_on_exit.store(false);
+    different_bits.store(false);
+    all_done.store(false);
+  }
 };
 
-static EGData s_eg_data{};
-static EGResults s_eg{};
+static EGData s_eg_data;
+static EGResults s_eg;
 
 void eg_task1(void *param) {
   auto *d = static_cast<EGData *>(param);
   d->eg.set_bits(0x01);
   EventBits_t result = d->eg.wait_bits(0x02, pdTRUE, pdTRUE, pdMS_TO_TICKS(2000));
-  d->t1_ok = (result & 0x02) != 0;
+  d->t1_ok.store((result & 0x02) != 0);
   vTaskDelete(nullptr);
 }
 
@@ -51,55 +45,55 @@ void eg_task2(void *param) {
   auto *d = static_cast<EGData *>(param);
   d->eg.set_bits(0x02);
   EventBits_t result = d->eg.wait_bits(0x01, pdTRUE, pdTRUE, pdMS_TO_TICKS(2000));
-  d->t2_ok = (result & 0x01) != 0;
+  d->t2_ok.store((result & 0x01) != 0);
   vTaskDelete(nullptr);
 }
 
 void eg_orchestrator(void *param) {
   auto *r = static_cast<EGResults *>(param);
 
-  r->set_wait_bits = false;
-  r->sync_tasks = false;
-  r->clear_on_exit = false;
-  r->different_bits = false;
+  r->set_wait_bits.store(false);
+  r->sync_tasks.store(false);
+  r->clear_on_exit.store(false);
+  r->different_bits.store(false);
 
   {
     freertos::da::event_group eg;
     eg.set_bits(0x05);
     EventBits_t bits = eg.wait_bits(0x05, pdFALSE, pdFALSE, pdMS_TO_TICKS(10));
-    r->set_wait_bits = (bits & 0x05) == 0x05;
+    r->set_wait_bits.store((bits & 0x05) == 0x05);
   }
 
   vTaskDelay(pdMS_TO_TICKS(1000));
-  r->sync_tasks = s_eg_data.t1_ok && s_eg_data.t2_ok;
+  r->sync_tasks.store(s_eg_data.t1_ok && s_eg_data.t2_ok);
 
   {
     freertos::da::event_group eg;
     eg.set_bits(0xFF);
     EventBits_t bits = eg.wait_bits(0x01, pdTRUE, pdTRUE, pdMS_TO_TICKS(10));
-    r->clear_on_exit = (bits & 0x01) != 0;
+    r->clear_on_exit.store((bits & 0x01) != 0);
     EventBits_t remaining = eg.get_bits();
-    r->clear_on_exit = r->clear_on_exit && ((remaining & 0x01) == 0) &&
-                       ((remaining & 0xFE) != 0);
+    r->clear_on_exit.store(r->clear_on_exit && ((remaining & 0x01) == 0) &&
+                           ((remaining & 0xFE) != 0));
   }
 
   {
-    volatile bool waiter1_ok = false;
-    volatile bool waiter2_ok = false;
+    std::atomic<bool> waiter1_ok{false};
+    std::atomic<bool> waiter2_ok{false};
     freertos::da::event_group eg;
-    struct P { freertos::da::event_group *eg; volatile bool *ok; EventBits_t bits; };
+    struct P { freertos::da::event_group *eg; std::atomic<bool> *ok; EventBits_t bits; };
     P p1{&eg, &waiter1_ok, 0x01};
     P p2{&eg, &waiter2_ok, 0x02};
     auto w1 = [](void *pv) {
       auto *pp = static_cast<P *>(pv);
       EventBits_t b = pp->eg->wait_bits(pp->bits, pdTRUE, pdTRUE, pdMS_TO_TICKS(500));
-      *pp->ok = (b & pp->bits) != 0;
+      pp->ok->store((b & pp->bits) != 0);
       vTaskDelete(nullptr);
     };
     auto w2 = [](void *pv) {
       auto *pp = static_cast<P *>(pv);
       EventBits_t b = pp->eg->wait_bits(pp->bits, pdTRUE, pdTRUE, pdMS_TO_TICKS(500));
-      *pp->ok = (b & pp->bits) != 0;
+      pp->ok->store((b & pp->bits) != 0);
       vTaskDelete(nullptr);
     };
     xTaskCreate(w1, "eg1", 512, &p1, 2, nullptr);
@@ -107,17 +101,16 @@ void eg_orchestrator(void *param) {
     vTaskDelay(pdMS_TO_TICKS(50));
     eg.set_bits(0x03);
     vTaskDelay(pdMS_TO_TICKS(200));
-    r->different_bits = waiter1_ok && waiter2_ok;
+    r->different_bits.store(waiter1_ok && waiter2_ok);
   }
 
-  r->all_done = true;
+  r->all_done.store(true);
   vTaskEndScheduler();
 }
 
 TEST(SimEventGroup, AllEventGroupTests) {
-  s_eg_data.t1_ok = false;
-  s_eg_data.t2_ok = false;
-  memset(&s_eg, 0, sizeof(s_eg));
+  s_eg_data.reset();
+  s_eg.reset();
 
   xTaskCreate(eg_task1, "eg1", 512, &s_eg_data, 3, nullptr);
   xTaskCreate(eg_task2, "eg2", 512, &s_eg_data, 3, nullptr);

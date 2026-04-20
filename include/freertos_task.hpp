@@ -39,7 +39,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "freertos_expected.hpp"
 #include "freertos_isr_result.hpp"
 #include <FreeRTOS.h>
-#include <event_groups.h>
+#include <event_groups.h> // required for EventBits_t used in freertos_strong_types.hpp
 #include <array>
 #include <cassert>
 #include <chrono>

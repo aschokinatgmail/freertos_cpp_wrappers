@@ -1,42 +1,39 @@
 #include <freertos.hpp>
 #include <gtest/gtest.h>
 
-extern "C" {
-static StaticTask_t xIdleTaskTCB;
-static StackType_t uxIdleTaskStack[configMINIMAL_STACK_SIZE];
-void vApplicationGetIdleTaskMemory(StaticTask_t **ppxIdleTaskTCBBuffer,
-                                    StackType_t **ppxIdleTaskStackBuffer,
-                                    configSTACK_DEPTH_TYPE *pulIdleTaskStackSize) {
-  *ppxIdleTaskTCBBuffer = &xIdleTaskTCB;
-  *ppxIdleTaskStackBuffer = uxIdleTaskStack;
-  *pulIdleTaskStackSize = configMINIMAL_STACK_SIZE;
-}
-static StaticTask_t xTimerTaskTCB;
-static StackType_t uxTimerTaskStack[configTIMER_TASK_STACK_DEPTH];
-void vApplicationGetTimerTaskMemory(StaticTask_t **ppxTimerTaskTCBBuffer,
-                                     StackType_t **ppxIdleTaskStackBuffer,
-                                     configSTACK_DEPTH_TYPE *pulTimerTaskStackSize) {
-  *ppxTimerTaskTCBBuffer = &xTimerTaskTCB;
-  *ppxIdleTaskStackBuffer = uxTimerTaskStack;
-  *pulTimerTaskStackSize = configTIMER_TASK_STACK_DEPTH;
-}
-}
+#include <atomic>
 
 struct PCData {
   freertos::da::queue<8, int> q;
-  volatile int sum;
-  volatile int prod_count;
-  volatile int cons_count;
-  volatile bool p1_ok;
-  volatile bool p2_ok;
-  volatile bool c_ok;
+  std::atomic<int> sum;
+  std::atomic<int> prod_count;
+  std::atomic<int> cons_count;
+  std::atomic<bool> p1_ok;
+  std::atomic<bool> p2_ok;
+  std::atomic<bool> c_ok;
+
+  void reset() {
+    sum.store(0);
+    prod_count.store(0);
+    cons_count.store(0);
+    p1_ok.store(false);
+    p2_ok.store(false);
+    c_ok.store(false);
+  }
 };
 
 struct ConcurrencyResults {
-  volatile bool producer_consumer;
-  volatile bool timer_task_sync;
-  volatile bool deadlock_timeout;
-  volatile bool all_done;
+  std::atomic<bool> producer_consumer;
+  std::atomic<bool> timer_task_sync;
+  std::atomic<bool> deadlock_timeout;
+  std::atomic<bool> all_done;
+
+  void reset() {
+    producer_consumer.store(false);
+    timer_task_sync.store(false);
+    deadlock_timeout.store(false);
+    all_done.store(false);
+  }
 };
 
 static PCData s_pc;
@@ -46,13 +43,13 @@ void producer1(void *param) {
   auto *d = static_cast<PCData *>(param);
   for (int i = 1; i <= 5; ++i) {
     if (d->q.send(i, pdMS_TO_TICKS(100)) != pdTRUE) {
-      d->p1_ok = false;
+      d->p1_ok.store(false);
       vTaskDelete(nullptr);
       return;
     }
     d->prod_count++;
   }
-  d->p1_ok = true;
+  d->p1_ok.store(true);
   vTaskDelete(nullptr);
 }
 
@@ -60,13 +57,13 @@ void producer2(void *param) {
   auto *d = static_cast<PCData *>(param);
   for (int i = 6; i <= 10; ++i) {
     if (d->q.send(i, pdMS_TO_TICKS(100)) != pdTRUE) {
-      d->p2_ok = false;
+      d->p2_ok.store(false);
       vTaskDelete(nullptr);
       return;
     }
     d->prod_count++;
   }
-  d->p2_ok = true;
+  d->p2_ok.store(true);
   vTaskDelete(nullptr);
 }
 
@@ -83,39 +80,38 @@ void consumer(void *param) {
       break;
     }
   }
-  d->sum = total;
-  d->cons_count = count;
-  d->c_ok = (count == 10);
+  d->sum.store(total);
+  d->cons_count.store(count);
+  d->c_ok.store(count == 10);
   vTaskDelete(nullptr);
 }
 
 void conc_orchestrator(void *param) {
   auto *r = static_cast<ConcurrencyResults *>(param);
 
-  r->producer_consumer = false;
-  r->timer_task_sync = false;
-  r->deadlock_timeout = false;
+  r->producer_consumer.store(false);
+  r->timer_task_sync.store(false);
+  r->deadlock_timeout.store(false);
 
   vTaskDelay(pdMS_TO_TICKS(1000));
-  r->producer_consumer = s_pc.p1_ok && s_pc.p2_ok && s_pc.c_ok &&
-                         (s_pc.sum == 55);
+  r->producer_consumer.store(s_pc.p1_ok && s_pc.p2_ok && s_pc.c_ok &&
+                             (s_pc.sum == 55));
 
   {
-    volatile bool timer_fired = false;
-    volatile bool task_signaled = false;
+    std::atomic<bool> timer_fired{false};
     freertos::da::binary_semaphore sync;
     freertos::da::timer t("sync_timer", pdMS_TO_TICKS(100), pdFALSE,
                            [&timer_fired, &sync]() {
-                             timer_fired = true;
+                             timer_fired.store(true);
                              sync.give();
                            });
-    volatile bool got_signal = false;
-    struct P { freertos::da::binary_semaphore *sync; volatile bool *got_signal; };
+    std::atomic<bool> got_signal{false};
+    struct P { freertos::da::binary_semaphore *sync; std::atomic<bool> *got_signal; };
     P p{&sync, &got_signal};
     auto waiter = [](void *pv) {
       auto *pp = static_cast<P *>(pv);
       if (pp->sync->take(pdMS_TO_TICKS(2000))) {
-        *pp->got_signal = true;
+        pp->got_signal->store(true);
       }
       vTaskDelete(nullptr);
     };
@@ -123,32 +119,27 @@ void conc_orchestrator(void *param) {
     vTaskDelay(pdMS_TO_TICKS(10));
     t.start();
     vTaskDelay(pdMS_TO_TICKS(300));
-    r->timer_task_sync = timer_fired && got_signal;
+    r->timer_task_sync.store(timer_fired && got_signal);
     t.stop(portMAX_DELAY);
   }
 
   {
     freertos::da::mutex m;
-    volatile bool deadlock_detected = false;
+    std::atomic<bool> deadlock_detected{false};
     m.lock();
     auto result = m.try_lock();
-    deadlock_detected = (result != pdTRUE);
+    deadlock_detected.store(result != pdTRUE);
     m.unlock();
-    r->deadlock_timeout = deadlock_detected;
+    r->deadlock_timeout.store(deadlock_detected);
   }
 
-  r->all_done = true;
+  r->all_done.store(true);
   vTaskEndScheduler();
 }
 
 TEST(SimConcurrency, AllConcurrencyTests) {
-  s_pc.sum = 0;
-  s_pc.prod_count = 0;
-  s_pc.cons_count = 0;
-  s_pc.p1_ok = false;
-  s_pc.p2_ok = false;
-  s_pc.c_ok = false;
-  memset(&s_conc, 0, sizeof(s_conc));
+  s_pc.reset();
+  s_conc.reset();
 
   xTaskCreate(producer1, "p1", 512, &s_pc, 2, nullptr);
   xTaskCreate(producer2, "p2", 512, &s_pc, 2, nullptr);

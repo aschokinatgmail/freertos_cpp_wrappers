@@ -1,46 +1,43 @@
 #include <freertos.hpp>
 #include <gtest/gtest.h>
 
-extern "C" {
-static StaticTask_t xIdleTaskTCB;
-static StackType_t uxIdleTaskStack[configMINIMAL_STACK_SIZE];
-void vApplicationGetIdleTaskMemory(StaticTask_t **ppxIdleTaskTCBBuffer,
-                                    StackType_t **ppxIdleTaskStackBuffer,
-                                    configSTACK_DEPTH_TYPE *pulIdleTaskStackSize) {
-  *ppxIdleTaskTCBBuffer = &xIdleTaskTCB;
-  *ppxIdleTaskStackBuffer = uxIdleTaskStack;
-  *pulIdleTaskStackSize = configMINIMAL_STACK_SIZE;
-}
-static StaticTask_t xTimerTaskTCB;
-static StackType_t uxTimerTaskStack[configTIMER_TASK_STACK_DEPTH];
-void vApplicationGetTimerTaskMemory(StaticTask_t **ppxTimerTaskTCBBuffer,
-                                     StackType_t **ppxIdleTaskStackBuffer,
-                                     configSTACK_DEPTH_TYPE *pulTimerTaskStackSize) {
-  *ppxTimerTaskTCBBuffer = &xTimerTaskTCB;
-  *ppxIdleTaskStackBuffer = uxTimerTaskStack;
-  *pulTimerTaskStackSize = configTIMER_TASK_STACK_DEPTH;
-}
-}
+#include <atomic>
 
 struct MutexData {
   freertos::da::mutex mtx;
-  volatile int counter;
-  volatile bool t1_ok;
-  volatile bool t2_ok;
+  std::atomic<int> counter;
+  std::atomic<bool> t1_ok;
+  std::atomic<bool> t2_ok;
+
+  void reset() {
+    counter.store(0);
+    t1_ok.store(false);
+    t2_ok.store(false);
+  }
 };
 
 struct MutexResults {
-  volatile bool lock_unlock;
-  volatile bool contention;
-  volatile bool try_lock_when_held;
-  volatile bool recursive_lock;
-  volatile bool recursive_unlock;
-  volatile bool lock_guard_raii;
-  volatile bool all_done;
+  std::atomic<bool> lock_unlock;
+  std::atomic<bool> contention;
+  std::atomic<bool> try_lock_when_held;
+  std::atomic<bool> recursive_lock;
+  std::atomic<bool> recursive_unlock;
+  std::atomic<bool> lock_guard_raii;
+  std::atomic<bool> all_done;
+
+  void reset() {
+    lock_unlock.store(false);
+    contention.store(false);
+    try_lock_when_held.store(false);
+    recursive_lock.store(false);
+    recursive_unlock.store(false);
+    lock_guard_raii.store(false);
+    all_done.store(false);
+  }
 };
 
-static MutexData s_mutex_data{};
-static MutexResults s_mutex{};
+static MutexData s_mutex_data;
+static MutexResults s_mutex;
 
 void mutex_task1(void *param) {
   auto *d = static_cast<MutexData *>(param);
@@ -49,12 +46,12 @@ void mutex_task1(void *param) {
       d->counter++;
       d->mtx.unlock();
     } else {
-      d->t1_ok = false;
+      d->t1_ok.store(false);
       vTaskDelete(nullptr);
       return;
     }
   }
-  d->t1_ok = true;
+  d->t1_ok.store(true);
   vTaskDelete(nullptr);
 }
 
@@ -65,73 +62,71 @@ void mutex_task2(void *param) {
       d->counter++;
       d->mtx.unlock();
     } else {
-      d->t2_ok = false;
+      d->t2_ok.store(false);
       vTaskDelete(nullptr);
       return;
     }
   }
-  d->t2_ok = true;
+  d->t2_ok.store(true);
   vTaskDelete(nullptr);
 }
 
 void mutex_orchestrator(void *param) {
   auto *r = static_cast<MutexResults *>(param);
 
-  r->lock_unlock = false;
-  r->contention = false;
-  r->try_lock_when_held = false;
-  r->recursive_lock = false;
-  r->recursive_unlock = false;
-  r->lock_guard_raii = false;
+  r->lock_unlock.store(false);
+  r->contention.store(false);
+  r->try_lock_when_held.store(false);
+  r->recursive_lock.store(false);
+  r->recursive_unlock.store(false);
+  r->lock_guard_raii.store(false);
 
   {
     freertos::da::mutex m;
-    r->lock_unlock = (m.lock() == pdTRUE) && m.locked();
+    r->lock_unlock.store((m.lock() == pdTRUE) && m.locked());
     m.unlock();
-    r->lock_unlock = r->lock_unlock && !m.locked();
+    r->lock_unlock.store(r->lock_unlock && !m.locked());
   }
 
-  r->contention = s_mutex_data.t1_ok && s_mutex_data.t2_ok &&
-                  (s_mutex_data.counter == 100);
+  r->contention.store(s_mutex_data.t1_ok && s_mutex_data.t2_ok &&
+                      (s_mutex_data.counter == 100));
 
   {
     freertos::da::mutex m;
     m.lock();
-    r->try_lock_when_held = (m.try_lock() != pdTRUE);
+    r->try_lock_when_held.store(m.try_lock() != pdTRUE);
     m.unlock();
   }
 
   {
     freertos::da::recursive_mutex rm;
-    r->recursive_lock = (rm.lock() == pdTRUE) && rm.locked() &&
-                        (rm.recursions_count() == 1);
-    r->recursive_lock = r->recursive_lock && (rm.lock() == pdTRUE) &&
-                        (rm.recursions_count() == 2);
-    r->recursive_unlock = (rm.unlock() == pdTRUE) &&
-                          (rm.recursions_count() == 1);
-    r->recursive_unlock = r->recursive_unlock && (rm.unlock() == pdTRUE) &&
-                          !rm.locked() && (rm.recursions_count() == 0);
+    r->recursive_lock.store((rm.lock() == pdTRUE) && rm.locked() &&
+                            (rm.recursions_count() == 1));
+    r->recursive_lock.store(r->recursive_lock && (rm.lock() == pdTRUE) &&
+                            (rm.recursions_count() == 2));
+    r->recursive_unlock.store((rm.unlock() == pdTRUE) &&
+                              (rm.recursions_count() == 1));
+    r->recursive_unlock.store(r->recursive_unlock && (rm.unlock() == pdTRUE) &&
+                              !rm.locked() && (rm.recursions_count() == 0));
   }
 
   {
     freertos::da::mutex guard_mtx;
-    r->lock_guard_raii = true;
+    r->lock_guard_raii.store(true);
     {
       freertos::lock_guard<freertos::da::mutex> lg(guard_mtx);
-      r->lock_guard_raii = r->lock_guard_raii && guard_mtx.locked();
+      r->lock_guard_raii.store(r->lock_guard_raii && guard_mtx.locked());
     }
-    r->lock_guard_raii = r->lock_guard_raii && !guard_mtx.locked();
+    r->lock_guard_raii.store(r->lock_guard_raii && !guard_mtx.locked());
   }
 
-  r->all_done = true;
+  r->all_done.store(true);
   vTaskEndScheduler();
 }
 
 TEST(SimMutex, AllMutexTests) {
-  memset(&s_mutex, 0, sizeof(s_mutex));
-  s_mutex_data.counter = 0;
-  s_mutex_data.t1_ok = false;
-  s_mutex_data.t2_ok = false;
+  s_mutex.reset();
+  s_mutex_data.reset();
 
   xTaskCreate(mutex_task1, "mtx1", 256, &s_mutex_data, 3, nullptr);
   xTaskCreate(mutex_task2, "mtx2", 256, &s_mutex_data, 3, nullptr);

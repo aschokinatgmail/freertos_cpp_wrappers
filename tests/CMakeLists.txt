@@ -207,6 +207,26 @@ add_executable(
     test_freertos_concurrency.cpp
 )
 
+add_executable(
+    test_freertos_coverage_ex_variants
+    test_freertos_coverage_ex_variants.cpp
+)
+
+add_executable(
+    test_freertos_coverage_isr
+    test_freertos_coverage_isr.cpp
+)
+
+add_executable(
+    test_freertos_coverage_sa
+    test_freertos_coverage_sa.cpp
+)
+
+add_executable(
+    test_freertos_coverage_external_allocator2
+    test_freertos_coverage_external_allocator2.cpp
+)
+
 target_link_libraries(
     test_freertos_task
     freertos_cpp_wrappers
@@ -493,6 +513,38 @@ target_link_libraries(
     pthread
 )
 
+target_link_libraries(
+    test_freertos_coverage_ex_variants
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
+target_link_libraries(
+    test_freertos_coverage_isr
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
+target_link_libraries(
+    test_freertos_coverage_sa
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
+target_link_libraries(
+    test_freertos_coverage_external_allocator2
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
 # Apply compile options if using PkgConfig
 if(GTEST_COMPILE_OPTIONS)
     target_compile_options(test_freertos_task PRIVATE ${GTEST_COMPILE_OPTIONS})
@@ -531,6 +583,10 @@ target_compile_options(test_freertos_coverage_sa_ns PRIVATE ${GTEST_COMPILE_OPTI
 target_compile_options(test_freertos_coverage_faults PRIVATE ${GTEST_COMPILE_OPTIONS})
 target_compile_options(test_freertos_isr_result PRIVATE ${GTEST_COMPILE_OPTIONS})
     target_compile_options(test_freertos_concurrency PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_coverage_ex_variants PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_coverage_isr PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_coverage_sa PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_coverage_external_allocator2 PRIVATE ${GTEST_COMPILE_OPTIONS})
 endif()
 
 # Add tests - run complete test executables to ensure proper failure detection
@@ -571,3 +627,7 @@ add_test(NAME test_freertos_coverage_sa_ns COMMAND test_freertos_coverage_sa_ns)
 add_test(NAME test_freertos_coverage_faults COMMAND test_freertos_coverage_faults)
 add_test(NAME test_freertos_isr_result COMMAND test_freertos_isr_result)
 add_test(NAME test_freertos_concurrency COMMAND test_freertos_concurrency)
+add_test(NAME test_freertos_coverage_ex_variants COMMAND test_freertos_coverage_ex_variants)
+add_test(NAME test_freertos_coverage_isr COMMAND test_freertos_coverage_isr)
+add_test(NAME test_freertos_coverage_sa COMMAND test_freertos_coverage_sa)
+add_test(NAME test_freertos_coverage_external_allocator2 COMMAND test_freertos_coverage_external_allocator2)
