@@ -2248,3 +2248,81 @@ TEST_F(FreeRTOSTaskTest, PeriodicTaskSwap) {
   ptask1.swap(ptask2);
 }
 #endif
+
+// =============================================================================
+// BUG FIX REGRESSION TESTS - Issue #119
+// Allocator must be moved/swapped along with the handle in move and swap ops
+// =============================================================================
+
+TEST_F(FreeRTOSTaskTest, Issue119TaskMoveConstructionTransfersAllocator) {
+  TaskHandle_t handle_a = reinterpret_cast<TaskHandle_t>(0xAAAA0001);
+
+  EXPECT_CALL(*mock, xTaskCreateStatic(_, _, _, _, _, _, _))
+      .WillOnce(Return(handle_a));
+
+  sa::task<1024> original_task("Issue119Src", 2, empty_task_routine);
+  EXPECT_EQ(original_task.handle(), handle_a);
+
+  // Move construction transfers the allocator along with the handle.
+  // Without the fix (m_allocator(std::move(other.m_allocator))), the
+  // moved-to task would reference deallocated static buffers.
+  sa::task<1024> moved_task = std::move(original_task);
+
+  EXPECT_EQ(moved_task.handle(), handle_a);
+  EXPECT_EQ(original_task.handle(), nullptr);
+
+  EXPECT_CALL(*mock, vTaskDelete(handle_a));
+}
+
+TEST_F(FreeRTOSTaskTest, Issue119TaskMoveAssignmentTransfersAllocator) {
+  TaskHandle_t handle_a = reinterpret_cast<TaskHandle_t>(0xAAAA0002);
+  TaskHandle_t handle_b = reinterpret_cast<TaskHandle_t>(0xBBBB0002);
+
+  EXPECT_CALL(*mock, xTaskCreateStatic(_, _, _, _, _, _, _))
+      .WillOnce(Return(handle_a))
+      .WillOnce(Return(handle_b));
+
+  sa::task<1024> task1("Issue119T1", 2, empty_task_routine);
+  sa::task<1024> task2("Issue119T2", 2, empty_task_routine);
+
+  EXPECT_EQ(task1.handle(), handle_a);
+  EXPECT_EQ(task2.handle(), handle_b);
+
+  // Move assignment: deletes task1's old handle then swaps.
+  // After this, task1 owns handle_b (with task2's allocator),
+  // task2 is left with nullptr handle.
+  EXPECT_CALL(*mock, vTaskDelete(handle_a));
+
+  task1 = std::move(task2);
+
+  EXPECT_EQ(task1.handle(), handle_b);
+  EXPECT_EQ(task2.handle(), nullptr);
+
+  EXPECT_CALL(*mock, vTaskDelete(handle_b));
+}
+
+TEST_F(FreeRTOSTaskTest, Issue119TaskSwapExchangesAllocator) {
+  TaskHandle_t handle_a = reinterpret_cast<TaskHandle_t>(0xAAAA0003);
+  TaskHandle_t handle_b = reinterpret_cast<TaskHandle_t>(0xBBBB0003);
+
+  EXPECT_CALL(*mock, xTaskCreateStatic(_, _, _, _, _, _, _))
+      .WillOnce(Return(handle_a))
+      .WillOnce(Return(handle_b));
+
+  sa::task<1024> task1("Issue119A", 2, empty_task_routine);
+  sa::task<1024> task2("Issue119B", 2, empty_task_routine);
+
+  EXPECT_EQ(task1.handle(), handle_a);
+  EXPECT_EQ(task2.handle(), handle_b);
+
+  // Swap exchanges both the allocator and the handle.
+  // Without the fix (m_allocator.swap(other.m_allocator)), each task
+  // would reference the other's (now moved-from) static buffers.
+  task1.swap(task2);
+
+  EXPECT_EQ(task1.handle(), handle_b);
+  EXPECT_EQ(task2.handle(), handle_a);
+
+  EXPECT_CALL(*mock, vTaskDelete(handle_a));
+  EXPECT_CALL(*mock, vTaskDelete(handle_b));
+}

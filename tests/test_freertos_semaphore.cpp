@@ -2631,3 +2631,98 @@ TEST_F(FreeRTOSSemaphoreTest, RecursiveMutexSwap) {
   freertos::recursive_mutex<freertos::dynamic_semaphore_allocator> rmtx2;
   swap(rmtx1, rmtx2);
 }
+
+// =============================================================================
+// BUG FIX REGRESSION TESTS - Issue #119
+// Allocator must be moved/swapped along with the handle in move and swap ops
+// =============================================================================
+
+// Verify that after move construction, the moved-to object is operational
+// (allocator was correctly transferred, not just the handle).
+TEST_F(FreeRTOSSemaphoreTest, Issue119BinarySemaphoreMoveConstructionTransfersAllocator) {
+  EXPECT_CALL(*mock, xSemaphoreCreateBinary())
+      .WillOnce(Return(mock_semaphore_handle));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
+
+  freertos::binary_semaphore<freertos::dynamic_semaphore_allocator> sem1;
+  freertos::binary_semaphore<freertos::dynamic_semaphore_allocator> sem2(
+      std::move(sem1));
+
+  // The moved-to semaphore should be operational (allocator was moved)
+  EXPECT_CALL(*mock, xSemaphoreGive(mock_semaphore_handle))
+      .WillOnce(Return(pdTRUE));
+  EXPECT_TRUE(sem2.give());
+}
+
+// Verify that after swap, both objects can still operate with their
+// exchanged allocators (not just exchanged handles).
+TEST_F(FreeRTOSSemaphoreTest, Issue119BinarySemaphoreSwapExchangesAllocatorAndHandle) {
+  SemaphoreHandle_t handle1 = reinterpret_cast<SemaphoreHandle_t>(0x1111);
+  SemaphoreHandle_t handle2 = reinterpret_cast<SemaphoreHandle_t>(0x2222);
+
+  EXPECT_CALL(*mock, xSemaphoreCreateBinary())
+      .WillOnce(Return(handle1))
+      .WillOnce(Return(handle2));
+  EXPECT_CALL(*mock, vSemaphoreDelete(handle1));
+  EXPECT_CALL(*mock, vSemaphoreDelete(handle2));
+
+  freertos::binary_semaphore<freertos::dynamic_semaphore_allocator> sem1;
+  freertos::binary_semaphore<freertos::dynamic_semaphore_allocator> sem2;
+  sem1.swap(sem2);
+
+  // After swap, sem1 has handle2 and sem2 has handle1.
+  // Both should be operational (allocators were swapped correctly).
+  EXPECT_CALL(*mock, xSemaphoreGive(handle2))
+      .WillOnce(Return(pdTRUE));
+  EXPECT_TRUE(sem1.give());
+
+  EXPECT_CALL(*mock, xSemaphoreGive(handle1))
+      .WillOnce(Return(pdTRUE));
+  EXPECT_TRUE(sem2.give());
+}
+
+// Verify allocator swap in mutex move assignment
+TEST_F(FreeRTOSSemaphoreTest, Issue119MutexMoveAssignmentTransfersAllocator) {
+  SemaphoreHandle_t handle1 = reinterpret_cast<SemaphoreHandle_t>(0x1111);
+  SemaphoreHandle_t handle2 = reinterpret_cast<SemaphoreHandle_t>(0x2222);
+
+  EXPECT_CALL(*mock, xSemaphoreCreateMutex())
+      .WillOnce(Return(handle1))
+      .WillOnce(Return(handle2));
+  EXPECT_CALL(*mock, vSemaphoreDelete(handle1));
+  EXPECT_CALL(*mock, vSemaphoreDelete(handle2));
+
+  freertos::mutex<freertos::dynamic_semaphore_allocator> mtx1;
+  freertos::mutex<freertos::dynamic_semaphore_allocator> mtx2;
+  mtx1 = std::move(mtx2);
+
+  // mtx1 should have handle2 and be operational (allocator moved)
+  EXPECT_CALL(*mock, xSemaphoreGive(handle2))
+      .WillOnce(Return(pdTRUE));
+  EXPECT_EQ(mtx1.unlock(), pdTRUE);
+}
+
+// Verify allocator swap in counting_semaphore swap
+TEST_F(FreeRTOSSemaphoreTest, Issue119CountingSemaphoreSwapExchangesAllocator) {
+  SemaphoreHandle_t handle1 = reinterpret_cast<SemaphoreHandle_t>(0x1111);
+  SemaphoreHandle_t handle2 = reinterpret_cast<SemaphoreHandle_t>(0x2222);
+
+  EXPECT_CALL(*mock, xSemaphoreCreateCounting(5, 5))
+      .WillOnce(Return(handle1))
+      .WillOnce(Return(handle2));
+  EXPECT_CALL(*mock, vSemaphoreDelete(handle1));
+  EXPECT_CALL(*mock, vSemaphoreDelete(handle2));
+
+  freertos::counting_semaphore<freertos::dynamic_semaphore_allocator> sem1(5);
+  freertos::counting_semaphore<freertos::dynamic_semaphore_allocator> sem2(5);
+  sem1.swap(sem2);
+
+  // Verify both still operational after swap
+  EXPECT_CALL(*mock, xSemaphoreGive(handle2))
+      .WillOnce(Return(pdTRUE));
+  EXPECT_TRUE(sem1.give());
+
+  EXPECT_CALL(*mock, xSemaphoreGive(handle1))
+      .WillOnce(Return(pdTRUE));
+  EXPECT_TRUE(sem2.give());
+}

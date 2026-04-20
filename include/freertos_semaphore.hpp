@@ -67,6 +67,11 @@ public:
   operator=(const static_semaphore_allocator &) = delete;
   static_semaphore_allocator &operator=(static_semaphore_allocator &&) = delete;
 
+  void swap(static_semaphore_allocator &other) noexcept {
+    using std::swap;
+    swap(m_semaphore_placeholder, other.m_semaphore_placeholder);
+  }
+
   SemaphoreHandle_t create_binary() {
     return xSemaphoreCreateBinaryStatic(&m_semaphore_placeholder);
   }
@@ -89,6 +94,8 @@ public:
  */
 class dynamic_semaphore_allocator {
 public:
+  void swap(dynamic_semaphore_allocator &other) noexcept { (void)other; }
+
   SemaphoreHandle_t create_binary() { return xSemaphoreCreateBinary(); }
   SemaphoreHandle_t create_counting(UBaseType_t max_count) {
     return xSemaphoreCreateCounting(max_count, max_count);
@@ -189,7 +196,7 @@ public:
   }
   binary_semaphore(const binary_semaphore &) = delete;
   binary_semaphore(binary_semaphore &&src) noexcept
-      : m_semaphore(src.m_semaphore) {
+      : m_allocator(std::move(src.m_allocator)), m_semaphore(src.m_semaphore) {
     src.m_semaphore = nullptr;
   }
   /**
@@ -213,6 +220,7 @@ public:
 
   void swap(binary_semaphore &other) noexcept {
     using std::swap;
+    m_allocator.swap(other.m_allocator);
     swap(m_semaphore, other.m_semaphore);
   }
 
@@ -373,7 +381,8 @@ public:
   }
   counting_semaphore(const counting_semaphore &) = delete;
   counting_semaphore(counting_semaphore &&src) noexcept
-      : m_semaphore(src.m_semaphore) {
+      : m_allocator(std::move(src.m_allocator)),
+        m_semaphore(src.m_semaphore) {
     src.m_semaphore = nullptr;
   }
   /**
@@ -397,6 +406,7 @@ public:
 
   void swap(counting_semaphore &other) noexcept {
     using std::swap;
+    m_allocator.swap(other.m_allocator);
     swap(m_semaphore, other.m_semaphore);
   }
 
@@ -616,7 +626,8 @@ public:
   }
   mutex(const mutex &) = delete;
   mutex(mutex &&src) noexcept
-      : m_semaphore(src.m_semaphore), m_locked(src.m_locked) {
+      : m_allocator(std::move(src.m_allocator)), m_semaphore(src.m_semaphore),
+        m_locked(src.m_locked) {
     configASSERT(!src.m_locked);
     src.m_semaphore = nullptr;
     src.m_locked = false;
@@ -644,10 +655,11 @@ public:
 
   void swap(mutex &other) noexcept {
     using std::swap;
+    m_allocator.swap(other.m_allocator);
     swap(m_semaphore, other.m_semaphore);
-    const uint8_t locked_tmp = m_locked;
-    m_locked = other.m_locked;
-    other.m_locked = locked_tmp;
+    const auto locked_tmp = static_cast<uint8_t>(m_locked);
+    m_locked = static_cast<decltype(m_locked)>(other.m_locked);
+    other.m_locked = static_cast<decltype(other.m_locked)>(locked_tmp);
   }
 
   friend void swap(mutex &a, mutex &b) noexcept { a.swap(b); }
@@ -839,7 +851,8 @@ public:
   }
   recursive_mutex(const recursive_mutex &) = delete;
   recursive_mutex(recursive_mutex &&src) noexcept
-      : m_semaphore(src.m_semaphore),
+      : m_allocator(std::move(src.m_allocator)),
+        m_semaphore(src.m_semaphore),
         m_recursions_count(src.m_recursions_count) {
     configASSERT(src.m_recursions_count == 0);
     src.m_semaphore = nullptr;
@@ -868,6 +881,7 @@ public:
 
   void swap(recursive_mutex &other) noexcept {
     using std::swap;
+    m_allocator.swap(other.m_allocator);
     swap(m_semaphore, other.m_semaphore);
     swap(m_recursions_count, other.m_recursions_count);
   }

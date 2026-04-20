@@ -69,6 +69,12 @@ public:
   static_message_buffer_allocator &
   operator=(static_message_buffer_allocator &&) = delete;
 
+  void swap(static_message_buffer_allocator &other) noexcept {
+    using std::swap;
+    swap(m_message_buffer_placeholder, other.m_message_buffer_placeholder);
+    swap(m_storage, other.m_storage);
+  }
+
   MessageBufferHandle_t create() {
     return xMessageBufferCreateStatic(MessageBufferSize, m_storage.data(),
                                       &m_message_buffer_placeholder);
@@ -83,6 +89,8 @@ public:
  */
 template <size_t MessageBufferSize> class dynamic_message_buffer_allocator {
 public:
+  void swap(dynamic_message_buffer_allocator &other) noexcept { (void)other; }
+
   MessageBufferHandle_t create() {
     return xMessageBufferCreate(MessageBufferSize);
   }
@@ -117,7 +125,8 @@ public:
   }
   message_buffer(const message_buffer &) = delete;
   message_buffer(message_buffer &&src) noexcept
-      : m_message_buffer(src.m_message_buffer) {
+      : m_allocator(std::move(src.m_allocator)),
+        m_message_buffer(src.m_message_buffer) {
     src.m_message_buffer = nullptr;
   }
   /**
@@ -141,6 +150,7 @@ public:
 
   void swap(message_buffer &other) noexcept {
     using std::swap;
+    m_allocator.swap(other.m_allocator);
     swap(m_message_buffer, other.m_message_buffer);
   }
 

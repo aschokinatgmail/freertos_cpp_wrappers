@@ -1663,4 +1663,118 @@ TEST_F(FreeRTOSSwTimerTest, DynamicTimerSwap) {
   t1.swap(t2);
 }
 
+// =============================================================================
+// BUG FIX REGRESSION TESTS
+// =============================================================================
+
+// Issue #121: m_started data race between ISR and task context
+// Verify that start/stop correctly manage m_started (which is volatile-qualified).
+TEST_F(FreeRTOSSwTimerTest, Issue121VolatileStartedFlag) {
+  EXPECT_CALL(*mock, xTimerCreateStatic(_, _, _, _, _, _))
+      .WillOnce(Return(mock_timer_handle));
+
+  auto callback = createTestCallback();
+  sa::timer test_timer("TestTimer", 1000, pdTRUE, std::move(callback));
+
+  // Verify start sets m_started
+  EXPECT_CALL(*mock, xTimerStart(mock_timer_handle, portMAX_DELAY))
+      .WillOnce(Return(pdPASS));
+  EXPECT_EQ(test_timer.start(), pdPASS);
+
+  // Verify stop clears m_started
+  EXPECT_CALL(*mock, xTimerStop(mock_timer_handle, portMAX_DELAY))
+      .WillOnce(Return(pdPASS));
+  EXPECT_EQ(test_timer.stop(), pdPASS);
+
+  EXPECT_CALL(*mock, xTimerDelete(mock_timer_handle, portMAX_DELAY))
+      .WillOnce(Return(pdPASS));
+}
+
+// Issue #120: Timer move assignment rollback on failure
+// When xTimerStop fails during move assignment, the destination timer
+// must be restored to its original state (not left in a broken null state).
+TEST_F(FreeRTOSSwTimerTest, Issue120TimerMoveAssignmentRollbackOnStopFailure) {
+  TimerHandle_t dst_handle = reinterpret_cast<TimerHandle_t>(0xAAAA);
+  TimerHandle_t src_handle = reinterpret_cast<TimerHandle_t>(0xBBBB);
+
+  // Create destination timer
+  EXPECT_CALL(*mock, xTimerCreateStatic(StrEq("DstTimer"), _, _, _, _, _))
+      .WillOnce(Return(dst_handle));
+
+  // Create source timer (started)
+  EXPECT_CALL(*mock, xTimerCreateStatic(StrEq("SrcTimer"), _, _, _, _, _))
+      .WillOnce(Return(src_handle));
+
+  auto callback1 = createTestCallback();
+  auto callback2 = createTestCallback();
+  sa::timer dst_timer("DstTimer", 1000, pdTRUE, std::move(callback1));
+  sa::timer src_timer("SrcTimer", 2000, pdFALSE, std::move(callback2));
+
+  // Start the source timer
+  EXPECT_CALL(*mock, xTimerStart(src_handle, portMAX_DELAY))
+      .WillOnce(Return(pdPASS));
+  EXPECT_EQ(src_timer.start(), pdPASS);
+
+  // xTimerStop on source fails during move assignment -> rollback
+  EXPECT_CALL(*mock, xTimerStop(src_handle, portMAX_DELAY))
+      .WillOnce(Return(pdFAIL));
+
+  // After failed move assignment, dst_timer should still be operational
+  // (its original handle should be restored)
+  EXPECT_CALL(*mock, xTimerStart(dst_handle, portMAX_DELAY))
+      .WillOnce(Return(pdPASS));
+
+  dst_timer = std::move(src_timer);
+
+  // dst_timer should have been restored to its original state
+  EXPECT_EQ(dst_timer.start(), pdPASS);
+
+  // Cleanup: both timers get their handles deleted
+  EXPECT_CALL(*mock, xTimerDelete(dst_handle, portMAX_DELAY))
+      .WillOnce(Return(pdPASS));
+  EXPECT_CALL(*mock, xTimerDelete(src_handle, portMAX_DELAY))
+      .WillOnce(Return(pdPASS));
+}
+
+// Issue #119: Allocator must be moved/swapped along with the handle
+// This test verifies that the allocator participates in swap operations.
+// After swap, both timers must have correct vTimerSetTimerID self-pointers.
+
+#if configSUPPORT_STATIC_ALLOCATION
+
+TEST_F(FreeRTOSSwTimerTest, Issue119TimerSwapExchangesStaticStorage) {
+  TimerHandle_t handle1 = reinterpret_cast<TimerHandle_t>(0x1111);
+  TimerHandle_t handle2 = reinterpret_cast<TimerHandle_t>(0x2222);
+
+  EXPECT_CALL(*mock, xTimerCreateStatic(_, _, _, _, _, _))
+      .WillOnce(Return(handle1))
+      .WillOnce(Return(handle2));
+
+  auto callback1 = createTestCallback();
+  auto callback2 = createTestCallback();
+  sa::timer t1("Timer1", 1000, pdTRUE, std::move(callback1));
+  sa::timer t2("Timer2", 2000, pdFALSE, std::move(callback2));
+
+  // swap calls vTimerSetTimerID for both handles since both are non-null
+  EXPECT_CALL(*mock, vTimerSetTimerID(handle1, _)).Times(1);
+  EXPECT_CALL(*mock, vTimerSetTimerID(handle2, _)).Times(1);
+
+  t1.swap(t2);
+
+  // After swap, t1 has handle2 and t2 has handle1
+  EXPECT_CALL(*mock, pcTimerGetName(handle2))
+      .WillOnce(Return(const_cast<char *>("Timer2")));
+  EXPECT_CALL(*mock, pcTimerGetName(handle1))
+      .WillOnce(Return(const_cast<char *>("Timer1")));
+  EXPECT_STREQ(t1.name(), "Timer2");
+  EXPECT_STREQ(t2.name(), "Timer1");
+
+  EXPECT_CALL(*mock, xTimerDelete(handle2, portMAX_DELAY))
+      .WillOnce(Return(pdPASS));
+  EXPECT_CALL(*mock, xTimerDelete(handle1, portMAX_DELAY))
+      .WillOnce(Return(pdPASS));
+}
+
+#endif // configSUPPORT_STATIC_ALLOCATION
+
 #endif // configSUPPORT_DYNAMIC_ALLOCATION

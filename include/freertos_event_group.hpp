@@ -64,6 +64,11 @@ public:
   operator=(const static_event_group_allocator &) = delete;
   static_event_group_allocator &
   operator=(static_event_group_allocator &&) = delete;
+
+  void swap(static_event_group_allocator &other) noexcept {
+    using std::swap;
+    swap(m_event_group_placeholder, other.m_event_group_placeholder);
+  }
   EventGroupHandle_t create() {
     return xEventGroupCreateStatic(&m_event_group_placeholder);
   }
@@ -77,6 +82,8 @@ public:
  */
 class dynamic_event_group_allocator {
 public:
+  void swap(dynamic_event_group_allocator &other) noexcept { (void)other; }
+
   EventGroupHandle_t create() { return xEventGroupCreate(); }
 };
 #endif
@@ -107,7 +114,8 @@ public:
   }
   event_group(const event_group &) = delete;
   event_group(event_group &&other) noexcept
-      : m_event_group(other.m_event_group) {
+      : m_allocator(std::move(other.m_allocator)),
+        m_event_group(other.m_event_group) {
     other.m_event_group = nullptr;
   }
   /**
@@ -131,6 +139,7 @@ public:
 
   void swap(event_group &other) noexcept {
     using std::swap;
+    m_allocator.swap(other.m_allocator);
     swap(m_event_group, other.m_event_group);
   }
 

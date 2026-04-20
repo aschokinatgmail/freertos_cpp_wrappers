@@ -1060,3 +1060,53 @@ TEST_F(FreeRTOSStreamBufferTest, StreamBufferSwap) {
       sb2;
   sb1.swap(sb2);
 }
+
+// =============================================================================
+// BUG FIX REGRESSION TESTS - Issue #119
+// =============================================================================
+
+TEST_F(FreeRTOSStreamBufferTest, Issue119StreamBufferSwapExchangesAllocator) {
+  StreamBufferHandle_t handle1 = reinterpret_cast<StreamBufferHandle_t>(0x1111);
+  StreamBufferHandle_t handle2 = reinterpret_cast<StreamBufferHandle_t>(0x2222);
+
+  EXPECT_CALL(*mock, xStreamBufferCreate(64, 1))
+      .WillOnce(Return(handle1))
+      .WillOnce(Return(handle2));
+  EXPECT_CALL(*mock, vStreamBufferDelete(handle1));
+  EXPECT_CALL(*mock, vStreamBufferDelete(handle2));
+
+  freertos::stream_buffer<64, freertos::dynamic_stream_buffer_allocator<64>>
+      sb1;
+  freertos::stream_buffer<64, freertos::dynamic_stream_buffer_allocator<64>>
+      sb2;
+  sb1.swap(sb2);
+
+  uint8_t data1[] = {1, 2, 3, 4};
+  EXPECT_CALL(*mock, xStreamBufferSend(handle2, NotNull(), 4, portMAX_DELAY))
+      .WillOnce(Return(4));
+  EXPECT_EQ(sb1.send(data1, 4), 4);
+
+  uint8_t data2[] = {5, 6, 7, 8};
+  EXPECT_CALL(*mock, xStreamBufferSend(handle1, NotNull(), 4, portMAX_DELAY))
+      .WillOnce(Return(4));
+  EXPECT_EQ(sb2.send(data2, 4), 4);
+}
+
+TEST_F(FreeRTOSStreamBufferTest,
+       Issue119StreamBufferMoveConstructionTransfersAllocator) {
+  StreamBufferHandle_t handle1 = reinterpret_cast<StreamBufferHandle_t>(0x1111);
+
+  EXPECT_CALL(*mock, xStreamBufferCreate(64, 1))
+      .WillOnce(Return(handle1));
+  EXPECT_CALL(*mock, vStreamBufferDelete(handle1));
+
+  freertos::stream_buffer<64, freertos::dynamic_stream_buffer_allocator<64>>
+      sb1;
+  freertos::stream_buffer<64, freertos::dynamic_stream_buffer_allocator<64>>
+      sb2(std::move(sb1));
+
+  uint8_t data[] = {1, 2, 3, 4};
+  EXPECT_CALL(*mock, xStreamBufferSend(handle1, NotNull(), 4, portMAX_DELAY))
+      .WillOnce(Return(4));
+  EXPECT_EQ(sb2.send(data, 4), 4);
+}

@@ -72,6 +72,12 @@ public:
   static_task_allocator &operator=(const static_task_allocator &) = delete;
   static_task_allocator &operator=(static_task_allocator &&) = delete;
 
+  void swap(static_task_allocator &other) noexcept {
+    using std::swap;
+    swap(m_stackBuffer, other.m_stackBuffer);
+    swap(m_taskBuffer, other.m_taskBuffer);
+  }
+
   TaskHandle_t create(TaskFunction_t taskFunction, const char *name,
                       UBaseType_t priority, void *context) {
     return xTaskCreateStatic(taskFunction, name,
@@ -87,6 +93,8 @@ public:
  */
 template <size_t StackSize> class dynamic_task_allocator {
 public:
+  void swap(dynamic_task_allocator &other) noexcept { (void)other; }
+
   TaskHandle_t create(TaskFunction_t taskFunction, const char *name,
                       UBaseType_t priority, void *context) {
     TaskHandle_t hTask = nullptr;
@@ -255,7 +263,8 @@ public:
 #endif
   task(const task &) = delete;
   task(task &&other) noexcept
-      : m_hTask(other.m_hTask), m_taskRoutine(std::move(other.m_taskRoutine))
+      : m_allocator(std::move(other.m_allocator)),
+        m_hTask(other.m_hTask), m_taskRoutine(std::move(other.m_taskRoutine))
 #if INCLUDE_vTaskSuspend
         ,
         m_start_suspended(other.m_start_suspended)
@@ -290,12 +299,13 @@ public:
 
   void swap(task &other) noexcept {
     using std::swap;
+    m_allocator.swap(other.m_allocator);
     swap(m_hTask, other.m_hTask);
     swap(m_taskRoutine, other.m_taskRoutine);
 #if INCLUDE_vTaskSuspend
-    const uint8_t start_suspended_tmp = m_start_suspended;
-    m_start_suspended = other.m_start_suspended;
-    other.m_start_suspended = start_suspended_tmp;
+    const auto start_suspended_tmp = static_cast<uint8_t>(m_start_suspended);
+    m_start_suspended = static_cast<decltype(m_start_suspended)>(other.m_start_suspended);
+    other.m_start_suspended = static_cast<decltype(other.m_start_suspended)>(start_suspended_tmp);
 #endif
   }
 

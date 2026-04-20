@@ -73,6 +73,11 @@ public:
   operator=(const static_sw_timer_allocator &) = delete;
   static_sw_timer_allocator &operator=(static_sw_timer_allocator &&) = delete;
 
+  void swap(static_sw_timer_allocator &other) noexcept {
+    using std::swap;
+    swap(m_timer_placeholder, other.m_timer_placeholder);
+  }
+
   TimerHandle_t create(const char *name, const TickType_t period_ticks,
                        UBaseType_t auto_reload, void *const timer_id,
                        TimerCallbackFunction_t callback) {
@@ -89,6 +94,8 @@ public:
  */
 class dynamic_sw_timer_allocator {
 public:
+  void swap(dynamic_sw_timer_allocator &other) noexcept { (void)other; }
+
   TimerHandle_t create(const char *name, const TickType_t period_ticks,
                        UBaseType_t auto_reload, void *const timer_id,
                        TimerCallbackFunction_t callback) {
@@ -111,7 +118,7 @@ using timer_callback_t = function<void()>;
 template <typename SwTimerAllocator> class timer {
   SwTimerAllocator m_allocator;
   timer_callback_t m_callback;
-  uint8_t m_started : 1;
+  volatile uint8_t m_started : 1;
   TimerHandle_t m_timer;
 
   // LCOV_EXCL_START - Internal FreeRTOS timer callback function
@@ -193,7 +200,8 @@ public:
    * @param src The source timer to move from (will be invalidated)
    */
   timer(timer &&src) noexcept
-      : m_callback(std::move(src.m_callback)), m_started(src.m_started),
+      : m_allocator(std::move(src.m_allocator)),
+        m_callback(std::move(src.m_callback)), m_started(src.m_started),
         m_timer(src.m_timer) {
     src.m_timer = nullptr;
     src.m_started = false;
@@ -216,10 +224,12 @@ public:
   timer &operator=(const timer &) = delete;
   timer &operator=(timer &&src) noexcept {
     if (this != &src) {
-      if (m_timer) {
-        xTimerDelete(m_timer, portMAX_DELAY);
-        m_timer = nullptr;
-      }
+      TimerHandle_t old_timer = m_timer;
+      bool old_started = m_started;
+
+      m_timer = nullptr;
+      m_started = false;
+
       if (src.m_timer) {
         auto rc = xTimerStop(src.m_timer, portMAX_DELAY);
         if (rc == pdPASS) {
@@ -230,7 +240,7 @@ public:
           xTimerDelete(src.m_timer, portMAX_DELAY);
           src.m_timer = nullptr;
           m_callback = std::move(src.m_callback);
-          m_started = false;
+          m_allocator.swap(src.m_allocator);
           m_timer = m_allocator.create(name, period, auto_reload, this,
                                        callback_wrapper);
           if (m_timer) {
@@ -240,8 +250,18 @@ public:
                 m_started = true;
               }
             }
+          } else {
+            m_timer = old_timer;
+            m_started = old_started;
           }
+        } else {
+          m_timer = old_timer;
+          m_started = old_started;
         }
+      }
+
+      if (old_timer && old_timer != m_timer) {
+        xTimerDelete(old_timer, portMAX_DELAY);
       }
     }
     return *this;
@@ -249,10 +269,11 @@ public:
 
   void swap(timer &other) noexcept {
     using std::swap;
+    m_allocator.swap(other.m_allocator);
     swap(m_callback, other.m_callback);
-    const uint8_t started_tmp = m_started;
-    m_started = other.m_started;
-    other.m_started = started_tmp;
+    const bool started_tmp = m_started;
+    m_started = other.m_started ? 1 : 0;
+    other.m_started = started_tmp ? 1 : 0;
     swap(m_timer, other.m_timer);
     if (m_timer) {
       vTimerSetTimerID(m_timer, this);
