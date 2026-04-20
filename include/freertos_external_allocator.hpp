@@ -90,7 +90,7 @@ public:
       return nullptr;
     }
     return xSemaphoreCreateBinaryStatic(
-        static_cast<StaticSemaphore_t *>(m_memory));
+        static_cast<StaticSemaphore_t *>(m_memory)); // NOLINT(clang-tidy:cppcoreguidelines-pro-type-static-cast-downcast)
   }
   SemaphoreHandle_t create_counting(UBaseType_t max_count) {
     m_memory = m_region->allocate(sizeof(StaticSemaphore_t));
@@ -98,7 +98,7 @@ public:
       return nullptr;
     }
     return xSemaphoreCreateCountingStatic(
-        max_count, max_count, static_cast<StaticSemaphore_t *>(m_memory));
+        max_count, max_count, static_cast<StaticSemaphore_t *>(m_memory)); // NOLINT(clang-tidy:cppcoreguidelines-pro-type-static-cast-downcast)
   }
   SemaphoreHandle_t create_mutex() {
     m_memory = m_region->allocate(sizeof(StaticSemaphore_t));
@@ -106,7 +106,7 @@ public:
       return nullptr;
     }
     return xSemaphoreCreateMutexStatic(
-        static_cast<StaticSemaphore_t *>(m_memory));
+        static_cast<StaticSemaphore_t *>(m_memory)); // NOLINT(clang-tidy:cppcoreguidelines-pro-type-static-cast-downcast)
   }
   SemaphoreHandle_t create_recursive_mutex() {
     m_memory = m_region->allocate(sizeof(StaticSemaphore_t));
@@ -114,7 +114,7 @@ public:
       return nullptr;
     }
     return xSemaphoreCreateRecursiveMutexStatic(
-        static_cast<StaticSemaphore_t *>(m_memory));
+        static_cast<StaticSemaphore_t *>(m_memory)); // NOLINT(clang-tidy:cppcoreguidelines-pro-type-static-cast-downcast)
   }
 };
 
@@ -160,7 +160,7 @@ public:
     }
     return xQueueCreateStatic(QueueLength, sizeof(T),
                               static_cast<uint8_t *>(m_storage_memory),
-                              static_cast<StaticQueue_t *>(m_struct_memory));
+                              static_cast<StaticQueue_t *>(m_struct_memory)); // NOLINT(clang-tidy:cppcoreguidelines-pro-type-static-cast-downcast)
   }
 };
 
@@ -194,7 +194,7 @@ public:
     if (!m_memory) {
       return nullptr;
     }
-    return xEventGroupCreateStatic(static_cast<StaticEventGroup_t *>(m_memory));
+    return xEventGroupCreateStatic(static_cast<StaticEventGroup_t *>(m_memory)); // NOLINT(clang-tidy:cppcoreguidelines-pro-type-static-cast-downcast)
   }
 };
 
@@ -245,7 +245,7 @@ public:
     return xStreamBufferCreateStatic(
         StreamBufferSize, trigger_level_bytes,
         static_cast<uint8_t *>(m_storage_memory),
-        static_cast<StaticStreamBuffer_t *>(m_struct_memory));
+        static_cast<StaticStreamBuffer_t *>(m_struct_memory)); // NOLINT(clang-tidy:cppcoreguidelines-pro-type-static-cast-downcast)
   }
 };
 
@@ -295,7 +295,7 @@ public:
     }
     return xMessageBufferCreateStatic(
         MessageBufferSize, static_cast<uint8_t *>(m_storage_memory),
-        static_cast<StaticMessageBuffer_t *>(m_struct_memory));
+        static_cast<StaticMessageBuffer_t *>(m_struct_memory)); // NOLINT(clang-tidy:cppcoreguidelines-pro-type-static-cast-downcast)
   }
 };
 
@@ -330,7 +330,7 @@ public:
       return nullptr;
     }
     return xTimerCreateStatic(name, period_ticks, auto_reload, timer_id,
-                              callback, static_cast<StaticTimer_t *>(m_memory));
+                              callback, static_cast<StaticTimer_t *>(m_memory)); // NOLINT(clang-tidy:cppcoreguidelines-pro-type-static-cast-downcast)
   }
 };
 
@@ -376,7 +376,7 @@ public:
     return xTaskCreateStatic(taskFunction, name,
                              StackSize / sizeof(StackType_t), context, priority,
                              static_cast<StackType_t *>(m_stack_memory),
-                             static_cast<StaticTask_t *>(m_task_memory));
+                             static_cast<StaticTask_t *>(m_task_memory)); // NOLINT(clang-tidy:cppcoreguidelines-pro-type-static-cast-downcast)
   }
 };
 

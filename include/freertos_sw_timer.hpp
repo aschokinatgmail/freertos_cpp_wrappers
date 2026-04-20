@@ -116,7 +116,7 @@ template <typename SwTimerAllocator> class timer {
 
   // LCOV_EXCL_START - Internal FreeRTOS timer callback function
   static void callback_wrapper(TimerHandle_t t) {
-    auto *const self = static_cast<timer *>(pvTimerGetTimerID(t));
+    auto *const self = static_cast<timer *>(pvTimerGetTimerID(t)); // NOLINT(clang-tidy:cppcoreguidelines-pro-type-static-cast-downcast)
     configASSERT(self);
     self->m_callback();
   }

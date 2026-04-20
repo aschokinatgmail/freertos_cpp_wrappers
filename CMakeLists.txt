@@ -118,12 +118,26 @@ if(ENABLE_CLANG_TIDY)
         # To extend or modify the check set, update the list below:
         # - cppcoreguidelines-*: C++ Core Guidelines compliance
         # - cert-*: CERT C++ Secure Coding Standard
-        # - google-*: Google C++ Style Guide compliance  
+        # - google-*: Google C++ Style Guide compliance
         # - hicpp-*: High Integrity C++ Coding Standard
-        # Add additional check patterns with commas, or exclude specific checks with '-pattern'
-        # For faster builds during development, consider using a subset like: "readability-*,performance-*"
+        # - bugprone-*: Common programming errors (misused casts, sizeof, dangling pointers)
+        # - performance-*: Unnecessary copies, move semantic issues
+        # - concurrency-*: Thread safety and concurrency issues
+        # - modernize-*: C++17 modernization recommendations
+        # - readability-*: Naming, magic numbers, function complexity
+        # Exclusions are required for FreeRTOS C API integration patterns:
+        # - bugprone-easily-swappable-parameters: FreeRTOS uses similar-typed params (TickType_t, UBaseType_t)
+        # - bugprone-narrowing-conversions: FreeRTOS uses mixed integer types
+        # - cppcoreguidelines-pro-type-reinterpret-cast: Required for void* callback pattern
+        # - cppcoreguidelines-pro-type-vararg: configASSERT and FreeRTOS API patterns
+        # - cppcoreguidelines-avoid-magic-numbers: FreeRTOS constants (pdTRUE, pdPASS)
+        # - google-readability-todo: TODO format is project-specific
+        # - modernize-use-trailing-return-type: Style preference
+        # - readability-function-cognitive-complexity: Wrapper functions are necessarily complex
+        # - readability-identifier-length: FreeRTOS naming uses short names
+        # - readability-magic-numbers: FreeRTOS constants are opaque integers
         set(CLANG_TIDY_CHECKS
-            "cppcoreguidelines-*,cert-*,google-*,hicpp-*"
+            "cppcoreguidelines-*,cert-*,google-*,hicpp-*,bugprone-*,concurrency-*,modernize-*,performance-*,readability-*,-bugprone-easily-swappable-parameters,-bugprone-narrowing-conversions,-cppcoreguidelines-pro-type-reinterpret-cast,-cppcoreguidelines-pro-type-vararg,-cppcoreguidelines-avoid-magic-numbers,-google-readability-todo,-modernize-use-trailing-return-type,-readability-function-cognitive-complexity,-readability-identifier-length,-readability-magic-numbers"
         )
         
         # Set up clang-tidy command with report generation

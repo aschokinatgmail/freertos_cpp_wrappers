@@ -176,7 +176,7 @@ template <typename TaskAllocator> class task {
   TaskHandle_t m_hTask;
 
   // LCOV_EXCL_START - Internal FreeRTOS callback function
-  static void task_exec(void *context) {
+  static void task_exec(void *context) { // NOLINT(clang-tidy:cppcoreguidelines-pro-type-static-cast-downcast)
     auto pThis = static_cast<task *>(context);
     assert(nullptr != pThis);
 #if INCLUDE_vTaskSuspend
