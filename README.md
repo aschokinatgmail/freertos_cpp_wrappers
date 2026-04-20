@@ -1,7 +1,7 @@
 # C++ Wrappers for FreeRTOS
 
-[![Tests](https://img.shields.io/badge/Tests-439%20passing-brightgreen)]()
-[![Coverage](https://img.shields.io/badge/Coverage-97%25-brightgreen)]()
+[![Tests](https://img.shields.io/badge/Tests-592%20passing-brightgreen)]()
+[![Coverage](https://img.shields.io/badge/Coverage-95%25-brightgreen)]()
 [![MISRA C 2012](https://img.shields.io/badge/MISRA%20C++-Compliant-blue)]()
 [![C++17](https://img.shields.io/badge/C%2B%2B-17-blue)]()
 [![License](https://img.shields.io/badge/License-MIT-yellow)]()
@@ -28,7 +28,7 @@ Include `<freertos.hpp>` to access version macros at compile time.
 |---------|---------|
 | **Safety-Critical Ready** | MISRA 2012 C compliant, suitable for functionally safe applications |
 | **Modern C++17** | RAII wrappers with move semantics, no raw pointers |
-| **Production Tested** | 439 tests, 97% coverage, used in commercial BMS systems |
+| **Production Tested** | 592 tests, 95% branch coverage, used in commercial BMS systems |
 | **Zero Overhead** | Thin wrappers compile to efficient FreeRTOS calls |
 | **Dual API** | FreeRTOS-native and std-compatible interfaces |
 | **expected\<T,E\> Error Handling** | Type-safe error handling replacing error codes |
@@ -45,7 +45,7 @@ Include `<freertos.hpp>` to access version macros at compile time.
 | expected\<T,E\> Error Handling | ✅ | ❌ | ❌ |
 | Strong Typedefs | ✅ | ❌ | ❌ |
 | Thread Safety Annotations | ✅ | ❌ | ❌ |
-| Test Coverage | 97% | N/A | Unknown |
+| Test Coverage | 95% branch | N/A | Unknown |
 | C++17 Features | ✅ | ❌ | Limited |
 | ISR Result Type | ✅ | ❌ | ❌ |
 | Queue Sets | ✅ | C API only | ❌ |
@@ -65,7 +65,7 @@ This library is ideal for:
 - Industrial automation controllers
 - Consumer electronics with safety requirements
 
-## Features (v3.0.0)
+## Features (v3.0.1)
 
 | Category | Feature | Description |
 |----------|---------|-------------|
@@ -94,7 +94,7 @@ Include(FetchContent)
 FetchContent_Declare(
   freertos_cpp_wrappers
   GIT_REPOSITORY https://github.com/aschokinatgmail/freertos_cpp_wrappers.git
-  GIT_TAG v3.0.0
+  GIT_TAG v3.0.1
 )
 FetchContent_MakeAvailable(freertos_cpp_wrappers)
 
@@ -327,7 +327,7 @@ Key changes in v3.0.0:
 
 ## 📚 Documentation
 
-**[View Online Documentation](docs/html/index.html)** - Comprehensive API reference with examples
+**[View Documentation](docs/html/index.html)** (local — generate with `doxygen Doxyfile`)
 
 The library now features modern, user-friendly documentation with:
 - **Interactive examples** for all major components
@@ -347,7 +347,7 @@ doxygen Doxyfile
 
 ## Testing
 
-The project includes comprehensive test coverage with 439 automated tests covering all major functionality:
+The project includes comprehensive test coverage with 592 automated tests across 8 test executables, covering all major functionality:
 
 - **Task Module**: 81 tests (lifecycle, periodic tasks, move semantics)
 - **Semaphore Module**: 81 tests (binary, counting, mutexes, lock guards)
@@ -484,8 +484,8 @@ ls ../VnV/
 
 ## Project Status
 
-- ✅ **All 439 tests passing** (100% success rate)
-- ✅ **97.0% line coverage** and **98.2% function coverage**
+- ✅ **All 592 tests passing** (100% success rate)
+- ✅ **95.0% branch coverage**, **99.9% function coverage**, **100% line coverage**
 - ✅ **Comprehensive static analysis** with clang-tidy + enhanced cppcheck (all rules) + MISRA C++
 - ✅ **Production ready** with comprehensive validation
 
@@ -495,7 +495,7 @@ Contributions are welcome! Please ensure:
 
 1. All tests pass: `ctest --verbose`
 2. Code coverage remains above 95%
-3. Static analysis passes: `make clang-tidy`
+3. Static analysis passes: `make static-analysis-report`
 4. MISRA C++ compliance maintained
 5. Code formatted: `make format`
 

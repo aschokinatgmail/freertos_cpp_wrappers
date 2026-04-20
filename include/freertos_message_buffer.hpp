@@ -2,7 +2,7 @@
 @file freertos_message_buffer.hpp
 @author Andrey V. Shchekin <aschokin@gmail.com>
 @brief FreeRTOS message buffer wrapper
-@version 0.1
+@version 3.1.0
 @date 2024-04-07
 
 The MIT License (MIT)
@@ -262,7 +262,7 @@ public:
    *
    * @return size_t the number of bytes available in the buffer
    */
-  size_t available(void) const {
+  [[nodiscard]] size_t available(void) const {
     return xMessageBufferSpaceAvailable(m_message_buffer);
   }
   /**
@@ -278,14 +278,14 @@ public:
    *
    * @return BaseType_t pdTRUE if the message buffer is empty, pdFALSE otherwise
    */
-  BaseType_t empty(void) { return xMessageBufferIsEmpty(m_message_buffer); }
+  [[nodiscard]] BaseType_t empty(void) const { return xMessageBufferIsEmpty(m_message_buffer); }
   /**
    * @brief Method checking if the message buffer is full.
    * @ref https://www.freertos.org/xMessageBufferIsFull.html
    *
    * @return BaseType_t pdTRUE if the message buffer is full, pdFALSE otherwise
    */
-  BaseType_t full(void) { return xMessageBufferIsFull(m_message_buffer); }
+  [[nodiscard]] BaseType_t full(void) const { return xMessageBufferIsFull(m_message_buffer); }
 
   [[nodiscard]] expected<size_t, error> send_ex(const void *pvTxData,
                                                 size_t xDataLengthBytes,

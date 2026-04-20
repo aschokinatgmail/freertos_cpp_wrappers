@@ -2,7 +2,7 @@
 @file freertos_event_group.hpp
 @author Andrey V. Shchekin <aschokin@gmail.com>
 @brief FreeRTOS event group wrapper
-@version 0.1
+@version 3.1.0
 @date 2024-04-07
 
 The MIT License (MIT)
@@ -151,7 +151,7 @@ public:
    *
    * @return EventGroupHandle_t event group handle
    */
-  EventGroupHandle_t handle(void) const { return m_event_group; }
+  [[nodiscard]] EventGroupHandle_t handle(void) const { return m_event_group; }
 
   /**
    * @brief Method to set bits in the event group.
@@ -171,8 +171,8 @@ public:
    * @return isr_result<EventBits_t> result with bits set and higher priority
    * task woken flag
    */
-  isr_result<EventBits_t> set_bits_isr(const EventBits_t bits_to_set) {
-    isr_result<EventBits_t> result{0, pdFALSE};
+  isr_result<BaseType_t> set_bits_isr(const EventBits_t bits_to_set) {
+    isr_result<BaseType_t> result{pdFALSE, pdFALSE};
     result.result = xEventGroupSetBitsFromISR(
         m_event_group, bits_to_set, &result.higher_priority_task_woken);
     return result;
@@ -232,14 +232,14 @@ public:
    *
    * @return EventBits_t Current value of the event group bits
    */
-  EventBits_t get_bits(void) const { return xEventGroupGetBits(m_event_group); }
+  [[nodiscard]] EventBits_t get_bits(void) const { return xEventGroupGetBits(m_event_group); }
   /**
    * @brief Method to get the bits of the event group from an ISR.
    * @ref https://www.freertos.org/xEventGroupGetBitsFromISR.html
    *
    * @return EventBits_t Current value of the event group bits
    */
-  EventBits_t get_bits_isr(void) const {
+  [[nodiscard]] EventBits_t get_bits_isr(void) const {
     return xEventGroupGetBitsFromISR(m_event_group);
   }
   /**
@@ -276,7 +276,11 @@ public:
   set_bits_ex_isr(const EventBits_t bits_to_set) {
     auto result = set_bits_isr(bits_to_set);
     isr_result<expected<EventBits_t, error>> ret{
-        result.result, result.higher_priority_task_woken};
+        unexpected<error>(error::invalid_handle),
+        result.higher_priority_task_woken};
+    if (result.result == pdPASS) {
+      ret.result = bits_to_set;
+    }
     return ret;
   }
   [[nodiscard]] expected<EventBits_t, error>

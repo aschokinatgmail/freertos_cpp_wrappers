@@ -2,7 +2,7 @@
 @file freertos_task.hpp
 @author Andrey V. Shchekin <aschokin@gmail.com>
 @brief FreeRTOS task routines wrapper
-@version 0.1
+@version 3.1.0
 @date 2024-04-07
 
 The MIT License (MIT)
@@ -36,6 +36,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #error "This header is for C++ only"
 #endif
 
+#include "freertos_expected.hpp"
 #include "freertos_isr_result.hpp"
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wshadow"
@@ -316,7 +317,7 @@ public:
    *
    * @return TaskHandle_t task handle
    */
-  TaskHandle_t handle(void) const { return m_hTask; }
+  [[nodiscard]] TaskHandle_t handle(void) const { return m_hTask; }
 #if INCLUDE_vTaskSuspend
   /**
    * @brief Suspend the task.
@@ -333,14 +334,17 @@ public:
    *
    * @return BaseType_t pdTRUE if the task was resumed, pdFALSE otherwise
    */
-  BaseType_t resume_isr(void) { return xTaskResumeFromISR(m_hTask); }
+  isr_result<BaseType_t> resume_isr(void) {
+    BaseType_t xSwitchRequired = xTaskResumeFromISR(m_hTask);
+    return {pdTRUE, xSwitchRequired};
+  }
 #endif
   /**
    * @brief Check if the task is running.
    *
    * @return bool true if the task is running, false otherwise
    */
-  bool is_running(void) const {
+  [[nodiscard]] bool is_running(void) const {
     switch (state()) {
     case eRunning:
     case eReady:
@@ -350,8 +354,8 @@ public:
       return false;
     }
   }
-  bool is_suspended(void) const { return state() == eSuspended; }
-  bool is_alive(void) const {
+  [[nodiscard]] bool is_suspended(void) const { return state() == eSuspended; }
+  [[nodiscard]] bool is_alive(void) const {
     eTaskState s = state();
     return s != eDeleted && s != eInvalid;
   }
@@ -374,11 +378,11 @@ public:
   }
 #endif
 #if INCLUDE_uxTaskPriorityGet && configUSE_MUTEXES
-  UBaseType_t priority(void) const { return uxTaskPriorityGet(m_hTask); }
-  UBaseType_t priority_isr(void) const {
+  [[nodiscard]] UBaseType_t priority(void) const { return uxTaskPriorityGet(m_hTask); }
+  [[nodiscard]] UBaseType_t priority_isr(void) const {
     return uxTaskPriorityGetFromISR(m_hTask);
   }
-  UBaseType_t base_priority(void) const {
+  [[nodiscard]] UBaseType_t base_priority(void) const {
     return uxTaskBasePriorityGet(m_hTask);
   }
 #endif
@@ -402,7 +406,7 @@ public:
    * @param eState task state
    * @return TaskStatus_t task status
    */
-  TaskStatus_t status(BaseType_t getFreeStackSpace = pdFALSE,
+  [[nodiscard]] TaskStatus_t status(BaseType_t getFreeStackSpace = pdFALSE,
                       eTaskState eState = eInvalid) const {
     TaskStatus_t status;
     vTaskGetInfo(m_hTask, &status, getFreeStackSpace, eState);
@@ -425,7 +429,7 @@ public:
    *
    * @return TaskHookFunction_t task tag
    */
-  TaskHookFunction_t tag(void) const {
+  [[nodiscard]] TaskHookFunction_t tag(void) const {
     return ulTaskGetApplicationTaskTag(m_hTask);
   }
   /**
@@ -433,7 +437,7 @@ public:
    *
    * @return TaskHookFunction_t task tag
    */
-  TaskHookFunction_t tag_isr(void) const {
+  [[nodiscard]] TaskHookFunction_t tag_isr(void) const {
     return ulTaskGetApplicationTaskTagFromISR(m_hTask);
   }
 #endif
@@ -443,7 +447,7 @@ public:
    *
    * @return size_t high water mark
    */
-  size_t stack_high_water_mark(void) const {
+  [[nodiscard]] size_t stack_high_water_mark(void) const {
     return uxTaskGetStackHighWaterMark(m_hTask);
   }
 #endif
@@ -453,7 +457,7 @@ public:
    *
    * @return size_t high water mark
    */
-  size_t stack_high_water_mark2(void) const {
+  [[nodiscard]] size_t stack_high_water_mark2(void) const {
     return uxTaskGetStackHighWaterMark2(m_hTask);
   }
 #endif
@@ -463,14 +467,14 @@ public:
    *
    * @return eTaskState task state
    */
-  eTaskState state(void) const { return eTaskGetState(m_hTask); }
+  [[nodiscard]] eTaskState state(void) const { return eTaskGetState(m_hTask); }
 #endif
   /**
    * @brief Get the name of the task.
    *
    * @return const char* task name
    */
-  const char *name(void) const { return pcTaskGetName(m_hTask); }
+  [[nodiscard]] const char *name(void) const { return pcTaskGetName(m_hTask); }
 // Task notification API
 #if configUSE_TASK_NOTIFICATIONS
   /**
@@ -478,7 +482,7 @@ public:
    *
    * @return BaseType_t pdTRUE if the notification was given, pdFALSE otherwise
    */
-  BaseType_t notify_give(void) { return xTaskNotifyGive(m_hTask); }
+  [[nodiscard]] BaseType_t notify_give(void) { return xTaskNotifyGive(m_hTask); }
   /**
    * @brief Take a notification from the task.
    *
@@ -486,7 +490,7 @@ public:
    * @param ticksToWait ticks to wait
    * @return uint32_t notification value
    */
-  uint32_t notify_take(BaseType_t clearCountOnExit = pdTRUE,
+  [[nodiscard]] uint32_t notify_take(BaseType_t clearCountOnExit = pdTRUE,
                        TickType_t ticksToWait = portMAX_DELAY) {
     return ulTaskNotifyTake(clearCountOnExit, ticksToWait);
   }
@@ -513,7 +517,7 @@ public:
    * @param action notification action
    * @return BaseType_t pdTRUE if the notification was given, pdFALSE otherwise
    */
-  BaseType_t notify(const uint32_t val, eNotifyAction action) {
+  [[nodiscard]] BaseType_t notify(const uint32_t val, eNotifyAction action) {
     return xTaskNotify(m_hTask, val, action);
   }
   /**
@@ -524,7 +528,7 @@ public:
    * @param prev_value previous value
    * @return BaseType_t pdTRUE if the notification was given, pdFALSE otherwise
    */
-  BaseType_t notify_and_query(const uint32_t val, eNotifyAction action,
+  [[nodiscard]] BaseType_t notify_and_query(const uint32_t val, eNotifyAction action,
                               uint32_t &prev_value) {
     return xTaskNotifyAndQuery(m_hTask, val, action, &prev_value);
   }
@@ -551,7 +555,7 @@ public:
    * @param xTicksToWait ticks to wait
    * @return BaseType_t pdTRUE if the notification was given, pdFALSE otherwise
    */
-  BaseType_t notify_wait(uint32_t ulBitsToClearOnEntry,
+  [[nodiscard]] BaseType_t notify_wait(uint32_t ulBitsToClearOnEntry,
                          uint32_t ulBitsToClearOnExit,
                          uint32_t &notification_value,
                          TickType_t xTicksToWait) {
@@ -584,26 +588,26 @@ public:
    * @return BaseType_t pdTRUE if the notification state was cleared, pdFALSE
    * otherwise
    */
-  BaseType_t notify_state_clear(void) { return xTaskNotifyStateClear(m_hTask); }
+  [[nodiscard]] BaseType_t notify_state_clear(void) { return xTaskNotifyStateClear(m_hTask); }
   /**
    * @brief Clear the notification value.
    *
    * @param ulBitsToClear bits to clear
    * @return uint32_t bits cleared
    */
-  uint32_t notify_value_clear(uint32_t ulBitsToClear) {
+  [[nodiscard]] uint32_t notify_value_clear(uint32_t ulBitsToClear) {
     return ulTaskNotifyValueClear(m_hTask, ulBitsToClear);
   }
 #if configTASK_NOTIFICATION_ARRAY_ENTRIES > 1
-  BaseType_t notify_give(UBaseType_t index) {
+  [[nodiscard]] BaseType_t notify_give(UBaseType_t index) {
     return xTaskNotifyGiveIndexed(m_hTask, index);
   }
-  uint32_t notify_take(UBaseType_t index, BaseType_t clearCountOnExit,
+  [[nodiscard]] uint32_t notify_take(UBaseType_t index, BaseType_t clearCountOnExit,
                        TickType_t ticksToWait) {
     return ulTaskNotifyTakeIndexed(index, clearCountOnExit, ticksToWait);
   }
   template <typename Rep, typename Period>
-  uint32_t notify_take(UBaseType_t index, BaseType_t clearCountOnExit,
+  [[nodiscard]] uint32_t notify_take(UBaseType_t index, BaseType_t clearCountOnExit,
                        std::chrono::duration<Rep, Period> duration) {
     return notify_take(
         index, clearCountOnExit,
@@ -611,11 +615,11 @@ public:
             std::chrono::duration_cast<std::chrono::milliseconds>(duration)
                 .count()));
   }
-  BaseType_t notify(UBaseType_t index, const uint32_t val,
+  [[nodiscard]] BaseType_t notify(UBaseType_t index, const uint32_t val,
                     eNotifyAction action) {
     return xTaskNotifyIndexed(m_hTask, index, val, action);
   }
-  BaseType_t notify_and_query(UBaseType_t index, const uint32_t val,
+  [[nodiscard]] BaseType_t notify_and_query(UBaseType_t index, const uint32_t val,
                               eNotifyAction action, uint32_t &prev_value) {
     return xTaskNotifyAndQueryIndexed(m_hTask, index, val, action, &prev_value);
   }
@@ -636,7 +640,7 @@ public:
         &result.higher_priority_task_woken);
     return result;
   }
-  BaseType_t notify_wait(UBaseType_t index, uint32_t ulBitsToClearOnEntry,
+  [[nodiscard]] BaseType_t notify_wait(UBaseType_t index, uint32_t ulBitsToClearOnEntry,
                          uint32_t ulBitsToClearOnExit,
                          uint32_t &notification_value,
                          TickType_t xTicksToWait) {
@@ -645,7 +649,7 @@ public:
                                   xTicksToWait);
   }
   template <typename Rep, typename Period>
-  BaseType_t notify_wait(UBaseType_t index, uint32_t ulBitsToClearOnEntry,
+  [[nodiscard]] BaseType_t notify_wait(UBaseType_t index, uint32_t ulBitsToClearOnEntry,
                          uint32_t ulBitsToClearOnExit,
                          uint32_t &notification_value,
                          std::chrono::duration<Rep, Period> duration) {
@@ -655,13 +659,36 @@ public:
             std::chrono::duration_cast<std::chrono::milliseconds>(duration)
                 .count()));
   }
-  BaseType_t notify_state_clear(UBaseType_t index) {
+  [[nodiscard]] BaseType_t notify_state_clear(UBaseType_t index) {
     return xTaskNotifyStateClearIndexed(m_hTask, index);
   }
-  uint32_t notify_value_clear(UBaseType_t index, uint32_t ulBitsToClear) {
+  [[nodiscard]] uint32_t notify_value_clear(UBaseType_t index, uint32_t ulBitsToClear) {
     return ulTaskNotifyValueClearIndexed(m_hTask, index, ulBitsToClear);
   }
 #endif
+
+  [[nodiscard]] expected<uint32_t, error>
+  notify_wait_ex(uint32_t ulBitsToClearOnEntry, uint32_t ulBitsToClearOnExit,
+                 uint32_t &notification_value, TickType_t xTicksToWait) {
+    auto rc = notify_wait(ulBitsToClearOnEntry, ulBitsToClearOnExit,
+                          notification_value, xTicksToWait);
+    if (rc == pdTRUE) {
+      return notification_value;
+    }
+    return unexpected<error>(xTicksToWait == 0 ? error::would_block
+                                               : error::timeout);
+  }
+  template <typename Rep, typename Period>
+  [[nodiscard]] expected<uint32_t, error>
+  notify_wait_ex(uint32_t ulBitsToClearOnEntry, uint32_t ulBitsToClearOnExit,
+                 uint32_t &notification_value,
+                 std::chrono::duration<Rep, Period> duration) {
+    return notify_wait_ex(
+        ulBitsToClearOnEntry, ulBitsToClearOnExit, notification_value,
+        pdMS_TO_TICKS(
+            std::chrono::duration_cast<std::chrono::milliseconds>(duration)
+                .count()));
+  }
 #endif
 #if configNUMBER_OF_CORES > 1 && (configUSE_CORE_AFFINITY == 1)
   void set_affinity(freertos::core_affinity_mask mask) {
@@ -897,7 +924,7 @@ public:
    *
    * @return TaskHandle_t task handle
    */
-  TaskHandle_t handle(void) const { return m_task.handle(); }
+  [[nodiscard]] TaskHandle_t handle(void) const { return m_task.handle(); }
 #if INCLUDE_vTaskSuspend
   /**
    * @brief Suspend the task.
@@ -914,14 +941,14 @@ public:
    *
    * @return BaseType_t pdTRUE if the task was resumed, pdFALSE otherwise
    */
-  BaseType_t resume_isr(void) { return m_task.resume_isr(); }
+  isr_result<BaseType_t> resume_isr(void) { return m_task.resume_isr(); }
 #endif
   /**
    * @brief Check if the task is running.
    *
    * @return bool true if the task is running, false otherwise
    */
-  bool is_running(void) const {
+  [[nodiscard]] bool is_running(void) const {
     switch (m_task.state()) {
     case eRunning:
     case eReady:
@@ -931,8 +958,8 @@ public:
       return false;
     }
   }
-  bool is_suspended(void) const { return m_task.state() == eSuspended; }
-  bool is_alive(void) const {
+  [[nodiscard]] bool is_suspended(void) const { return m_task.state() == eSuspended; }
+  [[nodiscard]] bool is_alive(void) const {
     eTaskState s = m_task.state();
     return s != eDeleted && s != eInvalid;
   }
@@ -950,9 +977,9 @@ public:
   BaseType_t abort_delay(void) { return m_task.abort_delay(); }
 #endif
 #if INCLUDE_uxTaskPriorityGet && configUSE_MUTEXES
-  UBaseType_t priority(void) const { return m_task.priority(); }
-  UBaseType_t priority_isr(void) const { return m_task.priority_isr(); }
-  UBaseType_t base_priority(void) const { return m_task.base_priority(); }
+  [[nodiscard]] UBaseType_t priority(void) const { return m_task.priority(); }
+  [[nodiscard]] UBaseType_t priority_isr(void) const { return m_task.priority_isr(); }
+  [[nodiscard]] UBaseType_t base_priority(void) const { return m_task.base_priority(); }
 #endif
 #if INCLUDE_vTaskPrioritySet
   /**
@@ -974,7 +1001,7 @@ public:
    * @param eState  task state
    * @return TaskStatus_t  task status
    */
-  TaskStatus_t status(BaseType_t getFreeStackSpace = pdFALSE,
+  [[nodiscard]] TaskStatus_t status(BaseType_t getFreeStackSpace = pdFALSE,
                       eTaskState eState = eInvalid) const {
     return m_task.status(getFreeStackSpace, eState);
   }
@@ -995,13 +1022,13 @@ public:
    *
    * @return TaskHookFunction_t  task tag
    */
-  TaskHookFunction_t tag(void) const { return m_task.tag(); }
+  [[nodiscard]] TaskHookFunction_t tag(void) const { return m_task.tag(); }
   /**
    * @brief Get the tag of the task from an ISR.
    *
    * @return TaskHookFunction_t  task tag
    */
-  TaskHookFunction_t tag_isr(void) const { return m_task.tag_isr(); }
+  [[nodiscard]] TaskHookFunction_t tag_isr(void) const { return m_task.tag_isr(); }
 #endif
 #if INCLUDE_uxTaskGetStackHighWaterMark
   /**
@@ -1009,7 +1036,7 @@ public:
    *
    * @return size_t  high water mark
    */
-  size_t stack_high_water_mark(void) const {
+  [[nodiscard]] size_t stack_high_water_mark(void) const {
     return m_task.stack_high_water_mark();
   }
 #endif
@@ -1019,7 +1046,7 @@ public:
    *
    * @return size_t  high water mark
    */
-  size_t stack_high_water_mark2(void) const {
+  [[nodiscard]] size_t stack_high_water_mark2(void) const {
     return m_task.stack_high_water_mark2();
   }
 #endif
@@ -1029,14 +1056,14 @@ public:
    *
    * @return eTaskState  task state
    */
-  eTaskState state(void) const { return m_task.state(); }
+  [[nodiscard]] eTaskState state(void) const { return m_task.state(); }
 #endif
   /**
    * @brief Get the name of the task.
    *
    * @return const char*  task name
    */
-  const char *name(void) const { return m_task.name(); }
+  [[nodiscard]] const char *name(void) const { return m_task.name(); }
 // Task notification API
 #if configUSE_TASK_NOTIFICATIONS
   /**
@@ -1044,7 +1071,7 @@ public:
    *
    * @return BaseType_t  pdTRUE if the notification was given, pdFALSE otherwise
    */
-  BaseType_t notify_give(void) { return m_task.notify_give(); }
+  [[nodiscard]] BaseType_t notify_give(void) { return m_task.notify_give(); }
   /**
    * @brief Take a notification from the task.
    *
@@ -1052,7 +1079,7 @@ public:
    * @param ticksToWait  ticks to wait
    * @return uint32_t  notification value
    */
-  uint32_t notify_take(BaseType_t clearCountOnExit = pdTRUE,
+  [[nodiscard]] uint32_t notify_take(BaseType_t clearCountOnExit = pdTRUE,
                        TickType_t ticksToWait = portMAX_DELAY) {
     return m_task.notify_take(clearCountOnExit, ticksToWait);
   }
@@ -1064,7 +1091,7 @@ public:
    * @return uint32_t  notification value
    */
   template <typename Rep, typename Period>
-  uint32_t notify_take(BaseType_t clearCountOnExit,
+  [[nodiscard]] uint32_t notify_take(BaseType_t clearCountOnExit,
                        std::chrono::duration<Rep, Period> duration) {
     return notify_take(
         clearCountOnExit,
@@ -1079,7 +1106,7 @@ public:
    * @param action  notification action
    * @return BaseType_t  pdTRUE if the notification was given, pdFALSE otherwise
    */
-  BaseType_t notify(const uint32_t val, eNotifyAction action) {
+  [[nodiscard]] BaseType_t notify(const uint32_t val, eNotifyAction action) {
     return m_task.notify(val, action);
   }
   /**
@@ -1090,7 +1117,7 @@ public:
    * @param prev_value  previous value
    * @return BaseType_t  pdTRUE if the notification was given, pdFALSE otherwise
    */
-  BaseType_t notify_and_query(const uint32_t val, eNotifyAction action,
+  [[nodiscard]] BaseType_t notify_and_query(const uint32_t val, eNotifyAction action,
                               uint32_t &prev_value) {
     return m_task.notify_and_query(val, action, prev_value);
   }
@@ -1111,7 +1138,7 @@ public:
    * @param xTicksToWait  ticks to wait
    * @return BaseType_t  pdTRUE if the notification was given, pdFALSE otherwise
    */
-  BaseType_t notify_wait(uint32_t ulBitsToClearOnEntry,
+  [[nodiscard]] BaseType_t notify_wait(uint32_t ulBitsToClearOnEntry,
                          uint32_t ulBitsToClearOnExit,
                          uint32_t &notification_value,
                          TickType_t xTicksToWait) {
@@ -1128,7 +1155,7 @@ public:
    * @return BaseType_t  pdTRUE if the notification was given, pdFALSE otherwise
    */
   template <typename Rep, typename Period>
-  BaseType_t notify_wait(uint32_t ulBitsToClearOnEntry,
+  [[nodiscard]] BaseType_t notify_wait(uint32_t ulBitsToClearOnEntry,
                          uint32_t ulBitsToClearOnExit,
                          uint32_t &notification_value,
                          std::chrono::duration<Rep, Period> duration) {
@@ -1144,34 +1171,34 @@ public:
    * @return BaseType_t  pdTRUE if the notification state was cleared, pdFALSE
    * otherwise
    */
-  BaseType_t notify_state_clear(void) { return m_task.notify_state_clear(); }
+  [[nodiscard]] BaseType_t notify_state_clear(void) { return m_task.notify_state_clear(); }
   /**
    * @brief Clear the notification value.
    *
    * @param ulBitsToClear  bits to clear
    * @return uint32_t  bits cleared
    */
-  uint32_t notify_value_clear(uint32_t ulBitsToClear) {
+  [[nodiscard]] uint32_t notify_value_clear(uint32_t ulBitsToClear) {
     return m_task.notify_value_clear(ulBitsToClear);
   }
 #if configTASK_NOTIFICATION_ARRAY_ENTRIES > 1
-  BaseType_t notify_give(UBaseType_t index) {
+  [[nodiscard]] BaseType_t notify_give(UBaseType_t index) {
     return m_task.notify_give(index);
   }
-  uint32_t notify_take(UBaseType_t index, BaseType_t clearCountOnExit,
+  [[nodiscard]] uint32_t notify_take(UBaseType_t index, BaseType_t clearCountOnExit,
                        TickType_t ticksToWait) {
     return m_task.notify_take(index, clearCountOnExit, ticksToWait);
   }
   template <typename Rep, typename Period>
-  uint32_t notify_take(UBaseType_t index, BaseType_t clearCountOnExit,
+  [[nodiscard]] uint32_t notify_take(UBaseType_t index, BaseType_t clearCountOnExit,
                        std::chrono::duration<Rep, Period> duration) {
     return m_task.notify_take(index, clearCountOnExit, duration);
   }
-  BaseType_t notify(UBaseType_t index, const uint32_t val,
+  [[nodiscard]] BaseType_t notify(UBaseType_t index, const uint32_t val,
                     eNotifyAction action) {
     return m_task.notify(index, val, action);
   }
-  BaseType_t notify_and_query(UBaseType_t index, const uint32_t val,
+  [[nodiscard]] BaseType_t notify_and_query(UBaseType_t index, const uint32_t val,
                               eNotifyAction action, uint32_t &prev_value) {
     return m_task.notify_and_query(index, val, action, prev_value);
   }
@@ -1185,7 +1212,7 @@ public:
                                               uint32_t &prev_value) {
     return m_task.notify_and_query_isr(index, val, action, prev_value);
   }
-  BaseType_t notify_wait(UBaseType_t index, uint32_t ulBitsToClearOnEntry,
+  [[nodiscard]] BaseType_t notify_wait(UBaseType_t index, uint32_t ulBitsToClearOnEntry,
                          uint32_t ulBitsToClearOnExit,
                          uint32_t &notification_value,
                          TickType_t xTicksToWait) {
@@ -1193,20 +1220,35 @@ public:
                               notification_value, xTicksToWait);
   }
   template <typename Rep, typename Period>
-  BaseType_t notify_wait(UBaseType_t index, uint32_t ulBitsToClearOnEntry,
+  [[nodiscard]] BaseType_t notify_wait(UBaseType_t index, uint32_t ulBitsToClearOnEntry,
                          uint32_t ulBitsToClearOnExit,
                          uint32_t &notification_value,
                          std::chrono::duration<Rep, Period> duration) {
     return m_task.notify_wait(index, ulBitsToClearOnEntry, ulBitsToClearOnExit,
                               notification_value, duration);
   }
-  BaseType_t notify_state_clear(UBaseType_t index) {
+  [[nodiscard]] BaseType_t notify_state_clear(UBaseType_t index) {
     return m_task.notify_state_clear(index);
   }
-  uint32_t notify_value_clear(UBaseType_t index, uint32_t ulBitsToClear) {
+  [[nodiscard]] uint32_t notify_value_clear(UBaseType_t index, uint32_t ulBitsToClear) {
     return m_task.notify_value_clear(index, ulBitsToClear);
   }
 #endif
+
+  [[nodiscard]] expected<uint32_t, error>
+  notify_wait_ex(uint32_t ulBitsToClearOnEntry, uint32_t ulBitsToClearOnExit,
+                 uint32_t &notification_value, TickType_t xTicksToWait) {
+    return m_task.notify_wait_ex(ulBitsToClearOnEntry, ulBitsToClearOnExit,
+                                 notification_value, xTicksToWait);
+  }
+  template <typename Rep, typename Period>
+  [[nodiscard]] expected<uint32_t, error>
+  notify_wait_ex(uint32_t ulBitsToClearOnEntry, uint32_t ulBitsToClearOnExit,
+                 uint32_t &notification_value,
+                 std::chrono::duration<Rep, Period> duration) {
+    return m_task.notify_wait_ex(ulBitsToClearOnEntry, ulBitsToClearOnExit,
+                                 notification_value, duration);
+  }
 #endif
 #if configNUMBER_OF_CORES > 1 && (configUSE_CORE_AFFINITY == 1)
   void set_affinity(freertos::core_affinity_mask mask) {

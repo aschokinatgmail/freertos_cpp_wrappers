@@ -44,7 +44,7 @@ TEST(ExpectedTest, ExpectedWithValue) {
 }
 
 TEST(ExpectedTest, ExpectedWithError) {
-  expected<int, error> e(unexpected<error>(error::timeout));
+  expected<int, error> e{unexpected<error>(error::timeout)};
   EXPECT_FALSE(e.has_value());
   EXPECT_FALSE(static_cast<bool>(e));
   EXPECT_EQ(e.error(), error::timeout);
@@ -62,7 +62,7 @@ TEST(ExpectedTest, ExpectedCopyConstruction) {
   EXPECT_TRUE(e2.has_value());
   EXPECT_EQ(e2.value(), 10);
 
-  expected<int, error> e3(unexpected<error>(error::invalid_handle));
+  expected<int, error> e3{unexpected<error>(error::invalid_handle)};
   expected<int, error> e4(e3);
   EXPECT_FALSE(e4.has_value());
   EXPECT_EQ(e4.error(), error::invalid_handle);
@@ -77,7 +77,7 @@ TEST(ExpectedTest, ExpectedMoveConstruction) {
 
 TEST(ExpectedTest, ExpectedCopyAssignment) {
   expected<int, error> e1(10);
-  expected<int, error> e2(unexpected<error>(error::timeout));
+  expected<int, error> e2{unexpected<error>(error::timeout)};
   e2 = e1;
   EXPECT_TRUE(e2.has_value());
   EXPECT_EQ(e2.value(), 10);
@@ -85,7 +85,7 @@ TEST(ExpectedTest, ExpectedCopyAssignment) {
 
 TEST(ExpectedTest, ExpectedMoveAssignment) {
   expected<int, error> e1(10);
-  expected<int, error> e2(unexpected<error>(error::timeout));
+  expected<int, error> e2{unexpected<error>(error::timeout)};
   e2 = std::move(e1);
   EXPECT_TRUE(e2.has_value());
   EXPECT_EQ(e2.value(), 10);
@@ -107,7 +107,7 @@ TEST(ExpectedTest, ExpectedAndThenWithValue) {
 }
 
 TEST(ExpectedTest, ExpectedAndThenWithError) {
-  expected<int, error> e(unexpected<error>(error::timeout));
+  expected<int, error> e{unexpected<error>(error::timeout)};
   auto result = e.and_then([](int v) -> expected<int, error> {
     return expected<int, error>(v * 2);
   });
@@ -124,7 +124,7 @@ TEST(ExpectedTest, ExpectedOrElseWithValue) {
 }
 
 TEST(ExpectedTest, ExpectedOrElseWithError) {
-  expected<int, error> e(unexpected<error>(error::timeout));
+  expected<int, error> e{unexpected<error>(error::timeout)};
   auto result = e.or_else(
       [](error) -> expected<int, error> { return expected<int, error>(99); });
   EXPECT_TRUE(result.has_value());
@@ -139,14 +139,14 @@ TEST(ExpectedTest, ExpectedTransformWithValue) {
 }
 
 TEST(ExpectedTest, ExpectedTransformWithError) {
-  expected<int, error> e(unexpected<error>(error::queue_empty));
+  expected<int, error> e{unexpected<error>(error::queue_empty)};
   auto result = e.transform([](int v) { return v * 3; });
   EXPECT_FALSE(result.has_value());
   EXPECT_EQ(result.error(), error::queue_empty);
 }
 
 TEST(ExpectedTest, ExpectedTransformErrorWithError) {
-  expected<int, error> e(unexpected<error>(error::timeout));
+  expected<int, error> e{unexpected<error>(error::timeout)};
   auto result = e.transform_error([](error) -> int { return 42; });
   EXPECT_FALSE(result.has_value());
   EXPECT_EQ(result.error(), 42);
@@ -166,7 +166,7 @@ TEST(ExpectedVoidTest, DefaultSuccess) {
 }
 
 TEST(ExpectedVoidTest, WithError) {
-  expected<void, error> e(unexpected<error>(error::timeout));
+  expected<void, error> e{unexpected<error>(error::timeout)};
   EXPECT_FALSE(e.has_value());
   EXPECT_EQ(e.error(), error::timeout);
 }
@@ -182,7 +182,7 @@ TEST(ExpectedVoidTest, CopyConstruction) {
   expected<void, error> e2(e1);
   EXPECT_TRUE(e2.has_value());
 
-  expected<void, error> e3(unexpected<error>(error::queue_full));
+  expected<void, error> e3{unexpected<error>(error::queue_full)};
   expected<void, error> e4(e3);
   EXPECT_FALSE(e4.has_value());
   EXPECT_EQ(e4.error(), error::queue_full);
@@ -197,7 +197,7 @@ TEST(ExpectedVoidTest, AndThenWithValue) {
 }
 
 TEST(ExpectedVoidTest, AndThenWithError) {
-  expected<void, error> e(unexpected<error>(error::would_block));
+  expected<void, error> e{unexpected<error>(error::would_block)};
   auto result = e.and_then(
       []() -> expected<int, error> { return expected<int, error>(42); });
   EXPECT_FALSE(result.has_value());
@@ -212,7 +212,7 @@ TEST(ExpectedVoidTest, TransformWithValue) {
 }
 
 TEST(ExpectedVoidTest, TransformError) {
-  expected<void, error> e(unexpected<error>(error::timeout));
+  expected<void, error> e{unexpected<error>(error::timeout)};
   auto result = e.transform_error([](error) -> int { return 99; });
   EXPECT_FALSE(result.has_value());
   EXPECT_EQ(result.error(), 99);
@@ -226,7 +226,7 @@ TEST(ExpectedVoidTest, OrElseWithValue) {
 }
 
 TEST(ExpectedVoidTest, OrElseWithError) {
-  expected<void, error> e(unexpected<error>(error::timeout));
+  expected<void, error> e{unexpected<error>(error::timeout)};
   auto result = e.or_else(
       [](error) -> expected<void, error> { return expected<void, error>(); });
   EXPECT_TRUE(result.has_value());

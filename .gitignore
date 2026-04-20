@@ -11,8 +11,14 @@ cmake-build/
 # Documentation build output
 site/
 docs_old/
+docs/html/
+docs/latex/
 
 # Note: Generated documentation site is excluded (built from source)
+
+# Tool caches
+.opencode/
+.ruff_cache/
 
 # CMake
 CMakeCache.txt
@@ -20,6 +26,7 @@ CMakeFiles/
 cmake_install.cmake
 Makefile
 *.cmake
+!cmake/*.cmake.in
 
 # Compiled object files
 *.o

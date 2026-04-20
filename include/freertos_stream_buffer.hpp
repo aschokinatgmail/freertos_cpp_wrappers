@@ -2,7 +2,7 @@
 @file freertos_stream_buffer.hpp
 @author Andrey V. Shchekin <aschokin@gmail.com>
 @brief FreeRTOS stream buffer interface wrapper
-@version 0.1
+@version 3.1.0
 @date 2024-04-07
 
 The MIT License (MIT)
@@ -311,7 +311,7 @@ public:
    *
    * @return size_t Number of bytes available in the stream buffer.
    */
-  size_t available(void) {
+  [[nodiscard]] size_t available(void) const {
     return xStreamBufferBytesAvailable(m_stream_buffer);
   }
   /**
@@ -320,7 +320,7 @@ public:
    *
    * @return size_t Number of bytes free in the stream buffer.
    */
-  size_t free(void) { return xStreamBufferSpacesAvailable(m_stream_buffer); }
+  [[nodiscard]] size_t free(void) const { return xStreamBufferSpacesAvailable(m_stream_buffer); }
   /**
    * @brief Reset the stream buffer to the cleared state.
    * @ref https://www.freertos.org/xStreamBufferReset.html
@@ -344,21 +344,21 @@ public:
    *
    * @return StreamBufferHandle_t Handle of the stream buffer.
    */
-  StreamBufferHandle_t handle(void) const { return m_stream_buffer; }
+  [[nodiscard]] StreamBufferHandle_t handle(void) const { return m_stream_buffer; }
   /**
    * @brief Check if the stream buffer is empty.
    * @ref https://www.freertos.org/xStreamBufferIsEmpty.html
    *
    * @return BaseType_t pdTRUE if the stream buffer is empty, pdFALSE otherwise.
    */
-  BaseType_t empty(void) { return xStreamBufferIsEmpty(m_stream_buffer); }
+  [[nodiscard]] BaseType_t empty(void) const { return xStreamBufferIsEmpty(m_stream_buffer); }
   /**
    * @brief Check if the stream buffer is full.
    * @ref https://www.freertos.org/xStreamBufferIsFull.html
    *
    * @return BaseType_t pdTRUE if the stream buffer is full, pdFALSE otherwise.
    */
-  BaseType_t full(void) { return xStreamBufferIsFull(m_stream_buffer); }
+  [[nodiscard]] BaseType_t full(void) const { return xStreamBufferIsFull(m_stream_buffer); }
 
   [[nodiscard]] expected<size_t, error>
   send_ex(const void *data, size_t data_size,

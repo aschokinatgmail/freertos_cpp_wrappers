@@ -1,0 +1,5 @@
+@PACKAGE_INIT@
+
+include("${CMAKE_CURRENT_LIST_DIR}/freertos_cpp_wrappers-targets.cmake")
+
+check_required_components(freertos_cpp_wrappers)

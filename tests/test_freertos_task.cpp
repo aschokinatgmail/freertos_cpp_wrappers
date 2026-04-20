@@ -243,8 +243,8 @@ TEST_F(FreeRTOSTaskTest, StaticTaskSuspendResume) {
 
   EXPECT_CALL(*mock, xTaskResumeFromISR(mock_task_handle))
       .WillOnce(Return(pdTRUE));
-  BaseType_t result = test_task.resume_isr();
-  EXPECT_EQ(result, pdTRUE);
+  auto result = test_task.resume_isr();
+  EXPECT_EQ(result.result, pdTRUE);
 
   EXPECT_CALL(*mock, vTaskDelete(mock_task_handle));
 }

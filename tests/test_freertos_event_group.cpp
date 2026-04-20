@@ -2,8 +2,12 @@
 @file test_freertos_event_group.cpp
 @author Assistant AI
 @brief Comprehensive unit tests for FreeRTOS event group wrapper
-@version 0.1
+@version 3.1.0
 @date 2024-12-19
+
+NAMING CONVENTION (going forward):
+  TestSuiteName_TestCaseName or Component_Function_Scenario
+  e.g. EventGroup_SetBitsExIsr_ReturnsErrorOnFailure
 
 The MIT License (MIT)
 
@@ -756,3 +760,22 @@ TEST_F(FreeRTOSEventGroupTest, Issue137StaticEventGroupSwap) {
   EXPECT_EQ(eg2.set_bits(0x02), 0x02);
 }
 #endif
+
+// =============================================================================
+// DESTRUCTOR AFTER MOVE TEST (Issue #134)
+// Verifies that moved-from event_group does not double-free the handle.
+// =============================================================================
+
+TEST_F(FreeRTOSEventGroupTest, EventGroup_DestructorAfterMoveDoesNotDoubleFree) {
+  EventGroupHandle_t handle = reinterpret_cast<EventGroupHandle_t>(0xDEAD);
+
+  EXPECT_CALL(*mock, xEventGroupCreate())
+      .WillOnce(Return(handle));
+  EXPECT_CALL(*mock, vEventGroupDelete(handle)).Times(1);
+
+  freertos::event_group<freertos::dynamic_event_group_allocator> eg1;
+  freertos::event_group<freertos::dynamic_event_group_allocator> eg2(
+      std::move(eg1));
+  // eg1 has nullptr handle, eg2 owns the handle
+  // Only one vEventGroupDelete call when both destruct
+}

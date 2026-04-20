@@ -2,7 +2,7 @@
 @file freertos_semaphore.hpp
 @author Andrey V. Shchekin <aschokin@gmail.com>
 @brief FreeRTOS semaphore wrapper
-@version 0.1
+@version 3.1.0
 @date 2024-04-07
 
 The MIT License (MIT)
@@ -582,7 +582,7 @@ public:
    *
    * @return UBaseType_t count of the counting semaphore.
    */
-  UBaseType_t count() { return uxSemaphoreGetCount(m_semaphore); }
+  [[nodiscard]] UBaseType_t count() const { return uxSemaphoreGetCount(m_semaphore); }
   /**
    * @brief Give the counting semaphore.
    *

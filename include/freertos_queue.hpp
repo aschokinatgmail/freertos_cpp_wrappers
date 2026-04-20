@@ -2,7 +2,7 @@
 @file freertos_queue.hpp
 @author Andrey V. Shchekin <aschokin@gmail.com>
 @brief FreeRTOS queue wrapper
-@version 0.1
+@version 3.1.0
 @date 2024-04-07
 
 The MIT License (MIT)
@@ -489,14 +489,14 @@ public:
    *
    * @return UBaseType_t The number of items stored in the queue.
    */
-  UBaseType_t messages_waiting(void) { return uxQueueMessagesWaiting(m_queue); }
+  [[nodiscard]] UBaseType_t messages_waiting(void) const { return uxQueueMessagesWaiting(m_queue); }
   /**
    * @brief Return the number of items stored in the queue from an ISR.
    * @ref https://www.freertos.org/a00018.html#uxQueueMessagesWaitingFromISR
    *
    * @return UBaseType_t The number of items stored in the queue.
    */
-  UBaseType_t messages_waiting_isr(void) {
+  UBaseType_t messages_waiting_isr(void) const {
     return uxQueueMessagesWaitingFromISR(m_queue);
   }
   /**
@@ -505,7 +505,7 @@ public:
    *
    * @return UBaseType_t The number of spaces available in the queue.
    */
-  UBaseType_t spaces_available(void) { return uxQueueSpacesAvailable(m_queue); }
+  [[nodiscard]] UBaseType_t spaces_available(void) const { return uxQueueSpacesAvailable(m_queue); }
   /**
    * @brief Resets the queue to the empty state.
    * @ref https://www.freertos.org/a00018.html#xQueueReset

@@ -197,6 +197,16 @@ add_executable(
     test_freertos_coverage_faults.cpp
 )
 
+add_executable(
+    test_freertos_isr_result
+    test_freertos_isr_result.cpp
+)
+
+add_executable(
+    test_freertos_concurrency
+    test_freertos_concurrency.cpp
+)
+
 target_link_libraries(
     test_freertos_task
     freertos_cpp_wrappers
@@ -467,6 +477,22 @@ target_link_libraries(
     pthread
 )
 
+target_link_libraries(
+    test_freertos_isr_result
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
+target_link_libraries(
+    test_freertos_concurrency
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
 # Apply compile options if using PkgConfig
 if(GTEST_COMPILE_OPTIONS)
     target_compile_options(test_freertos_task PRIVATE ${GTEST_COMPILE_OPTIONS})
@@ -503,6 +529,8 @@ target_compile_options(test_freertos_expected_monadic PRIVATE ${GTEST_COMPILE_OP
 target_compile_options(test_freertos_coverage_branches2 PRIVATE ${GTEST_COMPILE_OPTIONS})
 target_compile_options(test_freertos_coverage_sa_ns PRIVATE ${GTEST_COMPILE_OPTIONS})
 target_compile_options(test_freertos_coverage_faults PRIVATE ${GTEST_COMPILE_OPTIONS})
+target_compile_options(test_freertos_isr_result PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_concurrency PRIVATE ${GTEST_COMPILE_OPTIONS})
 endif()
 
 # Add tests - run complete test executables to ensure proper failure detection
@@ -541,3 +569,5 @@ add_test(NAME test_freertos_expected_monadic COMMAND test_freertos_expected_mona
 add_test(NAME test_freertos_coverage_branches2 COMMAND test_freertos_coverage_branches2)
 add_test(NAME test_freertos_coverage_sa_ns COMMAND test_freertos_coverage_sa_ns)
 add_test(NAME test_freertos_coverage_faults COMMAND test_freertos_coverage_faults)
+add_test(NAME test_freertos_isr_result COMMAND test_freertos_isr_result)
+add_test(NAME test_freertos_concurrency COMMAND test_freertos_concurrency)

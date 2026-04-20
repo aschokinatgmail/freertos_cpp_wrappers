@@ -2,6 +2,10 @@
  * @file test_freertos_message_buffer.cpp
  * @brief Comprehensive unit tests for FreeRTOS C++ message buffer wrappers
  *
+ * NAMING CONVENTION (going forward):
+ *   TestSuiteName_TestCaseName or Component_Function_Scenario
+ *   e.g. MessageBuffer_SendEx_BufferFull_ReturnsError
+ *
  * This file provides comprehensive behavioral unit tests for the message buffer
  * modules, including static and dynamic message buffer allocators.
  *
@@ -1161,3 +1165,25 @@ TEST_F(FreeRTOSMessageBufferTest, Issue137StaticMessageBufferSwap) {
   EXPECT_EQ(mb2.send(data2, 4, 0), 4);
 }
 #endif
+
+// =============================================================================
+// DESTRUCTOR AFTER MOVE TEST (Issue #134)
+// Verifies that moved-from message_buffer does not double-free the handle.
+// =============================================================================
+
+TEST_F(FreeRTOSMessageBufferTest,
+       MessageBuffer_DestructorAfterMoveDoesNotDoubleFree) {
+  MessageBufferHandle_t handle =
+      reinterpret_cast<MessageBufferHandle_t>(0xDEAD);
+
+  EXPECT_CALL(*mock, xMessageBufferCreate(512))
+      .WillOnce(Return(handle));
+  EXPECT_CALL(*mock, vMessageBufferDelete(handle)).Times(1);
+
+  freertos::message_buffer<512, freertos::dynamic_message_buffer_allocator<512>>
+      mb1;
+  freertos::message_buffer<512, freertos::dynamic_message_buffer_allocator<512>>
+      mb2(std::move(mb1));
+  // mb1 has nullptr handle, mb2 owns the handle
+  // Only one vMessageBufferDelete call when both destruct
+}

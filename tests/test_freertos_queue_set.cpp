@@ -2,7 +2,7 @@
 @file test_freertos_queue_set.cpp
 @author Assistant AI
 @brief Comprehensive unit tests for FreeRTOS queue set wrapper
-@version 0.1
+@version 3.1.0
 @date 2026-04-17
 
 The MIT License (MIT)

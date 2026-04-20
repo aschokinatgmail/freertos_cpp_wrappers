@@ -2,7 +2,7 @@
 @file freertos_sw_timer.hpp
 @author Andrey V. Shchekin <aschokin@gmail.com>
 @brief FreeRTOS software timer wrapper
-@version 0.1
+@version 3.1.0
 @date 2024-04-07
 
 The MIT License (MIT)
@@ -531,7 +531,7 @@ public:
    * was woken
    * @return TickType_t timer period in ticks
    */
-  TickType_t period_ticks(void) const {
+  [[nodiscard]] TickType_t period_ticks(void) const {
     if (!m_timer) {
       return 0;
     }
@@ -542,7 +542,7 @@ public:
    *
    * @return std::chrono::milliseconds period of the timer in milliseconds
    */
-  std::chrono::milliseconds period(void) const {
+  [[nodiscard]] std::chrono::milliseconds period(void) const {
     return std::chrono::milliseconds{period_ticks()};
   }
   /**
@@ -565,13 +565,13 @@ public:
    * @return UBaseType_t pdTRUE if auto-reload mode is enabled, pdFALSE
    * otherwise
    */
-  UBaseType_t reload_mode(void) const { return uxTimerGetReloadMode(m_timer); }
+  [[nodiscard]] UBaseType_t reload_mode(void) const { return uxTimerGetReloadMode(m_timer); }
   /**
    * @brief Method to get number of remaining ticks before the timer expires.
    *
    * @return TickType_t number of remaining ticks before the timer expires.
    */
-  TickType_t remaining_ticks(void) const {
+  [[nodiscard]] TickType_t remaining_ticks(void) const {
     if (m_timer) {
       return xTimerGetExpiryTime(m_timer) - xTaskGetTickCount();
     } else {
@@ -584,7 +584,7 @@ public:
    * @return std::chrono::milliseconds remaining time before the timer expires
    * in milliseconds.
    */
-  std::chrono::milliseconds remaining_time(void) const {
+  [[nodiscard]] std::chrono::milliseconds remaining_time(void) const {
     return std::chrono::milliseconds{remaining_ticks()};
   }
   /**
@@ -593,7 +593,7 @@ public:
    *
    * @return BaseType_t pdTRUE if the timer is running, pdFALSE otherwise
    */
-  BaseType_t running(void) const {
+  [[nodiscard]] BaseType_t running(void) const {
     if (!m_timer) {
       return pdFALSE;
     }
@@ -604,7 +604,7 @@ public:
    *
    * @return const char* name of the timer
    */
-  const char *name(void) const {
+  [[nodiscard]] const char *name(void) const {
     if (!m_timer) {
       return nullptr;
     }

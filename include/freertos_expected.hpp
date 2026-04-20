@@ -2,7 +2,7 @@
 @file freertos_expected.hpp
 @author Andrey V. Shchekin <aschokin@gmail.com>
 @brief std::expected polyfill for FreeRTOS C++ Wrappers
-@version 3.0.0
+@version 3.1.0
 @date 2026-04-16
 
 The MIT License (MIT)
@@ -120,6 +120,7 @@ inline constexpr unexpect_t unexpect{};
  * @tparam E The error type on failure
  */
 template <typename T, typename E> class expected {
+public:
   constexpr expected(const T &val) : m_has_value(true) {
     new (&m_storage) T(val);
   }
@@ -199,57 +200,83 @@ template <typename T, typename E> class expected {
     return *this;
   }
 
-  constexpr bool has_value() const noexcept { return m_has_value; }
-  constexpr explicit operator bool() const noexcept { return m_has_value; }
+  [[nodiscard]] constexpr bool has_value() const noexcept { return m_has_value; }
+  [[nodiscard]] constexpr explicit operator bool() const noexcept { return m_has_value; }
 
-  constexpr T &value() & {
+  [[nodiscard]] constexpr T &value() & {
     configASSERT(m_has_value);
     return *reinterpret_cast<T *>(&m_storage);
   }
 
-  constexpr const T &value() const & {
+  [[nodiscard]] constexpr const T &value() const & {
     configASSERT(m_has_value);
     return *reinterpret_cast<const T *>(&m_storage);
   }
 
-  constexpr T &&value() && {
+  [[nodiscard]] constexpr T &&value() && {
     configASSERT(m_has_value);
     return std::move(*reinterpret_cast<T *>(&m_storage));
   }
 
-  constexpr E &error() & {
+  [[nodiscard]] constexpr const T &&value() const && {
+    configASSERT(m_has_value);
+    return std::move(*reinterpret_cast<const T *>(&m_storage));
+  }
+
+  [[nodiscard]] constexpr E &error() & {
     configASSERT(!m_has_value);
     return *reinterpret_cast<E *>(&m_error_storage);
   }
 
-  constexpr const E &error() const & {
+  [[nodiscard]] constexpr const E &error() const & {
     configASSERT(!m_has_value);
     return *reinterpret_cast<const E *>(&m_error_storage);
   }
 
-  constexpr E &&error() && {
+  [[nodiscard]] constexpr E &&error() && {
     configASSERT(!m_has_value);
     return std::move(*reinterpret_cast<E *>(&m_error_storage));
   }
 
-  constexpr T &operator*() & {
+  [[nodiscard]] constexpr const E &&error() const && {
+    configASSERT(!m_has_value);
+    return std::move(*reinterpret_cast<const E *>(&m_error_storage));
+  }
+
+  [[nodiscard]] constexpr T &operator*() & {
     configASSERT(m_has_value);
     return *reinterpret_cast<T *>(&m_storage);
   }
 
-  constexpr const T &operator*() const & {
+  [[nodiscard]] constexpr const T &operator*() const & {
     configASSERT(m_has_value);
     return *reinterpret_cast<const T *>(&m_storage);
   }
 
-  constexpr T *operator->() {
+  [[nodiscard]] constexpr T *operator->() {
     configASSERT(m_has_value);
     return reinterpret_cast<T *>(&m_storage);
   }
 
-  constexpr const T *operator->() const {
+  [[nodiscard]] constexpr const T *operator->() const {
     configASSERT(m_has_value);
     return reinterpret_cast<const T *>(&m_storage);
+  }
+
+  template <typename U>
+  [[nodiscard]] constexpr T value_or(U &&default_value) const & {
+    if (m_has_value) {
+      return *reinterpret_cast<const T *>(&m_storage);
+    }
+    return static_cast<T>(std::forward<U>(default_value));
+  }
+
+  template <typename U>
+  [[nodiscard]] constexpr T value_or(U &&default_value) && {
+    if (m_has_value) {
+      return std::move(*reinterpret_cast<T *>(&m_storage));
+    }
+    return static_cast<T>(std::forward<U>(default_value));
   }
 
   template <typename F>
@@ -322,9 +349,9 @@ template <typename T, typename E> class expected {
     return expected<T, decltype(f(std::declval<E &>()))>(
         std::move(*reinterpret_cast<T *>(&m_storage)));
   }
-
   template <typename F>
-  constexpr auto transform_error(
+  constexpr auto
+  transform_error(
       F &&f) const & -> expected<T, decltype(f(std::declval<const E &>()))> {
     if (!m_has_value) {
       return expected<T, decltype(f(std::declval<const E &>()))>(
@@ -332,6 +359,32 @@ template <typename T, typename E> class expected {
     }
     return expected<T, decltype(f(std::declval<const E &>()))>(
         *reinterpret_cast<const T *>(&m_storage));
+  }
+
+  friend constexpr bool operator==(const expected &lhs, const expected &rhs) {
+    if (lhs.m_has_value != rhs.m_has_value) {
+      return false;
+    }
+    if (lhs.m_has_value) {
+      return *reinterpret_cast<const T *>(&lhs.m_storage) ==
+             *reinterpret_cast<const T *>(&rhs.m_storage);
+    }
+    return *reinterpret_cast<const E *>(&lhs.m_error_storage) ==
+           *reinterpret_cast<const E *>(&rhs.m_error_storage);
+  }
+
+  friend constexpr bool operator!=(const expected &lhs, const expected &rhs) {
+    return !(lhs == rhs);
+  }
+
+  friend constexpr bool operator==(const expected &lhs, const T &rhs) {
+    return lhs.m_has_value &&
+           *reinterpret_cast<const T *>(&lhs.m_storage) == rhs;
+  }
+
+  friend constexpr bool operator==(const expected &lhs, const unexpected<E> &rhs) {
+    return !lhs.m_has_value &&
+           *reinterpret_cast<const E *>(&lhs.m_error_storage) == rhs.value();
   }
 
 private:
@@ -417,22 +470,27 @@ public:
     return *this;
   }
 
-  constexpr bool has_value() const noexcept { return m_has_value; }
-  constexpr explicit operator bool() const noexcept { return m_has_value; }
+  [[nodiscard]] constexpr bool has_value() const noexcept { return m_has_value; }
+  [[nodiscard]] constexpr explicit operator bool() const noexcept { return m_has_value; }
 
-  constexpr E &error() & {
+  [[nodiscard]] constexpr E &error() & {
     configASSERT(!m_has_value);
     return *reinterpret_cast<E *>(&m_error_storage);
   }
 
-  constexpr const E &error() const & {
+  [[nodiscard]] constexpr const E &error() const & {
     configASSERT(!m_has_value);
     return *reinterpret_cast<const E *>(&m_error_storage);
   }
 
-  constexpr E &&error() && {
+  [[nodiscard]] constexpr E &&error() && {
     configASSERT(!m_has_value);
     return std::move(*reinterpret_cast<E *>(&m_error_storage));
+  }
+
+  [[nodiscard]] constexpr const E &&error() const && {
+    configASSERT(!m_has_value);
+    return std::move(*reinterpret_cast<const E *>(&m_error_storage));
   }
 
   template <typename F> constexpr auto and_then(F &&f) & -> decltype(f()) {
@@ -505,6 +563,26 @@ public:
           unexpect, f(*reinterpret_cast<const E *>(&m_error_storage)));
     }
     return expected<void, decltype(f(std::declval<const E &>()))>();
+  }
+
+  friend constexpr bool operator==(const expected &lhs, const expected &rhs) {
+    if (lhs.m_has_value != rhs.m_has_value) {
+      return false;
+    }
+    if (lhs.m_has_value) {
+      return true;
+    }
+    return *reinterpret_cast<const E *>(&lhs.m_error_storage) ==
+           *reinterpret_cast<const E *>(&rhs.m_error_storage);
+  }
+
+  friend constexpr bool operator!=(const expected &lhs, const expected &rhs) {
+    return !(lhs == rhs);
+  }
+
+  friend constexpr bool operator==(const expected &lhs, const unexpected<E> &rhs) {
+    return !lhs.m_has_value &&
+           *reinterpret_cast<const E *>(&lhs.m_error_storage) == rhs.value();
   }
 
 private:

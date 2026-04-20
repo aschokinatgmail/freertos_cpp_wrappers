@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.14)
 project(freertos_cpp_wrappers
-    VERSION 3.0.1
+    VERSION 3.1.0
     LANGUAGES C CXX
 )
 
@@ -75,6 +75,8 @@ add_library(freertos_cpp_wrappers
 
 # Add include directories to the library target
 target_include_directories(freertos_cpp_wrappers PRIVATE tests/mocks)
+
+target_compile_features(freertos_cpp_wrappers PUBLIC cxx_std_17)
 
 # For coverage builds, disable exceptions for library code to reduce GCC artifact branches
 if(ENABLE_COVERAGE)
@@ -359,3 +361,32 @@ if(ENABLE_SIMULATION)
     message(STATUS "Simulation tests enabled - building with FreeRTOS+POSIX kernel")
     add_subdirectory(tests/simulation)
 endif()
+
+# Install rules
+include(GNUInstallDirs)
+
+install(TARGETS freertos_cpp_wrappers
+    EXPORT freertos_cpp_wrappers-targets
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+)
+
+install(DIRECTORY include/
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    FILES_MATCHING PATTERN "*.hpp"
+)
+
+include(CMakePackageConfigHelpers)
+configure_package_config_file(
+    cmake/freertos_cpp_wrappersConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/freertos_cpp_wrappersConfig.cmake
+    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/freertos_cpp_wrappers
+)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/freertos_cpp_wrappersConfig.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/freertos_cpp_wrappers
+)
+
+install(EXPORT freertos_cpp_wrappers-targets
+    NAMESPACE freertos::
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/freertos_cpp_wrappers
+)

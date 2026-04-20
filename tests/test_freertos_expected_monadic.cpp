@@ -15,14 +15,14 @@ class ExpectedTMonadicTest : public ::testing::Test {};
 // ---------- expected<T,E> copy/move constructors from error ---------
 
 TEST_F(ExpectedTMonadicTest, CopyConstructorFromError) {
-  expected<int, error> src(unexpected<error>(error::timeout));
+  expected<int, error> src{unexpected<error>(error::timeout)};
   expected<int, error> dst(src);
   EXPECT_FALSE(dst.has_value());
   EXPECT_EQ(dst.error(), error::timeout);
 }
 
 TEST_F(ExpectedTMonadicTest, MoveConstructorFromError) {
-  expected<int, error> src(unexpected<error>(error::queue_full));
+  expected<int, error> src{unexpected<error>(error::queue_full)};
   expected<int, error> dst(std::move(src));
   EXPECT_FALSE(dst.has_value());
   EXPECT_EQ(dst.error(), error::queue_full);
@@ -38,7 +38,7 @@ TEST_F(ExpectedTMonadicTest, ConstructFromUnexpectedLvalue) {
 }
 
 TEST_F(ExpectedTMonadicTest, ConstructFromUnexpectedRvalue) {
-  expected<int, error> e(unexpected<error>(error::out_of_memory));
+  expected<int, error> e{unexpected<error>(error::out_of_memory)};
   EXPECT_FALSE(e.has_value());
   EXPECT_EQ(e.error(), error::out_of_memory);
 }
@@ -69,7 +69,7 @@ TEST_F(ExpectedTMonadicTest, CopyAssignmentSelfAssignment) {
 }
 
 TEST_F(ExpectedTMonadicTest, CopyAssignmentSelfAssignmentError) {
-  expected<int, error> e(unexpected<error>(error::timeout));
+  expected<int, error> e{unexpected<error>(error::timeout)};
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wself-assign-overloaded"
   e = e;
@@ -80,14 +80,14 @@ TEST_F(ExpectedTMonadicTest, CopyAssignmentSelfAssignmentError) {
 
 TEST_F(ExpectedTMonadicTest, CopyAssignmentValueToError) {
   expected<int, error> src(99);
-  expected<int, error> dst(unexpected<error>(error::timeout));
+  expected<int, error> dst{unexpected<error>(error::timeout)};
   dst = src;
   EXPECT_TRUE(dst.has_value());
   EXPECT_EQ(dst.value(), 99);
 }
 
 TEST_F(ExpectedTMonadicTest, CopyAssignmentErrorToValue) {
-  expected<int, error> src(unexpected<error>(error::queue_empty));
+  expected<int, error> src{unexpected<error>(error::queue_empty)};
   expected<int, error> dst(42);
   dst = src;
   EXPECT_FALSE(dst.has_value());
@@ -95,8 +95,8 @@ TEST_F(ExpectedTMonadicTest, CopyAssignmentErrorToValue) {
 }
 
 TEST_F(ExpectedTMonadicTest, CopyAssignmentErrorToError) {
-  expected<int, error> src(unexpected<error>(error::would_block));
-  expected<int, error> dst(unexpected<error>(error::timeout));
+  expected<int, error> src{unexpected<error>(error::would_block)};
+  expected<int, error> dst{unexpected<error>(error::timeout)};
   dst = src;
   EXPECT_FALSE(dst.has_value());
   EXPECT_EQ(dst.error(), error::would_block);
@@ -115,7 +115,7 @@ TEST_F(ExpectedTMonadicTest, MoveAssignmentSelfAssignment) {
 }
 
 TEST_F(ExpectedTMonadicTest, MoveAssignmentSelfAssignmentError) {
-  expected<int, error> e(unexpected<error>(error::queue_full));
+  expected<int, error> e{unexpected<error>(error::queue_full)};
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wself-move"
   e = std::move(e);
@@ -126,14 +126,14 @@ TEST_F(ExpectedTMonadicTest, MoveAssignmentSelfAssignmentError) {
 
 TEST_F(ExpectedTMonadicTest, MoveAssignmentValueToError) {
   expected<int, error> src(77);
-  expected<int, error> dst(unexpected<error>(error::timeout));
+  expected<int, error> dst{unexpected<error>(error::timeout)};
   dst = std::move(src);
   EXPECT_TRUE(dst.has_value());
   EXPECT_EQ(dst.value(), 77);
 }
 
 TEST_F(ExpectedTMonadicTest, MoveAssignmentErrorToValue) {
-  expected<int, error> src(unexpected<error>(error::would_block));
+  expected<int, error> src{unexpected<error>(error::would_block)};
   expected<int, error> dst(42);
   dst = std::move(src);
   EXPECT_FALSE(dst.has_value());
@@ -141,8 +141,8 @@ TEST_F(ExpectedTMonadicTest, MoveAssignmentErrorToValue) {
 }
 
 TEST_F(ExpectedTMonadicTest, MoveAssignmentErrorToError) {
-  expected<int, error> src(unexpected<error>(error::invalid_handle));
-  expected<int, error> dst(unexpected<error>(error::timeout));
+  expected<int, error> src{unexpected<error>(error::invalid_handle)};
+  expected<int, error> dst{unexpected<error>(error::timeout)};
   dst = std::move(src);
   EXPECT_FALSE(dst.has_value());
   EXPECT_EQ(dst.error(), error::invalid_handle);
@@ -162,12 +162,12 @@ TEST_F(ExpectedTMonadicTest, ValueRvalueRef) {
 }
 
 TEST_F(ExpectedTMonadicTest, ErrorConstRef) {
-  const expected<int, error> e(unexpected<error>(error::timeout));
+  const expected<int, error> e{unexpected<error>(error::timeout)};
   EXPECT_EQ(e.error(), error::timeout);
 }
 
 TEST_F(ExpectedTMonadicTest, ErrorRvalueRef) {
-  expected<int, error> e(unexpected<error>(error::queue_full));
+  expected<int, error> e{unexpected<error>(error::queue_full)};
   error err = std::move(e).error();
   EXPECT_EQ(err, error::queue_full);
 }
@@ -182,7 +182,7 @@ TEST_F(ExpectedTMonadicTest, OperatorDerefConstRef) {
 // ---------- expected<T,E> and_then lvalue& on error ---------
 
 TEST_F(ExpectedTMonadicTest, AndThenLvalueOnError) {
-  expected<int, error> e(unexpected<error>(error::timeout));
+  expected<int, error> e{unexpected<error>(error::timeout)};
   auto result = e.and_then([](int v) -> expected<int, error> {
     return expected<int, error>(v * 2);
   });
@@ -204,7 +204,7 @@ TEST_F(ExpectedTMonadicTest, AndThenConstLvalueOnValue) {
 // ---------- expected<T,E> and_then const& on error ---------
 
 TEST_F(ExpectedTMonadicTest, AndThenConstLvalueOnError) {
-  const expected<int, error> e(unexpected<error>(error::would_block));
+  const expected<int, error> e{unexpected<error>(error::would_block)};
   auto result = e.and_then([](const int &v) -> expected<int, error> {
     return expected<int, error>(v * 3);
   });
@@ -237,7 +237,7 @@ TEST_F(ExpectedTMonadicTest, OrElseConstLvalueOnValue) {
 // ---------- expected<T,E> or_else const& on error ---------
 
 TEST_F(ExpectedTMonadicTest, OrElseConstLvalueOnError) {
-  const expected<int, error> e(unexpected<error>(error::timeout));
+  const expected<int, error> e{unexpected<error>(error::timeout)};
   auto result = e.or_else([](const error &) -> expected<int, error> {
     return expected<int, error>(99);
   });
@@ -248,7 +248,7 @@ TEST_F(ExpectedTMonadicTest, OrElseConstLvalueOnError) {
 // ---------- expected<T,E> transform lvalue& on error ---------
 
 TEST_F(ExpectedTMonadicTest, TransformLvalueOnError) {
-  expected<int, error> e(unexpected<error>(error::queue_empty));
+  expected<int, error> e{unexpected<error>(error::queue_empty)};
   auto result = e.transform([](int v) { return v * 3; });
   EXPECT_FALSE(result.has_value());
   EXPECT_EQ(result.error(), error::queue_empty);
@@ -266,7 +266,7 @@ TEST_F(ExpectedTMonadicTest, TransformConstLvalueOnValue) {
 // ---------- expected<T,E> transform const& on error ---------
 
 TEST_F(ExpectedTMonadicTest, TransformConstLvalueOnError) {
-  const expected<int, error> e(unexpected<error>(error::out_of_memory));
+  const expected<int, error> e{unexpected<error>(error::out_of_memory)};
   auto result = e.transform([](const int &v) { return v + 1; });
   EXPECT_FALSE(result.has_value());
   EXPECT_EQ(result.error(), error::out_of_memory);
@@ -284,7 +284,7 @@ TEST_F(ExpectedTMonadicTest, TransformErrorLvalueOnValue) {
 // ---------- expected<T,E> transform_error lvalue& on error ---------
 
 TEST_F(ExpectedTMonadicTest, TransformErrorLvalueOnError) {
-  expected<int, error> e(unexpected<error>(error::timeout));
+  expected<int, error> e{unexpected<error>(error::timeout)};
   auto result = e.transform_error([](error) -> int { return 42; });
   EXPECT_FALSE(result.has_value());
   EXPECT_EQ(result.error(), 42);
@@ -302,7 +302,7 @@ TEST_F(ExpectedTMonadicTest, TransformErrorConstLvalueOnValue) {
 // ---------- expected<T,E> transform_error const& on error ---------
 
 TEST_F(ExpectedTMonadicTest, TransformErrorConstLvalueOnError) {
-  const expected<int, error> e(unexpected<error>(error::invalid_handle));
+  const expected<int, error> e{unexpected<error>(error::invalid_handle)};
   auto result = e.transform_error([](const error &) -> int { return 99; });
   EXPECT_FALSE(result.has_value());
   EXPECT_EQ(result.error(), 99);
@@ -336,14 +336,14 @@ class ExpectedVoidMonadicTest : public ::testing::Test {};
 // ---------- expected<void,E> copy/move from error ---------
 
 TEST_F(ExpectedVoidMonadicTest, CopyConstructorFromError) {
-  expected<void, error> src(unexpected<error>(error::timeout));
+  expected<void, error> src{unexpected<error>(error::timeout)};
   expected<void, error> dst(src);
   EXPECT_FALSE(dst.has_value());
   EXPECT_EQ(dst.error(), error::timeout);
 }
 
 TEST_F(ExpectedVoidMonadicTest, MoveConstructorFromError) {
-  expected<void, error> src(unexpected<error>(error::queue_empty));
+  expected<void, error> src{unexpected<error>(error::queue_empty)};
   expected<void, error> dst(std::move(src));
   EXPECT_FALSE(dst.has_value());
   EXPECT_EQ(dst.error(), error::queue_empty);
@@ -359,7 +359,7 @@ TEST_F(ExpectedVoidMonadicTest, ConstructFromUnexpectedLvalue) {
 }
 
 TEST_F(ExpectedVoidMonadicTest, ConstructFromUnexpectedRvalue) {
-  expected<void, error> e(unexpected<error>(error::out_of_memory));
+  expected<void, error> e{unexpected<error>(error::out_of_memory)};
   EXPECT_FALSE(e.has_value());
   EXPECT_EQ(e.error(), error::out_of_memory);
 }
@@ -389,7 +389,7 @@ TEST_F(ExpectedVoidMonadicTest, CopyAssignmentSelfAssignmentValue) {
 }
 
 TEST_F(ExpectedVoidMonadicTest, CopyAssignmentSelfAssignmentError) {
-  expected<void, error> e(unexpected<error>(error::timeout));
+  expected<void, error> e{unexpected<error>(error::timeout)};
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wself-assign-overloaded"
   e = e;
@@ -400,13 +400,13 @@ TEST_F(ExpectedVoidMonadicTest, CopyAssignmentSelfAssignmentError) {
 
 TEST_F(ExpectedVoidMonadicTest, CopyAssignmentValueToError) {
   expected<void, error> src;
-  expected<void, error> dst(unexpected<error>(error::timeout));
+  expected<void, error> dst{unexpected<error>(error::timeout)};
   dst = src;
   EXPECT_TRUE(dst.has_value());
 }
 
 TEST_F(ExpectedVoidMonadicTest, CopyAssignmentErrorToValue) {
-  expected<void, error> src(unexpected<error>(error::queue_empty));
+  expected<void, error> src{unexpected<error>(error::queue_empty)};
   expected<void, error> dst;
   dst = src;
   EXPECT_FALSE(dst.has_value());
@@ -414,8 +414,8 @@ TEST_F(ExpectedVoidMonadicTest, CopyAssignmentErrorToValue) {
 }
 
 TEST_F(ExpectedVoidMonadicTest, CopyAssignmentErrorToError) {
-  expected<void, error> src(unexpected<error>(error::would_block));
-  expected<void, error> dst(unexpected<error>(error::timeout));
+  expected<void, error> src{unexpected<error>(error::would_block)};
+  expected<void, error> dst{unexpected<error>(error::timeout)};
   dst = src;
   EXPECT_FALSE(dst.has_value());
   EXPECT_EQ(dst.error(), error::would_block);
@@ -433,7 +433,7 @@ TEST_F(ExpectedVoidMonadicTest, MoveAssignmentSelfAssignmentValue) {
 }
 
 TEST_F(ExpectedVoidMonadicTest, MoveAssignmentSelfAssignmentError) {
-  expected<void, error> e(unexpected<error>(error::queue_full));
+  expected<void, error> e{unexpected<error>(error::queue_full)};
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wself-move"
   e = std::move(e);
@@ -444,13 +444,13 @@ TEST_F(ExpectedVoidMonadicTest, MoveAssignmentSelfAssignmentError) {
 
 TEST_F(ExpectedVoidMonadicTest, MoveAssignmentValueToError) {
   expected<void, error> src;
-  expected<void, error> dst(unexpected<error>(error::timeout));
+  expected<void, error> dst{unexpected<error>(error::timeout)};
   dst = std::move(src);
   EXPECT_TRUE(dst.has_value());
 }
 
 TEST_F(ExpectedVoidMonadicTest, MoveAssignmentErrorToValue) {
-  expected<void, error> src(unexpected<error>(error::would_block));
+  expected<void, error> src{unexpected<error>(error::would_block)};
   expected<void, error> dst;
   dst = std::move(src);
   EXPECT_FALSE(dst.has_value());
@@ -458,8 +458,8 @@ TEST_F(ExpectedVoidMonadicTest, MoveAssignmentErrorToValue) {
 }
 
 TEST_F(ExpectedVoidMonadicTest, MoveAssignmentErrorToError) {
-  expected<void, error> src(unexpected<error>(error::invalid_handle));
-  expected<void, error> dst(unexpected<error>(error::timeout));
+  expected<void, error> src{unexpected<error>(error::invalid_handle)};
+  expected<void, error> dst{unexpected<error>(error::timeout)};
   dst = std::move(src);
   EXPECT_FALSE(dst.has_value());
   EXPECT_EQ(dst.error(), error::invalid_handle);
@@ -468,12 +468,12 @@ TEST_F(ExpectedVoidMonadicTest, MoveAssignmentErrorToError) {
 // ---------- expected<void,E> error() const&, error()&& ---------
 
 TEST_F(ExpectedVoidMonadicTest, ErrorConstRef) {
-  const expected<void, error> e(unexpected<error>(error::timeout));
+  const expected<void, error> e{unexpected<error>(error::timeout)};
   EXPECT_EQ(e.error(), error::timeout);
 }
 
 TEST_F(ExpectedVoidMonadicTest, ErrorRvalueRef) {
-  expected<void, error> e(unexpected<error>(error::queue_full));
+  expected<void, error> e{unexpected<error>(error::queue_full)};
   error err = std::move(e).error();
   EXPECT_EQ(err, error::queue_full);
 }
@@ -481,7 +481,7 @@ TEST_F(ExpectedVoidMonadicTest, ErrorRvalueRef) {
 // ---------- expected<void,E> and_then lvalue& on error ---------
 
 TEST_F(ExpectedVoidMonadicTest, AndThenLvalueOnError) {
-  expected<void, error> e(unexpected<error>(error::timeout));
+  expected<void, error> e{unexpected<error>(error::timeout)};
   auto result = e.and_then([]() -> expected<int, error> {
     return expected<int, error>(42);
   });
@@ -503,7 +503,7 @@ TEST_F(ExpectedVoidMonadicTest, AndThenConstLvalueOnValue) {
 // ---------- expected<void,E> and_then const& on error ---------
 
 TEST_F(ExpectedVoidMonadicTest, AndThenConstLvalueOnError) {
-  const expected<void, error> e(unexpected<error>(error::would_block));
+  const expected<void, error> e{unexpected<error>(error::would_block)};
   auto result = e.and_then([]() -> expected<int, error> {
     return expected<int, error>(42);
   });
@@ -524,7 +524,7 @@ TEST_F(ExpectedVoidMonadicTest, OrElseLvalueOnValue) {
 // ---------- expected<void,E> or_else lvalue& on error ---------
 
 TEST_F(ExpectedVoidMonadicTest, OrElseLvalueOnError) {
-  expected<void, error> e(unexpected<error>(error::timeout));
+  expected<void, error> e{unexpected<error>(error::timeout)};
   auto result = e.or_else([](error) -> expected<void, error> {
     return expected<void, error>();
   });
@@ -544,7 +544,7 @@ TEST_F(ExpectedVoidMonadicTest, OrElseConstLvalueOnValue) {
 // ---------- expected<void,E> or_else const& on error ---------
 
 TEST_F(ExpectedVoidMonadicTest, OrElseConstLvalueOnError) {
-  const expected<void, error> e(unexpected<error>(error::queue_empty));
+  const expected<void, error> e{unexpected<error>(error::queue_empty)};
   auto result = e.or_else([](const error &) -> expected<void, error> {
     return expected<void, error>();
   });
@@ -554,7 +554,7 @@ TEST_F(ExpectedVoidMonadicTest, OrElseConstLvalueOnError) {
 // ---------- expected<void,E> transform lvalue& on error ---------
 
 TEST_F(ExpectedVoidMonadicTest, TransformLvalueOnError) {
-  expected<void, error> e(unexpected<error>(error::timeout));
+  expected<void, error> e{unexpected<error>(error::timeout)};
   auto result = e.transform([]() { return 42; });
   EXPECT_FALSE(result.has_value());
   EXPECT_EQ(result.error(), error::timeout);
@@ -572,7 +572,7 @@ TEST_F(ExpectedVoidMonadicTest, TransformConstLvalueOnValue) {
 // ---------- expected<void,E> transform const& on error ---------
 
 TEST_F(ExpectedVoidMonadicTest, TransformConstLvalueOnError) {
-  const expected<void, error> e(unexpected<error>(error::out_of_memory));
+  const expected<void, error> e{unexpected<error>(error::out_of_memory)};
   auto result = e.transform([]() { return 42; });
   EXPECT_FALSE(result.has_value());
   EXPECT_EQ(result.error(), error::out_of_memory);
@@ -589,7 +589,7 @@ TEST_F(ExpectedVoidMonadicTest, TransformErrorLvalueOnValue) {
 // ---------- expected<void,E> transform_error lvalue& on error ---------
 
 TEST_F(ExpectedVoidMonadicTest, TransformErrorLvalueOnError) {
-  expected<void, error> e(unexpected<error>(error::timeout));
+  expected<void, error> e{unexpected<error>(error::timeout)};
   auto result = e.transform_error([](error) -> int { return 42; });
   EXPECT_FALSE(result.has_value());
   EXPECT_EQ(result.error(), 42);
@@ -606,7 +606,7 @@ TEST_F(ExpectedVoidMonadicTest, TransformErrorConstLvalueOnValue) {
 // ---------- expected<void,E> transform_error const& on error ---------
 
 TEST_F(ExpectedVoidMonadicTest, TransformErrorConstLvalueOnError) {
-  const expected<void, error> e(unexpected<error>(error::invalid_handle));
+  const expected<void, error> e{unexpected<error>(error::invalid_handle)};
   auto result = e.transform_error([](const error &) -> int { return 99; });
   EXPECT_FALSE(result.has_value());
   EXPECT_EQ(result.error(), 99);
@@ -619,7 +619,7 @@ TEST_F(ExpectedVoidMonadicTest, DestructorValuePath) {
 }
 
 TEST_F(ExpectedVoidMonadicTest, DestructorErrorPath) {
-  { expected<void, error> e(unexpected<error>(error::timeout)); }
+  { expected<void, error> e{unexpected<error>(error::timeout)}; }
 }
 
 // ---------- expected<T,E> destructor path: value then error ---------
@@ -629,7 +629,7 @@ TEST_F(ExpectedTMonadicTest, DestructorValuePath) {
 }
 
 TEST_F(ExpectedTMonadicTest, DestructorErrorPath) {
-  { expected<int, error> e(unexpected<error>(error::timeout)); }
+  { expected<int, error> e{unexpected<error>(error::timeout)}; }
 }
 
 // ---------- String-typed T for branch coverage ---------
