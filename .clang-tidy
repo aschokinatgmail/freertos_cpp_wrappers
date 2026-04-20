@@ -3,8 +3,33 @@ Checks: >
   cppcoreguidelines-*,
   cert-*,
   google-*,
-  hicpp-*
+  hicpp-*,
+  bugprone-*,
+  concurrency-*,
+  modernize-*,
+  performance-*,
+  readability-*,
+  -bugprone-easily-swappable-parameters,
+  -bugprone-narrowing-conversions,
+  -cppcoreguidelines-pro-type-reinterpret-cast,
+  -cppcoreguidelines-pro-type-vararg,
+  -cppcoreguidelines-avoid-magic-numbers,
+  -google-readability-todo,
+  -modernize-use-trailing-return-type,
+  -readability-function-cognitive-complexity,
+  -readability-identifier-length,
+  -readability-magic-numbers
 HeaderFilterRegex: '^include/.*'
 FormatStyle: file
+WarningsAsErrors: ''
 SystemHeaders: false
+CheckOptions:
+  - key: readability-function-size.LineThreshold
+    value: 150
+  - key: readability-function-size.StatementThreshold
+    value: 200
+  - key: readability-function-size.BranchThreshold
+    value: 30
+  - key: modernize-use-override.AllowOverrideAndFinal
+    value: true
 ...

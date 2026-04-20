@@ -52,6 +52,12 @@ template <typename E> using unexpected = std::unexpected<E>;
 
 namespace freertos {
 
+/** @brief Unified error enumeration for all FreeRTOS wrapper operations.
+ *
+ * Used as the error type in expected<T, error> return values from
+ * _ex-suffixed wrapper methods, providing type-safe error handling
+ * instead of bare error codes.
+ */
 enum class error : uint8_t {
   ok = 0,
   timeout,
@@ -64,6 +70,11 @@ enum class error : uint8_t {
   invalid_parameter,
 };
 
+/** @brief Wrapper for an unexpected error value, used to construct error states in expected.
+ *
+ * Analogous to std::unexpected from C++23. Holds an error value of type E
+ * and is implicitly convertible from it.
+ */
 template <typename E> class unexpected {
 public:
   constexpr unexpected(const E &err) : m_error(err) {}
@@ -88,14 +99,27 @@ constexpr bool operator!=(const unexpected<E> &lhs, const unexpected<E> &rhs) {
   return !(lhs == rhs);
 }
 
+/** @brief Tag type for in-place error construction of expected values.
+ *
+ * Used as expected(unexpect, error_value) to explicitly construct an error state.
+ * Analogous to std::unexpect_t from C++23.
+ */
 struct unexpect_t {
   explicit unexpect_t() = default;
 };
 
 inline constexpr unexpect_t unexpect{};
 
+/** @brief A type-safe return type that holds either a value of type T or an error of type E.
+ *
+ * Polyfill for std::expected (C++23). Provides value(), error(), has_value(),
+ * and_then(), or_else(), transform(), and transform_error() for monadic chaining.
+ * When C++23 std::expected is available, it is used directly via an alias.
+ *
+ * @tparam T The value type on success
+ * @tparam E The error type on failure
+ */
 template <typename T, typename E> class expected {
-public:
   constexpr expected(const T &val) : m_has_value(true) {
     new (&m_storage) T(val);
   }
@@ -316,6 +340,14 @@ private:
   bool m_has_value;
 };
 
+/** @brief Specialization of expected for void value type.
+ *
+ * Represents an operation that either succeeds (void) or fails with error E.
+ * Used for operations that do not return a value but can still fail,
+ * such as semaphore give or queue send.
+ *
+ * @tparam E The error type on failure (typically freertos::error)
+ */
 template <typename E> class expected<void, E> {
 public:
   constexpr expected() noexcept : m_has_value(true) {}

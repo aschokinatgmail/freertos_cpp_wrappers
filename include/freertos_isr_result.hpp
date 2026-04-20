@@ -36,6 +36,14 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 namespace freertos {
 
+/** @brief Result type for ISR-safe FreeRTOS wrapper methods.
+ *
+ * Bundles the operation return value with the higher_priority_task_woken flag
+ * required for proper ISR context handling. After all ISR operations, check
+ * higher_priority_task_woken and call portYIELD_FROM_ISR() if set.
+ *
+ * @tparam T The type of the operation result value
+ */
 template <typename T> struct isr_result {
   T result;
   BaseType_t higher_priority_task_woken;

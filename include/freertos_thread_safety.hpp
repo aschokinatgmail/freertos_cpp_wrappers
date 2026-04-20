@@ -30,6 +30,19 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ************************************************************************************/
 
+/** @file freertos_thread_safety.hpp
+ *  @brief Thread safety annotation macros for FreeRTOS C++ Wrappers.
+ *
+ * When FREERTOS_CPP_WRAPPERS_THREAD_SAFETY_ANNOTATIONS is enabled and
+ * compiled with Clang, these macros expand to __attribute__((capability(...)))
+ * annotations that enable Clang's Thread Safety Analysis. On other compilers
+ * or when disabled, they expand to nothing.
+ *
+ * Usage: Define FREERTOS_CPP_WRAPPERS_THREAD_SAFETY_ANNOTATIONS=1 before
+ * including this header, or pass -DFREERTOS_CPP_WRAPPERS_THREAD_SAFETY_ANNOTATIONS=1
+ * to the compiler.
+ */
+
 #pragma once
 
 #ifndef __cplusplus

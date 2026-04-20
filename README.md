@@ -18,7 +18,7 @@ This project follows [Semantic Versioning](https://semver.org/). The version is 
 | `FREERTOS_CPP_WRAPPERS_VERSION_MAJOR` | Major version (breaking changes) |
 | `FREERTOS_CPP_WRAPPERS_VERSION_MINOR` | Minor version (new features) |
 | `FREERTOS_CPP_WRAPPERS_VERSION_PATCH` | Patch version (bug fixes) |
-| `FREERTOS_CPP_WRAPPERS_VERSION` | Full version string (e.g. `"1.0.2"`) |
+| `FREERTOS_CPP_WRAPPERS_VERSION` | Full version string (e.g. `"3.0.0"`) |
 
 Include `<freertos.hpp>` to access version macros at compile time.
 
@@ -26,11 +26,14 @@ Include `<freertos.hpp>` to access version macros at compile time.
 
 | Feature | Benefit |
 |---------|---------|
-| **Safety-Critical Ready** | MISRA 2012 C compliant, suitable for functonaly safe applications |
+| **Safety-Critical Ready** | MISRA 2012 C compliant, suitable for functionally safe applications |
 | **Modern C++17** | RAII wrappers with move semantics, no raw pointers |
 | **Production Tested** | 439 tests, 97% coverage, used in commercial BMS systems |
 | **Zero Overhead** | Thin wrappers compile to efficient FreeRTOS calls |
-| **Comprehensive** | Tasks, Semaphores, Queues, Event Groups, Stream/Message Buffers, Timers |
+| **Dual API** | FreeRTOS-native and std-compatible interfaces |
+| **expected\<T,E\> Error Handling** | Type-safe error handling replacing error codes |
+| **Strong Typedefs** | Prevent mixing primitive types at compile time |
+| **Comprehensive** | Tasks, Semaphores, Queues, Event Groups, Stream/Message Buffers, Timers, Queue Sets |
 | **Well Documented** | Doxygen API reference with examples and tutorials |
 
 ### Comparison with Alternatives
@@ -38,9 +41,15 @@ Include `<freertos.hpp>` to access version macros at compile time.
 | Feature | This Library | Raw FreeRTOS | Other Wrappers |
 |---------|--------------|--------------|-----------------|
 | RAII Support | ✅ | ❌ | Varies |
-| MISRA C 2012 Rulles Compliant | ✅ | N/A | ❌ |
+| MISRA C 2012 Rules Compliant | ✅ | N/A | ❌ |
+| expected\<T,E\> Error Handling | ✅ | ❌ | ❌ |
+| Strong Typedefs | ✅ | ❌ | ❌ |
+| Thread Safety Annotations | ✅ | ❌ | ❌ |
 | Test Coverage | 97% | N/A | Unknown |
 | C++17 Features | ✅ | ❌ | Limited |
+| ISR Result Type | ✅ | ❌ | ❌ |
+| Queue Sets | ✅ | C API only | ❌ |
+| External Allocators | ✅ | ❌ | ❌ |
 | Documentation | Comprehensive | Reference | Basic |
 
 ## Use Cases
@@ -56,6 +65,26 @@ This library is ideal for:
 - Industrial automation controllers
 - Consumer electronics with safety requirements
 
+## Features (v3.0.0)
+
+| Category | Feature | Description |
+|----------|---------|-------------|
+| **API** | Dual API | FreeRTOS-native and std-compatible method pairs |
+| **Error Handling** | expected\<T,E\> | Type-safe error handling with `freertos::expected` (C++23 polyfill) |
+| **Error Handling** | error enum | Unified `freertos::error` enumeration for all wrapper errors |
+| **Memory** | External Allocators | Static allocation from user-supplied memory regions |
+| **Memory** | Dynamic Allocators | Built-in dynamic allocation with `da::` namespace aliases |
+| **Type Safety** | Strong Typedefs | `priority`, `tick_count`, `event_bits`, `core_affinity_mask`, `queue_index`, `semaphore_count` |
+| **Concurrency** | Thread Safety Annotations | Clang `__attribute__((capability))` based annotations (opt-in) |
+| **Concurrency** | Queue Sets | Monitor multiple queues/semaphores simultaneously |
+| **Concurrency** | Indexed Task Notifications | Notification arrays via `configTASK_NOTIFICATION_ARRAY_ENTRIES` |
+| **Concurrency** | SMP Core Affinity | Pin tasks to specific CPU cores on SMP FreeRTOS |
+| **Semantics** | Move Semantics | All wrappers are move-constructible and move-assignable |
+| **Interoperability** | span-based API | `freertos::span` polyfill for buffer operations |
+| **Interoperability** | ISR Result Type | `isr_result<T>` bundles return value with `higher_priority_task_woken` flag |
+| **Build** | C++17 Feature Detection | Compile-time `FREERTOS_CPP_WRAPPERS_CPP17`, `FREERTOS_CPP_WRAPPERS_CPP20` macros |
+| **Build** | C++17 Polyfills | `expected` and `span` polyfills fall back when std library lacks them |
+
 ## Quick Integration
 
 ### Option 1: CMake FetchContent (Recommended)
@@ -65,7 +94,7 @@ Include(FetchContent)
 FetchContent_Declare(
   freertos_cpp_wrappers
   GIT_REPOSITORY https://github.com/aschokinatgmail/freertos_cpp_wrappers.git
-  GIT_TAG v1.0.2
+  GIT_TAG v3.0.0
 )
 FetchContent_MakeAvailable(freertos_cpp_wrappers)
 
@@ -93,20 +122,114 @@ git submodule add https://github.com/aschokinatgmail/freertos_cpp_wrappers.git t
 ```cpp
 #include <freertos_task.hpp>
 
-// RAII task with automatic cleanup
 freertos::Task my_task(
-    "MyTask",           // Name
-    1024,               // Stack size (words)
-    freertos::Priority::Normal,
+    "MyTask",
+    1024,
+    freertos::priority::Normal,
     []() {
         while (true) {
-            // Task code
-            freertos::Task::delay(100);
+            freertos::Task::delay(freertos::tick_count{100});
         }
     }
 );
+```
 
-// Task automatically starts and cleans up on destruction
+### Strong Typedefs (v3.0.0)
+
+```cpp
+#include <freertos_strong_types.hpp>
+
+// Type-safe FreeRTOS primitives - no more mixing raw integers
+freertos::priority task_prio{2};
+freertos::tick_count delay_ticks{100};
+freertos::event_bits bits{0x01};
+freertos::core_affinity_mask mask = freertos::core_affinity_mask::core(0);
+
+// Compile-time prevention of accidental type mixing
+// task_prio = delay_ticks;  // Error: different types
+auto higher = task_prio.above();   // priority{3}
+auto lower  = task_prio.below();   // priority{1}
+```
+
+### Expected-based Error Handling (v3.0.0)
+
+```cpp
+#include <freertos_queue.hpp>
+
+freertos::queue<10, int> q;
+
+// std-compatible API returns expected<T, error>
+auto result = q.send_ex(42);
+if (result.has_value()) {
+    // Success
+} else {
+    // Type-safe error: result.error() is freertos::error
+    switch (result.error()) {
+        case freertos::error::timeout:     break;
+        case freertos::error::queue_full:   break;
+        case freertos::error::invalid_handle: break;
+        default: break;
+    }
+}
+
+// Chaining with and_then / or_else
+q.send_ex(42).and_then([]() { /* success */ })
+             .or_else([](freertos::error e) { /* handle error */ });
+```
+
+### ISR Result Type (v3.0.0)
+
+```cpp
+#include <freertos_isr_result.hpp>
+
+void my_isr_handler() {
+    auto result = semaphore.release_isr();
+    // result.higher_priority_task_woken tracks context switch need
+    // result.result contains the return value
+    if (result.higher_priority_task_woken) {
+        portYIELD_FROM_ISR();
+    }
+}
+```
+
+### External Allocators (v3.0.0)
+
+```cpp
+#include <freertos_external_allocator.hpp>
+
+// Define a memory region for static allocation
+struct MyRegion {
+    static void* allocate(size_t size) { return region_pool.allocate(size); }
+    static void deallocate(void* ptr) { region_pool.deallocate(ptr); }
+};
+
+// Create wrappers using external memory
+freertos::binary_semaphore<freertos::external_semaphore_allocator<MyRegion>> sem;
+freertos::queue<10, int, freertos::external_queue_allocator<MyRegion, 10, int>> q;
+
+// Or use the ea:: namespace aliases
+namespace ea = freertos::ea;
+ea::binary_semaphore<MyRegion> sem;      // External allocator semaphore
+ea::queue<MyRegion, 10, int> q;         // External allocator queue
+```
+
+### Thread Safety Annotations (v3.0.0)
+
+```cpp
+#define FREERTOS_CPP_WRAPPERS_THREAD_SAFETY_ANNOTATIONS 1
+#include <freertos_thread_safety.hpp>
+
+class FREERTOS_CAPABILITY("mutex") SharedData {
+    FREERTOS_GUARDED_BY(mutex_) int value_{0};
+    freertos::mutex<> mutex_;
+
+public:
+    void increment() FREERTOS_ACQUIRE(mutex_) {
+        auto lock = mutex_.lock();
+        value_++;
+    }
+    int get() FREERTOS_REQUIRES(mutex_) { return value_; }
+};
 ```
 
 ### Semaphore for Resource Protection
@@ -127,23 +250,23 @@ void protected_operation() {
 ```cpp
 #include <freertos_queue.hpp>
 
-freertos::Queue<int> data_queue(10);
+freertos::queue<10, int> data_queue;
 
 // Producer task
 data_queue.send(42);
 
 // Consumer task
-auto value = data_queue.receive(freertos::Timeout::ms(100));
+auto value = data_queue.receive(freertos::tick_count{100});
 ```
 
 ### Timer with Callback
 
 ```cpp
-#include <freertos_timer.hpp>
+#include <freertos_sw_timer.hpp>
 
-freertos::Timer periodic_timer(
+freertos::timer periodic_timer(
     "Periodic",
-    freertos::Timeout::ms(500),
+    freertos::tick_count{500},
     true,  // Auto-reload
     []() {
         // Timer callback
@@ -168,16 +291,39 @@ All wrappers compile to near-native FreeRTOS calls with no virtual function over
 
 ## Requirements
 
+- **C++ Standard:** C++17 or later (required)
 - **FreeRTOS:** v10.0.0 or later
-- **C++ Standard:** C++17 or later
 - **Compiler:** GCC 7+, Clang 6+, or MSVC 2019+
 - **Platform:** Any FreeRTOS-supported platform
+
+### C++17 Requirement
+
+This library requires C++17. Key C++17 features used:
+- `std::optional` for optional return values
+- `if constexpr` for compile-time branching
+- Structured bindings
+- `freertos::expected` polyfill (falls back to `std::expected` when C++23 is available)
+- `freertos::span` polyfill (falls back to `std::span` when C++20 is available)
 
 ### Tested Platforms
 
 - STM32 (ARM Cortex-M)
 - ESP32 (Xtensa)
 - Linux (FreeRTOS simulator)
+
+## Migration Guide
+
+### Migrating from v1.x to v2.x/v3.x
+
+See the detailed migration guide: [docs/migration-v1-to-v2.md](docs/migration-v1-to-v2.md)
+
+Key changes in v3.0.0:
+- **C++17 is now required** (previously C++14)
+- **expected\<T,E\> error handling** replaces bare error codes in `_ex`-suffixed methods
+- **Strong typedefs** replace raw `UBaseType_t`/`TickType_t` parameters in new API overloads
+- **Thread safety annotations** are opt-in via `FREERTOS_CPP_WRAPPERS_THREAD_SAFETY_ANNOTATIONS`
+- **Queue sets** are available under `#if configUSE_QUEUE_SETS`
+- **External allocators** provide user-controlled static allocation
 
 ## 📚 Documentation
 
@@ -199,24 +345,12 @@ doxygen Doxyfile
 # Documentation will be available in docs/html/index.html
 ```
 
-## Features
-
-- Modern C++17 RAII wrappers for FreeRTOS APIs
-- Comprehensive test coverage (439 tests)
-- Comprehensive static analysis with clang-tidy + enhanced cppcheck (all rules)
-- MISRA C++ compliance analysis with detailed rule descriptions
-- Automated code formatting with clang-format (LLVM-based style)
-- Support for both static and dynamic allocation strategies
-- chrono compatibility for timeout handling
-- Enhanced C++17 features testing
-- Automated validation and verification reporting
-
 ## Testing
 
 The project includes comprehensive test coverage with 439 automated tests covering all major functionality:
 
 - **Task Module**: 81 tests (lifecycle, periodic tasks, move semantics)
-- **Semaphore Module**: 81 tests (binary, counting, mutexes, lock guards)  
+- **Semaphore Module**: 81 tests (binary, counting, mutexes, lock guards)
 - **Queue Module**: 49 tests (send/receive operations, state management)
 - **Event Group Module**: 30 tests (bit operations, wait conditions)
 - **Stream Buffer Module**: 47 tests (buffer operations, ISR variants)
@@ -248,7 +382,7 @@ The project generates a single comprehensive validation and verification report 
   - **Test Execution Results**: Complete Google Test results with pass/fail status per test
   - **Code Coverage Analysis**: Line and function coverage with uncovered areas explanation
   - **Validation Conclusions**: Production readiness assessment and recommendations
-- **Tools**: 
+- **Tools**:
   - **clang-tidy**: cppcoreguidelines-*, cert-*, google-*, hicpp-*
   - **Enhanced cppcheck**: All rules (style, performance, portability, security, unused code, const correctness)
   - **MISRA C++**: MISRA C 2012 rules applicable to C++ with detailed descriptions
@@ -266,13 +400,6 @@ make validation-verification-report
 
 # Or run the script directly
 ./scripts/generate_validation_verification_report.sh
-
-# This will:
-# 1. Build the project with coverage enabled
-# 2. Run all tests via Google Test harness
-# 3. Generate coverage data
-# 4. Run comprehensive static analysis (clang-tidy + enhanced cppcheck + MISRA C++)
-# 5. Generate combined timestamped report in VnV/ directory
 ```
 
 ### Manual Report Generation
@@ -402,6 +529,6 @@ This library is suitable for commercial applications. The MIT license permits:
 
 ## Author
 
-**Andrey Shchekin**  
+**Andrey Shchekin**
 - GitHub: [@aschokinatgmail](https://github.com/aschokinatgmail)
 - LinkedIn: [Andrey Shchekin](https://linkedin.com/in/andrey-shchekin)
