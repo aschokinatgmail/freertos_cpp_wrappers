@@ -90,6 +90,13 @@ public:
     other.m_memory = nullptr;
     other.m_region = nullptr;
   }
+
+  void swap(external_semaphore_allocator &other) noexcept {
+    using std::swap;
+    swap(m_region, other.m_region);
+    swap(m_memory, other.m_memory);
+  }
+
   ~external_semaphore_allocator() {
     if (m_memory) {
       m_region->deallocate(m_memory);
@@ -159,6 +166,14 @@ public:
     other.m_storage_memory = nullptr;
     other.m_region = nullptr;
   }
+
+  void swap(external_queue_allocator &other) noexcept {
+    using std::swap;
+    swap(m_region, other.m_region);
+    swap(m_struct_memory, other.m_struct_memory);
+    swap(m_storage_memory, other.m_storage_memory);
+  }
+
   ~external_queue_allocator() {
     if (m_struct_memory) {
       m_region->deallocate(m_struct_memory);
@@ -211,6 +226,13 @@ public:
     other.m_memory = nullptr;
     other.m_region = nullptr;
   }
+
+  void swap(external_event_group_allocator &other) noexcept {
+    using std::swap;
+    swap(m_region, other.m_region);
+    swap(m_memory, other.m_memory);
+  }
+
   ~external_event_group_allocator() {
     if (m_memory) {
       m_region->deallocate(m_memory);
@@ -258,6 +280,14 @@ public:
     other.m_storage_memory = nullptr;
     other.m_region = nullptr;
   }
+
+  void swap(external_stream_buffer_allocator &other) noexcept {
+    using std::swap;
+    swap(m_region, other.m_region);
+    swap(m_struct_memory, other.m_struct_memory);
+    swap(m_storage_memory, other.m_storage_memory);
+  }
+
   ~external_stream_buffer_allocator() {
     if (m_struct_memory) {
       m_region->deallocate(m_struct_memory);
@@ -317,6 +347,14 @@ public:
     other.m_storage_memory = nullptr;
     other.m_region = nullptr;
   }
+
+  void swap(external_message_buffer_allocator &other) noexcept {
+    using std::swap;
+    swap(m_region, other.m_region);
+    swap(m_struct_memory, other.m_struct_memory);
+    swap(m_storage_memory, other.m_storage_memory);
+  }
+
   ~external_message_buffer_allocator() {
     if (m_struct_memory) {
       m_region->deallocate(m_struct_memory);
@@ -367,6 +405,13 @@ public:
     other.m_memory = nullptr;
     other.m_region = nullptr;
   }
+
+  void swap(external_sw_timer_allocator &other) noexcept {
+    using std::swap;
+    swap(m_region, other.m_region);
+    swap(m_memory, other.m_memory);
+  }
+
   ~external_sw_timer_allocator() {
     if (m_memory) {
       m_region->deallocate(m_memory);
@@ -411,6 +456,14 @@ public:
     other.m_stack_memory = nullptr;
     other.m_region = nullptr;
   }
+
+  void swap(external_task_allocator &other) noexcept {
+    using std::swap;
+    swap(m_region, other.m_region);
+    swap(m_task_memory, other.m_task_memory);
+    swap(m_stack_memory, other.m_stack_memory);
+  }
+
   ~external_task_allocator() {
     if (m_task_memory) {
       m_region->deallocate(m_task_memory);

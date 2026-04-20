@@ -63,12 +63,18 @@ public:
   ~static_stream_buffer_allocator() = default;
   static_stream_buffer_allocator(const static_stream_buffer_allocator &) =
       delete;
-  static_stream_buffer_allocator(static_stream_buffer_allocator &&) = delete;
+  static_stream_buffer_allocator(static_stream_buffer_allocator &&) = default;
 
   static_stream_buffer_allocator &
   operator=(const static_stream_buffer_allocator &) = delete;
   static_stream_buffer_allocator &
   operator=(static_stream_buffer_allocator &&) = delete;
+
+  void swap(static_stream_buffer_allocator &other) noexcept {
+    using std::swap;
+    swap(m_stream_buffer_placeholder, other.m_stream_buffer_placeholder);
+    swap(m_storage, other.m_storage);
+  }
 
   StreamBufferHandle_t create(size_t trigger_level_bytes = 1) {
     return xStreamBufferCreateStatic(StreamBufferSize, trigger_level_bytes,
@@ -85,6 +91,8 @@ public:
  */
 template <size_t StreamBufferSize> class dynamic_stream_buffer_allocator {
 public:
+  void swap(dynamic_stream_buffer_allocator &other) noexcept { (void)other; }
+
   StreamBufferHandle_t create(size_t trigger_level_bytes = 1) {
     return xStreamBufferCreate(StreamBufferSize, trigger_level_bytes);
   }
@@ -122,7 +130,8 @@ public:
   }
   stream_buffer(const stream_buffer &) = delete;
   stream_buffer(stream_buffer &&src) noexcept
-      : m_stream_buffer(src.m_stream_buffer) {
+      : m_allocator(std::move(src.m_allocator)),
+        m_stream_buffer(src.m_stream_buffer) {
     src.m_stream_buffer = nullptr;
   }
   /**
@@ -146,6 +155,7 @@ public:
 
   void swap(stream_buffer &other) noexcept {
     using std::swap;
+    m_allocator.swap(other.m_allocator);
     swap(m_stream_buffer, other.m_stream_buffer);
   }
 

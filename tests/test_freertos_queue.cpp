@@ -1643,3 +1643,101 @@ TEST_F(FreeRTOSQueueTest, QueueSwap) {
   freertos::queue<1, int, freertos::dynamic_queue_allocator<1, int>> q2;
   q1.swap(q2);
 }
+
+// =============================================================================
+// BUG FIX REGRESSION TESTS - Issue #119
+// =============================================================================
+
+TEST_F(FreeRTOSQueueTest, Issue119QueueSwapExchangesAllocator) {
+  QueueHandle_t handle1 = reinterpret_cast<QueueHandle_t>(0xAAAA);
+  QueueHandle_t handle2 = reinterpret_cast<QueueHandle_t>(0xBBBB);
+
+  EXPECT_CALL(*mock, xQueueCreate(1, sizeof(int)))
+      .WillOnce(Return(handle1))
+      .WillOnce(Return(handle2));
+  EXPECT_CALL(*mock, pcQueueGetName(handle1)).WillOnce(Return(nullptr));
+  EXPECT_CALL(*mock, pcQueueGetName(handle2)).WillOnce(Return(nullptr));
+  EXPECT_CALL(*mock, vQueueDelete(handle1));
+  EXPECT_CALL(*mock, vQueueDelete(handle2));
+
+  freertos::queue<1, int, freertos::dynamic_queue_allocator<1, int>> q1;
+  freertos::queue<1, int, freertos::dynamic_queue_allocator<1, int>> q2;
+  q1.swap(q2);
+
+  EXPECT_CALL(*mock, xQueueSend(handle2, NotNull(), portMAX_DELAY))
+      .WillOnce(Return(pdPASS));
+  int val = 42;
+  EXPECT_EQ(q1.send(val, portMAX_DELAY), pdPASS);
+
+  EXPECT_CALL(*mock, xQueueSend(handle1, NotNull(), portMAX_DELAY))
+      .WillOnce(Return(pdPASS));
+  EXPECT_EQ(q2.send(val, portMAX_DELAY), pdPASS);
+}
+
+TEST_F(FreeRTOSQueueTest, Issue119QueueMoveConstructionTransfersAllocator) {
+  QueueHandle_t handle = reinterpret_cast<QueueHandle_t>(0xAAAA);
+
+  EXPECT_CALL(*mock, xQueueCreate(1, sizeof(int)))
+      .WillOnce(Return(handle));
+  EXPECT_CALL(*mock, pcQueueGetName(handle)).WillOnce(Return(nullptr));
+  EXPECT_CALL(*mock, vQueueDelete(handle));
+
+  freertos::queue<1, int, freertos::dynamic_queue_allocator<1, int>> q1;
+  freertos::queue<1, int, freertos::dynamic_queue_allocator<1, int>> q2(
+      std::move(q1));
+
+  EXPECT_CALL(*mock, xQueueSend(handle, NotNull(), portMAX_DELAY))
+      .WillOnce(Return(pdPASS));
+  int val = 42;
+  EXPECT_EQ(q2.send(val, portMAX_DELAY), pdPASS);
+}
+
+// =============================================================================
+// BUG FIX REGRESSION TESTS - Issue #137
+// Static allocator move/swap must transfer/swap the allocator along with handle
+// =============================================================================
+
+#if configSUPPORT_STATIC_ALLOCATION
+TEST_F(FreeRTOSQueueTest, Issue137StaticQueueMoveConstruction) {
+  QueueHandle_t handle = reinterpret_cast<QueueHandle_t>(0xAAAA);
+
+  EXPECT_CALL(*mock, xQueueCreateStatic(4, sizeof(uint32_t), NotNull(), NotNull()))
+      .WillOnce(Return(handle));
+  EXPECT_CALL(*mock, pcQueueGetName(handle)).WillOnce(Return(nullptr));
+  EXPECT_CALL(*mock, vQueueDelete(handle));
+
+  freertos::sa::queue<4, uint32_t> q1;
+  freertos::sa::queue<4, uint32_t> q2(std::move(q1));
+
+  EXPECT_CALL(*mock, xQueueSend(handle, NotNull(), portMAX_DELAY))
+      .WillOnce(Return(pdPASS));
+  uint32_t val = 42;
+  EXPECT_EQ(q2.send(val, portMAX_DELAY), pdPASS);
+}
+
+TEST_F(FreeRTOSQueueTest, Issue137StaticQueueSwap) {
+  QueueHandle_t handle1 = reinterpret_cast<QueueHandle_t>(0xBBBB);
+  QueueHandle_t handle2 = reinterpret_cast<QueueHandle_t>(0xCCCC);
+
+  EXPECT_CALL(*mock, xQueueCreateStatic(4, sizeof(uint32_t), NotNull(), NotNull()))
+      .WillOnce(Return(handle1))
+      .WillOnce(Return(handle2));
+  EXPECT_CALL(*mock, pcQueueGetName(handle1)).WillOnce(Return(nullptr));
+  EXPECT_CALL(*mock, pcQueueGetName(handle2)).WillOnce(Return(nullptr));
+  EXPECT_CALL(*mock, vQueueDelete(handle1));
+  EXPECT_CALL(*mock, vQueueDelete(handle2));
+
+  freertos::sa::queue<4, uint32_t> q1;
+  freertos::sa::queue<4, uint32_t> q2;
+  q1.swap(q2);
+
+  EXPECT_CALL(*mock, xQueueSend(handle2, NotNull(), portMAX_DELAY))
+      .WillOnce(Return(pdPASS));
+  uint32_t val = 10;
+  EXPECT_EQ(q1.send(val, portMAX_DELAY), pdPASS);
+
+  EXPECT_CALL(*mock, xQueueSend(handle1, NotNull(), portMAX_DELAY))
+      .WillOnce(Return(pdPASS));
+  EXPECT_EQ(q2.send(val, portMAX_DELAY), pdPASS);
+}
+#endif

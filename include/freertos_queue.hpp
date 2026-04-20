@@ -61,10 +61,16 @@ public:
   static_queue_allocator() = default;
   ~static_queue_allocator() = default;
   static_queue_allocator(const static_queue_allocator &) = delete;
-  static_queue_allocator(static_queue_allocator &&) = delete;
+  static_queue_allocator(static_queue_allocator &&) = default;
 
   static_queue_allocator &operator=(const static_queue_allocator &) = delete;
   static_queue_allocator &operator=(static_queue_allocator &&) = delete;
+
+  void swap(static_queue_allocator &other) noexcept {
+    using std::swap;
+    swap(m_queue_placeholder, other.m_queue_placeholder);
+    swap(m_storage, other.m_storage);
+  }
 
   QueueHandle_t create() {
     return xQueueCreateStatic(QueueLength, sizeof(T), m_storage.data(),
@@ -79,6 +85,8 @@ public:
  */
 template <size_t QueueLength, typename T> class dynamic_queue_allocator {
 public:
+  void swap(dynamic_queue_allocator &other) noexcept { (void)other; }
+
   QueueHandle_t create() { return xQueueCreate(QueueLength, sizeof(T)); }
 };
 #endif
@@ -216,7 +224,10 @@ public:
     }
   }
   queue(const queue &) = delete;
-  queue(queue &&src) noexcept : m_queue(src.m_queue) { src.m_queue = nullptr; }
+  queue(queue &&src) noexcept
+      : m_allocator(std::move(src.m_allocator)), m_queue(src.m_queue) {
+    src.m_queue = nullptr;
+  }
   ~queue(void) {
     if (m_queue) {
       auto n = pcQueueGetName(m_queue);
@@ -237,6 +248,7 @@ public:
 
   void swap(queue &other) noexcept {
     using std::swap;
+    m_allocator.swap(other.m_allocator);
     swap(m_queue, other.m_queue);
   }
 

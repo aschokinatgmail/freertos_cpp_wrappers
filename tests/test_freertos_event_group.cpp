@@ -667,3 +667,92 @@ TEST_F(FreeRTOSEventGroupTest, EventGroupSwap) {
   freertos::event_group<freertos::dynamic_event_group_allocator> eg2;
   eg1.swap(eg2);
 }
+
+// =============================================================================
+// BUG FIX REGRESSION TESTS - Issue #119
+// =============================================================================
+
+TEST_F(FreeRTOSEventGroupTest, Issue119EventGroupSwapExchangesAllocator) {
+  EventGroupHandle_t handle1 = reinterpret_cast<EventGroupHandle_t>(0xAAAA);
+  EventGroupHandle_t handle2 = reinterpret_cast<EventGroupHandle_t>(0xBBBB);
+
+  EXPECT_CALL(*mock, xEventGroupCreate())
+      .WillOnce(Return(handle1))
+      .WillOnce(Return(handle2));
+  EXPECT_CALL(*mock, vEventGroupDelete(handle1));
+  EXPECT_CALL(*mock, vEventGroupDelete(handle2));
+
+  freertos::event_group<freertos::dynamic_event_group_allocator> eg1;
+  freertos::event_group<freertos::dynamic_event_group_allocator> eg2;
+  eg1.swap(eg2);
+
+  EXPECT_CALL(*mock, xEventGroupSetBits(handle2, 0x01))
+      .WillOnce(Return(0x01));
+  EXPECT_EQ(eg1.set_bits(0x01), 0x01);
+
+  EXPECT_CALL(*mock, xEventGroupSetBits(handle1, 0x02))
+      .WillOnce(Return(0x02));
+  EXPECT_EQ(eg2.set_bits(0x02), 0x02);
+}
+
+TEST_F(FreeRTOSEventGroupTest, Issue119EventGroupMoveConstructionTransfersAllocator) {
+  EventGroupHandle_t handle = reinterpret_cast<EventGroupHandle_t>(0xAAAA);
+
+  EXPECT_CALL(*mock, xEventGroupCreate())
+      .WillOnce(Return(handle));
+  EXPECT_CALL(*mock, vEventGroupDelete(handle));
+
+  freertos::event_group<freertos::dynamic_event_group_allocator> eg1;
+  freertos::event_group<freertos::dynamic_event_group_allocator> eg2(
+      std::move(eg1));
+
+  EXPECT_CALL(*mock, xEventGroupSetBits(handle, 0x01))
+      .WillOnce(Return(0x01));
+  EXPECT_EQ(eg2.set_bits(0x01), 0x01);
+}
+
+#if configSUPPORT_STATIC_ALLOCATION
+// =============================================================================
+// BUG FIX REGRESSION TESTS - Issue #137
+// Static allocator move/swap must transfer/exchange the allocator along with
+// the handle
+// =============================================================================
+
+TEST_F(FreeRTOSEventGroupTest, Issue137StaticEventGroupMoveConstruction) {
+  EventGroupHandle_t handle = reinterpret_cast<EventGroupHandle_t>(0xAAAA);
+
+  EXPECT_CALL(*mock, xEventGroupCreateStatic(NotNull()))
+      .WillOnce(Return(handle));
+  EXPECT_CALL(*mock, vEventGroupDelete(handle));
+
+  freertos::sa::event_group eg1;
+  freertos::sa::event_group eg2(std::move(eg1));
+
+  EXPECT_CALL(*mock, xEventGroupSetBits(handle, 0x01))
+      .WillOnce(Return(0x01));
+  EXPECT_EQ(eg2.set_bits(0x01), 0x01);
+}
+
+TEST_F(FreeRTOSEventGroupTest, Issue137StaticEventGroupSwap) {
+  EventGroupHandle_t handle1 = reinterpret_cast<EventGroupHandle_t>(0xAAAA);
+  EventGroupHandle_t handle2 = reinterpret_cast<EventGroupHandle_t>(0xBBBB);
+
+  EXPECT_CALL(*mock, xEventGroupCreateStatic(NotNull()))
+      .WillOnce(Return(handle1))
+      .WillOnce(Return(handle2));
+  EXPECT_CALL(*mock, vEventGroupDelete(handle1));
+  EXPECT_CALL(*mock, vEventGroupDelete(handle2));
+
+  freertos::sa::event_group eg1;
+  freertos::sa::event_group eg2;
+  eg1.swap(eg2);
+
+  EXPECT_CALL(*mock, xEventGroupSetBits(handle2, 0x01))
+      .WillOnce(Return(0x01));
+  EXPECT_EQ(eg1.set_bits(0x01), 0x01);
+
+  EXPECT_CALL(*mock, xEventGroupSetBits(handle1, 0x02))
+      .WillOnce(Return(0x02));
+  EXPECT_EQ(eg2.set_bits(0x02), 0x02);
+}
+#endif
