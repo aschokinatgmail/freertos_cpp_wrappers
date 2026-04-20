@@ -61,7 +61,7 @@ public:
   static_queue_allocator() = default;
   ~static_queue_allocator() = default;
   static_queue_allocator(const static_queue_allocator &) = delete;
-  static_queue_allocator(static_queue_allocator &&) = delete;
+  static_queue_allocator(static_queue_allocator &&) = default;
 
   static_queue_allocator &operator=(const static_queue_allocator &) = delete;
   static_queue_allocator &operator=(static_queue_allocator &&) = delete;

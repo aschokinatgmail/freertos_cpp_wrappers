@@ -304,8 +304,8 @@ public:
     swap(m_taskRoutine, other.m_taskRoutine);
 #if INCLUDE_vTaskSuspend
     const auto start_suspended_tmp = static_cast<uint8_t>(m_start_suspended);
-    m_start_suspended = static_cast<decltype(m_start_suspended)>(other.m_start_suspended);
-    other.m_start_suspended = static_cast<decltype(other.m_start_suspended)>(start_suspended_tmp);
+    m_start_suspended = other.m_start_suspended ? 1 : 0;
+    other.m_start_suspended = start_suspended_tmp ? 1 : 0;
 #endif
   }
 

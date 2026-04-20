@@ -61,7 +61,7 @@ public:
   static_semaphore_allocator() = default;
   ~static_semaphore_allocator() = default;
   static_semaphore_allocator(const static_semaphore_allocator &) = delete;
-  static_semaphore_allocator(static_semaphore_allocator &&) = delete;
+  static_semaphore_allocator(static_semaphore_allocator &&) = default;
 
   static_semaphore_allocator &
   operator=(const static_semaphore_allocator &) = delete;
@@ -658,8 +658,8 @@ public:
     m_allocator.swap(other.m_allocator);
     swap(m_semaphore, other.m_semaphore);
     const auto locked_tmp = static_cast<uint8_t>(m_locked);
-    m_locked = static_cast<decltype(m_locked)>(other.m_locked);
-    other.m_locked = static_cast<decltype(other.m_locked)>(locked_tmp);
+    m_locked = other.m_locked ? 1 : 0;
+    other.m_locked = locked_tmp ? 1 : 0;
   }
 
   friend void swap(mutex &a, mutex &b) noexcept { a.swap(b); }

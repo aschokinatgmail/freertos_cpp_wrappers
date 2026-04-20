@@ -62,7 +62,7 @@ public:
   ~static_message_buffer_allocator() = default;
   static_message_buffer_allocator(const static_message_buffer_allocator &) =
       delete;
-  static_message_buffer_allocator(static_message_buffer_allocator &&) = delete;
+  static_message_buffer_allocator(static_message_buffer_allocator &&) = default;
 
   static_message_buffer_allocator &
   operator=(const static_message_buffer_allocator &) = delete;

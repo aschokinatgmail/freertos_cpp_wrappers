@@ -2726,3 +2726,54 @@ TEST_F(FreeRTOSSemaphoreTest, Issue119CountingSemaphoreSwapExchangesAllocator) {
       .WillOnce(Return(pdTRUE));
   EXPECT_TRUE(sem2.give());
 }
+
+// =============================================================================
+// BUG FIX REGRESSION TESTS - Issue #137
+// Static allocator move/swap must transfer/swap the allocator along with handle
+// =============================================================================
+
+#if configSUPPORT_STATIC_ALLOCATION
+TEST_F(FreeRTOSSemaphoreTest, Issue137StaticBinarySemaphoreMoveConstruction) {
+  SemaphoreHandle_t handle = reinterpret_cast<SemaphoreHandle_t>(0xAAAA);
+
+  EXPECT_CALL(*mock, xSemaphoreCreateBinaryStatic(NotNull()))
+      .WillOnce(Return(handle));
+  EXPECT_CALL(*mock, vSemaphoreDelete(handle));
+
+  freertos::sa::binary_semaphore sem1;
+  freertos::sa::binary_semaphore sem2(std::move(sem1));
+
+  EXPECT_CALL(*mock, xSemaphoreGive(handle))
+      .WillOnce(Return(pdTRUE));
+  EXPECT_TRUE(sem2.give());
+}
+
+TEST_F(FreeRTOSSemaphoreTest, Issue137StaticMutexSwap) {
+  SemaphoreHandle_t handle1 = reinterpret_cast<SemaphoreHandle_t>(0xBBBB);
+  SemaphoreHandle_t handle2 = reinterpret_cast<SemaphoreHandle_t>(0xCCCC);
+
+  EXPECT_CALL(*mock, xSemaphoreCreateMutexStatic(NotNull()))
+      .WillOnce(Return(handle1))
+      .WillOnce(Return(handle2));
+  EXPECT_CALL(*mock, vSemaphoreDelete(handle1));
+  EXPECT_CALL(*mock, vSemaphoreDelete(handle2));
+
+  freertos::sa::mutex mtx1;
+  freertos::sa::mutex mtx2;
+  mtx1.swap(mtx2);
+
+  EXPECT_CALL(*mock, xSemaphoreTake(handle2, portMAX_DELAY))
+      .WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, xSemaphoreGive(handle2))
+      .WillOnce(Return(pdTRUE));
+  EXPECT_EQ(mtx1.lock(), pdTRUE);
+  EXPECT_EQ(mtx1.unlock(), pdTRUE);
+
+  EXPECT_CALL(*mock, xSemaphoreTake(handle1, portMAX_DELAY))
+      .WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, xSemaphoreGive(handle1))
+      .WillOnce(Return(pdTRUE));
+  EXPECT_EQ(mtx2.lock(), pdTRUE);
+  EXPECT_EQ(mtx2.unlock(), pdTRUE);
+}
+#endif

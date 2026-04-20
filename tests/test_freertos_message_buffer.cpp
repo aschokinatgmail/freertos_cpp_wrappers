@@ -1109,3 +1109,55 @@ TEST_F(FreeRTOSMessageBufferTest,
       .WillOnce(Return(4));
   EXPECT_EQ(mb2.send(data, 4, 0), 4);
 }
+
+#if configSUPPORT_STATIC_ALLOCATION
+// =============================================================================
+// BUG FIX REGRESSION TESTS - Issue #137
+// Static allocator move/swap must transfer/exchange the allocator along with
+// the handle
+// =============================================================================
+
+TEST_F(FreeRTOSMessageBufferTest, Issue137StaticMessageBufferMoveConstruction) {
+  MessageBufferHandle_t handle =
+      reinterpret_cast<MessageBufferHandle_t>(0xAAAA);
+
+  EXPECT_CALL(*mock, xMessageBufferCreateStatic(_, NotNull(), NotNull()))
+      .WillOnce(Return(handle));
+  EXPECT_CALL(*mock, vMessageBufferDelete(handle));
+
+  sa::message_buffer<256> mb1;
+  sa::message_buffer<256> mb2(std::move(mb1));
+
+  uint8_t data[] = {1, 2, 3, 4};
+  EXPECT_CALL(*mock, xMessageBufferSend(handle, NotNull(), 4, _))
+      .WillOnce(Return(4));
+  EXPECT_EQ(mb2.send(data, 4, 0), 4);
+}
+
+TEST_F(FreeRTOSMessageBufferTest, Issue137StaticMessageBufferSwap) {
+  MessageBufferHandle_t handle1 =
+      reinterpret_cast<MessageBufferHandle_t>(0xAAAA);
+  MessageBufferHandle_t handle2 =
+      reinterpret_cast<MessageBufferHandle_t>(0xBBBB);
+
+  EXPECT_CALL(*mock, xMessageBufferCreateStatic(_, NotNull(), NotNull()))
+      .WillOnce(Return(handle1))
+      .WillOnce(Return(handle2));
+  EXPECT_CALL(*mock, vMessageBufferDelete(handle1));
+  EXPECT_CALL(*mock, vMessageBufferDelete(handle2));
+
+  sa::message_buffer<256> mb1;
+  sa::message_buffer<256> mb2;
+  mb1.swap(mb2);
+
+  uint8_t data1[] = {1, 2, 3, 4};
+  EXPECT_CALL(*mock, xMessageBufferSend(handle2, NotNull(), 4, _))
+      .WillOnce(Return(4));
+  EXPECT_EQ(mb1.send(data1, 4, 0), 4);
+
+  uint8_t data2[] = {5, 6, 7, 8};
+  EXPECT_CALL(*mock, xMessageBufferSend(handle1, NotNull(), 4, _))
+      .WillOnce(Return(4));
+  EXPECT_EQ(mb2.send(data2, 4, 0), 4);
+}
+#endif

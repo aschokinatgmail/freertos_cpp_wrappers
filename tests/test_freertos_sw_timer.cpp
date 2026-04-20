@@ -1736,6 +1736,58 @@ TEST_F(FreeRTOSSwTimerTest, Issue120TimerMoveAssignmentRollbackOnStopFailure) {
       .WillOnce(Return(pdPASS));
 }
 
+// Issue #136: Timer move assignment must revert allocator swap on recreation
+// failure. When m_allocator.create() returns nullptr, both objects must remain
+// in their original state (allocators un-swapped, source timer not deleted).
+TEST_F(FreeRTOSSwTimerTest, Issue136TimerMoveAssignmentRevertOnCreateFailure) {
+  TimerHandle_t dst_handle = reinterpret_cast<TimerHandle_t>(0xAAAA);
+  TimerHandle_t src_handle = reinterpret_cast<TimerHandle_t>(0xBBBB);
+
+  // Create destination timer
+  EXPECT_CALL(*mock, xTimerCreateStatic(StrEq("DstTimer"), _, _, _, _, _))
+      .WillOnce(Return(dst_handle));
+
+  // Create source timer
+  EXPECT_CALL(*mock, xTimerCreateStatic(StrEq("SrcTimer"), _, _, _, _, _))
+      .WillOnce(Return(src_handle));
+
+  auto callback1 = createTestCallback();
+  auto callback2 = createTestCallback();
+  sa::timer dst_timer("DstTimer", 1000, pdTRUE, std::move(callback1));
+  sa::timer src_timer("SrcTimer", 2000, pdFALSE, std::move(callback2));
+
+  // xTimerStop succeeds, then xTimerCreateStatic (recreation) fails
+  EXPECT_CALL(*mock, xTimerStop(src_handle, portMAX_DELAY))
+      .WillOnce(Return(pdPASS));
+  EXPECT_CALL(*mock, pcTimerGetName(src_handle))
+      .WillOnce(Return(const_cast<char *>("SrcTimer")));
+  EXPECT_CALL(*mock, xTimerGetPeriod(src_handle))
+      .WillOnce(Return(2000));
+  EXPECT_CALL(*mock, uxTimerGetReloadMode(src_handle))
+      .WillOnce(Return(pdFALSE));
+  EXPECT_CALL(*mock, xTimerCreateStatic(_, _, _, _, _, _))
+      .WillOnce(Return(nullptr));
+
+  dst_timer = std::move(src_timer);
+
+  // Both timers should be in their original state after failed recreation
+  // dst_timer still has its original handle
+  EXPECT_CALL(*mock, xTimerStart(dst_handle, portMAX_DELAY))
+      .WillOnce(Return(pdPASS));
+  EXPECT_EQ(dst_timer.start(), pdPASS);
+
+  // src_timer still has its original handle
+  EXPECT_CALL(*mock, xTimerStart(src_handle, portMAX_DELAY))
+      .WillOnce(Return(pdPASS));
+  EXPECT_EQ(src_timer.start(), pdPASS);
+
+  // Cleanup
+  EXPECT_CALL(*mock, xTimerDelete(dst_handle, portMAX_DELAY))
+      .WillOnce(Return(pdPASS));
+  EXPECT_CALL(*mock, xTimerDelete(src_handle, portMAX_DELAY))
+      .WillOnce(Return(pdPASS));
+}
+
 // Issue #119: Allocator must be moved/swapped along with the handle
 // This test verifies that the allocator participates in swap operations.
 // After swap, both timers must have correct vTimerSetTimerID self-pointers.

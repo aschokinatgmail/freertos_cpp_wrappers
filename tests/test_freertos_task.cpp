@@ -2326,3 +2326,51 @@ TEST_F(FreeRTOSTaskTest, Issue119TaskSwapExchangesAllocator) {
   EXPECT_CALL(*mock, vTaskDelete(handle_a));
   EXPECT_CALL(*mock, vTaskDelete(handle_b));
 }
+
+#if configSUPPORT_STATIC_ALLOCATION
+// =============================================================================
+// BUG FIX REGRESSION TESTS - Issue #137
+// Static allocator move/swap must transfer/exchange the allocator along with
+// the handle
+// =============================================================================
+
+TEST_F(FreeRTOSTaskTest, Issue137StaticTaskMoveConstruction) {
+  TaskHandle_t handle = reinterpret_cast<TaskHandle_t>(0xAAAA0001);
+
+  EXPECT_CALL(*mock, xTaskCreateStatic(_, _, _, _, _, _, _))
+      .WillOnce(Return(handle));
+
+  sa::task<1024> task1("Issue137Src", 2, empty_task_routine);
+  EXPECT_EQ(task1.handle(), handle);
+
+  sa::task<1024> task2(std::move(task1));
+
+  EXPECT_EQ(task2.handle(), handle);
+  EXPECT_EQ(task1.handle(), nullptr);
+
+  EXPECT_CALL(*mock, vTaskDelete(handle));
+}
+
+TEST_F(FreeRTOSTaskTest, Issue137StaticTaskSwap) {
+  TaskHandle_t handle1 = reinterpret_cast<TaskHandle_t>(0xAAAA1371);
+  TaskHandle_t handle2 = reinterpret_cast<TaskHandle_t>(0xBBBB1371);
+
+  EXPECT_CALL(*mock, xTaskCreateStatic(_, _, _, _, _, _, _))
+      .WillOnce(Return(handle1))
+      .WillOnce(Return(handle2));
+
+  sa::task<1024> task1("Issue137A", 2, empty_task_routine);
+  sa::task<1024> task2("Issue137B", 2, empty_task_routine);
+
+  EXPECT_EQ(task1.handle(), handle1);
+  EXPECT_EQ(task2.handle(), handle2);
+
+  task1.swap(task2);
+
+  EXPECT_EQ(task1.handle(), handle2);
+  EXPECT_EQ(task2.handle(), handle1);
+
+  EXPECT_CALL(*mock, vTaskDelete(handle1));
+  EXPECT_CALL(*mock, vTaskDelete(handle2));
+}
+#endif
