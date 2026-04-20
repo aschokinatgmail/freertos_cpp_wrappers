@@ -38,11 +38,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "freertos_expected.hpp"
 #include "freertos_isr_result.hpp"
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wshadow"
-#include "freertos_strong_types.hpp"
-#pragma GCC diagnostic pop
 #include <FreeRTOS.h>
+#include <event_groups.h>
 #include <array>
 #include <cassert>
 #include <chrono>
@@ -52,6 +49,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <task.h>
 #include <type_traits>
 #include <utility>
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wshadow"
+#include "freertos_strong_types.hpp"
+#pragma GCC diagnostic pop
 
 namespace freertos {
 

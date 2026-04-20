@@ -2,7 +2,7 @@
 @file freertos_isr_result.hpp
 @author Andrey V. Shchekin <aschokin@gmail.com>
 @brief ISR result type for FreeRTOS C++ Wrappers
-@version 3.0.0
+@version 3.1.0
 @date 2026-04-16
 
 The MIT License (MIT)
@@ -49,14 +49,28 @@ template <typename T> struct isr_result {
   BaseType_t higher_priority_task_woken;
 };
 
+template <> struct isr_result<void> {
+  BaseType_t higher_priority_task_woken;
+};
+
 template <typename T>
 bool operator==(const isr_result<T> &lhs, const isr_result<T> &rhs) {
   return lhs.result == rhs.result &&
          lhs.higher_priority_task_woken == rhs.higher_priority_task_woken;
 }
 
+inline bool operator==(const isr_result<void> &lhs,
+                        const isr_result<void> &rhs) {
+  return lhs.higher_priority_task_woken == rhs.higher_priority_task_woken;
+}
+
 template <typename T>
 bool operator!=(const isr_result<T> &lhs, const isr_result<T> &rhs) {
+  return !(lhs == rhs);
+}
+
+inline bool operator!=(const isr_result<void> &lhs,
+                        const isr_result<void> &rhs) {
   return !(lhs == rhs);
 }
 

@@ -84,11 +84,11 @@ struct StreamBufferData {
 };
 
 // Globals accessible from both TEST body and task functions
-static MutexData s_mutex_data{};
-static QueueData s_queue_data{};
-static EventGroupData s_eg_data{};
-static MessageBufferData s_mb_data{};
-static StreamBufferData s_sb_data{};
+static MutexData s_mutex_data;
+static QueueData s_queue_data;
+static EventGroupData s_eg_data;
+static MessageBufferData s_mb_data;
+static StreamBufferData s_sb_data;
 static TaskHandle_t s_orch_handle = nullptr;
 
 // --- Sub-task functions (all created BEFORE vTaskStartScheduler) ---
@@ -365,7 +365,8 @@ void orchestrator_task(void *param) {
 // === TEST ===
 
 TEST(SimulationSystem, AllWrapperTests) {
-  AllResults results = {};
+  AllResults results;
+  memset(&results, 0, sizeof(results));
 
   // All tasks must be created BEFORE vTaskStartScheduler
   // (FreeRTOS POSIX port limitation: xTaskCreate after vTaskStartScheduler
