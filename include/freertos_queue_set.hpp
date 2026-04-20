@@ -48,6 +48,11 @@ namespace freertos {
 
 #if configUSE_QUEUE_SETS
 
+/** @brief Dynamic allocation policy for queue_set.
+ *
+ * Uses xQueueCreateSet() to allocate the queue set from the FreeRTOS heap.
+ * Available only when configSUPPORT_DYNAMIC_ALLOCATION is enabled.
+ */
 #if configSUPPORT_DYNAMIC_ALLOCATION
 class dynamic_queue_set_allocator {
 public:
@@ -57,6 +62,15 @@ public:
 };
 #endif
 
+/** @brief RAII wrapper for FreeRTOS queue sets (configUSE_QUEUE_SETS).
+ *
+ * A queue set allows monitoring multiple queues and semaphores simultaneously.
+ * Use add() to register members, select() to block until a member is ready,
+ * or select_isr() for ISR context. The _ex variants return expected<T,error>.
+ * Available only when configUSE_QUEUE_SETS is enabled.
+ *
+ * @tparam QueueSetAllocator Allocator policy (dynamic_queue_set_allocator or custom)
+ */
 template <typename QueueSetAllocator> class queue_set {
   QueueSetAllocator m_allocator{};
   QueueSetHandle_t m_queue_set{nullptr};

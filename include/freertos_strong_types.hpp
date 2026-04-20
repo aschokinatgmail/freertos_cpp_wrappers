@@ -41,6 +41,11 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 namespace freertos {
 
+/** @brief Strong typedef for FreeRTOS task priority values.
+ *
+ * Prevents accidental mixing of task priorities with other integer types.
+ * Supports comparison operators and above()/below() for relative priority navigation.
+ */
 class priority {
 public:
   explicit constexpr priority(UBaseType_t value = 0) : m_value(value) {}
@@ -75,6 +80,11 @@ private:
   UBaseType_t m_value;
 };
 
+/** @brief Strong typedef for FreeRTOS event group bits.
+ *
+ * Prevents accidental mixing of event bit values with other integer types.
+ * Supports bitwise OR, AND, XOR, and NOT operations for combining and masking.
+ */
 class event_bits {
 public:
   explicit constexpr event_bits(EventBits_t value = 0) : m_value(value) {}
@@ -122,6 +132,11 @@ private:
   EventBits_t m_value;
 };
 
+/** @brief Strong typedef for FreeRTOS tick count values.
+ *
+ * Prevents accidental mixing of tick counts with other integer types.
+ * Supports arithmetic (addition, subtraction) and relational comparisons.
+ */
 class tick_count {
 public:
   explicit constexpr tick_count(TickType_t value = 0) : m_value(value) {}
@@ -167,6 +182,12 @@ private:
   TickType_t m_value;
 };
 
+/** @brief Strong typedef for SMP core affinity mask values.
+ *
+ * Used with FreeRTOS SMP builds (configNUMBER_OF_CORES > 1) to pin tasks
+ * to specific CPU cores. Supports bitwise operations for combining masks.
+ * Use core(uint8_t) factory method to create single-core masks.
+ */
 class core_affinity_mask {
 public:
   explicit constexpr core_affinity_mask(UBaseType_t value = 0)

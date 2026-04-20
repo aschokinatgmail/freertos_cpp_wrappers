@@ -56,11 +56,23 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 namespace freertos {
 
+/** @brief Interface for external memory regions used by external allocators.
+ *
+ * Provide an implementation with allocate() and deallocate() functions
+ * to supply user-controlled memory to FreeRTOS wrapper objects.
+ */
 struct external_memory_region {
   void *(*allocate)(size_t size);
   void (*deallocate)(void *ptr);
 };
 
+/** @brief External allocator for semaphore objects (binary, counting, mutex, recursive mutex).
+ *
+ * Allocates StaticSemaphore_t from the supplied memory Region.
+ * Requires configSUPPORT_STATIC_ALLOCATION.
+ *
+ * @tparam Region A type implementing external_memory_region interface (allocate/deallocate)
+ */
 template <typename Region> class external_semaphore_allocator {
   Region *m_region{nullptr};
   void *m_memory{nullptr};
@@ -118,6 +130,15 @@ public:
   }
 };
 
+/** @brief External allocator for queue objects.
+ *
+ * Allocates both the StaticQueue_t structure and the item storage array
+ * from the supplied memory Region. Requires configSUPPORT_STATIC_ALLOCATION.
+ *
+ * @tparam Region      A type implementing external_memory_region interface
+ * @tparam QueueLength Maximum number of items in the queue
+ * @tparam T           Type of items stored in the queue
+ */
 template <typename Region, size_t QueueLength, typename T>
 class external_queue_allocator {
   Region *m_region{nullptr};
@@ -164,6 +185,13 @@ public:
   }
 };
 
+/** @brief External allocator for event group objects.
+ *
+ * Allocates StaticEventGroup_t from the supplied memory Region.
+ * Requires configSUPPORT_STATIC_ALLOCATION.
+ *
+ * @tparam Region A type implementing external_memory_region interface
+ */
 template <typename Region> class external_event_group_allocator {
   Region *m_region{nullptr};
   void *m_memory{nullptr};
@@ -198,6 +226,14 @@ public:
   }
 };
 
+/** @brief External allocator for stream buffer objects.
+ *
+ * Allocates both the StaticStreamBuffer_t structure and the data buffer
+ * from the supplied memory Region. Requires configSUPPORT_STATIC_ALLOCATION.
+ *
+ * @tparam Region           A type implementing external_memory_region interface
+ * @tparam StreamBufferSize Size of the stream buffer in bytes
+ */
 template <typename Region, size_t StreamBufferSize>
 class external_stream_buffer_allocator {
   Region *m_region{nullptr};
@@ -249,6 +285,14 @@ public:
   }
 };
 
+/** @brief External allocator for message buffer objects.
+ *
+ * Allocates both the StaticMessageBuffer_t structure and the data buffer
+ * from the supplied memory Region. Requires configSUPPORT_STATIC_ALLOCATION.
+ *
+ * @tparam Region            A type implementing external_memory_region interface
+ * @tparam MessageBufferSize Size of the message buffer in bytes
+ */
 template <typename Region, size_t MessageBufferSize>
 class external_message_buffer_allocator {
   Region *m_region{nullptr};
@@ -299,6 +343,13 @@ public:
   }
 };
 
+/** @brief External allocator for software timer objects.
+ *
+ * Allocates StaticTimer_t from the supplied memory Region.
+ * Requires configSUPPORT_STATIC_ALLOCATION and configUSE_TIMERS.
+ *
+ * @tparam Region A type implementing external_memory_region interface
+ */
 template <typename Region> class external_sw_timer_allocator {
   Region *m_region{nullptr};
   void *m_memory{nullptr};
@@ -334,6 +385,14 @@ public:
   }
 };
 
+/** @brief External allocator for task objects.
+ *
+ * Allocates both StaticTask_t (TCB) and the task stack from the supplied
+ * memory Region. Requires configSUPPORT_STATIC_ALLOCATION.
+ *
+ * @tparam Region    A type implementing external_memory_region interface
+ * @tparam StackSize Stack size in bytes for the task
+ */
 template <typename Region, size_t StackSize> class external_task_allocator {
   Region *m_region{nullptr};
   void *m_task_memory{nullptr};

@@ -56,6 +56,15 @@ namespace freertos {
 
 inline constexpr size_t dynamic_extent = static_cast<size_t>(-1);
 
+/** @brief A non-owning view over a contiguous sequence of elements.
+ *
+ * Polyfill for std::span (C++20). Provides data(), size(), subview()
+ * operations and iterator support. When C++20 std::span is available,
+ * it is used directly via an alias.
+ *
+ * @tparam T      Element type
+ * @tparam Extent Number of elements (default: dynamic_extent)
+ */
 template <typename T, size_t Extent = dynamic_extent> class span {
 public:
   using element_type = T;
