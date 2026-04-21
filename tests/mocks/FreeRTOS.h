@@ -86,6 +86,8 @@ typedef struct {
 // Static allocation support flag (enabled for testing)
 #define configSUPPORT_STATIC_ALLOCATION 1
 #define configSUPPORT_DYNAMIC_ALLOCATION 1
+#define configMINIMAL_STACK_SIZE 256
+#define configNUM_THREAD_LOCAL_STORAGE_POINTERS 4
 
 // Feature flags (enabled for comprehensive testing)
 #define INCLUDE_vTaskSuspend 1
@@ -154,6 +156,7 @@ typedef struct {
 typedef void (*TaskHookFunction_t)(void);
 
 // Critical section macros (no-op for host testing with comments)
+#define taskSCHEDULER_RUNNING ((BaseType_t)2)
 #define taskENTER_CRITICAL() // Host testing: Critical section entry not
                              // applicable
 #define taskEXIT_CRITICAL()  // Host testing: Critical section exit not
@@ -559,6 +562,12 @@ public:
 
   // Port layer mocks (needed by event group ISR functions)
   MOCK_METHOD(void, portYIELD_FROM_ISR, (BaseType_t xHigherPriorityTaskWoken));
+
+  // Thread Local Storage mocks
+  MOCK_METHOD(void, vTaskSetThreadLocalStoragePointer,
+              (TaskHandle_t xTask, BaseType_t xIndex, void *pvValue));
+  MOCK_METHOD(void *, pvTaskGetThreadLocalStoragePointer,
+              (TaskHandle_t xTask, BaseType_t xIndex));
 };
 
 // Global mock instance
@@ -827,5 +836,8 @@ BaseType_t xStreamBufferIsEmpty(StreamBufferHandle_t xStreamBuffer);
 BaseType_t xStreamBufferIsFull(StreamBufferHandle_t xStreamBuffer);
 BaseType_t xStreamBufferReset(StreamBufferHandle_t xStreamBuffer);
 BaseType_t xStreamBufferSetTriggerLevel(StreamBufferHandle_t xStreamBuffer,
-                                        size_t xTriggerLevel);
+                                         size_t xTriggerLevel);
+void vTaskSetThreadLocalStoragePointer(TaskHandle_t xTask, BaseType_t xIndex,
+                                       void *pvValue);
+void *pvTaskGetThreadLocalStoragePointer(TaskHandle_t xTask, BaseType_t xIndex);
 }

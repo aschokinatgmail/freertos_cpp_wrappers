@@ -261,6 +261,16 @@ add_executable(
     test_freertos_external_threading.cpp
 )
 
+add_executable(
+    test_freertos_gthr_impl
+    test_freertos_gthr_impl.cpp
+)
+
+add_executable(
+    test_freertos_external_threading_impl
+    test_freertos_external_threading_impl.cpp
+)
+
 target_link_libraries(
     test_freertos_task
     freertos_cpp_wrappers
@@ -626,6 +636,20 @@ target_link_libraries(
     pthread
 )
 
+target_link_libraries(
+    test_freertos_gthr_impl
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
+target_link_libraries(
+    test_freertos_external_threading_impl
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
 # Apply compile options if using PkgConfig
 if(GTEST_COMPILE_OPTIONS)
     target_compile_options(test_freertos_task PRIVATE ${GTEST_COMPILE_OPTIONS})
@@ -674,6 +698,8 @@ target_compile_options(test_freertos_isr_result PRIVATE ${GTEST_COMPILE_OPTIONS}
     target_compile_options(test_freertos_atomic_wait PRIVATE ${GTEST_COMPILE_OPTIONS})
     target_compile_options(test_freertos_gthr PRIVATE ${GTEST_COMPILE_OPTIONS})
     target_compile_options(test_freertos_external_threading PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_gthr_impl PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_external_threading_impl PRIVATE ${GTEST_COMPILE_OPTIONS})
 endif()
 
 # Add tests - run complete test executables to ensure proper failure detection
@@ -724,3 +750,5 @@ add_test(NAME test_freertos_config_kconfig COMMAND test_freertos_config_kconfig)
 add_test(NAME test_freertos_atomic_wait COMMAND test_freertos_atomic_wait)
 add_test(NAME test_freertos_gthr COMMAND test_freertos_gthr)
 add_test(NAME test_freertos_external_threading COMMAND test_freertos_external_threading)
+add_test(NAME test_freertos_gthr_impl COMMAND test_freertos_gthr_impl)
+add_test(NAME test_freertos_external_threading_impl COMMAND test_freertos_external_threading_impl)

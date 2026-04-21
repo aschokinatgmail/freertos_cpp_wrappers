@@ -43,8 +43,13 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <semphr.h>
 #include <task.h>
 
+#if __STDC_HOSTED__
 #include <chrono>
 #include <cstring>
+#else
+#include <stdint.h>
+#include <string.h>
+#endif
 
 #define _LIBCPP_HAS_THREADS 1
 #define _LIBCPP_HAS_THREAD_API_EXTERNAL
@@ -340,17 +345,36 @@ inline void __libcpp_execute_once(__libcpp_exec_once_flag *flag,
   if (*flag == 0) {
     *flag = 1;
     taskEXIT_CRITICAL();
-    func();
+    func(nullptr);
     __atomic_store_n(flag, 2, __ATOMIC_RELEASE);
   } else {
     taskEXIT_CRITICAL();
   }
 }
 
+namespace __et_detail {
+struct __thread_trampoline {
+  void *(*func)(void *);
+  void *args;
+};
+static void __thread_entry(void *arg) {
+  auto *t = static_cast<__thread_trampoline *>(arg);
+  t->func(t->args);
+  vPortFree(t);
+  vTaskDelete(nullptr);
+}
+} // namespace __et_detail
+
 inline bool __libcpp_thread_create(__libcpp_thread_t *thread,
                                     void *(*func)(void *), void *args) {
-  return xTaskCreate(static_cast<void (*)(void *)>(func), "lcxx",
-                     configMINIMAL_STACK_SIZE, args, tskIDLE_PRIORITY + 1,
+  auto *t = static_cast<__et_detail::__thread_trampoline *>(
+      pvPortMalloc(sizeof(__et_detail::__thread_trampoline)));
+  if (!t)
+    return false;
+  t->func = func;
+  t->args = args;
+  return xTaskCreate(__et_detail::__thread_entry, "lcxx",
+                     configMINIMAL_STACK_SIZE, t, tskIDLE_PRIORITY + 1,
                      thread) == pdPASS;
 }
 
@@ -364,7 +388,6 @@ inline bool __libcpp_thread_join(__libcpp_thread_t thread, void **value_ptr) {
     }
     vTaskDelay(1);
   } while (1);
-  vTaskDelete(thread);
   return true;
 }
 
@@ -375,6 +398,7 @@ inline bool __libcpp_thread_detach(__libcpp_thread_t thread) {
 
 inline void __libcpp_thread_yield() { taskYIELD(); }
 
+#if __STDC_HOSTED__
 inline void
 __libcpp_thread_sleep_for(const std::chrono::nanoseconds &ns) {
   TickType_t ticks = static_cast<TickType_t>(
@@ -383,6 +407,15 @@ __libcpp_thread_sleep_for(const std::chrono::nanoseconds &ns) {
     ticks = 1;
   vTaskDelay(ticks);
 }
+#else
+inline void __libcpp_thread_sleep_for(uint32_t ms) {
+  TickType_t ticks = static_cast<TickType_t>(
+      ms * configTICK_RATE_HZ / 1000);
+  if (ticks == 0)
+    ticks = 1;
+  vTaskDelay(ticks);
+}
+#endif
 
 inline __libcpp_thread_id __libcpp_thread_get_id(__libcpp_thread_t thread) {
   return thread;

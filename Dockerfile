@@ -21,6 +21,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3-markdown \
     python3-kconfiglib \
     git \
+    gcc-arm-none-eabi \
+    libnewlib-arm-none-eabi \
+    qemu-system-arm \
     && rm -rf /var/lib/apt/lists/*
 
 RUN cd /usr/src/gtest && cmake . && make -j$(nproc) && cp lib/*.a /usr/lib/ || true

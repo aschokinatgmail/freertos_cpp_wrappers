@@ -43,7 +43,11 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <semphr.h>
 #include <task.h>
 
+#if __STDC_HOSTED__
 #include <cstring>
+#else
+#include <string.h>
+#endif
 
 #define __GTHREADS 1
 
@@ -419,7 +423,7 @@ inline int __gthread_cond_destroy(__gthread_cond_t *cond) {
 
 inline int __gthread_create(__gthread_t *thread, void (*func)(void *),
                              void *args) {
-  return xTaskCreate(static_cast<void (*)(void *)>(func), "gthr",
+  return xTaskCreate(func, "gthr",
                      configMINIMAL_STACK_SIZE, args, tskIDLE_PRIORITY + 1,
                      thread) == pdPASS
              ? 0

@@ -104,6 +104,61 @@ services:
         echo "=== All tests passed ==="
 
   # =======================================================================
+  # ARM cross-compile verification (compile-only, ARM Cortex-M target)
+  # =======================================================================
+  xcompile:
+    build: .
+    image: freertos-cpp-wrappers:latest
+    working_dir: /project
+    volumes:
+      - .:/project
+    command:
+      - bash
+      - -c
+      - |
+        echo "=== Cross-compile verification (ARM Cortex-M) ===" && \
+        rm -rf build-xcompile && \
+        cmake -B build-xcompile \
+          -DCMAKE_TOOLCHAIN_FILE=cmake/arm-none-eabi-toolchain.cmake \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -DENABLE_CROSS_COMPILE=ON && \
+        cmake --build build-xcompile -j$$(nproc) && \
+        cmake --build build-xcompile --target xcompile_all && \
+        echo "=== Cross-compile verification passed ==="
+
+  # =======================================================================
+  # QEMU ARM runtime test (FreeRTOS on ARM Cortex-M via QEMU)
+  # =======================================================================
+  qemu:
+    build: .
+    image: freertos-cpp-wrappers:latest
+    working_dir: /project
+    volumes:
+      - .:/project
+    command:
+      - bash
+      - -c
+      - |
+        echo "=== QEMU ARM runtime test ===" && \
+        rm -rf build-qemu && \
+        cmake -B build-qemu \
+          -DCMAKE_TOOLCHAIN_FILE=cmake/arm-cortex-m3-toolchain.cmake \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -DENABLE_QEMU_TEST=ON && \
+        cmake --build build-qemu -j$$(nproc) && \
+        echo "=== Running QEMU test (timeout 30s) ===" && \
+        timeout 30 qemu-system-arm \
+          -machine mps2-an385 \
+          -nographic \
+          -kernel build-qemu/tests/qemu/qemu_test 2>&1 | tee build-qemu/qemu_test.log; \
+        if grep -q SUCCESS build-qemu/qemu_test.log; then \
+          echo "=== QEMU test PASSED ==="; \
+        else \
+          echo "=== QEMU test FAILED ==="; \
+          exit 1; \
+        fi
+
+  # =======================================================================
   # Interactive shell for development
   # =======================================================================
   shell:

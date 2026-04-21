@@ -1377,11 +1377,25 @@ BaseType_t xStreamBufferReset(StreamBufferHandle_t xStreamBuffer) {
 }
 
 BaseType_t xStreamBufferSetTriggerLevel(StreamBufferHandle_t xStreamBuffer,
-                                        size_t xTriggerLevel) {
+                                         size_t xTriggerLevel) {
   if (g_freertos_mock) {
     return g_freertos_mock->xStreamBufferSetTriggerLevel(xStreamBuffer,
-                                                         xTriggerLevel);
+                                                          xTriggerLevel);
   }
   return pdPASS;
+}
+
+void vTaskSetThreadLocalStoragePointer(TaskHandle_t xTask, BaseType_t xIndex,
+                                       void *pvValue) {
+  if (g_freertos_mock) {
+    g_freertos_mock->vTaskSetThreadLocalStoragePointer(xTask, xIndex, pvValue);
+  }
+}
+
+void *pvTaskGetThreadLocalStoragePointer(TaskHandle_t xTask, BaseType_t xIndex) {
+  if (g_freertos_mock) {
+    return g_freertos_mock->pvTaskGetThreadLocalStoragePointer(xTask, xIndex);
+  }
+  return nullptr;
 }
 }

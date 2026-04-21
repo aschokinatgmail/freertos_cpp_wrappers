@@ -7,7 +7,8 @@ project(freertos_cpp_wrappers
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Compiler warning flags
+# Compiler warning flags (host builds only - cross-compile sets its own)
+if(NOT CMAKE_CROSSCOMPILING)
 add_compile_options(
     -Wall -Wextra -Wpedantic
     -Wshadow -Wconversion -Wsign-conversion
@@ -15,6 +16,7 @@ add_compile_options(
     -Wdouble-promotion -Wformat=2
     -Wundef -Werror=return-type
 )
+endif()
 
 configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/include/freertos_version.hpp.in
@@ -85,6 +87,11 @@ configure_file(
     ${CMAKE_CURRENT_BINARY_DIR}/include/freertos_cpp_wrappers_config.hpp
     @ONLY
 )
+
+# =============================================================================
+# HOST-BUILD ONLY: library, tests, static analysis, docs, install
+# =============================================================================
+if(NOT CMAKE_CROSSCOMPILING)
 
 # Add option for coverage
 option(ENABLE_COVERAGE "Enable code coverage" OFF)
@@ -436,39 +443,21 @@ if(ENABLE_SIMULATION)
     add_subdirectory(tests/simulation)
 endif()
 
-# Install rules
-include(GNUInstallDirs)
+endif() # NOT CMAKE_CROSSCOMPILING
 
-install(TARGETS freertos_cpp_wrappers
-    EXPORT freertos_cpp_wrappers-targets
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-)
+# =============================================================================
+# CROSS-COMPILATION: ARM Cortex-M verification tests
+# =============================================================================
+option(ENABLE_CROSS_COMPILE "Enable ARM cross-compile verification test" OFF)
 
-install(DIRECTORY include/
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-    FILES_MATCHING PATTERN "*.hpp"
-)
+if(ENABLE_CROSS_COMPILE)
+    message(STATUS "Cross-compile verification enabled - building for ARM Cortex-M")
+    add_subdirectory(tests/cross_compile)
+endif()
 
-install(FILES Kconfig
-    DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/freertos_cpp_wrappers
-)
+option(ENABLE_QEMU_TEST "Enable QEMU ARM runtime test" OFF)
 
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/include/freertos_cpp_wrappers_config.hpp
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-)
-
-include(CMakePackageConfigHelpers)
-configure_package_config_file(
-    cmake/freertos_cpp_wrappersConfig.cmake.in
-    ${CMAKE_CURRENT_BINARY_DIR}/freertos_cpp_wrappersConfig.cmake
-    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/freertos_cpp_wrappers
-)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/freertos_cpp_wrappersConfig.cmake
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/freertos_cpp_wrappers
-)
-
-install(EXPORT freertos_cpp_wrappers-targets
-    NAMESPACE freertos::
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/freertos_cpp_wrappers
-)
+if(ENABLE_QEMU_TEST)
+    message(STATUS "QEMU ARM runtime test enabled - building for ARM Cortex-M + QEMU")
+    add_subdirectory(tests/qemu)
+endif()

@@ -1,0 +1,20 @@
+#!/bin/bash
+set -e
+
+TOOL=arm-none-eabi-g++
+COMMON_FLAGS="-mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -ffreestanding -O2 -fno-exceptions -fno-rtti -fno-unwind-tables -Wno-old-style-cast -Wno-sign-conversion -Wno-conversion -Wno-pedantic -Wno-undef -Wno-missing-field-initializers -Wno-cast-qual -Wno-shadow -Wno-unused-parameter -Wno-unused-variable"
+
+INCLUDES="-I@FREERTOS_KERNEL_DIR@/include -I@FREERTOS_KERNEL_DIR@/portable/GCC/ARM_CM4F -I@CMAKE_CURRENT_SOURCE_DIR@ -I@CMAKE_CURRENT_SOURCE_DIR@/../../include -I@CMAKE_CURRENT_BINARY_DIR@/../../include"
+
+SOURCE="$1"
+DEFINES_STR="$2"
+
+DEFS=""
+IFS=';' read -ra DEFS_ARR <<< "$DEFINES_STR"
+for d in "${DEFS_ARR[@]}"; do
+    DEFS="$DEFS -D$d"
+done
+
+echo "[$(basename $SOURCE)] compile-only check for ARM Cortex-M..."
+$TOOL $COMMON_FLAGS $INCLUDES $DEFS -fsyntax-only "$SOURCE"
+echo "[$(basename $SOURCE)] OK"
