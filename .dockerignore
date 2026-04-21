@@ -1,8 +1,15 @@
-build/
+build-test/
+build-sim/
+build-cov/
+build-strict/
+build_main/
+out/
 docs/html/
 docs/latex/
 VnV/
 .vs/
+.vscode/
+.opencode/
 *.o
 *.a
 *.so
@@ -15,4 +22,3 @@ coverage_report/
 *.swp
 *.swo
 *~
-.git

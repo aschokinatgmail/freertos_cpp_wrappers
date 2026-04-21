@@ -27,6 +27,7 @@ typedef struct StaticEventGroup {
 #define pdPASS 1
 #define pdFAIL 0
 
+#define configTICK_RATE_HZ 1000
 #define portMAX_DELAY 0xFFFFFFFF
 #define portTICK_PERIOD_MS 1
 

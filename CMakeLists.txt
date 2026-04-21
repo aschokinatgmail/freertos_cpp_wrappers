@@ -22,6 +22,70 @@ configure_file(
     @ONLY
 )
 
+# =============================================================================
+# KCONFIG-BASED CONFIGURATION
+# =============================================================================
+
+# Phase 3 -- Standard Library Integration Backends
+option(FREERTOS_CPP_WRAPPERS_ENABLE_GTHR_BACKEND "Enable gthr-FreeRTOS backend for GCC/libstdc++" OFF)
+option(FREERTOS_CPP_WRAPPERS_ENABLE_EXTERNAL_THREADING "Enable __external_threading backend for libc++" OFF)
+
+# Atomic Wait/Notify
+option(FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY "Enable atomic wait/notify platform hooks" OFF)
+set(FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL "1" CACHE STRING "Atomic wait impl: 1=semaphore table, 2=task notifications, 3=spin-only")
+set(FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_TABLE_SIZE "16" CACHE STRING "Hash table size for atomic wait semaphore table")
+
+# Allocation Strategy
+set(FREERTOS_CPP_WRAPPERS_ALLOC_STRATEGY "3" CACHE STRING "Allocation strategy: 1=dynamic, 2=static, 3=auto")
+
+# Condition Variable Implementation
+set(FREERTOS_CPP_WRAPPERS_CONDVAR_IMPL "1" CACHE STRING "Condition variable impl: 1=counting semaphore, 2=task notifications, 3=binary semaphore per waiter")
+
+# C++ Standard Library Features
+option(FREERTOS_CPP_WRAPPERS_ENABLE_STD_THREAD "Enable <thread> support" ON)
+option(FREERTOS_CPP_WRAPPERS_ENABLE_STD_MUTEX "Enable <mutex>/<condition_variable>/<call_once> support" ON)
+option(FREERTOS_CPP_WRAPPERS_ENABLE_STD_SHARED_MUTEX "Enable <shared_mutex> support" ON)
+option(FREERTOS_CPP_WRAPPERS_ENABLE_STD_FUTURE "Enable <future>/<promise>/<async> support" OFF)
+
+# Library Feature Toggles
+option(FREERTOS_CPP_WRAPPERS_ENABLE_EXPECTED "Enable freertos::expected" ON)
+option(FREERTOS_CPP_WRAPPERS_ENABLE_SPAN "Enable freertos::span" ON)
+option(FREERTOS_CPP_WRAPPERS_ENABLE_THREAD_SAFETY "Enable thread safety annotations" ON)
+option(FREERTOS_CPP_WRAPPERS_ENABLE_CONCEPTS "Enable C++20 concepts" ON)
+option(FREERTOS_CPP_WRAPPERS_ENABLE_EXTERNAL_ALLOCATOR "Enable external allocator support" ON)
+option(FREERTOS_CPP_WRAPPERS_ENABLE_ISR_RESULT "Enable ISR result types" ON)
+option(FREERTOS_CPP_WRAPPERS_ENABLE_STRONG_TYPES "Enable strong type wrappers" ON)
+
+# Convert boolean CMake options to 0/1 for C++ macros
+foreach(_opt
+    ENABLE_GTHR_BACKEND
+    ENABLE_EXTERNAL_THREADING
+    ENABLE_ATOMIC_WAIT_NOTIFY
+    ENABLE_STD_THREAD
+    ENABLE_STD_MUTEX
+    ENABLE_STD_SHARED_MUTEX
+    ENABLE_STD_FUTURE
+    ENABLE_EXPECTED
+    ENABLE_SPAN
+    ENABLE_THREAD_SAFETY
+    ENABLE_CONCEPTS
+    ENABLE_EXTERNAL_ALLOCATOR
+    ENABLE_ISR_RESULT
+    ENABLE_STRONG_TYPES
+)
+    if(FREERTOS_CPP_WRAPPERS_${_opt})
+        set(FREERTOS_CPP_WRAPPERS_${_opt} 1)
+    else()
+        set(FREERTOS_CPP_WRAPPERS_${_opt} 0)
+    endif()
+endforeach()
+
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/freertos_cpp_wrappers_config.hpp.in
+    ${CMAKE_CURRENT_BINARY_DIR}/include/freertos_cpp_wrappers_config.hpp
+    @ONLY
+)
+
 # Add option for coverage
 option(ENABLE_COVERAGE "Enable code coverage" OFF)
 
@@ -72,6 +136,15 @@ add_library(freertos_cpp_wrappers
     include/freertos_task.hpp
     include/freertos.hpp
 )
+
+if(FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY)
+    target_sources(freertos_cpp_wrappers PRIVATE src/freertos_atomic_wait.cc)
+    target_compile_definitions(freertos_cpp_wrappers PUBLIC
+        CONFIG_FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY=1
+        CONFIG_FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL=${FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL}
+        CONFIG_FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_TABLE_SIZE=${FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_TABLE_SIZE}
+    )
+endif()
 
 # Add include directories to the library target
 target_include_directories(freertos_cpp_wrappers PRIVATE tests/mocks)
@@ -209,6 +282,7 @@ if(ENABLE_CLANG_TIDY)
                     ${CMAKE_CURRENT_SOURCE_DIR}/include/freertos_stream_buffer.hpp
                     ${CMAKE_CURRENT_SOURCE_DIR}/include/freertos_sw_timer.hpp
                     ${CMAKE_CURRENT_SOURCE_DIR}/include/freertos_task.hpp
+                    ${CMAKE_CURRENT_SOURCE_DIR}/include/freertos_atomic_wait.hpp
                     -- 
                     -I${CMAKE_CURRENT_SOURCE_DIR}/include
                     -isystem${CMAKE_CURRENT_SOURCE_DIR}/tests/mocks
@@ -374,6 +448,14 @@ install(TARGETS freertos_cpp_wrappers
 install(DIRECTORY include/
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     FILES_MATCHING PATTERN "*.hpp"
+)
+
+install(FILES Kconfig
+    DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/freertos_cpp_wrappers
+)
+
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/include/freertos_cpp_wrappers_config.hpp
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
 include(CMakePackageConfigHelpers)

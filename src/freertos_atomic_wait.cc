@@ -1,0 +1,216 @@
+#include "freertos_atomic_wait.hpp"
+
+/**********************************************************************************
+@file freertos_atomic_wait.cc
+@author Andrey V. Shchekin <aschokin@gmail.com>
+@brief FreeRTOS platform hooks implementation for atomic wait/notify
+@version 3.1.0
+@date 2026-04-21
+
+The MIT License (MIT)
+
+FreeRTOS C++ Wrappers Library
+https://github.com/aschokinatgmail/freertos_cpp_wrappers/
+
+Copyright(c) 2024 Andrey V. Shchekin <aschokin@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights to
+  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+***********************************************************************************/
+
+#if defined(CONFIG_FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY)
+
+#if CONFIG_FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL == 1
+
+freertos_wait_entry freertos_wait_table[atomic_wait_table_size] = {};
+
+static SemaphoreHandle_t atomic_wait_ensure_semaphore(freertos_wait_entry &entry) {
+    if (entry.semaphore == nullptr) {
+        entry.semaphore = xSemaphoreCreateCounting(SemaphoreHandle_t(-1), 0);
+        configASSERT(entry.semaphore != nullptr);
+    }
+    return entry.semaphore;
+}
+
+extern "C" bool __platform_wait_on_address(void const *addr,
+                                           __cxx_atomic_contention_t const *expected,
+                                           int size) {
+    (void)size;
+    auto idx = atomic_wait_hash(addr);
+    auto &entry = freertos_wait_table[idx];
+    entry.address = addr;
+    entry.waiter_count.fetch_add(1, std::memory_order_relaxed);
+    std::atomic_thread_fence(std::memory_order_seq_cst);
+
+    bool match = false;
+    switch (size) {
+    case 1:
+        match = *reinterpret_cast<unsigned char const volatile *>(expected) ==
+                *reinterpret_cast<unsigned char const volatile *>(addr);
+        break;
+    case 2:
+        match = *reinterpret_cast<unsigned short const volatile *>(expected) ==
+                *reinterpret_cast<unsigned short const volatile *>(addr);
+        break;
+    case 4:
+        match = *reinterpret_cast<unsigned int const volatile *>(expected) ==
+                *reinterpret_cast<unsigned int const volatile *>(addr);
+        break;
+    case 8:
+        match = *reinterpret_cast<unsigned long long const volatile *>(expected) ==
+                *reinterpret_cast<unsigned long long const volatile *>(addr);
+        break;
+    }
+
+    if (match) {
+        auto sem = atomic_wait_ensure_semaphore(entry);
+        xSemaphoreTake(sem, portMAX_DELAY);
+    }
+
+    entry.waiter_count.fetch_sub(1, std::memory_order_release);
+    return true;
+}
+
+extern "C" void __platform_wake_by_address(void const *addr, int count) {
+    auto idx = atomic_wait_hash(addr);
+    auto &entry = freertos_wait_table[idx];
+    auto waiters = entry.waiter_count.load(std::memory_order_seq_cst);
+    if (waiters == 0 || entry.semaphore == nullptr) {
+        return;
+    }
+
+    if (count == 1) {
+        xSemaphoreGive(entry.semaphore);
+    } else {
+        auto to_wake = count < 0
+                            ? waiters
+                            : static_cast<__cxx_atomic_contention_t>(count);
+        for (__cxx_atomic_contention_t i = 0; i < to_wake; ++i) {
+            xSemaphoreGive(entry.semaphore);
+        }
+    }
+}
+
+#elif CONFIG_FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL == 2
+
+freertos_wait_bucket freertos_wait_buckets[atomic_wait_table_size] = {};
+
+extern "C" bool __platform_wait_on_address(void const *addr,
+                                           __cxx_atomic_contention_t const *expected,
+                                           int size) {
+    (void)size;
+    auto idx = atomic_wait_hash(addr);
+    auto &bucket = freertos_wait_buckets[idx];
+    bucket.waiter_count.fetch_add(1, std::memory_order_relaxed);
+    std::atomic_thread_fence(std::memory_order_seq_cst);
+
+    bool match = false;
+    switch (size) {
+    case 1:
+        match = *reinterpret_cast<unsigned char const volatile *>(expected) ==
+                *reinterpret_cast<unsigned char const volatile *>(addr);
+        break;
+    case 2:
+        match = *reinterpret_cast<unsigned short const volatile *>(expected) ==
+                *reinterpret_cast<unsigned short const volatile *>(addr);
+        break;
+    case 4:
+        match = *reinterpret_cast<unsigned int const volatile *>(expected) ==
+                *reinterpret_cast<unsigned int const volatile *>(addr);
+        break;
+    case 8:
+        match = *reinterpret_cast<unsigned long long const volatile *>(expected) ==
+                *reinterpret_cast<unsigned long long const volatile *>(addr);
+        break;
+    }
+
+    if (match) {
+        if (bucket.mutex == nullptr) {
+            bucket.mutex = xSemaphoreCreateMutex();
+            configASSERT(bucket.mutex != nullptr);
+        }
+        freertos_waiter_node node;
+        node.task = xTaskGetCurrentTaskHandle();
+        node.address = addr;
+        node.next = bucket.waiters;
+        xSemaphoreTake(bucket.mutex, portMAX_DELAY);
+        bucket.waiters = &node;
+        xSemaphoreGive(bucket.mutex);
+
+        ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+
+        xSemaphoreTake(bucket.mutex, portMAX_DELAY);
+        freertos_waiter_node **pp = &bucket.waiters;
+        while (*pp != nullptr) {
+            if (*pp == &node) {
+                *pp = node.next;
+                break;
+            }
+            pp = &(*pp)->next;
+        }
+        xSemaphoreGive(bucket.mutex);
+    }
+
+    bucket.waiter_count.fetch_sub(1, std::memory_order_release);
+    return true;
+}
+
+extern "C" void __platform_wake_by_address(void const *addr, int count) {
+    auto idx = atomic_wait_hash(addr);
+    auto &bucket = freertos_wait_buckets[idx];
+    auto waiters = bucket.waiter_count.load(std::memory_order_seq_cst);
+    if (waiters == 0) {
+        return;
+    }
+
+    if (bucket.mutex == nullptr) {
+        return;
+    }
+
+    xSemaphoreTake(bucket.mutex, portMAX_DELAY);
+    auto to_wake = count < 0 ? waiters : static_cast<__cxx_atomic_contention_t>(count);
+    __cxx_atomic_contention_t woken = 0;
+    auto *node = bucket.waiters;
+    while (node != nullptr && woken < to_wake) {
+        if (node->address == addr) {
+            xTaskNotifyGive(node->task);
+            ++woken;
+        }
+        node = node->next;
+    }
+    xSemaphoreGive(bucket.mutex);
+}
+
+#elif CONFIG_FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL == 3
+
+extern "C" bool __platform_wait_on_address(void const *addr,
+                                           __cxx_atomic_contention_t const *expected,
+                                           int size) {
+    (void)addr;
+    (void)expected;
+    (void)size;
+    return false;
+}
+
+extern "C" void __platform_wake_by_address(void const *addr, int count) {
+    (void)addr;
+    (void)count;
+}
+
+#endif
+
+#endif

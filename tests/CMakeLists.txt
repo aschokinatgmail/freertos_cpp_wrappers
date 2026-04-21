@@ -227,6 +227,40 @@ add_executable(
     test_freertos_coverage_external_allocator2.cpp
 )
 
+add_executable(
+    test_freertos_clock
+    test_freertos_clock.cpp
+)
+
+add_executable(
+    test_freertos_concepts
+    test_freertos_concepts.cpp
+)
+
+add_executable(
+    test_freertos_config_kconfig
+    test_freertos_config_kconfig.cpp
+)
+
+add_executable(
+    test_freertos_atomic_wait
+    test_freertos_atomic_wait.cpp
+)
+target_compile_definitions(test_freertos_atomic_wait PRIVATE
+    CONFIG_FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY=1
+    CONFIG_FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL=3
+)
+
+add_executable(
+    test_freertos_gthr
+    test_freertos_gthr.cpp
+)
+
+add_executable(
+    test_freertos_external_threading
+    test_freertos_external_threading.cpp
+)
+
 target_link_libraries(
     test_freertos_task
     freertos_cpp_wrappers
@@ -545,6 +579,53 @@ target_link_libraries(
     pthread
 )
 
+target_link_libraries(
+    test_freertos_clock
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
+target_link_libraries(
+    test_freertos_concepts
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
+target_link_libraries(
+    test_freertos_config_kconfig
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
+target_link_libraries(
+    test_freertos_atomic_wait
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
+target_link_libraries(
+    test_freertos_gthr
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
+target_link_libraries(
+    test_freertos_external_threading
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
 # Apply compile options if using PkgConfig
 if(GTEST_COMPILE_OPTIONS)
     target_compile_options(test_freertos_task PRIVATE ${GTEST_COMPILE_OPTIONS})
@@ -587,6 +668,12 @@ target_compile_options(test_freertos_isr_result PRIVATE ${GTEST_COMPILE_OPTIONS}
     target_compile_options(test_freertos_coverage_isr PRIVATE ${GTEST_COMPILE_OPTIONS})
     target_compile_options(test_freertos_coverage_sa PRIVATE ${GTEST_COMPILE_OPTIONS})
     target_compile_options(test_freertos_coverage_external_allocator2 PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_clock PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_concepts PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_config_kconfig PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_atomic_wait PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_gthr PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_external_threading PRIVATE ${GTEST_COMPILE_OPTIONS})
 endif()
 
 # Add tests - run complete test executables to ensure proper failure detection
@@ -631,3 +718,9 @@ add_test(NAME test_freertos_coverage_ex_variants COMMAND test_freertos_coverage_
 add_test(NAME test_freertos_coverage_isr COMMAND test_freertos_coverage_isr)
 add_test(NAME test_freertos_coverage_sa COMMAND test_freertos_coverage_sa)
 add_test(NAME test_freertos_coverage_external_allocator2 COMMAND test_freertos_coverage_external_allocator2)
+add_test(NAME test_freertos_concepts COMMAND test_freertos_concepts)
+add_test(NAME test_freertos_clock COMMAND test_freertos_clock)
+add_test(NAME test_freertos_config_kconfig COMMAND test_freertos_config_kconfig)
+add_test(NAME test_freertos_atomic_wait COMMAND test_freertos_atomic_wait)
+add_test(NAME test_freertos_gthr COMMAND test_freertos_gthr)
+add_test(NAME test_freertos_external_threading COMMAND test_freertos_external_threading)

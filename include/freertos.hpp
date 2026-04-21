@@ -40,6 +40,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "freertos_config.hpp"
 
+#include "freertos_clock.hpp"
 #include "freertos_event_group.hpp"
 #include "freertos_expected.hpp"
 #include "freertos_external_allocator.hpp"
@@ -54,6 +55,12 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "freertos_sw_timer.hpp"
 #include "freertos_task.hpp"
 #include "freertos_thread_safety.hpp"
+
+#include "freertos_atomic_wait.hpp"
+#if !defined(FREERTOS_CPP_WRAPPERS_SIMULATION) && !defined(UNIT_TESTING)
+#include "freertos_gthr.hpp"
+#include "freertos_external_threading.hpp"
+#endif
 
 namespace freertos {
 

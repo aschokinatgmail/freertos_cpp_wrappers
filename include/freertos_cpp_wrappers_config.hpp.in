@@ -1,0 +1,115 @@
+/**********************************************************************************
+@file freertos_cpp_wrappers_config.hpp.in
+@author Andrey V. Shchekin <aschokin@gmail.com>
+@brief CMake-generated configuration header for FreeRTOS C++ Wrappers
+@version 3.1.0
+@date 2026-04-21
+
+This file is processed by CMake's configure_file() command.
+All @VARIABLE@ placeholders are substituted with values from
+the CMake cache. When this header is not generated (e.g.,
+header-only usage without CMake), sensible defaults are
+provided via preprocessor fallbacks.
+**********************************************************************************/
+
+#pragma once
+
+#ifndef __cplusplus
+#error "This header is for C++ only"
+#endif
+
+/* ========================================================================= */
+/* Phase 3 — Standard Library Integration Backends                           */
+/* ========================================================================= */
+
+#ifndef FREERTOS_CPP_WRAPPERS_ENABLE_GTHR_BACKEND
+#define FREERTOS_CPP_WRAPPERS_ENABLE_GTHR_BACKEND @FREERTOS_CPP_WRAPPERS_ENABLE_GTHR_BACKEND@
+#endif
+
+#ifndef FREERTOS_CPP_WRAPPERS_ENABLE_EXTERNAL_THREADING
+#define FREERTOS_CPP_WRAPPERS_ENABLE_EXTERNAL_THREADING @FREERTOS_CPP_WRAPPERS_ENABLE_EXTERNAL_THREADING@
+#endif
+
+/* ========================================================================= */
+/* Atomic Wait/Notify                                                        */
+/* ========================================================================= */
+
+#ifndef FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY
+#define FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY @FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY@
+#endif
+
+#ifndef FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL
+#define FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL @FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL@
+#endif
+
+#ifndef FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_TABLE_SIZE
+#define FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_TABLE_SIZE @FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_TABLE_SIZE@
+#endif
+
+/* ========================================================================= */
+/* Allocation Strategy                                                       */
+/* ========================================================================= */
+
+#ifndef FREERTOS_CPP_WRAPPERS_ALLOC_STRATEGY
+#define FREERTOS_CPP_WRAPPERS_ALLOC_STRATEGY @FREERTOS_CPP_WRAPPERS_ALLOC_STRATEGY@
+#endif
+
+/* ========================================================================= */
+/* Condition Variable Implementation                                         */
+/* ========================================================================= */
+
+#ifndef FREERTOS_CPP_WRAPPERS_CONDVAR_IMPL
+#define FREERTOS_CPP_WRAPPERS_CONDVAR_IMPL @FREERTOS_CPP_WRAPPERS_CONDVAR_IMPL@
+#endif
+
+/* ========================================================================= */
+/* C++ Standard Library Features                                             */
+/* ========================================================================= */
+
+#ifndef FREERTOS_CPP_WRAPPERS_ENABLE_STD_THREAD
+#define FREERTOS_CPP_WRAPPERS_ENABLE_STD_THREAD @FREERTOS_CPP_WRAPPERS_ENABLE_STD_THREAD@
+#endif
+
+#ifndef FREERTOS_CPP_WRAPPERS_ENABLE_STD_MUTEX
+#define FREERTOS_CPP_WRAPPERS_ENABLE_STD_MUTEX @FREERTOS_CPP_WRAPPERS_ENABLE_STD_MUTEX@
+#endif
+
+#ifndef FREERTOS_CPP_WRAPPERS_ENABLE_STD_SHARED_MUTEX
+#define FREERTOS_CPP_WRAPPERS_ENABLE_STD_SHARED_MUTEX @FREERTOS_CPP_WRAPPERS_ENABLE_STD_SHARED_MUTEX@
+#endif
+
+#ifndef FREERTOS_CPP_WRAPPERS_ENABLE_STD_FUTURE
+#define FREERTOS_CPP_WRAPPERS_ENABLE_STD_FUTURE @FREERTOS_CPP_WRAPPERS_ENABLE_STD_FUTURE@
+#endif
+
+/* ========================================================================= */
+/* Library Feature Toggles                                                   */
+/* ========================================================================= */
+
+#ifndef FREERTOS_CPP_WRAPPERS_ENABLE_EXPECTED
+#define FREERTOS_CPP_WRAPPERS_ENABLE_EXPECTED @FREERTOS_CPP_WRAPPERS_ENABLE_EXPECTED@
+#endif
+
+#ifndef FREERTOS_CPP_WRAPPERS_ENABLE_SPAN
+#define FREERTOS_CPP_WRAPPERS_ENABLE_SPAN @FREERTOS_CPP_WRAPPERS_ENABLE_SPAN@
+#endif
+
+#ifndef FREERTOS_CPP_WRAPPERS_ENABLE_THREAD_SAFETY
+#define FREERTOS_CPP_WRAPPERS_ENABLE_THREAD_SAFETY @FREERTOS_CPP_WRAPPERS_ENABLE_THREAD_SAFETY@
+#endif
+
+#ifndef FREERTOS_CPP_WRAPPERS_ENABLE_CONCEPTS
+#define FREERTOS_CPP_WRAPPERS_ENABLE_CONCEPTS @FREERTOS_CPP_WRAPPERS_ENABLE_CONCEPTS@
+#endif
+
+#ifndef FREERTOS_CPP_WRAPPERS_ENABLE_EXTERNAL_ALLOCATOR
+#define FREERTOS_CPP_WRAPPERS_ENABLE_EXTERNAL_ALLOCATOR @FREERTOS_CPP_WRAPPERS_ENABLE_EXTERNAL_ALLOCATOR@
+#endif
+
+#ifndef FREERTOS_CPP_WRAPPERS_ENABLE_ISR_RESULT
+#define FREERTOS_CPP_WRAPPERS_ENABLE_ISR_RESULT @FREERTOS_CPP_WRAPPERS_ENABLE_ISR_RESULT@
+#endif
+
+#ifndef FREERTOS_CPP_WRAPPERS_ENABLE_STRONG_TYPES
+#define FREERTOS_CPP_WRAPPERS_ENABLE_STRONG_TYPES @FREERTOS_CPP_WRAPPERS_ENABLE_STRONG_TYPES@
+#endif
