@@ -223,6 +223,11 @@ add_executable(
 )
 
 add_executable(
+    test_freertos_coverage_task_timer_isr
+    test_freertos_coverage_task_timer_isr.cpp
+)
+
+add_executable(
     test_freertos_coverage_sa
     test_freertos_coverage_sa.cpp
 )
@@ -282,6 +287,11 @@ add_executable(
 )
 
 add_executable(
+    test_freertos_coverage_stream_message2
+    test_freertos_coverage_stream_message2.cpp
+)
+
+add_executable(
     test_freertos_coverage_external_allocator3
     test_freertos_coverage_external_allocator3.cpp
 )
@@ -294,6 +304,66 @@ add_executable(
 add_executable(
     test_freertos_coverage_event_group2
     test_freertos_coverage_event_group2.cpp
+)
+
+add_executable(
+    test_freertos_coverage_alloc_swap
+    test_freertos_coverage_alloc_swap.cpp
+)
+
+add_executable(
+    test_freertos_coverage_semaphores3
+    test_freertos_coverage_semaphores3.cpp
+)
+
+add_executable(
+    test_freertos_coverage_semaphores4
+    test_freertos_coverage_semaphores4.cpp
+)
+
+add_executable(
+    test_freertos_coverage_queue2
+    test_freertos_coverage_queue2.cpp
+)
+
+add_executable(
+    test_freertos_coverage_semaphores5
+    test_freertos_coverage_semaphores5.cpp
+)
+
+add_executable(
+    test_freertos_coverage_stream_buffer3
+    test_freertos_coverage_stream_buffer3.cpp
+)
+
+add_executable(
+    test_freertos_coverage_external_allocator4
+    test_freertos_coverage_external_allocator4.cpp
+)
+
+add_executable(
+    test_freertos_coverage_task2
+    test_freertos_coverage_task2.cpp
+)
+
+add_executable(
+    test_freertos_coverage_expected2
+    test_freertos_coverage_expected2.cpp
+)
+
+add_executable(
+    test_freertos_coverage_timer2
+    test_freertos_coverage_timer2.cpp
+)
+
+add_executable(
+    test_freertos_coverage_expected3
+    test_freertos_coverage_expected3.cpp
+)
+
+add_executable(
+    test_freertos_coverage_branches4
+    test_freertos_coverage_branches4.cpp
 )
 
 target_link_libraries(
@@ -607,6 +677,14 @@ target_link_libraries(
 )
 
 target_link_libraries(
+    test_freertos_coverage_task_timer_isr
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
+target_link_libraries(
     test_freertos_coverage_sa
     freertos_cpp_wrappers
     freertos_mocks
@@ -692,6 +770,14 @@ target_link_libraries(
 )
 
 target_link_libraries(
+    test_freertos_coverage_stream_message2
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
+target_link_libraries(
     test_freertos_coverage_external_allocator3
     freertos_cpp_wrappers
     freertos_mocks
@@ -709,6 +795,102 @@ target_link_libraries(
 
 target_link_libraries(
     test_freertos_coverage_event_group2
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
+target_link_libraries(
+    test_freertos_coverage_alloc_swap
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
+target_link_libraries(
+    test_freertos_coverage_semaphores3
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
+target_link_libraries(
+    test_freertos_coverage_semaphores4
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
+target_link_libraries(
+    test_freertos_coverage_queue2
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
+target_link_libraries(
+    test_freertos_coverage_semaphores5
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
+target_link_libraries(
+    test_freertos_coverage_stream_buffer3
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
+target_link_libraries(
+    test_freertos_coverage_external_allocator4
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
+target_link_libraries(
+    test_freertos_coverage_task2
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
+target_link_libraries(
+    test_freertos_coverage_expected2
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
+target_link_libraries(
+    test_freertos_coverage_timer2
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
+target_link_libraries(
+    test_freertos_coverage_expected3
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
+target_link_libraries(
+    test_freertos_coverage_branches4
     freertos_cpp_wrappers
     freertos_mocks
     ${GTEST_LIBRARIES}
@@ -756,6 +938,7 @@ target_compile_options(test_freertos_isr_result PRIVATE ${GTEST_COMPILE_OPTIONS}
     target_compile_options(test_freertos_concurrency PRIVATE ${GTEST_COMPILE_OPTIONS})
     target_compile_options(test_freertos_coverage_ex_variants PRIVATE ${GTEST_COMPILE_OPTIONS})
     target_compile_options(test_freertos_coverage_isr PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_coverage_task_timer_isr PRIVATE ${GTEST_COMPILE_OPTIONS})
     target_compile_options(test_freertos_coverage_sa PRIVATE ${GTEST_COMPILE_OPTIONS})
     target_compile_options(test_freertos_coverage_external_allocator2 PRIVATE ${GTEST_COMPILE_OPTIONS})
     target_compile_options(test_freertos_clock PRIVATE ${GTEST_COMPILE_OPTIONS})
@@ -767,9 +950,24 @@ target_compile_options(test_freertos_isr_result PRIVATE ${GTEST_COMPILE_OPTIONS}
     target_compile_options(test_freertos_gthr_impl PRIVATE ${GTEST_COMPILE_OPTIONS})
     target_compile_options(test_freertos_external_threading_impl PRIVATE ${GTEST_COMPILE_OPTIONS})
     target_compile_options(test_freertos_coverage_stream_message PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_coverage_stream_message2 PRIVATE ${GTEST_COMPILE_OPTIONS})
     target_compile_options(test_freertos_coverage_external_allocator3 PRIVATE ${GTEST_COMPILE_OPTIONS})
     target_compile_options(test_freertos_coverage_queue_timer_task PRIVATE ${GTEST_COMPILE_OPTIONS})
     target_compile_options(test_freertos_coverage_event_group2 PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_coverage_alloc_swap PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_coverage_semaphores3 PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_coverage_semaphores4 PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_coverage_queue2 PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_coverage_semaphores5 PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_coverage_stream_buffer3 PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_coverage_external_allocator4 PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_coverage_task2 PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_coverage_branches3 PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_coverage_misc_branches PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_coverage_expected2 PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_coverage_timer2 PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_coverage_expected3 PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_coverage_branches4 PRIVATE ${GTEST_COMPILE_OPTIONS})
 endif()
 
 # Add tests - run complete test executables to ensure proper failure detection
@@ -813,6 +1011,7 @@ add_test(NAME test_freertos_isr_result COMMAND test_freertos_isr_result)
 add_test(NAME test_freertos_concurrency COMMAND test_freertos_concurrency)
 add_test(NAME test_freertos_coverage_ex_variants COMMAND test_freertos_coverage_ex_variants)
 add_test(NAME test_freertos_coverage_isr COMMAND test_freertos_coverage_isr)
+add_test(NAME test_freertos_coverage_task_timer_isr COMMAND test_freertos_coverage_task_timer_isr)
 add_test(NAME test_freertos_coverage_sa COMMAND test_freertos_coverage_sa)
 add_test(NAME test_freertos_coverage_external_allocator2 COMMAND test_freertos_coverage_external_allocator2)
 add_test(NAME test_freertos_concepts COMMAND test_freertos_concepts)
@@ -824,6 +1023,22 @@ add_test(NAME test_freertos_external_threading COMMAND test_freertos_external_th
 add_test(NAME test_freertos_gthr_impl COMMAND test_freertos_gthr_impl)
 add_test(NAME test_freertos_external_threading_impl COMMAND test_freertos_external_threading_impl)
 add_test(NAME test_freertos_coverage_stream_message COMMAND test_freertos_coverage_stream_message)
+add_test(NAME test_freertos_coverage_stream_message2 COMMAND test_freertos_coverage_stream_message2)
 add_test(NAME test_freertos_coverage_external_allocator3 COMMAND test_freertos_coverage_external_allocator3)
 add_test(NAME test_freertos_coverage_queue_timer_task COMMAND test_freertos_coverage_queue_timer_task)
 add_test(NAME test_freertos_coverage_event_group2 COMMAND test_freertos_coverage_event_group2)
+add_test(NAME test_freertos_coverage_alloc_swap COMMAND test_freertos_coverage_alloc_swap)
+add_test(NAME test_freertos_coverage_semaphores3 COMMAND test_freertos_coverage_semaphores3)
+add_test(NAME test_freertos_coverage_semaphores4 COMMAND test_freertos_coverage_semaphores4)
+add_test(NAME test_freertos_coverage_queue2 COMMAND test_freertos_coverage_queue2)
+add_test(NAME test_freertos_coverage_semaphores5 COMMAND test_freertos_coverage_semaphores5)
+add_test(NAME test_freertos_coverage_stream_buffer3 COMMAND test_freertos_coverage_stream_buffer3)
+add_test(NAME test_freertos_coverage_external_allocator4 COMMAND test_freertos_coverage_external_allocator4)
+add_test(NAME test_freertos_coverage_task2 COMMAND test_freertos_coverage_task2)
+add_test(NAME test_freertos_coverage_branches3 COMMAND test_freertos_coverage_branches3)
+add_test(NAME test_freertos_coverage_misc_branches COMMAND test_freertos_coverage_misc_branches)
+add_test(NAME test_freertos_coverage_expected2 COMMAND test_freertos_coverage_expected2)
+
+add_test(NAME test_freertos_coverage_timer2 COMMAND test_freertos_coverage_timer2)
+add_test(NAME test_freertos_coverage_expected3 COMMAND test_freertos_coverage_expected3)
+add_test(NAME test_freertos_coverage_branches4 COMMAND test_freertos_coverage_branches4)
