@@ -63,6 +63,11 @@ inline void disable_redirect() noexcept { detail::redirect_flag() = false; }
 inline void *allocate(size_t size) noexcept { return pvPortMalloc(size); }
 
 inline void *allocate_aligned(size_t alignment, size_t size) noexcept {
+#if defined(portBYTE_ALIGNMENT)
+    configASSERT(alignment <= static_cast<size_t>(portBYTE_ALIGNMENT));
+#else
+    configASSERT(alignment <= sizeof(size_t));
+#endif
     (void)alignment;
     return pvPortMalloc(size);
 }
@@ -162,6 +167,14 @@ void *operator new(size_t size, const std::nothrow_t &) noexcept {
 }
 
 void operator delete(void *ptr, const std::nothrow_t &) noexcept {
+    freertos::heap::deallocate(ptr);
+}
+
+void operator delete(void *ptr, size_t) noexcept {
+    freertos::heap::deallocate(ptr);
+}
+
+void operator delete[](void *ptr, size_t) noexcept {
     freertos::heap::deallocate(ptr);
 }
 

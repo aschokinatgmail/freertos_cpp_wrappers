@@ -52,11 +52,21 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 namespace freertos {
 
+#ifndef FREERTOS_CPP_WRAPPERS_ATOMIC_FLAG_MAX_WAITERS
+#define FREERTOS_CPP_WRAPPERS_ATOMIC_FLAG_MAX_WAITERS 8
+#endif
+
 class atomic_flag {
 public:
     atomic_flag() noexcept = default;
     atomic_flag(const atomic_flag &) = delete;
     atomic_flag &operator=(const atomic_flag &) = delete;
+
+    ~atomic_flag() {
+        if (m_semaphore) {
+            vSemaphoreDelete(m_semaphore);
+        }
+    }
 
     bool test_and_set(std::memory_order order = std::memory_order_seq_cst) noexcept {
         return m_flag.exchange(true, order);
@@ -87,8 +97,10 @@ public:
 
     void notify_all() noexcept {
         ensure_semaphore();
-        xSemaphoreGive(m_semaphore);
-        xSemaphoreGive(m_semaphore);
+        for (UBaseType_t i = 0;
+             i < FREERTOS_CPP_WRAPPERS_ATOMIC_FLAG_MAX_WAITERS; i++) {
+            xSemaphoreGive(m_semaphore);
+        }
     }
 
     isr_result<void> notify_one_isr() noexcept {
@@ -101,8 +113,14 @@ public:
     isr_result<void> notify_all_isr() noexcept {
         ensure_semaphore();
         isr_result<void> result{pdFALSE};
-        xSemaphoreGiveFromISR(m_semaphore, &result.higher_priority_task_woken);
-        xSemaphoreGiveFromISR(m_semaphore, &result.higher_priority_task_woken);
+        for (UBaseType_t i = 0;
+             i < FREERTOS_CPP_WRAPPERS_ATOMIC_FLAG_MAX_WAITERS; i++) {
+            BaseType_t woken = pdFALSE;
+            xSemaphoreGiveFromISR(m_semaphore, &woken);
+            if (woken) {
+                result.higher_priority_task_woken = pdTRUE;
+            }
+        }
         return result;
     }
 
@@ -117,13 +135,9 @@ public:
 
     [[nodiscard]] expected<void, error> notify_all_ex() noexcept {
         ensure_semaphore();
-        auto rc = xSemaphoreGive(m_semaphore);
-        if (rc != pdTRUE) {
-            return unexpected<error>(error::semaphore_not_owned);
-        }
-        rc = xSemaphoreGive(m_semaphore);
-        if (rc != pdTRUE) {
-            return unexpected<error>(error::semaphore_not_owned);
+        for (UBaseType_t i = 0;
+             i < FREERTOS_CPP_WRAPPERS_ATOMIC_FLAG_MAX_WAITERS; i++) {
+            xSemaphoreGive(m_semaphore);
         }
         return {};
     }
@@ -131,20 +145,27 @@ public:
 private:
     mutable std::atomic<bool> m_flag{false};
     mutable SemaphoreHandle_t m_semaphore{nullptr};
-    mutable uint8_t m_semaphore_created{0};
+    mutable std::atomic<uint8_t> m_semaphore_created{0};
 
 #if configSUPPORT_STATIC_ALLOCATION
     mutable StaticSemaphore_t m_semaphore_storage{};
 #endif
 
     void ensure_semaphore() const {
-        if (m_semaphore_created == 0) {
+        if (m_semaphore_created.load(std::memory_order_acquire) == 0) {
+            taskENTER_CRITICAL();
+            if (m_semaphore_created.load(std::memory_order_relaxed) == 0) {
 #if configSUPPORT_STATIC_ALLOCATION
-            m_semaphore = xSemaphoreCreateBinaryStatic(&m_semaphore_storage);
+                m_semaphore = xSemaphoreCreateCountingStatic(
+                    FREERTOS_CPP_WRAPPERS_ATOMIC_FLAG_MAX_WAITERS, 0,
+                    &m_semaphore_storage);
 #else
-            m_semaphore = xSemaphoreCreateBinary();
+                m_semaphore = xSemaphoreCreateCounting(
+                    FREERTOS_CPP_WRAPPERS_ATOMIC_FLAG_MAX_WAITERS, 0);
 #endif
-            m_semaphore_created = 1;
+                m_semaphore_created.store(1, std::memory_order_release);
+            }
+            taskEXIT_CRITICAL();
         }
     }
 };
@@ -157,6 +178,12 @@ public:
     atomic_flag_static() noexcept = default;
     atomic_flag_static(const atomic_flag_static &) = delete;
     atomic_flag_static &operator=(const atomic_flag_static &) = delete;
+
+    ~atomic_flag_static() {
+        if (m_semaphore) {
+            vSemaphoreDelete(m_semaphore);
+        }
+    }
 
     bool test_and_set(std::memory_order order = std::memory_order_seq_cst) noexcept {
         return m_flag.exchange(true, order);
@@ -174,58 +201,64 @@ public:
         if (m_flag.load(order) != old) {
             return;
         }
-        if (m_semaphore_created == 0) {
-            m_semaphore = xSemaphoreCreateBinaryStatic(&m_semaphore_storage);
-            m_semaphore_created = 1;
-        }
+        ensure_semaphore();
         while (m_flag.load(order) == old) {
             xSemaphoreTake(m_semaphore, portMAX_DELAY);
         }
     }
 
     void notify_one() noexcept {
-        if (m_semaphore_created == 0) {
-            m_semaphore = xSemaphoreCreateBinaryStatic(&m_semaphore_storage);
-            m_semaphore_created = 1;
-        }
+        ensure_semaphore();
         xSemaphoreGive(m_semaphore);
     }
 
     void notify_all() noexcept {
-        if (m_semaphore_created == 0) {
-            m_semaphore = xSemaphoreCreateBinaryStatic(&m_semaphore_storage);
-            m_semaphore_created = 1;
+        ensure_semaphore();
+        for (UBaseType_t i = 0;
+             i < FREERTOS_CPP_WRAPPERS_ATOMIC_FLAG_MAX_WAITERS; i++) {
+            xSemaphoreGive(m_semaphore);
         }
-        xSemaphoreGive(m_semaphore);
-        xSemaphoreGive(m_semaphore);
     }
 
     isr_result<void> notify_one_isr() noexcept {
-        if (m_semaphore_created == 0) {
-            m_semaphore = xSemaphoreCreateBinaryStatic(&m_semaphore_storage);
-            m_semaphore_created = 1;
-        }
+        ensure_semaphore();
         isr_result<void> result{pdFALSE};
         xSemaphoreGiveFromISR(m_semaphore, &result.higher_priority_task_woken);
         return result;
     }
 
     isr_result<void> notify_all_isr() noexcept {
-        if (m_semaphore_created == 0) {
-            m_semaphore = xSemaphoreCreateBinaryStatic(&m_semaphore_storage);
-            m_semaphore_created = 1;
-        }
+        ensure_semaphore();
         isr_result<void> result{pdFALSE};
-        xSemaphoreGiveFromISR(m_semaphore, &result.higher_priority_task_woken);
-        xSemaphoreGiveFromISR(m_semaphore, &result.higher_priority_task_woken);
+        for (UBaseType_t i = 0;
+             i < FREERTOS_CPP_WRAPPERS_ATOMIC_FLAG_MAX_WAITERS; i++) {
+            BaseType_t woken = pdFALSE;
+            xSemaphoreGiveFromISR(m_semaphore, &woken);
+            if (woken) {
+                result.higher_priority_task_woken = pdTRUE;
+            }
+        }
         return result;
     }
 
 private:
     mutable std::atomic<bool> m_flag{false};
     mutable SemaphoreHandle_t m_semaphore{nullptr};
-    mutable uint8_t m_semaphore_created{0};
+    mutable std::atomic<uint8_t> m_semaphore_created{0};
     mutable StaticSemaphore_t m_semaphore_storage{};
+
+    void ensure_semaphore() const {
+        if (m_semaphore_created.load(std::memory_order_acquire) == 0) {
+            taskENTER_CRITICAL();
+            if (m_semaphore_created.load(std::memory_order_relaxed) == 0) {
+                m_semaphore = xSemaphoreCreateCountingStatic(
+                    FREERTOS_CPP_WRAPPERS_ATOMIC_FLAG_MAX_WAITERS, 0,
+                    &m_semaphore_storage);
+                m_semaphore_created.store(1, std::memory_order_release);
+            }
+            taskEXIT_CRITICAL();
+        }
+    }
 };
 
 using atomic_flag = atomic_flag_static;

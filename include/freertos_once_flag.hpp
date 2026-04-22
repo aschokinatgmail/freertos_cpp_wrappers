@@ -40,7 +40,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "freertos_thread_safety.hpp"
 #include <FreeRTOS.h>
 #include <atomic>
-#include <functional>
 #include <semphr.h>
 #include <utility>
 
@@ -68,16 +67,20 @@ private:
     template <typename Callable, typename... Args>
     friend void call_once(once_flag &, Callable &&, Args &&...);
 
-    void ensure_semaphore() {
+    void ensure_semaphore() const {
         if (m_semaphore == nullptr) {
+            taskENTER_CRITICAL();
+            if (m_semaphore == nullptr) {
 #if configSUPPORT_STATIC_ALLOCATION
-            if (m_semaphore_created == 0) {
-                m_semaphore = xSemaphoreCreateBinaryStatic(&m_semaphore_storage);
-                m_semaphore_created = 1;
-            }
+                if (m_semaphore_created == 0) {
+                    m_semaphore = xSemaphoreCreateBinaryStatic(&m_semaphore_storage);
+                    m_semaphore_created = 1;
+                }
 #else
-            m_semaphore = xSemaphoreCreateBinary();
+                m_semaphore = xSemaphoreCreateBinary();
 #endif
+            }
+            taskEXIT_CRITICAL();
         }
     }
 
@@ -90,7 +93,13 @@ private:
                                               std::memory_order_acq_rel,
                                               std::memory_order_acquire)) {
             ensure_semaphore();
-            func(arg);
+            try {
+                func(arg);
+            } catch (...) {
+                m_state.store(0, std::memory_order_release);
+                xSemaphoreGive(m_semaphore);
+                throw;
+            }
             m_state.store(2, std::memory_order_release);
             xSemaphoreGive(m_semaphore);
         } else {
@@ -114,10 +123,9 @@ void call_once(once_flag &flag, Callable &&func, Args &&...args) {
     if (flag.m_state.load(std::memory_order_acquire) == 2) {
         return;
     }
-    auto bound = std::bind(std::forward<Callable>(func),
-                            std::forward<Args>(args)...);
-    flag.do_call(detail::call_once_wrapper<decltype(bound)>,
-                 static_cast<void *>(&bound));
+    auto wrapper = [&]() mutable { std::forward<Callable>(func)(std::forward<Args>(args)...); };
+    flag.do_call(detail::call_once_wrapper<decltype(wrapper)>,
+                 static_cast<void *>(&wrapper));
 }
 
 #if configSUPPORT_STATIC_ALLOCATION
@@ -150,20 +158,30 @@ private:
         if (m_state.compare_exchange_strong(expected, 1,
                                               std::memory_order_acq_rel,
                                               std::memory_order_acquire)) {
+            taskENTER_CRITICAL();
             if (m_semaphore_created == 0) {
                 m_semaphore =
                     xSemaphoreCreateBinaryStatic(&m_semaphore_storage);
                 m_semaphore_created = 1;
             }
-            func(arg);
+            taskEXIT_CRITICAL();
+            try {
+                func(arg);
+            } catch (...) {
+                m_state.store(0, std::memory_order_release);
+                xSemaphoreGive(m_semaphore);
+                throw;
+            }
             m_state.store(2, std::memory_order_release);
             xSemaphoreGive(m_semaphore);
         } else {
+            taskENTER_CRITICAL();
             if (m_semaphore_created == 0) {
                 m_semaphore =
                     xSemaphoreCreateBinaryStatic(&m_semaphore_storage);
                 m_semaphore_created = 1;
             }
+            taskEXIT_CRITICAL();
             xSemaphoreTake(m_semaphore, portMAX_DELAY);
         }
     }
@@ -174,10 +192,9 @@ void call_once(once_flag_static &flag, Callable &&func, Args &&...args) {
     if (flag.m_state.load(std::memory_order_acquire) == 2) {
         return;
     }
-    auto bound = std::bind(std::forward<Callable>(func),
-                            std::forward<Args>(args)...);
-    flag.do_call(freertos::detail::call_once_wrapper<decltype(bound)>,
-                 static_cast<void *>(&bound));
+    auto wrapper = [&]() mutable { std::forward<Callable>(func)(std::forward<Args>(args)...); };
+    flag.do_call(freertos::detail::call_once_wrapper<decltype(wrapper)>,
+                 static_cast<void *>(&wrapper));
 }
 
 using once_flag = once_flag_static;

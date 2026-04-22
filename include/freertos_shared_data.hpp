@@ -78,9 +78,14 @@ public:
   template <typename Fn>
   auto use(Fn &&fn) -> decltype(fn(std::declval<T &>())) {
     m_mutex.lock();
-    auto result = fn(m_data);
-    m_mutex.unlock();
-    return result;
+    try {
+      auto result = fn(m_data);
+      m_mutex.unlock();
+      return result;
+    } catch (...) {
+      m_mutex.unlock();
+      throw;
+    }
   }
 
   [[nodiscard]] expected<T, error> get_ex() const {

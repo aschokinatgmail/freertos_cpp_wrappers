@@ -824,13 +824,18 @@ public:
   template <typename Fn>
   auto claim(Fn &&fn) -> decltype(fn()) {
     lock();
-    if constexpr (std::is_void_v<decltype(fn())>) {
-      fn();
+    try {
+      if constexpr (std::is_void_v<decltype(fn())>) {
+        fn();
+        unlock();
+      } else {
+        auto result = fn();
+        unlock();
+        return result;
+      }
+    } catch (...) {
       unlock();
-    } else {
-      auto result = fn();
-      unlock();
-      return result;
+      throw;
     }
   }
 
@@ -1027,13 +1032,18 @@ public:
   template <typename Fn>
   auto claim(Fn &&fn) -> decltype(fn()) {
     lock();
-    if constexpr (std::is_void_v<decltype(fn())>) {
-      fn();
+    try {
+      if constexpr (std::is_void_v<decltype(fn())>) {
+        fn();
+        unlock();
+      } else {
+        auto result = fn();
+        unlock();
+        return result;
+      }
+    } catch (...) {
       unlock();
-    } else {
-      auto result = fn();
-      unlock();
-      return result;
+      throw;
     }
   }
 

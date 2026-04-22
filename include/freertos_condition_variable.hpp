@@ -50,6 +50,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 namespace freertos {
 
+#ifndef FREERTOS_CPP_WRAPPERS_CONDITION_VARIABLE_MAX_WAITERS
+#define FREERTOS_CPP_WRAPPERS_CONDITION_VARIABLE_MAX_WAITERS 8
+#endif
+
 class condition_variable_any {
   SemaphoreHandle_t m_semaphore{nullptr};
 
@@ -60,9 +64,6 @@ class condition_variable_any {
 
 public:
   condition_variable_any() {
-#ifndef FREERTOS_CPP_WRAPPERS_CONDITION_VARIABLE_MAX_WAITERS
-#define FREERTOS_CPP_WRAPPERS_CONDITION_VARIABLE_MAX_WAITERS 8
-#endif
 #if configSUPPORT_STATIC_ALLOCATION
     m_semaphore =
         xSemaphoreCreateCountingStatic(FREERTOS_CPP_WRAPPERS_CONDITION_VARIABLE_MAX_WAITERS, 0,
@@ -84,12 +85,11 @@ public:
   }
 
   void notify_one() noexcept {
-    xSemaphoreGive(m_semaphore);
+    (void)xSemaphoreGive(m_semaphore);
   }
 
   void notify_all() noexcept {
-    UBaseType_t count = uxSemaphoreGetCount(m_semaphore);
-    for (UBaseType_t i = 0; i < count; i++) {
+    for (UBaseType_t i = 0; i < FREERTOS_CPP_WRAPPERS_CONDITION_VARIABLE_MAX_WAITERS; i++) {
       xSemaphoreGive(m_semaphore);
     }
   }
@@ -102,8 +102,7 @@ public:
 
   isr_result<void> notify_all_isr() noexcept {
     isr_result<void> result{pdFALSE};
-    UBaseType_t count = uxSemaphoreGetCount(m_semaphore);
-    for (UBaseType_t i = 0; i < count; i++) {
+    for (UBaseType_t i = 0; i < FREERTOS_CPP_WRAPPERS_CONDITION_VARIABLE_MAX_WAITERS; i++) {
       BaseType_t woken = pdFALSE;
       xSemaphoreGiveFromISR(m_semaphore, &woken);
       if (woken) {
@@ -197,7 +196,7 @@ public:
     return {};
   }
 
-  SemaphoreHandle_t native_handle() noexcept { return m_semaphore; }
+  SemaphoreHandle_t native_handle() const noexcept { return m_semaphore; }
 };
 
 #if configSUPPORT_STATIC_ALLOCATION

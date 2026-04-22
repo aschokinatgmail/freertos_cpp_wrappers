@@ -320,7 +320,7 @@ public:
     return unexpected<error>(error::semaphore_not_owned);
   }
 
-  SemaphoreHandle_t native_handle() { return m_mutex_handle; }
+  SemaphoreHandle_t native_handle() const noexcept { return m_mutex_handle; }
 };
 
 #if configSUPPORT_STATIC_ALLOCATION

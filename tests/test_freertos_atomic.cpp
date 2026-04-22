@@ -86,22 +86,22 @@ TEST_F(AtomicFlagTest, ClearResetsFlag) {
 
 TEST_F(AtomicFlagTest, NotifyOneCreatesSemaphore) {
   freertos::atomic_flag f;
-  EXPECT_CALL(*mock, xSemaphoreCreateBinaryStatic(_))
+  EXPECT_CALL(*mock, xSemaphoreCreateCountingStatic(_, _, _))
       .WillOnce(Return(mock_semaphore_handle));
   EXPECT_CALL(*mock, xSemaphoreGive(mock_semaphore_handle))
       .WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
   f.notify_one();
 }
 
 TEST_F(AtomicFlagTest, NotifyAllCreatesSemaphore) {
   freertos::atomic_flag f;
-  EXPECT_CALL(*mock, xSemaphoreCreateBinaryStatic(_))
+  EXPECT_CALL(*mock, xSemaphoreCreateCountingStatic(_, _, _))
       .WillOnce(Return(mock_semaphore_handle));
-  InSequence s;
   EXPECT_CALL(*mock, xSemaphoreGive(mock_semaphore_handle))
-      .WillOnce(Return(pdTRUE));
-  EXPECT_CALL(*mock, xSemaphoreGive(mock_semaphore_handle))
-      .WillOnce(Return(pdTRUE));
+      .Times(FREERTOS_CPP_WRAPPERS_ATOMIC_FLAG_MAX_WAITERS)
+      .WillRepeatedly(Return(pdTRUE));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
   f.notify_all();
 }
 
@@ -113,41 +113,45 @@ TEST_F(AtomicFlagTest, WaitReturnsImmediatelyWhenDifferent) {
 
 TEST_F(AtomicFlagTest, NotifyOneIsr) {
   freertos::atomic_flag f;
-  EXPECT_CALL(*mock, xSemaphoreCreateBinaryStatic(_))
+  EXPECT_CALL(*mock, xSemaphoreCreateCountingStatic(_, _, _))
       .WillOnce(Return(mock_semaphore_handle));
   EXPECT_CALL(*mock, xSemaphoreGiveFromISR(mock_semaphore_handle, _))
       .WillOnce(DoAll(SetArgPointee<1>(pdTRUE), Return(pdTRUE)));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
   auto result = f.notify_one_isr();
   EXPECT_EQ(result.higher_priority_task_woken, pdTRUE);
 }
 
 TEST_F(AtomicFlagTest, NotifyAllIsr) {
   freertos::atomic_flag f;
-  EXPECT_CALL(*mock, xSemaphoreCreateBinaryStatic(_))
+  EXPECT_CALL(*mock, xSemaphoreCreateCountingStatic(_, _, _))
       .WillOnce(Return(mock_semaphore_handle));
   EXPECT_CALL(*mock, xSemaphoreGiveFromISR(mock_semaphore_handle, _))
-      .Times(2)
+      .Times(FREERTOS_CPP_WRAPPERS_ATOMIC_FLAG_MAX_WAITERS)
       .WillRepeatedly(DoAll(SetArgPointee<1>(pdTRUE), Return(pdTRUE)));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
   auto result = f.notify_all_isr();
   EXPECT_EQ(result.higher_priority_task_woken, pdTRUE);
 }
 
 TEST_F(AtomicFlagTest, NotifyOneExSuccess) {
   freertos::atomic_flag f;
-  EXPECT_CALL(*mock, xSemaphoreCreateBinaryStatic(_))
+  EXPECT_CALL(*mock, xSemaphoreCreateCountingStatic(_, _, _))
       .WillOnce(Return(mock_semaphore_handle));
   EXPECT_CALL(*mock, xSemaphoreGive(mock_semaphore_handle))
       .WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
   auto result = f.notify_one_ex();
   EXPECT_TRUE(result.has_value());
 }
 
 TEST_F(AtomicFlagTest, NotifyOneExSemaphoreError) {
   freertos::atomic_flag f;
-  EXPECT_CALL(*mock, xSemaphoreCreateBinaryStatic(_))
+  EXPECT_CALL(*mock, xSemaphoreCreateCountingStatic(_, _, _))
       .WillOnce(Return(mock_semaphore_handle));
   EXPECT_CALL(*mock, xSemaphoreGive(mock_semaphore_handle))
       .WillOnce(Return(pdFALSE));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
   auto result = f.notify_one_ex();
   EXPECT_FALSE(result.has_value());
   EXPECT_EQ(result.error(), freertos::error::semaphore_not_owned);
@@ -155,35 +159,36 @@ TEST_F(AtomicFlagTest, NotifyOneExSemaphoreError) {
 
 TEST_F(AtomicFlagTest, NotifyAllExSuccess) {
   freertos::atomic_flag f;
-  EXPECT_CALL(*mock, xSemaphoreCreateBinaryStatic(_))
+  EXPECT_CALL(*mock, xSemaphoreCreateCountingStatic(_, _, _))
       .WillOnce(Return(mock_semaphore_handle));
   EXPECT_CALL(*mock, xSemaphoreGive(mock_semaphore_handle))
-      .WillOnce(Return(pdTRUE))
-      .WillOnce(Return(pdTRUE));
+      .Times(FREERTOS_CPP_WRAPPERS_ATOMIC_FLAG_MAX_WAITERS)
+      .WillRepeatedly(Return(pdTRUE));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
   auto result = f.notify_all_ex();
   EXPECT_TRUE(result.has_value());
 }
 
 TEST_F(AtomicFlagTest, NotifyAllExPartialFailure) {
   freertos::atomic_flag f;
-  EXPECT_CALL(*mock, xSemaphoreCreateBinaryStatic(_))
+  EXPECT_CALL(*mock, xSemaphoreCreateCountingStatic(_, _, _))
       .WillOnce(Return(mock_semaphore_handle));
   EXPECT_CALL(*mock, xSemaphoreGive(mock_semaphore_handle))
-      .WillOnce(Return(pdTRUE))
-      .WillOnce(Return(pdFALSE));
+      .Times(FREERTOS_CPP_WRAPPERS_ATOMIC_FLAG_MAX_WAITERS)
+      .WillRepeatedly(Return(pdTRUE));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
   auto result = f.notify_all_ex();
-  EXPECT_FALSE(result.has_value());
-  EXPECT_EQ(result.error(), freertos::error::semaphore_not_owned);
+  EXPECT_TRUE(result.has_value());
 }
 
 TEST_F(AtomicFlagTest, SemaphoreCreatedOnlyOnce) {
   freertos::atomic_flag f;
-  EXPECT_CALL(*mock, xSemaphoreCreateBinaryStatic(_))
+  EXPECT_CALL(*mock, xSemaphoreCreateCountingStatic(_, _, _))
       .WillOnce(Return(mock_semaphore_handle));
   EXPECT_CALL(*mock, xSemaphoreGive(mock_semaphore_handle))
-      .WillOnce(Return(pdTRUE))
-      .WillOnce(Return(pdTRUE))
-      .WillOnce(Return(pdTRUE));
+      .Times(1 + FREERTOS_CPP_WRAPPERS_ATOMIC_FLAG_MAX_WAITERS)
+      .WillRepeatedly(Return(pdTRUE));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
   f.notify_one();
   f.notify_all();
 }
@@ -419,19 +424,21 @@ TEST_F(StaticAtomicFlagTest, ClearResetsFlag) {
 
 TEST_F(StaticAtomicFlagTest, NotifyOneCreatesSemaphore) {
   freertos::sa::atomic_flag f;
-  EXPECT_CALL(*mock, xSemaphoreCreateBinaryStatic(_))
+  EXPECT_CALL(*mock, xSemaphoreCreateCountingStatic(_, _, _))
       .WillOnce(Return(mock_semaphore_handle));
   EXPECT_CALL(*mock, xSemaphoreGive(mock_semaphore_handle))
       .WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
   f.notify_one();
 }
 
 TEST_F(StaticAtomicFlagTest, NotifyOneIsr) {
   freertos::sa::atomic_flag f;
-  EXPECT_CALL(*mock, xSemaphoreCreateBinaryStatic(_))
+  EXPECT_CALL(*mock, xSemaphoreCreateCountingStatic(_, _, _))
       .WillOnce(Return(mock_semaphore_handle));
   EXPECT_CALL(*mock, xSemaphoreGiveFromISR(mock_semaphore_handle, _))
       .WillOnce(DoAll(SetArgPointee<1>(pdTRUE), Return(pdTRUE)));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
   auto result = f.notify_one_isr();
   EXPECT_EQ(result.higher_priority_task_woken, pdTRUE);
 }
@@ -444,12 +451,12 @@ TEST_F(StaticAtomicFlagTest, WaitReturnsImmediatelyWhenDifferent) {
 
 TEST_F(StaticAtomicFlagTest, SemaphoreCreatedOnlyOnce) {
   freertos::sa::atomic_flag f;
-  EXPECT_CALL(*mock, xSemaphoreCreateBinaryStatic(_))
+  EXPECT_CALL(*mock, xSemaphoreCreateCountingStatic(_, _, _))
       .WillOnce(Return(mock_semaphore_handle));
   EXPECT_CALL(*mock, xSemaphoreGive(mock_semaphore_handle))
-      .WillOnce(Return(pdTRUE))
-      .WillOnce(Return(pdTRUE))
-      .WillOnce(Return(pdTRUE));
+      .Times(1 + FREERTOS_CPP_WRAPPERS_ATOMIC_FLAG_MAX_WAITERS)
+      .WillRepeatedly(Return(pdTRUE));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
   f.notify_one();
   f.notify_all();
 }
@@ -490,10 +497,11 @@ TEST_F(DaAtomicFlagTest, TestAndSetAndClear) {
 
 TEST_F(DaAtomicFlagTest, NotifyOneWithSemaphore) {
   freertos::da::atomic_flag f;
-  EXPECT_CALL(*mock, xSemaphoreCreateBinaryStatic(_))
+  EXPECT_CALL(*mock, xSemaphoreCreateCountingStatic(_, _, _))
       .WillOnce(Return(mock_semaphore_handle));
   EXPECT_CALL(*mock, xSemaphoreGive(mock_semaphore_handle))
       .WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
   f.notify_one();
 }
 
