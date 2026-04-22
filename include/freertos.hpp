@@ -41,6 +41,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "freertos_config.hpp"
 
 #include "freertos_clock.hpp"
+#include "freertos_condition_variable.hpp"
 #include "freertos_event_group.hpp"
 #include "freertos_expected.hpp"
 #include "freertos_external_allocator.hpp"
