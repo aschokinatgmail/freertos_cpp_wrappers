@@ -141,6 +141,7 @@ typedef struct {
 #define configUSE_SB_COMPLETED_CALLBACK 1
 #define configUSE_STREAM_BUFFERS 1
 #define configUSE_MUTEXES 1
+#define configUSE_COUNTING_SEMAPHORES 1
 #define configUSE_QUEUE_SETS 1
 #define configUSE_TRACE_FACILITY 1
 #define configUSE_APPLICATION_TASK_TAG 1
