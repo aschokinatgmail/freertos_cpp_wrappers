@@ -184,6 +184,9 @@ template <typename TaskAllocator> class task {
   uint8_t m_start_suspended : 1;
 #endif
   TaskHandle_t m_hTask;
+#if configUSE_TASK_NOTIFICATIONS
+  TaskHandle_t m_joinHandle{nullptr};
+#endif
 
   // LCOV_EXCL_START - Internal FreeRTOS callback function
   static void task_exec(void *context) { // NOLINT(clang-tidy:cppcoreguidelines-pro-type-static-cast-downcast)
@@ -195,6 +198,11 @@ template <typename TaskAllocator> class task {
     }
 #endif
     pThis->m_taskRoutine();
+#if configUSE_TASK_NOTIFICATIONS
+    if (pThis->m_joinHandle) {
+      xTaskNotify(pThis->m_joinHandle, 0, eNoAction);
+    }
+#endif
   }
   // LCOV_EXCL_STOP
 
@@ -266,13 +274,20 @@ public:
   task(const task &) = delete;
   task(task &&other) noexcept
       : m_allocator(std::move(other.m_allocator)),
-        m_hTask(other.m_hTask), m_taskRoutine(std::move(other.m_taskRoutine))
+        m_taskRoutine(std::move(other.m_taskRoutine)), m_hTask(other.m_hTask)
 #if INCLUDE_vTaskSuspend
         ,
         m_start_suspended(other.m_start_suspended)
 #endif
+#if configUSE_TASK_NOTIFICATIONS
+        ,
+        m_joinHandle(other.m_joinHandle)
+#endif
   {
     other.m_hTask = nullptr;
+#if configUSE_TASK_NOTIFICATIONS
+    other.m_joinHandle = nullptr;
+#endif
   }
   /**
    * @brief Destruct the task object and delete the task instance if it was
@@ -308,6 +323,9 @@ public:
     const auto start_suspended_tmp = static_cast<uint8_t>(m_start_suspended);
     m_start_suspended = other.m_start_suspended ? 1 : 0;
     other.m_start_suspended = start_suspended_tmp ? 1 : 0;
+#endif
+#if configUSE_TASK_NOTIFICATIONS
+    swap(m_joinHandle, other.m_joinHandle);
 #endif
   }
 
@@ -368,6 +386,17 @@ public:
     vTaskDelete(m_hTask);
     m_hTask = nullptr;
   }
+  [[nodiscard]] bool joinable(void) const noexcept { return m_hTask != nullptr; }
+#if configUSE_TASK_NOTIFICATIONS
+  void join(void) {
+    configASSERT(m_hTask != nullptr);
+    m_joinHandle = xTaskGetCurrentTaskHandle();
+    ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+    vTaskDelete(m_hTask);
+    m_hTask = nullptr;
+    m_joinHandle = nullptr;
+  }
+#endif
 #if INCLUDE_xTaskAbortDelay
   /**
    * @brief Abort the delay of the task.

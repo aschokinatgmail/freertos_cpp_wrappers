@@ -371,6 +371,26 @@ add_executable(
     test_freertos_stream_buffer_callbacks.cpp
 )
 
+add_executable(
+    test_freertos_task_join
+    test_freertos_task_join.cpp
+)
+
+add_executable(
+    test_freertos_stream_batching_buffer
+    test_freertos_stream_batching_buffer.cpp
+)
+
+add_executable(
+    test_freertos_fixed_function
+    test_freertos_fixed_function.cpp
+)
+
+add_executable(
+    test_freertos_isr_context
+    test_freertos_isr_context.cpp
+)
+
 target_link_libraries(
     test_freertos_task
     freertos_cpp_wrappers
@@ -910,6 +930,38 @@ target_link_libraries(
     pthread
 )
 
+target_link_libraries(
+    test_freertos_task_join
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
+target_link_libraries(
+    test_freertos_stream_batching_buffer
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
+target_link_libraries(
+    test_freertos_fixed_function
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
+target_link_libraries(
+    test_freertos_isr_context
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
 # Apply compile options if using PkgConfig
 if(GTEST_COMPILE_OPTIONS)
     target_compile_options(test_freertos_task PRIVATE ${GTEST_COMPILE_OPTIONS})
@@ -982,6 +1034,9 @@ target_compile_options(test_freertos_isr_result PRIVATE ${GTEST_COMPILE_OPTIONS}
     target_compile_options(test_freertos_coverage_expected3 PRIVATE ${GTEST_COMPILE_OPTIONS})
     target_compile_options(test_freertos_coverage_branches4 PRIVATE ${GTEST_COMPILE_OPTIONS})
     target_compile_options(test_freertos_stream_buffer_callbacks PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_task_join PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_fixed_function PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_isr_context PRIVATE ${GTEST_COMPILE_OPTIONS})
 endif()
 
 # Add tests - run complete test executables to ensure proper failure detection
@@ -1058,3 +1113,7 @@ add_test(NAME test_freertos_coverage_expected3 COMMAND test_freertos_coverage_ex
 add_test(NAME test_freertos_coverage_branches4 COMMAND test_freertos_coverage_branches4)
 
 add_test(NAME test_freertos_stream_buffer_callbacks COMMAND test_freertos_stream_buffer_callbacks)
+add_test(NAME test_freertos_task_join COMMAND test_freertos_task_join)
+add_test(NAME test_freertos_stream_batching_buffer COMMAND test_freertos_stream_batching_buffer)
+add_test(NAME test_freertos_isr_context COMMAND test_freertos_isr_context)
+add_test(NAME test_freertos_fixed_function COMMAND test_freertos_fixed_function)

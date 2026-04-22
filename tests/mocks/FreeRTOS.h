@@ -69,6 +69,10 @@ typedef struct {
 // Stream buffer types
 typedef void *StreamBufferHandle_t;
 
+// Stream buffer type constants (V11.1.0+)
+#define sbTYPE_STREAM_BUFFER 1
+#define sbTYPE_STREAM_BATCHING_BUFFER 2
+
 // Stream buffer callback function type (V10.5.0+)
 typedef void (*StreamBufferCallbackFunction_t)(StreamBufferHandle_t xStreamBuffer,
                                                 BaseType_t *pxHigherPriorityTaskWoken,
@@ -575,6 +579,16 @@ public:
                (StreamBufferHandle_t xStreamBuffer, uint8_t **ppucStreamBufferStorageArea,
                 StaticStreamBuffer_t **ppxStaticStreamBuffer));
 
+  // Stream Buffer generic creation (V11.1.0+)
+  MOCK_METHOD(StreamBufferHandle_t, xStreamBufferGenericCreate,
+              (size_t xBufferSizeBytes, size_t xTriggerLevelBytes,
+               BaseType_t xIsMessageBuffer));
+  MOCK_METHOD(StreamBufferHandle_t, xStreamBufferGenericCreateStatic,
+              (size_t xBufferSizeBytes, size_t xTriggerLevelBytes,
+               BaseType_t xIsMessageBuffer,
+               uint8_t *pucStreamBufferStorageArea,
+               StaticStreamBuffer_t *pxStaticStreamBuffer));
+
   // Stream Buffer callback creation (V10.5.0+)
   MOCK_METHOD(StreamBufferHandle_t, xStreamBufferCreateWithCallback,
                (size_t xBufferSizeBytes, size_t xTriggerLevelBytes,
@@ -584,6 +598,24 @@ public:
                 void *pvReceiveCompletedCallbackContext));
   MOCK_METHOD(StreamBufferHandle_t, xStreamBufferCreateStaticWithCallback,
                (size_t xBufferSizeBytes, size_t xTriggerLevelBytes,
+                uint8_t *pucStreamBufferStorageArea,
+                StaticStreamBuffer_t *pxStaticStreamBuffer,
+                StreamBufferCallbackFunction_t pxSendCompletedCallback,
+                void *pvSendCompletedCallbackContext,
+                StreamBufferCallbackFunction_t pxReceiveCompletedCallback,
+                void *pvReceiveCompletedCallbackContext));
+
+  // Stream Buffer generic callback creation (V11.1.0+)
+  MOCK_METHOD(StreamBufferHandle_t, xStreamBufferGenericCreateWithCallback,
+               (size_t xBufferSizeBytes, size_t xTriggerLevelBytes,
+                BaseType_t xIsMessageBuffer,
+                StreamBufferCallbackFunction_t pxSendCompletedCallback,
+                void *pvSendCompletedCallbackContext,
+                StreamBufferCallbackFunction_t pxReceiveCompletedCallback,
+                void *pvReceiveCompletedCallbackContext));
+  MOCK_METHOD(StreamBufferHandle_t, xStreamBufferGenericCreateStaticWithCallback,
+               (size_t xBufferSizeBytes, size_t xTriggerLevelBytes,
+                BaseType_t xIsMessageBuffer,
                 uint8_t *pucStreamBufferStorageArea,
                 StaticStreamBuffer_t *pxStaticStreamBuffer,
                 StreamBufferCallbackFunction_t pxSendCompletedCallback,
@@ -874,6 +906,16 @@ BaseType_t xMessageBufferReset(MessageBufferHandle_t xMessageBuffer);
 BaseType_t xMessageBufferIsEmpty(MessageBufferHandle_t xMessageBuffer);
 BaseType_t xMessageBufferIsFull(MessageBufferHandle_t xMessageBuffer);
 
+// Stream buffer generic creation functions (V11.1.0+)
+StreamBufferHandle_t xStreamBufferGenericCreate(size_t xBufferSizeBytes,
+                                                 size_t xTriggerLevelBytes,
+                                                 BaseType_t xIsMessageBuffer);
+StreamBufferHandle_t
+xStreamBufferGenericCreateStatic(size_t xBufferSizeBytes, size_t xTriggerLevelBytes,
+                                 BaseType_t xIsMessageBuffer,
+                                 uint8_t *pucStreamBufferStorageArea,
+                                 StaticStreamBuffer_t *pxStaticStreamBuffer);
+
 // Stream buffer function declarations
 StreamBufferHandle_t xStreamBufferCreate(size_t xBufferSizeBytes,
                                          size_t xTriggerLevelBytes);
@@ -920,6 +962,24 @@ StreamBufferHandle_t xStreamBufferCreateWithCallback(
     void *pvReceiveCompletedCallbackContext);
 StreamBufferHandle_t xStreamBufferCreateStaticWithCallback(
     size_t xBufferSizeBytes, size_t xTriggerLevelBytes,
+    uint8_t *pucStreamBufferStorageArea,
+    StaticStreamBuffer_t *pxStaticStreamBuffer,
+    StreamBufferCallbackFunction_t pxSendCompletedCallback,
+    void *pvSendCompletedCallbackContext,
+    StreamBufferCallbackFunction_t pxReceiveCompletedCallback,
+    void *pvReceiveCompletedCallbackContext);
+
+// Stream buffer generic callback creation functions (V11.1.0+)
+StreamBufferHandle_t xStreamBufferGenericCreateWithCallback(
+    size_t xBufferSizeBytes, size_t xTriggerLevelBytes,
+    BaseType_t xIsMessageBuffer,
+    StreamBufferCallbackFunction_t pxSendCompletedCallback,
+    void *pvSendCompletedCallbackContext,
+    StreamBufferCallbackFunction_t pxReceiveCompletedCallback,
+    void *pvReceiveCompletedCallbackContext);
+StreamBufferHandle_t xStreamBufferGenericCreateStaticWithCallback(
+    size_t xBufferSizeBytes, size_t xTriggerLevelBytes,
+    BaseType_t xIsMessageBuffer,
     uint8_t *pucStreamBufferStorageArea,
     StaticStreamBuffer_t *pxStaticStreamBuffer,
     StreamBufferCallbackFunction_t pxSendCompletedCallback,
