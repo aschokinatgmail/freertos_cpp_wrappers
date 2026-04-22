@@ -1423,6 +1423,26 @@ void *pvTaskGetThreadLocalStoragePointer(TaskHandle_t xTask, BaseType_t xIndex) 
   return nullptr;
 }
 
+void *pvPortMalloc(size_t xSize) {
+  if (g_freertos_mock) {
+    return g_freertos_mock->pvPortMalloc(xSize);
+  }
+  return nullptr;
+}
+
+void vPortFree(void *pv) {
+  if (g_freertos_mock) {
+    g_freertos_mock->vPortFree(pv);
+  }
+}
+
+void *pvPortCalloc(size_t xNum, size_t xSize) {
+  if (g_freertos_mock) {
+    return g_freertos_mock->pvPortCalloc(xNum, xSize);
+  }
+  return nullptr;
+}
+
 BaseType_t xStreamBufferResetFromISR(StreamBufferHandle_t xStreamBuffer,
                                       BaseType_t *pxHigherPriorityTaskWoken) {
   if (g_freertos_mock) {
@@ -1587,6 +1607,16 @@ BaseType_t xEventGroupGetStaticBuffer(
   if (g_freertos_mock) {
     return g_freertos_mock->xEventGroupGetStaticBuffer(xEventGroup,
                                                         ppxStaticEventGroup);
+  }
+  return pdFAIL;
+}
+
+BaseType_t xTimerPendFunctionCall(PendedFunction_t xFunctionToPend,
+                                  void *pvParameter1, uint32_t ulParameter2,
+                                  TickType_t xTicksToWait) {
+  if (g_freertos_mock) {
+    return g_freertos_mock->xTimerPendFunctionCall(xFunctionToPend, pvParameter1,
+                                                     ulParameter2, xTicksToWait);
   }
   return pdFAIL;
 }

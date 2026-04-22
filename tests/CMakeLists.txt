@@ -391,6 +391,36 @@ add_executable(
     test_freertos_isr_context.cpp
 )
 
+add_executable(
+    test_freertos_once_flag
+    test_freertos_once_flag.cpp
+)
+
+add_executable(
+    test_freertos_pend_call
+    test_freertos_pend_call.cpp
+)
+
+add_executable(
+    test_freertos_shared_data
+    test_freertos_shared_data.cpp
+)
+
+add_executable(
+    test_freertos_claim
+    test_freertos_claim.cpp
+)
+
+add_executable(
+    test_freertos_heap
+    test_freertos_heap.cpp
+)
+
+add_executable(
+    test_freertos_latch
+    test_freertos_latch.cpp
+)
+
 target_link_libraries(
     test_freertos_task
     freertos_cpp_wrappers
@@ -962,6 +992,54 @@ target_link_libraries(
     pthread
 )
 
+target_link_libraries(
+    test_freertos_once_flag
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
+target_link_libraries(
+    test_freertos_heap
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
+target_link_libraries(
+    test_freertos_latch
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
+target_link_libraries(
+    test_freertos_pend_call
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
+target_link_libraries(
+    test_freertos_shared_data
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
+target_link_libraries(
+    test_freertos_claim
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
 # Apply compile options if using PkgConfig
 if(GTEST_COMPILE_OPTIONS)
     target_compile_options(test_freertos_task PRIVATE ${GTEST_COMPILE_OPTIONS})
@@ -1037,6 +1115,12 @@ target_compile_options(test_freertos_isr_result PRIVATE ${GTEST_COMPILE_OPTIONS}
     target_compile_options(test_freertos_task_join PRIVATE ${GTEST_COMPILE_OPTIONS})
     target_compile_options(test_freertos_fixed_function PRIVATE ${GTEST_COMPILE_OPTIONS})
     target_compile_options(test_freertos_isr_context PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_once_flag PRIVATE ${GTEST_COMPILE_OPTIONS})
+     target_compile_options(test_freertos_heap PRIVATE ${GTEST_COMPILE_OPTIONS})
+     target_compile_options(test_freertos_pend_call PRIVATE ${GTEST_COMPILE_OPTIONS})
+     target_compile_options(test_freertos_shared_data PRIVATE ${GTEST_COMPILE_OPTIONS})
+     target_compile_options(test_freertos_claim PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_latch PRIVATE ${GTEST_COMPILE_OPTIONS})
 endif()
 
 # Add tests - run complete test executables to ensure proper failure detection
@@ -1116,4 +1200,10 @@ add_test(NAME test_freertos_stream_buffer_callbacks COMMAND test_freertos_stream
 add_test(NAME test_freertos_task_join COMMAND test_freertos_task_join)
 add_test(NAME test_freertos_stream_batching_buffer COMMAND test_freertos_stream_batching_buffer)
 add_test(NAME test_freertos_isr_context COMMAND test_freertos_isr_context)
+add_test(NAME test_freertos_once_flag COMMAND test_freertos_once_flag)
 add_test(NAME test_freertos_fixed_function COMMAND test_freertos_fixed_function)
+add_test(NAME test_freertos_heap COMMAND test_freertos_heap)
+add_test(NAME test_freertos_pend_call COMMAND test_freertos_pend_call)
+add_test(NAME test_freertos_shared_data COMMAND test_freertos_shared_data)
+add_test(NAME test_freertos_claim COMMAND test_freertos_claim)
+add_test(NAME test_freertos_latch COMMAND test_freertos_latch)

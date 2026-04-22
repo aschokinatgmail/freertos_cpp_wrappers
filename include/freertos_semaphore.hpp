@@ -820,6 +820,24 @@ public:
    * @return bool true if the mutex is locked, otherwise false.
    */
   bool locked(void) const { return m_locked; }
+
+  template <typename Fn>
+  auto claim(Fn &&fn) -> decltype(fn()) {
+    lock();
+    if constexpr (std::is_void_v<decltype(fn())>) {
+      fn();
+      unlock();
+    } else {
+      auto result = fn();
+      unlock();
+      return result;
+    }
+  }
+
+  template <typename Fn>
+  auto with_lock(Fn &&fn) -> decltype(fn()) {
+    return claim(std::forward<Fn>(fn));
+  }
 };
 
 /**
@@ -1005,6 +1023,24 @@ public:
    * @return uint8_t number of recursions of the recursive mutex.
    */
   uint8_t recursions_count(void) const { return m_recursions_count; }
+
+  template <typename Fn>
+  auto claim(Fn &&fn) -> decltype(fn()) {
+    lock();
+    if constexpr (std::is_void_v<decltype(fn())>) {
+      fn();
+      unlock();
+    } else {
+      auto result = fn();
+      unlock();
+      return result;
+    }
+  }
+
+  template <typename Fn>
+  auto with_lock(Fn &&fn) -> decltype(fn()) {
+    return claim(std::forward<Fn>(fn));
+  }
 };
 
 /**

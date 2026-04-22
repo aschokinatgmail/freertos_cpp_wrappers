@@ -27,6 +27,10 @@ typedef struct StaticEventGroup {
 #define pdPASS 1
 #define pdFAIL 0
 
+// FreeRTOS kernel version (mock as V10.5.0 for feature testing)
+#define tskKERNEL_VERSION_MAJOR 10
+#define tskKERNEL_VERSION_MINOR 5
+
 #define configTICK_RATE_HZ 1000
 #define portMAX_DELAY 0xFFFFFFFF
 #define portTICK_PERIOD_MS 1
@@ -84,6 +88,7 @@ typedef struct {
 } StaticStreamBuffer_t;
 
 // Timer types
+typedef void (*PendedFunction_t)(void *, uint32_t);
 typedef void *TimerHandle_t;
 typedef void (*TimerCallbackFunction_t)(TimerHandle_t xTimer);
 
@@ -96,6 +101,7 @@ typedef struct {
 #define configSUPPORT_STATIC_ALLOCATION 1
 #define configSUPPORT_DYNAMIC_ALLOCATION 1
 #define configMINIMAL_STACK_SIZE 256
+#define configTIMER_TASK_STACK_DEPTH 256
 #define configNUM_THREAD_LOCAL_STORAGE_POINTERS 4
 
 // Feature flags (enabled for comprehensive testing)
@@ -467,10 +473,14 @@ public:
                const EventBits_t uxBitsToWaitFor, TickType_t xTicksToWait));
 
   // Software Timer operations
+  MOCK_METHOD(BaseType_t, xTimerPendFunctionCall,
+               (PendedFunction_t xFunctionToPend, void *pvParameter1,
+                uint32_t ulParameter2, TickType_t xTicksToWait));
+
   MOCK_METHOD(TimerHandle_t, xTimerCreate,
-              (const char *pcTimerName, TickType_t xTimerPeriodInTicks,
-               UBaseType_t uxAutoReload, void *pvTimerID,
-               TimerCallbackFunction_t pxCallbackFunction));
+               (const char *pcTimerName, TickType_t xTimerPeriodInTicks,
+                UBaseType_t uxAutoReload, void *pvTimerID,
+                TimerCallbackFunction_t pxCallbackFunction));
   MOCK_METHOD(TimerHandle_t, xTimerCreateStatic,
               (const char *pcTimerName, TickType_t xTimerPeriodInTicks,
                UBaseType_t uxAutoReload, void *pvTimerID,
@@ -663,6 +673,11 @@ public:
               (TaskHandle_t xTask, BaseType_t xIndex, void *pvValue));
   MOCK_METHOD(void *, pvTaskGetThreadLocalStoragePointer,
               (TaskHandle_t xTask, BaseType_t xIndex));
+
+  // Heap allocation mocks
+  MOCK_METHOD(void *, pvPortMalloc, (size_t xSize));
+  MOCK_METHOD(void, vPortFree, (void *pv));
+  MOCK_METHOD(void *, pvPortCalloc, (size_t xNum, size_t xSize));
 };
 
 // Global mock instance
@@ -849,6 +864,9 @@ xQueueSelectFromSetFromISR(QueueSetHandle_t xQueueSet,
                            BaseType_t *pxHigherPriorityTaskWoken);
 
 // Timer functions
+BaseType_t xTimerPendFunctionCall(PendedFunction_t xFunctionToPend,
+                                  void *pvParameter1, uint32_t ulParameter2,
+                                  TickType_t xTicksToWait);
 TimerHandle_t xTimerCreate(const char *pcTimerName,
                            TickType_t xTimerPeriodInTicks,
                            UBaseType_t uxAutoReload, void *pvTimerID,
@@ -1016,4 +1034,9 @@ BaseType_t xQueueGetStaticBuffers(QueueHandle_t xQueue,
 // Event Group static buffer retrieval (V10.6.0+)
 BaseType_t xEventGroupGetStaticBuffer(EventGroupHandle_t xEventGroup,
                                        StaticEventGroup_t **ppxStaticEventGroup);
+
+// Heap allocation functions
+void *pvPortMalloc(size_t xSize);
+void vPortFree(void *pv);
+void *pvPortCalloc(size_t xNum, size_t xSize);
 }
