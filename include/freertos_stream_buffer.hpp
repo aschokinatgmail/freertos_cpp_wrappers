@@ -48,7 +48,95 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 namespace freertos {
 
+#if configUSE_SB_COMPLETED_CALLBACK
+/**
+ * @brief An allocator for the stream buffer that uses a dynamic memory
+ * allocation with send/receive completed callbacks.
+ *
+ */
+template <size_t StreamBufferSize>
+class dynamic_stream_buffer_allocator_with_callback {
+  StreamBufferCallbackFunction_t m_send_callback;
+  void *m_send_context;
+  StreamBufferCallbackFunction_t m_receive_callback;
+  void *m_receive_context;
+
+public:
+  dynamic_stream_buffer_allocator_with_callback(
+      StreamBufferCallbackFunction_t send_callback, void *send_context,
+      StreamBufferCallbackFunction_t receive_callback, void *receive_context)
+      : m_send_callback{send_callback}, m_send_context{send_context},
+        m_receive_callback{receive_callback},
+        m_receive_context{receive_context} {}
+
+  void swap(dynamic_stream_buffer_allocator_with_callback &other) noexcept {
+    using std::swap;
+    swap(m_send_callback, other.m_send_callback);
+    swap(m_send_context, other.m_send_context);
+    swap(m_receive_callback, other.m_receive_callback);
+    swap(m_receive_context, other.m_receive_context);
+  }
+
+  StreamBufferHandle_t create(size_t trigger_level_bytes = 1) {
+    return xStreamBufferCreateWithCallback(
+        StreamBufferSize, trigger_level_bytes, m_send_callback, m_send_context,
+        m_receive_callback, m_receive_context);
+  }
+};
+#endif
+
 #if configSUPPORT_STATIC_ALLOCATION
+#if configUSE_SB_COMPLETED_CALLBACK
+/**
+ * @brief An allocator for the stream buffer that uses a static memory
+ * allocation with send/receive completed callbacks.
+ *
+ */
+template <size_t StreamBufferSize>
+class static_stream_buffer_allocator_with_callback {
+  StreamBufferCallbackFunction_t m_send_callback;
+  void *m_send_context;
+  StreamBufferCallbackFunction_t m_receive_callback;
+  void *m_receive_context;
+  StaticStreamBuffer_t m_stream_buffer_placeholder{};
+  std::array<uint8_t, StreamBufferSize> m_storage;
+
+public:
+  static_stream_buffer_allocator_with_callback(
+      StreamBufferCallbackFunction_t send_callback, void *send_context,
+      StreamBufferCallbackFunction_t receive_callback, void *receive_context)
+      : m_send_callback{send_callback}, m_send_context{send_context},
+        m_receive_callback{receive_callback},
+        m_receive_context{receive_context} {}
+  ~static_stream_buffer_allocator_with_callback() = default;
+  static_stream_buffer_allocator_with_callback(
+      const static_stream_buffer_allocator_with_callback &) = delete;
+  static_stream_buffer_allocator_with_callback(
+      static_stream_buffer_allocator_with_callback &&) = default;
+
+  static_stream_buffer_allocator_with_callback &
+  operator=(const static_stream_buffer_allocator_with_callback &) = delete;
+  static_stream_buffer_allocator_with_callback &
+  operator=(static_stream_buffer_allocator_with_callback &&) = delete;
+
+  void swap(static_stream_buffer_allocator_with_callback &other) noexcept {
+    using std::swap;
+    swap(m_send_callback, other.m_send_callback);
+    swap(m_send_context, other.m_send_context);
+    swap(m_receive_callback, other.m_receive_callback);
+    swap(m_receive_context, other.m_receive_context);
+    swap(m_stream_buffer_placeholder, other.m_stream_buffer_placeholder);
+    swap(m_storage, other.m_storage);
+  }
+
+  StreamBufferHandle_t create(size_t trigger_level_bytes = 1) {
+    return xStreamBufferCreateStaticWithCallback(
+        StreamBufferSize, trigger_level_bytes, m_storage.data(),
+        &m_stream_buffer_placeholder, m_send_callback, m_send_context,
+        m_receive_callback, m_receive_context);
+  }
+};
+#endif
 /**
  * @brief An allocator for the stream buffer that uses a static memory
  * allocation.
@@ -444,6 +532,56 @@ public:
     }
     return unexpected<error>(error::invalid_handle);
   }
+  /**
+   * @brief Reset the stream buffer from an ISR context.
+   * @ref https://www.freertos.org/xStreamBufferResetFromISR.html
+   *
+   * @return isr_result<bool> result containing true if the stream buffer was
+   * reset, and the higher_priority_task_woken flag.
+   */
+  isr_result<bool> reset_isr() {
+    isr_result<bool> result{false, pdFALSE};
+    result.result =
+        xStreamBufferResetFromISR(m_stream_buffer,
+                                  &result.higher_priority_task_woken) == pdPASS;
+    return result;
+  }
+  [[nodiscard]] isr_result<expected<void, error>> reset_ex_isr() {
+    auto result = reset_isr();
+    isr_result<expected<void, error>> ret{{}, result.higher_priority_task_woken};
+    if (!result.result) {
+      ret.result = unexpected<error>(error::invalid_handle);
+    }
+    return ret;
+  }
+#if configUSE_STREAM_BUFFERS == 1
+  /**
+   * @brief Set the notification index for the stream buffer.
+   * @ref https://www.freertos.org/vStreamBufferSetStreamBufferNotificationIndex.html
+   *
+   * @param index The notification index to set (0 to
+   * configTASK_NOTIFICATION_ARRAY_ENTRIES-1).
+   */
+  void set_notification_index(uint8_t index) {
+    vStreamBufferSetStreamBufferNotificationIndex(m_stream_buffer, index);
+  }
+#endif
+#if configSUPPORT_STATIC_ALLOCATION
+  /**
+   * @brief Retrieve the static buffers used by the stream buffer.
+   * @ref https://www.freertos.org/xStreamBufferGetStaticBuffers.html
+   *
+   * @param storage Pointer to receive the storage area pointer.
+   * @param static_buffer Pointer to receive the static stream buffer pointer.
+   * @return true if the stream buffer was created statically and the buffers
+   * were retrieved, false otherwise.
+   */
+  [[nodiscard]] bool get_static_buffers(uint8_t **storage,
+                                        StaticStreamBuffer_t **static_buffer) {
+    return xStreamBufferGetStaticBuffers(m_stream_buffer, storage,
+                                         static_buffer) == pdPASS;
+  }
+#endif
   [[nodiscard]] expected<void, error>
   set_trigger_level_ex(size_t trigger_level_bytes) {
     auto rc = set_trigger_level(trigger_level_bytes);
@@ -470,6 +608,14 @@ using stream_buffer = freertos::stream_buffer<
     StreamBufferSize,
     freertos::static_stream_buffer_allocator<StreamBufferSize>>;
 } // namespace sa
+#if configUSE_SB_COMPLETED_CALLBACK
+namespace sa_cb {
+template <size_t StreamBufferSize>
+using stream_buffer = freertos::stream_buffer<
+    StreamBufferSize,
+    freertos::static_stream_buffer_allocator_with_callback<StreamBufferSize>>;
+} // namespace sa_cb
+#endif
 #endif
 #if configSUPPORT_DYNAMIC_ALLOCATION
 /**
@@ -488,6 +634,14 @@ using stream_buffer = freertos::stream_buffer<
     StreamBufferSize,
     freertos::dynamic_stream_buffer_allocator<StreamBufferSize>>;
 } // namespace da
+#if configUSE_SB_COMPLETED_CALLBACK
+namespace da_cb {
+template <size_t StreamBufferSize>
+using stream_buffer = freertos::stream_buffer<
+    StreamBufferSize,
+    freertos::dynamic_stream_buffer_allocator_with_callback<StreamBufferSize>>;
+} // namespace da_cb
+#endif
 #endif
 
 } // namespace freertos

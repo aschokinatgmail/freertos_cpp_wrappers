@@ -47,7 +47,95 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 namespace freertos {
 
+#if configUSE_SB_COMPLETED_CALLBACK
+/**
+ * @brief An allocator for the message buffer that uses a dynamic memory
+ * allocation with send/receive completed callbacks.
+ *
+ */
+template <size_t MessageBufferSize>
+class dynamic_message_buffer_allocator_with_callback {
+  StreamBufferCallbackFunction_t m_send_callback;
+  void *m_send_context;
+  StreamBufferCallbackFunction_t m_receive_callback;
+  void *m_receive_context;
+
+public:
+  dynamic_message_buffer_allocator_with_callback(
+      StreamBufferCallbackFunction_t send_callback, void *send_context,
+      StreamBufferCallbackFunction_t receive_callback, void *receive_context)
+      : m_send_callback{send_callback}, m_send_context{send_context},
+        m_receive_callback{receive_callback},
+        m_receive_context{receive_context} {}
+
+  void swap(dynamic_message_buffer_allocator_with_callback &other) noexcept {
+    using std::swap;
+    swap(m_send_callback, other.m_send_callback);
+    swap(m_send_context, other.m_send_context);
+    swap(m_receive_callback, other.m_receive_callback);
+    swap(m_receive_context, other.m_receive_context);
+  }
+
+  MessageBufferHandle_t create() {
+    return xMessageBufferCreateWithCallback(
+        MessageBufferSize, m_send_callback, m_send_context,
+        m_receive_callback, m_receive_context);
+  }
+};
+#endif
+
 #if configSUPPORT_STATIC_ALLOCATION
+#if configUSE_SB_COMPLETED_CALLBACK
+/**
+ * @brief An allocator for the message buffer that uses a static memory
+ * allocation with send/receive completed callbacks.
+ *
+ */
+template <size_t MessageBufferSize>
+class static_message_buffer_allocator_with_callback {
+  StreamBufferCallbackFunction_t m_send_callback;
+  void *m_send_context;
+  StreamBufferCallbackFunction_t m_receive_callback;
+  void *m_receive_context;
+  StaticMessageBuffer_t m_message_buffer_placeholder{};
+  std::array<uint8_t, MessageBufferSize> m_storage;
+
+public:
+  static_message_buffer_allocator_with_callback(
+      StreamBufferCallbackFunction_t send_callback, void *send_context,
+      StreamBufferCallbackFunction_t receive_callback, void *receive_context)
+      : m_send_callback{send_callback}, m_send_context{send_context},
+        m_receive_callback{receive_callback},
+        m_receive_context{receive_context} {}
+  ~static_message_buffer_allocator_with_callback() = default;
+  static_message_buffer_allocator_with_callback(
+      const static_message_buffer_allocator_with_callback &) = delete;
+  static_message_buffer_allocator_with_callback(
+      static_message_buffer_allocator_with_callback &&) = default;
+
+  static_message_buffer_allocator_with_callback &
+  operator=(const static_message_buffer_allocator_with_callback &) = delete;
+  static_message_buffer_allocator_with_callback &
+  operator=(static_message_buffer_allocator_with_callback &&) = delete;
+
+  void swap(static_message_buffer_allocator_with_callback &other) noexcept {
+    using std::swap;
+    swap(m_send_callback, other.m_send_callback);
+    swap(m_send_context, other.m_send_context);
+    swap(m_receive_callback, other.m_receive_callback);
+    swap(m_receive_context, other.m_receive_context);
+    swap(m_message_buffer_placeholder, other.m_message_buffer_placeholder);
+    swap(m_storage, other.m_storage);
+  }
+
+  MessageBufferHandle_t create() {
+    return xMessageBufferCreateStaticWithCallback(
+        MessageBufferSize, m_storage.data(), &m_message_buffer_placeholder,
+        m_send_callback, m_send_context, m_receive_callback,
+        m_receive_context);
+  }
+};
+#endif
 /**
  * @brief An allocator for the message buffer that uses a static memory
  * allocation.
@@ -356,6 +444,56 @@ public:
     }
     return unexpected<error>(error::invalid_handle);
   }
+  /**
+   * @brief Reset the message buffer from an ISR context.
+   * @ref https://www.freertos.org/xMessageBufferResetFromISR.html
+   *
+   * @return isr_result<bool> result containing true if the message buffer was
+   * reset, and the higher_priority_task_woken flag.
+   */
+  isr_result<bool> reset_isr() {
+    isr_result<bool> result{false, pdFALSE};
+    result.result =
+        xMessageBufferResetFromISR(m_message_buffer,
+                                    &result.higher_priority_task_woken) == pdPASS;
+    return result;
+  }
+  [[nodiscard]] isr_result<expected<void, error>> reset_ex_isr() {
+    auto result = reset_isr();
+    isr_result<expected<void, error>> ret{{}, result.higher_priority_task_woken};
+    if (!result.result) {
+      ret.result = unexpected<error>(error::invalid_handle);
+    }
+    return ret;
+  }
+#if configUSE_STREAM_BUFFERS == 1
+  /**
+   * @brief Set the notification index for the message buffer.
+   * @ref https://www.freertos.org/vStreamBufferSetStreamBufferNotificationIndex.html
+   *
+   * @param index The notification index to set (0 to
+   * configTASK_NOTIFICATION_ARRAY_ENTRIES-1).
+   */
+  void set_notification_index(uint8_t index) {
+    vStreamBufferSetStreamBufferNotificationIndex(m_message_buffer, index);
+  }
+#endif
+#if configSUPPORT_STATIC_ALLOCATION
+  /**
+   * @brief Retrieve the static buffers used by the message buffer.
+   * @ref https://www.freertos.org/xMessageBufferGetStaticBuffers.html
+   *
+   * @param storage Pointer to receive the storage area pointer.
+   * @param static_buffer Pointer to receive the static message buffer pointer.
+   * @return true if the message buffer was created statically and the buffers
+   * were retrieved, false otherwise.
+   */
+  [[nodiscard]] bool get_static_buffers(uint8_t **storage,
+                                        StaticMessageBuffer_t **static_buffer) {
+    return xMessageBufferGetStaticBuffers(m_message_buffer, storage,
+                                          static_buffer) == pdPASS;
+  }
+#endif
 };
 
 #if configSUPPORT_STATIC_ALLOCATION
@@ -375,6 +513,14 @@ using message_buffer = freertos::message_buffer<
     MessageBufferSize,
     freertos::static_message_buffer_allocator<MessageBufferSize>>;
 } // namespace sa
+#if configUSE_SB_COMPLETED_CALLBACK
+namespace sa_cb {
+template <size_t MessageBufferSize>
+using message_buffer = freertos::message_buffer<
+    MessageBufferSize,
+    freertos::static_message_buffer_allocator_with_callback<MessageBufferSize>>;
+} // namespace sa_cb
+#endif
 #endif
 #if configSUPPORT_DYNAMIC_ALLOCATION
 /**
@@ -393,6 +539,14 @@ using message_buffer = freertos::message_buffer<
     MessageBufferSize,
     freertos::dynamic_message_buffer_allocator<MessageBufferSize>>;
 } // namespace da
+#if configUSE_SB_COMPLETED_CALLBACK
+namespace da_cb {
+template <size_t MessageBufferSize>
+using message_buffer = freertos::message_buffer<
+    MessageBufferSize,
+    freertos::dynamic_message_buffer_allocator_with_callback<MessageBufferSize>>;
+} // namespace da_cb
+#endif
 #endif
 
 } // namespace freertos

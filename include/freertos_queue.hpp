@@ -788,7 +788,7 @@ public:
     return unexpected<error>(error::queue_full);
   }
   [[nodiscard]] expected<void, error> peek_ex(T &item,
-                                              TickType_t ticks_to_wait) {
+                                               TickType_t ticks_to_wait) {
     auto rc = peek(item, ticks_to_wait);
     if (rc == pdPASS) {
       return {};
@@ -804,6 +804,21 @@ public:
                   std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
                       .count()));
   }
+#if configSUPPORT_STATIC_ALLOCATION
+  /**
+   * @brief Retrieve the static buffers used by the queue.
+   * @ref https://www.freertos.org/xQueueGetStaticBuffers.html
+   *
+   * @param storage Pointer to receive the storage area pointer.
+   * @param static_queue Pointer to receive the static queue pointer.
+   * @return true if the queue was created statically and the buffers were
+   * retrieved, false otherwise.
+   */
+  [[nodiscard]] bool get_static_buffers(uint8_t **storage,
+                                        StaticQueue_t **static_queue) {
+    return xQueueGetStaticBuffers(m_queue, storage, static_queue) == pdPASS;
+  }
+#endif
 };
 
 #if configSUPPORT_STATIC_ALLOCATION

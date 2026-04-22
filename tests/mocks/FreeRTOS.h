@@ -69,6 +69,11 @@ typedef struct {
 // Stream buffer types
 typedef void *StreamBufferHandle_t;
 
+// Stream buffer callback function type (V10.5.0+)
+typedef void (*StreamBufferCallbackFunction_t)(StreamBufferHandle_t xStreamBuffer,
+                                                BaseType_t *pxHigherPriorityTaskWoken,
+                                                void *pvContext);
+
 // Stream buffer static allocation structure (opaque for mock)
 typedef struct {
   uint8_t dummy[128]; // Placeholder size
@@ -123,6 +128,8 @@ typedef struct {
 #define INCLUDE_uxTaskGetStackHighWaterMark2 1
 #define INCLUDE_xTaskGetSchedulerState 1
 
+#define configUSE_SB_COMPLETED_CALLBACK 1
+#define configUSE_STREAM_BUFFERS 1
 #define configUSE_MUTEXES 1
 #define configUSE_QUEUE_SETS 1
 #define configUSE_TRACE_FACILITY 1
@@ -558,7 +565,63 @@ public:
   MOCK_METHOD(BaseType_t, xStreamBufferReset,
               (StreamBufferHandle_t xStreamBuffer));
   MOCK_METHOD(BaseType_t, xStreamBufferSetTriggerLevel,
-              (StreamBufferHandle_t xStreamBuffer, size_t xTriggerLevel));
+               (StreamBufferHandle_t xStreamBuffer, size_t xTriggerLevel));
+  MOCK_METHOD(BaseType_t, xStreamBufferResetFromISR,
+               (StreamBufferHandle_t xStreamBuffer,
+                BaseType_t *pxHigherPriorityTaskWoken));
+  MOCK_METHOD(void, vStreamBufferSetStreamBufferNotificationIndex,
+               (StreamBufferHandle_t xStreamBuffer, uint8_t uxNotificationIndex));
+  MOCK_METHOD(BaseType_t, xStreamBufferGetStaticBuffers,
+               (StreamBufferHandle_t xStreamBuffer, uint8_t **ppucStreamBufferStorageArea,
+                StaticStreamBuffer_t **ppxStaticStreamBuffer));
+
+  // Stream Buffer callback creation (V10.5.0+)
+  MOCK_METHOD(StreamBufferHandle_t, xStreamBufferCreateWithCallback,
+               (size_t xBufferSizeBytes, size_t xTriggerLevelBytes,
+                StreamBufferCallbackFunction_t pxSendCompletedCallback,
+                void *pvSendCompletedCallbackContext,
+                StreamBufferCallbackFunction_t pxReceiveCompletedCallback,
+                void *pvReceiveCompletedCallbackContext));
+  MOCK_METHOD(StreamBufferHandle_t, xStreamBufferCreateStaticWithCallback,
+               (size_t xBufferSizeBytes, size_t xTriggerLevelBytes,
+                uint8_t *pucStreamBufferStorageArea,
+                StaticStreamBuffer_t *pxStaticStreamBuffer,
+                StreamBufferCallbackFunction_t pxSendCompletedCallback,
+                void *pvSendCompletedCallbackContext,
+                StreamBufferCallbackFunction_t pxReceiveCompletedCallback,
+                void *pvReceiveCompletedCallbackContext));
+
+  // Message Buffer additional operations (V10.5.0+)
+  MOCK_METHOD(BaseType_t, xMessageBufferResetFromISR,
+               (MessageBufferHandle_t xMessageBuffer,
+                BaseType_t *pxHigherPriorityTaskWoken));
+  MOCK_METHOD(BaseType_t, xMessageBufferGetStaticBuffers,
+               (MessageBufferHandle_t xMessageBuffer, uint8_t **ppucMessageBufferStorageArea,
+                StaticMessageBuffer_t **ppxStaticMessageBuffer));
+  MOCK_METHOD(MessageBufferHandle_t, xMessageBufferCreateWithCallback,
+               (size_t xBufferSizeBytes,
+                StreamBufferCallbackFunction_t pxSendCompletedCallback,
+                void *pvSendCompletedCallbackContext,
+                StreamBufferCallbackFunction_t pxReceiveCompletedCallback,
+                void *pvReceiveCompletedCallbackContext));
+  MOCK_METHOD(MessageBufferHandle_t, xMessageBufferCreateStaticWithCallback,
+               (size_t xBufferSizeBytes,
+                uint8_t *pucMessageBufferStorageArea,
+                StaticMessageBuffer_t *pxStaticMessageBuffer,
+                StreamBufferCallbackFunction_t pxSendCompletedCallback,
+                void *pvSendCompletedCallbackContext,
+                StreamBufferCallbackFunction_t pxReceiveCompletedCallback,
+                void *pvReceiveCompletedCallbackContext));
+
+  // Queue static buffer retrieval (V10.6.0+)
+  MOCK_METHOD(BaseType_t, xQueueGetStaticBuffers,
+               (QueueHandle_t xQueue, uint8_t **ppucQueueStorageArea,
+                StaticQueue_t **ppxStaticQueue));
+
+  // Event Group static buffer retrieval (V10.6.0+)
+  MOCK_METHOD(BaseType_t, xEventGroupGetStaticBuffer,
+               (EventGroupHandle_t xEventGroup,
+                StaticEventGroup_t **ppxStaticEventGroup));
 
   // Port layer mocks (needed by event group ISR functions)
   MOCK_METHOD(void, portYIELD_FROM_ISR, (BaseType_t xHigherPriorityTaskWoken));
@@ -838,6 +901,59 @@ BaseType_t xStreamBufferReset(StreamBufferHandle_t xStreamBuffer);
 BaseType_t xStreamBufferSetTriggerLevel(StreamBufferHandle_t xStreamBuffer,
                                          size_t xTriggerLevel);
 void vTaskSetThreadLocalStoragePointer(TaskHandle_t xTask, BaseType_t xIndex,
-                                       void *pvValue);
+                                        void *pvValue);
 void *pvTaskGetThreadLocalStoragePointer(TaskHandle_t xTask, BaseType_t xIndex);
+
+// Stream Buffer additional operations (V10.5.0+)
+BaseType_t xStreamBufferResetFromISR(StreamBufferHandle_t xStreamBuffer,
+                                      BaseType_t *pxHigherPriorityTaskWoken);
+void vStreamBufferSetStreamBufferNotificationIndex(StreamBufferHandle_t xStreamBuffer,
+                                                    uint8_t uxNotificationIndex);
+BaseType_t xStreamBufferGetStaticBuffers(StreamBufferHandle_t xStreamBuffer,
+                                          uint8_t **ppucStreamBufferStorageArea,
+                                          StaticStreamBuffer_t **ppxStaticStreamBuffer);
+StreamBufferHandle_t xStreamBufferCreateWithCallback(
+    size_t xBufferSizeBytes, size_t xTriggerLevelBytes,
+    StreamBufferCallbackFunction_t pxSendCompletedCallback,
+    void *pvSendCompletedCallbackContext,
+    StreamBufferCallbackFunction_t pxReceiveCompletedCallback,
+    void *pvReceiveCompletedCallbackContext);
+StreamBufferHandle_t xStreamBufferCreateStaticWithCallback(
+    size_t xBufferSizeBytes, size_t xTriggerLevelBytes,
+    uint8_t *pucStreamBufferStorageArea,
+    StaticStreamBuffer_t *pxStaticStreamBuffer,
+    StreamBufferCallbackFunction_t pxSendCompletedCallback,
+    void *pvSendCompletedCallbackContext,
+    StreamBufferCallbackFunction_t pxReceiveCompletedCallback,
+    void *pvReceiveCompletedCallbackContext);
+
+// Message Buffer additional operations (V10.5.0+)
+BaseType_t xMessageBufferResetFromISR(MessageBufferHandle_t xMessageBuffer,
+                                       BaseType_t *pxHigherPriorityTaskWoken);
+BaseType_t xMessageBufferGetStaticBuffers(MessageBufferHandle_t xMessageBuffer,
+                                            uint8_t **ppucMessageBufferStorageArea,
+                                            StaticMessageBuffer_t **ppxStaticMessageBuffer);
+MessageBufferHandle_t xMessageBufferCreateWithCallback(
+    size_t xBufferSizeBytes,
+    StreamBufferCallbackFunction_t pxSendCompletedCallback,
+    void *pvSendCompletedCallbackContext,
+    StreamBufferCallbackFunction_t pxReceiveCompletedCallback,
+    void *pvReceiveCompletedCallbackContext);
+MessageBufferHandle_t xMessageBufferCreateStaticWithCallback(
+    size_t xBufferSizeBytes,
+    uint8_t *pucMessageBufferStorageArea,
+    StaticMessageBuffer_t *pxStaticMessageBuffer,
+    StreamBufferCallbackFunction_t pxSendCompletedCallback,
+    void *pvSendCompletedCallbackContext,
+    StreamBufferCallbackFunction_t pxReceiveCompletedCallback,
+    void *pvReceiveCompletedCallbackContext);
+
+// Queue static buffer retrieval (V10.6.0+)
+BaseType_t xQueueGetStaticBuffers(QueueHandle_t xQueue,
+                                  uint8_t **ppucQueueStorageArea,
+                                  StaticQueue_t **ppxStaticQueue);
+
+// Event Group static buffer retrieval (V10.6.0+)
+BaseType_t xEventGroupGetStaticBuffer(EventGroupHandle_t xEventGroup,
+                                       StaticEventGroup_t **ppxStaticEventGroup);
 }
