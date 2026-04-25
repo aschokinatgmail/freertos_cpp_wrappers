@@ -57,7 +57,7 @@ public:
   latch(const latch &) = delete;
   latch &operator=(const latch &) = delete;
 
-  ~latch() {
+  ~latch() noexcept {
     if (m_semaphore) {
       vSemaphoreDelete(m_semaphore);
     }
@@ -70,7 +70,9 @@ public:
     auto prev =
         m_counter.fetch_sub(update, std::memory_order_acq_rel);
     if (prev == update) {
-      xSemaphoreGive(m_semaphore);
+      if (m_semaphore) {
+        xSemaphoreGive(m_semaphore);
+      }
     }
   }
 
@@ -80,6 +82,9 @@ public:
 
   void wait() const {
     if (m_counter.load(std::memory_order_acquire) == 0) {
+      return;
+    }
+    if (!m_semaphore) {
       return;
     }
     xSemaphoreTake(m_semaphore, portMAX_DELAY);
@@ -99,7 +104,9 @@ public:
         m_counter.fetch_sub(update, std::memory_order_acq_rel);
     isr_result<void> result{pdFALSE};
     if (prev == update) {
-      xSemaphoreGiveFromISR(m_semaphore, &result.higher_priority_task_woken);
+      if (m_semaphore) {
+        xSemaphoreGiveFromISR(m_semaphore, &result.higher_priority_task_woken);
+      }
     }
     return result;
   }
@@ -111,6 +118,9 @@ public:
     auto prev =
         m_counter.fetch_sub(update, std::memory_order_acq_rel);
     if (prev == update) {
+      if (!m_semaphore) {
+        return unexpected<error>(error::invalid_handle);
+      }
       auto rc = xSemaphoreGive(m_semaphore);
       if (rc == pdTRUE) {
         return {};
@@ -130,6 +140,10 @@ public:
     isr_result<expected<void, error>> result{
         unexpected<error>(error::semaphore_not_owned), pdFALSE};
     if (prev == update) {
+      if (!m_semaphore) {
+        result.result = unexpected<error>(error::invalid_handle);
+        return result;
+      }
       BaseType_t woken = pdFALSE;
       auto rc = xSemaphoreGiveFromISR(m_semaphore, &woken);
       result.higher_priority_task_woken = woken;
@@ -168,7 +182,7 @@ public:
   latch_static(const latch_static &) = delete;
   latch_static &operator=(const latch_static &) = delete;
 
-  ~latch_static() {
+  ~latch_static() noexcept {
     if (m_semaphore) {
       vSemaphoreDelete(m_semaphore);
     }

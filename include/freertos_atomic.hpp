@@ -46,7 +46,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <task.h>
 #include <type_traits>
 
-#if defined(CONFIG_FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY)
+#if defined(FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY)
 #include "freertos_atomic_wait.hpp"
 #endif
 
@@ -61,8 +61,10 @@ public:
     atomic_flag() noexcept = default;
     atomic_flag(const atomic_flag &) = delete;
     atomic_flag &operator=(const atomic_flag &) = delete;
+    atomic_flag(atomic_flag &&) = delete;
+    atomic_flag &operator=(atomic_flag &&) = delete;
 
-    ~atomic_flag() {
+    ~atomic_flag() noexcept {
         if (m_semaphore) {
             vSemaphoreDelete(m_semaphore);
         }
@@ -85,6 +87,9 @@ public:
             return;
         }
         ensure_semaphore();
+        if (!m_semaphore) {
+            return;
+        }
         while (m_flag.load(order) == old) {
             xSemaphoreTake(m_semaphore, portMAX_DELAY);
         }
@@ -92,11 +97,17 @@ public:
 
     void notify_one() noexcept {
         ensure_semaphore();
+        if (!m_semaphore) {
+            return;
+        }
         xSemaphoreGive(m_semaphore);
     }
 
     void notify_all() noexcept {
         ensure_semaphore();
+        if (!m_semaphore) {
+            return;
+        }
         for (UBaseType_t i = 0;
              i < FREERTOS_CPP_WRAPPERS_ATOMIC_FLAG_MAX_WAITERS; i++) {
             xSemaphoreGive(m_semaphore);
@@ -105,6 +116,9 @@ public:
 
     isr_result<void> notify_one_isr() noexcept {
         ensure_semaphore();
+        if (!m_semaphore) {
+            return {pdFALSE};
+        }
         isr_result<void> result{pdFALSE};
         xSemaphoreGiveFromISR(m_semaphore, &result.higher_priority_task_woken);
         return result;
@@ -112,6 +126,9 @@ public:
 
     isr_result<void> notify_all_isr() noexcept {
         ensure_semaphore();
+        if (!m_semaphore) {
+            return {pdFALSE};
+        }
         isr_result<void> result{pdFALSE};
         for (UBaseType_t i = 0;
              i < FREERTOS_CPP_WRAPPERS_ATOMIC_FLAG_MAX_WAITERS; i++) {
@@ -126,6 +143,9 @@ public:
 
     [[nodiscard]] expected<void, error> notify_one_ex() noexcept {
         ensure_semaphore();
+        if (!m_semaphore) {
+            return unexpected<error>(error::invalid_handle);
+        }
         auto rc = xSemaphoreGive(m_semaphore);
         if (rc == pdTRUE) {
             return {};
@@ -135,6 +155,9 @@ public:
 
     [[nodiscard]] expected<void, error> notify_all_ex() noexcept {
         ensure_semaphore();
+        if (!m_semaphore) {
+            return unexpected<error>(error::invalid_handle);
+        }
         for (UBaseType_t i = 0;
              i < FREERTOS_CPP_WRAPPERS_ATOMIC_FLAG_MAX_WAITERS; i++) {
             xSemaphoreGive(m_semaphore);
@@ -163,7 +186,9 @@ private:
                 m_semaphore = xSemaphoreCreateCounting(
                     FREERTOS_CPP_WRAPPERS_ATOMIC_FLAG_MAX_WAITERS, 0);
 #endif
-                m_semaphore_created.store(1, std::memory_order_release);
+                if (m_semaphore) {
+                    m_semaphore_created.store(1, std::memory_order_release);
+                }
             }
             taskEXIT_CRITICAL();
         }
@@ -178,8 +203,10 @@ public:
     atomic_flag_static() noexcept = default;
     atomic_flag_static(const atomic_flag_static &) = delete;
     atomic_flag_static &operator=(const atomic_flag_static &) = delete;
+    atomic_flag_static(atomic_flag_static &&) = delete;
+    atomic_flag_static &operator=(atomic_flag_static &&) = delete;
 
-    ~atomic_flag_static() {
+    ~atomic_flag_static() noexcept {
         if (m_semaphore) {
             vSemaphoreDelete(m_semaphore);
         }
@@ -289,14 +316,14 @@ public:
     atomic &operator=(const atomic &) = delete;
 
     void wait(T old, std::memory_order order = std::memory_order_seq_cst) const
-#if defined(CONFIG_FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY)
+#if defined(FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY)
         noexcept
 #endif
     {
         if (this->load(order) != old) {
             return;
         }
-#if defined(CONFIG_FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY)
+#if defined(FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY)
         __cxx_atomic_contention_t expected = 0;
         while (this->load(order) == old) {
             __platform_wait_on_address(static_cast<void const *>(this),
@@ -310,45 +337,45 @@ public:
     }
 
     void notify_one() noexcept {
-#if defined(CONFIG_FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY)
+#if defined(FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY)
         __platform_wake_by_address(static_cast<void const *>(this), 1);
 #endif
     }
 
     void notify_all() noexcept {
-#if defined(CONFIG_FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY)
+#if defined(FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY)
         __platform_wake_by_address(static_cast<void const *>(this),
                                    INT_MAX);
 #endif
     }
 
     isr_result<void> notify_one_isr() noexcept {
-#if defined(CONFIG_FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY) &&           \
-    (CONFIG_FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL == 1 ||                        \
-     CONFIG_FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL == 2)
+#if defined(FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY) &&           \
+    (FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL == 1 ||                        \
+     FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL == 2)
         freertos::atomic_notify_one_isr(static_cast<void const *>(this));
 #endif
         return {pdFALSE};
     }
 
     isr_result<void> notify_all_isr() noexcept {
-#if defined(CONFIG_FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY) &&           \
-    (CONFIG_FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL == 1 ||                        \
-     CONFIG_FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL == 2)
+#if defined(FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY) &&           \
+    (FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL == 1 ||                        \
+     FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL == 2)
         freertos::atomic_notify_all_isr(static_cast<void const *>(this));
 #endif
         return {pdFALSE};
     }
 
     [[nodiscard]] expected<void, error> notify_one_ex() noexcept {
-#if defined(CONFIG_FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY)
+#if defined(FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY)
         __platform_wake_by_address(static_cast<void const *>(this), 1);
 #endif
         return {};
     }
 
     [[nodiscard]] expected<void, error> notify_all_ex() noexcept {
-#if defined(CONFIG_FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY)
+#if defined(FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY)
         __platform_wake_by_address(static_cast<void const *>(this),
                                    INT_MAX);
 #endif

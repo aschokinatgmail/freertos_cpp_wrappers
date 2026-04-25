@@ -45,6 +45,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "freertos_event_group.hpp"
 #include "freertos_expected.hpp"
 #include "freertos_external_allocator.hpp"
+#include "freertos_fixed_function.hpp"
 #include "freertos_isr_context.hpp"
 #include "freertos_isr_result.hpp"
 #include "freertos_latch.hpp"

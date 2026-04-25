@@ -225,10 +225,12 @@ public:
     }
 
     ReturnType operator()(Args... args) {
+        configASSERT(m_invoker != nullptr && "cannot call empty fixed_function");
         return m_invoker(m_storage.data(), static_cast<Args>(args)...);
     }
 
     ReturnType operator()(Args... args) const {
+        configASSERT(m_invoker != nullptr && "cannot call empty fixed_function");
         return const_cast<fixed_function*>(this)->m_invoker(
             const_cast<std::byte*>(m_storage.data()), static_cast<Args>(args)...);
     }

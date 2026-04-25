@@ -44,37 +44,20 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <semphr.h>
 #include <task.h>
 
-#if FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY &&                             \
-    !defined(CONFIG_FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY)
-#define CONFIG_FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY 1
+#if defined(FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY)
+
+#ifndef FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL
+#define FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL 1
 #endif
 
-#if FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL &&                                      \
-    !defined(CONFIG_FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL)
-#define CONFIG_FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL                              \
-    FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL
-#endif
-
-#if FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_TABLE_SIZE &&                                \
-    !defined(CONFIG_FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_TABLE_SIZE)
-#define CONFIG_FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_TABLE_SIZE                        \
-    FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_TABLE_SIZE
-#endif
-
-#if defined(CONFIG_FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY)
-
-#ifndef CONFIG_FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL
-#define CONFIG_FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL 1
-#endif
-
-#ifndef CONFIG_FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_TABLE_SIZE
-#define CONFIG_FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_TABLE_SIZE 16
+#ifndef FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_TABLE_SIZE
+#define FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_TABLE_SIZE 16
 #endif
 
 using __cxx_atomic_contention_t = unsigned int;
 
 inline constexpr size_t atomic_wait_table_size =
-    CONFIG_FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_TABLE_SIZE;
+    FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_TABLE_SIZE;
 
 [[nodiscard]] inline size_t atomic_wait_hash(void const *addr) {
     auto const key = reinterpret_cast<uintptr_t>(addr);
@@ -100,11 +83,11 @@ struct freertos_wait_bucket {
     SemaphoreHandle_t mutex;
 };
 
-#if CONFIG_FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL == 1
+#if FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL == 1
 
 extern freertos_wait_entry freertos_wait_table[atomic_wait_table_size];
 
-#elif CONFIG_FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL == 2
+#elif FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL == 2
 
 extern freertos_wait_bucket freertos_wait_buckets[atomic_wait_table_size];
 
@@ -118,7 +101,7 @@ extern "C" void __platform_wake_by_address(void const *addr, int count);
 
 namespace freertos {
 
-#if CONFIG_FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL == 1
+#if FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL == 1
 
 inline void atomic_notify_one_isr(void const *addr) {
     auto idx = atomic_wait_hash(addr);
@@ -139,7 +122,7 @@ inline void atomic_notify_all_isr(void const *addr) {
     portYIELD_FROM_ISR(higher_priority_task_woken);
 }
 
-#elif CONFIG_FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL == 2
+#elif FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL == 2
 
 inline void atomic_notify_one_isr(void const *addr) {
     auto idx = atomic_wait_hash(addr);

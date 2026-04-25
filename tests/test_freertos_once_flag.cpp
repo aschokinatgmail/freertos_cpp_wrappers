@@ -140,6 +140,44 @@ TEST_F(OnceFlagTest, StaticAllocation_CallOnceOnlyOnce) {
 }
 #endif
 
+TEST_F(OnceFlagTest, CallOnce_ThrowsException_Rethrows) {
+  freertos::once_flag flag;
+  SemaphoreHandle_t sem = reinterpret_cast<SemaphoreHandle_t>(0x1);
+
+  EXPECT_CALL(*mock, xSemaphoreCreateBinaryStatic(_))
+      .WillOnce(Return(sem));
+  EXPECT_CALL(*mock, xSemaphoreGive(sem)).WillOnce(Return(pdTRUE));
+
+  EXPECT_THROW(
+      freertos::call_once(flag, []() { throw std::runtime_error("test"); }),
+      std::runtime_error);
+  EXPECT_FALSE(flag.is_initialized());
+}
+
+TEST_F(OnceFlagTest, CallOnce_ThrowsException_RetrySucceeds) {
+  freertos::once_flag flag;
+  SemaphoreHandle_t sem = reinterpret_cast<SemaphoreHandle_t>(0x1);
+  int value = 0;
+
+  {
+    ::testing::InSequence s;
+    EXPECT_CALL(*mock, xSemaphoreCreateBinaryStatic(_))
+        .WillOnce(Return(sem));
+    EXPECT_CALL(*mock, xSemaphoreGive(sem)).WillOnce(Return(pdTRUE));
+  }
+
+  EXPECT_THROW(
+      freertos::call_once(flag, []() { throw std::runtime_error("test"); }),
+      std::runtime_error);
+  EXPECT_FALSE(flag.is_initialized());
+
+  EXPECT_CALL(*mock, xSemaphoreGive(sem)).WillOnce(Return(pdTRUE));
+
+  freertos::call_once(flag, [&value]() { value = 42; });
+  EXPECT_EQ(value, 42);
+  EXPECT_TRUE(flag.is_initialized());
+}
+
 #if configSUPPORT_DYNAMIC_ALLOCATION
 TEST_F(OnceFlagTest, DynamicAllocation_NamespaceAlias) {
   freertos::da::once_flag flag;

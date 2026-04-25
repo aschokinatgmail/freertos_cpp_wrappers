@@ -461,6 +461,8 @@ public:
   MOCK_METHOD(EventBits_t, xEventGroupClearBits,
               (EventGroupHandle_t xEventGroup,
                const EventBits_t uxBitsToClear));
+  MOCK_METHOD(EventBits_t, xEventGroupClearBitsFromISR,
+              (EventGroupHandle_t, const EventBits_t, BaseType_t *));
   MOCK_METHOD(EventBits_t, xEventGroupWaitBits,
               (EventGroupHandle_t xEventGroup,
                const EventBits_t uxBitsToWaitFor, const BaseType_t xClearOnExit,

@@ -93,6 +93,48 @@ TEST(ConditionVariableAnyTest, NotifyAllIsr) {
     cv.notify_all_isr();
 }
 
+TEST(ConditionVariableAnyTest, WaitWithLockBlocksAndReturns) {
+    freertos::condition_variable_any cv;
+    dynamic_mutex m;
+    m.lock();
+    cv.wait(m);
+}
+
+TEST(ConditionVariableAnyTest, WaitWithUniqueLockBlocksAndReturns) {
+    freertos::condition_variable_any cv;
+    dynamic_mutex m;
+    freertos::unique_lock<dynamic_mutex> lock(m);
+    cv.wait(lock);
+    EXPECT_TRUE(lock.owns_lock());
+}
+
+TEST(ConditionVariableAnyTest, WaitPredicateImmediatelyTrue) {
+    freertos::condition_variable_any cv;
+    dynamic_mutex m;
+    m.lock();
+    bool result = cv.wait(m, [] { return true; });
+    EXPECT_TRUE(result);
+}
+
+TEST(ConditionVariableAnyTest, WaitPredicateBecomesTrue) {
+    freertos::condition_variable_any cv;
+    dynamic_mutex m;
+    m.lock();
+    int count = 0;
+    bool result = cv.wait(m, [&count] { return ++count > 1; });
+    EXPECT_TRUE(result);
+    EXPECT_GT(count, 1);
+}
+
+TEST(ConditionVariableAnyTest, WaitPredicateWithUniqueLockImmediatelyTrue) {
+    freertos::condition_variable_any cv;
+    dynamic_mutex m;
+    freertos::unique_lock<dynamic_mutex> lock(m);
+    bool result = cv.wait(lock, [] { return true; });
+    EXPECT_TRUE(result);
+    EXPECT_TRUE(lock.owns_lock());
+}
+
 #if configSUPPORT_DYNAMIC_ALLOCATION
 TEST(ConditionVariableAnyTest, DaNamespaceAlias) {
     freertos::da::condition_variable_any cv;

@@ -78,29 +78,41 @@ public:
   condition_variable_any(const condition_variable_any &) = delete;
   condition_variable_any &operator=(const condition_variable_any &) = delete;
 
-  ~condition_variable_any() {
+  ~condition_variable_any() noexcept {
     if (m_semaphore) {
       vSemaphoreDelete(m_semaphore);
     }
   }
 
   void notify_one() noexcept {
+    if (!m_semaphore) {
+      return;
+    }
     (void)xSemaphoreGive(m_semaphore);
   }
 
   void notify_all() noexcept {
+    if (!m_semaphore) {
+      return;
+    }
     for (UBaseType_t i = 0; i < FREERTOS_CPP_WRAPPERS_CONDITION_VARIABLE_MAX_WAITERS; i++) {
       xSemaphoreGive(m_semaphore);
     }
   }
 
   isr_result<void> notify_one_isr() noexcept {
+    if (!m_semaphore) {
+      return {pdFALSE};
+    }
     isr_result<void> result{pdFALSE};
     xSemaphoreGiveFromISR(m_semaphore, &result.higher_priority_task_woken);
     return result;
   }
 
   isr_result<void> notify_all_isr() noexcept {
+    if (!m_semaphore) {
+      return {pdFALSE};
+    }
     isr_result<void> result{pdFALSE};
     for (UBaseType_t i = 0; i < FREERTOS_CPP_WRAPPERS_CONDITION_VARIABLE_MAX_WAITERS; i++) {
       BaseType_t woken = pdFALSE;
@@ -113,6 +125,11 @@ public:
   }
 
   template <typename Lock> void wait(Lock &lock) {
+    if (!m_semaphore) {
+      lock.unlock();
+      lock.lock();
+      return;
+    }
     lock.unlock();
     xSemaphoreTake(m_semaphore, portMAX_DELAY);
     lock.lock();
@@ -128,7 +145,12 @@ public:
 
   template <typename Lock, typename Rep, typename Period>
   std::cv_status wait_for(Lock &lock,
-                          const std::chrono::duration<Rep, Period> &rel_time) {
+                           const std::chrono::duration<Rep, Period> &rel_time) {
+    if (!m_semaphore) {
+      lock.unlock();
+      lock.lock();
+      return std::cv_status::timeout;
+    }
     lock.unlock();
     auto ms = static_cast<TickType_t>(
         std::chrono::duration_cast<std::chrono::milliseconds>(rel_time).count());
@@ -184,6 +206,9 @@ public:
   }
 
   [[nodiscard]] expected<void, error> notify_one_ex() noexcept {
+    if (!m_semaphore) {
+      return unexpected<error>(error::invalid_handle);
+    }
     auto rc = xSemaphoreGive(m_semaphore);
     if (rc == pdTRUE) {
       return {};
@@ -192,6 +217,9 @@ public:
   }
 
   [[nodiscard]] expected<void, error> notify_all_ex() noexcept {
+    if (!m_semaphore) {
+      return unexpected<error>(error::invalid_handle);
+    }
     notify_all();
     return {};
   }

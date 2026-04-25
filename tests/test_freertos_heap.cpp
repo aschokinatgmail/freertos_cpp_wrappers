@@ -40,7 +40,7 @@ TEST_F(HeapTest, AllocateAlignedCallsPvPortMalloc) {
     void *expected = reinterpret_cast<void *>(0x5678);
     EXPECT_CALL(*mock, pvPortMalloc(128))
         .WillOnce(Return(expected));
-    auto *ptr = freertos::heap::allocate_aligned(8, 128);
+    auto *ptr = freertos::heap::allocate_with_alignment_check(8, 128);
     EXPECT_EQ(ptr, expected);
 }
 

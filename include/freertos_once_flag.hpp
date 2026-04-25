@@ -50,6 +50,7 @@ public:
     constexpr once_flag() noexcept = default;
     once_flag(const once_flag &) = delete;
     once_flag &operator=(const once_flag &) = delete;
+    ~once_flag() noexcept { if (m_semaphore) vSemaphoreDelete(m_semaphore); }
 
     [[nodiscard]] bool is_initialized() const noexcept {
         return m_state.load(std::memory_order_acquire) == 2;
@@ -136,6 +137,7 @@ public:
     constexpr once_flag_static() noexcept = default;
     once_flag_static(const once_flag_static &) = delete;
     once_flag_static &operator=(const once_flag_static &) = delete;
+    ~once_flag_static() noexcept = default;
 
     [[nodiscard]] bool is_initialized() const noexcept {
         return m_state.load(std::memory_order_acquire) == 2;

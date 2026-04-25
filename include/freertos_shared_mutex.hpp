@@ -133,7 +133,7 @@ public:
   shared_mutex &operator=(const shared_mutex &) = delete;
   shared_mutex &operator=(shared_mutex &&) = delete;
 
-  ~shared_mutex(void) {
+  ~shared_mutex(void) noexcept {
     if (m_reader_slots_handle) {
       vSemaphoreDelete(m_reader_slots_handle);
     }

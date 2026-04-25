@@ -267,8 +267,8 @@ add_executable(
     test_freertos_atomic_wait.cpp
 )
 target_compile_definitions(test_freertos_atomic_wait PRIVATE
-    CONFIG_FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY=1
-    CONFIG_FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL=3
+    FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY=1
+    FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL=3
 )
 
 add_executable(
@@ -441,8 +441,8 @@ add_executable(
     test_freertos_atomic.cpp
 )
 target_compile_definitions(test_freertos_atomic PRIVATE
-    CONFIG_FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY=1
-    CONFIG_FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL=3
+    FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY=1
+    FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL=3
 )
 
 add_executable(
@@ -1107,22 +1107,6 @@ target_link_libraries(
 )
 
 target_link_libraries(
-    test_freertos_shared_mutex
-    freertos_cpp_wrappers
-    freertos_mocks
-    ${GTEST_LIBRARIES}
-    pthread
-)
-
-target_link_libraries(
-    test_freertos_atomic
-    freertos_cpp_wrappers
-    freertos_mocks
-    ${GTEST_LIBRARIES}
-    pthread
-)
-
-target_link_libraries(
     test_freertos_lock
     freertos_cpp_wrappers
     freertos_mocks
@@ -1210,6 +1194,7 @@ target_compile_options(test_freertos_isr_result PRIVATE ${GTEST_COMPILE_OPTIONS}
     target_compile_options(test_freertos_coverage_expected3 PRIVATE ${GTEST_COMPILE_OPTIONS})
     target_compile_options(test_freertos_coverage_branches4 PRIVATE ${GTEST_COMPILE_OPTIONS})
     target_compile_options(test_freertos_stream_buffer_callbacks PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_stream_batching_buffer PRIVATE ${GTEST_COMPILE_OPTIONS})
     target_compile_options(test_freertos_task_join PRIVATE ${GTEST_COMPILE_OPTIONS})
     target_compile_options(test_freertos_fixed_function PRIVATE ${GTEST_COMPILE_OPTIONS})
     target_compile_options(test_freertos_isr_context PRIVATE ${GTEST_COMPILE_OPTIONS})

@@ -187,6 +187,13 @@ public:
   EventBits_t clear_bits(const EventBits_t bits_to_clear) {
     return xEventGroupClearBits(m_event_group, bits_to_clear);
   }
+
+  isr_result<BaseType_t> clear_bits_isr(const EventBits_t bits_to_clear) {
+    isr_result<BaseType_t> result{pdFALSE, pdFALSE};
+    result.result = xEventGroupClearBitsFromISR(
+        m_event_group, bits_to_clear, &result.higher_priority_task_woken);
+    return result;
+  }
   /**
    * @brief Method waiting for the bits or group of bits to be set.
    * @ref https://www.freertos.org/xEventGroupWaitBits.html

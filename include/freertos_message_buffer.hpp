@@ -248,65 +248,65 @@ public:
    * @brief Method sends a discret message to the message buffer.
    * @ref https://www.freertos.org/xMessageBufferSend.html
    *
-   * @param pvTxData pointer to the message data
-   * @param xDataLengthBytes length of the message data
-   * @param xTicksToWait timeout in ticks to wait for the message buffer to
+   * @param data pointer to the message data
+   * @param data_size length of the message data
+   * @param ticks_to_wait timeout in ticks to wait for the message buffer to
    * become available
    * @return size_t number of bytes sent
    */
-  size_t send(const void *pvTxData, size_t xDataLengthBytes,
-              TickType_t xTicksToWait) {
-    return xMessageBufferSend(m_message_buffer, pvTxData, xDataLengthBytes,
-                              xTicksToWait);
+  size_t send(const void *data, size_t data_size,
+              TickType_t ticks_to_wait) {
+    return xMessageBufferSend(m_message_buffer, data, data_size,
+                              ticks_to_wait);
   }
   /**
    * @brief Method sends a discret message to the message buffer.
    * @ref https://www.freertos.org/xMessageBufferSend.html
    *
-   * @param pvTxData pointer to the message data
-   * @param xDataLengthBytes length of the message data
-   * @param xTicksToWait timeout in ticks to wait for the message buffer to
+   * @param data pointer to the message data
+   * @param data_size length of the message data
+   * @param ticks_to_wait timeout in ticks to wait for the message buffer to
    * @return size_t number of bytes sent
    */
   template <typename Rep, typename Period>
-  size_t send(const void *pvTxData, size_t xDataLengthBytes,
-              const std::chrono::duration<Rep, Period> &xTicksToWait) {
+  size_t send(const void *data, size_t data_size,
+              const std::chrono::duration<Rep, Period> &ticks_to_wait) {
     return send(
-        pvTxData, xDataLengthBytes,
+        data, data_size,
         pdMS_TO_TICKS(
-            std::chrono::duration_cast<std::chrono::milliseconds>(xTicksToWait)
+            std::chrono::duration_cast<std::chrono::milliseconds>(ticks_to_wait)
                 .count()));
   }
   /**
    * @brief Method receives a discret message from the message buffer.
    * @ref https://www.freertos.org/xMessageBufferReceive.html
    *
-   * @param pvRxData pointer to the message data
-   * @param xBufferLengthBytes length of the message data buffer
-   * @param xTicksToWait timeout in ticks to wait for the message buffer to
+   * @param data pointer to the message data
+   * @param buffer_size length of the message data buffer
+   * @param ticks_to_wait timeout in ticks to wait for the message buffer to
    * become available
    * @return size_t number of bytes received
    */
-  size_t receive(void *pvRxData, size_t xBufferLengthBytes,
-                 TickType_t xTicksToWait) {
-    return xMessageBufferReceive(m_message_buffer, pvRxData, xBufferLengthBytes,
-                                 xTicksToWait);
+  size_t receive(void *data, size_t buffer_size,
+                 TickType_t ticks_to_wait) {
+    return xMessageBufferReceive(m_message_buffer, data, buffer_size,
+                                 ticks_to_wait);
   }
   /**
    * @brief Method receives a discret message from the message buffer.
    * @ref https://www.freertos.org/xMessageBufferReceive.html
    *
-   * @param pvRxData pointer to the message data
-   * @param xBufferLengthBytes length of the message data buffer
+   * @param data pointer to the message data
+   * @param buffer_size length of the message data buffer
    * @param timeout timeout to wait for the message buffer to
    * become available
    * @return size_t number of bytes received
    */
   template <typename Rep, typename Period>
-  size_t receive(void *pvRxData, size_t xBufferLengthBytes,
+  size_t receive(void *data, size_t buffer_size,
                  const std::chrono::duration<Rep, Period> &timeout) {
     return receive(
-        pvRxData, xBufferLengthBytes,
+        data, buffer_size,
         pdMS_TO_TICKS(
             std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
                 .count()));
@@ -375,24 +375,24 @@ public:
    */
   [[nodiscard]] BaseType_t full(void) const { return xMessageBufferIsFull(m_message_buffer); }
 
-  [[nodiscard]] expected<size_t, error> send_ex(const void *pvTxData,
-                                                size_t xDataLengthBytes,
-                                                TickType_t xTicksToWait) {
-    auto rc = send(pvTxData, xDataLengthBytes, xTicksToWait);
+  [[nodiscard]] expected<size_t, error> send_ex(const void *data,
+                                                size_t data_size,
+                                                TickType_t ticks_to_wait) {
+    auto rc = send(data, data_size, ticks_to_wait);
     if (rc > 0) {
       return rc;
     }
-    return unexpected<error>(xTicksToWait == 0 ? error::would_block
+    return unexpected<error>(ticks_to_wait == 0 ? error::would_block
                                                : error::timeout);
   }
   template <typename Rep, typename Period>
   [[nodiscard]] expected<size_t, error>
-  send_ex(const void *pvTxData, size_t xDataLengthBytes,
-          const std::chrono::duration<Rep, Period> &xTicksToWait) {
+  send_ex(const void *data, size_t data_size,
+          const std::chrono::duration<Rep, Period> &ticks_to_wait) {
     return send_ex(
-        pvTxData, xDataLengthBytes,
+        data, data_size,
         pdMS_TO_TICKS(
-            std::chrono::duration_cast<std::chrono::milliseconds>(xTicksToWait)
+            std::chrono::duration_cast<std::chrono::milliseconds>(ticks_to_wait)
                 .count()));
   }
   [[nodiscard]] isr_result<expected<size_t, error>>
@@ -406,22 +406,22 @@ public:
     }
     return ret;
   }
-  [[nodiscard]] expected<size_t, error> receive_ex(void *pvRxData,
-                                                   size_t xBufferLengthBytes,
-                                                   TickType_t xTicksToWait) {
-    auto rc = receive(pvRxData, xBufferLengthBytes, xTicksToWait);
+  [[nodiscard]] expected<size_t, error> receive_ex(void *data,
+                                                   size_t buffer_size,
+                                                   TickType_t ticks_to_wait) {
+    auto rc = receive(data, buffer_size, ticks_to_wait);
     if (rc > 0) {
       return rc;
     }
-    return unexpected<error>(xTicksToWait == 0 ? error::would_block
+    return unexpected<error>(ticks_to_wait == 0 ? error::would_block
                                                : error::timeout);
   }
   template <typename Rep, typename Period>
   [[nodiscard]] expected<size_t, error>
-  receive_ex(void *pvRxData, size_t xBufferLengthBytes,
+  receive_ex(void *data, size_t buffer_size,
              const std::chrono::duration<Rep, Period> &timeout) {
     return receive_ex(
-        pvRxData, xBufferLengthBytes,
+        data, buffer_size,
         pdMS_TO_TICKS(
             std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
                 .count()));

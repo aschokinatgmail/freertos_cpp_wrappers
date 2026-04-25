@@ -147,9 +147,9 @@ add_library(freertos_cpp_wrappers
 if(FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY)
     target_sources(freertos_cpp_wrappers PRIVATE src/freertos_atomic_wait.cc)
     target_compile_definitions(freertos_cpp_wrappers PUBLIC
-        CONFIG_FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY=1
-        CONFIG_FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL=${FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL}
-        CONFIG_FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_TABLE_SIZE=${FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_TABLE_SIZE}
+        FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY=1
+        FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL=${FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL}
+        FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_TABLE_SIZE=${FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_TABLE_SIZE}
     )
 endif()
 
@@ -427,7 +427,7 @@ endif()
 # =============================================================================
 
 # Only build tests if GoogleTest is available
-if(GTEST_FOUND)
+if(GTEST_FOUND OR GTest_FOUND)
     message(STATUS "GoogleTest found via PkgConfig - building tests")
     # Add tests subdirectory
     add_subdirectory(tests)

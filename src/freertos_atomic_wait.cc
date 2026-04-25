@@ -32,9 +32,9 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ***********************************************************************************/
 
-#if defined(CONFIG_FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY)
+#if defined(FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY)
 
-#if CONFIG_FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL == 1
+#if FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL == 1
 
 freertos_wait_entry freertos_wait_table[atomic_wait_table_size] = {};
 
@@ -105,7 +105,7 @@ extern "C" void __platform_wake_by_address(void const *addr, int count) {
     }
 }
 
-#elif CONFIG_FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL == 2
+#elif FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL == 2
 
 freertos_wait_bucket freertos_wait_buckets[atomic_wait_table_size] = {};
 
@@ -195,7 +195,7 @@ extern "C" void __platform_wake_by_address(void const *addr, int count) {
     xSemaphoreGive(bucket.mutex);
 }
 
-#elif CONFIG_FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL == 3
+#elif FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL == 3
 
 extern "C" bool __platform_wait_on_address(void const *addr,
                                            __cxx_atomic_contention_t const *expected,

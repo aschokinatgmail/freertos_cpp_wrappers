@@ -240,15 +240,13 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #if FREERTOS_CPP_WRAPPERS_HAS_RECURSIVE_MUTEX &&                               \
     !FREERTOS_CPP_WRAPPERS_HAS_MUTEX
-static_assert(
-    false,
-    "configUSE_RECURSIVE_MUTEXES requires configUSE_MUTEXES to be enabled");
+#error "configUSE_RECURSIVE_MUTEXES requires configUSE_MUTEXES to be enabled"
 #endif
 
 #if !FREERTOS_CPP_WRAPPERS_HAS_STATIC_ALLOCATION &&                            \
     !FREERTOS_CPP_WRAPPERS_HAS_DYNAMIC_ALLOCATION
-static_assert(false, "At least one of configSUPPORT_STATIC_ALLOCATION or "
-                     "configSUPPORT_DYNAMIC_ALLOCATION must be enabled");
+#error "At least one of configSUPPORT_STATIC_ALLOCATION or "                   \
+       "configSUPPORT_DYNAMIC_ALLOCATION must be enabled"
 #endif
 
 #if defined(configNUMBER_OF_CORES) && configNUMBER_OF_CORES > 1 &&             \
@@ -265,7 +263,7 @@ static_assert(false, "At least one of configSUPPORT_STATIC_ALLOCATION or "
 #endif
 
 #if !FREERTOS_CPP_WRAPPERS_CPP17
-static_assert(false, "FreeRTOS C++ Wrappers require C++17 or later");
+#error "FreeRTOS C++ Wrappers require C++17 or later"
 #endif
 
 #if defined(FREERTOS_CPP_WRAPPERS_THREAD_SAFETY_ANNOTATIONS) &&                \

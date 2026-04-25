@@ -3,7 +3,7 @@
  * @brief Unit tests for freertos_atomic_wait.hpp
  *
  * Tests cover:
- * - Header compiles when CONFIG_FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY
+ * - Header compiles when FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY
  *   is defined
  * - Type checks on the wait entry structure
  * - Spin-only implementation compiles and works
@@ -15,8 +15,8 @@
 
 #include "FreeRTOS.h"
 
-#define CONFIG_FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY 1
-#define CONFIG_FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL 3
+#define FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY 1
+#define FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL 3
 #include "freertos_atomic_wait.hpp"
 
 extern "C" bool __platform_wait_on_address(void const *addr,
@@ -83,7 +83,7 @@ TEST(AtomicWait, AtomicWaitTableSizeIsPowerOfTwo) {
 }
 
 TEST(AtomicWait, SpinOnlyImplementationMacro) {
-    EXPECT_EQ(CONFIG_FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL, 3);
+    EXPECT_EQ(FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL, 3);
 }
 
 TEST(AtomicWait, PlatformFunctionsHaveCorrectSignature) {

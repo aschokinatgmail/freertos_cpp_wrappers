@@ -207,6 +207,19 @@ TEST_F(FreeRTOSEventGroupTest, EventGroupClearBits) {
   EXPECT_EQ(result, 0x0C);
 }
 
+TEST_F(FreeRTOSEventGroupTest, EventGroupClearBitsISR) {
+  EXPECT_CALL(*mock, xEventGroupCreate())
+      .WillOnce(Return(mock_event_group_handle));
+  EXPECT_CALL(*mock, xEventGroupClearBitsFromISR(mock_event_group_handle, 0x03, _))
+      .WillOnce(Return(0x0C));
+  EXPECT_CALL(*mock, vEventGroupDelete(mock_event_group_handle));
+
+  freertos::da::event_group event_group;
+
+  auto result = event_group.clear_bits_isr(0x03);
+  EXPECT_EQ(result.result, 0x0C);
+}
+
 TEST_F(FreeRTOSEventGroupTest, EventGroupGetBits) {
   EXPECT_CALL(*mock, xEventGroupCreate())
       .WillOnce(Return(mock_event_group_handle));

@@ -62,7 +62,7 @@ inline void disable_redirect() noexcept { detail::redirect_flag() = false; }
 
 inline void *allocate(size_t size) noexcept { return pvPortMalloc(size); }
 
-inline void *allocate_aligned(size_t alignment, size_t size) noexcept {
+inline void *allocate_with_alignment_check(size_t alignment, size_t size) noexcept {
 #if defined(portBYTE_ALIGNMENT)
     configASSERT(alignment <= static_cast<size_t>(portBYTE_ALIGNMENT));
 #else

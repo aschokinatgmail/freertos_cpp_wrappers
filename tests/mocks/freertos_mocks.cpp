@@ -864,6 +864,12 @@ EventBits_t xEventGroupClearBits(EventGroupHandle_t xEventGroup,
   return 0;
 }
 
+EventBits_t xEventGroupClearBitsFromISR(EventGroupHandle_t xEventGroup,
+                                        const EventBits_t uxBitsToClear,
+                                        BaseType_t *pxHigherPriorityTaskWoken) {
+    return g_freertos_mock->xEventGroupClearBitsFromISR(xEventGroup, uxBitsToClear, pxHigherPriorityTaskWoken);
+}
+
 EventBits_t xEventGroupWaitBits(EventGroupHandle_t xEventGroup,
                                 const EventBits_t uxBitsToWaitFor,
                                 const BaseType_t xClearOnExit,

@@ -18,8 +18,8 @@
 #include "FreeRTOS.h"
 #include "freertos_atomic.hpp"
 
-#define CONFIG_FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY 1
-#define CONFIG_FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL 3
+#define FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY 1
+#define FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL 3
 #include "freertos_atomic_wait.hpp"
 
 extern "C" bool __platform_wait_on_address(void const *addr,
