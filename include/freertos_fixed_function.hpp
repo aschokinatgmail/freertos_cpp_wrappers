@@ -37,9 +37,14 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #endif
 
 #include <array>
+#include <cassert>
 #include <cstddef>
 #include <cstring>
 #include <type_traits>
+
+#ifndef configASSERT
+#define configASSERT(expr) assert(expr)
+#endif
 #include <utility>
 
 namespace freertos {

@@ -37,6 +37,7 @@ TEST_F(OnceFlagTest, CallOnce_ExecutesFunction) {
   EXPECT_CALL(*mock, xSemaphoreCreateBinaryStatic(_))
       .WillOnce(Return(sem));
   EXPECT_CALL(*mock, xSemaphoreGive(sem)).WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, vSemaphoreDelete(sem));
 
   freertos::call_once(flag, [this]() { counter++; });
   EXPECT_EQ(counter, 1);
@@ -50,6 +51,7 @@ TEST_F(OnceFlagTest, CallOnce_ExecutesOnlyOnce) {
   EXPECT_CALL(*mock, xSemaphoreCreateBinaryStatic(_))
       .WillOnce(Return(sem));
   EXPECT_CALL(*mock, xSemaphoreGive(sem)).WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, vSemaphoreDelete(sem));
 
   freertos::call_once(flag, [this]() { counter++; });
   freertos::call_once(flag, [this]() { counter++; });
@@ -65,6 +67,7 @@ TEST_F(OnceFlagTest, CallOnce_WithLambda) {
   EXPECT_CALL(*mock, xSemaphoreCreateBinaryStatic(_))
       .WillOnce(Return(sem));
   EXPECT_CALL(*mock, xSemaphoreGive(sem)).WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, vSemaphoreDelete(sem));
 
   freertos::call_once(flag, [&value]() { value = 42; });
   EXPECT_EQ(value, 42);
@@ -78,6 +81,7 @@ TEST_F(OnceFlagTest, CallOnce_WithFunctionPointer) {
   EXPECT_CALL(*mock, xSemaphoreCreateBinaryStatic(_))
       .WillOnce(Return(sem));
   EXPECT_CALL(*mock, xSemaphoreGive(sem)).WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, vSemaphoreDelete(sem));
 
   static int global_val;
   global_val = 0;
@@ -99,6 +103,7 @@ TEST_F(OnceFlagTest, CallOnce_WithFunctionObject) {
   EXPECT_CALL(*mock, xSemaphoreCreateBinaryStatic(_))
       .WillOnce(Return(sem));
   EXPECT_CALL(*mock, xSemaphoreGive(sem)).WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, vSemaphoreDelete(sem));
 
   Functor f{value};
   freertos::call_once(flag, f);
@@ -147,6 +152,7 @@ TEST_F(OnceFlagTest, CallOnce_ThrowsException_Rethrows) {
   EXPECT_CALL(*mock, xSemaphoreCreateBinaryStatic(_))
       .WillOnce(Return(sem));
   EXPECT_CALL(*mock, xSemaphoreGive(sem)).WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, vSemaphoreDelete(sem));
 
   EXPECT_THROW(
       freertos::call_once(flag, []() { throw std::runtime_error("test"); }),
@@ -172,6 +178,7 @@ TEST_F(OnceFlagTest, CallOnce_ThrowsException_RetrySucceeds) {
   EXPECT_FALSE(flag.is_initialized());
 
   EXPECT_CALL(*mock, xSemaphoreGive(sem)).WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, vSemaphoreDelete(sem));
 
   freertos::call_once(flag, [&value]() { value = 42; });
   EXPECT_EQ(value, 42);

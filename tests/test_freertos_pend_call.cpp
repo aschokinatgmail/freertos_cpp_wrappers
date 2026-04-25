@@ -202,16 +202,14 @@ TEST_F(PendCallTest, PendCallCallableAdapterDeletesCallableAfterInvocation) {
 
   struct CountingCallable {
     int *target;
-    static int *alive_count_ptr;
-    CountingCallable(int *t) : target(t) { (*alive_count_ptr)++; }
-    CountingCallable(const CountingCallable &other) : target(other.target) {
+    int *alive_count_ptr;
+    CountingCallable(int *t, int *ac) : target(t), alive_count_ptr(ac) { (*alive_count_ptr)++; }
+    CountingCallable(const CountingCallable &other) : target(other.target), alive_count_ptr(other.alive_count_ptr) {
       (*alive_count_ptr)++;
     }
     ~CountingCallable() { (*alive_count_ptr)--; }
     void operator()() { (*target)++; }
   };
-
-  CountingCallable::alive_count_ptr = &alive_count;
 
   int value = 0;
   PendedFunction_t captured_adapter = nullptr;
@@ -222,7 +220,7 @@ TEST_F(PendCallTest, PendCallCallableAdapterDeletesCallableAfterInvocation) {
       .WillOnce(DoAll(SaveArg<0>(&captured_adapter),
                       SaveArg<1>(&captured_ptr), Return(pdPASS)));
 
-  auto result = freertos::pend_call(CountingCallable(&value));
+  auto result = freertos::pend_call(CountingCallable(&value, &alive_count));
   EXPECT_TRUE(result);
   ASSERT_NE(captured_adapter, nullptr);
   ASSERT_NE(captured_ptr, nullptr);
@@ -247,23 +245,21 @@ TEST_F(PendCallTest, PendCallLambdaFailurePathDeletesCallable) {
 
   struct TrackedCallable {
     bool *called;
-    static int *alive_count_ptr;
-    TrackedCallable(bool *c) : called(c) { (*alive_count_ptr)++; }
-    TrackedCallable(const TrackedCallable &other) : called(other.called) {
+    int *alive_count_ptr;
+    TrackedCallable(bool *c, int *ac) : called(c), alive_count_ptr(ac) { (*alive_count_ptr)++; }
+    TrackedCallable(const TrackedCallable &other) : called(other.called), alive_count_ptr(other.alive_count_ptr) {
       (*alive_count_ptr)++;
     }
     ~TrackedCallable() { (*alive_count_ptr)--; }
     void operator()() { *called = true; }
   };
 
-  TrackedCallable::alive_count_ptr = &alive_count;
-
   EXPECT_CALL(*mock,
               xTimerPendFunctionCall(_, _, 0, portMAX_DELAY))
       .WillOnce(Return(pdFAIL));
 
   bool called = false;
-  auto result = freertos::pend_call(TrackedCallable(&called));
+  auto result = freertos::pend_call(TrackedCallable(&called, &alive_count));
   EXPECT_FALSE(result);
   EXPECT_FALSE(called);
   EXPECT_EQ(alive_count, 0);
