@@ -203,6 +203,16 @@ add_executable(
 )
 
 add_executable(
+    test_freertos_coverage_branches3
+    test_freertos_coverage_branches3.cpp
+)
+
+add_executable(
+    test_freertos_coverage_misc_branches
+    test_freertos_coverage_misc_branches.cpp
+)
+
+add_executable(
     test_freertos_isr_result
     test_freertos_isr_result.cpp
 )
@@ -717,6 +727,22 @@ target_link_libraries(
 
 target_link_libraries(
     test_freertos_coverage_faults
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
+target_link_libraries(
+    test_freertos_coverage_branches3
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
+target_link_libraries(
+    test_freertos_coverage_misc_branches
     freertos_cpp_wrappers
     freertos_mocks
     ${GTEST_LIBRARIES}

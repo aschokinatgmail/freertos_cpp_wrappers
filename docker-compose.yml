@@ -19,7 +19,6 @@ services:
           -DENABLE_MISRA_ANALYSIS=OFF && \
         cmake --build build-test -j$$(nproc) && \
         ctest --test-dir build-test \
-          -E "coverage_branches2|coverage_sa_ns|coverage_faults" \
           --output-on-failure
 
   # =======================================================================
@@ -53,6 +52,7 @@ services:
     working_dir: /project
     volumes:
       - .:/project
+    mem_limit: 8g
     command:
       - bash
       - -c
@@ -63,11 +63,10 @@ services:
           -DENABLE_CLANG_TIDY=OFF \
           -DENABLE_MISRA_ANALYSIS=OFF \
           -DENABLE_COVERAGE=ON && \
-        cmake --build build-cov -j$$(nproc) && \
+        cmake --build build-cov -j2 && \
         ctest --test-dir build-cov \
-          -E "coverage_branches2|coverage_sa_ns|coverage_faults" \
           --output-on-failure && \
-        gcovr --filter 'include/' --filter 'src/' --print-summary build-cov
+        gcovr --filter 'include/' --filter 'src/' --gcov-ignore-parse-errors negative_hits.warn --print-summary build-cov
 
   # =======================================================================
   # Both mock + sim in one run (CI gate)
@@ -90,7 +89,6 @@ services:
           -DENABLE_MISRA_ANALYSIS=OFF && \
         cmake --build build-test -j$$(nproc) && \
         ctest --test-dir build-test \
-          -E "coverage_branches2|coverage_sa_ns|coverage_faults" \
           --output-on-failure && \
         echo "=== Simulation tests ===" && \
         rm -rf build-sim && \

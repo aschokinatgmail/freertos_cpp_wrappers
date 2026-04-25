@@ -1828,8 +1828,8 @@ TEST_F(TimerMoveTest, MoveAssignDestinationNullHandle) {
   EXPECT_CALL(*mock, pcTimerGetName(src_handle)).WillOnce(Return("src"));
   EXPECT_CALL(*mock, xTimerGetPeriod(src_handle)).WillOnce(Return(50));
   EXPECT_CALL(*mock, uxTimerGetReloadMode(src_handle)).WillOnce(Return(pdTRUE));
-  EXPECT_CALL(*mock, xTimerDelete(src_handle, portMAX_DELAY));
   EXPECT_CALL(*mock, xTimerCreate(_, _, _, _, _)).WillOnce(Return(nullptr));
+  EXPECT_CALL(*mock, xTimerDelete(src_handle, portMAX_DELAY));
 
   freertos::da::timer src("src", 50, pdTRUE, []() {});
   freertos::da::timer dst("dst", 50, pdTRUE, []() {});
@@ -1865,13 +1865,13 @@ TEST_F(TimerMoveTest, MoveAssignmentNotStarted) {
   TimerHandle_t new_timer = reinterpret_cast<TimerHandle_t>(0x1003);
   EXPECT_CALL(*mock, xTimerCreate(_, _, _, _, _)).WillOnce(Return(fake_timer));
   EXPECT_CALL(*mock, xTimerCreate(_, _, _, _, _)).WillOnce(Return(timer2));
-  EXPECT_CALL(*mock, xTimerDelete(timer2, portMAX_DELAY));
   EXPECT_CALL(*mock, xTimerStop(fake_timer, portMAX_DELAY)).WillOnce(Return(pdPASS));
   EXPECT_CALL(*mock, pcTimerGetName(fake_timer)).WillOnce(Return("t1"));
   EXPECT_CALL(*mock, xTimerGetPeriod(fake_timer)).WillOnce(Return(100));
   EXPECT_CALL(*mock, uxTimerGetReloadMode(fake_timer)).WillOnce(Return(pdTRUE));
-  EXPECT_CALL(*mock, xTimerDelete(fake_timer, portMAX_DELAY));
   EXPECT_CALL(*mock, xTimerCreate(_, _, _, _, _)).WillOnce(Return(new_timer));
+  EXPECT_CALL(*mock, xTimerDelete(timer2, portMAX_DELAY));
+  EXPECT_CALL(*mock, xTimerDelete(fake_timer, portMAX_DELAY));
   EXPECT_CALL(*mock, xTimerDelete(new_timer, portMAX_DELAY));
   freertos::da::timer t1("t1", 100, pdTRUE, []() {});
   freertos::da::timer t2("t2", 100, pdTRUE, []() {});
