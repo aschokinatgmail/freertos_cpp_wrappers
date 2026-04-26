@@ -2,7 +2,7 @@
 @file freertos_isr_result.hpp
 @author Andrey V. Shchekin <aschokin@gmail.com>
 @brief ISR result type for FreeRTOS C++ Wrappers
-@version 3.0.0
+@version 3.1.0
 @date 2026-04-16
 
 The MIT License (MIT)
@@ -38,14 +38,28 @@ namespace freertos {
 
 /** @brief Result type for ISR-safe FreeRTOS wrapper methods.
  *
- * Bundles the operation return value with the higher_priority_task_woken flag
- * required for proper ISR context handling. After all ISR operations, check
- * higher_priority_task_woken and call portYIELD_FROM_ISR() if set.
+ *  Bundles the operation return value with the higher_priority_task_woken flag
+ *  required for proper ISR context handling. After all ISR operations, check
+ *  higher_priority_task_woken and call portYIELD_FROM_ISR() if set.
  *
- * @tparam T The type of the operation result value
+ *  @tparam T The type of the operation result value
  */
 template <typename T> struct isr_result {
   T result;
+  BaseType_t higher_priority_task_woken;
+};
+
+/** @brief Specialization for ISR wrappers with no return value.
+ *
+ *  This specialization omits the `result` field — only
+ *  `higher_priority_task_woken` is available. Callers that need
+ *  a result should use `isr_result<T>` instead.
+ *
+ *  Currently used only by the simulation test suite. A production
+ *  consumer will be added when a void-returning ISR wrapper is
+ *  introduced (e.g., event_group::clear_bits_isr).
+ */
+template <> struct isr_result<void> {
   BaseType_t higher_priority_task_woken;
 };
 
@@ -55,8 +69,18 @@ bool operator==(const isr_result<T> &lhs, const isr_result<T> &rhs) {
          lhs.higher_priority_task_woken == rhs.higher_priority_task_woken;
 }
 
+inline bool operator==(const isr_result<void> &lhs,
+                       const isr_result<void> &rhs) {
+  return lhs.higher_priority_task_woken == rhs.higher_priority_task_woken;
+}
+
 template <typename T>
 bool operator!=(const isr_result<T> &lhs, const isr_result<T> &rhs) {
+  return !(lhs == rhs);
+}
+
+inline bool operator!=(const isr_result<void> &lhs,
+                       const isr_result<void> &rhs) {
   return !(lhs == rhs);
 }
 

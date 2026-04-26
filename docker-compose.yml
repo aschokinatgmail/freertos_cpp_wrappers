@@ -1,64 +1,170 @@
 services:
-  build:
+  # =======================================================================
+  # Mock (unit) tests — GTest/GMock with FreeRTOS mock layer
+  # =======================================================================
+  test:
     build: .
     image: freertos-cpp-wrappers:latest
-    command: ["bash", "-c", "cmake -B build -S /project && cmake --build build -j$(nproc)"]
+    working_dir: /project
     volumes:
-      - build-artifacts:/project/build
-      - .:/project-src
+      - .:/project
+    command:
+      - bash
+      - -c
+      - |
+        rm -rf build-test && \
+        cmake -B build-test \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -DENABLE_CLANG_TIDY=OFF \
+          -DENABLE_MISRA_ANALYSIS=OFF && \
+        cmake --build build-test -j$$(nproc) && \
+        ctest --test-dir build-test \
+          --output-on-failure
 
-  test:
+  # =======================================================================
+  # FreeRTOS+POSIX simulation system tests
+  # =======================================================================
+  sim:
+    build: .
     image: freertos-cpp-wrappers:latest
-    command: ["bash", "-c", "cd /project/build && ctest --verbose --output-on-failure"]
+    working_dir: /project
     volumes:
-      - build-artifacts:/project/build
-    depends_on:
-      build:
-        condition: service_completed_successfully
+      - .:/project
+    command:
+      - bash
+      - -c
+      - |
+        rm -rf build-sim && \
+        cmake -B build-sim \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -DENABLE_SIMULATION=ON \
+          -DENABLE_CLANG_TIDY=OFF \
+          -DENABLE_MISRA_ANALYSIS=OFF && \
+        cmake --build build-sim -j$$(nproc) && \
+        ctest --test-dir build-sim -L simulation --output-on-failure
 
+  # =======================================================================
+  # Coverage build + gcovr report
+  # =======================================================================
   coverage:
+    build: .
     image: freertos-cpp-wrappers:latest
-    command: ["bash", "-c", "cd /project/build && cmake -DENABLE_COVERAGE=ON .. && make -j$(nproc) && ctest --verbose --output-on-failure && lcov --rc lcov_branch_coverage=1 --capture --directory . --output-file coverage.info && lcov --rc lcov_branch_coverage=1 --remove coverage.info '/usr/*' '/project/tests/*' '/project/mocks/*' --output-file coverage.info && python3 /project/scripts/filter_coverage.py coverage.info coverage.info && genhtml --branch-coverage coverage.info --output-directory coverage_report"]
+    working_dir: /project
     volumes:
-      - build-artifacts:/project/build
-      - .:/project-src
-    depends_on:
-      build:
-        condition: service_completed_successfully
+      - .:/project
+    mem_limit: 8g
+    command:
+      - bash
+      - -c
+      - |
+        rm -rf build-cov && \
+        cmake -B build-cov \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -DENABLE_CLANG_TIDY=OFF \
+          -DENABLE_MISRA_ANALYSIS=OFF \
+          -DENABLE_COVERAGE=ON && \
+        cmake --build build-cov -j2 && \
+        ctest --test-dir build-cov \
+          --output-on-failure && \
+        gcovr --filter 'include/' --filter 'src/' --gcov-ignore-parse-errors negative_hits.warn --print-summary build-cov
 
-  static-analysis:
+  # =======================================================================
+  # Both mock + sim in one run (CI gate)
+  # =======================================================================
+  all:
+    build: .
     image: freertos-cpp-wrappers:latest
-    command: ["bash", "-c", "cd /project/build && cmake --build . --target static-analysis-report"]
+    working_dir: /project
     volumes:
-      - build-artifacts:/project/build
-    depends_on:
-      build:
-        condition: service_completed_successfully
+      - .:/project
+    command:
+      - bash
+      - -c
+      - |
+        echo "=== Mock tests ===" && \
+        rm -rf build-test && \
+        cmake -B build-test \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -DENABLE_CLANG_TIDY=OFF \
+          -DENABLE_MISRA_ANALYSIS=OFF && \
+        cmake --build build-test -j$$(nproc) && \
+        ctest --test-dir build-test \
+          --output-on-failure && \
+        echo "=== Simulation tests ===" && \
+        rm -rf build-sim && \
+        cmake -B build-sim \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -DENABLE_SIMULATION=ON \
+          -DENABLE_CLANG_TIDY=OFF \
+          -DENABLE_MISRA_ANALYSIS=OFF && \
+        cmake --build build-sim -j$$(nproc) && \
+        ctest --test-dir build-sim -L simulation --output-on-failure && \
+        echo "=== All tests passed ==="
 
-  validation:
+  # =======================================================================
+  # ARM cross-compile verification (compile-only, ARM Cortex-M target)
+  # =======================================================================
+  xcompile:
+    build: .
     image: freertos-cpp-wrappers:latest
-    command: ["bash", "/project/scripts/generate_validation_verification_report.sh", "/project/build"]
+    working_dir: /project
     volumes:
-      - build-artifacts:/project/build
-    depends_on:
-      build:
-        condition: service_completed_successfully
+      - .:/project
+    command:
+      - bash
+      - -c
+      - |
+        echo "=== Cross-compile verification (ARM Cortex-M) ===" && \
+        rm -rf build-xcompile && \
+        cmake -B build-xcompile \
+          -DCMAKE_TOOLCHAIN_FILE=cmake/arm-none-eabi-toolchain.cmake \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -DENABLE_CROSS_COMPILE=ON && \
+        cmake --build build-xcompile -j$$(nproc) && \
+        cmake --build build-xcompile --target xcompile_all && \
+        echo "=== Cross-compile verification passed ==="
 
-  docs:
+  # =======================================================================
+  # QEMU ARM runtime test (FreeRTOS on ARM Cortex-M via QEMU)
+  # =======================================================================
+  qemu:
+    build: .
     image: freertos-cpp-wrappers:latest
-    command: ["bash", "-c", "cd /project/build && cmake --build . --target docs"]
+    working_dir: /project
     volumes:
-      - build-artifacts:/project/build
-    depends_on:
-      build:
-        condition: service_completed_successfully
+      - .:/project
+    command:
+      - bash
+      - -c
+      - |
+        echo "=== QEMU ARM runtime test ===" && \
+        rm -rf build-qemu && \
+        cmake -B build-qemu \
+          -DCMAKE_TOOLCHAIN_FILE=cmake/arm-cortex-m3-toolchain.cmake \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -DENABLE_QEMU_TEST=ON && \
+        cmake --build build-qemu -j$$(nproc) && \
+        echo "=== Running QEMU test (timeout 30s) ===" && \
+        timeout 30 qemu-system-arm \
+          -machine mps2-an385 \
+          -nographic \
+          -kernel build-qemu/tests/qemu/qemu_test 2>&1 | tee build-qemu/qemu_test.log; \
+        if grep -q SUCCESS build-qemu/qemu_test.log; then \
+          echo "=== QEMU test PASSED ==="; \
+        else \
+          echo "=== QEMU test FAILED ==="; \
+          exit 1; \
+        fi
 
-  simulation:
-    build:
-      context: .
-      dockerfile: Dockerfile.simulation
-    image: freertos-cpp-wrappers:simulation
-    command: ["bash", "-c", "cd /project/build-sim && ctest --verbose --output-on-failure -L simulation"]
-
-volumes:
-  build-artifacts:
+  # =======================================================================
+  # Interactive shell for development
+  # =======================================================================
+  shell:
+    build: .
+    image: freertos-cpp-wrappers:latest
+    working_dir: /project
+    volumes:
+      - .:/project
+    stdin_open: true
+    tty: true
+    command: ["bash"]

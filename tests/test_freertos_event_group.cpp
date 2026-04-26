@@ -207,6 +207,19 @@ TEST_F(FreeRTOSEventGroupTest, EventGroupClearBits) {
   EXPECT_EQ(result, 0x0C);
 }
 
+TEST_F(FreeRTOSEventGroupTest, EventGroupClearBitsISR) {
+  EXPECT_CALL(*mock, xEventGroupCreate())
+      .WillOnce(Return(mock_event_group_handle));
+  EXPECT_CALL(*mock, xEventGroupClearBitsFromISR(mock_event_group_handle, 0x03, _))
+      .WillOnce(Return(0x0C));
+  EXPECT_CALL(*mock, vEventGroupDelete(mock_event_group_handle));
+
+  freertos::da::event_group event_group;
+
+  auto result = event_group.clear_bits_isr(0x03);
+  EXPECT_EQ(result.result, 0x0C);
+}
+
 TEST_F(FreeRTOSEventGroupTest, EventGroupGetBits) {
   EXPECT_CALL(*mock, xEventGroupCreate())
       .WillOnce(Return(mock_event_group_handle));
@@ -779,3 +792,236 @@ TEST_F(FreeRTOSEventGroupTest, EventGroup_DestructorAfterMoveDoesNotDoubleFree) 
   // eg1 has nullptr handle, eg2 owns the handle
   // Only one vEventGroupDelete call when both destruct
 }
+
+// =============================================================================
+// clear_bits_isr branch coverage tests
+// =============================================================================
+
+TEST_F(FreeRTOSEventGroupTest, EventGroupClearBitsIsr_WithHigherPriorityTaskWoken) {
+  EXPECT_CALL(*mock, xEventGroupCreate())
+      .WillOnce(Return(mock_event_group_handle));
+  EXPECT_CALL(*mock, xEventGroupClearBitsFromISR(mock_event_group_handle, 0x07, _))
+      .WillOnce(::testing::Invoke([](EventGroupHandle_t, EventBits_t, BaseType_t *woken) {
+          *woken = pdTRUE;
+          return static_cast<EventBits_t>(0x07);
+      }));
+  EXPECT_CALL(*mock, vEventGroupDelete(mock_event_group_handle));
+
+  freertos::da::event_group event_group;
+  auto result = event_group.clear_bits_isr(0x07);
+  EXPECT_EQ(result.result, 0x07);
+  EXPECT_EQ(result.higher_priority_task_woken, pdTRUE);
+}
+
+TEST_F(FreeRTOSEventGroupTest, EventGroupClearBitsIsr_NoHigherPriorityTaskWoken) {
+  EXPECT_CALL(*mock, xEventGroupCreate())
+      .WillOnce(Return(mock_event_group_handle));
+  EXPECT_CALL(*mock, xEventGroupClearBitsFromISR(mock_event_group_handle, 0x03, _))
+      .WillOnce(::testing::Invoke([](EventGroupHandle_t, EventBits_t, BaseType_t *woken) {
+          *woken = pdFALSE;
+          return static_cast<EventBits_t>(0x0F);
+      }));
+  EXPECT_CALL(*mock, vEventGroupDelete(mock_event_group_handle));
+
+  freertos::da::event_group event_group;
+  auto result = event_group.clear_bits_isr(0x03);
+  EXPECT_EQ(result.result, 0x0F);
+  EXPECT_EQ(result.higher_priority_task_woken, pdFALSE);
+}
+
+// =============================================================================
+// _ex variant branch coverage tests
+// =============================================================================
+
+TEST_F(FreeRTOSEventGroupTest, EventGroupSetBitsEx_Success) {
+  EXPECT_CALL(*mock, xEventGroupCreate())
+      .WillOnce(Return(mock_event_group_handle));
+  EXPECT_CALL(*mock, xEventGroupSetBits(mock_event_group_handle, 0x05))
+      .WillOnce(Return(0x05));
+  EXPECT_CALL(*mock, vEventGroupDelete(mock_event_group_handle));
+
+  freertos::da::event_group event_group;
+  auto result = event_group.set_bits_ex(0x05);
+  EXPECT_TRUE(result.has_value());
+  EXPECT_EQ(result.value(), 0x05);
+}
+
+TEST_F(FreeRTOSEventGroupTest, EventGroupClearBitsEx_Success) {
+  EXPECT_CALL(*mock, xEventGroupCreate())
+      .WillOnce(Return(mock_event_group_handle));
+  EXPECT_CALL(*mock, xEventGroupClearBits(mock_event_group_handle, 0x03))
+      .WillOnce(Return(0x0F));
+  EXPECT_CALL(*mock, vEventGroupDelete(mock_event_group_handle));
+
+  freertos::da::event_group event_group;
+  auto result = event_group.clear_bits_ex(0x03);
+  EXPECT_TRUE(result.has_value());
+  EXPECT_EQ(result.value(), 0x0F);
+}
+
+TEST_F(FreeRTOSEventGroupTest, EventGroupSetBitsExIsr_Pass) {
+  EXPECT_CALL(*mock, xEventGroupCreate())
+      .WillOnce(Return(mock_event_group_handle));
+  EXPECT_CALL(*mock, xEventGroupSetBitsFromISR(mock_event_group_handle, 0x0A, _))
+      .WillOnce(::testing::Invoke([](EventGroupHandle_t, EventBits_t, BaseType_t *woken) {
+          *woken = pdTRUE;
+          return static_cast<EventBits_t>(pdPASS);
+      }));
+  EXPECT_CALL(*mock, vEventGroupDelete(mock_event_group_handle));
+
+  freertos::da::event_group event_group;
+  auto result = event_group.set_bits_ex_isr(0x0A);
+  EXPECT_TRUE(result.result.has_value());
+  EXPECT_EQ(result.result.value(), 0x0A);
+  EXPECT_EQ(result.higher_priority_task_woken, pdTRUE);
+}
+
+TEST_F(FreeRTOSEventGroupTest, EventGroupSetBitsExIsr_Fail) {
+  EXPECT_CALL(*mock, xEventGroupCreate())
+      .WillOnce(Return(mock_event_group_handle));
+  EXPECT_CALL(*mock, xEventGroupSetBitsFromISR(mock_event_group_handle, 0x0A, _))
+      .WillOnce(::testing::Invoke([](EventGroupHandle_t, EventBits_t, BaseType_t *woken) {
+          *woken = pdFALSE;
+          return static_cast<EventBits_t>(errQUEUE_EMPTY);
+      }));
+  EXPECT_CALL(*mock, vEventGroupDelete(mock_event_group_handle));
+
+  freertos::da::event_group event_group;
+  auto result = event_group.set_bits_ex_isr(0x0A);
+  EXPECT_FALSE(result.result.has_value());
+  EXPECT_EQ(result.result.error(), freertos::error::invalid_handle);
+  EXPECT_EQ(result.higher_priority_task_woken, pdFALSE);
+}
+
+TEST_F(FreeRTOSEventGroupTest, EventGroupWaitBitsEx_Success) {
+  EXPECT_CALL(*mock, xEventGroupCreate())
+      .WillOnce(Return(mock_event_group_handle));
+  EXPECT_CALL(*mock, xEventGroupWaitBits(mock_event_group_handle, 0x03, pdTRUE, pdTRUE, 100))
+      .WillOnce(Return(0x03));
+  EXPECT_CALL(*mock, vEventGroupDelete(mock_event_group_handle));
+
+  freertos::da::event_group event_group;
+  auto result = event_group.wait_bits_ex(0x03, pdTRUE, pdTRUE, 100);
+  EXPECT_TRUE(result.has_value());
+  EXPECT_EQ(result.value(), 0x03);
+}
+
+TEST_F(FreeRTOSEventGroupTest, EventGroupWaitBitsEx_Timeout) {
+  EXPECT_CALL(*mock, xEventGroupCreate())
+      .WillOnce(Return(mock_event_group_handle));
+  EXPECT_CALL(*mock, xEventGroupWaitBits(mock_event_group_handle, 0x03, pdTRUE, pdTRUE, 100))
+      .WillOnce(Return(0x00));
+  EXPECT_CALL(*mock, vEventGroupDelete(mock_event_group_handle));
+
+  freertos::da::event_group event_group;
+  auto result = event_group.wait_bits_ex(0x03, pdTRUE, pdTRUE, 100);
+  EXPECT_FALSE(result.has_value());
+  EXPECT_EQ(result.error(), freertos::error::timeout);
+}
+
+TEST_F(FreeRTOSEventGroupTest, EventGroupWaitBitsEx_WouldBlock) {
+  EXPECT_CALL(*mock, xEventGroupCreate())
+      .WillOnce(Return(mock_event_group_handle));
+  EXPECT_CALL(*mock, xEventGroupWaitBits(mock_event_group_handle, 0x03, pdTRUE, pdTRUE, 0))
+      .WillOnce(Return(0x00));
+  EXPECT_CALL(*mock, vEventGroupDelete(mock_event_group_handle));
+
+  freertos::da::event_group event_group;
+  auto result = event_group.wait_bits_ex(0x03, pdTRUE, pdTRUE, 0);
+  EXPECT_FALSE(result.has_value());
+  EXPECT_EQ(result.error(), freertos::error::would_block);
+}
+
+TEST_F(FreeRTOSEventGroupTest, EventGroupWaitBitsEx_ChronoTimeout) {
+  EXPECT_CALL(*mock, xEventGroupCreate())
+      .WillOnce(Return(mock_event_group_handle));
+  EXPECT_CALL(*mock, xEventGroupWaitBits(mock_event_group_handle, 0x03, pdTRUE, pdTRUE, pdMS_TO_TICKS(500)))
+      .WillOnce(Return(0x00));
+  EXPECT_CALL(*mock, vEventGroupDelete(mock_event_group_handle));
+
+  freertos::da::event_group event_group;
+  auto result = event_group.wait_bits_ex(0x03, pdTRUE, pdTRUE, std::chrono::milliseconds(500));
+  EXPECT_FALSE(result.has_value());
+  EXPECT_EQ(result.error(), freertos::error::timeout);
+}
+
+TEST_F(FreeRTOSEventGroupTest, EventGroupSyncEx_Success) {
+  EXPECT_CALL(*mock, xEventGroupCreate())
+      .WillOnce(Return(mock_event_group_handle));
+  EXPECT_CALL(*mock, xEventGroupSync(mock_event_group_handle, 0x01, 0x03, 100))
+      .WillOnce(Return(0x03));
+  EXPECT_CALL(*mock, vEventGroupDelete(mock_event_group_handle));
+
+  freertos::da::event_group event_group;
+  auto result = event_group.sync_ex(0x01, 0x03, 100);
+  EXPECT_TRUE(result.has_value());
+  EXPECT_EQ(result.value(), 0x03);
+}
+
+TEST_F(FreeRTOSEventGroupTest, EventGroupSyncEx_Timeout) {
+  EXPECT_CALL(*mock, xEventGroupCreate())
+      .WillOnce(Return(mock_event_group_handle));
+  EXPECT_CALL(*mock, xEventGroupSync(mock_event_group_handle, 0x01, 0x03, 100))
+      .WillOnce(Return(0x01));
+  EXPECT_CALL(*mock, vEventGroupDelete(mock_event_group_handle));
+
+  freertos::da::event_group event_group;
+  auto result = event_group.sync_ex(0x01, 0x03, 100);
+  EXPECT_FALSE(result.has_value());
+  EXPECT_EQ(result.error(), freertos::error::timeout);
+}
+
+TEST_F(FreeRTOSEventGroupTest, EventGroupSyncEx_WouldBlock) {
+  EXPECT_CALL(*mock, xEventGroupCreate())
+      .WillOnce(Return(mock_event_group_handle));
+  EXPECT_CALL(*mock, xEventGroupSync(mock_event_group_handle, 0x01, 0x03, 0))
+      .WillOnce(Return(0x01));
+  EXPECT_CALL(*mock, vEventGroupDelete(mock_event_group_handle));
+
+  freertos::da::event_group event_group;
+  auto result = event_group.sync_ex(0x01, 0x03, 0);
+  EXPECT_FALSE(result.has_value());
+  EXPECT_EQ(result.error(), freertos::error::would_block);
+}
+
+TEST_F(FreeRTOSEventGroupTest, EventGroupSyncEx_ChronoTimeout) {
+  EXPECT_CALL(*mock, xEventGroupCreate())
+      .WillOnce(Return(mock_event_group_handle));
+  EXPECT_CALL(*mock, xEventGroupSync(mock_event_group_handle, 0x01, 0x03, pdMS_TO_TICKS(750)))
+      .WillOnce(Return(0x01));
+  EXPECT_CALL(*mock, vEventGroupDelete(mock_event_group_handle));
+
+  freertos::da::event_group event_group;
+  auto result = event_group.sync_ex(0x01, 0x03, std::chrono::milliseconds(750));
+  EXPECT_FALSE(result.has_value());
+  EXPECT_EQ(result.error(), freertos::error::timeout);
+}
+
+#if configSUPPORT_STATIC_ALLOCATION
+TEST_F(FreeRTOSEventGroupTest, EventGroupClearBitsIsr_StaticAllocation) {
+  EXPECT_CALL(*mock, xEventGroupCreateStatic(NotNull()))
+      .WillOnce(Return(mock_event_group_handle));
+  EXPECT_CALL(*mock, xEventGroupClearBitsFromISR(mock_event_group_handle, 0x0F, _))
+      .WillOnce(Return(0x0F));
+  EXPECT_CALL(*mock, vEventGroupDelete(mock_event_group_handle));
+
+  freertos::sa::event_group event_group;
+  auto result = event_group.clear_bits_isr(0x0F);
+  EXPECT_EQ(result.result, 0x0F);
+}
+
+TEST_F(FreeRTOSEventGroupTest, EventGroupGetStaticBuffer) {
+  StaticEventGroup_t *static_buffer = nullptr;
+  EXPECT_CALL(*mock, xEventGroupCreateStatic(NotNull()))
+      .WillOnce(Return(mock_event_group_handle));
+  EXPECT_CALL(*mock, xEventGroupGetStaticBuffer(mock_event_group_handle, _))
+      .WillOnce(::testing::Invoke([](EventGroupHandle_t, StaticEventGroup_t **ppStaticEventGroup) -> BaseType_t {
+          return pdPASS;
+      }));
+  EXPECT_CALL(*mock, vEventGroupDelete(mock_event_group_handle));
+
+  freertos::sa::event_group event_group;
+  auto ok = event_group.get_static_buffer(&static_buffer);
+  EXPECT_TRUE(ok);
+}
+#endif

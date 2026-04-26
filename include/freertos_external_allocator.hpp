@@ -492,4 +492,62 @@ public:
   }
 };
 
+template <typename Region> class external_shared_mutex_allocator {
+  Region *m_region{nullptr};
+  void *m_mutex_memory{nullptr};
+  void *m_reader_slots_memory{nullptr};
+
+  external_shared_mutex_allocator(const external_shared_mutex_allocator &) =
+      delete;
+  external_shared_mutex_allocator &
+  operator=(const external_shared_mutex_allocator &) = delete;
+  external_shared_mutex_allocator &
+  operator=(external_shared_mutex_allocator &&) = delete;
+
+public:
+  explicit external_shared_mutex_allocator(Region &region) : m_region(&region) {}
+  external_shared_mutex_allocator(
+      external_shared_mutex_allocator &&other) noexcept
+      : m_region(other.m_region), m_mutex_memory(other.m_mutex_memory),
+        m_reader_slots_memory(other.m_reader_slots_memory) {
+    other.m_mutex_memory = nullptr;
+    other.m_reader_slots_memory = nullptr;
+    other.m_region = nullptr;
+  }
+
+  void swap(external_shared_mutex_allocator &other) noexcept {
+    using std::swap;
+    swap(m_region, other.m_region);
+    swap(m_mutex_memory, other.m_mutex_memory);
+    swap(m_reader_slots_memory, other.m_reader_slots_memory);
+  }
+
+  ~external_shared_mutex_allocator() {
+    if (m_mutex_memory) {
+      m_region->deallocate(m_mutex_memory);
+    }
+    if (m_reader_slots_memory) {
+      m_region->deallocate(m_reader_slots_memory);
+    }
+  }
+
+  SemaphoreHandle_t create_mutex() {
+    m_mutex_memory = m_region->allocate(sizeof(StaticSemaphore_t));
+    if (!m_mutex_memory) {
+      return nullptr;
+    }
+    return xSemaphoreCreateMutexStatic(
+        static_cast<StaticSemaphore_t *>(m_mutex_memory)); // NOLINT(clang-tidy:cppcoreguidelines-pro-type-static-cast-downcast)
+  }
+  SemaphoreHandle_t create_counting(UBaseType_t max_count) {
+    m_reader_slots_memory = m_region->allocate(sizeof(StaticSemaphore_t));
+    if (!m_reader_slots_memory) {
+      return nullptr;
+    }
+    return xSemaphoreCreateCountingStatic(
+        max_count, max_count,
+        static_cast<StaticSemaphore_t *>(m_reader_slots_memory)); // NOLINT(clang-tidy:cppcoreguidelines-pro-type-static-cast-downcast)
+  }
+};
+
 } // namespace freertos

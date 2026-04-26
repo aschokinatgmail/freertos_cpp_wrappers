@@ -1023,13 +1023,13 @@ TEST_F(SaTimerTest, MoveAssignStartedTimer) {
   EXPECT_CALL(*mock, xTimerCreateStatic(_, _, _, _, _, _)).WillOnce(Return(t1));
   EXPECT_CALL(*mock, xTimerCreateStatic(_, _, _, _, _, _)).WillOnce(Return(t2));
   EXPECT_CALL(*mock, xTimerStart(t2, _)).WillOnce(Return(pdPASS));
-  EXPECT_CALL(*mock, xTimerDelete(t1, portMAX_DELAY));
   EXPECT_CALL(*mock, xTimerStop(t2, portMAX_DELAY)).WillOnce(Return(pdPASS));
   EXPECT_CALL(*mock, pcTimerGetName(t2)).WillOnce(Return(timer_name));
   EXPECT_CALL(*mock, xTimerGetPeriod(t2)).WillOnce(Return(100));
   EXPECT_CALL(*mock, uxTimerGetReloadMode(t2)).WillOnce(Return(pdTRUE));
-  EXPECT_CALL(*mock, xTimerDelete(t2, portMAX_DELAY));
   EXPECT_CALL(*mock, xTimerCreateStatic(_, _, _, _, _, _)).WillOnce(Return(t3));
+  EXPECT_CALL(*mock, xTimerDelete(t1, portMAX_DELAY));
+  EXPECT_CALL(*mock, xTimerDelete(t2, portMAX_DELAY));
   EXPECT_CALL(*mock, xTimerStart(t3, portMAX_DELAY)).WillOnce(Return(pdPASS));
   EXPECT_CALL(*mock, xTimerDelete(t3, portMAX_DELAY));
   freertos::sa::timer a("a", 100, pdTRUE, []() {});

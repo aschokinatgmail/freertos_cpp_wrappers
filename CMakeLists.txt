@@ -7,7 +7,8 @@ project(freertos_cpp_wrappers
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Compiler warning flags
+# Compiler warning flags (host builds only - cross-compile sets its own)
+if(NOT CMAKE_CROSSCOMPILING)
 add_compile_options(
     -Wall -Wextra -Wpedantic
     -Wshadow -Wconversion -Wsign-conversion
@@ -15,12 +16,82 @@ add_compile_options(
     -Wdouble-promotion -Wformat=2
     -Wundef -Werror=return-type
 )
+endif()
 
 configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/include/freertos_version.hpp.in
     ${CMAKE_CURRENT_BINARY_DIR}/include/freertos_version.hpp
     @ONLY
 )
+
+# =============================================================================
+# KCONFIG-BASED CONFIGURATION
+# =============================================================================
+
+# Phase 3 -- Standard Library Integration Backends
+option(FREERTOS_CPP_WRAPPERS_ENABLE_GTHR_BACKEND "Enable gthr-FreeRTOS backend for GCC/libstdc++" OFF)
+option(FREERTOS_CPP_WRAPPERS_ENABLE_EXTERNAL_THREADING "Enable __external_threading backend for libc++" OFF)
+
+# Atomic Wait/Notify
+option(FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY "Enable atomic wait/notify platform hooks" OFF)
+set(FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL "1" CACHE STRING "Atomic wait impl: 1=semaphore table, 2=task notifications, 3=spin-only")
+set(FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_TABLE_SIZE "16" CACHE STRING "Hash table size for atomic wait semaphore table")
+
+# Allocation Strategy
+set(FREERTOS_CPP_WRAPPERS_ALLOC_STRATEGY "3" CACHE STRING "Allocation strategy: 1=dynamic, 2=static, 3=auto")
+
+# Condition Variable Implementation
+set(FREERTOS_CPP_WRAPPERS_CONDVAR_IMPL "1" CACHE STRING "Condition variable impl: 1=counting semaphore, 2=task notifications, 3=binary semaphore per waiter")
+
+# C++ Standard Library Features
+option(FREERTOS_CPP_WRAPPERS_ENABLE_STD_THREAD "Enable <thread> support" ON)
+option(FREERTOS_CPP_WRAPPERS_ENABLE_STD_MUTEX "Enable <mutex>/<condition_variable>/<call_once> support" ON)
+option(FREERTOS_CPP_WRAPPERS_ENABLE_STD_SHARED_MUTEX "Enable <shared_mutex> support" ON)
+option(FREERTOS_CPP_WRAPPERS_ENABLE_STD_FUTURE "Enable <future>/<promise>/<async> support" OFF)
+
+# Library Feature Toggles
+option(FREERTOS_CPP_WRAPPERS_ENABLE_EXPECTED "Enable freertos::expected" ON)
+option(FREERTOS_CPP_WRAPPERS_ENABLE_SPAN "Enable freertos::span" ON)
+option(FREERTOS_CPP_WRAPPERS_ENABLE_THREAD_SAFETY "Enable thread safety annotations" ON)
+option(FREERTOS_CPP_WRAPPERS_ENABLE_CONCEPTS "Enable C++20 concepts" ON)
+option(FREERTOS_CPP_WRAPPERS_ENABLE_EXTERNAL_ALLOCATOR "Enable external allocator support" ON)
+option(FREERTOS_CPP_WRAPPERS_ENABLE_ISR_RESULT "Enable ISR result types" ON)
+option(FREERTOS_CPP_WRAPPERS_ENABLE_STRONG_TYPES "Enable strong type wrappers" ON)
+
+# Convert boolean CMake options to 0/1 for C++ macros
+foreach(_opt
+    ENABLE_GTHR_BACKEND
+    ENABLE_EXTERNAL_THREADING
+    ENABLE_ATOMIC_WAIT_NOTIFY
+    ENABLE_STD_THREAD
+    ENABLE_STD_MUTEX
+    ENABLE_STD_SHARED_MUTEX
+    ENABLE_STD_FUTURE
+    ENABLE_EXPECTED
+    ENABLE_SPAN
+    ENABLE_THREAD_SAFETY
+    ENABLE_CONCEPTS
+    ENABLE_EXTERNAL_ALLOCATOR
+    ENABLE_ISR_RESULT
+    ENABLE_STRONG_TYPES
+)
+    if(FREERTOS_CPP_WRAPPERS_${_opt})
+        set(FREERTOS_CPP_WRAPPERS_${_opt} 1)
+    else()
+        set(FREERTOS_CPP_WRAPPERS_${_opt} 0)
+    endif()
+endforeach()
+
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/freertos_cpp_wrappers_config.hpp.in
+    ${CMAKE_CURRENT_BINARY_DIR}/include/freertos_cpp_wrappers_config.hpp
+    @ONLY
+)
+
+# =============================================================================
+# HOST-BUILD ONLY: library, tests, static analysis, docs, install
+# =============================================================================
+if(NOT CMAKE_CROSSCOMPILING)
 
 # Add option for coverage
 option(ENABLE_COVERAGE "Enable code coverage" OFF)
@@ -72,6 +143,15 @@ add_library(freertos_cpp_wrappers
     include/freertos_task.hpp
     include/freertos.hpp
 )
+
+if(FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY)
+    target_sources(freertos_cpp_wrappers PRIVATE src/freertos_atomic_wait.cc)
+    target_compile_definitions(freertos_cpp_wrappers PUBLIC
+        FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY=1
+        FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL=${FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL}
+        FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_TABLE_SIZE=${FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_TABLE_SIZE}
+    )
+endif()
 
 # Add include directories to the library target
 target_include_directories(freertos_cpp_wrappers PRIVATE tests/mocks)
@@ -209,6 +289,7 @@ if(ENABLE_CLANG_TIDY)
                     ${CMAKE_CURRENT_SOURCE_DIR}/include/freertos_stream_buffer.hpp
                     ${CMAKE_CURRENT_SOURCE_DIR}/include/freertos_sw_timer.hpp
                     ${CMAKE_CURRENT_SOURCE_DIR}/include/freertos_task.hpp
+                    ${CMAKE_CURRENT_SOURCE_DIR}/include/freertos_atomic_wait.hpp
                     -- 
                     -I${CMAKE_CURRENT_SOURCE_DIR}/include
                     -isystem${CMAKE_CURRENT_SOURCE_DIR}/tests/mocks
@@ -346,7 +427,7 @@ endif()
 # =============================================================================
 
 # Only build tests if GoogleTest is available
-if(GTEST_FOUND)
+if(GTEST_FOUND OR GTest_FOUND)
     message(STATUS "GoogleTest found via PkgConfig - building tests")
     # Add tests subdirectory
     add_subdirectory(tests)
@@ -362,31 +443,21 @@ if(ENABLE_SIMULATION)
     add_subdirectory(tests/simulation)
 endif()
 
-# Install rules
-include(GNUInstallDirs)
+endif() # NOT CMAKE_CROSSCOMPILING
 
-install(TARGETS freertos_cpp_wrappers
-    EXPORT freertos_cpp_wrappers-targets
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-)
+# =============================================================================
+# CROSS-COMPILATION: ARM Cortex-M verification tests
+# =============================================================================
+option(ENABLE_CROSS_COMPILE "Enable ARM cross-compile verification test" OFF)
 
-install(DIRECTORY include/
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-    FILES_MATCHING PATTERN "*.hpp"
-)
+if(ENABLE_CROSS_COMPILE)
+    message(STATUS "Cross-compile verification enabled - building for ARM Cortex-M")
+    add_subdirectory(tests/cross_compile)
+endif()
 
-include(CMakePackageConfigHelpers)
-configure_package_config_file(
-    cmake/freertos_cpp_wrappersConfig.cmake.in
-    ${CMAKE_CURRENT_BINARY_DIR}/freertos_cpp_wrappersConfig.cmake
-    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/freertos_cpp_wrappers
-)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/freertos_cpp_wrappersConfig.cmake
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/freertos_cpp_wrappers
-)
+option(ENABLE_QEMU_TEST "Enable QEMU ARM runtime test" OFF)
 
-install(EXPORT freertos_cpp_wrappers-targets
-    NAMESPACE freertos::
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/freertos_cpp_wrappers
-)
+if(ENABLE_QEMU_TEST)
+    message(STATUS "QEMU ARM runtime test enabled - building for ARM Cortex-M + QEMU")
+    add_subdirectory(tests/qemu)
+endif()

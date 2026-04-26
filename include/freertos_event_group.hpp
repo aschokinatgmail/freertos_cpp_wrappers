@@ -187,6 +187,13 @@ public:
   EventBits_t clear_bits(const EventBits_t bits_to_clear) {
     return xEventGroupClearBits(m_event_group, bits_to_clear);
   }
+
+  isr_result<BaseType_t> clear_bits_isr(const EventBits_t bits_to_clear) {
+    isr_result<BaseType_t> result{pdFALSE, pdFALSE};
+    result.result = xEventGroupClearBitsFromISR(
+        m_event_group, bits_to_clear, &result.higher_priority_task_woken);
+    return result;
+  }
   /**
    * @brief Method waiting for the bits or group of bits to be set.
    * @ref https://www.freertos.org/xEventGroupWaitBits.html
@@ -330,6 +337,22 @@ public:
             std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
                 .count()));
   }
+#if configSUPPORT_STATIC_ALLOCATION
+  /**
+   * @brief Retrieve the static buffer used by the event group.
+   * @ref https://www.freertos.org/xEventGroupGetStaticBuffer.html
+   *
+   * @param static_event_group Pointer to receive the static event group
+   * pointer.
+   * @return true if the event group was created statically and the buffer was
+   * retrieved, false otherwise.
+   */
+  [[nodiscard]] bool
+  get_static_buffer(StaticEventGroup_t **static_event_group) {
+    return xEventGroupGetStaticBuffer(m_event_group, static_event_group) ==
+           pdPASS;
+  }
+#endif
 };
 
 #if configSUPPORT_STATIC_ALLOCATION

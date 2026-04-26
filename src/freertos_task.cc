@@ -69,13 +69,27 @@ BaseType_t get_scheduler_state(void) { return xTaskGetSchedulerState(); }
 #endif
 UBaseType_t task_count(void) { return uxTaskGetNumberOfTasks(); }
 void yield(void) { taskYIELD(); }
-bool is_isr(void) { return xPortIsInsideInterrupt() != 0; }
+bool is_isr(void) {
+#ifdef FREERTOS_CPP_WRAPPERS_SIMULATION
+  return false;
+#else
+  return xPortIsInsideInterrupt() != 0;
+#endif
+}
 #if configUSE_TICKLESS_IDLE
 void catch_up_ticks(TickType_t ticks) { xTaskCatchUpTicks(ticks); }
 #endif
 #if configUSE_TIMERS
 TaskHandle_t timer_daemon_task_handle(void) {
+#ifdef FREERTOS_CPP_WRAPPERS_SIMULATION
+  // The POSIX port does not provide xTimerGetTimerDaemonTaskHandle().
+  // configASSERT here so any test that inadvertently calls this method
+  // under simulation fails loudly rather than silently returning nullptr.
+  configASSERT(!"timer_daemon_task_handle() unavailable under simulation");
+  return nullptr;
+#else
   return xTimerGetTimerDaemonTaskHandle();
+#endif
 }
 #endif
 

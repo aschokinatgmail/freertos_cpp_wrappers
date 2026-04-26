@@ -1,0 +1,313 @@
+# Kconfig — FreeRTOS C++ Wrappers Library Configuration
+#
+# This file defines all configurable options for the FreeRTOS C++ Wrappers
+# library. It can be processed by kconfiglib (Python) or the Linux kernel
+# Kconfig tools to generate a configuration header.
+#
+# Usage with kconfiglib:
+#   pip install kconfiglib
+#   python3 scripts/gen_config.py
+#
+# Or manually via menuconfig:
+#   menuconfig Kconfig
+
+mainmenu "FreeRTOS C++ Wrappers Configuration"
+
+comment "Phase 3 — Standard Library Integration Backends"
+
+config FREERTOS_CPP_WRAPPERS_ENABLE_GTHR_BACKEND
+	bool "Enable gthr-FreeRTOS backend for GCC/libstdc++"
+	default n
+	help
+	  Enable the gthr-FreeRTOS threading backend that allows
+	  GCC's libstdc++ (gthr) to use FreeRTOS primitives for
+	  <thread>, <mutex>, <condition_variable>, etc.
+
+	  When enabled, the library provides gthr-compatible wrappers
+	  that map pthreads semantics onto FreeRTOS task and sync
+	  primitives.
+
+	  Say N unless you are linking against libstdc++ on a
+	  FreeRTOS target and need C++ threading support.
+
+config FREERTOS_CPP_WRAPPERS_ENABLE_EXTERNAL_THREADING
+	bool "Enable __external_threading backend for libc++"
+	default n
+	help
+	  Enable the __external_threading backend for LLVM's libc++.
+
+	  When enabled, the library provides the __external_threading
+	  header that libc++ uses for its threading implementation,
+	  mapping to FreeRTOS primitives.
+
+	  Say N unless you are linking against libc++ on a FreeRTOS
+	  target and need C++ threading support.
+
+comment "Atomic Wait/Notify (C++20 std::atomic::wait/notify_one/notify_all)"
+
+config FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY
+	bool "Enable atomic wait/notify platform hooks"
+	default n
+	help
+	  Enable platform hooks for C++20 std::atomic::wait,
+	  notify_one, and notify_all.
+
+	  This requires an underlying wait/notify mechanism on
+	  FreeRTOS. Choose the implementation via
+	  FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL.
+
+	  Say N unless you need C++20 atomic wait/notify support.
+
+choice
+	prompt "Atomic wait/notify implementation"
+	depends on FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY
+	default FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL_SEMAPHORE_TABLE
+
+config FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL_SEMAPHORE_TABLE
+	bool "Semaphore hash table (1)"
+	help
+	  Use a fixed-size hash table of FreeRTOS semaphores for
+	  atomic wait/notify. This is the default and most portable
+	  implementation. Choose this for general-purpose use.
+
+config FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL_TASK_NOTIFICATIONS
+	bool "Task notifications (2)"
+	help
+	  Use FreeRTOS task notifications for atomic wait/notify.
+	  This is more memory-efficient but only works when the
+	  waiting task is known at compile time.
+
+config FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL_SPIN_ONLY
+	bool "Spin-only (3)"
+	help
+	  Use a spin-only implementation for atomic wait/notify.
+	  This is the simplest but consumes CPU cycles while
+	  waiting. Choose this only for very low-latency scenarios.
+
+endchoice
+
+config FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL
+	int
+	default 1 if FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL_SEMAPHORE_TABLE
+	default 2 if FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL_TASK_NOTIFICATIONS
+	default 3 if FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL_SPIN_ONLY
+	default 0
+
+config FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_TABLE_SIZE
+	int "Atomic wait hash table size"
+	depends on FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY && \
+	           FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL_SEMAPHORE_TABLE
+	default 16
+	range 4 256
+	help
+	  Size of the semaphore hash table used for atomic wait/notify
+	  when using the semaphore table implementation.
+
+	  Each table entry holds a FreeRTOS semaphore and a queue of
+	  waiters. Larger tables reduce hash collisions but use more
+	  memory.
+
+	  Default is 16. Adjust based on the expected number of
+	  concurrently waiting atomic objects.
+
+choice
+	prompt "Memory allocation strategy"
+	default FREERTOS_CPP_WRAPPERS_ALLOC_STRATEGY_AUTO
+
+config FREERTOS_CPP_WRAPPERS_ALLOC_STRATEGY_DYNAMIC
+	bool "Dynamic allocation (1)"
+	help
+	  Use only dynamic allocation (pvPortMalloc/vPortFree) for
+	  all C++ wrapper objects. Object sizes are determined at
+	  runtime.
+
+config FREERTOS_CPP_WRAPPERS_ALLOC_STRATEGY_STATIC
+	bool "Static allocation (2)"
+	help
+	  Use only static allocation for all C++ wrapper objects.
+	  All memory is allocated at compile time. Suitable for
+	  safety-critical systems where dynamic allocation is
+	  prohibited.
+
+config FREERTOS_CPP_WRAPPERS_ALLOC_STRATEGY_AUTO
+	bool "Auto-select (3)"
+	help
+	  Automatically select between static and dynamic allocation
+	  based on the FreeRTOS configuration. Uses static allocation
+	  when configSUPPORT_STATIC_ALLOCATION is enabled, and
+	  dynamic allocation when configSUPPORT_DYNAMIC_ALLOCATION
+	  is enabled. This is the default and recommended setting.
+
+endchoice
+
+config FREERTOS_CPP_WRAPPERS_ALLOC_STRATEGY
+	int
+	default 1 if FREERTOS_CPP_WRAPPERS_ALLOC_STRATEGY_DYNAMIC
+	default 2 if FREERTOS_CPP_WRAPPERS_ALLOC_STRATEGY_STATIC
+	default 3 if FREERTOS_CPP_WRAPPERS_ALLOC_STRATEGY_AUTO
+	default 3
+
+choice
+	prompt "Condition variable implementation"
+	default FREERTOS_CPP_WRAPPERS_CONDVAR_IMPL_COUNTING_SEMAPHORE
+
+config FREERTOS_CPP_WRAPPERS_CONDVAR_IMPL_COUNTING_SEMAPHORE
+	bool "Counting semaphore (1)"
+	help
+	  Implement condition variables using FreeRTOS counting
+	  semaphores. This is the simplest and most portable
+	  implementation. Choose this for general-purpose use.
+
+config FREERTOS_CPP_WRAPPERS_CONDVAR_IMPL_TASK_NOTIFICATIONS
+	bool "Task notifications (2)"
+	help
+	  Implement condition variables using FreeRTOS task
+	  notifications. More memory-efficient but limited to
+	  notifying a single task at a time.
+
+config FREERTOS_CPP_WRAPPERS_CONDVAR_IMPL_BINARY_SEMAPHORE_PER_WAITER
+	bool "Binary semaphore per waiter (3)"
+	help
+	  Implement condition variables by creating a binary
+	  semaphore for each waiting thread. This provides the
+	  most standards-compliant behavior but uses more memory.
+
+endchoice
+
+config FREERTOS_CPP_WRAPPERS_CONDVAR_IMPL
+	int
+	default 1 if FREERTOS_CPP_WRAPPERS_CONDVAR_IMPL_COUNTING_SEMAPHORE
+	default 2 if FREERTOS_CPP_WRAPPERS_CONDVAR_IMPL_TASK_NOTIFICATIONS
+	default 3 if FREERTOS_CPP_WRAPPERS_CONDVAR_IMPL_BINARY_SEMAPHORE_PER_WAITER
+	default 1
+
+comment "C++ Standard Library Features"
+
+config FREERTOS_CPP_WRAPPERS_ENABLE_STD_THREAD
+	bool "Enable <thread> support"
+	default y
+	help
+	  Enable C++ <thread> header support, providing freeRTOS-backed
+	  std::thread implementation.
+
+	  Requires either gthr or __external_threading backend to be
+	  enabled, or a custom threading backend.
+
+	  Say Y to enable std::thread on FreeRTOS.
+
+config FREERTOS_CPP_WRAPPERS_ENABLE_STD_MUTEX
+	bool "Enable <mutex>/<condition_variable>/<call_once> support"
+	default y
+	help
+	  Enable C++ <mutex>, <condition_variable>, and <call_once>
+	  headers support, providing thread synchronization primitives
+	  backed by FreeRTOS.
+
+	  Say Y to enable std::mutex, std::condition_variable, etc.
+
+config FREERTOS_CPP_WRAPPERS_ENABLE_STD_SHARED_MUTEX
+	bool "Enable <shared_mutex> support"
+	default y
+	depends on FREERTOS_CPP_WRAPPERS_ENABLE_STD_MUTEX
+	help
+	  Enable C++ <shared_mutex> header support, providing
+	  shared (reader-writer) mutex primitives backed by FreeRTOS.
+
+	  This depends on std::mutex support being enabled.
+
+	  Say Y to enable std::shared_mutex on FreeRTOS.
+
+config FREERTOS_CPP_WRAPPERS_ENABLE_STD_FUTURE
+	bool "Enable <future>/<promise>/<async> support"
+	default n
+	depends on FREERTOS_CPP_WRAPPERS_ENABLE_STD_THREAD
+	help
+	  Enable C++ <future>, <promise>, and <async> headers support,
+	  providing asynchronous computation primitives backed by
+	  FreeRTOS.
+
+	  This requires std::thread support to be enabled.
+
+	  Say N unless you specifically need std::future/promise/async.
+
+comment "Library Feature Toggles"
+
+config FREERTOS_CPP_WRAPPERS_ENABLE_EXPECTED
+	bool "Enable freertos::expected"
+	default y
+	help
+	  Enable the freertos::expected implementation, a C++23-style
+	  result type for error handling without exceptions.
+
+	  Say Y unless you have a very constrained build and do not
+	  need this utility.
+
+config FREERTOS_CPP_WRAPPERS_ENABLE_SPAN
+	bool "Enable freertos::span"
+	default y
+	help
+	  Enable the freertos::span implementation, a C++20-style
+	  non-owning view over a contiguous sequence of objects.
+
+	  Say Y unless you have a very constrained build and do not
+	  need this utility.
+
+config FREERTOS_CPP_WRAPPERS_ENABLE_THREAD_SAFETY
+	bool "Enable thread safety annotations"
+	default y
+	help
+	  Enable Clang-style thread safety annotations on all
+	  synchronization primitive wrappers. These annotations
+	  enable compile-time detection of data races and lock
+	  ordering violations.
+
+	  Requires Clang compiler. On other compilers, the
+	  annotations expand to nothing.
+
+	  Say Y to enable thread safety analysis.
+
+config FREERTOS_CPP_WRAPPERS_ENABLE_CONCEPTS
+	bool "Enable C++20 concepts"
+	default y
+	help
+	  Enable C++20 concepts for template constraints in the
+	  library. When building with C++20 or later, concepts
+	  provide clearer error messages and additional type safety.
+
+	  When building with C++17, the concepts are replaced with
+	  SFINAE or static_assert.
+
+	  Say Y unless you need C++17-only compatibility without
+	  concepts.
+
+config FREERTOS_CPP_WRAPPERS_ENABLE_EXTERNAL_ALLOCATOR
+	bool "Enable external allocator support"
+	default y
+	help
+	  Enable support for external/custom allocators in all
+	  C++ wrapper classes. This allows users to provide their
+	  own memory allocation strategy for FreeRTOS objects.
+
+	  Say Y unless all your objects use the default allocators.
+
+config FREERTOS_CPP_WRAPPERS_ENABLE_ISR_RESULT
+	bool "Enable ISR result types"
+	default y
+	help
+	  Enable ISR (Interrupt Service Routine) result types that
+	  provide type-safe wrappers around FreeRTOS FromISR APIs.
+
+	  These types prevent accidental use of non-ISR-safe APIs
+	  from interrupt context.
+
+	  Say Y unless you do not use FreeRTOS FromISR APIs.
+
+config FREERTOS_CPP_WRAPPERS_ENABLE_STRONG_TYPES
+	bool "Enable strong type wrappers"
+	default y
+	help
+	  Enable strong type wrappers that provide type safety for
+	  FreeRTOS handles and parameters. These prevent accidental
+	  misuse of raw handles and provide clearer APIs.
+
+	  Say Y unless you need minimal type overhead.

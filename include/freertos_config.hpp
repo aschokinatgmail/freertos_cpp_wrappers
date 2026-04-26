@@ -2,8 +2,8 @@
 @file freertos_config.hpp
 @author Andrey V. Shchekin <aschokin@gmail.com>
 @brief Feature detection header for FreeRTOS C++ Wrappers
-@version 3.0.0
-@date 2026-04-16
+@version 3.1.0
+@date 2026-04-21
 
 The MIT License (MIT)
 
@@ -34,11 +34,14 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *  @brief Feature detection header for FreeRTOS C++ Wrappers.
  *
  *  Defines compile-time feature macros based on FreeRTOS configuration
- *  (FreeRTOSConfig.h) and the C++ standard in use. These macros enable
- *  conditional compilation of wrapper features such as mutex support,
- *  task notifications, queue sets, SMP affinity, and thread safety annotations.
+ *  (FreeRTOSConfig.h), the C++ standard in use, and the Kconfig-based
+ *  library configuration (freertos_cpp_wrappers_config.hpp).
  *
- *  Key macros:
+ *  When built with CMake, the configuration header is auto-generated from
+ *  include/freertos_cpp_wrappers_config.hpp.in. When used header-only
+ *  without CMake, sensible defaults are provided.
+ *
+ *  Key macros (from FreeRTOS config):
  *  - FREERTOS_CPP_WRAPPERS_CPP17 / FREERTOS_CPP_WRAPPERS_CPP20: C++ standard detection
  *  - FREERTOS_CPP_WRAPPERS_HAS_MUTEX: configUSE_MUTEXES
  *  - FREERTOS_CPP_WRAPPERS_HAS_COUNTING_SEMAPHORE: configUSE_COUNTING_SEMAPHORES
@@ -53,9 +56,105 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *  - FREERTOS_CPP_WRAPPERS_HAS_DYNAMIC_ALLOCATION: configSUPPORT_DYNAMIC_ALLOCATION
  *  - FREERTOS_CPP_WRAPPERS_HAS_SMP_AFFINITY: configNUMBER_OF_CORES > 1 && configUSE_CORE_AFFINITY
  *  - FREERTOS_CPP_WRAPPERS_HAS_THREAD_SAFETY_ANNOTATIONS: opt-in via FREERTOS_CPP_WRAPPERS_THREAD_SAFETY_ANNOTATIONS
+ *
+ *  Key macros (from Kconfig configuration):
+ *  - FREERTOS_CPP_WRAPPERS_ENABLE_GTHR_BACKEND
+ *  - FREERTOS_CPP_WRAPPERS_ENABLE_EXTERNAL_THREADING
+ *  - FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY
+ *  - FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL
+ *  - FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_TABLE_SIZE
+ *  - FREERTOS_CPP_WRAPPERS_ALLOC_STRATEGY
+ *  - FREERTOS_CPP_WRAPPERS_CONDVAR_IMPL
+ *  - FREERTOS_CPP_WRAPPERS_ENABLE_STD_THREAD
+ *  - FREERTOS_CPP_WRAPPERS_ENABLE_STD_MUTEX
+ *  - FREERTOS_CPP_WRAPPERS_ENABLE_STD_SHARED_MUTEX
+ *  - FREERTOS_CPP_WRAPPERS_ENABLE_STD_FUTURE
+ *  - FREERTOS_CPP_WRAPPERS_ENABLE_EXPECTED
+ *  - FREERTOS_CPP_WRAPPERS_ENABLE_SPAN
+ *  - FREERTOS_CPP_WRAPPERS_ENABLE_THREAD_SAFETY
+ *  - FREERTOS_CPP_WRAPPERS_ENABLE_CONCEPTS
+ *  - FREERTOS_CPP_WRAPPERS_ENABLE_EXTERNAL_ALLOCATOR
+ *  - FREERTOS_CPP_WRAPPERS_ENABLE_ISR_RESULT
+ *  - FREERTOS_CPP_WRAPPERS_ENABLE_STRONG_TYPES
  */
 
 #pragma once
+
+#if __has_include("freertos_cpp_wrappers_config.hpp")
+#include "freertos_cpp_wrappers_config.hpp"
+#endif
+
+#ifndef FREERTOS_CPP_WRAPPERS_ENABLE_GTHR_BACKEND
+#define FREERTOS_CPP_WRAPPERS_ENABLE_GTHR_BACKEND 0
+#endif
+
+#ifndef FREERTOS_CPP_WRAPPERS_ENABLE_EXTERNAL_THREADING
+#define FREERTOS_CPP_WRAPPERS_ENABLE_EXTERNAL_THREADING 0
+#endif
+
+#ifndef FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY
+#define FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY 0
+#endif
+
+#ifndef FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL
+#define FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL 1
+#endif
+
+#ifndef FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_TABLE_SIZE
+#define FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_TABLE_SIZE 16
+#endif
+
+#ifndef FREERTOS_CPP_WRAPPERS_ALLOC_STRATEGY
+#define FREERTOS_CPP_WRAPPERS_ALLOC_STRATEGY 3
+#endif
+
+#ifndef FREERTOS_CPP_WRAPPERS_CONDVAR_IMPL
+#define FREERTOS_CPP_WRAPPERS_CONDVAR_IMPL 1
+#endif
+
+#ifndef FREERTOS_CPP_WRAPPERS_ENABLE_STD_THREAD
+#define FREERTOS_CPP_WRAPPERS_ENABLE_STD_THREAD 1
+#endif
+
+#ifndef FREERTOS_CPP_WRAPPERS_ENABLE_STD_MUTEX
+#define FREERTOS_CPP_WRAPPERS_ENABLE_STD_MUTEX 1
+#endif
+
+#ifndef FREERTOS_CPP_WRAPPERS_ENABLE_STD_SHARED_MUTEX
+#define FREERTOS_CPP_WRAPPERS_ENABLE_STD_SHARED_MUTEX 1
+#endif
+
+#ifndef FREERTOS_CPP_WRAPPERS_ENABLE_STD_FUTURE
+#define FREERTOS_CPP_WRAPPERS_ENABLE_STD_FUTURE 0
+#endif
+
+#ifndef FREERTOS_CPP_WRAPPERS_ENABLE_EXPECTED
+#define FREERTOS_CPP_WRAPPERS_ENABLE_EXPECTED 1
+#endif
+
+#ifndef FREERTOS_CPP_WRAPPERS_ENABLE_SPAN
+#define FREERTOS_CPP_WRAPPERS_ENABLE_SPAN 1
+#endif
+
+#ifndef FREERTOS_CPP_WRAPPERS_ENABLE_THREAD_SAFETY
+#define FREERTOS_CPP_WRAPPERS_ENABLE_THREAD_SAFETY 1
+#endif
+
+#ifndef FREERTOS_CPP_WRAPPERS_ENABLE_CONCEPTS
+#define FREERTOS_CPP_WRAPPERS_ENABLE_CONCEPTS 1
+#endif
+
+#ifndef FREERTOS_CPP_WRAPPERS_ENABLE_EXTERNAL_ALLOCATOR
+#define FREERTOS_CPP_WRAPPERS_ENABLE_EXTERNAL_ALLOCATOR 1
+#endif
+
+#ifndef FREERTOS_CPP_WRAPPERS_ENABLE_ISR_RESULT
+#define FREERTOS_CPP_WRAPPERS_ENABLE_ISR_RESULT 1
+#endif
+
+#ifndef FREERTOS_CPP_WRAPPERS_ENABLE_STRONG_TYPES
+#define FREERTOS_CPP_WRAPPERS_ENABLE_STRONG_TYPES 1
+#endif
 
 #include <FreeRTOS.h>
 
@@ -141,15 +240,13 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #if FREERTOS_CPP_WRAPPERS_HAS_RECURSIVE_MUTEX &&                               \
     !FREERTOS_CPP_WRAPPERS_HAS_MUTEX
-static_assert(
-    false,
-    "configUSE_RECURSIVE_MUTEXES requires configUSE_MUTEXES to be enabled");
+#error "configUSE_RECURSIVE_MUTEXES requires configUSE_MUTEXES to be enabled"
 #endif
 
 #if !FREERTOS_CPP_WRAPPERS_HAS_STATIC_ALLOCATION &&                            \
     !FREERTOS_CPP_WRAPPERS_HAS_DYNAMIC_ALLOCATION
-static_assert(false, "At least one of configSUPPORT_STATIC_ALLOCATION or "
-                     "configSUPPORT_DYNAMIC_ALLOCATION must be enabled");
+#error "At least one of configSUPPORT_STATIC_ALLOCATION or "                   \
+       "configSUPPORT_DYNAMIC_ALLOCATION must be enabled"
 #endif
 
 #if defined(configNUMBER_OF_CORES) && configNUMBER_OF_CORES > 1 &&             \
@@ -166,7 +263,7 @@ static_assert(false, "At least one of configSUPPORT_STATIC_ALLOCATION or "
 #endif
 
 #if !FREERTOS_CPP_WRAPPERS_CPP17
-static_assert(false, "FreeRTOS C++ Wrappers require C++17 or later");
+#error "FreeRTOS C++ Wrappers require C++17 or later"
 #endif
 
 #if defined(FREERTOS_CPP_WRAPPERS_THREAD_SAFETY_ANNOTATIONS) &&                \

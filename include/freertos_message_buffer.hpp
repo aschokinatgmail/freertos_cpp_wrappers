@@ -47,7 +47,95 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 namespace freertos {
 
+#if configUSE_SB_COMPLETED_CALLBACK
+/**
+ * @brief An allocator for the message buffer that uses a dynamic memory
+ * allocation with send/receive completed callbacks.
+ *
+ */
+template <size_t MessageBufferSize>
+class dynamic_message_buffer_allocator_with_callback {
+  StreamBufferCallbackFunction_t m_send_callback;
+  void *m_send_context;
+  StreamBufferCallbackFunction_t m_receive_callback;
+  void *m_receive_context;
+
+public:
+  dynamic_message_buffer_allocator_with_callback(
+      StreamBufferCallbackFunction_t send_callback, void *send_context,
+      StreamBufferCallbackFunction_t receive_callback, void *receive_context)
+      : m_send_callback{send_callback}, m_send_context{send_context},
+        m_receive_callback{receive_callback},
+        m_receive_context{receive_context} {}
+
+  void swap(dynamic_message_buffer_allocator_with_callback &other) noexcept {
+    using std::swap;
+    swap(m_send_callback, other.m_send_callback);
+    swap(m_send_context, other.m_send_context);
+    swap(m_receive_callback, other.m_receive_callback);
+    swap(m_receive_context, other.m_receive_context);
+  }
+
+  MessageBufferHandle_t create() {
+    return xMessageBufferCreateWithCallback(
+        MessageBufferSize, m_send_callback, m_send_context,
+        m_receive_callback, m_receive_context);
+  }
+};
+#endif
+
 #if configSUPPORT_STATIC_ALLOCATION
+#if configUSE_SB_COMPLETED_CALLBACK
+/**
+ * @brief An allocator for the message buffer that uses a static memory
+ * allocation with send/receive completed callbacks.
+ *
+ */
+template <size_t MessageBufferSize>
+class static_message_buffer_allocator_with_callback {
+  StreamBufferCallbackFunction_t m_send_callback;
+  void *m_send_context;
+  StreamBufferCallbackFunction_t m_receive_callback;
+  void *m_receive_context;
+  StaticMessageBuffer_t m_message_buffer_placeholder{};
+  std::array<uint8_t, MessageBufferSize> m_storage;
+
+public:
+  static_message_buffer_allocator_with_callback(
+      StreamBufferCallbackFunction_t send_callback, void *send_context,
+      StreamBufferCallbackFunction_t receive_callback, void *receive_context)
+      : m_send_callback{send_callback}, m_send_context{send_context},
+        m_receive_callback{receive_callback},
+        m_receive_context{receive_context} {}
+  ~static_message_buffer_allocator_with_callback() = default;
+  static_message_buffer_allocator_with_callback(
+      const static_message_buffer_allocator_with_callback &) = delete;
+  static_message_buffer_allocator_with_callback(
+      static_message_buffer_allocator_with_callback &&) = default;
+
+  static_message_buffer_allocator_with_callback &
+  operator=(const static_message_buffer_allocator_with_callback &) = delete;
+  static_message_buffer_allocator_with_callback &
+  operator=(static_message_buffer_allocator_with_callback &&) = delete;
+
+  void swap(static_message_buffer_allocator_with_callback &other) noexcept {
+    using std::swap;
+    swap(m_send_callback, other.m_send_callback);
+    swap(m_send_context, other.m_send_context);
+    swap(m_receive_callback, other.m_receive_callback);
+    swap(m_receive_context, other.m_receive_context);
+    swap(m_message_buffer_placeholder, other.m_message_buffer_placeholder);
+    swap(m_storage, other.m_storage);
+  }
+
+  MessageBufferHandle_t create() {
+    return xMessageBufferCreateStaticWithCallback(
+        MessageBufferSize, m_storage.data(), &m_message_buffer_placeholder,
+        m_send_callback, m_send_context, m_receive_callback,
+        m_receive_context);
+  }
+};
+#endif
 /**
  * @brief An allocator for the message buffer that uses a static memory
  * allocation.
@@ -160,65 +248,65 @@ public:
    * @brief Method sends a discret message to the message buffer.
    * @ref https://www.freertos.org/xMessageBufferSend.html
    *
-   * @param pvTxData pointer to the message data
-   * @param xDataLengthBytes length of the message data
-   * @param xTicksToWait timeout in ticks to wait for the message buffer to
+   * @param data pointer to the message data
+   * @param data_size length of the message data
+   * @param ticks_to_wait timeout in ticks to wait for the message buffer to
    * become available
    * @return size_t number of bytes sent
    */
-  size_t send(const void *pvTxData, size_t xDataLengthBytes,
-              TickType_t xTicksToWait) {
-    return xMessageBufferSend(m_message_buffer, pvTxData, xDataLengthBytes,
-                              xTicksToWait);
+  size_t send(const void *data, size_t data_size,
+              TickType_t ticks_to_wait) {
+    return xMessageBufferSend(m_message_buffer, data, data_size,
+                              ticks_to_wait);
   }
   /**
    * @brief Method sends a discret message to the message buffer.
    * @ref https://www.freertos.org/xMessageBufferSend.html
    *
-   * @param pvTxData pointer to the message data
-   * @param xDataLengthBytes length of the message data
-   * @param xTicksToWait timeout in ticks to wait for the message buffer to
+   * @param data pointer to the message data
+   * @param data_size length of the message data
+   * @param ticks_to_wait timeout in ticks to wait for the message buffer to
    * @return size_t number of bytes sent
    */
   template <typename Rep, typename Period>
-  size_t send(const void *pvTxData, size_t xDataLengthBytes,
-              const std::chrono::duration<Rep, Period> &xTicksToWait) {
+  size_t send(const void *data, size_t data_size,
+              const std::chrono::duration<Rep, Period> &ticks_to_wait) {
     return send(
-        pvTxData, xDataLengthBytes,
+        data, data_size,
         pdMS_TO_TICKS(
-            std::chrono::duration_cast<std::chrono::milliseconds>(xTicksToWait)
+            std::chrono::duration_cast<std::chrono::milliseconds>(ticks_to_wait)
                 .count()));
   }
   /**
    * @brief Method receives a discret message from the message buffer.
    * @ref https://www.freertos.org/xMessageBufferReceive.html
    *
-   * @param pvRxData pointer to the message data
-   * @param xBufferLengthBytes length of the message data buffer
-   * @param xTicksToWait timeout in ticks to wait for the message buffer to
+   * @param data pointer to the message data
+   * @param buffer_size length of the message data buffer
+   * @param ticks_to_wait timeout in ticks to wait for the message buffer to
    * become available
    * @return size_t number of bytes received
    */
-  size_t receive(void *pvRxData, size_t xBufferLengthBytes,
-                 TickType_t xTicksToWait) {
-    return xMessageBufferReceive(m_message_buffer, pvRxData, xBufferLengthBytes,
-                                 xTicksToWait);
+  size_t receive(void *data, size_t buffer_size,
+                 TickType_t ticks_to_wait) {
+    return xMessageBufferReceive(m_message_buffer, data, buffer_size,
+                                 ticks_to_wait);
   }
   /**
    * @brief Method receives a discret message from the message buffer.
    * @ref https://www.freertos.org/xMessageBufferReceive.html
    *
-   * @param pvRxData pointer to the message data
-   * @param xBufferLengthBytes length of the message data buffer
+   * @param data pointer to the message data
+   * @param buffer_size length of the message data buffer
    * @param timeout timeout to wait for the message buffer to
    * become available
    * @return size_t number of bytes received
    */
   template <typename Rep, typename Period>
-  size_t receive(void *pvRxData, size_t xBufferLengthBytes,
+  size_t receive(void *data, size_t buffer_size,
                  const std::chrono::duration<Rep, Period> &timeout) {
     return receive(
-        pvRxData, xBufferLengthBytes,
+        data, buffer_size,
         pdMS_TO_TICKS(
             std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
                 .count()));
@@ -287,24 +375,24 @@ public:
    */
   [[nodiscard]] BaseType_t full(void) const { return xMessageBufferIsFull(m_message_buffer); }
 
-  [[nodiscard]] expected<size_t, error> send_ex(const void *pvTxData,
-                                                size_t xDataLengthBytes,
-                                                TickType_t xTicksToWait) {
-    auto rc = send(pvTxData, xDataLengthBytes, xTicksToWait);
+  [[nodiscard]] expected<size_t, error> send_ex(const void *data,
+                                                size_t data_size,
+                                                TickType_t ticks_to_wait) {
+    auto rc = send(data, data_size, ticks_to_wait);
     if (rc > 0) {
       return rc;
     }
-    return unexpected<error>(xTicksToWait == 0 ? error::would_block
+    return unexpected<error>(ticks_to_wait == 0 ? error::would_block
                                                : error::timeout);
   }
   template <typename Rep, typename Period>
   [[nodiscard]] expected<size_t, error>
-  send_ex(const void *pvTxData, size_t xDataLengthBytes,
-          const std::chrono::duration<Rep, Period> &xTicksToWait) {
+  send_ex(const void *data, size_t data_size,
+          const std::chrono::duration<Rep, Period> &ticks_to_wait) {
     return send_ex(
-        pvTxData, xDataLengthBytes,
+        data, data_size,
         pdMS_TO_TICKS(
-            std::chrono::duration_cast<std::chrono::milliseconds>(xTicksToWait)
+            std::chrono::duration_cast<std::chrono::milliseconds>(ticks_to_wait)
                 .count()));
   }
   [[nodiscard]] isr_result<expected<size_t, error>>
@@ -318,22 +406,22 @@ public:
     }
     return ret;
   }
-  [[nodiscard]] expected<size_t, error> receive_ex(void *pvRxData,
-                                                   size_t xBufferLengthBytes,
-                                                   TickType_t xTicksToWait) {
-    auto rc = receive(pvRxData, xBufferLengthBytes, xTicksToWait);
+  [[nodiscard]] expected<size_t, error> receive_ex(void *data,
+                                                   size_t buffer_size,
+                                                   TickType_t ticks_to_wait) {
+    auto rc = receive(data, buffer_size, ticks_to_wait);
     if (rc > 0) {
       return rc;
     }
-    return unexpected<error>(xTicksToWait == 0 ? error::would_block
+    return unexpected<error>(ticks_to_wait == 0 ? error::would_block
                                                : error::timeout);
   }
   template <typename Rep, typename Period>
   [[nodiscard]] expected<size_t, error>
-  receive_ex(void *pvRxData, size_t xBufferLengthBytes,
+  receive_ex(void *data, size_t buffer_size,
              const std::chrono::duration<Rep, Period> &timeout) {
     return receive_ex(
-        pvRxData, xBufferLengthBytes,
+        data, buffer_size,
         pdMS_TO_TICKS(
             std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
                 .count()));
@@ -356,6 +444,56 @@ public:
     }
     return unexpected<error>(error::invalid_handle);
   }
+  /**
+   * @brief Reset the message buffer from an ISR context.
+   * @ref https://www.freertos.org/xMessageBufferResetFromISR.html
+   *
+   * @return isr_result<bool> result containing true if the message buffer was
+   * reset, and the higher_priority_task_woken flag.
+   */
+  isr_result<bool> reset_isr() {
+    isr_result<bool> result{false, pdFALSE};
+    result.result =
+        xMessageBufferResetFromISR(m_message_buffer,
+                                    &result.higher_priority_task_woken) == pdPASS;
+    return result;
+  }
+  [[nodiscard]] isr_result<expected<void, error>> reset_ex_isr() {
+    auto result = reset_isr();
+    isr_result<expected<void, error>> ret{{}, result.higher_priority_task_woken};
+    if (!result.result) {
+      ret.result = unexpected<error>(error::invalid_handle);
+    }
+    return ret;
+  }
+#if configUSE_STREAM_BUFFERS == 1
+  /**
+   * @brief Set the notification index for the message buffer.
+   * @ref https://www.freertos.org/vStreamBufferSetStreamBufferNotificationIndex.html
+   *
+   * @param index The notification index to set (0 to
+   * configTASK_NOTIFICATION_ARRAY_ENTRIES-1).
+   */
+  void set_notification_index(uint8_t index) {
+    vStreamBufferSetStreamBufferNotificationIndex(m_message_buffer, index);
+  }
+#endif
+#if configSUPPORT_STATIC_ALLOCATION
+  /**
+   * @brief Retrieve the static buffers used by the message buffer.
+   * @ref https://www.freertos.org/xMessageBufferGetStaticBuffers.html
+   *
+   * @param storage Pointer to receive the storage area pointer.
+   * @param static_buffer Pointer to receive the static message buffer pointer.
+   * @return true if the message buffer was created statically and the buffers
+   * were retrieved, false otherwise.
+   */
+  [[nodiscard]] bool get_static_buffers(uint8_t **storage,
+                                        StaticMessageBuffer_t **static_buffer) {
+    return xMessageBufferGetStaticBuffers(m_message_buffer, storage,
+                                          static_buffer) == pdPASS;
+  }
+#endif
 };
 
 #if configSUPPORT_STATIC_ALLOCATION
@@ -375,6 +513,14 @@ using message_buffer = freertos::message_buffer<
     MessageBufferSize,
     freertos::static_message_buffer_allocator<MessageBufferSize>>;
 } // namespace sa
+#if configUSE_SB_COMPLETED_CALLBACK
+namespace sa_cb {
+template <size_t MessageBufferSize>
+using message_buffer = freertos::message_buffer<
+    MessageBufferSize,
+    freertos::static_message_buffer_allocator_with_callback<MessageBufferSize>>;
+} // namespace sa_cb
+#endif
 #endif
 #if configSUPPORT_DYNAMIC_ALLOCATION
 /**
@@ -393,6 +539,14 @@ using message_buffer = freertos::message_buffer<
     MessageBufferSize,
     freertos::dynamic_message_buffer_allocator<MessageBufferSize>>;
 } // namespace da
+#if configUSE_SB_COMPLETED_CALLBACK
+namespace da_cb {
+template <size_t MessageBufferSize>
+using message_buffer = freertos::message_buffer<
+    MessageBufferSize,
+    freertos::dynamic_message_buffer_allocator_with_callback<MessageBufferSize>>;
+} // namespace da_cb
+#endif
 #endif
 
 } // namespace freertos

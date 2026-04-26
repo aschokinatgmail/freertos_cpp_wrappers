@@ -864,6 +864,12 @@ EventBits_t xEventGroupClearBits(EventGroupHandle_t xEventGroup,
   return 0;
 }
 
+EventBits_t xEventGroupClearBitsFromISR(EventGroupHandle_t xEventGroup,
+                                        const EventBits_t uxBitsToClear,
+                                        BaseType_t *pxHigherPriorityTaskWoken) {
+    return g_freertos_mock->xEventGroupClearBitsFromISR(xEventGroup, uxBitsToClear, pxHigherPriorityTaskWoken);
+}
+
 EventBits_t xEventGroupWaitBits(EventGroupHandle_t xEventGroup,
                                 const EventBits_t uxBitsToWaitFor,
                                 const BaseType_t xClearOnExit,
@@ -1275,7 +1281,7 @@ BaseType_t xMessageBufferIsFull(MessageBufferHandle_t xMessageBuffer) {
 
 // Stream buffer function implementations
 StreamBufferHandle_t xStreamBufferCreate(size_t xBufferSizeBytes,
-                                         size_t xTriggerLevelBytes) {
+                                          size_t xTriggerLevelBytes) {
   if (g_freertos_mock) {
     return g_freertos_mock->xStreamBufferCreate(xBufferSizeBytes,
                                                 xTriggerLevelBytes);
@@ -1284,13 +1290,37 @@ StreamBufferHandle_t xStreamBufferCreate(size_t xBufferSizeBytes,
 }
 
 StreamBufferHandle_t
+xStreamBufferGenericCreate(size_t xBufferSizeBytes, size_t xTriggerLevelBytes,
+                           BaseType_t xIsMessageBuffer) {
+  if (g_freertos_mock) {
+    return g_freertos_mock->xStreamBufferGenericCreate(xBufferSizeBytes,
+                                                       xTriggerLevelBytes,
+                                                       xIsMessageBuffer);
+  }
+  return nullptr;
+}
+
+StreamBufferHandle_t
 xStreamBufferCreateStatic(size_t xBufferSizeBytes, size_t xTriggerLevelBytes,
-                          uint8_t *pucStreamBufferStorageArea,
-                          StaticStreamBuffer_t *pxStaticStreamBuffer) {
+                           uint8_t *pucStreamBufferStorageArea,
+                           StaticStreamBuffer_t *pxStaticStreamBuffer) {
   if (g_freertos_mock) {
     return g_freertos_mock->xStreamBufferCreateStatic(
         xBufferSizeBytes, xTriggerLevelBytes, pucStreamBufferStorageArea,
         pxStaticStreamBuffer);
+  }
+  return nullptr;
+}
+
+StreamBufferHandle_t
+xStreamBufferGenericCreateStatic(size_t xBufferSizeBytes, size_t xTriggerLevelBytes,
+                                  BaseType_t xIsMessageBuffer,
+                                  uint8_t *pucStreamBufferStorageArea,
+                                  StaticStreamBuffer_t *pxStaticStreamBuffer) {
+  if (g_freertos_mock) {
+    return g_freertos_mock->xStreamBufferGenericCreateStatic(
+        xBufferSizeBytes, xTriggerLevelBytes, xIsMessageBuffer,
+        pucStreamBufferStorageArea, pxStaticStreamBuffer);
   }
   return nullptr;
 }
@@ -1377,11 +1407,223 @@ BaseType_t xStreamBufferReset(StreamBufferHandle_t xStreamBuffer) {
 }
 
 BaseType_t xStreamBufferSetTriggerLevel(StreamBufferHandle_t xStreamBuffer,
-                                        size_t xTriggerLevel) {
+                                         size_t xTriggerLevel) {
   if (g_freertos_mock) {
     return g_freertos_mock->xStreamBufferSetTriggerLevel(xStreamBuffer,
-                                                         xTriggerLevel);
+                                                          xTriggerLevel);
   }
   return pdPASS;
+}
+
+void vTaskSetThreadLocalStoragePointer(TaskHandle_t xTask, BaseType_t xIndex,
+                                        void *pvValue) {
+  if (g_freertos_mock) {
+    g_freertos_mock->vTaskSetThreadLocalStoragePointer(xTask, xIndex, pvValue);
+  }
+}
+
+void *pvTaskGetThreadLocalStoragePointer(TaskHandle_t xTask, BaseType_t xIndex) {
+  if (g_freertos_mock) {
+    return g_freertos_mock->pvTaskGetThreadLocalStoragePointer(xTask, xIndex);
+  }
+  return nullptr;
+}
+
+void *pvPortMalloc(size_t xSize) {
+  if (g_freertos_mock) {
+    return g_freertos_mock->pvPortMalloc(xSize);
+  }
+  return nullptr;
+}
+
+void vPortFree(void *pv) {
+  if (g_freertos_mock) {
+    g_freertos_mock->vPortFree(pv);
+  }
+}
+
+void *pvPortCalloc(size_t xNum, size_t xSize) {
+  if (g_freertos_mock) {
+    return g_freertos_mock->pvPortCalloc(xNum, xSize);
+  }
+  return nullptr;
+}
+
+BaseType_t xStreamBufferResetFromISR(StreamBufferHandle_t xStreamBuffer,
+                                      BaseType_t *pxHigherPriorityTaskWoken) {
+  if (g_freertos_mock) {
+    return g_freertos_mock->xStreamBufferResetFromISR(xStreamBuffer,
+                                                       pxHigherPriorityTaskWoken);
+  }
+  return pdPASS;
+}
+
+void vStreamBufferSetStreamBufferNotificationIndex(
+    StreamBufferHandle_t xStreamBuffer, uint8_t uxNotificationIndex) {
+  if (g_freertos_mock) {
+    g_freertos_mock->vStreamBufferSetStreamBufferNotificationIndex(
+        xStreamBuffer, uxNotificationIndex);
+  }
+}
+
+BaseType_t xStreamBufferGetStaticBuffers(
+    StreamBufferHandle_t xStreamBuffer,
+    uint8_t **ppucStreamBufferStorageArea,
+    StaticStreamBuffer_t **ppxStaticStreamBuffer) {
+  if (g_freertos_mock) {
+    return g_freertos_mock->xStreamBufferGetStaticBuffers(
+        xStreamBuffer, ppucStreamBufferStorageArea, ppxStaticStreamBuffer);
+  }
+  return pdFAIL;
+}
+
+StreamBufferHandle_t xStreamBufferCreateWithCallback(
+    size_t xBufferSizeBytes, size_t xTriggerLevelBytes,
+    StreamBufferCallbackFunction_t pxSendCompletedCallback,
+    void *pvSendCompletedCallbackContext,
+    StreamBufferCallbackFunction_t pxReceiveCompletedCallback,
+    void *pvReceiveCompletedCallbackContext) {
+  if (g_freertos_mock) {
+    return g_freertos_mock->xStreamBufferCreateWithCallback(
+        xBufferSizeBytes, xTriggerLevelBytes, pxSendCompletedCallback,
+        pvSendCompletedCallbackContext, pxReceiveCompletedCallback,
+        pvReceiveCompletedCallbackContext);
+  }
+  return nullptr;
+}
+
+StreamBufferHandle_t xStreamBufferCreateStaticWithCallback(
+    size_t xBufferSizeBytes, size_t xTriggerLevelBytes,
+    uint8_t *pucStreamBufferStorageArea,
+    StaticStreamBuffer_t *pxStaticStreamBuffer,
+    StreamBufferCallbackFunction_t pxSendCompletedCallback,
+    void *pvSendCompletedCallbackContext,
+    StreamBufferCallbackFunction_t pxReceiveCompletedCallback,
+    void *pvReceiveCompletedCallbackContext) {
+  if (g_freertos_mock) {
+    return g_freertos_mock->xStreamBufferCreateStaticWithCallback(
+        xBufferSizeBytes, xTriggerLevelBytes, pucStreamBufferStorageArea,
+        pxStaticStreamBuffer, pxSendCompletedCallback,
+        pvSendCompletedCallbackContext, pxReceiveCompletedCallback,
+        pvReceiveCompletedCallbackContext);
+  }
+  return nullptr;
+}
+
+StreamBufferHandle_t xStreamBufferGenericCreateWithCallback(
+    size_t xBufferSizeBytes, size_t xTriggerLevelBytes,
+    BaseType_t xIsMessageBuffer,
+    StreamBufferCallbackFunction_t pxSendCompletedCallback,
+    void *pvSendCompletedCallbackContext,
+    StreamBufferCallbackFunction_t pxReceiveCompletedCallback,
+    void *pvReceiveCompletedCallbackContext) {
+  if (g_freertos_mock) {
+    return g_freertos_mock->xStreamBufferGenericCreateWithCallback(
+        xBufferSizeBytes, xTriggerLevelBytes, xIsMessageBuffer,
+        pxSendCompletedCallback, pvSendCompletedCallbackContext,
+        pxReceiveCompletedCallback, pvReceiveCompletedCallbackContext);
+  }
+  return nullptr;
+}
+
+StreamBufferHandle_t xStreamBufferGenericCreateStaticWithCallback(
+    size_t xBufferSizeBytes, size_t xTriggerLevelBytes,
+    BaseType_t xIsMessageBuffer,
+    uint8_t *pucStreamBufferStorageArea,
+    StaticStreamBuffer_t *pxStaticStreamBuffer,
+    StreamBufferCallbackFunction_t pxSendCompletedCallback,
+    void *pvSendCompletedCallbackContext,
+    StreamBufferCallbackFunction_t pxReceiveCompletedCallback,
+    void *pvReceiveCompletedCallbackContext) {
+  if (g_freertos_mock) {
+    return g_freertos_mock->xStreamBufferGenericCreateStaticWithCallback(
+        xBufferSizeBytes, xTriggerLevelBytes, xIsMessageBuffer,
+        pucStreamBufferStorageArea, pxStaticStreamBuffer,
+        pxSendCompletedCallback, pvSendCompletedCallbackContext,
+        pxReceiveCompletedCallback, pvReceiveCompletedCallbackContext);
+  }
+  return nullptr;
+}
+
+BaseType_t xMessageBufferResetFromISR(MessageBufferHandle_t xMessageBuffer,
+                                       BaseType_t *pxHigherPriorityTaskWoken) {
+  if (g_freertos_mock) {
+    return g_freertos_mock->xMessageBufferResetFromISR(xMessageBuffer,
+                                                        pxHigherPriorityTaskWoken);
+  }
+  return pdPASS;
+}
+
+BaseType_t xMessageBufferGetStaticBuffers(
+    MessageBufferHandle_t xMessageBuffer,
+    uint8_t **ppucMessageBufferStorageArea,
+    StaticMessageBuffer_t **ppxStaticMessageBuffer) {
+  if (g_freertos_mock) {
+    return g_freertos_mock->xMessageBufferGetStaticBuffers(
+        xMessageBuffer, ppucMessageBufferStorageArea, ppxStaticMessageBuffer);
+  }
+  return pdFAIL;
+}
+
+MessageBufferHandle_t xMessageBufferCreateWithCallback(
+    size_t xBufferSizeBytes,
+    StreamBufferCallbackFunction_t pxSendCompletedCallback,
+    void *pvSendCompletedCallbackContext,
+    StreamBufferCallbackFunction_t pxReceiveCompletedCallback,
+    void *pvReceiveCompletedCallbackContext) {
+  if (g_freertos_mock) {
+    return g_freertos_mock->xMessageBufferCreateWithCallback(
+        xBufferSizeBytes, pxSendCompletedCallback,
+        pvSendCompletedCallbackContext, pxReceiveCompletedCallback,
+        pvReceiveCompletedCallbackContext);
+  }
+  return nullptr;
+}
+
+MessageBufferHandle_t xMessageBufferCreateStaticWithCallback(
+    size_t xBufferSizeBytes,
+    uint8_t *pucMessageBufferStorageArea,
+    StaticMessageBuffer_t *pxStaticMessageBuffer,
+    StreamBufferCallbackFunction_t pxSendCompletedCallback,
+    void *pvSendCompletedCallbackContext,
+    StreamBufferCallbackFunction_t pxReceiveCompletedCallback,
+    void *pvReceiveCompletedCallbackContext) {
+  if (g_freertos_mock) {
+    return g_freertos_mock->xMessageBufferCreateStaticWithCallback(
+        xBufferSizeBytes, pucMessageBufferStorageArea, pxStaticMessageBuffer,
+        pxSendCompletedCallback, pvSendCompletedCallbackContext,
+        pxReceiveCompletedCallback, pvReceiveCompletedCallbackContext);
+  }
+  return nullptr;
+}
+
+BaseType_t xQueueGetStaticBuffers(QueueHandle_t xQueue,
+                                  uint8_t **ppucQueueStorageArea,
+                                  StaticQueue_t **ppxStaticQueue) {
+  if (g_freertos_mock) {
+    return g_freertos_mock->xQueueGetStaticBuffers(xQueue, ppucQueueStorageArea,
+                                                    ppxStaticQueue);
+  }
+  return pdFAIL;
+}
+
+BaseType_t xEventGroupGetStaticBuffer(
+    EventGroupHandle_t xEventGroup,
+    StaticEventGroup_t **ppxStaticEventGroup) {
+  if (g_freertos_mock) {
+    return g_freertos_mock->xEventGroupGetStaticBuffer(xEventGroup,
+                                                        ppxStaticEventGroup);
+  }
+  return pdFAIL;
+}
+
+BaseType_t xTimerPendFunctionCall(PendedFunction_t xFunctionToPend,
+                                  void *pvParameter1, uint32_t ulParameter2,
+                                  TickType_t xTicksToWait) {
+  if (g_freertos_mock) {
+    return g_freertos_mock->xTimerPendFunctionCall(xFunctionToPend, pvParameter1,
+                                                     ulParameter2, xTicksToWait);
+  }
+  return pdFAIL;
 }
 }

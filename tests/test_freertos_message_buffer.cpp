@@ -338,9 +338,9 @@ TEST_F(FreeRTOSMessageBufferTest, MessageBufferReceiveSuccess) {
                                     ))
       .WillOnce(DoAll(
           // Simulate receiving "Hello, World!" message
-          Invoke([expected_length](MessageBufferHandle_t, void *pvRxData,
+          Invoke([expected_length](MessageBufferHandle_t, void *data,
                                    size_t, TickType_t) {
-            memcpy(pvRxData, "Hello, World!", expected_length);
+            memcpy(data, "Hello, World!", expected_length);
           }),
           Return(expected_length)));
 
@@ -394,8 +394,8 @@ TEST_F(FreeRTOSMessageBufferTest, MessageBufferReceiveWithChrono) {
                                     250 // 250ms converted to ticks
                                     ))
       .WillOnce(DoAll(
-          Invoke([](MessageBufferHandle_t, void *pvRxData, size_t, TickType_t) {
-            *static_cast<uint32_t *>(pvRxData) = 0x87654321;
+          Invoke([](MessageBufferHandle_t, void *data, size_t, TickType_t) {
+            *static_cast<uint32_t *>(data) = 0x87654321;
           }),
           Return(sizeof(uint32_t))));
 
@@ -420,11 +420,11 @@ TEST_F(FreeRTOSMessageBufferTest, MessageBufferReceiveBufferTooSmall) {
   EXPECT_CALL(*mock,
               xMessageBufferReceive(mock_message_buffer_handle, small_buffer,
                                     sizeof(small_buffer), 100))
-      .WillOnce(DoAll(Invoke([](MessageBufferHandle_t, void *pvRxData,
-                                size_t xBufferLengthBytes, TickType_t) {
+      .WillOnce(DoAll(Invoke([](MessageBufferHandle_t, void *data,
+                                size_t buffer_size, TickType_t) {
                         // Simulate truncation - only copy what fits
-                        memcpy(pvRxData, "Hell",
-                               std::min(size_t(4), xBufferLengthBytes));
+                        memcpy(data, "Hell",
+                               std::min(size_t(4), buffer_size));
                       }),
                       Return(4) // Return actual bytes that could be received
                       ));
@@ -700,8 +700,8 @@ TEST_F(FreeRTOSMessageBufferTest, MessageBufferComplexSendReceiveScenario) {
               xMessageBufferReceive(mock_message_buffer_handle, recv_buffer1,
                                     sizeof(recv_buffer1), 50))
       .WillOnce(DoAll(
-          Invoke([&msg1](MessageBufferHandle_t, void *pvRxData, size_t,
-                         TickType_t) { memcpy(pvRxData, msg1, strlen(msg1)); }),
+          Invoke([&msg1](MessageBufferHandle_t, void *data, size_t,
+                         TickType_t) { memcpy(data, msg1, strlen(msg1)); }),
           Return(strlen(msg1))));
   size_t received1 =
       test_buffer.receive(recv_buffer1, sizeof(recv_buffer1), 50);
@@ -716,9 +716,9 @@ TEST_F(FreeRTOSMessageBufferTest, MessageBufferComplexSendReceiveScenario) {
   EXPECT_CALL(*mock,
               xMessageBufferReceive(mock_message_buffer_handle, recv_buffer2,
                                     sizeof(recv_buffer2), 50))
-      .WillOnce(DoAll(Invoke([&msg2_data](MessageBufferHandle_t, void *pvRxData,
+      .WillOnce(DoAll(Invoke([&msg2_data](MessageBufferHandle_t, void *data,
                                           size_t, TickType_t) {
-                        memcpy(pvRxData, msg2_data, sizeof(msg2_data));
+                        memcpy(data, msg2_data, sizeof(msg2_data));
                       }),
                       Return(sizeof(msg2_data))));
   size_t received2 =
@@ -897,8 +897,8 @@ TEST_F(FreeRTOSMessageBufferTest, MessageBufferReceiveIsr) {
                          mock_message_buffer_handle, receive_buffer,
                          sizeof(receive_buffer), NotNull()))
       .WillOnce(
-          DoAll(Invoke([](MessageBufferHandle_t, void *pvRxData, size_t,
-                          BaseType_t *) { memcpy(pvRxData, "Hello", 5); }),
+          DoAll(Invoke([](MessageBufferHandle_t, void *data, size_t,
+                          BaseType_t *) { memcpy(data, "Hello", 5); }),
                 WithArg<3>([](BaseType_t *woken) { *woken = pdTRUE; }),
                 Return(expected_length)));
 

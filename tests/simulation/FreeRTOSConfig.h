@@ -31,6 +31,7 @@
 #define configUSE_EVENT_GROUPS 1
 #define configENABLE_FPU 0
 #define configENABLE_MPU 0
+#define configNUM_THREAD_LOCAL_STORAGE_POINTERS 4
 #define configUSE_POSIX_ERRNO 1
 #define configUSE_IDLE_HOOK 0
 #define configUSE_TICK_HOOK 0

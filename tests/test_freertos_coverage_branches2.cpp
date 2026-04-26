@@ -223,9 +223,9 @@ TEST_F(TimerBranchTest, MoveAssignStopFails) {
   testing::InSequence seq;
   EXPECT_CALL(*mock, xTimerCreate(_, _, _, _, _)).WillOnce(Return(t1));
   EXPECT_CALL(*mock, xTimerCreate(_, _, _, _, _)).WillOnce(Return(fake_timer));
-  EXPECT_CALL(*mock, xTimerDelete(t1, portMAX_DELAY));
   EXPECT_CALL(*mock, xTimerStop(fake_timer, portMAX_DELAY)).WillOnce(Return(pdFAIL));
   EXPECT_CALL(*mock, xTimerDelete(fake_timer, portMAX_DELAY));
+  EXPECT_CALL(*mock, xTimerDelete(t1, portMAX_DELAY));
 
   freertos::da::timer a("a", 100, pdTRUE, []() {});
   freertos::da::timer b("b", 100, pdTRUE, []() {});
@@ -238,14 +238,13 @@ TEST_F(TimerBranchTest, MoveAssignCreateFails) {
   testing::InSequence seq;
   EXPECT_CALL(*mock, xTimerCreate(_, _, _, _, _)).WillOnce(Return(t1));
   EXPECT_CALL(*mock, xTimerCreate(_, _, _, _, _)).WillOnce(Return(fake_timer));
-  EXPECT_CALL(*mock, xTimerDelete(t1, portMAX_DELAY));
   EXPECT_CALL(*mock, xTimerStop(fake_timer, portMAX_DELAY)).WillOnce(Return(pdPASS));
   EXPECT_CALL(*mock, pcTimerGetName(fake_timer)).WillOnce(Return(timer_name));
   EXPECT_CALL(*mock, xTimerGetPeriod(fake_timer)).WillOnce(Return(100));
   EXPECT_CALL(*mock, uxTimerGetReloadMode(fake_timer)).WillOnce(Return(pdTRUE));
-  EXPECT_CALL(*mock, xTimerDelete(fake_timer, portMAX_DELAY));
   EXPECT_CALL(*mock, xTimerCreate(_, _, _, _, _)).WillOnce(Return(nullptr));
-  // a ends up with null handle, no delete on destructor
+  EXPECT_CALL(*mock, xTimerDelete(fake_timer, portMAX_DELAY));
+  EXPECT_CALL(*mock, xTimerDelete(t1, portMAX_DELAY));
 
   freertos::da::timer a("a", 100, pdTRUE, []() {});
   freertos::da::timer b("b", 100, pdTRUE, []() {});
@@ -259,13 +258,13 @@ TEST_F(TimerBranchTest, MoveAssignNotStarted) {
   testing::InSequence seq;
   EXPECT_CALL(*mock, xTimerCreate(_, _, _, _, _)).WillOnce(Return(t1));
   EXPECT_CALL(*mock, xTimerCreate(_, _, _, _, _)).WillOnce(Return(t2));
-  EXPECT_CALL(*mock, xTimerDelete(t1, portMAX_DELAY));
   EXPECT_CALL(*mock, xTimerStop(t2, portMAX_DELAY)).WillOnce(Return(pdPASS));
   EXPECT_CALL(*mock, pcTimerGetName(t2)).WillOnce(Return(timer_name));
   EXPECT_CALL(*mock, xTimerGetPeriod(t2)).WillOnce(Return(100));
   EXPECT_CALL(*mock, uxTimerGetReloadMode(t2)).WillOnce(Return(pdTRUE));
-  EXPECT_CALL(*mock, xTimerDelete(t2, portMAX_DELAY));
   EXPECT_CALL(*mock, xTimerCreate(_, _, _, _, _)).WillOnce(Return(fake_timer));
+  EXPECT_CALL(*mock, xTimerDelete(t1, portMAX_DELAY));
+  EXPECT_CALL(*mock, xTimerDelete(t2, portMAX_DELAY));
   EXPECT_CALL(*mock, xTimerDelete(fake_timer, portMAX_DELAY));
 
   freertos::da::timer a("a", 100, pdTRUE, []() {});
@@ -282,13 +281,13 @@ TEST_F(TimerBranchTest, MoveAssignStartFails) {
   EXPECT_CALL(*mock, xTimerCreate(_, _, _, _, _)).WillOnce(Return(t1));
   EXPECT_CALL(*mock, xTimerCreate(_, _, _, _, _)).WillOnce(Return(t2));
   EXPECT_CALL(*mock, xTimerStart(t2, _)).WillOnce(Return(pdPASS));
-  EXPECT_CALL(*mock, xTimerDelete(t1, portMAX_DELAY));
   EXPECT_CALL(*mock, xTimerStop(t2, portMAX_DELAY)).WillOnce(Return(pdPASS));
   EXPECT_CALL(*mock, pcTimerGetName(t2)).WillOnce(Return(timer_name));
   EXPECT_CALL(*mock, xTimerGetPeriod(t2)).WillOnce(Return(100));
   EXPECT_CALL(*mock, uxTimerGetReloadMode(t2)).WillOnce(Return(pdTRUE));
-  EXPECT_CALL(*mock, xTimerDelete(t2, portMAX_DELAY));
   EXPECT_CALL(*mock, xTimerCreate(_, _, _, _, _)).WillOnce(Return(t3));
+  EXPECT_CALL(*mock, xTimerDelete(t1, portMAX_DELAY));
+  EXPECT_CALL(*mock, xTimerDelete(t2, portMAX_DELAY));
   EXPECT_CALL(*mock, xTimerStart(t3, portMAX_DELAY)).WillOnce(Return(pdFAIL));
   EXPECT_CALL(*mock, xTimerDelete(t3, portMAX_DELAY));
 

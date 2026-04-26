@@ -40,20 +40,36 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "freertos_config.hpp"
 
+#include "freertos_clock.hpp"
+#include "freertos_condition_variable.hpp"
 #include "freertos_event_group.hpp"
 #include "freertos_expected.hpp"
 #include "freertos_external_allocator.hpp"
+#include "freertos_fixed_function.hpp"
+#include "freertos_isr_context.hpp"
 #include "freertos_isr_result.hpp"
+#include "freertos_latch.hpp"
+#include "freertos_lock.hpp"
 #include "freertos_message_buffer.hpp"
+#include "freertos_pend_call.hpp"
 #include "freertos_queue.hpp"
 #include "freertos_queue_set.hpp"
 #include "freertos_semaphore.hpp"
+#include "freertos_shared_mutex.hpp"
+#include "freertos_shared_data.hpp"
 #include "freertos_span.hpp"
 #include "freertos_stream_buffer.hpp"
 #include "freertos_strong_types.hpp"
 #include "freertos_sw_timer.hpp"
 #include "freertos_task.hpp"
 #include "freertos_thread_safety.hpp"
+
+#include "freertos_atomic.hpp"
+#include "freertos_atomic_wait.hpp"
+#if !defined(FREERTOS_CPP_WRAPPERS_SIMULATION) && !defined(UNIT_TESTING)
+#include "freertos_gthr.hpp"
+#include "freertos_external_threading.hpp"
+#endif
 
 namespace freertos {
 
@@ -75,6 +91,12 @@ using mutex = freertos::mutex<freertos::external_semaphore_allocator<Region>>;
 template <typename Region>
 using recursive_mutex =
     freertos::recursive_mutex<freertos::external_semaphore_allocator<Region>>;
+
+#if FREERTOS_CPP_WRAPPERS_HAS_MUTEX && FREERTOS_CPP_WRAPPERS_HAS_COUNTING_SEMAPHORE
+template <typename Region>
+using shared_mutex = freertos::shared_mutex<
+    freertos::external_shared_mutex_allocator<Region>>;
+#endif
 
 template <typename Region, size_t QueueLength, typename T>
 using queue =

@@ -1,4 +1,4 @@
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -11,6 +11,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     doxygen \
     graphviz \
     lcov \
+    gcovr \
     clang-format \
     libgtest-dev \
     libgmock-dev \
@@ -18,24 +19,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3 \
     python3-pip \
     python3-markdown \
+    python3-kconfiglib \
     git \
+    gcc-arm-none-eabi \
+    libnewlib-arm-none-eabi \
+    qemu-system-arm \
     && rm -rf /var/lib/apt/lists/*
+
+RUN cd /usr/src/gtest && cmake . && make -j$(nproc) && cp lib/*.a /usr/lib/ || true
+RUN cd /usr/src/gmock && cmake . && make -j$(nproc) && cp lib/*.a /usr/lib/ || true
 
 WORKDIR /project
 
-# Copy dependency specs first for better layer caching
-COPY CMakeLists.txt .
-COPY include/ include/
-COPY src/ src/
-COPY tests/ tests/
-
-RUN mkdir -p build && cd build && \
-    cmake -DENABLE_COVERAGE=ON .. && \
-    make -j$(nproc)
-
-# Copy scripts after build (changes less often)
-COPY scripts/ scripts/
-
-WORKDIR /project/build
-
-CMD ["ctest", "--verbose", "--output-on-failure"]
+CMD ["bash"]
