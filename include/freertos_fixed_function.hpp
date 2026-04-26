@@ -2,7 +2,7 @@
 @file freertos_fixed_function.hpp
 @author Andrey V. Shchekin <aschokin@gmail.com>
 @brief Fixed-capacity callback (SBO delegate) for heap-free task/timer callbacks
-@version 3.1.0
+@version 3.2.0
 @date 2026-04-22
 
 The MIT License (MIT)

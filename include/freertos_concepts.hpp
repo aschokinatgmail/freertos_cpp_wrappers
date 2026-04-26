@@ -2,7 +2,7 @@
 @file freertos_concepts.hpp
 @author Andrey V. Shchekin <aschokin@gmail.com>
 @brief C++20 concepts for FreeRTOS wrapper template constraints
-@version 3.1.0
+@version 3.2.0
 @date 2026-04-21
 
 The MIT License (MIT)

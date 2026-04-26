@@ -2,7 +2,7 @@
 @file freertos_stream_batching_buffer.hpp
 @author Andrey V. Shchekin <aschokin@gmail.com>
 @brief FreeRTOS stream batching buffer interface wrapper (V11.1.0+)
-@version 3.1.0
+@version 3.2.0
 @date 2026-04-22
 
 The MIT License (MIT)

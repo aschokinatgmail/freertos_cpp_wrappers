@@ -2,7 +2,7 @@
 @file freertos_external_allocator.hpp
 @author Andrey V. Shchekin <aschokin@gmail.com>
 @brief External memory allocation for FreeRTOS C++ Wrappers
-@version 3.0.0
+@version 3.2.0
 @date 2026-04-16
 
 The MIT License (MIT)

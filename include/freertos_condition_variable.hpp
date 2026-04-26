@@ -2,7 +2,7 @@
 @file freertos_condition_variable.hpp
 @author Andrey V. Shchekin <aschokin@gmail.com>
 @brief FreeRTOS condition_variable_any wrapper
-@version 3.1.0
+@version 3.2.0
 @date 2026-04-22
 
 The MIT License (MIT)

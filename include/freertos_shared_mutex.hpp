@@ -2,7 +2,7 @@
 @file freertos_shared_mutex.hpp
 @author Andrey V. Shchekin <aschokin@gmail.com>
 @brief FreeRTOS shared_mutex wrapper providing C++20 std::shared_mutex semantics
-@version 3.1.0
+@version 3.2.0
 @date 2026-04-22
 
 The MIT License (MIT)

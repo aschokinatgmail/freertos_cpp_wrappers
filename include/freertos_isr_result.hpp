@@ -2,7 +2,7 @@
 @file freertos_isr_result.hpp
 @author Andrey V. Shchekin <aschokin@gmail.com>
 @brief ISR result type for FreeRTOS C++ Wrappers
-@version 3.1.0
+@version 3.2.0
 @date 2026-04-16
 
 The MIT License (MIT)

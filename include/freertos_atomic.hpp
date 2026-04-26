@@ -2,7 +2,7 @@
 @file freertos_atomic.hpp
 @author Andrey V. Shchekin <aschokin@gmail.com>
 @brief FreeRTOS atomic_flag and atomic<T> polyfill with wait/notify support
-@version 3.1.0
+@version 3.2.0
 @date 2026-04-22
 
 The MIT License (MIT)

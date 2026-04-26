@@ -2,7 +2,7 @@
 @file freertos.hpp
 @author Andrey V. Shchekin <aschokin@gmail.com>
 @brief FreeRTOS C++ Wrappers Library main header
-@version 3.1.0
+@version 3.2.0
 @date 2024-04-12
 
 The MIT License (MIT)
