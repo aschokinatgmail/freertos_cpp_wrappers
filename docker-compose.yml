@@ -8,11 +8,11 @@ services:
     working_dir: /project
     volumes:
       - .:/project
+      - build-test-cache:/project/build-test
     command:
       - bash
       - -c
       - |
-        rm -rf build-test && \
         cmake -B build-test \
           -DCMAKE_BUILD_TYPE=Debug \
           -DENABLE_CLANG_TIDY=OFF \
@@ -30,11 +30,11 @@ services:
     working_dir: /project
     volumes:
       - .:/project
+      - build-sim-cache:/project/build-sim
     command:
       - bash
       - -c
       - |
-        rm -rf build-sim && \
         cmake -B build-sim \
           -DCMAKE_BUILD_TYPE=Debug \
           -DENABLE_SIMULATION=ON \
@@ -52,12 +52,13 @@ services:
     working_dir: /project
     volumes:
       - .:/project
+      - build-cov-cache:/project/build-cov
     mem_limit: 8g
     command:
       - bash
       - -c
       - |
-        rm -rf build-cov && \
+        rm -rf build-cov/CMakeCache.txt build-cov/CMakeFiles && \
         cmake -B build-cov \
           -DCMAKE_BUILD_TYPE=Debug \
           -DENABLE_CLANG_TIDY=OFF \
@@ -165,6 +166,12 @@ services:
     working_dir: /project
     volumes:
       - .:/project
+      - build-test-cache:/project/build-test
     stdin_open: true
     tty: true
     command: ["bash"]
+
+volumes:
+  build-test-cache:
+  build-sim-cache:
+  build-cov-cache:

@@ -1655,8 +1655,6 @@ TEST_F(SemArgCtorTest, LockGuardIsrConstructorFailurePath) {
   EXPECT_CALL(*mock, xSemaphoreCreateMutex()).WillOnce(Return(fake_sem));
   EXPECT_CALL(*mock, xSemaphoreTakeFromISR(fake_sem, _))
       .WillOnce(DoAll(SetArgPointee<1>(pdFALSE), Return(pdFALSE)));
-  EXPECT_CALL(*mock, xSemaphoreGiveFromISR(fake_sem, _))
-      .WillOnce(DoAll(SetArgPointee<1>(pdFALSE), Return(pdFALSE)));
   EXPECT_CALL(*mock, vSemaphoreDelete(fake_sem));
   freertos::da::mutex m;
   freertos::lock_guard_isr<freertos::da::mutex> guard(m);

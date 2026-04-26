@@ -40,6 +40,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "freertos_isr_result.hpp"
 #include <FreeRTOS.h>
 #include <chrono>
+#include <atomic>
 #include <cstdbool>
 #include <ctime>
 #include <functional>
@@ -118,11 +119,7 @@ using timer_callback_t = function<void()>;
 template <typename SwTimerAllocator> class timer {
   SwTimerAllocator m_allocator;
   timer_callback_t m_callback;
-  // Note: volatile is used as a single-core workaround to prevent compiler
-  // reordering of reads/writes between ISR and task contexts. On multi-core
-  // systems, stronger synchronization (std::atomic or critical sections)
-  // would be required. See issue #121.
-  volatile uint8_t m_started : 1;
+  std::atomic<bool> m_started{false};
   TimerHandle_t m_timer;
 
   // LCOV_EXCL_START - Internal FreeRTOS timer callback function
@@ -205,10 +202,11 @@ public:
    */
   timer(timer &&src) noexcept
       : m_allocator(std::move(src.m_allocator)),
-        m_callback(std::move(src.m_callback)), m_started(src.m_started),
+        m_callback(std::move(src.m_callback)),
+        m_started{src.m_started.load(std::memory_order_acquire)},
         m_timer(src.m_timer) {
     src.m_timer = nullptr;
-    src.m_started = false;
+    src.m_started.store(false, std::memory_order_release);
     if (m_timer) {
       vTimerSetTimerID(m_timer, this);
     }
@@ -234,7 +232,7 @@ public:
           auto name = pcTimerGetName(src.m_timer);
           auto period = xTimerGetPeriod(src.m_timer);
           auto auto_reload = uxTimerGetReloadMode(src.m_timer);
-          bool was_started = src.m_started;
+          bool was_started = src.m_started.load(std::memory_order_acquire);
 
           // Create new timer using source's allocator BEFORE modifying
           // either object, so we can roll back cleanly on failure.
@@ -252,11 +250,11 @@ public:
             xTimerDelete(src.m_timer, portMAX_DELAY);
             src.m_timer = nullptr;
             src.m_callback = nullptr;
-            m_started = false;
+            m_started.store(false, std::memory_order_release);
             if (was_started) {
               rc = xTimerStart(m_timer, portMAX_DELAY);
               if (rc == pdPASS) {
-                m_started = true;
+                m_started.store(true, std::memory_order_release);
               }
             }
           } else {
@@ -271,7 +269,7 @@ public:
           xTimerDelete(m_timer, portMAX_DELAY);
           m_timer = nullptr;
         }
-        m_started = false;
+        m_started.store(false, std::memory_order_release);
       }
     }
     return *this;
@@ -281,9 +279,10 @@ public:
     using std::swap;
     m_allocator.swap(other.m_allocator);
     swap(m_callback, other.m_callback);
-    const bool started_tmp = m_started;
-    m_started = other.m_started ? 1 : 0;
-    other.m_started = started_tmp ? 1 : 0;
+    const bool started_tmp = m_started.load(std::memory_order_acquire);
+    m_started.store(other.m_started.load(std::memory_order_acquire),
+                    std::memory_order_release);
+    other.m_started.store(started_tmp, std::memory_order_release);
     swap(m_timer, other.m_timer);
     if (m_timer) {
       vTimerSetTimerID(m_timer, this);
@@ -308,7 +307,7 @@ public:
     }
     auto rc = xTimerStart(m_timer, ticks_to_wait);
     if (rc) {
-      m_started = true;
+      m_started.store(true, std::memory_order_release);
     }
     return rc;
   }
@@ -342,7 +341,7 @@ public:
     result.result =
         xTimerStartFromISR(m_timer, &result.higher_priority_task_woken);
     if (result.result) {
-      m_started = true;
+      m_started.store(true, std::memory_order_release);
     }
     return result;
   }
@@ -359,7 +358,7 @@ public:
     }
     auto rc = xTimerStop(m_timer, ticks_to_wait);
     if (rc) {
-      m_started = false;
+      m_started.store(false, std::memory_order_release);
     }
     return rc;
   }
@@ -393,7 +392,7 @@ public:
     result.result =
         xTimerStopFromISR(m_timer, &result.higher_priority_task_woken);
     if (result.result) {
-      m_started = false;
+      m_started.store(false, std::memory_order_release);
     }
     return result;
   }

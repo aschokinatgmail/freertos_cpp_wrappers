@@ -876,8 +876,6 @@ TEST_F(CoverageSemaphore3Test, LockGuardIsrFailCycle) {
   EXPECT_CALL(*mock, xSemaphoreCreateMutex()).WillOnce(Return(mock_mutex));
   EXPECT_CALL(*mock, xSemaphoreTakeFromISR(mock_mutex, _))
       .WillOnce(DoAll(SetArgPointee<1>(pdFALSE), Return(pdFALSE)));
-  EXPECT_CALL(*mock, xSemaphoreGiveFromISR(mock_mutex, _))
-      .WillOnce(DoAll(SetArgPointee<1>(pdFALSE), Return(pdFALSE)));
   EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex));
   Mutex mtx;
   {

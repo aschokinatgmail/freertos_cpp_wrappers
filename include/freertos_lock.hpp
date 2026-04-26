@@ -104,6 +104,7 @@ public:
 
   void lock() FREERTOS_ACQUIRE_SHARED() {
     configASSERT(m_mutex != nullptr);
+    configASSERT(!m_owns);
     if (m_mutex && !m_owns) {
       m_mutex->lock_shared();
       m_owns = true;
@@ -230,6 +231,7 @@ public:
 
   void lock() FREERTOS_ACQUIRE() {
     configASSERT(m_mutex != nullptr);
+    configASSERT(!m_owns);
     if (m_mutex && !m_owns) {
       m_mutex->lock();
       m_owns = true;

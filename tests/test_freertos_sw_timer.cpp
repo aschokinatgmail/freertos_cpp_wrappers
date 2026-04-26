@@ -1667,8 +1667,9 @@ TEST_F(FreeRTOSSwTimerTest, DynamicTimerSwap) {
 // BUG FIX REGRESSION TESTS
 // =============================================================================
 
-// Issue #121: m_started data race between ISR and task context
-// Verify that start/stop correctly manage m_started (which is volatile-qualified).
+// Issue #172 (was #121): m_started data race between ISR and task context
+// Verify that start/stop correctly manage m_started (which is now
+// std::atomic<bool> for SMP-safe access).
 TEST_F(FreeRTOSSwTimerTest, Issue121VolatileStartedFlag) {
   EXPECT_CALL(*mock, xTimerCreateStatic(_, _, _, _, _, _))
       .WillOnce(Return(mock_timer_handle));

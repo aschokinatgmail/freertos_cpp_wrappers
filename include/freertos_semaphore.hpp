@@ -1147,6 +1147,7 @@ template <typename Mutex> class FREERTOS_SCOPED_CAPABILITY lock_guard_isr {
   Mutex &m_mutex; // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members):
                   // RAII design requires reference
   BaseType_t m_high_priority_task_woken{pdFALSE};
+  bool m_lock_acquired{false};
 
 public:
   /**
@@ -1157,6 +1158,7 @@ public:
   explicit lock_guard_isr(Mutex &mutex) FREERTOS_ACQUIRE("mutex")
       : m_mutex{mutex} {
     auto result = m_mutex.lock_isr();
+    m_lock_acquired = static_cast<bool>(result.result);
     m_high_priority_task_woken = result.higher_priority_task_woken;
   }
   /**
@@ -1164,8 +1166,10 @@ public:
    *
    */
   ~lock_guard_isr(void) FREERTOS_RELEASE() {
-    auto result = m_mutex.unlock_isr();
-    m_high_priority_task_woken = result.higher_priority_task_woken;
+    if (m_lock_acquired) {
+      auto result = m_mutex.unlock_isr();
+      m_high_priority_task_woken = result.higher_priority_task_woken;
+    }
   }
 
   // Delete copy and move operations for RAII safety
@@ -1188,7 +1192,7 @@ public:
    *
    * @return  true if the mutex is locked, otherwise false.
    */
-  bool locked(void) const { return m_mutex.locked(); }
+  bool locked(void) const { return m_lock_acquired && m_mutex.locked(); }
 };
 
 /**
