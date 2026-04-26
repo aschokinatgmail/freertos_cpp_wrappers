@@ -40,7 +40,8 @@ freertos_wait_entry freertos_wait_table[atomic_wait_table_size] = {};
 
 static SemaphoreHandle_t atomic_wait_ensure_semaphore(freertos_wait_entry &entry) {
     if (entry.semaphore == nullptr) {
-        entry.semaphore = xSemaphoreCreateCounting(SemaphoreHandle_t(-1), 0);
+        static constexpr UBaseType_t unbounded_max_count = static_cast<UBaseType_t>(-1);
+        entry.semaphore = xSemaphoreCreateCounting(unbounded_max_count, 0);
         configASSERT(entry.semaphore != nullptr);
     }
     return entry.semaphore;

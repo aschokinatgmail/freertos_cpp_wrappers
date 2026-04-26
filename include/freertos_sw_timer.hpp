@@ -53,8 +53,6 @@ namespace freertos {
 
 #if configUSE_TIMERS
 
-using std::function;
-
 #if configSUPPORT_STATIC_ALLOCATION
 /**
  * @brief An allocator for the software timer that uses a static memory
@@ -113,7 +111,7 @@ public:
  * @brief Timer callback routine type definition based on std::function.
  *
  */
-using timer_callback_t = function<void()>;
+using timer_callback_t = std::function<void()>;
 
 /**
  * @brief A wrapper for the FreeRTOS software timer.

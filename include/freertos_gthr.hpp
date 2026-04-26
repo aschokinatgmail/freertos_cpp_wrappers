@@ -440,7 +440,7 @@ inline int __gthread_join(__gthread_t thread, void **value_ptr) {
     }
     vTaskDelay(1);
   } while (1);
-  vTaskDelete(thread);
+  // Task has already self-deleted; do not call vTaskDelete again.
   return 0;
 }
 

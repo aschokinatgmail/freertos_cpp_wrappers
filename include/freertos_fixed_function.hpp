@@ -157,7 +157,7 @@ public:
             m_copier(m_storage.data(), other.m_storage.data());
         } else if (!m_invoker) {
         } else {
-            configASSERT(!"cannot copy fixed_function wrapping non-copyable callable");
+            configASSERT(false); // cannot copy fixed_function wrapping non-copyable callable
             m_invoker = nullptr;
             m_copier = nullptr;
             m_mover = nullptr;
@@ -172,7 +172,7 @@ public:
             try {
                 m_mover(m_storage.data(), other.m_storage.data());
             } catch (...) {
-                configASSERT(!"move of contained callable threw in noexcept context");
+                configASSERT(false); // move of contained callable threw in noexcept context
                 std::terminate();
             }
         }
@@ -195,7 +195,7 @@ public:
             if (m_copier) {
                 m_copier(m_storage.data(), other.m_storage.data());
             } else if (m_invoker) {
-                configASSERT(!"cannot copy fixed_function wrapping non-copyable callable");
+                configASSERT(false); // cannot copy fixed_function wrapping non-copyable callable
                 m_invoker = nullptr;
                 m_copier = nullptr;
                 m_mover = nullptr;
@@ -216,7 +216,7 @@ public:
                 try {
                     m_mover(m_storage.data(), other.m_storage.data());
                 } catch (...) {
-                    configASSERT(!"move of contained callable threw in noexcept context");
+                    configASSERT(false); // move of contained callable threw in noexcept context
                     std::terminate();
                 }
             }
