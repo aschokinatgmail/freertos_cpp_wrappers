@@ -58,6 +58,7 @@ class static_semaphore_allocator {
   StaticSemaphore_t m_semaphore_placeholder{};
 
 public:
+  static constexpr bool is_static = true;
   static_semaphore_allocator() = default;
   ~static_semaphore_allocator() = default;
   static_semaphore_allocator(const static_semaphore_allocator &) = delete;
@@ -94,6 +95,8 @@ public:
  */
 class dynamic_semaphore_allocator {
 public:
+  static constexpr bool is_static = false;
+
   void swap(dynamic_semaphore_allocator &other) noexcept { (void)other; }
 
   SemaphoreHandle_t create_binary() { return xSemaphoreCreateBinary(); }
@@ -197,6 +200,7 @@ public:
   binary_semaphore(const binary_semaphore &) = delete;
   binary_semaphore(binary_semaphore &&src) noexcept
       : m_allocator(std::move(src.m_allocator)), m_semaphore(src.m_semaphore) {
+    configASSERT(!SemaphoreAllocator::is_static);
     src.m_semaphore = nullptr;
   }
   /**
@@ -212,6 +216,7 @@ public:
 
   binary_semaphore &operator=(const binary_semaphore &) = delete;
   binary_semaphore &operator=(binary_semaphore &&src) noexcept {
+    configASSERT(!SemaphoreAllocator::is_static);
     if (this != &src) {
       swap(src);
     }
@@ -219,6 +224,7 @@ public:
   }
 
   void swap(binary_semaphore &other) noexcept {
+    configASSERT(!SemaphoreAllocator::is_static);
     using std::swap;
     m_allocator.swap(other.m_allocator);
     swap(m_semaphore, other.m_semaphore);
@@ -383,6 +389,7 @@ public:
   counting_semaphore(counting_semaphore &&src) noexcept
       : m_allocator(std::move(src.m_allocator)),
         m_semaphore(src.m_semaphore) {
+    configASSERT(!SemaphoreAllocator::is_static);
     src.m_semaphore = nullptr;
   }
   /**
@@ -398,6 +405,7 @@ public:
 
   counting_semaphore &operator=(const counting_semaphore &) = delete;
   counting_semaphore &operator=(counting_semaphore &&src) noexcept {
+    configASSERT(!SemaphoreAllocator::is_static);
     if (this != &src) {
       swap(src);
     }
@@ -405,6 +413,7 @@ public:
   }
 
   void swap(counting_semaphore &other) noexcept {
+    configASSERT(!SemaphoreAllocator::is_static);
     using std::swap;
     m_allocator.swap(other.m_allocator);
     swap(m_semaphore, other.m_semaphore);
@@ -628,6 +637,7 @@ public:
   mutex(mutex &&src) noexcept
       : m_allocator(std::move(src.m_allocator)), m_semaphore(src.m_semaphore),
         m_locked(src.m_locked) {
+    configASSERT(!SemaphoreAllocator::is_static);
     configASSERT(!src.m_locked);
     src.m_semaphore = nullptr;
     src.m_locked = false;
@@ -645,6 +655,7 @@ public:
 
   mutex &operator=(const mutex &) = delete;
   mutex &operator=(mutex &&src) noexcept {
+    configASSERT(!SemaphoreAllocator::is_static);
     configASSERT(!m_locked);
     configASSERT(!src.m_locked);
     if (this != &src) {
@@ -654,6 +665,7 @@ public:
   }
 
   void swap(mutex &other) noexcept {
+    configASSERT(!SemaphoreAllocator::is_static);
     using std::swap;
     m_allocator.swap(other.m_allocator);
     swap(m_semaphore, other.m_semaphore);
@@ -689,13 +701,8 @@ public:
    * higher priority task was woken.
    */
   isr_result<BaseType_t> unlock_isr(void) {
-    isr_result<BaseType_t> result{pdFALSE, pdFALSE};
-    result.result =
-        xSemaphoreGiveFromISR(m_semaphore, &result.higher_priority_task_woken);
-    if (result.result) {
-      m_locked = false;
-    }
-    return result;
+    configASSERT(false);
+    return {pdFALSE, pdFALSE};
   }
   /**
    * @brief Lock the mutex.
@@ -724,13 +731,8 @@ public:
    * higher priority task was woken.
    */
   isr_result<BaseType_t> lock_isr(void) {
-    isr_result<BaseType_t> result{pdFALSE, pdFALSE};
-    result.result =
-        xSemaphoreTakeFromISR(m_semaphore, &result.higher_priority_task_woken);
-    if (result.result) {
-      m_locked = true;
-    }
-    return result;
+    configASSERT(false);
+    return {pdFALSE, pdFALSE};
   }
   /**
    * @brief Lock the mutex.
@@ -767,17 +769,14 @@ public:
     return unexpected<error>(ticks_to_wait == 0 ? error::would_block
                                                 : error::timeout);
   }
-  // WARNING: Mutexes must not be used from ISR context — FreeRTOS mutexes
-  // have priority inheritance that is incompatible with ISR. Use
-  // binary_semaphore instead.
+  BaseType_t try_lock_isr() {
+    configASSERT(false);
+    return pdFALSE;
+  }
+
   [[nodiscard]] isr_result<expected<void, error>> lock_ex_isr() {
-    auto result = lock_isr();
-    isr_result<expected<void, error>> ret{unexpected<error>(error::would_block),
-                                          result.higher_priority_task_woken};
-    if (result.result == pdTRUE) {
-      ret.result = {};
-    }
-    return ret;
+    configASSERT(false);
+    return {unexpected<error>(error::would_block), pdFALSE};
   }
   [[nodiscard]] expected<void, error> unlock_ex() {
     auto rc = unlock();
@@ -786,18 +785,9 @@ public:
     }
     return unexpected<error>(error::semaphore_not_owned);
   }
-  // WARNING: Mutexes must not be used from ISR context — FreeRTOS mutexes
-  // have priority inheritance that is incompatible with ISR. Use
-  // binary_semaphore instead.
   [[nodiscard]] isr_result<expected<void, error>> unlock_ex_isr() {
-    auto result = unlock_isr();
-    isr_result<expected<void, error>> ret{
-        unexpected<error>(error::semaphore_not_owned),
-        result.higher_priority_task_woken};
-    if (result.result == pdTRUE) {
-      ret.result = {};
-    }
-    return ret;
+    configASSERT(false);
+    return {unexpected<error>(error::semaphore_not_owned), pdFALSE};
   }
   [[nodiscard]] expected<void, error> try_lock_ex() {
     auto rc = try_lock();
@@ -891,6 +881,7 @@ public:
       : m_allocator(std::move(src.m_allocator)),
         m_semaphore(src.m_semaphore),
         m_recursions_count(src.m_recursions_count) {
+    configASSERT(!SemaphoreAllocator::is_static);
     configASSERT(src.m_recursions_count == 0);
     src.m_semaphore = nullptr;
     src.m_recursions_count = 0;
@@ -908,6 +899,7 @@ public:
 
   recursive_mutex &operator=(const recursive_mutex &) = delete;
   recursive_mutex &operator=(recursive_mutex &&src) noexcept {
+    configASSERT(!SemaphoreAllocator::is_static);
     configASSERT(m_recursions_count == 0);
     configASSERT(src.m_recursions_count == 0);
     if (this != &src) {
@@ -917,6 +909,7 @@ public:
   }
 
   void swap(recursive_mutex &other) noexcept {
+    configASSERT(!SemaphoreAllocator::is_static);
     using std::swap;
     m_allocator.swap(other.m_allocator);
     swap(m_semaphore, other.m_semaphore);

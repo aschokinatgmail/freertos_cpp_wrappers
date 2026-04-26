@@ -625,15 +625,14 @@ TEST_F(SaMutexTest, LockExWouldBlock) {
   EXPECT_EQ(result.error(), freertos::error::would_block);
 }
 
-TEST_F(SaMutexTest, LockExIsrFailure) {
-  BaseType_t high_task_woken = pdFALSE;
+TEST_F(SaMutexTest, LockExIsrReturnsWouldBlock) {
   EXPECT_CALL(*mock, xSemaphoreCreateMutexStatic(_)).WillOnce(Return(fake_sem));
-  EXPECT_CALL(*mock, xSemaphoreTakeFromISR(fake_sem, _))
-      .WillOnce(Return(pdFALSE));
   EXPECT_CALL(*mock, vSemaphoreDelete(fake_sem));
   freertos::sa::mutex m;
   auto result = m.lock_ex_isr();
   EXPECT_FALSE(result.result.has_value());
+  EXPECT_EQ(result.result.error(), freertos::error::would_block);
+  EXPECT_EQ(result.higher_priority_task_woken, pdFALSE);
 }
 
 TEST_F(SaMutexTest, UnlockExFailure) {
@@ -645,15 +644,14 @@ TEST_F(SaMutexTest, UnlockExFailure) {
   EXPECT_FALSE(result.has_value());
 }
 
-TEST_F(SaMutexTest, UnlockExIsrFailure) {
-  BaseType_t high_task_woken = pdFALSE;
+TEST_F(SaMutexTest, UnlockExIsrReturnsNotOwned) {
   EXPECT_CALL(*mock, xSemaphoreCreateMutexStatic(_)).WillOnce(Return(fake_sem));
-  EXPECT_CALL(*mock, xSemaphoreGiveFromISR(fake_sem, _))
-      .WillOnce(Return(pdFALSE));
   EXPECT_CALL(*mock, vSemaphoreDelete(fake_sem));
   freertos::sa::mutex m;
   auto result = m.unlock_ex_isr();
   EXPECT_FALSE(result.result.has_value());
+  EXPECT_EQ(result.result.error(), freertos::error::semaphore_not_owned);
+  EXPECT_EQ(result.higher_priority_task_woken, pdFALSE);
 }
 
 TEST_F(SaMutexTest, TryLockExFailure) {
@@ -858,15 +856,13 @@ TEST_F(GuardBranchTest, TimeoutLockGuardSuccessUnlocks) {
 }
 
 TEST_F(GuardBranchTest, LockGuardIsrOnSaMutex) {
-  BaseType_t high_task_woken = pdFALSE;
   testing::InSequence seq;
   EXPECT_CALL(*mock, xSemaphoreCreateMutexStatic(_)).WillOnce(Return(fake_sem));
-  EXPECT_CALL(*mock, xSemaphoreTakeFromISR(fake_sem, _)).WillOnce(Return(pdTRUE));
-  EXPECT_CALL(*mock, xSemaphoreGiveFromISR(fake_sem, _)).WillOnce(Return(pdTRUE));
   EXPECT_CALL(*mock, vSemaphoreDelete(fake_sem));
   freertos::sa::mutex m;
   {
     freertos::lock_guard_isr<freertos::sa::mutex> guard(m);
+    EXPECT_FALSE(guard.locked());
   }
 }
 

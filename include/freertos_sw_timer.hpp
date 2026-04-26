@@ -65,6 +65,8 @@ class static_sw_timer_allocator {
   StaticTimer_t m_timer_placeholder{};
 
 public:
+  static constexpr bool is_static = true;
+
   static_sw_timer_allocator() = default;
   ~static_sw_timer_allocator() = default;
   static_sw_timer_allocator(const static_sw_timer_allocator &) = delete;
@@ -95,6 +97,8 @@ public:
  */
 class dynamic_sw_timer_allocator {
 public:
+  static constexpr bool is_static = false;
+
   void swap(dynamic_sw_timer_allocator &other) noexcept { (void)other; }
 
   TimerHandle_t create(const char *name, const TickType_t period_ticks,
@@ -205,6 +209,7 @@ public:
         m_callback(std::move(src.m_callback)),
         m_started{src.m_started.load(std::memory_order_acquire)},
         m_timer(src.m_timer) {
+    configASSERT(!SwTimerAllocator::is_static);
     src.m_timer = nullptr;
     src.m_started.store(false, std::memory_order_release);
     if (m_timer) {
@@ -225,6 +230,7 @@ public:
 
   timer &operator=(const timer &) = delete;
   timer &operator=(timer &&src) noexcept {
+    configASSERT(!SwTimerAllocator::is_static);
     if (this != &src) {
       if (src.m_timer) {
         auto rc = xTimerStop(src.m_timer, portMAX_DELAY);
@@ -276,6 +282,7 @@ public:
   }
 
   void swap(timer &other) noexcept {
+    configASSERT(!SwTimerAllocator::is_static);
     using std::swap;
     m_allocator.swap(other.m_allocator);
     swap(m_callback, other.m_callback);

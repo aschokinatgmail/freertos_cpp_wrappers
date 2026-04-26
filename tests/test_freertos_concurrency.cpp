@@ -248,41 +248,34 @@ TEST_F(ConcurrencyTest, IsrContextFlagSimulatesInterrupt) {
   EXPECT_EQ(xPortIsInsideInterrupt(), pdFALSE);
 }
 
-TEST_F(ConcurrencyTest, MutexLockIsrCalledInSimulatedIsrContext) {
+TEST_F(ConcurrencyTest, MutexLockIsrReturnsFailure) {
   EXPECT_CALL(*mock, xSemaphoreCreateMutex())
       .WillOnce(Return(mock_mutex_handle));
-  EXPECT_CALL(*mock, xSemaphoreTakeFromISR(mock_mutex_handle, _))
-      .WillOnce(DoAll(SetArgPointee<1>(pdTRUE), Return(pdTRUE)));
-  EXPECT_CALL(*mock, xSemaphoreGiveFromISR(mock_mutex_handle, _))
-      .WillOnce(DoAll(SetArgPointee<1>(pdFALSE), Return(pdTRUE)));
   EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex_handle));
 
   mutex_t m;
   g_is_isr_context = true;
   auto lock_result = m.lock_isr();
-  EXPECT_EQ(lock_result.result, pdTRUE);
-  EXPECT_EQ(lock_result.higher_priority_task_woken, pdTRUE);
+  EXPECT_EQ(lock_result.result, pdFALSE);
+  EXPECT_EQ(lock_result.higher_priority_task_woken, pdFALSE);
   auto unlock_result = m.unlock_isr();
-  EXPECT_EQ(unlock_result.result, pdTRUE);
+  EXPECT_EQ(unlock_result.result, pdFALSE);
+  EXPECT_EQ(unlock_result.higher_priority_task_woken, pdFALSE);
   g_is_isr_context = false;
 }
 
-TEST_F(ConcurrencyTest, MutexUnlockIsrPropagatesContextSwitchNeeded) {
+TEST_F(ConcurrencyTest, MutexUnlockIsrReturnsFailureNoContextSwitch) {
   EXPECT_CALL(*mock, xSemaphoreCreateMutex())
       .WillOnce(Return(mock_mutex_handle));
-  EXPECT_CALL(*mock, xSemaphoreTakeFromISR(mock_mutex_handle, _))
-      .WillOnce(DoAll(SetArgPointee<1>(pdFALSE), Return(pdTRUE)));
-  EXPECT_CALL(*mock, xSemaphoreGiveFromISR(mock_mutex_handle, _))
-      .WillOnce(DoAll(SetArgPointee<1>(pdTRUE), Return(pdTRUE)));
   EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex_handle));
 
   mutex_t m;
   auto lock_result = m.lock_isr();
-  EXPECT_EQ(lock_result.result, pdTRUE);
+  EXPECT_EQ(lock_result.result, pdFALSE);
 
   auto unlock_result = m.unlock_isr();
-  EXPECT_EQ(unlock_result.result, pdTRUE);
-  EXPECT_EQ(unlock_result.higher_priority_task_woken, pdTRUE);
+  EXPECT_EQ(unlock_result.result, pdFALSE);
+  EXPECT_EQ(unlock_result.higher_priority_task_woken, pdFALSE);
 }
 
 TEST_F(ConcurrencyTest, BinarySemaphoreGiveIsrReturnsContextSwitchNeeded) {
@@ -331,32 +324,22 @@ TEST_F(ConcurrencyTest, CountingSemaphoreGiveIsrReturnsContextSwitchNeeded) {
 // lock_guard_isr with real freertos::mutex
 // =============================================================================
 
-TEST_F(ConcurrencyTest, LockGuardIsrWithRealMutexAcquiresAndReleases) {
+TEST_F(ConcurrencyTest, LockGuardIsrWithRealMutexFailsToAcquire) {
   EXPECT_CALL(*mock, xSemaphoreCreateMutex())
       .WillOnce(Return(mock_mutex_handle));
-
-  EXPECT_CALL(*mock, xSemaphoreTakeFromISR(mock_mutex_handle, _))
-      .WillOnce(DoAll(SetArgPointee<1>(pdTRUE), Return(pdTRUE)));
-  EXPECT_CALL(*mock, xSemaphoreGiveFromISR(mock_mutex_handle, _))
-      .WillOnce(DoAll(SetArgPointee<1>(pdFALSE), Return(pdTRUE)));
   EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex_handle));
 
   mutex_t m;
   {
     freertos::lock_guard_isr<mutex_t> guard(m);
-    EXPECT_EQ(guard.high_priority_task_woken(), pdTRUE);
-    EXPECT_TRUE(guard.locked());
+    EXPECT_EQ(guard.high_priority_task_woken(), pdFALSE);
+    EXPECT_FALSE(guard.locked());
   }
 }
 
-TEST_F(ConcurrencyTest, LockGuardIsrContextSwitchPropagatedThroughDestruction) {
+TEST_F(ConcurrencyTest, LockGuardIsrNoContextSwitch) {
   EXPECT_CALL(*mock, xSemaphoreCreateMutex())
       .WillOnce(Return(mock_mutex_handle));
-
-  EXPECT_CALL(*mock, xSemaphoreTakeFromISR(mock_mutex_handle, _))
-      .WillOnce(DoAll(SetArgPointee<1>(pdFALSE), Return(pdTRUE)));
-  EXPECT_CALL(*mock, xSemaphoreGiveFromISR(mock_mutex_handle, _))
-      .WillOnce(DoAll(SetArgPointee<1>(pdTRUE), Return(pdTRUE)));
   EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex_handle));
 
   mutex_t m;
@@ -482,53 +465,38 @@ TEST_F(ConcurrencyTest, TaskContextUsesNormalApi) {
   EXPECT_EQ(m.unlock(), pdTRUE);
 }
 
-TEST_F(ConcurrencyTest, IsrContextUsesIsrApi) {
+TEST_F(ConcurrencyTest, IsrContextMutexIsrReturnsFailure) {
   EXPECT_CALL(*mock, xSemaphoreCreateMutex())
       .WillOnce(Return(mock_mutex_handle));
-  EXPECT_CALL(*mock, xSemaphoreTakeFromISR(mock_mutex_handle, _))
-      .WillOnce(DoAll(SetArgPointee<1>(pdFALSE), Return(pdTRUE)));
-  EXPECT_CALL(*mock, xSemaphoreGiveFromISR(mock_mutex_handle, _))
-      .WillOnce(DoAll(SetArgPointee<1>(pdTRUE), Return(pdTRUE)));
   EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex_handle));
 
   mutex_t m;
   g_is_isr_context = true;
 
   auto lock_result = m.lock_isr();
-  EXPECT_EQ(lock_result.result, pdTRUE);
+  EXPECT_EQ(lock_result.result, pdFALSE);
   EXPECT_EQ(lock_result.higher_priority_task_woken, pdFALSE);
 
   auto unlock_result = m.unlock_isr();
-  EXPECT_EQ(unlock_result.result, pdTRUE);
-  EXPECT_EQ(unlock_result.higher_priority_task_woken, pdTRUE);
+  EXPECT_EQ(unlock_result.result, pdFALSE);
+  EXPECT_EQ(unlock_result.higher_priority_task_woken, pdFALSE);
 
   g_is_isr_context = false;
 }
 
-TEST_F(ConcurrencyTest, PortYieldFromIsrCalledWhenHigherPriorityWoken) {
+TEST_F(ConcurrencyTest, PortYieldFromIsrNotCalledWhenIsrReturnsFailure) {
   EXPECT_CALL(*mock, xSemaphoreCreateMutex())
       .WillOnce(Return(mock_mutex_handle));
-  EXPECT_CALL(*mock, xSemaphoreTakeFromISR(mock_mutex_handle, _))
-      .WillOnce(DoAll(SetArgPointee<1>(pdTRUE), Return(pdTRUE)));
-  EXPECT_CALL(*mock, xSemaphoreGiveFromISR(mock_mutex_handle, _))
-      .WillOnce(DoAll(SetArgPointee<1>(pdTRUE), Return(pdTRUE)));
-  EXPECT_CALL(*mock, portYIELD_FROM_ISR(pdTRUE)).Times(2);
   EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex_handle));
 
   mutex_t m;
   g_is_isr_context = true;
 
   auto lock_result = m.lock_isr();
-  EXPECT_EQ(lock_result.higher_priority_task_woken, pdTRUE);
-  if (lock_result.higher_priority_task_woken) {
-    g_freertos_mock->portYIELD_FROM_ISR(lock_result.higher_priority_task_woken);
-  }
+  EXPECT_EQ(lock_result.higher_priority_task_woken, pdFALSE);
 
   auto unlock_result = m.unlock_isr();
-  EXPECT_EQ(unlock_result.higher_priority_task_woken, pdTRUE);
-  if (unlock_result.higher_priority_task_woken) {
-    g_freertos_mock->portYIELD_FROM_ISR(unlock_result.higher_priority_task_woken);
-  }
+  EXPECT_EQ(unlock_result.higher_priority_task_woken, pdFALSE);
 
   g_is_isr_context = false;
 }

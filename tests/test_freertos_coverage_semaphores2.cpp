@@ -254,22 +254,8 @@ TEST_F(CoverageSemaphore2Test, MutexLockExWouldBlock) {
   EXPECT_FALSE(mtx.locked());
 }
 
-TEST_F(CoverageSemaphore2Test, MutexLockExIsrSuccess) {
+TEST_F(CoverageSemaphore2Test, MutexLockExIsrReturnsWouldBlock) {
   EXPECT_CALL(*mock, xSemaphoreCreateMutex()).WillOnce(Return(mock_mutex));
-  EXPECT_CALL(*mock, xSemaphoreTakeFromISR(mock_mutex, _))
-      .WillOnce(DoAll(SetArgPointee<1>(pdTRUE), Return(pdTRUE)));
-  EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex));
-  Mutex mtx;
-  auto result = mtx.lock_ex_isr();
-  EXPECT_TRUE(result.result.has_value());
-  EXPECT_TRUE(mtx.locked());
-  EXPECT_EQ(result.higher_priority_task_woken, pdTRUE);
-}
-
-TEST_F(CoverageSemaphore2Test, MutexLockExIsrFailure) {
-  EXPECT_CALL(*mock, xSemaphoreCreateMutex()).WillOnce(Return(mock_mutex));
-  EXPECT_CALL(*mock, xSemaphoreTakeFromISR(mock_mutex, _))
-      .WillOnce(DoAll(SetArgPointee<1>(pdFALSE), Return(pdFALSE)));
   EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex));
   Mutex mtx;
   auto result = mtx.lock_ex_isr();
@@ -289,36 +275,14 @@ TEST_F(CoverageSemaphore2Test, MutexUnlockExFailure) {
   EXPECT_EQ(result.error(), error::semaphore_not_owned);
 }
 
-TEST_F(CoverageSemaphore2Test, MutexUnlockExIsrSuccess) {
+TEST_F(CoverageSemaphore2Test, MutexUnlockExIsrReturnsNotOwned) {
   EXPECT_CALL(*mock, xSemaphoreCreateMutex()).WillOnce(Return(mock_mutex));
-  EXPECT_CALL(*mock, xSemaphoreTake(mock_mutex, portMAX_DELAY))
-      .WillOnce(Return(pdTRUE));
-  EXPECT_CALL(*mock, xSemaphoreGiveFromISR(mock_mutex, _))
-      .WillOnce(DoAll(SetArgPointee<1>(pdTRUE), Return(pdTRUE)));
   EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex));
   Mutex mtx;
-  mtx.lock();
-  EXPECT_TRUE(mtx.locked());
-  auto result = mtx.unlock_ex_isr();
-  EXPECT_TRUE(result.result.has_value());
-  EXPECT_EQ(result.higher_priority_task_woken, pdTRUE);
-  EXPECT_FALSE(mtx.locked());
-}
-
-TEST_F(CoverageSemaphore2Test, MutexUnlockExIsrFailure) {
-  EXPECT_CALL(*mock, xSemaphoreCreateMutex()).WillOnce(Return(mock_mutex));
-  EXPECT_CALL(*mock, xSemaphoreTake(mock_mutex, portMAX_DELAY))
-      .WillOnce(Return(pdTRUE));
-  EXPECT_CALL(*mock, xSemaphoreGiveFromISR(mock_mutex, _))
-      .WillOnce(DoAll(SetArgPointee<1>(pdFALSE), Return(pdFALSE)));
-  EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex));
-  Mutex mtx;
-  mtx.lock();
-  EXPECT_TRUE(mtx.locked());
   auto result = mtx.unlock_ex_isr();
   EXPECT_FALSE(result.result.has_value());
   EXPECT_EQ(result.result.error(), error::semaphore_not_owned);
-  EXPECT_TRUE(mtx.locked());
+  EXPECT_EQ(result.higher_priority_task_woken, pdFALSE);
 }
 
 TEST_F(CoverageSemaphore2Test, MutexTryLockExFailure) {
@@ -331,30 +295,23 @@ TEST_F(CoverageSemaphore2Test, MutexTryLockExFailure) {
   EXPECT_EQ(result.error(), error::would_block);
 }
 
-TEST_F(CoverageSemaphore2Test, MutexLockIsrFailureNoMutedState) {
+TEST_F(CoverageSemaphore2Test, MutexLockIsrReturnsFailure) {
   EXPECT_CALL(*mock, xSemaphoreCreateMutex()).WillOnce(Return(mock_mutex));
-  EXPECT_CALL(*mock, xSemaphoreTakeFromISR(mock_mutex, _))
-      .WillOnce(DoAll(SetArgPointee<1>(pdFALSE), Return(pdFALSE)));
   EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex));
   Mutex mtx;
   auto result = mtx.lock_isr();
   EXPECT_EQ(result.result, pdFALSE);
+  EXPECT_EQ(result.higher_priority_task_woken, pdFALSE);
   EXPECT_FALSE(mtx.locked());
 }
 
-TEST_F(CoverageSemaphore2Test, MutexUnlockIsrFailureNoStateChange) {
+TEST_F(CoverageSemaphore2Test, MutexUnlockIsrReturnsFailure) {
   EXPECT_CALL(*mock, xSemaphoreCreateMutex()).WillOnce(Return(mock_mutex));
-  EXPECT_CALL(*mock, xSemaphoreTake(mock_mutex, portMAX_DELAY))
-      .WillOnce(Return(pdTRUE));
-  EXPECT_CALL(*mock, xSemaphoreGiveFromISR(mock_mutex, _))
-      .WillOnce(DoAll(SetArgPointee<1>(pdFALSE), Return(pdFALSE)));
   EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex));
   Mutex mtx;
-  mtx.lock();
-  EXPECT_TRUE(mtx.locked());
   auto result = mtx.unlock_isr();
   EXPECT_EQ(result.result, pdFALSE);
-  EXPECT_TRUE(mtx.locked());
+  EXPECT_EQ(result.higher_priority_task_woken, pdFALSE);
 }
 
 TEST_F(CoverageSemaphore2Test, MutexSwapWithLockedState) {
@@ -437,26 +394,8 @@ TEST_F(CoverageSemaphore2Test, RecursiveMutexSwapWithRecursionCount) {
 // Guard classes
 // ============================================================
 
-TEST_F(CoverageSemaphore2Test, LockGuardIsrConstructorDestructor) {
-  EXPECT_CALL(*mock, xSemaphoreCreateMutex()).WillOnce(Return(mock_mutex));
-  EXPECT_CALL(*mock, xSemaphoreTakeFromISR(mock_mutex, _))
-      .WillOnce(DoAll(SetArgPointee<1>(pdTRUE), Return(pdTRUE)));
-  EXPECT_CALL(*mock, xSemaphoreGiveFromISR(mock_mutex, _))
-      .WillOnce(DoAll(SetArgPointee<1>(pdFALSE), Return(pdTRUE)));
-  EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex));
-  Mutex mtx;
-  {
-    freertos::lock_guard_isr<Mutex> guard(mtx);
-    EXPECT_TRUE(guard.locked());
-    EXPECT_EQ(guard.high_priority_task_woken(), pdTRUE);
-  }
-  EXPECT_FALSE(mtx.locked());
-}
-
 TEST_F(CoverageSemaphore2Test, LockGuardIsrLockFailure) {
   EXPECT_CALL(*mock, xSemaphoreCreateMutex()).WillOnce(Return(mock_mutex));
-  EXPECT_CALL(*mock, xSemaphoreTakeFromISR(mock_mutex, _))
-      .WillOnce(DoAll(SetArgPointee<1>(pdFALSE), Return(pdFALSE)));
   EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex));
   Mutex mtx;
   {

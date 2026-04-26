@@ -62,6 +62,8 @@ class static_shared_mutex_allocator {
   StaticSemaphore_t m_reader_slots_placeholder{};
 
 public:
+  static constexpr bool is_static = true;
+
   static_shared_mutex_allocator() = default;
   ~static_shared_mutex_allocator() = default;
   static_shared_mutex_allocator(const static_shared_mutex_allocator &) = delete;
@@ -90,6 +92,8 @@ public:
 #if configSUPPORT_DYNAMIC_ALLOCATION
 class dynamic_shared_mutex_allocator {
 public:
+  static constexpr bool is_static = false;
+
   void swap(dynamic_shared_mutex_allocator &other) noexcept { (void)other; }
 
   SemaphoreHandle_t create_mutex() { return xSemaphoreCreateMutex(); }

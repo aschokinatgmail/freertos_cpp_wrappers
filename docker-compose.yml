@@ -67,7 +67,7 @@ services:
         cmake --build build-cov -j2 && \
         ctest --test-dir build-cov \
           --output-on-failure && \
-        gcovr --filter 'include/' --filter 'src/' --gcov-ignore-parse-errors negative_hits.warn --print-summary build-cov
+        gcovr --filter 'include/' --filter 'src/' --exclude-unreachable-branches --exclude-throw-branches --gcov-ignore-parse-errors negative_hits.warn --print-summary build-cov
 
   # =======================================================================
   # Both mock + sim in one run (CI gate)

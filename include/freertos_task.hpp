@@ -66,6 +66,8 @@ template <size_t StackSize> class static_task_allocator {
   StaticTask_t m_taskBuffer{};
 
 public:
+  static constexpr bool is_static = true;
+
   static_task_allocator() = default;
   ~static_task_allocator() = default;
   static_task_allocator(const static_task_allocator &) = delete;
@@ -95,6 +97,8 @@ public:
  */
 template <size_t StackSize> class dynamic_task_allocator {
 public:
+  static constexpr bool is_static = false;
+
   void swap(dynamic_task_allocator &other) noexcept { (void)other; }
 
   TaskHandle_t create(TaskFunction_t taskFunction, const char *name,
@@ -284,6 +288,7 @@ public:
         m_joinHandle(other.m_joinHandle)
 #endif
   {
+    configASSERT(!TaskAllocator::is_static);
     other.m_hTask = nullptr;
 #if configUSE_TASK_NOTIFICATIONS
     other.m_joinHandle = nullptr;
@@ -304,6 +309,7 @@ public:
 
   task &operator=(const task &) = delete;
   task &operator=(task &&other) noexcept {
+    configASSERT(!TaskAllocator::is_static);
 #if INCLUDE_vTaskDelete
     if (m_hTask) {
       vTaskDelete(m_hTask);
@@ -315,6 +321,7 @@ public:
   }
 
   void swap(task &other) noexcept {
+    configASSERT(!TaskAllocator::is_static);
     using std::swap;
     m_allocator.swap(other.m_allocator);
     swap(m_hTask, other.m_hTask);

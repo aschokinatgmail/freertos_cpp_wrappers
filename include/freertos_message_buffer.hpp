@@ -61,6 +61,8 @@ class dynamic_message_buffer_allocator_with_callback {
   void *m_receive_context;
 
 public:
+  static constexpr bool is_static = false;
+
   dynamic_message_buffer_allocator_with_callback(
       StreamBufferCallbackFunction_t send_callback, void *send_context,
       StreamBufferCallbackFunction_t receive_callback, void *receive_context)
@@ -101,6 +103,8 @@ class static_message_buffer_allocator_with_callback {
   std::array<uint8_t, MessageBufferSize> m_storage;
 
 public:
+  static constexpr bool is_static = true;
+
   static_message_buffer_allocator_with_callback(
       StreamBufferCallbackFunction_t send_callback, void *send_context,
       StreamBufferCallbackFunction_t receive_callback, void *receive_context)
@@ -146,6 +150,8 @@ template <size_t MessageBufferSize> class static_message_buffer_allocator {
   std::array<uint8_t, MessageBufferSize> m_storage;
 
 public:
+  static constexpr bool is_static = true;
+
   static_message_buffer_allocator() = default;
   ~static_message_buffer_allocator() = default;
   static_message_buffer_allocator(const static_message_buffer_allocator &) =
@@ -177,6 +183,8 @@ public:
  */
 template <size_t MessageBufferSize> class dynamic_message_buffer_allocator {
 public:
+  static constexpr bool is_static = false;
+
   void swap(dynamic_message_buffer_allocator &other) noexcept { (void)other; }
 
   MessageBufferHandle_t create() {
@@ -215,6 +223,7 @@ public:
   message_buffer(message_buffer &&src) noexcept
       : m_allocator(std::move(src.m_allocator)),
         m_message_buffer(src.m_message_buffer) {
+    configASSERT(!MessageBufferAllocator::is_static);
     src.m_message_buffer = nullptr;
   }
   /**
@@ -230,6 +239,7 @@ public:
 
   message_buffer &operator=(const message_buffer &) = delete;
   message_buffer &operator=(message_buffer &&src) noexcept {
+    configASSERT(!MessageBufferAllocator::is_static);
     if (this != &src) {
       swap(src);
     }
@@ -237,6 +247,7 @@ public:
   }
 
   void swap(message_buffer &other) noexcept {
+    configASSERT(!MessageBufferAllocator::is_static);
     using std::swap;
     m_allocator.swap(other.m_allocator);
     swap(m_message_buffer, other.m_message_buffer);
