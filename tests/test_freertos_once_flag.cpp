@@ -185,6 +185,70 @@ TEST_F(OnceFlagTest, CallOnce_ThrowsException_RetrySucceeds) {
   EXPECT_TRUE(flag.is_initialized());
 }
 
+TEST_F(OnceFlagTest, CallOnce_WaiterPath) {
+  freertos::once_flag flag;
+  SemaphoreHandle_t sem = reinterpret_cast<SemaphoreHandle_t>(0x1);
+
+  ::testing::InSequence seq;
+  EXPECT_CALL(*mock, xSemaphoreCreateBinaryStatic(_))
+      .WillOnce(Return(sem));
+  EXPECT_CALL(*mock, xSemaphoreTake(sem, portMAX_DELAY))
+      .WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, xSemaphoreGive(sem)).WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, vSemaphoreDelete(sem));
+
+  bool inner_called = false;
+  freertos::call_once(flag, [&]() {
+    freertos::call_once(flag, [&]() { inner_called = true; });
+  });
+  EXPECT_FALSE(inner_called);
+  EXPECT_TRUE(flag.is_initialized());
+}
+
+TEST_F(OnceFlagTest, CallOnce_WaiterPathThenSubsequentCallReturnsEarly) {
+  freertos::once_flag flag;
+  SemaphoreHandle_t sem = reinterpret_cast<SemaphoreHandle_t>(0x1);
+
+  ::testing::InSequence seq;
+  EXPECT_CALL(*mock, xSemaphoreCreateBinaryStatic(_))
+      .WillOnce(Return(sem));
+  EXPECT_CALL(*mock, xSemaphoreTake(sem, portMAX_DELAY))
+      .WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, xSemaphoreGive(sem)).WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, vSemaphoreDelete(sem));
+
+  int counter = 0;
+  freertos::call_once(flag, [&]() {
+    freertos::call_once(flag, [&]() { counter++; });
+  });
+  EXPECT_EQ(counter, 0);
+
+  freertos::call_once(flag, [&]() { counter++; });
+  EXPECT_EQ(counter, 0);
+  EXPECT_TRUE(flag.is_initialized());
+}
+
+#if configSUPPORT_STATIC_ALLOCATION
+TEST_F(OnceFlagTest, StaticAllocation_CallOnceWaiterPath) {
+  freertos::sa::once_flag flag;
+  SemaphoreHandle_t sem = reinterpret_cast<SemaphoreHandle_t>(0x1);
+
+  ::testing::InSequence seq;
+  EXPECT_CALL(*mock, xSemaphoreCreateBinaryStatic(_))
+      .WillOnce(Return(sem));
+  EXPECT_CALL(*mock, xSemaphoreTake(sem, portMAX_DELAY))
+      .WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, xSemaphoreGive(sem)).WillOnce(Return(pdTRUE));
+
+  bool inner_called = false;
+  freertos::sa::call_once(flag, [&]() {
+    freertos::sa::call_once(flag, [&]() { inner_called = true; });
+  });
+  EXPECT_FALSE(inner_called);
+  EXPECT_TRUE(flag.is_initialized());
+}
+#endif
+
 #if configSUPPORT_DYNAMIC_ALLOCATION
 TEST_F(OnceFlagTest, DynamicAllocation_NamespaceAlias) {
   freertos::da::once_flag flag;

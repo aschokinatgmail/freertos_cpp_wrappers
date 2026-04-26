@@ -296,6 +296,109 @@ TEST_F(LatchTest, DynamicLatchMaxReturnsPtrdiffMax) {
   EXPECT_EQ(l.max(), PTRDIFF_MAX);
 }
 
+TEST_F(LatchTest, DynamicLatch_WaitBlocksOnSemaphore) {
+  EXPECT_CALL(*mock, xSemaphoreCreateBinary())
+      .WillOnce(Return(mock_semaphore_handle));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
+
+  freertos::latch l(3);
+
+  EXPECT_CALL(*mock, xSemaphoreTake(mock_semaphore_handle, portMAX_DELAY))
+      .WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, xSemaphoreGive(mock_semaphore_handle))
+      .WillOnce(Return(pdTRUE));
+
+  l.wait();
+}
+
+TEST_F(LatchTest, DynamicLatch_WaitNullSemaphore) {
+  EXPECT_CALL(*mock, xSemaphoreCreateBinary())
+      .WillOnce(Return(nullptr));
+
+  freertos::latch l(3);
+
+  l.wait();
+}
+
+TEST_F(LatchTest, DynamicLatch_CountDownNullSemaphore) {
+  EXPECT_CALL(*mock, xSemaphoreCreateBinary())
+      .WillOnce(Return(nullptr));
+
+  freertos::latch l(1);
+  l.count_down(1);
+  EXPECT_TRUE(l.try_wait());
+}
+
+TEST_F(LatchTest, DynamicLatch_CountDownIsrNullSemaphore) {
+  EXPECT_CALL(*mock, xSemaphoreCreateBinary())
+      .WillOnce(Return(nullptr));
+
+  freertos::latch l(1);
+  auto result = l.count_down_isr(1);
+  EXPECT_EQ(result.higher_priority_task_woken, pdFALSE);
+}
+
+TEST_F(LatchTest, DynamicLatch_CountDownExNullSemaphore) {
+  EXPECT_CALL(*mock, xSemaphoreCreateBinary())
+      .WillOnce(Return(nullptr));
+
+  freertos::latch l(1);
+  auto result = l.count_down_ex(1);
+  EXPECT_FALSE(result.has_value());
+  EXPECT_EQ(result.error(), freertos::error::invalid_handle);
+}
+
+TEST_F(LatchTest, DynamicLatch_CountDownExIsrNullSemaphore) {
+  EXPECT_CALL(*mock, xSemaphoreCreateBinary())
+      .WillOnce(Return(nullptr));
+
+  freertos::latch l(1);
+  auto result = l.count_down_ex_isr(1);
+  EXPECT_FALSE(result.result.has_value());
+  EXPECT_EQ(result.result.error(), freertos::error::invalid_handle);
+}
+
+TEST_F(LatchTest, DynamicLatch_CountDownZeroUpdate) {
+  EXPECT_CALL(*mock, xSemaphoreCreateBinary())
+      .WillOnce(Return(mock_semaphore_handle));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
+
+  freertos::latch l(5);
+  l.count_down(0);
+  EXPECT_FALSE(l.try_wait());
+}
+
+TEST_F(LatchTest, DynamicLatch_CountDownIsrZeroUpdate) {
+  EXPECT_CALL(*mock, xSemaphoreCreateBinary())
+      .WillOnce(Return(mock_semaphore_handle));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
+
+  freertos::latch l(5);
+  auto result = l.count_down_isr(0);
+  EXPECT_EQ(result.higher_priority_task_woken, pdFALSE);
+}
+
+TEST_F(LatchTest, DynamicLatch_CountDownExZeroUpdate) {
+  EXPECT_CALL(*mock, xSemaphoreCreateBinary())
+      .WillOnce(Return(mock_semaphore_handle));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
+
+  freertos::latch l(5);
+  auto result = l.count_down_ex(0);
+  EXPECT_TRUE(result.has_value());
+}
+
+TEST_F(LatchTest, DynamicLatch_CountDownExIsrZeroUpdate) {
+  EXPECT_CALL(*mock, xSemaphoreCreateBinary())
+      .WillOnce(Return(mock_semaphore_handle));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
+
+  freertos::latch l(5);
+  auto result = l.count_down_ex_isr(0);
+  EXPECT_TRUE(result.result.has_value());
+  EXPECT_EQ(result.higher_priority_task_woken, pdFALSE);
+}
+
 #if configSUPPORT_STATIC_ALLOCATION
 
 class StaticLatchTest : public ::testing::Test {
@@ -442,6 +545,88 @@ TEST_F(StaticLatchTest, LatchAliasIsStatic) {
 
   freertos::sa::latch l;
   EXPECT_FALSE(l.try_wait());
+}
+
+TEST_F(StaticLatchTest, WaitBlocksOnSemaphore) {
+  EXPECT_CALL(*mock, xSemaphoreCreateBinaryStatic(_))
+      .WillOnce(Return(mock_semaphore_handle));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
+
+  freertos::sa::latch_static<3> l;
+
+  EXPECT_CALL(*mock, xSemaphoreTake(mock_semaphore_handle, portMAX_DELAY))
+      .WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, xSemaphoreGive(mock_semaphore_handle))
+      .WillOnce(Return(pdTRUE));
+
+  l.wait();
+}
+
+TEST_F(StaticLatchTest, CountDownSemaphoreGiveFails) {
+  EXPECT_CALL(*mock, xSemaphoreCreateBinaryStatic(_))
+      .WillOnce(Return(mock_semaphore_handle));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
+
+  freertos::sa::latch_static<1> l;
+
+  EXPECT_CALL(*mock, xSemaphoreGive(mock_semaphore_handle))
+      .WillOnce(Return(pdFALSE));
+  l.count_down(1);
+}
+
+TEST_F(StaticLatchTest, CountDownExSemaphoreGiveFails) {
+  EXPECT_CALL(*mock, xSemaphoreCreateBinaryStatic(_))
+      .WillOnce(Return(mock_semaphore_handle));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
+
+  freertos::sa::latch_static<1> l;
+
+  EXPECT_CALL(*mock, xSemaphoreGive(mock_semaphore_handle))
+      .WillOnce(Return(pdFALSE));
+  auto result = l.count_down_ex(1);
+  EXPECT_FALSE(result.has_value());
+  EXPECT_EQ(result.error(), freertos::error::semaphore_not_owned);
+}
+
+TEST_F(StaticLatchTest, CountDownZeroUpdate) {
+  EXPECT_CALL(*mock, xSemaphoreCreateBinaryStatic(_))
+      .WillOnce(Return(mock_semaphore_handle));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
+
+  freertos::sa::latch_static<5> l;
+  l.count_down(0);
+  EXPECT_FALSE(l.try_wait());
+}
+
+TEST_F(StaticLatchTest, CountDownIsrZeroUpdate) {
+  EXPECT_CALL(*mock, xSemaphoreCreateBinaryStatic(_))
+      .WillOnce(Return(mock_semaphore_handle));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
+
+  freertos::sa::latch_static<5> l;
+  auto result = l.count_down_isr(0);
+  EXPECT_EQ(result.higher_priority_task_woken, pdFALSE);
+}
+
+TEST_F(StaticLatchTest, CountDownExZeroUpdate) {
+  EXPECT_CALL(*mock, xSemaphoreCreateBinaryStatic(_))
+      .WillOnce(Return(mock_semaphore_handle));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
+
+  freertos::sa::latch_static<5> l;
+  auto result = l.count_down_ex(0);
+  EXPECT_TRUE(result.has_value());
+}
+
+TEST_F(StaticLatchTest, CountDownExIsrZeroUpdate) {
+  EXPECT_CALL(*mock, xSemaphoreCreateBinaryStatic(_))
+      .WillOnce(Return(mock_semaphore_handle));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
+
+  freertos::sa::latch_static<5> l;
+  auto result = l.count_down_ex_isr(0);
+  EXPECT_TRUE(result.result.has_value());
+  EXPECT_EQ(result.higher_priority_task_woken, pdFALSE);
 }
 
 #endif // configSUPPORT_STATIC_ALLOCATION
