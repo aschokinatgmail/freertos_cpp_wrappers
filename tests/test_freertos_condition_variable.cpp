@@ -276,7 +276,7 @@ TEST_F(ConditionVariableMockTest, NotifyOneEx_SemaphoreNotOwned) {
     freertos::condition_variable_any cv;
     auto result = cv.notify_one_ex();
     EXPECT_FALSE(result.has_value());
-    EXPECT_EQ(result.error(), freertos::error::semaphore_not_owned);
+    EXPECT_EQ(result.error(), freertos::error::would_block);
 }
 
 TEST_F(ConditionVariableMockTest, NotifyAllEx_Success) {

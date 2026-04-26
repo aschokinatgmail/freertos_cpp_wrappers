@@ -173,10 +173,10 @@ TEST(FixedFunctionTest, MoveOnlyCallableMoveConstruction) {
     EXPECT_EQ(f2(), 43);
 }
 
-TEST(FixedFunctionTest, MoveOnlyCallableCopyYieldsEmpty) {
+TEST(FixedFunctionTest, MoveOnlyCallableCopyTriggersAssert) {
     fixed_function<int()> f1(MoveOnlyCallable(42));
-    fixed_function<int()> f2(f1);
-    EXPECT_FALSE(f2);
+    EXPECT_DEATH({ fixed_function<int()> f2(f1); },
+                 "cannot copy fixed_function wrapping non-copyable callable");
 }
 
 TEST(FixedFunctionTest, AssignNullptr) {

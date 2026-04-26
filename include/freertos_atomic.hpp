@@ -42,6 +42,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <FreeRTOS.h>
 #include <atomic>
 #include <cstddef>
+#include <queue.h>
 #include <semphr.h>
 #include <task.h>
 #include <type_traits>
@@ -82,17 +83,19 @@ public:
         return m_flag.load(order);
     }
 
-    void wait(bool old, std::memory_order order = std::memory_order_seq_cst) const {
+    [[nodiscard]] expected<void, error> wait(bool old, std::memory_order order = std::memory_order_seq_cst) const {
         if (m_flag.load(order) != old) {
-            return;
+            return {};
         }
         ensure_semaphore();
         if (!m_semaphore) {
-            return;
+            configASSERT(m_semaphore);
+            return unexpected<error>(error::out_of_memory);
         }
         while (m_flag.load(order) == old) {
             xSemaphoreTake(m_semaphore, portMAX_DELAY);
         }
+        return {};
     }
 
     void notify_one() noexcept {
@@ -108,14 +111,14 @@ public:
         if (!m_semaphore) {
             return;
         }
-        for (UBaseType_t i = 0;
-             i < FREERTOS_CPP_WRAPPERS_ATOMIC_FLAG_MAX_WAITERS; i++) {
+        UBaseType_t count = uxSemaphoreGetCount(m_semaphore);
+        UBaseType_t available = FREERTOS_CPP_WRAPPERS_ATOMIC_FLAG_MAX_WAITERS - count;
+        for (UBaseType_t i = 0; i < available; i++) {
             xSemaphoreGive(m_semaphore);
         }
     }
 
     isr_result<void> notify_one_isr() noexcept {
-        ensure_semaphore();
         if (!m_semaphore) {
             return {pdFALSE};
         }
@@ -125,13 +128,14 @@ public:
     }
 
     isr_result<void> notify_all_isr() noexcept {
-        ensure_semaphore();
         if (!m_semaphore) {
             return {pdFALSE};
         }
         isr_result<void> result{pdFALSE};
-        for (UBaseType_t i = 0;
-             i < FREERTOS_CPP_WRAPPERS_ATOMIC_FLAG_MAX_WAITERS; i++) {
+        UBaseType_t count = uxQueueMessagesWaitingFromISR(
+            reinterpret_cast<QueueHandle_t>(m_semaphore));
+        UBaseType_t available = FREERTOS_CPP_WRAPPERS_ATOMIC_FLAG_MAX_WAITERS - count;
+        for (UBaseType_t i = 0; i < available; i++) {
             BaseType_t woken = pdFALSE;
             xSemaphoreGiveFromISR(m_semaphore, &woken);
             if (woken) {
@@ -158,8 +162,9 @@ public:
         if (!m_semaphore) {
             return unexpected<error>(error::invalid_handle);
         }
-        for (UBaseType_t i = 0;
-             i < FREERTOS_CPP_WRAPPERS_ATOMIC_FLAG_MAX_WAITERS; i++) {
+        UBaseType_t count = uxSemaphoreGetCount(m_semaphore);
+        UBaseType_t available = FREERTOS_CPP_WRAPPERS_ATOMIC_FLAG_MAX_WAITERS - count;
+        for (UBaseType_t i = 0; i < available; i++) {
             xSemaphoreGive(m_semaphore);
         }
         return {};
@@ -224,14 +229,16 @@ public:
         return m_flag.load(order);
     }
 
-    void wait(bool old, std::memory_order order = std::memory_order_seq_cst) const {
+    [[nodiscard]] expected<void, error> wait(bool old, std::memory_order order = std::memory_order_seq_cst) const {
         if (m_flag.load(order) != old) {
-            return;
+            return {};
         }
         ensure_semaphore();
+        configASSERT(m_semaphore);
         while (m_flag.load(order) == old) {
             xSemaphoreTake(m_semaphore, portMAX_DELAY);
         }
+        return {};
     }
 
     void notify_one() noexcept {
@@ -241,24 +248,31 @@ public:
 
     void notify_all() noexcept {
         ensure_semaphore();
-        for (UBaseType_t i = 0;
-             i < FREERTOS_CPP_WRAPPERS_ATOMIC_FLAG_MAX_WAITERS; i++) {
+        UBaseType_t count = uxSemaphoreGetCount(m_semaphore);
+        UBaseType_t available = FREERTOS_CPP_WRAPPERS_ATOMIC_FLAG_MAX_WAITERS - count;
+        for (UBaseType_t i = 0; i < available; i++) {
             xSemaphoreGive(m_semaphore);
         }
     }
 
     isr_result<void> notify_one_isr() noexcept {
-        ensure_semaphore();
+        if (!m_semaphore) {
+            return {pdFALSE};
+        }
         isr_result<void> result{pdFALSE};
         xSemaphoreGiveFromISR(m_semaphore, &result.higher_priority_task_woken);
         return result;
     }
 
     isr_result<void> notify_all_isr() noexcept {
-        ensure_semaphore();
+        if (!m_semaphore) {
+            return {pdFALSE};
+        }
         isr_result<void> result{pdFALSE};
-        for (UBaseType_t i = 0;
-             i < FREERTOS_CPP_WRAPPERS_ATOMIC_FLAG_MAX_WAITERS; i++) {
+        UBaseType_t count = uxQueueMessagesWaitingFromISR(
+            reinterpret_cast<QueueHandle_t>(m_semaphore));
+        UBaseType_t available = FREERTOS_CPP_WRAPPERS_ATOMIC_FLAG_MAX_WAITERS - count;
+        for (UBaseType_t i = 0; i < available; i++) {
             BaseType_t woken = pdFALSE;
             xSemaphoreGiveFromISR(m_semaphore, &woken);
             if (woken) {

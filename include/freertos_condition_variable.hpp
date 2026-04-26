@@ -68,11 +68,12 @@ public:
     m_semaphore =
         xSemaphoreCreateCountingStatic(FREERTOS_CPP_WRAPPERS_CONDITION_VARIABLE_MAX_WAITERS, 0,
                                        &m_semaphore_storage);
+    configASSERT(m_semaphore != nullptr);
     m_semaphore_created = 1;
 #else
     m_semaphore = xSemaphoreCreateCounting(FREERTOS_CPP_WRAPPERS_CONDITION_VARIABLE_MAX_WAITERS, 0);
+    configASSERT(m_semaphore != nullptr);
 #endif
-    configASSERT(m_semaphore);
   }
 
   condition_variable_any(const condition_variable_any &) = delete;
@@ -85,6 +86,7 @@ public:
   }
 
   void notify_one() noexcept {
+    configASSERT(m_semaphore != nullptr);
     if (!m_semaphore) {
       return;
     }
@@ -92,6 +94,7 @@ public:
   }
 
   void notify_all() noexcept {
+    configASSERT(m_semaphore != nullptr);
     if (!m_semaphore) {
       return;
     }
@@ -213,7 +216,7 @@ public:
     if (rc == pdTRUE) {
       return {};
     }
-    return unexpected<error>(error::semaphore_not_owned);
+    return unexpected<error>(error::would_block);
   }
 
   [[nodiscard]] expected<void, error> notify_all_ex() noexcept {

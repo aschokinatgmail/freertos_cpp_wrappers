@@ -40,6 +40,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <cassert>
 #include <cstddef>
 #include <cstring>
+#include <exception>
 #include <type_traits>
 
 #ifndef configASSERT
@@ -156,6 +157,7 @@ public:
             m_copier(m_storage.data(), other.m_storage.data());
         } else if (!m_invoker) {
         } else {
+            configASSERT(!"cannot copy fixed_function wrapping non-copyable callable");
             m_invoker = nullptr;
             m_copier = nullptr;
             m_mover = nullptr;
@@ -167,7 +169,12 @@ public:
         : m_invoker(other.m_invoker), m_copier(other.m_copier),
           m_mover(other.m_mover), m_destroyer(other.m_destroyer) {
         if (m_mover) {
-            m_mover(m_storage.data(), other.m_storage.data());
+            try {
+                m_mover(m_storage.data(), other.m_storage.data());
+            } catch (...) {
+                configASSERT(!"move of contained callable threw in noexcept context");
+                std::terminate();
+            }
         }
         if (other.m_destroyer) {
             other.m_destroyer(other.m_storage.data());
@@ -188,6 +195,7 @@ public:
             if (m_copier) {
                 m_copier(m_storage.data(), other.m_storage.data());
             } else if (m_invoker) {
+                configASSERT(!"cannot copy fixed_function wrapping non-copyable callable");
                 m_invoker = nullptr;
                 m_copier = nullptr;
                 m_mover = nullptr;
@@ -205,7 +213,12 @@ public:
             m_mover = other.m_mover;
             m_destroyer = other.m_destroyer;
             if (m_mover) {
-                m_mover(m_storage.data(), other.m_storage.data());
+                try {
+                    m_mover(m_storage.data(), other.m_storage.data());
+                } catch (...) {
+                    configASSERT(!"move of contained callable threw in noexcept context");
+                    std::terminate();
+                }
             }
             if (other.m_destroyer) {
                 other.m_destroyer(other.m_storage.data());

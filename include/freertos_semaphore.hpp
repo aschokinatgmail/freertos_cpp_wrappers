@@ -681,6 +681,10 @@ public:
    * @brief Unlock the mutex from an ISR.
    * @ref https://www.freertos.org/a00124.html
    *
+   * WARNING: Mutexes must not be used from ISR context — FreeRTOS mutexes
+   * have priority inheritance that is incompatible with ISR. Use
+   * binary_semaphore instead.
+   *
    * @return isr_result<BaseType_t> containing the result and whether a
    * higher priority task was woken.
    */
@@ -711,6 +715,10 @@ public:
   /**
    * @brief Lock the mutex from an ISR.
    * @ref https://www.freertos.org/xSemaphoreTakeFromISR.html
+   *
+   * WARNING: Mutexes must not be used from ISR context — FreeRTOS mutexes
+   * have priority inheritance that is incompatible with ISR. Use
+   * binary_semaphore instead.
    *
    * @return isr_result<BaseType_t> containing the result and whether a
    * higher priority task was woken.
@@ -759,6 +767,9 @@ public:
     return unexpected<error>(ticks_to_wait == 0 ? error::would_block
                                                 : error::timeout);
   }
+  // WARNING: Mutexes must not be used from ISR context — FreeRTOS mutexes
+  // have priority inheritance that is incompatible with ISR. Use
+  // binary_semaphore instead.
   [[nodiscard]] isr_result<expected<void, error>> lock_ex_isr() {
     auto result = lock_isr();
     isr_result<expected<void, error>> ret{unexpected<error>(error::would_block),
@@ -775,6 +786,9 @@ public:
     }
     return unexpected<error>(error::semaphore_not_owned);
   }
+  // WARNING: Mutexes must not be used from ISR context — FreeRTOS mutexes
+  // have priority inheritance that is incompatible with ISR. Use
+  // binary_semaphore instead.
   [[nodiscard]] isr_result<expected<void, error>> unlock_ex_isr() {
     auto result = unlock_isr();
     isr_result<expected<void, error>> ret{
