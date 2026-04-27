@@ -194,11 +194,10 @@ public:
   /**
    * @brief Move constructor that properly transfers timer ownership.
    *
-   * This constructor ensures that when a timer is moved, the source timer's
-   * handle is set to nullptr to prevent double deletion. Previously, the
-   * default move constructor would perform a shallow copy, causing both
-   * source and destination timers to share the same handle, leading to
-   * premature timer deletion when the source was destroyed.
+   * @warning Moving a **started** timer is undefined behavior. The timer
+   * daemon may fire concurrently and invoke the callback through the old
+   * `this` pointer (now invalid) or read `m_started` while it is being
+   * moved. Always stop the timer before moving it.
    *
    * @param src The source timer to move from (will be invalidated)
    */
@@ -208,6 +207,7 @@ public:
         m_started{src.m_started.load(std::memory_order_acquire)},
         m_timer(src.m_timer) {
     configASSERT(!SwTimerAllocator::is_static);
+    configASSERT(!src.m_started.load(std::memory_order_acquire)); // UB if started
     src.m_timer = nullptr;
     src.m_started.store(false, std::memory_order_release);
     if (m_timer) {

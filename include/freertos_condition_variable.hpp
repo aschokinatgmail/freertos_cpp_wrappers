@@ -41,6 +41,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "freertos_isr_result.hpp"
 #include "freertos_thread_safety.hpp"
 #include <FreeRTOS.h>
+#include <atomic>
 #include <chrono>
 #include <ctime>
 #include <semphr.h>
@@ -61,6 +62,8 @@ class condition_variable_any {
   StaticSemaphore_t m_semaphore_storage{};
   uint8_t m_semaphore_created{0};
 #endif
+
+  std::atomic<UBaseType_t> m_waiter_count{0};
 
 public:
   condition_variable_any() {
@@ -98,8 +101,14 @@ public:
     if (!m_semaphore) {
       return;
     }
-    for (UBaseType_t i = 0; i < FREERTOS_CPP_WRAPPERS_CONDITION_VARIABLE_MAX_WAITERS; i++) {
-      xSemaphoreGive(m_semaphore);
+    UBaseType_t count = m_waiter_count.load(std::memory_order_acquire);
+    if (count == 0) {
+      return;
+    }
+    UBaseType_t limit = FREERTOS_CPP_WRAPPERS_CONDITION_VARIABLE_MAX_WAITERS;
+    UBaseType_t gives = (count < limit) ? count : limit;
+    for (UBaseType_t i = 0; i < gives; i++) {
+      (void)xSemaphoreGive(m_semaphore);
     }
   }
 
@@ -134,7 +143,12 @@ public:
       return;
     }
     lock.unlock();
+    // Overflow protection: assert if max waiters exceeded
+    configASSERT(m_waiter_count.load(std::memory_order_acquire) <
+                 FREERTOS_CPP_WRAPPERS_CONDITION_VARIABLE_MAX_WAITERS);
+    m_waiter_count.fetch_add(1, std::memory_order_acq_rel);
     xSemaphoreTake(m_semaphore, portMAX_DELAY);
+    m_waiter_count.fetch_sub(1, std::memory_order_acq_rel);
     lock.lock();
   }
 
@@ -155,10 +169,15 @@ public:
       return std::cv_status::timeout;
     }
     lock.unlock();
+    // Overflow protection
+    configASSERT(m_waiter_count.load(std::memory_order_acquire) <
+                 FREERTOS_CPP_WRAPPERS_CONDITION_VARIABLE_MAX_WAITERS);
+    m_waiter_count.fetch_add(1, std::memory_order_acq_rel);
     auto ms = static_cast<TickType_t>(
         std::chrono::duration_cast<std::chrono::milliseconds>(rel_time).count());
     TickType_t ticks = pdMS_TO_TICKS(ms);
     BaseType_t result = xSemaphoreTake(m_semaphore, ticks);
+    m_waiter_count.fetch_sub(1, std::memory_order_acq_rel);
     lock.lock();
     return (result == pdTRUE) ? std::cv_status::no_timeout
                               : std::cv_status::timeout;

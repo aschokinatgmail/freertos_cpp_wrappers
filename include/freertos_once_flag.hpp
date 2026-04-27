@@ -78,7 +78,7 @@ private:
 
     void ensure_semaphore() const {
         if (m_semaphore == nullptr) {
-            taskENTER_CRITICAL();
+            vTaskSuspendAll();
             if (m_semaphore == nullptr) {
 #if configSUPPORT_STATIC_ALLOCATION
                 if (m_semaphore_created.load(std::memory_order_acquire) == 0) {
@@ -92,7 +92,7 @@ private:
                     FREERTOS_CPP_WRAPPERS_ONCE_FLAG_MAX_WAITERS, 0);
 #endif
             }
-            taskEXIT_CRITICAL();
+            (void)xTaskResumeAll();
         }
     }
 
