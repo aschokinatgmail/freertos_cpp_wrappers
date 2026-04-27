@@ -304,26 +304,23 @@ inline int __gthread_setspecific(__gthread_key_t key, const void *ptr) {
 
 inline int __gthread_cond_wait(__gthread_cond_t *cond,
                                 __gthread_mutex_t *mutex) {
-  cond->waiter_count++;
-  __atomic_thread_fence(__ATOMIC_SEQ_CST);
+  __atomic_fetch_add(&cond->waiter_count, 1, __ATOMIC_SEQ_CST);
   __gthread_mutex_unlock(mutex);
   xSemaphoreTake(cond->signal, portMAX_DELAY);
-  cond->waiter_count--;
+  __atomic_fetch_sub(&cond->waiter_count, 1, __ATOMIC_SEQ_CST);
   __gthread_mutex_lock(mutex);
   return 0;
 }
 
 inline int __gthread_cond_signal(__gthread_cond_t *cond) {
-  __atomic_thread_fence(__ATOMIC_SEQ_CST);
-  if (cond->waiter_count > 0) {
+  if (__atomic_load_n(&cond->waiter_count, __ATOMIC_SEQ_CST) > 0) {
     xSemaphoreGive(cond->signal);
   }
   return 0;
 }
 
 inline int __gthread_cond_broadcast(__gthread_cond_t *cond) {
-  __atomic_thread_fence(__ATOMIC_SEQ_CST);
-  int count = cond->waiter_count;
+  int count = __atomic_load_n(&cond->waiter_count, __ATOMIC_SEQ_CST);
   for (int i = 0; i < count; i++) {
     xSemaphoreGive(cond->signal);
   }
