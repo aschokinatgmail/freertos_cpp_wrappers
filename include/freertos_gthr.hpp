@@ -277,10 +277,13 @@ inline int __gthread_key_create(__gthread_key_t *key,
                                 void (*dtor)(void *)) {
   (void)dtor;
   static __gthread_key_t next_key = 0;
+  taskENTER_CRITICAL();
   if (next_key >= configNUM_THREAD_LOCAL_STORAGE_POINTERS) {
+    taskEXIT_CRITICAL();
     return 1;
   }
   *key = next_key++;
+  taskEXIT_CRITICAL();
   return 0;
 }
 
@@ -330,8 +333,18 @@ inline int __gthread_cond_broadcast(__gthread_cond_t *cond) {
 inline int __gthread_cond_timedwait(__gthread_cond_t *cond,
                                      __gthread_mutex_t *mutex,
                                      const struct timespec *ts) {
-  (void)ts;
-  return __gthread_cond_wait(cond, mutex);
+  TickType_t ticks_to_wait = portMAX_DELAY;
+  if (ts) {
+    ticks_to_wait = pdMS_TO_TICKS(
+        static_cast<uint64_t>(ts->tv_sec) * 1000ULL +
+        static_cast<uint64_t>(ts->tv_nsec) / 1000000ULL);
+  }
+  __atomic_fetch_add(&cond->waiter_count, 1, __ATOMIC_SEQ_CST);
+  __gthread_mutex_unlock(mutex);
+  xSemaphoreTake(cond->signal, ticks_to_wait);
+  __atomic_fetch_sub(&cond->waiter_count, 1, __ATOMIC_SEQ_CST);
+  __gthread_mutex_lock(mutex);
+  return 0;
 }
 
 inline int __gthread_cond_destroy(__gthread_cond_t *cond) {
@@ -358,7 +371,7 @@ inline int __gthread_cond_wait(__gthread_cond_t *cond,
 inline int __gthread_cond_signal(__gthread_cond_t *cond) {
   __atomic_thread_fence(__ATOMIC_SEQ_CST);
   if (cond->waiting_task) {
-    vTaskNotifyGiveFromISR(cond->waiting_task, nullptr);
+    xTaskNotifyGive(cond->waiting_task);
     cond->waiting_task = nullptr;
   }
   return 0;
@@ -371,8 +384,19 @@ inline int __gthread_cond_broadcast(__gthread_cond_t *cond) {
 inline int __gthread_cond_timedwait(__gthread_cond_t *cond,
                                      __gthread_mutex_t *mutex,
                                      const struct timespec *ts) {
-  (void)ts;
-  return __gthread_cond_wait(cond, mutex);
+  TickType_t ticks_to_wait = portMAX_DELAY;
+  if (ts) {
+    ticks_to_wait = pdMS_TO_TICKS(
+        static_cast<uint64_t>(ts->tv_sec) * 1000ULL +
+        static_cast<uint64_t>(ts->tv_nsec) / 1000000ULL);
+  }
+  cond->waiting_task = xTaskGetCurrentTaskHandle();
+  cond->signaled = 0;
+  __atomic_thread_fence(__ATOMIC_SEQ_CST);
+  __gthread_mutex_unlock(mutex);
+  ulTaskNotifyTake(pdTRUE, ticks_to_wait);
+  __gthread_mutex_lock(mutex);
+  return 0;
 }
 
 inline int __gthread_cond_destroy(__gthread_cond_t *cond) {

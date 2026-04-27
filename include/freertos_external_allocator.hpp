@@ -105,6 +105,7 @@ public:
   }
 
   SemaphoreHandle_t create_binary() {
+    configASSERT(m_memory == nullptr);
     m_memory = m_region->allocate(sizeof(StaticSemaphore_t));
     if (!m_memory) {
       return nullptr;
@@ -113,6 +114,7 @@ public:
         static_cast<StaticSemaphore_t *>(m_memory)); // NOLINT(clang-tidy:cppcoreguidelines-pro-type-static-cast-downcast)
   }
   SemaphoreHandle_t create_counting(UBaseType_t max_count) {
+    configASSERT(m_memory == nullptr);
     m_memory = m_region->allocate(sizeof(StaticSemaphore_t));
     if (!m_memory) {
       return nullptr;
@@ -121,6 +123,7 @@ public:
         max_count, max_count, static_cast<StaticSemaphore_t *>(m_memory)); // NOLINT(clang-tidy:cppcoreguidelines-pro-type-static-cast-downcast)
   }
   SemaphoreHandle_t create_mutex() {
+    configASSERT(m_memory == nullptr);
     m_memory = m_region->allocate(sizeof(StaticSemaphore_t));
     if (!m_memory) {
       return nullptr;
@@ -129,6 +132,7 @@ public:
         static_cast<StaticSemaphore_t *>(m_memory)); // NOLINT(clang-tidy:cppcoreguidelines-pro-type-static-cast-downcast)
   }
   SemaphoreHandle_t create_recursive_mutex() {
+    configASSERT(m_memory == nullptr);
     m_memory = m_region->allocate(sizeof(StaticSemaphore_t));
     if (!m_memory) {
       return nullptr;
@@ -540,6 +544,7 @@ public:
   }
 
   SemaphoreHandle_t create_mutex() {
+    configASSERT(m_mutex_memory == nullptr);
     m_mutex_memory = m_region->allocate(sizeof(StaticSemaphore_t));
     if (!m_mutex_memory) {
       return nullptr;
@@ -548,6 +553,7 @@ public:
         static_cast<StaticSemaphore_t *>(m_mutex_memory)); // NOLINT(clang-tidy:cppcoreguidelines-pro-type-static-cast-downcast)
   }
   SemaphoreHandle_t create_counting(UBaseType_t max_count) {
+    configASSERT(m_reader_slots_memory == nullptr);
     m_reader_slots_memory = m_region->allocate(sizeof(StaticSemaphore_t));
     if (!m_reader_slots_memory) {
       return nullptr;

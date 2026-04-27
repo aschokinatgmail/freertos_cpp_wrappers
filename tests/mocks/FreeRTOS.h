@@ -116,6 +116,12 @@ typedef struct {
   uint8_t dummy[80]; // Placeholder size
 } StaticSemaphore_t;
 
+// Timeout tracking structure (used by vTaskSetTimeOutState / xTaskCheckForTimeOut)
+typedef struct xTIME_OUT {
+  BaseType_t xOverflowCount;
+  TickType_t xTimeOnEntering;
+} TimeOut_t;
+
 // Queue types
 typedef void *QueueHandle_t;
 
@@ -254,6 +260,9 @@ public:
   MOCK_METHOD(void, vTaskDelay, (TickType_t xTicksToDelay));
   MOCK_METHOD(void, vTaskDelayUntil,
               (TickType_t * pxPreviousWakeTime, TickType_t xTimeIncrement));
+  MOCK_METHOD(void, vTaskSetTimeOutState, (TimeOut_t * pxTimeOut));
+  MOCK_METHOD(BaseType_t, xTaskCheckForTimeOut,
+              (TimeOut_t * pxTimeOut, TickType_t *pxTicksToWait));
 
   // Task notifications
   MOCK_METHOD(BaseType_t, xTaskNotifyGive, (TaskHandle_t xTaskToNotify));
@@ -717,6 +726,8 @@ UBaseType_t uxTaskGetStackHighWaterMark(TaskHandle_t xTask);
 UBaseType_t uxTaskGetStackHighWaterMark2(TaskHandle_t xTask);
 void vTaskDelay(TickType_t xTicksToDelay);
 void vTaskDelayUntil(TickType_t *pxPreviousWakeTime, TickType_t xTimeIncrement);
+void vTaskSetTimeOutState(TimeOut_t *pxTimeOut);
+BaseType_t xTaskCheckForTimeOut(TimeOut_t *pxTimeOut, TickType_t *pxTicksToWait);
 BaseType_t xPortIsInsideInterrupt(void);
 void xTaskCatchUpTicks(TickType_t xTicksToCatchUp);
 TaskHandle_t xTimerGetTimerDaemonTaskHandle(void);

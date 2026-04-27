@@ -40,9 +40,13 @@ freertos_wait_entry freertos_wait_table[atomic_wait_table_size] = {};
 
 static SemaphoreHandle_t atomic_wait_ensure_semaphore(freertos_wait_entry &entry) {
     if (entry.semaphore == nullptr) {
-        static constexpr UBaseType_t unbounded_max_count = static_cast<UBaseType_t>(-1);
-        entry.semaphore = xSemaphoreCreateCounting(unbounded_max_count, 0);
-        configASSERT(entry.semaphore != nullptr);
+        taskENTER_CRITICAL();
+        if (entry.semaphore == nullptr) {
+            static constexpr UBaseType_t unbounded_max_count = static_cast<UBaseType_t>(-1);
+            entry.semaphore = xSemaphoreCreateCounting(unbounded_max_count, 0);
+            configASSERT(entry.semaphore != nullptr);
+        }
+        taskEXIT_CRITICAL();
     }
     return entry.semaphore;
 }
@@ -53,8 +57,10 @@ extern "C" bool __platform_wait_on_address(void const *addr,
     (void)size;
     auto idx = atomic_wait_hash(addr);
     auto &entry = freertos_wait_table[idx];
+    taskENTER_CRITICAL();
     entry.address = addr;
     entry.waiter_count.fetch_add(1, std::memory_order_relaxed);
+    taskEXIT_CRITICAL();
     std::atomic_thread_fence(std::memory_order_seq_cst);
 
     bool match = false;
@@ -141,14 +147,18 @@ extern "C" bool __platform_wait_on_address(void const *addr,
 
     if (match) {
         if (bucket.mutex == nullptr) {
-            bucket.mutex = xSemaphoreCreateMutex();
-            configASSERT(bucket.mutex != nullptr);
+            taskENTER_CRITICAL();
+            if (bucket.mutex == nullptr) {
+                bucket.mutex = xSemaphoreCreateMutex();
+                configASSERT(bucket.mutex != nullptr);
+            }
+            taskEXIT_CRITICAL();
         }
         freertos_waiter_node node;
         node.task = xTaskGetCurrentTaskHandle();
         node.address = addr;
-        node.next = bucket.waiters;
         xSemaphoreTake(bucket.mutex, portMAX_DELAY);
+        node.next = bucket.waiters;
         bucket.waiters = &node;
         xSemaphoreGive(bucket.mutex);
 
@@ -184,16 +194,20 @@ extern "C" void __platform_wake_by_address(void const *addr, int count) {
 
     xSemaphoreTake(bucket.mutex, portMAX_DELAY);
     auto to_wake = count < 0 ? waiters : static_cast<__cxx_atomic_contention_t>(count);
-    __cxx_atomic_contention_t woken = 0;
+    TaskHandle_t tasks_to_notify[atomic_wait_table_size];
+    __cxx_atomic_contention_t collected = 0;
     auto *node = bucket.waiters;
-    while (node != nullptr && woken < to_wake) {
+    while (node != nullptr && collected < to_wake &&
+           collected < static_cast<__cxx_atomic_contention_t>(atomic_wait_table_size)) {
         if (node->address == addr) {
-            xTaskNotifyGive(node->task);
-            ++woken;
+            tasks_to_notify[collected++] = node->task;
         }
         node = node->next;
     }
     xSemaphoreGive(bucket.mutex);
+    for (__cxx_atomic_contention_t i = 0; i < collected; ++i) {
+        xTaskNotifyGive(tasks_to_notify[i]);
+    }
 }
 
 #elif FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL == 3

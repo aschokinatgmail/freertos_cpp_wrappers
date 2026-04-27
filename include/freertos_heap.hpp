@@ -147,69 +147,69 @@ inline void vApplicationGetTimerTaskMemory(
 
 #ifdef FREERTOS_CPP_WRAPPERS_REDIRECT_NEW_DELETE
 
-void *operator new(size_t size) noexcept {
+inline void *operator new(size_t size) noexcept {
     return freertos::heap::allocate(size);
 }
 
-void operator delete(void *ptr) noexcept {
+inline void operator delete(void *ptr) noexcept {
     freertos::heap::deallocate(ptr);
 }
 
-void *operator new[](size_t size) noexcept {
+inline void *operator new[](size_t size) noexcept {
     return freertos::heap::allocate(size);
 }
 
-void operator delete[](void *ptr) noexcept {
+inline void operator delete[](void *ptr) noexcept {
     freertos::heap::deallocate(ptr);
 }
 
-void *operator new(size_t size, const std::nothrow_t &) noexcept {
+inline void *operator new(size_t size, const std::nothrow_t &) noexcept {
     return freertos::heap::allocate(size);
 }
 
-void operator delete(void *ptr, const std::nothrow_t &) noexcept {
+inline void operator delete(void *ptr, const std::nothrow_t &) noexcept {
     freertos::heap::deallocate(ptr);
 }
 
-void operator delete(void *ptr, size_t) noexcept {
+inline void operator delete(void *ptr, size_t) noexcept {
     freertos::heap::deallocate(ptr);
 }
 
-void operator delete[](void *ptr, size_t) noexcept {
+inline void operator delete[](void *ptr, size_t) noexcept {
     freertos::heap::deallocate(ptr);
 }
 
 #if __cplusplus >= 201703L
 
-void *operator new(size_t size, std::align_val_t align) noexcept {
+inline void *operator new(size_t size, std::align_val_t align) noexcept {
     return freertos::heap::allocate_with_alignment_check(static_cast<size_t>(align), size);
 }
 
-void *operator new[](size_t size, std::align_val_t align) noexcept {
+inline void *operator new[](size_t size, std::align_val_t align) noexcept {
     return freertos::heap::allocate_with_alignment_check(static_cast<size_t>(align), size);
 }
 
-void *operator new(size_t size, std::align_val_t align, std::nothrow_t &) noexcept {
+inline void *operator new(size_t size, std::align_val_t align, std::nothrow_t &) noexcept {
     return freertos::heap::allocate_with_alignment_check(static_cast<size_t>(align), size);
 }
 
-void *operator new[](size_t size, std::align_val_t align, std::nothrow_t &) noexcept {
+inline void *operator new[](size_t size, std::align_val_t align, std::nothrow_t &) noexcept {
     return freertos::heap::allocate_with_alignment_check(static_cast<size_t>(align), size);
 }
 
-void operator delete(void *ptr, std::align_val_t) noexcept {
+inline void operator delete(void *ptr, std::align_val_t) noexcept {
     freertos::heap::deallocate(ptr);
 }
 
-void operator delete[](void *ptr, std::align_val_t) noexcept {
+inline void operator delete[](void *ptr, std::align_val_t) noexcept {
     freertos::heap::deallocate(ptr);
 }
 
-void operator delete(void *ptr, std::align_val_t, std::nothrow_t &) noexcept {
+inline void operator delete(void *ptr, std::align_val_t, std::nothrow_t &) noexcept {
     freertos::heap::deallocate(ptr);
 }
 
-void operator delete[](void *ptr, std::align_val_t, std::nothrow_t &) noexcept {
+inline void operator delete[](void *ptr, std::align_val_t, std::nothrow_t &) noexcept {
     freertos::heap::deallocate(ptr);
 }
 

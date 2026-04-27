@@ -176,10 +176,10 @@ public:
   }
 
   void unlock() FREERTOS_RELEASE() {
+    xSemaphoreGive(m_mutex_handle);
     for (UBaseType_t i = 0; i < m_max_readers; i++) {
       xSemaphoreGive(m_reader_slots_handle);
     }
-    xSemaphoreGive(m_mutex_handle);
   }
 
   template <typename Rep, typename Period>

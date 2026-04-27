@@ -40,6 +40,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "freertos_expected.hpp"
 #include "freertos_semaphore.hpp"
 #include "freertos_thread_safety.hpp"
+#include <mutex>
 #include <type_traits>
 #include <utility>
 
@@ -58,55 +59,24 @@ public:
   explicit shared_data(T &&value) : m_data(std::move(value)) {}
 
   T get() const {
-    m_mutex.lock();
-    try {
-      T result = m_data;
-      m_mutex.unlock();
-      return result;
-    } catch (...) {
-      m_mutex.unlock();
-      throw;
-    }
+    std::lock_guard<Mutex> lock(m_mutex);
+    return m_data;
   }
 
   void set(const T &value) {
-    m_mutex.lock();
-    try {
-      m_data = value;
-      m_mutex.unlock();
-    } catch (...) {
-      m_mutex.unlock();
-      throw;
-    }
+    std::lock_guard<Mutex> lock(m_mutex);
+    m_data = value;
   }
 
   void set(T &&value) {
-    m_mutex.lock();
-    try {
-      m_data = std::move(value);
-      m_mutex.unlock();
-    } catch (...) {
-      m_mutex.unlock();
-      throw;
-    }
+    std::lock_guard<Mutex> lock(m_mutex);
+    m_data = std::move(value);
   }
 
   template <typename Fn>
   auto use(Fn &&fn) -> decltype(fn(std::declval<T &>())) {
-    m_mutex.lock();
-    try {
-      if constexpr (std::is_void_v<decltype(fn(m_data))>) {
-        fn(m_data);
-        m_mutex.unlock();
-      } else {
-        auto result = fn(m_data);
-        m_mutex.unlock();
-        return result;
-      }
-    } catch (...) {
-      m_mutex.unlock();
-      throw;
-    }
+    std::lock_guard<Mutex> lock(m_mutex);
+    return fn(m_data);
   }
 
   [[nodiscard]] expected<T, error> get_ex() const {

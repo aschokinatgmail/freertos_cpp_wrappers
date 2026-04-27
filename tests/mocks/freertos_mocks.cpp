@@ -197,6 +197,20 @@ void vTaskDelayUntil(TickType_t *pxPreviousWakeTime,
   }
 }
 
+void vTaskSetTimeOutState(TimeOut_t *pxTimeOut) {
+  if (g_freertos_mock) {
+    g_freertos_mock->vTaskSetTimeOutState(pxTimeOut);
+  }
+}
+
+BaseType_t xTaskCheckForTimeOut(TimeOut_t *pxTimeOut,
+                                TickType_t *pxTicksToWait) {
+  if (g_freertos_mock) {
+    return g_freertos_mock->xTaskCheckForTimeOut(pxTimeOut, pxTicksToWait);
+  }
+  return pdFALSE;
+}
+
 BaseType_t xPortIsInsideInterrupt(void) {
   if (g_freertos_mock) {
     return g_freertos_mock->xPortIsInsideInterrupt();

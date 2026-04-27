@@ -345,7 +345,7 @@ public:
         }
 #else
         while (this->load(order) == old) {
-            taskYIELD();
+            vTaskDelay(1);
         }
 #endif
     }
@@ -367,18 +367,26 @@ public:
 #if defined(FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY) &&           \
     (FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL == 1 ||                        \
      FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL == 2)
-        freertos::atomic_notify_one_isr(static_cast<void const *>(this));
-#endif
+        isr_result<void> result{pdFALSE};
+        result.higher_priority_task_woken =
+            freertos::atomic_notify_one_isr(static_cast<void const *>(this));
+        return result;
+#else
         return {pdFALSE};
+#endif
     }
 
     isr_result<void> notify_all_isr() noexcept {
 #if defined(FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY) &&           \
     (FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL == 1 ||                        \
      FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL == 2)
-        freertos::atomic_notify_all_isr(static_cast<void const *>(this));
-#endif
+        isr_result<void> result{pdFALSE};
+        result.higher_priority_task_woken =
+            freertos::atomic_notify_all_isr(static_cast<void const *>(this));
+        return result;
+#else
         return {pdFALSE};
+#endif
     }
 
     [[nodiscard]] expected<void, error> notify_one_ex() noexcept {
