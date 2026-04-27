@@ -115,6 +115,14 @@ git submodule add https://github.com/aschokinatgmail/freertos_cpp_wrappers.git t
 #include <freertos_semaphore.hpp>
 ```
 
+## Known Limitations
+
+### Heap Allocation of `std::function` Callbacks
+
+The `task` and `timer` wrappers use `std::function<void()>` for their callback type. In embedded environments with constrained memory, `std::function` may allocate from the heap for large captures (it typically uses a small-object optimization for small lambdas, but this is implementation-defined and may throw `std::bad_alloc`).
+
+If heap-free callbacks are required, use `freertos::fixed_function<N>` — a fixed-capacity delegate that never allocates. It can be constructed from any callable and passed directly to wrapper constructors that accept callable parameters. See `freertos_fixed_function.hpp` for details.
+
 ## Code Examples
 
 ### Basic Task Creation
