@@ -2,7 +2,7 @@
 @file freertos_sw_timer.hpp
 @author Andrey V. Shchekin <aschokin@gmail.com>
 @brief FreeRTOS software timer wrapper
-@version 3.1.0
+@version 3.2.0
 @date 2024-04-07
 
 The MIT License (MIT)
@@ -40,6 +40,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "freertos_isr_result.hpp"
 #include <FreeRTOS.h>
 #include <chrono>
+#include <atomic>
 #include <cstdbool>
 #include <ctime>
 #include <functional>
@@ -52,8 +53,6 @@ namespace freertos {
 
 #if configUSE_TIMERS
 
-using std::function;
-
 #if configSUPPORT_STATIC_ALLOCATION
 /**
  * @brief An allocator for the software timer that uses a static memory
@@ -64,6 +63,8 @@ class static_sw_timer_allocator {
   StaticTimer_t m_timer_placeholder{};
 
 public:
+  static constexpr bool is_static = true;
+
   static_sw_timer_allocator() = default;
   ~static_sw_timer_allocator() = default;
   static_sw_timer_allocator(const static_sw_timer_allocator &) = delete;
@@ -94,6 +95,8 @@ public:
  */
 class dynamic_sw_timer_allocator {
 public:
+  static constexpr bool is_static = false;
+
   void swap(dynamic_sw_timer_allocator &other) noexcept { (void)other; }
 
   TimerHandle_t create(const char *name, const TickType_t period_ticks,
@@ -108,7 +111,7 @@ public:
  * @brief Timer callback routine type definition based on std::function.
  *
  */
-using timer_callback_t = function<void()>;
+using timer_callback_t = std::function<void()>;
 
 /**
  * @brief A wrapper for the FreeRTOS software timer.
@@ -118,11 +121,7 @@ using timer_callback_t = function<void()>;
 template <typename SwTimerAllocator> class timer {
   SwTimerAllocator m_allocator;
   timer_callback_t m_callback;
-  // Note: volatile is used as a single-core workaround to prevent compiler
-  // reordering of reads/writes between ISR and task contexts. On multi-core
-  // systems, stronger synchronization (std::atomic or critical sections)
-  // would be required. See issue #121.
-  volatile uint8_t m_started : 1;
+  std::atomic<bool> m_started{false};
   TimerHandle_t m_timer;
 
   // LCOV_EXCL_START - Internal FreeRTOS timer callback function
@@ -195,20 +194,22 @@ public:
   /**
    * @brief Move constructor that properly transfers timer ownership.
    *
-   * This constructor ensures that when a timer is moved, the source timer's
-   * handle is set to nullptr to prevent double deletion. Previously, the
-   * default move constructor would perform a shallow copy, causing both
-   * source and destination timers to share the same handle, leading to
-   * premature timer deletion when the source was destroyed.
+   * @warning Moving a **started** timer is undefined behavior. The timer
+   * daemon may fire concurrently and invoke the callback through the old
+   * `this` pointer (now invalid) or read `m_started` while it is being
+   * moved. Always stop the timer before moving it.
    *
    * @param src The source timer to move from (will be invalidated)
    */
   timer(timer &&src) noexcept
       : m_allocator(std::move(src.m_allocator)),
-        m_callback(std::move(src.m_callback)), m_started(src.m_started),
+        m_callback(std::move(src.m_callback)),
+        m_started{src.m_started.load(std::memory_order_acquire)},
         m_timer(src.m_timer) {
+    configASSERT(!SwTimerAllocator::is_static);
+    configASSERT(!src.m_started.load(std::memory_order_acquire)); // UB if started
     src.m_timer = nullptr;
-    src.m_started = false;
+    src.m_started.store(false, std::memory_order_release);
     if (m_timer) {
       vTimerSetTimerID(m_timer, this);
     }
@@ -227,6 +228,7 @@ public:
 
   timer &operator=(const timer &) = delete;
   timer &operator=(timer &&src) noexcept {
+    configASSERT(!SwTimerAllocator::is_static);
     if (this != &src) {
       if (src.m_timer) {
         auto rc = xTimerStop(src.m_timer, portMAX_DELAY);
@@ -234,7 +236,7 @@ public:
           auto name = pcTimerGetName(src.m_timer);
           auto period = xTimerGetPeriod(src.m_timer);
           auto auto_reload = uxTimerGetReloadMode(src.m_timer);
-          bool was_started = src.m_started;
+          bool was_started = src.m_started.load(std::memory_order_acquire);
 
           // Create new timer using source's allocator BEFORE modifying
           // either object, so we can roll back cleanly on failure.
@@ -252,11 +254,11 @@ public:
             xTimerDelete(src.m_timer, portMAX_DELAY);
             src.m_timer = nullptr;
             src.m_callback = nullptr;
-            m_started = false;
+            m_started.store(false, std::memory_order_release);
             if (was_started) {
               rc = xTimerStart(m_timer, portMAX_DELAY);
               if (rc == pdPASS) {
-                m_started = true;
+                m_started.store(true, std::memory_order_release);
               }
             }
           } else {
@@ -271,19 +273,21 @@ public:
           xTimerDelete(m_timer, portMAX_DELAY);
           m_timer = nullptr;
         }
-        m_started = false;
+        m_started.store(false, std::memory_order_release);
       }
     }
     return *this;
   }
 
   void swap(timer &other) noexcept {
+    configASSERT(!SwTimerAllocator::is_static);
     using std::swap;
     m_allocator.swap(other.m_allocator);
     swap(m_callback, other.m_callback);
-    const bool started_tmp = m_started;
-    m_started = other.m_started ? 1 : 0;
-    other.m_started = started_tmp ? 1 : 0;
+    const bool started_tmp = m_started.load(std::memory_order_acquire);
+    m_started.store(other.m_started.load(std::memory_order_acquire),
+                    std::memory_order_release);
+    other.m_started.store(started_tmp, std::memory_order_release);
     swap(m_timer, other.m_timer);
     if (m_timer) {
       vTimerSetTimerID(m_timer, this);
@@ -308,7 +312,7 @@ public:
     }
     auto rc = xTimerStart(m_timer, ticks_to_wait);
     if (rc) {
-      m_started = true;
+      m_started.store(true, std::memory_order_release);
     }
     return rc;
   }
@@ -342,7 +346,7 @@ public:
     result.result =
         xTimerStartFromISR(m_timer, &result.higher_priority_task_woken);
     if (result.result) {
-      m_started = true;
+      m_started.store(true, std::memory_order_release);
     }
     return result;
   }
@@ -359,7 +363,7 @@ public:
     }
     auto rc = xTimerStop(m_timer, ticks_to_wait);
     if (rc) {
-      m_started = false;
+      m_started.store(false, std::memory_order_release);
     }
     return rc;
   }
@@ -393,7 +397,7 @@ public:
     result.result =
         xTimerStopFromISR(m_timer, &result.higher_priority_task_woken);
     if (result.result) {
-      m_started = false;
+      m_started.store(false, std::memory_order_release);
     }
     return result;
   }

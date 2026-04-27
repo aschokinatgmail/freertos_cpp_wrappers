@@ -2,7 +2,7 @@
 @file freertos_atomic_wait.hpp
 @author Andrey V. Shchekin <aschokin@gmail.com>
 @brief FreeRTOS platform hooks for C++20 std::atomic::wait/notify_one/notify_all
-@version 3.1.0
+@version 3.2.0
 @date 2026-04-21
 
 The MIT License (MIT)

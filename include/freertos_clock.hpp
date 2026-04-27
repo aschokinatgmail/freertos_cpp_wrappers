@@ -2,7 +2,7 @@
 @file freertos_clock.hpp
 @author Andrey V. Shchekin <aschokin@gmail.com>
 @brief FreeRTOS tick-based TrivialClock and tick conversion utilities
-@version 3.1.0
+@version 3.2.0
 @date 2026-04-21
 
 The MIT License (MIT)

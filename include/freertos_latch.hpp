@@ -2,7 +2,7 @@
 @file freertos_latch.hpp
 @author Andrey V. Shchekin <aschokin@gmail.com>
 @brief FreeRTOS latch wrapper providing C++20 std::latch semantics
-@version 3.1.0
+@version 3.2.0
 @date 2026-04-22
 
 The MIT License (MIT)
@@ -46,6 +46,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 namespace freertos {
 
 class latch {
+  static_assert(std::atomic<ptrdiff_t>::is_always_lock_free,
+                "latch requires lock-free atomic for ISR safety");
+
 public:
   static constexpr ptrdiff_t max() noexcept { return PTRDIFF_MAX; }
 
@@ -53,6 +56,8 @@ public:
       : m_semaphore{xSemaphoreCreateBinary()}, m_counter{expected} {
     configASSERT(m_semaphore);
   }
+
+  [[nodiscard]] bool valid() const noexcept { return m_semaphore != nullptr; }
 
   latch(const latch &) = delete;
   latch &operator=(const latch &) = delete;
@@ -67,9 +72,18 @@ public:
     if (update <= 0) {
       return;
     }
-    auto prev =
-        m_counter.fetch_sub(update, std::memory_order_acq_rel);
-    if (prev == update) {
+    ptrdiff_t prev;
+    ptrdiff_t next;
+    do {
+      prev = m_counter.load(std::memory_order_acquire);
+      if (prev <= 0) {
+        return;
+      }
+      next = prev > update ? prev - update : 0;
+    } while (!m_counter.compare_exchange_weak(prev, next,
+                                              std::memory_order_acq_rel,
+                                              std::memory_order_acquire));
+    if (next == 0 && prev > 0) {
       if (m_semaphore) {
         xSemaphoreGive(m_semaphore);
       }
@@ -100,10 +114,19 @@ public:
     if (update <= 0) {
       return {pdFALSE};
     }
-    auto prev =
-        m_counter.fetch_sub(update, std::memory_order_acq_rel);
+    ptrdiff_t prev;
+    ptrdiff_t next;
+    do {
+      prev = m_counter.load(std::memory_order_acquire);
+      if (prev <= 0) {
+        return {pdFALSE};
+      }
+      next = prev > update ? prev - update : 0;
+    } while (!m_counter.compare_exchange_weak(prev, next,
+                                              std::memory_order_acq_rel,
+                                              std::memory_order_acquire));
     isr_result<void> result{pdFALSE};
-    if (prev == update) {
+    if (next == 0 && prev > 0) {
       if (m_semaphore) {
         xSemaphoreGiveFromISR(m_semaphore, &result.higher_priority_task_woken);
       }
@@ -115,9 +138,18 @@ public:
     if (update <= 0) {
       return {};
     }
-    auto prev =
-        m_counter.fetch_sub(update, std::memory_order_acq_rel);
-    if (prev == update) {
+    ptrdiff_t prev;
+    ptrdiff_t next;
+    do {
+      prev = m_counter.load(std::memory_order_acquire);
+      if (prev <= 0) {
+        return {};
+      }
+      next = prev > update ? prev - update : 0;
+    } while (!m_counter.compare_exchange_weak(prev, next,
+                                              std::memory_order_acq_rel,
+                                              std::memory_order_acquire));
+    if (next == 0 && prev > 0) {
       if (!m_semaphore) {
         return unexpected<error>(error::invalid_handle);
       }
@@ -135,11 +167,20 @@ public:
     if (update <= 0) {
       return {{}, pdFALSE};
     }
-    auto prev =
-        m_counter.fetch_sub(update, std::memory_order_acq_rel);
+    ptrdiff_t prev;
+    ptrdiff_t next;
+    do {
+      prev = m_counter.load(std::memory_order_acquire);
+      if (prev <= 0) {
+        return {{}, pdFALSE};
+      }
+      next = prev > update ? prev - update : 0;
+    } while (!m_counter.compare_exchange_weak(prev, next,
+                                              std::memory_order_acq_rel,
+                                              std::memory_order_acquire));
     isr_result<expected<void, error>> result{
         unexpected<error>(error::semaphore_not_owned), pdFALSE};
-    if (prev == update) {
+    if (next == 0 && prev > 0) {
       if (!m_semaphore) {
         result.result = unexpected<error>(error::invalid_handle);
         return result;
@@ -166,6 +207,8 @@ namespace sa {
 
 template <ptrdiff_t N = 1> class latch_static {
   static_assert(N > 0, "latch expected count must be positive");
+  static_assert(std::atomic<ptrdiff_t>::is_always_lock_free,
+                "latch requires lock-free atomic for ISR safety");
 
   StaticSemaphore_t m_semaphore_placeholder{};
   SemaphoreHandle_t m_semaphore{nullptr};
@@ -178,6 +221,8 @@ public:
       : m_semaphore{xSemaphoreCreateBinaryStatic(&m_semaphore_placeholder)} {
     configASSERT(m_semaphore);
   }
+
+  [[nodiscard]] bool valid() const noexcept { return m_semaphore != nullptr; }
 
   latch_static(const latch_static &) = delete;
   latch_static &operator=(const latch_static &) = delete;
@@ -192,9 +237,18 @@ public:
     if (update <= 0) {
       return;
     }
-    auto prev =
-        m_counter.fetch_sub(update, std::memory_order_acq_rel);
-    if (prev == update) {
+    ptrdiff_t prev;
+    ptrdiff_t next;
+    do {
+      prev = m_counter.load(std::memory_order_acquire);
+      if (prev <= 0) {
+        return;
+      }
+      next = prev > update ? prev - update : 0;
+    } while (!m_counter.compare_exchange_weak(prev, next,
+                                              std::memory_order_acq_rel,
+                                              std::memory_order_acquire));
+    if (next == 0 && prev > 0) {
       xSemaphoreGive(m_semaphore);
     }
   }
@@ -220,10 +274,19 @@ public:
     if (update <= 0) {
       return {pdFALSE};
     }
-    auto prev =
-        m_counter.fetch_sub(update, std::memory_order_acq_rel);
+    ptrdiff_t prev;
+    ptrdiff_t next;
+    do {
+      prev = m_counter.load(std::memory_order_acquire);
+      if (prev <= 0) {
+        return {pdFALSE};
+      }
+      next = prev > update ? prev - update : 0;
+    } while (!m_counter.compare_exchange_weak(prev, next,
+                                              std::memory_order_acq_rel,
+                                              std::memory_order_acquire));
     isr_result<void> result{pdFALSE};
-    if (prev == update) {
+    if (next == 0 && prev > 0) {
       xSemaphoreGiveFromISR(m_semaphore, &result.higher_priority_task_woken);
     }
     return result;
@@ -233,9 +296,18 @@ public:
     if (update <= 0) {
       return {};
     }
-    auto prev =
-        m_counter.fetch_sub(update, std::memory_order_acq_rel);
-    if (prev == update) {
+    ptrdiff_t prev;
+    ptrdiff_t next;
+    do {
+      prev = m_counter.load(std::memory_order_acquire);
+      if (prev <= 0) {
+        return {};
+      }
+      next = prev > update ? prev - update : 0;
+    } while (!m_counter.compare_exchange_weak(prev, next,
+                                              std::memory_order_acq_rel,
+                                              std::memory_order_acquire));
+    if (next == 0 && prev > 0) {
       auto rc = xSemaphoreGive(m_semaphore);
       if (rc == pdTRUE) {
         return {};
@@ -250,11 +322,20 @@ public:
     if (update <= 0) {
       return {{}, pdFALSE};
     }
-    auto prev =
-        m_counter.fetch_sub(update, std::memory_order_acq_rel);
+    ptrdiff_t prev;
+    ptrdiff_t next;
+    do {
+      prev = m_counter.load(std::memory_order_acquire);
+      if (prev <= 0) {
+        return {{}, pdFALSE};
+      }
+      next = prev > update ? prev - update : 0;
+    } while (!m_counter.compare_exchange_weak(prev, next,
+                                              std::memory_order_acq_rel,
+                                              std::memory_order_acquire));
     isr_result<expected<void, error>> result{
         unexpected<error>(error::semaphore_not_owned), pdFALSE};
-    if (prev == update) {
+    if (next == 0 && prev > 0) {
       BaseType_t woken = pdFALSE;
       auto rc = xSemaphoreGiveFromISR(m_semaphore, &woken);
       result.higher_priority_task_woken = woken;

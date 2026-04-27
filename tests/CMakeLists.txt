@@ -377,6 +377,11 @@ add_executable(
 )
 
 add_executable(
+    test_freertos_coverage_exception_safety
+    test_freertos_coverage_exception_safety.cpp
+)
+
+add_executable(
     test_freertos_stream_buffer_callbacks
     test_freertos_stream_buffer_callbacks.cpp
 )
@@ -995,6 +1000,14 @@ target_link_libraries(
 )
 
 target_link_libraries(
+    test_freertos_coverage_exception_safety
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
+target_link_libraries(
     test_freertos_coverage_branches4
     freertos_cpp_wrappers
     freertos_mocks
@@ -1193,6 +1206,7 @@ target_compile_options(test_freertos_isr_result PRIVATE ${GTEST_COMPILE_OPTIONS}
     target_compile_options(test_freertos_coverage_timer2 PRIVATE ${GTEST_COMPILE_OPTIONS})
     target_compile_options(test_freertos_coverage_expected3 PRIVATE ${GTEST_COMPILE_OPTIONS})
     target_compile_options(test_freertos_coverage_branches4 PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_coverage_exception_safety PRIVATE ${GTEST_COMPILE_OPTIONS})
     target_compile_options(test_freertos_stream_buffer_callbacks PRIVATE ${GTEST_COMPILE_OPTIONS})
     target_compile_options(test_freertos_stream_batching_buffer PRIVATE ${GTEST_COMPILE_OPTIONS})
     target_compile_options(test_freertos_task_join PRIVATE ${GTEST_COMPILE_OPTIONS})
@@ -1282,6 +1296,7 @@ add_test(NAME test_freertos_coverage_expected2 COMMAND test_freertos_coverage_ex
 add_test(NAME test_freertos_coverage_timer2 COMMAND test_freertos_coverage_timer2)
 add_test(NAME test_freertos_coverage_expected3 COMMAND test_freertos_coverage_expected3)
 add_test(NAME test_freertos_coverage_branches4 COMMAND test_freertos_coverage_branches4)
+add_test(NAME test_freertos_coverage_exception_safety COMMAND test_freertos_coverage_exception_safety)
 
 add_test(NAME test_freertos_stream_buffer_callbacks COMMAND test_freertos_stream_buffer_callbacks)
 add_test(NAME test_freertos_task_join COMMAND test_freertos_task_join)

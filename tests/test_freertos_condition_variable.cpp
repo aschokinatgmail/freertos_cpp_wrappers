@@ -276,7 +276,7 @@ TEST_F(ConditionVariableMockTest, NotifyOneEx_SemaphoreNotOwned) {
     freertos::condition_variable_any cv;
     auto result = cv.notify_one_ex();
     EXPECT_FALSE(result.has_value());
-    EXPECT_EQ(result.error(), freertos::error::semaphore_not_owned);
+    EXPECT_EQ(result.error(), freertos::error::would_block);
 }
 
 TEST_F(ConditionVariableMockTest, NotifyAllEx_Success) {
@@ -284,10 +284,10 @@ TEST_F(ConditionVariableMockTest, NotifyAllEx_Success) {
 
     EXPECT_CALL(*mock, xSemaphoreCreateCountingStatic(_, _, NotNull()))
         .WillOnce(Return(sem_handle));
-    // notify_all_ex calls notify_all() which gives FREERTOS_CPP_WRAPPERS_CONDITION_VARIABLE_MAX_WAITERS times
+    // notify_all_ex calls notify_all() — when no waiters are present,
+    // it returns early with zero semaphore gives.
     EXPECT_CALL(*mock, xSemaphoreGive(sem_handle))
-        .Times(FREERTOS_CPP_WRAPPERS_CONDITION_VARIABLE_MAX_WAITERS)
-        .WillRepeatedly(Return(pdTRUE));
+        .Times(0);
     EXPECT_CALL(*mock, vSemaphoreDelete(sem_handle));
 
     freertos::condition_variable_any cv;

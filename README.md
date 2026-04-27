@@ -28,7 +28,7 @@ Include `<freertos.hpp>` to access version macros at compile time.
 |---------|---------|
 | **Safety-Critical Ready** | MISRA 2012 C compliant, suitable for functionally safe applications |
 | **Modern C++17** | RAII wrappers with move semantics, no raw pointers |
-| **Production Tested** | 592 tests, 95% branch coverage, used in commercial BMS systems |
+| **Production Tested** | 592+ tests, 95% branch coverage, used in commercial BMS systems |
 | **Zero Overhead** | Thin wrappers compile to efficient FreeRTOS calls |
 | **Dual API** | FreeRTOS-native and std-compatible interfaces |
 | **expected\<T,E\> Error Handling** | Type-safe error handling replacing error codes |
@@ -65,7 +65,7 @@ This library is ideal for:
 - Industrial automation controllers
 - Consumer electronics with safety requirements
 
-## Features (v3.0.1)
+## Features (v3.2.0)
 
 | Category | Feature | Description |
 |----------|---------|-------------|
@@ -94,7 +94,7 @@ Include(FetchContent)
 FetchContent_Declare(
   freertos_cpp_wrappers
   GIT_REPOSITORY https://github.com/aschokinatgmail/freertos_cpp_wrappers.git
-  GIT_TAG v3.0.1
+  GIT_TAG v3.2.0
 )
 FetchContent_MakeAvailable(freertos_cpp_wrappers)
 
@@ -114,6 +114,14 @@ git submodule add https://github.com/aschokinatgmail/freertos_cpp_wrappers.git t
 #include <freertos_task.hpp>
 #include <freertos_semaphore.hpp>
 ```
+
+## Known Limitations
+
+### Heap Allocation of `std::function` Callbacks
+
+The `task` and `timer` wrappers use `std::function<void()>` for their callback type. In embedded environments with constrained memory, `std::function` may allocate from the heap for large captures (it typically uses a small-object optimization for small lambdas, but this is implementation-defined and may throw `std::bad_alloc`).
+
+If heap-free callbacks are required, use `freertos::fixed_function<N>` — a fixed-capacity delegate that never allocates. It can be constructed from any callable and passed directly to wrapper constructors that accept callable parameters. See `freertos_fixed_function.hpp` for details.
 
 ## Code Examples
 

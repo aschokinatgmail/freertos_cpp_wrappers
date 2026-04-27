@@ -2,7 +2,7 @@
 @file freertos_stream_batching_buffer.hpp
 @author Andrey V. Shchekin <aschokin@gmail.com>
 @brief FreeRTOS stream batching buffer interface wrapper (V11.1.0+)
-@version 3.1.0
+@version 3.2.0
 @date 2026-04-22
 
 The MIT License (MIT)
@@ -63,6 +63,8 @@ class dynamic_stream_batching_buffer_allocator_with_callback {
   void *m_receive_context;
 
 public:
+  static constexpr bool is_static = false;
+
   dynamic_stream_batching_buffer_allocator_with_callback(
       StreamBufferCallbackFunction_t send_callback, void *send_context,
       StreamBufferCallbackFunction_t receive_callback, void *receive_context)
@@ -99,6 +101,8 @@ class static_stream_batching_buffer_allocator_with_callback {
   std::array<uint8_t, StreamBufferSize> m_storage;
 
 public:
+  static constexpr bool is_static = true;
+
   static_stream_batching_buffer_allocator_with_callback(
       StreamBufferCallbackFunction_t send_callback, void *send_context,
       StreamBufferCallbackFunction_t receive_callback, void *receive_context)
@@ -139,6 +143,8 @@ template <size_t StreamBufferSize> class static_stream_batching_buffer_allocator
   std::array<uint8_t, StreamBufferSize> m_storage;
 
 public:
+  static constexpr bool is_static = true;
+
   static_stream_batching_buffer_allocator() = default;
   ~static_stream_batching_buffer_allocator() = default;
   static_stream_batching_buffer_allocator(const static_stream_batching_buffer_allocator &) =
@@ -167,6 +173,8 @@ public:
 #if configSUPPORT_DYNAMIC_ALLOCATION
 template <size_t StreamBufferSize> class dynamic_stream_batching_buffer_allocator {
 public:
+  static constexpr bool is_static = false;
+
   void swap(dynamic_stream_batching_buffer_allocator &other) noexcept { (void)other; }
 
   StreamBufferHandle_t create(size_t trigger_level_bytes = 1) {
@@ -197,6 +205,7 @@ public:
   stream_batching_buffer(stream_batching_buffer &&src) noexcept
       : m_allocator(std::move(src.m_allocator)),
         m_stream_buffer(src.m_stream_buffer) {
+    configASSERT(!StreamBatchingBufferAllocator::is_static);
     src.m_stream_buffer = nullptr;
   }
   ~stream_batching_buffer(void) {
@@ -207,6 +216,7 @@ public:
 
   stream_batching_buffer &operator=(const stream_batching_buffer &) = delete;
   stream_batching_buffer &operator=(stream_batching_buffer &&src) noexcept {
+    configASSERT(!StreamBatchingBufferAllocator::is_static);
     if (this != &src) {
       swap(src);
     }
@@ -214,6 +224,7 @@ public:
   }
 
   void swap(stream_batching_buffer &other) noexcept {
+    configASSERT(!StreamBatchingBufferAllocator::is_static);
     using std::swap;
     m_allocator.swap(other.m_allocator);
     swap(m_stream_buffer, other.m_stream_buffer);
