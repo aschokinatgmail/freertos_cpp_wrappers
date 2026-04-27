@@ -376,14 +376,14 @@ TEST_F(SemaphoreFaultTest, MutexLockExTimeout) {
   EXPECT_EQ(result.error(), freertos::error::timeout);
 }
 
-TEST_F(SemaphoreFaultTest, MutexLockExIsrSuccess) {
+TEST_F(SemaphoreFaultTest, MutexLockExIsrReturnsWouldBlock) {
   EXPECT_CALL(*mock, xSemaphoreCreateMutex()).WillOnce(Return(fake_sem));
-  EXPECT_CALL(*mock, xSemaphoreTakeFromISR(fake_sem, _))
-      .WillOnce(DoAll(SetArgPointee<1>(pdTRUE), Return(pdTRUE)));
   EXPECT_CALL(*mock, vSemaphoreDelete(fake_sem));
   freertos::da::mutex m;
   auto result = m.lock_ex_isr();
-  EXPECT_TRUE(result.result.has_value());
+  EXPECT_FALSE(result.result.has_value());
+  EXPECT_EQ(result.result.error(), freertos::error::would_block);
+  EXPECT_EQ(result.higher_priority_task_woken, pdFALSE);
 }
 
 TEST_F(SemaphoreFaultTest, MutexUnlockExSuccess) {
@@ -398,17 +398,14 @@ TEST_F(SemaphoreFaultTest, MutexUnlockExSuccess) {
   EXPECT_TRUE(result.has_value());
 }
 
-TEST_F(SemaphoreFaultTest, MutexUnlockExIsrSuccess) {
+TEST_F(SemaphoreFaultTest, MutexUnlockExIsrReturnsNotOwned) {
   EXPECT_CALL(*mock, xSemaphoreCreateMutex()).WillOnce(Return(fake_sem));
-  EXPECT_CALL(*mock, xSemaphoreTakeFromISR(fake_sem, _))
-      .WillOnce(DoAll(SetArgPointee<1>(pdTRUE), Return(pdTRUE)));
-  EXPECT_CALL(*mock, xSemaphoreGiveFromISR(fake_sem, _))
-      .WillOnce(DoAll(SetArgPointee<1>(pdTRUE), Return(pdTRUE)));
   EXPECT_CALL(*mock, vSemaphoreDelete(fake_sem));
   freertos::da::mutex m;
-  m.lock_isr();
   auto result = m.unlock_ex_isr();
-  EXPECT_TRUE(result.result.has_value());
+  EXPECT_FALSE(result.result.has_value());
+  EXPECT_EQ(result.result.error(), freertos::error::semaphore_not_owned);
+  EXPECT_EQ(result.higher_priority_task_woken, pdFALSE);
 }
 
 TEST_F(SemaphoreFaultTest, MutexTryLockExSuccess) {
@@ -1653,10 +1650,6 @@ TEST_F(SemArgCtorTest, MutexTryLockUntilFuturePath) {
 
 TEST_F(SemArgCtorTest, LockGuardIsrConstructorFailurePath) {
   EXPECT_CALL(*mock, xSemaphoreCreateMutex()).WillOnce(Return(fake_sem));
-  EXPECT_CALL(*mock, xSemaphoreTakeFromISR(fake_sem, _))
-      .WillOnce(DoAll(SetArgPointee<1>(pdFALSE), Return(pdFALSE)));
-  EXPECT_CALL(*mock, xSemaphoreGiveFromISR(fake_sem, _))
-      .WillOnce(DoAll(SetArgPointee<1>(pdFALSE), Return(pdFALSE)));
   EXPECT_CALL(*mock, vSemaphoreDelete(fake_sem));
   freertos::da::mutex m;
   freertos::lock_guard_isr<freertos::da::mutex> guard(m);
@@ -2495,40 +2488,42 @@ TEST_F(SemChronoTest, CountingSemaphoreTakeExIsrThrows) {
   EXPECT_THROW((void)cs.take_ex_isr(), std::runtime_error);
 }
 
-TEST_F(SemChronoTest, MutexLockIsrThrows) {
+TEST_F(SemChronoTest, MutexLockIsrReturnsFailure) {
   EXPECT_CALL(*mock, xSemaphoreCreateMutex()).WillOnce(Return(fake_sem));
-  EXPECT_CALL(*mock, xSemaphoreTakeFromISR(fake_sem, _))
-      .WillOnce(Throw(std::runtime_error("boom")));
   EXPECT_CALL(*mock, vSemaphoreDelete(fake_sem));
   freertos::da::mutex m;
-  EXPECT_THROW((void)m.lock_isr(), std::runtime_error);
+  auto result = m.lock_isr();
+  EXPECT_EQ(result.result, pdFALSE);
+  EXPECT_EQ(result.higher_priority_task_woken, pdFALSE);
 }
 
-TEST_F(SemChronoTest, MutexUnlockIsrThrows) {
+TEST_F(SemChronoTest, MutexUnlockIsrReturnsFailure) {
   EXPECT_CALL(*mock, xSemaphoreCreateMutex()).WillOnce(Return(fake_sem));
-  EXPECT_CALL(*mock, xSemaphoreGiveFromISR(fake_sem, _))
-      .WillOnce(Throw(std::runtime_error("boom")));
   EXPECT_CALL(*mock, vSemaphoreDelete(fake_sem));
   freertos::da::mutex m;
-  EXPECT_THROW((void)m.unlock_isr(), std::runtime_error);
+  auto result = m.unlock_isr();
+  EXPECT_EQ(result.result, pdFALSE);
+  EXPECT_EQ(result.higher_priority_task_woken, pdFALSE);
 }
 
-TEST_F(SemChronoTest, MutexLockExIsrThrows) {
+TEST_F(SemChronoTest, MutexLockExIsrReturnsWouldBlock) {
   EXPECT_CALL(*mock, xSemaphoreCreateMutex()).WillOnce(Return(fake_sem));
-  EXPECT_CALL(*mock, xSemaphoreTakeFromISR(fake_sem, _))
-      .WillOnce(Throw(std::runtime_error("boom")));
   EXPECT_CALL(*mock, vSemaphoreDelete(fake_sem));
   freertos::da::mutex m;
-  EXPECT_THROW((void)m.lock_ex_isr(), std::runtime_error);
+  auto result = m.lock_ex_isr();
+  EXPECT_FALSE(result.result.has_value());
+  EXPECT_EQ(result.result.error(), freertos::error::would_block);
+  EXPECT_EQ(result.higher_priority_task_woken, pdFALSE);
 }
 
-TEST_F(SemChronoTest, MutexUnlockExIsrThrows) {
+TEST_F(SemChronoTest, MutexUnlockExIsrReturnsNotOwned) {
   EXPECT_CALL(*mock, xSemaphoreCreateMutex()).WillOnce(Return(fake_sem));
-  EXPECT_CALL(*mock, xSemaphoreGiveFromISR(fake_sem, _))
-      .WillOnce(Throw(std::runtime_error("boom")));
   EXPECT_CALL(*mock, vSemaphoreDelete(fake_sem));
   freertos::da::mutex m;
-  EXPECT_THROW((void)m.unlock_ex_isr(), std::runtime_error);
+  auto result = m.unlock_ex_isr();
+  EXPECT_FALSE(result.result.has_value());
+  EXPECT_EQ(result.result.error(), freertos::error::semaphore_not_owned);
+  EXPECT_EQ(result.higher_priority_task_woken, pdFALSE);
 }
 
 TEST_F(SemChronoTest, RecursiveMutexTryLockUntilExpiredFalse) {
@@ -3819,16 +3814,12 @@ TEST_F(SemaphoreCoverageTest, TryLockGuardLockedFalseWhenNotAcquired) {
 TEST_F(SemaphoreCoverageTest, LockGuardIsrConstructorAndDestructor) {
   testing::InSequence seq;
   EXPECT_CALL(*mock, xSemaphoreCreateMutex()).WillOnce(Return(fake_sem));
-  EXPECT_CALL(*mock, xSemaphoreTakeFromISR(fake_sem, _))
-      .WillOnce(Return(pdTRUE));
-  EXPECT_CALL(*mock, xSemaphoreGiveFromISR(fake_sem, _))
-      .WillOnce(Return(pdTRUE));
   EXPECT_CALL(*mock, vSemaphoreDelete(fake_sem));
 
   freertos::da::mutex m;
   {
     freertos::lock_guard_isr<freertos::da::mutex> guard(m);
-    EXPECT_TRUE(guard.locked());
+    EXPECT_FALSE(guard.locked());
   }
 }
 

@@ -110,40 +110,22 @@ protected:
   }
 };
 
-TEST_F(IsrMutexTest, LockIsrSuccess) {
+TEST_F(IsrMutexTest, LockIsrReturnsFailure) {
   EXPECT_CALL(*mock, xSemaphoreCreateMutex()).WillOnce(Return(h));
-  EXPECT_CALL(*mock, xSemaphoreTakeFromISR(h, _)).WillOnce(Return(pdTRUE));
-  EXPECT_CALL(*mock, vSemaphoreDelete(h));
-  freertos::mutex<freertos::dynamic_semaphore_allocator> m;
-  auto r = m.lock_isr();
-  EXPECT_EQ(r.result, pdTRUE);
-}
-
-TEST_F(IsrMutexTest, LockIsrFailure) {
-  EXPECT_CALL(*mock, xSemaphoreCreateMutex()).WillOnce(Return(h));
-  EXPECT_CALL(*mock, xSemaphoreTakeFromISR(h, _)).WillOnce(Return(pdFALSE));
   EXPECT_CALL(*mock, vSemaphoreDelete(h));
   freertos::mutex<freertos::dynamic_semaphore_allocator> m;
   auto r = m.lock_isr();
   EXPECT_EQ(r.result, pdFALSE);
+  EXPECT_EQ(r.higher_priority_task_woken, pdFALSE);
 }
 
-TEST_F(IsrMutexTest, UnlockIsrSuccess) {
+TEST_F(IsrMutexTest, UnlockIsrReturnsFailure) {
   EXPECT_CALL(*mock, xSemaphoreCreateMutex()).WillOnce(Return(h));
-  EXPECT_CALL(*mock, xSemaphoreGiveFromISR(h, _)).WillOnce(Return(pdTRUE));
-  EXPECT_CALL(*mock, vSemaphoreDelete(h));
-  freertos::mutex<freertos::dynamic_semaphore_allocator> m;
-  auto r = m.unlock_isr();
-  EXPECT_EQ(r.result, pdTRUE);
-}
-
-TEST_F(IsrMutexTest, UnlockIsrFailure) {
-  EXPECT_CALL(*mock, xSemaphoreCreateMutex()).WillOnce(Return(h));
-  EXPECT_CALL(*mock, xSemaphoreGiveFromISR(h, _)).WillOnce(Return(pdFALSE));
   EXPECT_CALL(*mock, vSemaphoreDelete(h));
   freertos::mutex<freertos::dynamic_semaphore_allocator> m;
   auto r = m.unlock_isr();
   EXPECT_EQ(r.result, pdFALSE);
+  EXPECT_EQ(r.higher_priority_task_woken, pdFALSE);
 }
 
 class IsrQueueTest : public ::testing::Test {

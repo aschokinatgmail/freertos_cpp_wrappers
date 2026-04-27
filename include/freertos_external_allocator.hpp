@@ -2,7 +2,7 @@
 @file freertos_external_allocator.hpp
 @author Andrey V. Shchekin <aschokin@gmail.com>
 @brief External memory allocation for FreeRTOS C++ Wrappers
-@version 3.0.0
+@version 3.2.0
 @date 2026-04-16
 
 The MIT License (MIT)
@@ -84,6 +84,7 @@ template <typename Region> class external_semaphore_allocator {
   operator=(external_semaphore_allocator &&) = delete;
 
 public:
+  static constexpr bool is_static = true;
   explicit external_semaphore_allocator(Region &region) : m_region(&region) {}
   external_semaphore_allocator(external_semaphore_allocator &&other) noexcept
       : m_region(other.m_region), m_memory(other.m_memory) {
@@ -158,6 +159,7 @@ class external_queue_allocator {
   external_queue_allocator &operator=(external_queue_allocator &&) = delete;
 
 public:
+  static constexpr bool is_static = true;
   explicit external_queue_allocator(Region &region) : m_region(&region) {}
   external_queue_allocator(external_queue_allocator &&other) noexcept
       : m_region(other.m_region), m_struct_memory(other.m_struct_memory),
@@ -219,6 +221,7 @@ template <typename Region> class external_event_group_allocator {
   operator=(external_event_group_allocator &&) = delete;
 
 public:
+  static constexpr bool is_static = true;
   explicit external_event_group_allocator(Region &region) : m_region(&region) {}
   external_event_group_allocator(
       external_event_group_allocator &&other) noexcept
@@ -270,6 +273,7 @@ class external_stream_buffer_allocator {
   operator=(external_stream_buffer_allocator &&) = delete;
 
 public:
+  static constexpr bool is_static = true;
   explicit external_stream_buffer_allocator(Region &region)
       : m_region(&region) {}
   external_stream_buffer_allocator(
@@ -337,6 +341,7 @@ class external_message_buffer_allocator {
   operator=(external_message_buffer_allocator &&) = delete;
 
 public:
+  static constexpr bool is_static = true;
   explicit external_message_buffer_allocator(Region &region)
       : m_region(&region) {}
   external_message_buffer_allocator(
@@ -399,6 +404,7 @@ template <typename Region> class external_sw_timer_allocator {
   operator=(external_sw_timer_allocator &&) = delete;
 
 public:
+  static constexpr bool is_static = true;
   explicit external_sw_timer_allocator(Region &region) : m_region(&region) {}
   external_sw_timer_allocator(external_sw_timer_allocator &&other) noexcept
       : m_region(other.m_region), m_memory(other.m_memory) {
@@ -448,6 +454,7 @@ template <typename Region, size_t StackSize> class external_task_allocator {
   external_task_allocator &operator=(external_task_allocator &&) = delete;
 
 public:
+  static constexpr bool is_static = true;
   explicit external_task_allocator(Region &region) : m_region(&region) {}
   external_task_allocator(external_task_allocator &&other) noexcept
       : m_region(other.m_region), m_task_memory(other.m_task_memory),
@@ -505,6 +512,7 @@ template <typename Region> class external_shared_mutex_allocator {
   operator=(external_shared_mutex_allocator &&) = delete;
 
 public:
+  static constexpr bool is_static = true;
   explicit external_shared_mutex_allocator(Region &region) : m_region(&region) {}
   external_shared_mutex_allocator(
       external_shared_mutex_allocator &&other) noexcept

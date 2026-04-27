@@ -2,7 +2,7 @@
 @file freertos_shared_data.hpp
 @author Andrey V. Shchekin <aschokin@gmail.com>
 @brief Thread-safe value wrapper for FreeRTOS C++ Wrappers
-@version 3.1.0
+@version 3.2.0
 @date 2026-04-22
 
 The MIT License (MIT)
@@ -39,6 +39,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "freertos_config.hpp"
 #include "freertos_expected.hpp"
 #include "freertos_semaphore.hpp"
+#include "freertos_thread_safety.hpp"
 #include <type_traits>
 #include <utility>
 
@@ -46,7 +47,7 @@ namespace freertos {
 
 template <typename T, typename Mutex = freertos::mutex<freertos::dynamic_semaphore_allocator>>
 class shared_data {
-  T m_data{};
+  T m_data FREERTOS_GUARDED_BY(m_mutex){};
   mutable Mutex m_mutex;
 
 public:
@@ -58,30 +59,50 @@ public:
 
   T get() const {
     m_mutex.lock();
-    T result = m_data;
-    m_mutex.unlock();
-    return result;
+    try {
+      T result = m_data;
+      m_mutex.unlock();
+      return result;
+    } catch (...) {
+      m_mutex.unlock();
+      throw;
+    }
   }
 
   void set(const T &value) {
     m_mutex.lock();
-    m_data = value;
-    m_mutex.unlock();
+    try {
+      m_data = value;
+      m_mutex.unlock();
+    } catch (...) {
+      m_mutex.unlock();
+      throw;
+    }
   }
 
   void set(T &&value) {
     m_mutex.lock();
-    m_data = std::move(value);
-    m_mutex.unlock();
+    try {
+      m_data = std::move(value);
+      m_mutex.unlock();
+    } catch (...) {
+      m_mutex.unlock();
+      throw;
+    }
   }
 
   template <typename Fn>
   auto use(Fn &&fn) -> decltype(fn(std::declval<T &>())) {
     m_mutex.lock();
     try {
-      auto result = fn(m_data);
-      m_mutex.unlock();
-      return result;
+      if constexpr (std::is_void_v<decltype(fn(m_data))>) {
+        fn(m_data);
+        m_mutex.unlock();
+      } else {
+        auto result = fn(m_data);
+        m_mutex.unlock();
+        return result;
+      }
     } catch (...) {
       m_mutex.unlock();
       throw;
@@ -93,9 +114,14 @@ public:
     if (!rc.has_value()) {
       return unexpected<error>(rc.error());
     }
-    T result = m_data;
-    m_mutex.unlock();
-    return result;
+    try {
+      T result = m_data;
+      m_mutex.unlock();
+      return result;
+    } catch (...) {
+      m_mutex.unlock();
+      throw;
+    }
   }
 
   [[nodiscard]] expected<void, error> set_ex(const T &value) {
@@ -103,9 +129,14 @@ public:
     if (!rc.has_value()) {
       return unexpected<error>(rc.error());
     }
-    m_data = value;
-    m_mutex.unlock();
-    return {};
+    try {
+      m_data = value;
+      m_mutex.unlock();
+      return {};
+    } catch (...) {
+      m_mutex.unlock();
+      throw;
+    }
   }
 
   [[nodiscard]] expected<void, error> set_ex(T &&value) {
@@ -113,9 +144,14 @@ public:
     if (!rc.has_value()) {
       return unexpected<error>(rc.error());
     }
-    m_data = std::move(value);
-    m_mutex.unlock();
-    return {};
+    try {
+      m_data = std::move(value);
+      m_mutex.unlock();
+      return {};
+    } catch (...) {
+      m_mutex.unlock();
+      throw;
+    }
   }
 };
 

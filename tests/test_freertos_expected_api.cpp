@@ -214,29 +214,16 @@ TEST_F(ExpectedApiTest, MutexTryLockExWouldBlock) {
   EXPECT_EQ(result.error(), freertos::error::would_block);
 }
 
-TEST_F(ExpectedApiTest, MutexLockExIsrSuccess) {
+TEST_F(ExpectedApiTest, MutexLockExIsrReturnsWouldBlock) {
   EXPECT_CALL(*mock, xSemaphoreCreateMutex())
       .WillOnce(Return(mock_mutex_handle));
-  EXPECT_CALL(*mock, xSemaphoreTakeFromISR(mock_mutex_handle, _))
-      .WillOnce(DoAll(SetArgPointee<1>(pdFALSE), Return(pdTRUE)));
-  EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex_handle));
-
-  freertos::da::mutex mtx;
-  auto result = mtx.lock_ex_isr();
-  EXPECT_TRUE(result.result.has_value());
-}
-
-TEST_F(ExpectedApiTest, MutexLockExIsrWouldBlock) {
-  EXPECT_CALL(*mock, xSemaphoreCreateMutex())
-      .WillOnce(Return(mock_mutex_handle));
-  EXPECT_CALL(*mock, xSemaphoreTakeFromISR(mock_mutex_handle, _))
-      .WillOnce(DoAll(SetArgPointee<1>(pdFALSE), Return(pdFALSE)));
   EXPECT_CALL(*mock, vSemaphoreDelete(mock_mutex_handle));
 
   freertos::da::mutex mtx;
   auto result = mtx.lock_ex_isr();
   EXPECT_FALSE(result.result.has_value());
   EXPECT_EQ(result.result.error(), freertos::error::would_block);
+  EXPECT_EQ(result.higher_priority_task_woken, pdFALSE);
 }
 
 // ---------- queue _ex ----------

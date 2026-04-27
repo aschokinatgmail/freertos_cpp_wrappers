@@ -2,7 +2,7 @@
 @file freertos.hpp
 @author Andrey V. Shchekin <aschokin@gmail.com>
 @brief FreeRTOS C++ Wrappers Library main header
-@version 3.0.0
+@version 3.2.0
 @date 2024-04-12
 
 The MIT License (MIT)
@@ -46,11 +46,13 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "freertos_expected.hpp"
 #include "freertos_external_allocator.hpp"
 #include "freertos_fixed_function.hpp"
+#include "freertos_heap.hpp"
 #include "freertos_isr_context.hpp"
 #include "freertos_isr_result.hpp"
 #include "freertos_latch.hpp"
 #include "freertos_lock.hpp"
 #include "freertos_message_buffer.hpp"
+#include "freertos_once_flag.hpp"
 #include "freertos_pend_call.hpp"
 #include "freertos_queue.hpp"
 #include "freertos_queue_set.hpp"
@@ -58,6 +60,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "freertos_shared_mutex.hpp"
 #include "freertos_shared_data.hpp"
 #include "freertos_span.hpp"
+#include "freertos_stream_batching_buffer.hpp"
 #include "freertos_stream_buffer.hpp"
 #include "freertos_strong_types.hpp"
 #include "freertos_sw_timer.hpp"

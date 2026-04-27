@@ -205,24 +205,24 @@ TEST_F(ExVariantsSemTest, MutexUnlockExFailure) {
   EXPECT_EQ(r.error(), freertos::error::semaphore_not_owned);
 }
 
-TEST_F(ExVariantsSemTest, MutexLockExIsrFailure) {
+TEST_F(ExVariantsSemTest, MutexLockExIsrReturnsWouldBlock) {
   EXPECT_CALL(*mock, xSemaphoreCreateMutex()).WillOnce(Return(h));
-  EXPECT_CALL(*mock, xSemaphoreTakeFromISR(h, _)).WillOnce(Return(pdFALSE));
   EXPECT_CALL(*mock, vSemaphoreDelete(h));
   freertos::mutex<freertos::dynamic_semaphore_allocator> m;
   auto r = m.lock_ex_isr();
   EXPECT_FALSE(r.result.has_value());
   EXPECT_EQ(r.result.error(), freertos::error::would_block);
+  EXPECT_EQ(r.higher_priority_task_woken, pdFALSE);
 }
 
-TEST_F(ExVariantsSemTest, MutexUnlockExIsrFailure) {
+TEST_F(ExVariantsSemTest, MutexUnlockExIsrReturnsNotOwned) {
   EXPECT_CALL(*mock, xSemaphoreCreateMutex()).WillOnce(Return(h));
-  EXPECT_CALL(*mock, xSemaphoreGiveFromISR(h, _)).WillOnce(Return(pdFALSE));
   EXPECT_CALL(*mock, vSemaphoreDelete(h));
   freertos::mutex<freertos::dynamic_semaphore_allocator> m;
   auto r = m.unlock_ex_isr();
   EXPECT_FALSE(r.result.has_value());
   EXPECT_EQ(r.result.error(), freertos::error::semaphore_not_owned);
+  EXPECT_EQ(r.higher_priority_task_woken, pdFALSE);
 }
 
 TEST_F(ExVariantsSemTest, MutexTryLockExFailure) {

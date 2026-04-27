@@ -2,7 +2,7 @@
 @file freertos_condition_variable.hpp
 @author Andrey V. Shchekin <aschokin@gmail.com>
 @brief FreeRTOS condition_variable_any wrapper
-@version 3.1.0
+@version 3.2.0
 @date 2026-04-22
 
 The MIT License (MIT)
@@ -41,6 +41,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "freertos_isr_result.hpp"
 #include "freertos_thread_safety.hpp"
 #include <FreeRTOS.h>
+#include <atomic>
 #include <chrono>
 #include <ctime>
 #include <semphr.h>
@@ -62,17 +63,20 @@ class condition_variable_any {
   uint8_t m_semaphore_created{0};
 #endif
 
+  std::atomic<UBaseType_t> m_waiter_count{0};
+
 public:
   condition_variable_any() {
 #if configSUPPORT_STATIC_ALLOCATION
     m_semaphore =
         xSemaphoreCreateCountingStatic(FREERTOS_CPP_WRAPPERS_CONDITION_VARIABLE_MAX_WAITERS, 0,
                                        &m_semaphore_storage);
+    configASSERT(m_semaphore != nullptr);
     m_semaphore_created = 1;
 #else
     m_semaphore = xSemaphoreCreateCounting(FREERTOS_CPP_WRAPPERS_CONDITION_VARIABLE_MAX_WAITERS, 0);
+    configASSERT(m_semaphore != nullptr);
 #endif
-    configASSERT(m_semaphore);
   }
 
   condition_variable_any(const condition_variable_any &) = delete;
@@ -85,6 +89,7 @@ public:
   }
 
   void notify_one() noexcept {
+    configASSERT(m_semaphore != nullptr);
     if (!m_semaphore) {
       return;
     }
@@ -92,11 +97,18 @@ public:
   }
 
   void notify_all() noexcept {
+    configASSERT(m_semaphore != nullptr);
     if (!m_semaphore) {
       return;
     }
-    for (UBaseType_t i = 0; i < FREERTOS_CPP_WRAPPERS_CONDITION_VARIABLE_MAX_WAITERS; i++) {
-      xSemaphoreGive(m_semaphore);
+    UBaseType_t count = m_waiter_count.load(std::memory_order_acquire);
+    if (count == 0) {
+      return;
+    }
+    UBaseType_t limit = FREERTOS_CPP_WRAPPERS_CONDITION_VARIABLE_MAX_WAITERS;
+    UBaseType_t gives = (count < limit) ? count : limit;
+    for (UBaseType_t i = 0; i < gives; i++) {
+      (void)xSemaphoreGive(m_semaphore);
     }
   }
 
@@ -131,7 +143,12 @@ public:
       return;
     }
     lock.unlock();
+    // Overflow protection: assert if max waiters exceeded
+    configASSERT(m_waiter_count.load(std::memory_order_acquire) <
+                 FREERTOS_CPP_WRAPPERS_CONDITION_VARIABLE_MAX_WAITERS);
+    m_waiter_count.fetch_add(1, std::memory_order_acq_rel);
     xSemaphoreTake(m_semaphore, portMAX_DELAY);
+    m_waiter_count.fetch_sub(1, std::memory_order_acq_rel);
     lock.lock();
   }
 
@@ -152,10 +169,15 @@ public:
       return std::cv_status::timeout;
     }
     lock.unlock();
+    // Overflow protection
+    configASSERT(m_waiter_count.load(std::memory_order_acquire) <
+                 FREERTOS_CPP_WRAPPERS_CONDITION_VARIABLE_MAX_WAITERS);
+    m_waiter_count.fetch_add(1, std::memory_order_acq_rel);
     auto ms = static_cast<TickType_t>(
         std::chrono::duration_cast<std::chrono::milliseconds>(rel_time).count());
     TickType_t ticks = pdMS_TO_TICKS(ms);
     BaseType_t result = xSemaphoreTake(m_semaphore, ticks);
+    m_waiter_count.fetch_sub(1, std::memory_order_acq_rel);
     lock.lock();
     return (result == pdTRUE) ? std::cv_status::no_timeout
                               : std::cv_status::timeout;
@@ -213,7 +235,7 @@ public:
     if (rc == pdTRUE) {
       return {};
     }
-    return unexpected<error>(error::semaphore_not_owned);
+    return unexpected<error>(error::would_block);
   }
 
   [[nodiscard]] expected<void, error> notify_all_ex() noexcept {

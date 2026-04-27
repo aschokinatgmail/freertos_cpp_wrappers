@@ -2,7 +2,7 @@
 @file freertos_fixed_function.hpp
 @author Andrey V. Shchekin <aschokin@gmail.com>
 @brief Fixed-capacity callback (SBO delegate) for heap-free task/timer callbacks
-@version 3.1.0
+@version 3.2.0
 @date 2026-04-22
 
 The MIT License (MIT)
@@ -40,6 +40,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <cassert>
 #include <cstddef>
 #include <cstring>
+#include <exception>
 #include <type_traits>
 
 #ifndef configASSERT
@@ -156,6 +157,7 @@ public:
             m_copier(m_storage.data(), other.m_storage.data());
         } else if (!m_invoker) {
         } else {
+            configASSERT(false); // cannot copy fixed_function wrapping non-copyable callable
             m_invoker = nullptr;
             m_copier = nullptr;
             m_mover = nullptr;
@@ -167,7 +169,12 @@ public:
         : m_invoker(other.m_invoker), m_copier(other.m_copier),
           m_mover(other.m_mover), m_destroyer(other.m_destroyer) {
         if (m_mover) {
-            m_mover(m_storage.data(), other.m_storage.data());
+            try {
+                m_mover(m_storage.data(), other.m_storage.data());
+            } catch (...) {
+                configASSERT(false); // move of contained callable threw in noexcept context
+                std::terminate();
+            }
         }
         if (other.m_destroyer) {
             other.m_destroyer(other.m_storage.data());
@@ -188,6 +195,7 @@ public:
             if (m_copier) {
                 m_copier(m_storage.data(), other.m_storage.data());
             } else if (m_invoker) {
+                configASSERT(false); // cannot copy fixed_function wrapping non-copyable callable
                 m_invoker = nullptr;
                 m_copier = nullptr;
                 m_mover = nullptr;
@@ -205,7 +213,12 @@ public:
             m_mover = other.m_mover;
             m_destroyer = other.m_destroyer;
             if (m_mover) {
-                m_mover(m_storage.data(), other.m_storage.data());
+                try {
+                    m_mover(m_storage.data(), other.m_storage.data());
+                } catch (...) {
+                    configASSERT(false); // move of contained callable threw in noexcept context
+                    std::terminate();
+                }
             }
             if (other.m_destroyer) {
                 other.m_destroyer(other.m_storage.data());

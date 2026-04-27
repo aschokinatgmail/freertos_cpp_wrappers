@@ -23,6 +23,16 @@ protected:
 
   StrictMock<FreeRTOSMock> *mock;
   int counter;
+
+  static void set_initialized(freertos::once_flag &flag) {
+    flag.m_state.store(2, std::memory_order_release);
+  }
+
+#if configSUPPORT_STATIC_ALLOCATION
+  static void set_initialized(freertos::sa::once_flag_static &flag) {
+    flag.m_state.store(2, std::memory_order_release);
+  }
+#endif
 };
 
 TEST_F(OnceFlagTest, IsInitialized_DefaultFalse) {
@@ -34,9 +44,11 @@ TEST_F(OnceFlagTest, CallOnce_ExecutesFunction) {
   freertos::once_flag flag;
   SemaphoreHandle_t sem = reinterpret_cast<SemaphoreHandle_t>(0x1);
 
-  EXPECT_CALL(*mock, xSemaphoreCreateBinaryStatic(_))
+  EXPECT_CALL(*mock, xSemaphoreCreateCountingStatic(FREERTOS_CPP_WRAPPERS_ONCE_FLAG_MAX_WAITERS, 0, _))
       .WillOnce(Return(sem));
-  EXPECT_CALL(*mock, xSemaphoreGive(sem)).WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, xSemaphoreGive(sem))
+      .Times(FREERTOS_CPP_WRAPPERS_ONCE_FLAG_MAX_WAITERS)
+      .WillRepeatedly(Return(pdTRUE));
   EXPECT_CALL(*mock, vSemaphoreDelete(sem));
 
   freertos::call_once(flag, [this]() { counter++; });
@@ -48,9 +60,11 @@ TEST_F(OnceFlagTest, CallOnce_ExecutesOnlyOnce) {
   freertos::once_flag flag;
   SemaphoreHandle_t sem = reinterpret_cast<SemaphoreHandle_t>(0x1);
 
-  EXPECT_CALL(*mock, xSemaphoreCreateBinaryStatic(_))
+  EXPECT_CALL(*mock, xSemaphoreCreateCountingStatic(FREERTOS_CPP_WRAPPERS_ONCE_FLAG_MAX_WAITERS, 0, _))
       .WillOnce(Return(sem));
-  EXPECT_CALL(*mock, xSemaphoreGive(sem)).WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, xSemaphoreGive(sem))
+      .Times(FREERTOS_CPP_WRAPPERS_ONCE_FLAG_MAX_WAITERS)
+      .WillRepeatedly(Return(pdTRUE));
   EXPECT_CALL(*mock, vSemaphoreDelete(sem));
 
   freertos::call_once(flag, [this]() { counter++; });
@@ -64,9 +78,11 @@ TEST_F(OnceFlagTest, CallOnce_WithLambda) {
   SemaphoreHandle_t sem = reinterpret_cast<SemaphoreHandle_t>(0x1);
   int value = 0;
 
-  EXPECT_CALL(*mock, xSemaphoreCreateBinaryStatic(_))
+  EXPECT_CALL(*mock, xSemaphoreCreateCountingStatic(FREERTOS_CPP_WRAPPERS_ONCE_FLAG_MAX_WAITERS, 0, _))
       .WillOnce(Return(sem));
-  EXPECT_CALL(*mock, xSemaphoreGive(sem)).WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, xSemaphoreGive(sem))
+      .Times(FREERTOS_CPP_WRAPPERS_ONCE_FLAG_MAX_WAITERS)
+      .WillRepeatedly(Return(pdTRUE));
   EXPECT_CALL(*mock, vSemaphoreDelete(sem));
 
   freertos::call_once(flag, [&value]() { value = 42; });
@@ -78,9 +94,11 @@ TEST_F(OnceFlagTest, CallOnce_WithFunctionPointer) {
   freertos::once_flag flag;
   SemaphoreHandle_t sem = reinterpret_cast<SemaphoreHandle_t>(0x1);
 
-  EXPECT_CALL(*mock, xSemaphoreCreateBinaryStatic(_))
+  EXPECT_CALL(*mock, xSemaphoreCreateCountingStatic(FREERTOS_CPP_WRAPPERS_ONCE_FLAG_MAX_WAITERS, 0, _))
       .WillOnce(Return(sem));
-  EXPECT_CALL(*mock, xSemaphoreGive(sem)).WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, xSemaphoreGive(sem))
+      .Times(FREERTOS_CPP_WRAPPERS_ONCE_FLAG_MAX_WAITERS)
+      .WillRepeatedly(Return(pdTRUE));
   EXPECT_CALL(*mock, vSemaphoreDelete(sem));
 
   static int global_val;
@@ -100,9 +118,11 @@ TEST_F(OnceFlagTest, CallOnce_WithFunctionObject) {
   SemaphoreHandle_t sem = reinterpret_cast<SemaphoreHandle_t>(0x1);
   int value = 0;
 
-  EXPECT_CALL(*mock, xSemaphoreCreateBinaryStatic(_))
+  EXPECT_CALL(*mock, xSemaphoreCreateCountingStatic(FREERTOS_CPP_WRAPPERS_ONCE_FLAG_MAX_WAITERS, 0, _))
       .WillOnce(Return(sem));
-  EXPECT_CALL(*mock, xSemaphoreGive(sem)).WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, xSemaphoreGive(sem))
+      .Times(FREERTOS_CPP_WRAPPERS_ONCE_FLAG_MAX_WAITERS)
+      .WillRepeatedly(Return(pdTRUE));
   EXPECT_CALL(*mock, vSemaphoreDelete(sem));
 
   Functor f{value};
@@ -120,9 +140,12 @@ TEST_F(OnceFlagTest, StaticAllocation_CallOnce) {
   freertos::sa::once_flag flag;
   SemaphoreHandle_t sem = reinterpret_cast<SemaphoreHandle_t>(0x1);
 
-  EXPECT_CALL(*mock, xSemaphoreCreateBinaryStatic(_))
+  EXPECT_CALL(*mock, xSemaphoreCreateCountingStatic(FREERTOS_CPP_WRAPPERS_ONCE_FLAG_MAX_WAITERS, 0, _))
       .WillOnce(Return(sem));
-  EXPECT_CALL(*mock, xSemaphoreGive(sem)).WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, xSemaphoreGive(sem))
+      .Times(FREERTOS_CPP_WRAPPERS_ONCE_FLAG_MAX_WAITERS)
+      .WillRepeatedly(Return(pdTRUE));
+  EXPECT_CALL(*mock, vSemaphoreDelete(sem));
 
   int value = 0;
   freertos::sa::call_once(flag, [&value]() { value = 55; });
@@ -134,9 +157,12 @@ TEST_F(OnceFlagTest, StaticAllocation_CallOnceOnlyOnce) {
   freertos::sa::once_flag flag;
   SemaphoreHandle_t sem = reinterpret_cast<SemaphoreHandle_t>(0x1);
 
-  EXPECT_CALL(*mock, xSemaphoreCreateBinaryStatic(_))
+  EXPECT_CALL(*mock, xSemaphoreCreateCountingStatic(FREERTOS_CPP_WRAPPERS_ONCE_FLAG_MAX_WAITERS, 0, _))
       .WillOnce(Return(sem));
-  EXPECT_CALL(*mock, xSemaphoreGive(sem)).WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, xSemaphoreGive(sem))
+      .Times(FREERTOS_CPP_WRAPPERS_ONCE_FLAG_MAX_WAITERS)
+      .WillRepeatedly(Return(pdTRUE));
+  EXPECT_CALL(*mock, vSemaphoreDelete(sem));
 
   int value = 0;
   freertos::sa::call_once(flag, [&value]() { value++; });
@@ -149,9 +175,11 @@ TEST_F(OnceFlagTest, CallOnce_ThrowsException_Rethrows) {
   freertos::once_flag flag;
   SemaphoreHandle_t sem = reinterpret_cast<SemaphoreHandle_t>(0x1);
 
-  EXPECT_CALL(*mock, xSemaphoreCreateBinaryStatic(_))
+  EXPECT_CALL(*mock, xSemaphoreCreateCountingStatic(FREERTOS_CPP_WRAPPERS_ONCE_FLAG_MAX_WAITERS, 0, _))
       .WillOnce(Return(sem));
-  EXPECT_CALL(*mock, xSemaphoreGive(sem)).WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, xSemaphoreGive(sem))
+      .Times(FREERTOS_CPP_WRAPPERS_ONCE_FLAG_MAX_WAITERS)
+      .WillRepeatedly(Return(pdTRUE));
   EXPECT_CALL(*mock, vSemaphoreDelete(sem));
 
   EXPECT_THROW(
@@ -167,9 +195,11 @@ TEST_F(OnceFlagTest, CallOnce_ThrowsException_RetrySucceeds) {
 
   {
     ::testing::InSequence s;
-    EXPECT_CALL(*mock, xSemaphoreCreateBinaryStatic(_))
+    EXPECT_CALL(*mock, xSemaphoreCreateCountingStatic(FREERTOS_CPP_WRAPPERS_ONCE_FLAG_MAX_WAITERS, 0, _))
         .WillOnce(Return(sem));
-    EXPECT_CALL(*mock, xSemaphoreGive(sem)).WillOnce(Return(pdTRUE));
+    EXPECT_CALL(*mock, xSemaphoreGive(sem))
+        .Times(FREERTOS_CPP_WRAPPERS_ONCE_FLAG_MAX_WAITERS)
+        .WillRepeatedly(Return(pdTRUE));
   }
 
   EXPECT_THROW(
@@ -177,7 +207,9 @@ TEST_F(OnceFlagTest, CallOnce_ThrowsException_RetrySucceeds) {
       std::runtime_error);
   EXPECT_FALSE(flag.is_initialized());
 
-  EXPECT_CALL(*mock, xSemaphoreGive(sem)).WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, xSemaphoreGive(sem))
+      .Times(FREERTOS_CPP_WRAPPERS_ONCE_FLAG_MAX_WAITERS)
+      .WillRepeatedly(Return(pdTRUE));
   EXPECT_CALL(*mock, vSemaphoreDelete(sem));
 
   freertos::call_once(flag, [&value]() { value = 42; });
@@ -189,12 +221,16 @@ TEST_F(OnceFlagTest, CallOnce_WaiterPath) {
   freertos::once_flag flag;
   SemaphoreHandle_t sem = reinterpret_cast<SemaphoreHandle_t>(0x1);
 
-  ::testing::InSequence seq;
-  EXPECT_CALL(*mock, xSemaphoreCreateBinaryStatic(_))
+  EXPECT_CALL(*mock, xSemaphoreCreateCountingStatic(FREERTOS_CPP_WRAPPERS_ONCE_FLAG_MAX_WAITERS, 0, _))
       .WillOnce(Return(sem));
   EXPECT_CALL(*mock, xSemaphoreTake(sem, portMAX_DELAY))
-      .WillOnce(Return(pdTRUE));
-  EXPECT_CALL(*mock, xSemaphoreGive(sem)).WillOnce(Return(pdTRUE));
+      .WillOnce(::testing::Invoke([&flag]() -> BaseType_t {
+        set_initialized(flag);
+        return pdTRUE;
+      }));
+  EXPECT_CALL(*mock, xSemaphoreGive(sem))
+      .Times(FREERTOS_CPP_WRAPPERS_ONCE_FLAG_MAX_WAITERS)
+      .WillRepeatedly(Return(pdTRUE));
   EXPECT_CALL(*mock, vSemaphoreDelete(sem));
 
   bool inner_called = false;
@@ -209,12 +245,16 @@ TEST_F(OnceFlagTest, CallOnce_WaiterPathThenSubsequentCallReturnsEarly) {
   freertos::once_flag flag;
   SemaphoreHandle_t sem = reinterpret_cast<SemaphoreHandle_t>(0x1);
 
-  ::testing::InSequence seq;
-  EXPECT_CALL(*mock, xSemaphoreCreateBinaryStatic(_))
+  EXPECT_CALL(*mock, xSemaphoreCreateCountingStatic(FREERTOS_CPP_WRAPPERS_ONCE_FLAG_MAX_WAITERS, 0, _))
       .WillOnce(Return(sem));
   EXPECT_CALL(*mock, xSemaphoreTake(sem, portMAX_DELAY))
-      .WillOnce(Return(pdTRUE));
-  EXPECT_CALL(*mock, xSemaphoreGive(sem)).WillOnce(Return(pdTRUE));
+      .WillOnce(::testing::Invoke([&flag]() -> BaseType_t {
+        set_initialized(flag);
+        return pdTRUE;
+      }));
+  EXPECT_CALL(*mock, xSemaphoreGive(sem))
+      .Times(FREERTOS_CPP_WRAPPERS_ONCE_FLAG_MAX_WAITERS)
+      .WillRepeatedly(Return(pdTRUE));
   EXPECT_CALL(*mock, vSemaphoreDelete(sem));
 
   int counter = 0;
@@ -233,12 +273,17 @@ TEST_F(OnceFlagTest, StaticAllocation_CallOnceWaiterPath) {
   freertos::sa::once_flag flag;
   SemaphoreHandle_t sem = reinterpret_cast<SemaphoreHandle_t>(0x1);
 
-  ::testing::InSequence seq;
-  EXPECT_CALL(*mock, xSemaphoreCreateBinaryStatic(_))
+  EXPECT_CALL(*mock, xSemaphoreCreateCountingStatic(FREERTOS_CPP_WRAPPERS_ONCE_FLAG_MAX_WAITERS, 0, _))
       .WillOnce(Return(sem));
   EXPECT_CALL(*mock, xSemaphoreTake(sem, portMAX_DELAY))
-      .WillOnce(Return(pdTRUE));
-  EXPECT_CALL(*mock, xSemaphoreGive(sem)).WillOnce(Return(pdTRUE));
+      .WillOnce(::testing::Invoke([&flag]() -> BaseType_t {
+        set_initialized(flag);
+        return pdTRUE;
+      }));
+  EXPECT_CALL(*mock, xSemaphoreGive(sem))
+      .Times(FREERTOS_CPP_WRAPPERS_ONCE_FLAG_MAX_WAITERS)
+      .WillRepeatedly(Return(pdTRUE));
+  EXPECT_CALL(*mock, vSemaphoreDelete(sem));
 
   bool inner_called = false;
   freertos::sa::call_once(flag, [&]() {

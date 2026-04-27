@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.14)
 project(freertos_cpp_wrappers
-    VERSION 3.1.0
+    VERSION 3.2.0
     LANGUAGES C CXX
 )
 
@@ -443,6 +443,39 @@ if(ENABLE_SIMULATION)
     add_subdirectory(tests/simulation)
 endif()
 
+endif() # NOT CMAKE_CROSSCOMPILING
+
+# =============================================================================
+# INSTALL RULES (host builds only - cross-compile installs are project-specific)
+# =============================================================================
+if(NOT CMAKE_CROSSCOMPILING)
+include(GNUInstallDirs)
+
+install(TARGETS freertos_cpp_wrappers
+    EXPORT freertos_cpp_wrappers-targets
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+)
+
+install(DIRECTORY include/
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    FILES_MATCHING PATTERN "*.hpp"
+)
+
+include(CMakePackageConfigHelpers)
+configure_package_config_file(
+    cmake/freertos_cpp_wrappersConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/freertos_cpp_wrappersConfig.cmake
+    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/freertos_cpp_wrappers
+)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/freertos_cpp_wrappersConfig.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/freertos_cpp_wrappers
+)
+
+install(EXPORT freertos_cpp_wrappers-targets
+    NAMESPACE freertos::
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/freertos_cpp_wrappers
+)
 endif() # NOT CMAKE_CROSSCOMPILING
 
 # =============================================================================

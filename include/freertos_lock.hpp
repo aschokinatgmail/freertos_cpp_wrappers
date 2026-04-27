@@ -2,7 +2,7 @@
 @file freertos_lock.hpp
 @author Andrey V. Shchekin <aschokin@gmail.com>
 @brief FreeRTOS shared_lock and Lockable concept compliance utilities
-@version 3.1.0
+@version 3.2.0
 @date 2026-04-22
 
 The MIT License (MIT)
@@ -104,6 +104,7 @@ public:
 
   void lock() FREERTOS_ACQUIRE_SHARED() {
     configASSERT(m_mutex != nullptr);
+    configASSERT(!m_owns);
     if (m_mutex && !m_owns) {
       m_mutex->lock_shared();
       m_owns = true;
@@ -230,6 +231,7 @@ public:
 
   void lock() FREERTOS_ACQUIRE() {
     configASSERT(m_mutex != nullptr);
+    configASSERT(!m_owns);
     if (m_mutex && !m_owns) {
       m_mutex->lock();
       m_owns = true;

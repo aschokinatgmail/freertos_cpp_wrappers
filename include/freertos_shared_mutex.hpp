@@ -2,7 +2,7 @@
 @file freertos_shared_mutex.hpp
 @author Andrey V. Shchekin <aschokin@gmail.com>
 @brief FreeRTOS shared_mutex wrapper providing C++20 std::shared_mutex semantics
-@version 3.1.0
+@version 3.2.0
 @date 2026-04-22
 
 The MIT License (MIT)
@@ -62,6 +62,8 @@ class static_shared_mutex_allocator {
   StaticSemaphore_t m_reader_slots_placeholder{};
 
 public:
+  static constexpr bool is_static = true;
+
   static_shared_mutex_allocator() = default;
   ~static_shared_mutex_allocator() = default;
   static_shared_mutex_allocator(const static_shared_mutex_allocator &) = delete;
@@ -90,6 +92,8 @@ public:
 #if configSUPPORT_DYNAMIC_ALLOCATION
 class dynamic_shared_mutex_allocator {
 public:
+  static constexpr bool is_static = false;
+
   void swap(dynamic_shared_mutex_allocator &other) noexcept { (void)other; }
 
   SemaphoreHandle_t create_mutex() { return xSemaphoreCreateMutex(); }

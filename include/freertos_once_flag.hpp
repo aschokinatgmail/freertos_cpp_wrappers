@@ -2,7 +2,7 @@
 @file freertos_once_flag.hpp
 @author Andrey V. Shchekin <aschokin@gmail.com>
 @brief FreeRTOS call_once / once_flag wrapper
-@version 3.1.0
+@version 3.2.0
 @date 2026-04-22
 
 The MIT License (MIT)
@@ -43,7 +43,13 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <semphr.h>
 #include <utility>
 
+class OnceFlagTest;
+
 namespace freertos {
+
+#ifndef FREERTOS_CPP_WRAPPERS_ONCE_FLAG_MAX_WAITERS
+#define FREERTOS_CPP_WRAPPERS_ONCE_FLAG_MAX_WAITERS 8
+#endif
 
 class once_flag {
 public:
@@ -62,26 +68,31 @@ private:
 
 #if configSUPPORT_STATIC_ALLOCATION
     mutable StaticSemaphore_t m_semaphore_storage{};
-    mutable uint8_t m_semaphore_created{0};
+    mutable std::atomic<uint8_t> m_semaphore_created{0};
 #endif
 
     template <typename Callable, typename... Args>
     friend void call_once(once_flag &, Callable &&, Args &&...);
 
+    friend class ::OnceFlagTest;
+
     void ensure_semaphore() const {
         if (m_semaphore == nullptr) {
-            taskENTER_CRITICAL();
+            vTaskSuspendAll();
             if (m_semaphore == nullptr) {
 #if configSUPPORT_STATIC_ALLOCATION
-                if (m_semaphore_created == 0) {
-                    m_semaphore = xSemaphoreCreateBinaryStatic(&m_semaphore_storage);
-                    m_semaphore_created = 1;
+                if (m_semaphore_created.load(std::memory_order_acquire) == 0) {
+                    m_semaphore = xSemaphoreCreateCountingStatic(
+                        FREERTOS_CPP_WRAPPERS_ONCE_FLAG_MAX_WAITERS, 0,
+                        &m_semaphore_storage);
+                    m_semaphore_created.store(1, std::memory_order_release);
                 }
 #else
-                m_semaphore = xSemaphoreCreateBinary();
+                m_semaphore = xSemaphoreCreateCounting(
+                    FREERTOS_CPP_WRAPPERS_ONCE_FLAG_MAX_WAITERS, 0);
 #endif
             }
-            taskEXIT_CRITICAL();
+            (void)xTaskResumeAll();
         }
     }
 
@@ -98,14 +109,20 @@ private:
                 func(arg);
             } catch (...) {
                 m_state.store(0, std::memory_order_release);
-                xSemaphoreGive(m_semaphore);
+                for (uint8_t i = 0; i < FREERTOS_CPP_WRAPPERS_ONCE_FLAG_MAX_WAITERS; ++i)
+                    xSemaphoreGive(m_semaphore);
                 throw;
             }
             m_state.store(2, std::memory_order_release);
-            xSemaphoreGive(m_semaphore);
+            for (uint8_t i = 0; i < FREERTOS_CPP_WRAPPERS_ONCE_FLAG_MAX_WAITERS; ++i)
+                xSemaphoreGive(m_semaphore);
         } else {
             ensure_semaphore();
-            xSemaphoreTake(m_semaphore, portMAX_DELAY);
+            for (;;) {
+                xSemaphoreTake(m_semaphore, portMAX_DELAY);
+                if (m_state.load(std::memory_order_acquire) != 1)
+                    return;
+            }
         }
     }
 };
@@ -137,7 +154,7 @@ public:
     constexpr once_flag_static() noexcept = default;
     once_flag_static(const once_flag_static &) = delete;
     once_flag_static &operator=(const once_flag_static &) = delete;
-    ~once_flag_static() noexcept = default;
+    ~once_flag_static() noexcept { if (m_semaphore) vSemaphoreDelete(m_semaphore); }
 
     [[nodiscard]] bool is_initialized() const noexcept {
         return m_state.load(std::memory_order_acquire) == 2;
@@ -147,10 +164,12 @@ private:
     mutable SemaphoreHandle_t m_semaphore{nullptr};
     mutable std::atomic<uint8_t> m_state{0};
     StaticSemaphore_t m_semaphore_storage{};
-    mutable uint8_t m_semaphore_created{0};
+    mutable std::atomic<uint8_t> m_semaphore_created{0};
 
     template <typename Callable, typename... Args>
     friend void call_once(once_flag_static &, Callable &&, Args &&...);
+
+    friend class ::OnceFlagTest;
 
     void do_call(void (*func)(void *), void *arg) {
         uint8_t expected = 0;
@@ -161,30 +180,40 @@ private:
                                               std::memory_order_acq_rel,
                                               std::memory_order_acquire)) {
             taskENTER_CRITICAL();
-            if (m_semaphore_created == 0) {
+            if (m_semaphore_created.load(std::memory_order_acquire) == 0) {
                 m_semaphore =
-                    xSemaphoreCreateBinaryStatic(&m_semaphore_storage);
-                m_semaphore_created = 1;
+                    xSemaphoreCreateCountingStatic(
+                        FREERTOS_CPP_WRAPPERS_ONCE_FLAG_MAX_WAITERS, 0,
+                        &m_semaphore_storage);
+                m_semaphore_created.store(1, std::memory_order_release);
             }
             taskEXIT_CRITICAL();
             try {
                 func(arg);
             } catch (...) {
                 m_state.store(0, std::memory_order_release);
-                xSemaphoreGive(m_semaphore);
+                for (uint8_t i = 0; i < FREERTOS_CPP_WRAPPERS_ONCE_FLAG_MAX_WAITERS; ++i)
+                    xSemaphoreGive(m_semaphore);
                 throw;
             }
             m_state.store(2, std::memory_order_release);
-            xSemaphoreGive(m_semaphore);
+            for (uint8_t i = 0; i < FREERTOS_CPP_WRAPPERS_ONCE_FLAG_MAX_WAITERS; ++i)
+                xSemaphoreGive(m_semaphore);
         } else {
             taskENTER_CRITICAL();
-            if (m_semaphore_created == 0) {
+            if (m_semaphore_created.load(std::memory_order_acquire) == 0) {
                 m_semaphore =
-                    xSemaphoreCreateBinaryStatic(&m_semaphore_storage);
-                m_semaphore_created = 1;
+                    xSemaphoreCreateCountingStatic(
+                        FREERTOS_CPP_WRAPPERS_ONCE_FLAG_MAX_WAITERS, 0,
+                        &m_semaphore_storage);
+                m_semaphore_created.store(1, std::memory_order_release);
             }
             taskEXIT_CRITICAL();
-            xSemaphoreTake(m_semaphore, portMAX_DELAY);
+            for (;;) {
+                xSemaphoreTake(m_semaphore, portMAX_DELAY);
+                if (m_state.load(std::memory_order_acquire) != 1)
+                    return;
+            }
         }
     }
 };
