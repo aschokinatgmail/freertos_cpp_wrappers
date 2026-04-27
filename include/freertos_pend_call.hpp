@@ -64,6 +64,12 @@ pend_call_ex(void (*function)(void *, uint32_t), void *arg1, uint32_t arg2,
   return unexpected<error>(error::timeout);
 }
 
+/** @brief Pend a callable for deferred execution in the timer task context.
+ *
+ * @warning Must NOT be called from ISR context. Heap-allocates per call.
+ *          Use the function-pointer overload of pend_call() from ISR context
+ *          if heap allocation is not acceptable.
+ */
 template <typename Callable,
           std::enable_if_t<!std::is_convertible_v<Callable, void (*)(void *, uint32_t)>,
                            int> = 0>

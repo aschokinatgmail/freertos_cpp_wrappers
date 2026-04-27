@@ -248,8 +248,19 @@ inline int
 __libcpp_condvar_timedwait(__libcpp_condvar_t *cv,
                             __libcpp_mutex_t *mutex,
                             const struct timespec *ts) {
-  (void)ts;
-  return __libcpp_condvar_wait(cv, mutex);
+  TickType_t ticks_to_wait = portMAX_DELAY;
+  if (ts) {
+    ticks_to_wait = pdMS_TO_TICKS(
+        static_cast<uint64_t>(ts->tv_sec) * 1000ULL +
+        static_cast<uint64_t>(ts->tv_nsec) / 1000000ULL);
+  }
+  cv->waiter_count++;
+  __atomic_thread_fence(__ATOMIC_SEQ_CST);
+  __libcpp_mutex_unlock(mutex);
+  xSemaphoreTake(cv->signal, ticks_to_wait);
+  cv->waiter_count--;
+  __libcpp_mutex_lock(mutex);
+  return 0;
 }
 
 inline int __libcpp_condvar_destroy(__libcpp_condvar_t *cv) {
@@ -265,7 +276,7 @@ inline int __libcpp_condvar_destroy(__libcpp_condvar_t *cv) {
 inline int __libcpp_condvar_signal(__libcpp_condvar_t *cv) {
   __atomic_thread_fence(__ATOMIC_SEQ_CST);
   if (cv->waiting_task) {
-    vTaskNotifyGiveFromISR(cv->waiting_task, nullptr);
+    xTaskNotifyGive(cv->waiting_task);
     cv->waiting_task = nullptr;
   }
   return 0;
@@ -290,8 +301,19 @@ inline int
 __libcpp_condvar_timedwait(__libcpp_condvar_t *cv,
                             __libcpp_mutex_t *mutex,
                             const struct timespec *ts) {
-  (void)ts;
-  return __libcpp_condvar_wait(cv, mutex);
+  TickType_t ticks_to_wait = portMAX_DELAY;
+  if (ts) {
+    ticks_to_wait = pdMS_TO_TICKS(
+        static_cast<uint64_t>(ts->tv_sec) * 1000ULL +
+        static_cast<uint64_t>(ts->tv_nsec) / 1000000ULL);
+  }
+  cv->waiting_task = xTaskGetCurrentTaskHandle();
+  cv->signaled = 0;
+  __atomic_thread_fence(__ATOMIC_SEQ_CST);
+  __libcpp_mutex_unlock(mutex);
+  ulTaskNotifyTake(pdTRUE, ticks_to_wait);
+  __libcpp_mutex_lock(mutex);
+  return 0;
 }
 
 inline int __libcpp_condvar_destroy(__libcpp_condvar_t *cv) {
@@ -349,6 +371,9 @@ inline void __libcpp_execute_once(__libcpp_exec_once_flag *flag,
     __atomic_store_n(flag, 2, __ATOMIC_RELEASE);
   } else {
     taskEXIT_CRITICAL();
+    while (__atomic_load_n(flag, __ATOMIC_ACQUIRE) == 1) {
+      vTaskDelay(1);
+    }
   }
 }
 
@@ -443,10 +468,13 @@ inline int __libcpp_tls_create(__libcpp_tls_key *key,
                                 void (*dtor)(void *)) {
   (void)dtor;
   static __libcpp_tls_key next_key = 0;
+  taskENTER_CRITICAL();
   if (next_key >= configNUM_THREAD_LOCAL_STORAGE_POINTERS) {
+    taskEXIT_CRITICAL();
     return 1;
   }
   *key = next_key++;
+  taskEXIT_CRITICAL();
   return 0;
 }
 

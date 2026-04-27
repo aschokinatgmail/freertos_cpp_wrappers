@@ -45,6 +45,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 namespace freertos {
 
+#ifndef FREERTOS_CPP_WRAPPERS_LATCH_MAX_WAITERS
+#define FREERTOS_CPP_WRAPPERS_LATCH_MAX_WAITERS 8
+#endif
+
 class latch {
   static_assert(std::atomic<ptrdiff_t>::is_always_lock_free,
                 "latch requires lock-free atomic for ISR safety");
@@ -53,7 +57,8 @@ public:
   static constexpr ptrdiff_t max() noexcept { return PTRDIFF_MAX; }
 
   explicit latch(ptrdiff_t expected)
-      : m_semaphore{xSemaphoreCreateBinary()}, m_counter{expected} {
+      : m_semaphore{xSemaphoreCreateBinary()},
+        m_counter{expected} {
     configASSERT(m_semaphore);
   }
 
@@ -153,11 +158,9 @@ public:
       if (!m_semaphore) {
         return unexpected<error>(error::invalid_handle);
       }
-      auto rc = xSemaphoreGive(m_semaphore);
-      if (rc == pdTRUE) {
-        return {};
+      if (xSemaphoreGive(m_semaphore) != pdTRUE) {
+        return unexpected<error>(error::semaphore_not_owned);
       }
-      return unexpected<error>(error::semaphore_not_owned);
     }
     return {};
   }
@@ -178,23 +181,17 @@ public:
     } while (!m_counter.compare_exchange_weak(prev, next,
                                               std::memory_order_acq_rel,
                                               std::memory_order_acquire));
-    isr_result<expected<void, error>> result{
-        unexpected<error>(error::semaphore_not_owned), pdFALSE};
     if (next == 0 && prev > 0) {
       if (!m_semaphore) {
-        result.result = unexpected<error>(error::invalid_handle);
-        return result;
+        return {unexpected<error>(error::invalid_handle), pdFALSE};
       }
       BaseType_t woken = pdFALSE;
-      auto rc = xSemaphoreGiveFromISR(m_semaphore, &woken);
-      result.higher_priority_task_woken = woken;
-      if (rc == pdTRUE) {
-        result.result = {};
+      if (xSemaphoreGiveFromISR(m_semaphore, &woken) != pdTRUE) {
+        return {unexpected<error>(error::semaphore_not_owned), woken};
       }
-    } else {
-      result.result = {};
+      return {{}, woken};
     }
-    return result;
+    return {{}, pdFALSE};
   }
 
 private:
@@ -308,11 +305,9 @@ public:
                                               std::memory_order_acq_rel,
                                               std::memory_order_acquire));
     if (next == 0 && prev > 0) {
-      auto rc = xSemaphoreGive(m_semaphore);
-      if (rc == pdTRUE) {
-        return {};
+      if (xSemaphoreGive(m_semaphore) != pdTRUE) {
+        return unexpected<error>(error::semaphore_not_owned);
       }
-      return unexpected<error>(error::semaphore_not_owned);
     }
     return {};
   }
@@ -333,19 +328,14 @@ public:
     } while (!m_counter.compare_exchange_weak(prev, next,
                                               std::memory_order_acq_rel,
                                               std::memory_order_acquire));
-    isr_result<expected<void, error>> result{
-        unexpected<error>(error::semaphore_not_owned), pdFALSE};
     if (next == 0 && prev > 0) {
       BaseType_t woken = pdFALSE;
-      auto rc = xSemaphoreGiveFromISR(m_semaphore, &woken);
-      result.higher_priority_task_woken = woken;
-      if (rc == pdTRUE) {
-        result.result = {};
+      if (xSemaphoreGiveFromISR(m_semaphore, &woken) != pdTRUE) {
+        return {unexpected<error>(error::semaphore_not_owned), woken};
       }
-    } else {
-      result.result = {};
+      return {{}, woken};
     }
-    return result;
+    return {{}, pdFALSE};
   }
 };
 

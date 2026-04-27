@@ -78,7 +78,7 @@ private:
 
     void ensure_semaphore() const {
         if (m_semaphore == nullptr) {
-            vTaskSuspendAll();
+            taskENTER_CRITICAL();
             if (m_semaphore == nullptr) {
 #if configSUPPORT_STATIC_ALLOCATION
                 if (m_semaphore_created.load(std::memory_order_acquire) == 0) {
@@ -92,7 +92,7 @@ private:
                     FREERTOS_CPP_WRAPPERS_ONCE_FLAG_MAX_WAITERS, 0);
 #endif
             }
-            (void)xTaskResumeAll();
+            taskEXIT_CRITICAL();
         }
     }
 
@@ -163,7 +163,7 @@ public:
 private:
     mutable SemaphoreHandle_t m_semaphore{nullptr};
     mutable std::atomic<uint8_t> m_state{0};
-    StaticSemaphore_t m_semaphore_storage{};
+    mutable StaticSemaphore_t m_semaphore_storage{};
     mutable std::atomic<uint8_t> m_semaphore_created{0};
 
     template <typename Callable, typename... Args>
@@ -171,14 +171,8 @@ private:
 
     friend class ::OnceFlagTest;
 
-    void do_call(void (*func)(void *), void *arg) {
-        uint8_t expected = 0;
-        if (m_state.load(std::memory_order_acquire) == 2) {
-            return;
-        }
-        if (m_state.compare_exchange_strong(expected, 1,
-                                              std::memory_order_acq_rel,
-                                              std::memory_order_acquire)) {
+    void ensure_semaphore() const {
+        if (m_semaphore_created.load(std::memory_order_acquire) == 0) {
             taskENTER_CRITICAL();
             if (m_semaphore_created.load(std::memory_order_acquire) == 0) {
                 m_semaphore =
@@ -188,6 +182,18 @@ private:
                 m_semaphore_created.store(1, std::memory_order_release);
             }
             taskEXIT_CRITICAL();
+        }
+    }
+
+    void do_call(void (*func)(void *), void *arg) {
+        uint8_t expected = 0;
+        if (m_state.load(std::memory_order_acquire) == 2) {
+            return;
+        }
+        if (m_state.compare_exchange_strong(expected, 1,
+                                              std::memory_order_acq_rel,
+                                              std::memory_order_acquire)) {
+            ensure_semaphore();
             try {
                 func(arg);
             } catch (...) {
@@ -200,15 +206,7 @@ private:
             for (uint8_t i = 0; i < FREERTOS_CPP_WRAPPERS_ONCE_FLAG_MAX_WAITERS; ++i)
                 xSemaphoreGive(m_semaphore);
         } else {
-            taskENTER_CRITICAL();
-            if (m_semaphore_created.load(std::memory_order_acquire) == 0) {
-                m_semaphore =
-                    xSemaphoreCreateCountingStatic(
-                        FREERTOS_CPP_WRAPPERS_ONCE_FLAG_MAX_WAITERS, 0,
-                        &m_semaphore_storage);
-                m_semaphore_created.store(1, std::memory_order_release);
-            }
-            taskEXIT_CRITICAL();
+            ensure_semaphore();
             for (;;) {
                 xSemaphoreTake(m_semaphore, portMAX_DELAY);
                 if (m_state.load(std::memory_order_acquire) != 1)

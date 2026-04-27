@@ -82,7 +82,7 @@ public:
 
   shared_lock &operator=(shared_lock &&other) noexcept {
     if (this != &other) {
-      if (m_owns) {
+      if (m_owns && m_mutex) {
         m_mutex->unlock_shared();
       }
       m_mutex = other.m_mutex;

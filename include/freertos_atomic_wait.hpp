@@ -59,6 +59,9 @@ using __cxx_atomic_contention_t = unsigned int;
 inline constexpr size_t atomic_wait_table_size =
     FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_TABLE_SIZE;
 
+static_assert((atomic_wait_table_size & (atomic_wait_table_size - 1)) == 0,
+              "FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_TABLE_SIZE must be a power of two");
+
 [[nodiscard]] inline size_t atomic_wait_hash(void const *addr) {
     auto const key = reinterpret_cast<uintptr_t>(addr);
     auto const hash = key ^ (key >> 16);
@@ -71,6 +74,10 @@ struct freertos_wait_entry {
     std::atomic<__cxx_atomic_contention_t> waiter_count;
 };
 
+/** @warning freertos_waiter_node instances are stack-allocated inside
+ *  __platform_wait_on_address(). They must not be accessed after the waiting
+ *  task has been deleted; deleting a blocked task while it holds a node in the
+ *  waiters list results in a dangling pointer in the bucket. */
 struct freertos_waiter_node {
     TaskHandle_t task;
     void const *address;
@@ -103,15 +110,15 @@ namespace freertos {
 
 #if FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL == 1
 
-inline void atomic_notify_one_isr(void const *addr) {
+inline BaseType_t atomic_notify_one_isr(void const *addr) {
     auto idx = atomic_wait_hash(addr);
     auto &entry = freertos_wait_table[idx];
     BaseType_t higher_priority_task_woken = pdFALSE;
     xSemaphoreGiveFromISR(entry.semaphore, &higher_priority_task_woken);
-    portYIELD_FROM_ISR(higher_priority_task_woken);
+    return higher_priority_task_woken;
 }
 
-inline void atomic_notify_all_isr(void const *addr) {
+inline BaseType_t atomic_notify_all_isr(void const *addr) {
     auto idx = atomic_wait_hash(addr);
     auto &entry = freertos_wait_table[idx];
     auto count = entry.waiter_count.load(std::memory_order_seq_cst);
@@ -119,12 +126,12 @@ inline void atomic_notify_all_isr(void const *addr) {
     for (__cxx_atomic_contention_t i = 0; i < count; ++i) {
         xSemaphoreGiveFromISR(entry.semaphore, &higher_priority_task_woken);
     }
-    portYIELD_FROM_ISR(higher_priority_task_woken);
+    return higher_priority_task_woken;
 }
 
 #elif FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL == 2
 
-inline void atomic_notify_one_isr(void const *addr) {
+inline BaseType_t atomic_notify_one_isr(void const *addr) {
     auto idx = atomic_wait_hash(addr);
     auto &bucket = freertos_wait_buckets[idx];
     BaseType_t higher_priority_task_woken = pdFALSE;
@@ -136,10 +143,10 @@ inline void atomic_notify_one_isr(void const *addr) {
         }
         node = node->next;
     }
-    portYIELD_FROM_ISR(higher_priority_task_woken);
+    return higher_priority_task_woken;
 }
 
-inline void atomic_notify_all_isr(void const *addr) {
+inline BaseType_t atomic_notify_all_isr(void const *addr) {
     auto idx = atomic_wait_hash(addr);
     auto &bucket = freertos_wait_buckets[idx];
     BaseType_t higher_priority_task_woken = pdFALSE;
@@ -150,7 +157,7 @@ inline void atomic_notify_all_isr(void const *addr) {
         }
         node = node->next;
     }
-    portYIELD_FROM_ISR(higher_priority_task_woken);
+    return higher_priority_task_woken;
 }
 
 #endif

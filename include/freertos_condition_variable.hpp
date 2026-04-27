@@ -142,11 +142,11 @@ public:
       lock.lock();
       return;
     }
-    lock.unlock();
     // Overflow protection: assert if max waiters exceeded
     configASSERT(m_waiter_count.load(std::memory_order_acquire) <
                  FREERTOS_CPP_WRAPPERS_CONDITION_VARIABLE_MAX_WAITERS);
     m_waiter_count.fetch_add(1, std::memory_order_acq_rel);
+    lock.unlock();
     xSemaphoreTake(m_semaphore, portMAX_DELAY);
     m_waiter_count.fetch_sub(1, std::memory_order_acq_rel);
     lock.lock();
@@ -168,11 +168,11 @@ public:
       lock.lock();
       return std::cv_status::timeout;
     }
-    lock.unlock();
     // Overflow protection
     configASSERT(m_waiter_count.load(std::memory_order_acquire) <
                  FREERTOS_CPP_WRAPPERS_CONDITION_VARIABLE_MAX_WAITERS);
     m_waiter_count.fetch_add(1, std::memory_order_acq_rel);
+    lock.unlock();
     auto ms = static_cast<TickType_t>(
         std::chrono::duration_cast<std::chrono::milliseconds>(rel_time).count());
     TickType_t ticks = pdMS_TO_TICKS(ms);
