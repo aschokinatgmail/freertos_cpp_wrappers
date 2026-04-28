@@ -65,7 +65,7 @@ This library is ideal for:
 - Industrial automation controllers
 - Consumer electronics with safety requirements
 
-## Features (v3.2.0)
+## Features (v3.2.1)
 
 | Category | Feature | Description |
 |----------|---------|-------------|
@@ -94,7 +94,7 @@ Include(FetchContent)
 FetchContent_Declare(
   freertos_cpp_wrappers
   GIT_REPOSITORY https://github.com/aschokinatgmail/freertos_cpp_wrappers.git
-  GIT_TAG v3.2.0
+  GIT_TAG v3.2.1
 )
 FetchContent_MakeAvailable(freertos_cpp_wrappers)
 

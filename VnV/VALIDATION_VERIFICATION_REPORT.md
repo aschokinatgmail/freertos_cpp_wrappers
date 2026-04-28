@@ -1,8 +1,14 @@
-# Validation & Verification Report — v3.0.0
+# Validation & Verification Report — v3.2.1
 
-**Release:** v3.0.0  
+**Release:** v3.2.1  
 **Date:** 2026-04-20  
 **Reference Issue:** #103
+
+> **Note:** This document is the project's top-level V&V pointer.
+> The detailed metrics tables below capture the v3.0.0 baseline used as
+> the entry point for v3.x release validation. See the timestamped
+> reports in `VnV/VALIDATION_VERIFICATION_REPORT_<TS>.{md,html}` for the
+> current numbers regenerated from each test pipeline run.
 
 ---
 

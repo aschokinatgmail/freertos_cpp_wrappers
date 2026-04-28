@@ -2,7 +2,7 @@
 @file freertos_expected.hpp
 @author Andrey V. Shchekin <aschokin@gmail.com>
 @brief std::expected polyfill for FreeRTOS C++ Wrappers
-@version 3.2.0
+@version 3.2.1
 @date 2026-04-16
 
 The MIT License (MIT)
