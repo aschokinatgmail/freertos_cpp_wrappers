@@ -40,6 +40,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "freertos_expected.hpp"
 #include "freertos_isr_result.hpp"
 #include <FreeRTOS.h>
+#include <algorithm>
 #include <atomic>
 #include <cstddef>
 #include <queue.h>
@@ -112,7 +113,13 @@ public:
             return;
         }
         UBaseType_t count = uxSemaphoreGetCount(m_semaphore);
-        UBaseType_t available = FREERTOS_CPP_WRAPPERS_ATOMIC_FLAG_MAX_WAITERS - count;
+        // @note Guard against unsigned underflow when racy notify_all paths
+        //       observe a count that has briefly exceeded MAX_WAITERS. See
+        //       issue #242 for the underlying slot-count race.
+        const UBaseType_t safe_count =
+            std::min<UBaseType_t>(count, FREERTOS_CPP_WRAPPERS_ATOMIC_FLAG_MAX_WAITERS);
+        const UBaseType_t available =
+            FREERTOS_CPP_WRAPPERS_ATOMIC_FLAG_MAX_WAITERS - safe_count;
         for (UBaseType_t i = 0; i < available; i++) {
             xSemaphoreGive(m_semaphore);
         }
@@ -134,7 +141,13 @@ public:
         isr_result<void> result{pdFALSE};
         UBaseType_t count = uxQueueMessagesWaitingFromISR(
             reinterpret_cast<QueueHandle_t>(m_semaphore));
-        UBaseType_t available = FREERTOS_CPP_WRAPPERS_ATOMIC_FLAG_MAX_WAITERS - count;
+        // @note Guard against unsigned underflow when racy notify_all paths
+        //       observe a count that has briefly exceeded MAX_WAITERS. See
+        //       issue #242 for the underlying slot-count race.
+        const UBaseType_t safe_count =
+            std::min<UBaseType_t>(count, FREERTOS_CPP_WRAPPERS_ATOMIC_FLAG_MAX_WAITERS);
+        const UBaseType_t available =
+            FREERTOS_CPP_WRAPPERS_ATOMIC_FLAG_MAX_WAITERS - safe_count;
         for (UBaseType_t i = 0; i < available; i++) {
             BaseType_t woken = pdFALSE;
             xSemaphoreGiveFromISR(m_semaphore, &woken);
@@ -163,7 +176,13 @@ public:
             return unexpected<error>(error::invalid_handle);
         }
         UBaseType_t count = uxSemaphoreGetCount(m_semaphore);
-        UBaseType_t available = FREERTOS_CPP_WRAPPERS_ATOMIC_FLAG_MAX_WAITERS - count;
+        // @note Guard against unsigned underflow when racy notify_all paths
+        //       observe a count that has briefly exceeded MAX_WAITERS. See
+        //       issue #242 for the underlying slot-count race.
+        const UBaseType_t safe_count =
+            std::min<UBaseType_t>(count, FREERTOS_CPP_WRAPPERS_ATOMIC_FLAG_MAX_WAITERS);
+        const UBaseType_t available =
+            FREERTOS_CPP_WRAPPERS_ATOMIC_FLAG_MAX_WAITERS - safe_count;
         for (UBaseType_t i = 0; i < available; i++) {
             xSemaphoreGive(m_semaphore);
         }
@@ -249,7 +268,13 @@ public:
     void notify_all() noexcept {
         ensure_semaphore();
         UBaseType_t count = uxSemaphoreGetCount(m_semaphore);
-        UBaseType_t available = FREERTOS_CPP_WRAPPERS_ATOMIC_FLAG_MAX_WAITERS - count;
+        // @note Guard against unsigned underflow when racy notify_all paths
+        //       observe a count that has briefly exceeded MAX_WAITERS. See
+        //       issue #242 for the underlying slot-count race.
+        const UBaseType_t safe_count =
+            std::min<UBaseType_t>(count, FREERTOS_CPP_WRAPPERS_ATOMIC_FLAG_MAX_WAITERS);
+        const UBaseType_t available =
+            FREERTOS_CPP_WRAPPERS_ATOMIC_FLAG_MAX_WAITERS - safe_count;
         for (UBaseType_t i = 0; i < available; i++) {
             xSemaphoreGive(m_semaphore);
         }
@@ -271,7 +296,13 @@ public:
         isr_result<void> result{pdFALSE};
         UBaseType_t count = uxQueueMessagesWaitingFromISR(
             reinterpret_cast<QueueHandle_t>(m_semaphore));
-        UBaseType_t available = FREERTOS_CPP_WRAPPERS_ATOMIC_FLAG_MAX_WAITERS - count;
+        // @note Guard against unsigned underflow when racy notify_all paths
+        //       observe a count that has briefly exceeded MAX_WAITERS. See
+        //       issue #242 for the underlying slot-count race.
+        const UBaseType_t safe_count =
+            std::min<UBaseType_t>(count, FREERTOS_CPP_WRAPPERS_ATOMIC_FLAG_MAX_WAITERS);
+        const UBaseType_t available =
+            FREERTOS_CPP_WRAPPERS_ATOMIC_FLAG_MAX_WAITERS - safe_count;
         for (UBaseType_t i = 0; i < available; i++) {
             BaseType_t woken = pdFALSE;
             xSemaphoreGiveFromISR(m_semaphore, &woken);
