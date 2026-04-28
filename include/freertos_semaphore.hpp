@@ -85,9 +85,13 @@ public:
   SemaphoreHandle_t create_binary() {
     return xSemaphoreCreateBinaryStatic(&m_semaphore_placeholder);
   }
-  SemaphoreHandle_t create_counting(UBaseType_t max_count) {
-    return xSemaphoreCreateCountingStatic(max_count, max_count,
+  SemaphoreHandle_t create_counting(UBaseType_t max_count,
+                                    UBaseType_t initial_count) {
+    return xSemaphoreCreateCountingStatic(max_count, initial_count,
                                           &m_semaphore_placeholder);
+  }
+  SemaphoreHandle_t create_counting(UBaseType_t max_count) {
+    return create_counting(max_count, max_count);
   }
   SemaphoreHandle_t create_mutex() {
     return xSemaphoreCreateMutexStatic(&m_semaphore_placeholder);
@@ -109,8 +113,12 @@ public:
   void swap(dynamic_semaphore_allocator &other) noexcept { (void)other; }
 
   SemaphoreHandle_t create_binary() { return xSemaphoreCreateBinary(); }
+  SemaphoreHandle_t create_counting(UBaseType_t max_count,
+                                    UBaseType_t initial_count) {
+    return xSemaphoreCreateCounting(max_count, initial_count);
+  }
   SemaphoreHandle_t create_counting(UBaseType_t max_count) {
-    return xSemaphoreCreateCounting(max_count, max_count);
+    return create_counting(max_count, max_count);
   }
   SemaphoreHandle_t create_mutex() { return xSemaphoreCreateMutex(); }
   SemaphoreHandle_t create_recursive_mutex() {
@@ -382,16 +390,33 @@ public:
    *
    * @param max_count maximum count of the counting semaphore.
    *
+   * The initial count of the semaphore is set to @p max_count, matching the
+   * historical wrapper behaviour.
+   *
    */
   explicit counting_semaphore(UBaseType_t max_count = 1)
-      : m_semaphore{m_allocator.create_counting(max_count)} {
+      : m_semaphore{m_allocator.create_counting(max_count, max_count)} {
+    configASSERT(m_semaphore);
+  }
+  /**
+   * @brief Construct a new counting semaphore object with an explicit initial
+   * count.
+   *
+   * @param max_count maximum count of the counting semaphore.
+   * @param initial_count initial count of the counting semaphore. Must be
+   * less than or equal to @p max_count.
+   *
+   */
+  counting_semaphore(UBaseType_t max_count, UBaseType_t initial_count)
+      : m_semaphore{m_allocator.create_counting(max_count, initial_count)} {
+    configASSERT(initial_count <= max_count);
     configASSERT(m_semaphore);
   }
   template <typename... AllocatorArgs,
             typename std::enable_if_t<(sizeof...(AllocatorArgs) > 0), int> = 0>
   explicit counting_semaphore(UBaseType_t max_count, AllocatorArgs &&...args)
       : m_allocator{std::forward<AllocatorArgs>(args)...},
-        m_semaphore{m_allocator.create_counting(max_count)} {
+        m_semaphore{m_allocator.create_counting(max_count, max_count)} {
     configASSERT(m_semaphore);
   }
   counting_semaphore(const counting_semaphore &) = delete;

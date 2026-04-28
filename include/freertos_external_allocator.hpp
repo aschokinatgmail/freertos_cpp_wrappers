@@ -76,7 +76,6 @@ struct external_memory_region {
 template <typename Region> class external_semaphore_allocator {
   Region *m_region{nullptr};
   void *m_memory{nullptr};
-  bool m_created{false};
 
   external_semaphore_allocator(const external_semaphore_allocator &) = delete;
   external_semaphore_allocator &
@@ -88,18 +87,15 @@ public:
   static constexpr bool is_static = true;
   explicit external_semaphore_allocator(Region &region) : m_region(&region) {}
   external_semaphore_allocator(external_semaphore_allocator &&other) noexcept
-      : m_region(other.m_region), m_memory(other.m_memory),
-        m_created(other.m_created) {
+      : m_region(other.m_region), m_memory(other.m_memory) {
     other.m_memory = nullptr;
     other.m_region = nullptr;
-    other.m_created = false;
   }
 
   void swap(external_semaphore_allocator &other) noexcept {
     using std::swap;
     swap(m_region, other.m_region);
     swap(m_memory, other.m_memory);
-    swap(m_created, other.m_created);
   }
 
   ~external_semaphore_allocator() {
@@ -109,48 +105,40 @@ public:
   }
 
   SemaphoreHandle_t create_binary() {
-    configASSERT(!m_created);
     m_memory = m_region->allocate(sizeof(StaticSemaphore_t));
     if (!m_memory) {
       return nullptr;
     }
-    auto handle = xSemaphoreCreateBinaryStatic(
+    return xSemaphoreCreateBinaryStatic(
         static_cast<StaticSemaphore_t *>(m_memory)); // NOLINT(clang-tidy:cppcoreguidelines-pro-type-static-cast-downcast)
-    m_created = true;
-    return handle;
+  }
+  SemaphoreHandle_t create_counting(UBaseType_t max_count,
+                                    UBaseType_t initial_count) {
+    m_memory = m_region->allocate(sizeof(StaticSemaphore_t));
+    if (!m_memory) {
+      return nullptr;
+    }
+    return xSemaphoreCreateCountingStatic(
+        max_count, initial_count, static_cast<StaticSemaphore_t *>(m_memory)); // NOLINT(clang-tidy:cppcoreguidelines-pro-type-static-cast-downcast)
   }
   SemaphoreHandle_t create_counting(UBaseType_t max_count) {
-    configASSERT(!m_created);
-    m_memory = m_region->allocate(sizeof(StaticSemaphore_t));
-    if (!m_memory) {
-      return nullptr;
-    }
-    auto handle = xSemaphoreCreateCountingStatic(
-        max_count, max_count, static_cast<StaticSemaphore_t *>(m_memory)); // NOLINT(clang-tidy:cppcoreguidelines-pro-type-static-cast-downcast)
-    m_created = true;
-    return handle;
+    return create_counting(max_count, max_count);
   }
   SemaphoreHandle_t create_mutex() {
-    configASSERT(!m_created);
     m_memory = m_region->allocate(sizeof(StaticSemaphore_t));
     if (!m_memory) {
       return nullptr;
     }
-    auto handle = xSemaphoreCreateMutexStatic(
+    return xSemaphoreCreateMutexStatic(
         static_cast<StaticSemaphore_t *>(m_memory)); // NOLINT(clang-tidy:cppcoreguidelines-pro-type-static-cast-downcast)
-    m_created = true;
-    return handle;
   }
   SemaphoreHandle_t create_recursive_mutex() {
-    configASSERT(!m_created);
     m_memory = m_region->allocate(sizeof(StaticSemaphore_t));
     if (!m_memory) {
       return nullptr;
     }
-    auto handle = xSemaphoreCreateRecursiveMutexStatic(
+    return xSemaphoreCreateRecursiveMutexStatic(
         static_cast<StaticSemaphore_t *>(m_memory)); // NOLINT(clang-tidy:cppcoreguidelines-pro-type-static-cast-downcast)
-    m_created = true;
-    return handle;
   }
 };
 
@@ -168,7 +156,6 @@ class external_queue_allocator {
   Region *m_region{nullptr};
   void *m_struct_memory{nullptr};
   void *m_storage_memory{nullptr};
-  bool m_created{false};
 
   external_queue_allocator(const external_queue_allocator &) = delete;
   external_queue_allocator &
@@ -180,11 +167,10 @@ public:
   explicit external_queue_allocator(Region &region) : m_region(&region) {}
   external_queue_allocator(external_queue_allocator &&other) noexcept
       : m_region(other.m_region), m_struct_memory(other.m_struct_memory),
-        m_storage_memory(other.m_storage_memory), m_created(other.m_created) {
+        m_storage_memory(other.m_storage_memory) {
     other.m_struct_memory = nullptr;
     other.m_storage_memory = nullptr;
     other.m_region = nullptr;
-    other.m_created = false;
   }
 
   void swap(external_queue_allocator &other) noexcept {
@@ -192,7 +178,6 @@ public:
     swap(m_region, other.m_region);
     swap(m_struct_memory, other.m_struct_memory);
     swap(m_storage_memory, other.m_storage_memory);
-    swap(m_created, other.m_created);
   }
 
   ~external_queue_allocator() {
@@ -205,7 +190,6 @@ public:
   }
 
   QueueHandle_t create() {
-    configASSERT(!m_created);
     m_struct_memory = m_region->allocate(sizeof(StaticQueue_t));
     if (!m_struct_memory) {
       return nullptr;
@@ -216,12 +200,9 @@ public:
       m_struct_memory = nullptr;
       return nullptr;
     }
-    auto handle =
-        xQueueCreateStatic(QueueLength, sizeof(T),
-                           static_cast<uint8_t *>(m_storage_memory),
-                           static_cast<StaticQueue_t *>(m_struct_memory)); // NOLINT(clang-tidy:cppcoreguidelines-pro-type-static-cast-downcast)
-    m_created = true;
-    return handle;
+    return xQueueCreateStatic(QueueLength, sizeof(T),
+                              static_cast<uint8_t *>(m_storage_memory),
+                              static_cast<StaticQueue_t *>(m_struct_memory)); // NOLINT(clang-tidy:cppcoreguidelines-pro-type-static-cast-downcast)
   }
 };
 
@@ -235,7 +216,6 @@ public:
 template <typename Region> class external_event_group_allocator {
   Region *m_region{nullptr};
   void *m_memory{nullptr};
-  bool m_created{false};
 
   external_event_group_allocator(const external_event_group_allocator &) =
       delete;
@@ -249,18 +229,15 @@ public:
   explicit external_event_group_allocator(Region &region) : m_region(&region) {}
   external_event_group_allocator(
       external_event_group_allocator &&other) noexcept
-      : m_region(other.m_region), m_memory(other.m_memory),
-        m_created(other.m_created) {
+      : m_region(other.m_region), m_memory(other.m_memory) {
     other.m_memory = nullptr;
     other.m_region = nullptr;
-    other.m_created = false;
   }
 
   void swap(external_event_group_allocator &other) noexcept {
     using std::swap;
     swap(m_region, other.m_region);
     swap(m_memory, other.m_memory);
-    swap(m_created, other.m_created);
   }
 
   ~external_event_group_allocator() {
@@ -270,15 +247,11 @@ public:
   }
 
   EventGroupHandle_t create() {
-    configASSERT(!m_created);
     m_memory = m_region->allocate(sizeof(StaticEventGroup_t));
     if (!m_memory) {
       return nullptr;
     }
-    auto handle = xEventGroupCreateStatic(
-        static_cast<StaticEventGroup_t *>(m_memory)); // NOLINT(clang-tidy:cppcoreguidelines-pro-type-static-cast-downcast)
-    m_created = true;
-    return handle;
+    return xEventGroupCreateStatic(static_cast<StaticEventGroup_t *>(m_memory)); // NOLINT(clang-tidy:cppcoreguidelines-pro-type-static-cast-downcast)
   }
 };
 
@@ -295,7 +268,6 @@ class external_stream_buffer_allocator {
   Region *m_region{nullptr};
   void *m_struct_memory{nullptr};
   void *m_storage_memory{nullptr};
-  bool m_created{false};
 
   external_stream_buffer_allocator(const external_stream_buffer_allocator &) =
       delete;
@@ -311,11 +283,10 @@ public:
   external_stream_buffer_allocator(
       external_stream_buffer_allocator &&other) noexcept
       : m_region(other.m_region), m_struct_memory(other.m_struct_memory),
-        m_storage_memory(other.m_storage_memory), m_created(other.m_created) {
+        m_storage_memory(other.m_storage_memory) {
     other.m_struct_memory = nullptr;
     other.m_storage_memory = nullptr;
     other.m_region = nullptr;
-    other.m_created = false;
   }
 
   void swap(external_stream_buffer_allocator &other) noexcept {
@@ -323,7 +294,6 @@ public:
     swap(m_region, other.m_region);
     swap(m_struct_memory, other.m_struct_memory);
     swap(m_storage_memory, other.m_storage_memory);
-    swap(m_created, other.m_created);
   }
 
   ~external_stream_buffer_allocator() {
@@ -336,7 +306,6 @@ public:
   }
 
   StreamBufferHandle_t create(size_t trigger_level_bytes = 1) {
-    configASSERT(!m_created);
     m_struct_memory = m_region->allocate(sizeof(StaticStreamBuffer_t));
     if (!m_struct_memory) {
       return nullptr;
@@ -347,12 +316,10 @@ public:
       m_struct_memory = nullptr;
       return nullptr;
     }
-    auto handle = xStreamBufferCreateStatic(
+    return xStreamBufferCreateStatic(
         StreamBufferSize, trigger_level_bytes,
         static_cast<uint8_t *>(m_storage_memory),
         static_cast<StaticStreamBuffer_t *>(m_struct_memory)); // NOLINT(clang-tidy:cppcoreguidelines-pro-type-static-cast-downcast)
-    m_created = true;
-    return handle;
   }
 };
 
@@ -369,7 +336,6 @@ class external_message_buffer_allocator {
   Region *m_region{nullptr};
   void *m_struct_memory{nullptr};
   void *m_storage_memory{nullptr};
-  bool m_created{false};
 
   external_message_buffer_allocator(const external_message_buffer_allocator &) =
       delete;
@@ -385,11 +351,10 @@ public:
   external_message_buffer_allocator(
       external_message_buffer_allocator &&other) noexcept
       : m_region(other.m_region), m_struct_memory(other.m_struct_memory),
-        m_storage_memory(other.m_storage_memory), m_created(other.m_created) {
+        m_storage_memory(other.m_storage_memory) {
     other.m_struct_memory = nullptr;
     other.m_storage_memory = nullptr;
     other.m_region = nullptr;
-    other.m_created = false;
   }
 
   void swap(external_message_buffer_allocator &other) noexcept {
@@ -397,7 +362,6 @@ public:
     swap(m_region, other.m_region);
     swap(m_struct_memory, other.m_struct_memory);
     swap(m_storage_memory, other.m_storage_memory);
-    swap(m_created, other.m_created);
   }
 
   ~external_message_buffer_allocator() {
@@ -410,7 +374,6 @@ public:
   }
 
   MessageBufferHandle_t create() {
-    configASSERT(!m_created);
     m_struct_memory = m_region->allocate(sizeof(StaticMessageBuffer_t));
     if (!m_struct_memory) {
       return nullptr;
@@ -421,11 +384,9 @@ public:
       m_struct_memory = nullptr;
       return nullptr;
     }
-    auto handle = xMessageBufferCreateStatic(
+    return xMessageBufferCreateStatic(
         MessageBufferSize, static_cast<uint8_t *>(m_storage_memory),
         static_cast<StaticMessageBuffer_t *>(m_struct_memory)); // NOLINT(clang-tidy:cppcoreguidelines-pro-type-static-cast-downcast)
-    m_created = true;
-    return handle;
   }
 };
 
@@ -439,7 +400,6 @@ public:
 template <typename Region> class external_sw_timer_allocator {
   Region *m_region{nullptr};
   void *m_memory{nullptr};
-  bool m_created{false};
 
   external_sw_timer_allocator(const external_sw_timer_allocator &) = delete;
   external_sw_timer_allocator &
@@ -451,18 +411,15 @@ public:
   static constexpr bool is_static = true;
   explicit external_sw_timer_allocator(Region &region) : m_region(&region) {}
   external_sw_timer_allocator(external_sw_timer_allocator &&other) noexcept
-      : m_region(other.m_region), m_memory(other.m_memory),
-        m_created(other.m_created) {
+      : m_region(other.m_region), m_memory(other.m_memory) {
     other.m_memory = nullptr;
     other.m_region = nullptr;
-    other.m_created = false;
   }
 
   void swap(external_sw_timer_allocator &other) noexcept {
     using std::swap;
     swap(m_region, other.m_region);
     swap(m_memory, other.m_memory);
-    swap(m_created, other.m_created);
   }
 
   ~external_sw_timer_allocator() {
@@ -474,16 +431,12 @@ public:
   TimerHandle_t create(const char *name, const TickType_t period_ticks,
                        UBaseType_t auto_reload, void *const timer_id,
                        TimerCallbackFunction_t callback) {
-    configASSERT(!m_created);
     m_memory = m_region->allocate(sizeof(StaticTimer_t));
     if (!m_memory) {
       return nullptr;
     }
-    auto handle =
-        xTimerCreateStatic(name, period_ticks, auto_reload, timer_id, callback,
-                           static_cast<StaticTimer_t *>(m_memory)); // NOLINT(clang-tidy:cppcoreguidelines-pro-type-static-cast-downcast)
-    m_created = true;
-    return handle;
+    return xTimerCreateStatic(name, period_ticks, auto_reload, timer_id,
+                              callback, static_cast<StaticTimer_t *>(m_memory)); // NOLINT(clang-tidy:cppcoreguidelines-pro-type-static-cast-downcast)
   }
 };
 
@@ -499,7 +452,6 @@ template <typename Region, size_t StackSize> class external_task_allocator {
   Region *m_region{nullptr};
   void *m_task_memory{nullptr};
   void *m_stack_memory{nullptr};
-  bool m_created{false};
 
   external_task_allocator(const external_task_allocator &) = delete;
   external_task_allocator &operator=(const external_task_allocator &) = delete;
@@ -510,11 +462,10 @@ public:
   explicit external_task_allocator(Region &region) : m_region(&region) {}
   external_task_allocator(external_task_allocator &&other) noexcept
       : m_region(other.m_region), m_task_memory(other.m_task_memory),
-        m_stack_memory(other.m_stack_memory), m_created(other.m_created) {
+        m_stack_memory(other.m_stack_memory) {
     other.m_task_memory = nullptr;
     other.m_stack_memory = nullptr;
     other.m_region = nullptr;
-    other.m_created = false;
   }
 
   void swap(external_task_allocator &other) noexcept {
@@ -522,7 +473,6 @@ public:
     swap(m_region, other.m_region);
     swap(m_task_memory, other.m_task_memory);
     swap(m_stack_memory, other.m_stack_memory);
-    swap(m_created, other.m_created);
   }
 
   ~external_task_allocator() {
@@ -536,7 +486,6 @@ public:
 
   TaskHandle_t create(TaskFunction_t taskFunction, const char *name,
                       UBaseType_t priority, void *context) {
-    configASSERT(!m_created);
     m_task_memory = m_region->allocate(sizeof(StaticTask_t));
     if (!m_task_memory) {
       return nullptr;
@@ -547,13 +496,10 @@ public:
       m_task_memory = nullptr;
       return nullptr;
     }
-    auto handle =
-        xTaskCreateStatic(taskFunction, name, StackSize / sizeof(StackType_t),
-                          context, priority,
-                          static_cast<StackType_t *>(m_stack_memory),
-                          static_cast<StaticTask_t *>(m_task_memory)); // NOLINT(clang-tidy:cppcoreguidelines-pro-type-static-cast-downcast)
-    m_created = true;
-    return handle;
+    return xTaskCreateStatic(taskFunction, name,
+                             StackSize / sizeof(StackType_t), context, priority,
+                             static_cast<StackType_t *>(m_stack_memory),
+                             static_cast<StaticTask_t *>(m_task_memory)); // NOLINT(clang-tidy:cppcoreguidelines-pro-type-static-cast-downcast)
   }
 };
 
@@ -561,8 +507,6 @@ template <typename Region> class external_shared_mutex_allocator {
   Region *m_region{nullptr};
   void *m_mutex_memory{nullptr};
   void *m_reader_slots_memory{nullptr};
-  bool m_mutex_created{false};
-  bool m_counting_created{false};
 
   external_shared_mutex_allocator(const external_shared_mutex_allocator &) =
       delete;
@@ -577,14 +521,10 @@ public:
   external_shared_mutex_allocator(
       external_shared_mutex_allocator &&other) noexcept
       : m_region(other.m_region), m_mutex_memory(other.m_mutex_memory),
-        m_reader_slots_memory(other.m_reader_slots_memory),
-        m_mutex_created(other.m_mutex_created),
-        m_counting_created(other.m_counting_created) {
+        m_reader_slots_memory(other.m_reader_slots_memory) {
     other.m_mutex_memory = nullptr;
     other.m_reader_slots_memory = nullptr;
     other.m_region = nullptr;
-    other.m_mutex_created = false;
-    other.m_counting_created = false;
   }
 
   void swap(external_shared_mutex_allocator &other) noexcept {
@@ -592,8 +532,6 @@ public:
     swap(m_region, other.m_region);
     swap(m_mutex_memory, other.m_mutex_memory);
     swap(m_reader_slots_memory, other.m_reader_slots_memory);
-    swap(m_mutex_created, other.m_mutex_created);
-    swap(m_counting_created, other.m_counting_created);
   }
 
   ~external_shared_mutex_allocator() {
@@ -606,27 +544,21 @@ public:
   }
 
   SemaphoreHandle_t create_mutex() {
-    configASSERT(!m_mutex_created);
     m_mutex_memory = m_region->allocate(sizeof(StaticSemaphore_t));
     if (!m_mutex_memory) {
       return nullptr;
     }
-    auto handle = xSemaphoreCreateMutexStatic(
+    return xSemaphoreCreateMutexStatic(
         static_cast<StaticSemaphore_t *>(m_mutex_memory)); // NOLINT(clang-tidy:cppcoreguidelines-pro-type-static-cast-downcast)
-    m_mutex_created = true;
-    return handle;
   }
   SemaphoreHandle_t create_counting(UBaseType_t max_count) {
-    configASSERT(!m_counting_created);
     m_reader_slots_memory = m_region->allocate(sizeof(StaticSemaphore_t));
     if (!m_reader_slots_memory) {
       return nullptr;
     }
-    auto handle = xSemaphoreCreateCountingStatic(
+    return xSemaphoreCreateCountingStatic(
         max_count, max_count,
         static_cast<StaticSemaphore_t *>(m_reader_slots_memory)); // NOLINT(clang-tidy:cppcoreguidelines-pro-type-static-cast-downcast)
-    m_counting_created = true;
-    return handle;
   }
 };
 

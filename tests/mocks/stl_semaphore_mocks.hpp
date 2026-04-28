@@ -444,10 +444,15 @@ public:
     /**
      * @brief Create STL counting semaphore
      * @param max_count Maximum count for the semaphore
+     * @param initial_count Initial count for the semaphore
      * @return SemaphoreHandle_t Handle to STL counting semaphore
      */
+    SemaphoreHandle_t create_counting(UBaseType_t max_count,
+                                      UBaseType_t initial_count) {
+        return reinterpret_cast<SemaphoreHandle_t>(new stl_counting_semaphore(max_count, initial_count));
+    }
     SemaphoreHandle_t create_counting(UBaseType_t max_count) {
-        return reinterpret_cast<SemaphoreHandle_t>(new stl_counting_semaphore(max_count, max_count));
+        return create_counting(max_count, max_count);
     }
     
     /**

@@ -99,7 +99,20 @@ TEST_F(FreeRTOSSemaphoreTest, StaticSemaphoreAllocatorCreateCounting) {
   EXPECT_CALL(*mock, xSemaphoreCreateCountingStatic(5, 5, NotNull()))
       .WillOnce(Return(mock_semaphore_handle));
 
-  auto handle = allocator.create_counting(5);
+  auto handle = allocator.create_counting(5, 5);
+  EXPECT_EQ(handle, mock_semaphore_handle);
+}
+
+// Regression for #229: create_counting must forward initial_count separately
+// from max_count, not pass max_count for both arguments.
+TEST_F(FreeRTOSSemaphoreTest,
+       StaticSemaphoreAllocatorCreateCountingForwardsInitialCount) {
+  freertos::static_semaphore_allocator allocator;
+
+  EXPECT_CALL(*mock, xSemaphoreCreateCountingStatic(5, 2, NotNull()))
+      .WillOnce(Return(mock_semaphore_handle));
+
+  auto handle = allocator.create_counting(5, 2);
   EXPECT_EQ(handle, mock_semaphore_handle);
 }
 
@@ -149,8 +162,32 @@ TEST_F(FreeRTOSSemaphoreTest, DynamicSemaphoreAllocatorCreateCounting) {
   EXPECT_CALL(*mock, xSemaphoreCreateCounting(10, 10))
       .WillOnce(Return(mock_semaphore_handle));
 
-  auto handle = allocator.create_counting(10);
+  auto handle = allocator.create_counting(10, 10);
   EXPECT_EQ(handle, mock_semaphore_handle);
+}
+
+// Regression for #229: dynamic counting allocator must forward initial_count
+// separately from max_count.
+TEST_F(FreeRTOSSemaphoreTest,
+       DynamicSemaphoreAllocatorCreateCountingForwardsInitialCount) {
+  freertos::dynamic_semaphore_allocator allocator;
+
+  EXPECT_CALL(*mock, xSemaphoreCreateCounting(10, 3))
+      .WillOnce(Return(mock_semaphore_handle));
+
+  auto handle = allocator.create_counting(10, 3);
+  EXPECT_EQ(handle, mock_semaphore_handle);
+}
+
+// Regression for #229: counting_semaphore(max=5, initial=2) must initialise
+// the semaphore at 2, not at 5.
+TEST_F(FreeRTOSSemaphoreTest, CountingSemaphoreInitialCountIsForwarded) {
+  EXPECT_CALL(*mock, xSemaphoreCreateCounting(5, 2))
+      .WillOnce(Return(mock_semaphore_handle));
+  EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle)).Times(1);
+
+  freertos::counting_semaphore<freertos::dynamic_semaphore_allocator> semaphore(
+      static_cast<UBaseType_t>(5), static_cast<UBaseType_t>(2));
 }
 
 TEST_F(FreeRTOSSemaphoreTest, DynamicSemaphoreAllocatorCreateMutex) {
