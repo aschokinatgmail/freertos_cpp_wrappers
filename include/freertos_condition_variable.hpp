@@ -81,6 +81,7 @@ public:
   condition_variable_any &operator=(const condition_variable_any &) = delete;
 
   ~condition_variable_any() noexcept {
+    configASSERT(m_waiter_count.load(std::memory_order_acquire) == 0);
     if (m_semaphore) {
       vSemaphoreDelete(m_semaphore);
     }
