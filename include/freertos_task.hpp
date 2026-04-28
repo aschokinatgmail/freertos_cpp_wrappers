@@ -1363,19 +1363,28 @@ void delay_until(TickType_t &previousWakeTime,
 }
 
 /**
- * @brief Sleep the task until the specified time point.
+ * @brief Sleep the task until the specified system_clock time point.
  *
- * @tparam Clock clock type
- * @tparam Duration duration type
- * @param timePoint time point to sleep until
+ * @param wakeTime time point to sleep until
+ *
+ * @note The remaining duration is cast to std::chrono::milliseconds before
+ *       conversion to FreeRTOS ticks. Sub-millisecond resolution is
+ *       silently truncated. Scheduling resolution is bounded by
+ *       configTICK_RATE_HZ (typical: 100 Hz → 10 ms ticks; 1000 Hz → 1 ms).
+ *       For tick-aligned planning, use freertos::tick_timer from
+ *       freertos_clock.hpp.
  */
 void delay_until(const std::chrono::system_clock::time_point &wakeTime);
 /**
- * @brief Sleep the task until the specified time point.
+ * @brief Sleep the task until the specified steady_clock time point.
  *
- * @tparam Clock clock type
- * @tparam Duration duration type
- * @param timePoint time point to sleep until
+ * @param wakeTime time point to sleep until
+ *
+ * @note The remaining duration is cast to std::chrono::milliseconds before
+ *       conversion to FreeRTOS ticks. Sub-millisecond resolution is
+ *       silently truncated. Scheduling resolution is bounded by
+ *       configTICK_RATE_HZ. For tick-aligned planning, use
+ *       freertos::tick_timer from freertos_clock.hpp.
  */
 void delay_until(const std::chrono::steady_clock::time_point &wakeTime);
 

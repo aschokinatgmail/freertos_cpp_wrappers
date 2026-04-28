@@ -5,6 +5,42 @@ All notable changes to the FreeRTOS C++ Wrappers Library will be documented in t
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.2.1] - Unreleased
+
+### Documentation
+- Removed stale `yield_if_needed()` references from `freertos_isr_result.hpp` doxygen (#301)
+- `freertos_atomic_wait.cc` version stamp synchronized to current release (#308)
+- `event_group::set_bits_isr` doxygen `@return` corrected to `isr_result<BaseType_t>` (#310)
+- `event_group::clear_bits_isr` now has full doxygen header explaining the 2-arg API and pdFALSE flag (#311)
+- `delay_until` chrono overloads document sub-millisecond truncation and recommend `tick_timer` for tick-aligned planning (#314)
+
+## [3.2.0] - 2026-04-27
+
+### Added
+- `to_ticks_saturating()` helper for safe long-duration tick conversion (#287; corrected in v3.2.1 #303)
+- New error enumerators: `timer_queue_full`, `buffer_full`, `buffer_empty`, `message_too_large` (#295)
+- `isr_result` accessor methods (`result_value()`, `should_yield()`) for non-breaking encapsulation (#298)
+- Documented atomic_wait Implementation 1 hash-collision limitation with quantitative collision math (#279)
+- `__cpp_exceptions` guard in `once_flag` for `-fno-exceptions` toolchains
+
+### Fixed
+- `xEventGroupClearBitsFromISR` wrapper signature corrected (3-arg → 2-arg per production FreeRTOS) (#298 sim build)
+- `xMessageBufferResetFromISR` / `xStreamBufferResetFromISR` wrapper signatures corrected (2-arg → 1-arg per V10.6+)
+- `xStreamBufferGenericCreate` now uses 5-arg signature with version guard for V10.6+
+- `condition_variable_any::wait` overflow now prevented via CAS-based admission control (#280)
+- `atomic_wait` Implementation 2 mutex-creation race hardened with explicit publish ordering inside critical section (#285)
+- `task::delay_until(chrono::time_point)` chrono overload now performs explicit `duration_cast<milliseconds>` (#292)
+- `counting_semaphore` post-increment/decrement operators removed (cannot satisfy C++ contract on non-copyable type) (#284)
+- `[[nodiscard]]` consistency pass across ~30 status-returning methods (#286)
+- Version stamps unified to 3.2.0 across headers and CMakeLists.txt (#290)
+- `(void)` casts on internal `m_mutex.unlock()` calls in lock-guard destructors
+
+### Documentation
+- `set_bits_ex` / `clear_bits_ex` always-succeed semantics documented (#289)
+- `set_bits_ex_isr` async-bits-not-actual semantics documented (#294)
+- `timer::m_started` user-request-vs-actual-state semantics documented (#293)
+- `atomic_wait` Implementation 1 limitation block comment with use-Impl-2 decision tree
+
 ## [3.1.0] - Unreleased
 
 ### Added

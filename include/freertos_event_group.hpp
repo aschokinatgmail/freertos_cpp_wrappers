@@ -175,8 +175,13 @@ public:
    * @ref https://www.freertos.org/xEventGroupSetBitsFromISR.html
    *
    * @param bits_to_set bits to set
-   * @return isr_result<EventBits_t> result with bits set and higher priority
-   * task woken flag
+   * @return isr_result<BaseType_t> pdPASS / pdFAIL plus the
+   *         higher_priority_task_woken flag.
+   *
+   * @note xEventGroupSetBitsFromISR queues a request on the timer-service
+   *       daemon and returns only pdPASS/pdFAIL — it cannot synchronously
+   *       report the resulting bit pattern. To inspect actual bits, query
+   *       from a task context after the daemon has processed the request.
    */
   isr_result<BaseType_t> set_bits_isr(const EventBits_t bits_to_set) {
     isr_result<BaseType_t> result{pdFALSE, pdFALSE};
@@ -195,11 +200,21 @@ public:
     return xEventGroupClearBits(m_event_group, bits_to_clear);
   }
 
+  /**
+   * @brief Clear bits in the event group from an ISR.
+   * @ref https://www.freertos.org/xEventGroupClearBitsFromISR.html
+   *
+   * @param bits_to_clear bits to clear
+   * @return isr_result<BaseType_t> pdPASS / pdFAIL plus the
+   *         higher_priority_task_woken flag.
+   *
+   * @note xEventGroupClearBitsFromISR takes only 2 arguments in production
+   *       FreeRTOS — it queues a request to the timer-service daemon and
+   *       does not directly wake a task, so there is no
+   *       higher_priority_task_woken out-parameter from FreeRTOS. The flag
+   *       in the returned isr_result is always pdFALSE.
+   */
   isr_result<BaseType_t> clear_bits_isr(const EventBits_t bits_to_clear) {
-    // Note: xEventGroupClearBitsFromISR takes only 2 args in production
-    // FreeRTOS — it queues a request to the timer-service daemon and does
-    // not directly wake a task, so there is no higher_priority_task_woken
-    // out-parameter. The flag is left at pdFALSE in the returned result.
     isr_result<BaseType_t> result{pdFALSE, pdFALSE};
     result.result = xEventGroupClearBitsFromISR(m_event_group, bits_to_clear);
     return result;

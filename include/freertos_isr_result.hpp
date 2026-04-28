@@ -46,8 +46,11 @@ namespace freertos {
  *        intentionally kept public for backward compatibility with existing
  *        code. New code should prefer the accessor methods
  *        `result_value()`, `higher_priority_task_woken_value()`, and
- *        `should_yield()` for safer, encapsulated access. The helper
- *        `yield_if_needed()` issues `portYIELD_FROM_ISR()` when required.
+ *        `should_yield()` for safer, encapsulated access. The
+ *        `portYIELD_FROM_ISR()` macro is intentionally NOT wrapped in a
+ *        helper because some FreeRTOS ports define it in ways that require
+ *        expansion at the call site (e.g., inline assembly). Invoke it
+ *        directly when `should_yield()` returns true.
  *
  *  @tparam T The type of the operation result value
  */
@@ -103,8 +106,10 @@ template <typename T> struct isr_result {
  *
  *  @note The data member `higher_priority_task_woken` remains public for
  *        backward compatibility. New code should prefer the accessor methods
- *        `higher_priority_task_woken_value()` and `should_yield()`, or the
- *        `yield_if_needed()` helper.
+ *        `higher_priority_task_woken_value()` and `should_yield()`. As with
+ *        the primary template, `portYIELD_FROM_ISR()` is intentionally not
+ *        wrapped — invoke it directly at the end of the ISR when
+ *        `should_yield()` returns true.
  */
 template <> struct isr_result<void> {
   BaseType_t higher_priority_task_woken;
