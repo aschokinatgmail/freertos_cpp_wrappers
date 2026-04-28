@@ -823,16 +823,22 @@ TEST_F(FreeRTOSMoveSemanticsTest, StaticEventGroupMoveConstructor) {
   freertos::sa::event_group eg2(std::move(eg1));
 }
 
-TEST_F(FreeRTOSMoveSemanticsTest, StaticQueueMoveConstructor) {
-  QueueHandle_t handle = reinterpret_cast<QueueHandle_t>(0xEEEE);
-  EXPECT_CALL(*mock,
-              xQueueCreateStatic(4, sizeof(uint32_t), NotNull(), NotNull()))
-      .WillOnce(Return(handle));
-  EXPECT_CALL(*mock, pcQueueGetName(handle)).WillOnce(Return(nullptr));
-  EXPECT_CALL(*mock, vQueueDelete(handle)).Times(1);
-
-  freertos::sa::queue<4, uint32_t> q1;
-  freertos::sa::queue<4, uint32_t> q2(std::move(q1));
+// Issue #258: moving a static queue is forbidden — its storage buffer is part
+// of the object footprint, so the move ctor must trigger configASSERT.
+TEST_F(FreeRTOSMoveSemanticsTest, StaticQueueMoveConstructorAsserts) {
+  ::testing::FLAGS_gtest_death_test_style = "threadsafe";
+  ON_CALL(*mock, xQueueCreateStatic(_, _, _, _))
+      .WillByDefault(Return(reinterpret_cast<QueueHandle_t>(0xEEEE)));
+  ON_CALL(*mock, pcQueueGetName(_)).WillByDefault(Return(nullptr));
+  using static_queue_4_u32 =
+      freertos::queue<4, uint32_t,
+                      freertos::static_queue_allocator<4, uint32_t>>;
+  EXPECT_DEATH(
+      {
+        static_queue_4_u32 q1;
+        static_queue_4_u32 q2(std::move(q1));
+      },
+      "Assertion.*failed");
 }
 
 TEST_F(FreeRTOSMoveSemanticsTest, StaticStreamBufferMoveConstructor) {

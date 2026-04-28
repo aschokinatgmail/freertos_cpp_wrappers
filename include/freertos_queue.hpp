@@ -58,6 +58,7 @@ template <size_t QueueLength, typename T> class static_queue_allocator {
   std::array<uint8_t, QueueLength * sizeof(T)> m_storage;
 
 public:
+  static constexpr bool is_static = true;
   static_queue_allocator() = default;
   ~static_queue_allocator() = default;
   static_queue_allocator(const static_queue_allocator &) = delete;
@@ -85,6 +86,7 @@ public:
  */
 template <size_t QueueLength, typename T> class dynamic_queue_allocator {
 public:
+  static constexpr bool is_static = false;
   void swap(dynamic_queue_allocator &other) noexcept { (void)other; }
 
   QueueHandle_t create() { return xQueueCreate(QueueLength, sizeof(T)); }
@@ -226,6 +228,7 @@ public:
   queue(const queue &) = delete;
   queue(queue &&src) noexcept
       : m_allocator(std::move(src.m_allocator)), m_queue(src.m_queue) {
+    configASSERT(!QueueAllocator::is_static);
     src.m_queue = nullptr;
   }
   ~queue(void) {
@@ -240,6 +243,7 @@ public:
 
   queue &operator=(const queue &) = delete;
   queue &operator=(queue &&src) noexcept {
+    configASSERT(!QueueAllocator::is_static);
     if (this != &src) {
       swap(src);
     }
@@ -247,6 +251,7 @@ public:
   }
 
   void swap(queue &other) noexcept {
+    configASSERT(!QueueAllocator::is_static);
     using std::swap;
     m_allocator.swap(other.m_allocator);
     swap(m_queue, other.m_queue);

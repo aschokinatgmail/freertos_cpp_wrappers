@@ -3962,19 +3962,22 @@ TEST_F(SemaphoreCoverageTest, StaticMessageBufferSwap) {
   mb1.swap(mb2);
 }
 
-TEST_F(SemaphoreCoverageTest, StaticQueueSwap) {
-  QueueHandle_t fake_q1 = reinterpret_cast<QueueHandle_t>(0x8000);
-  QueueHandle_t fake_q2 = reinterpret_cast<QueueHandle_t>(0x8010);
-  EXPECT_CALL(*mock, xQueueCreateStatic(_, _, _, _))
-      .WillOnce(Return(fake_q1))
-      .WillOnce(Return(fake_q2));
-  // Queue destructor calls pcQueueGetName before vQueueDelete
-  EXPECT_CALL(*mock, pcQueueGetName(_)).WillRepeatedly(Return(nullptr));
-  EXPECT_CALL(*mock, vQueueDelete(_)).Times(2);
-
-  freertos::sa::queue<10, int> q1;
-  freertos::sa::queue<10, int> q2;
-  q1.swap(q2);
+// Issue #258: swap on a static queue is forbidden — its storage buffer is part
+// of the object footprint, so swap must trigger configASSERT.
+TEST_F(SemaphoreCoverageTest, StaticQueueSwapAsserts) {
+  ::testing::FLAGS_gtest_death_test_style = "threadsafe";
+  ON_CALL(*mock, xQueueCreateStatic(_, _, _, _))
+      .WillByDefault(Return(reinterpret_cast<QueueHandle_t>(0x8000)));
+  ON_CALL(*mock, pcQueueGetName(_)).WillByDefault(Return(nullptr));
+  using static_queue_10_int =
+      freertos::queue<10, int, freertos::static_queue_allocator<10, int>>;
+  EXPECT_DEATH(
+      {
+        static_queue_10_int q1;
+        static_queue_10_int q2;
+        q1.swap(q2);
+      },
+      "Assertion.*failed");
 }
 
 // ================================================================

@@ -1693,51 +1693,47 @@ TEST_F(FreeRTOSQueueTest, Issue119QueueMoveConstructionTransfersAllocator) {
 }
 
 // =============================================================================
-// BUG FIX REGRESSION TESTS - Issue #137
-// Static allocator move/swap must transfer/swap the allocator along with handle
+// BUG FIX REGRESSION TESTS - Issue #258
+// Static queues must NOT be movable/swappable: their backing storage is part
+// of the object footprint, so moving the QueueHandle_t while leaving the
+// StaticQueue_t buffer behind would corrupt the kernel's bookkeeping.
+// The wrapper must configASSERT(!is_static) on move ctor, move assign, swap.
 // =============================================================================
 
 #if configSUPPORT_STATIC_ALLOCATION
-TEST_F(FreeRTOSQueueTest, Issue137StaticQueueMoveConstruction) {
-  QueueHandle_t handle = reinterpret_cast<QueueHandle_t>(0xAAAA);
+// Use a typedef to dodge the EXPECT_DEATH preprocessor comma issue with
+// template arguments (see tests/test_freertos_expected.cpp pattern).
+using static_queue_4_u32 =
+    freertos::queue<4, uint32_t,
+                    freertos::static_queue_allocator<4, uint32_t>>;
 
-  EXPECT_CALL(*mock, xQueueCreateStatic(4, sizeof(uint32_t), NotNull(), NotNull()))
-      .WillOnce(Return(handle));
-  EXPECT_CALL(*mock, pcQueueGetName(handle)).WillOnce(Return(nullptr));
-  EXPECT_CALL(*mock, vQueueDelete(handle));
-
-  freertos::sa::queue<4, uint32_t> q1;
-  freertos::sa::queue<4, uint32_t> q2(std::move(q1));
-
-  EXPECT_CALL(*mock, xQueueSend(handle, NotNull(), portMAX_DELAY))
-      .WillOnce(Return(pdPASS));
-  uint32_t val = 42;
-  EXPECT_EQ(q2.send(val, portMAX_DELAY), pdPASS);
+TEST_F(FreeRTOSQueueTest, Issue258StaticQueueMoveConstructionAsserts) {
+  ::testing::FLAGS_gtest_death_test_style = "threadsafe";
+  // The death test forks; the parent doesn't expect calls — we only verify
+  // the assert fires, so use a NiceMock-style expectation set via permissive
+  // ON_CALL to allow the child process to satisfy any incidental calls.
+  ON_CALL(*mock, xQueueCreateStatic(_, _, _, _))
+      .WillByDefault(Return(reinterpret_cast<QueueHandle_t>(0xDEAD)));
+  ON_CALL(*mock, pcQueueGetName(_)).WillByDefault(Return(nullptr));
+  EXPECT_DEATH(
+      {
+        static_queue_4_u32 q1;
+        static_queue_4_u32 q2(std::move(q1));
+      },
+      "Assertion.*failed");
 }
 
-TEST_F(FreeRTOSQueueTest, Issue137StaticQueueSwap) {
-  QueueHandle_t handle1 = reinterpret_cast<QueueHandle_t>(0xBBBB);
-  QueueHandle_t handle2 = reinterpret_cast<QueueHandle_t>(0xCCCC);
-
-  EXPECT_CALL(*mock, xQueueCreateStatic(4, sizeof(uint32_t), NotNull(), NotNull()))
-      .WillOnce(Return(handle1))
-      .WillOnce(Return(handle2));
-  EXPECT_CALL(*mock, pcQueueGetName(handle1)).WillOnce(Return(nullptr));
-  EXPECT_CALL(*mock, pcQueueGetName(handle2)).WillOnce(Return(nullptr));
-  EXPECT_CALL(*mock, vQueueDelete(handle1));
-  EXPECT_CALL(*mock, vQueueDelete(handle2));
-
-  freertos::sa::queue<4, uint32_t> q1;
-  freertos::sa::queue<4, uint32_t> q2;
-  q1.swap(q2);
-
-  EXPECT_CALL(*mock, xQueueSend(handle2, NotNull(), portMAX_DELAY))
-      .WillOnce(Return(pdPASS));
-  uint32_t val = 10;
-  EXPECT_EQ(q1.send(val, portMAX_DELAY), pdPASS);
-
-  EXPECT_CALL(*mock, xQueueSend(handle1, NotNull(), portMAX_DELAY))
-      .WillOnce(Return(pdPASS));
-  EXPECT_EQ(q2.send(val, portMAX_DELAY), pdPASS);
+TEST_F(FreeRTOSQueueTest, Issue258StaticQueueSwapAsserts) {
+  ::testing::FLAGS_gtest_death_test_style = "threadsafe";
+  ON_CALL(*mock, xQueueCreateStatic(_, _, _, _))
+      .WillByDefault(Return(reinterpret_cast<QueueHandle_t>(0xDEAD)));
+  ON_CALL(*mock, pcQueueGetName(_)).WillByDefault(Return(nullptr));
+  EXPECT_DEATH(
+      {
+        static_queue_4_u32 q1;
+        static_queue_4_u32 q2;
+        q1.swap(q2);
+      },
+      "Assertion.*failed");
 }
 #endif
