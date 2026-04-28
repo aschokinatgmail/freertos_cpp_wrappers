@@ -920,6 +920,43 @@ TEST_F(FreeRTOSEventGroupTest, EventGroupWaitBitsEx_Timeout) {
   EXPECT_EQ(result.error(), freertos::error::timeout);
 }
 
+// Issue #265: when wait_for_all_bits=true and only some of the requested bits
+// are set at timeout, xEventGroupWaitBits returns the actual partial bit
+// state (non-zero). The wrapper must NOT report success in that case.
+TEST_F(FreeRTOSEventGroupTest, EventGroupWaitBitsEx_PartialBitsTimesOut) {
+  EXPECT_CALL(*mock, xEventGroupCreate())
+      .WillOnce(Return(mock_event_group_handle));
+  // Requesting bits A|B (0x03), wait_for_all=true, timeout=100. Only bit A
+  // (0x01) is set when the timeout hits — partial match must be a timeout,
+  // not a success.
+  EXPECT_CALL(*mock, xEventGroupWaitBits(mock_event_group_handle, 0x03, pdTRUE,
+                                         pdTRUE, 100))
+      .WillOnce(Return(0x01));
+  EXPECT_CALL(*mock, vEventGroupDelete(mock_event_group_handle));
+
+  freertos::da::event_group event_group;
+  auto result = event_group.wait_bits_ex(0x03, pdTRUE, pdTRUE, 100);
+  EXPECT_FALSE(result.has_value());
+  EXPECT_EQ(result.error(), freertos::error::timeout);
+}
+
+// Issue #265 corollary: when wait_for_all_bits=false ("any-of"), one bit set
+// is still success, even though the same partial state would be a timeout
+// under wait_for_all_bits=true.
+TEST_F(FreeRTOSEventGroupTest, EventGroupWaitBitsEx_AnyOfPartialIsSuccess) {
+  EXPECT_CALL(*mock, xEventGroupCreate())
+      .WillOnce(Return(mock_event_group_handle));
+  EXPECT_CALL(*mock, xEventGroupWaitBits(mock_event_group_handle, 0x03, pdTRUE,
+                                         pdFALSE, 100))
+      .WillOnce(Return(0x01));
+  EXPECT_CALL(*mock, vEventGroupDelete(mock_event_group_handle));
+
+  freertos::da::event_group event_group;
+  auto result = event_group.wait_bits_ex(0x03, pdTRUE, pdFALSE, 100);
+  EXPECT_TRUE(result.has_value());
+  EXPECT_EQ(result.value(), 0x01);
+}
+
 TEST_F(FreeRTOSEventGroupTest, EventGroupWaitBitsEx_WouldBlock) {
   EXPECT_CALL(*mock, xEventGroupCreate())
       .WillOnce(Return(mock_event_group_handle));

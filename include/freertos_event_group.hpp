@@ -354,7 +354,13 @@ public:
       const BaseType_t wait_for_all_bits, const TickType_t ticks_to_wait) {
     auto rc = wait_bits(bits_to_wait_for, clear_on_exit, wait_for_all_bits,
                         ticks_to_wait);
-    if (rc & bits_to_wait_for) {
+    // Issue #265: when wait_for_all_bits is true, xEventGroupWaitBits returns
+    // the actual bit state on timeout — which may have *some* requested bits
+    // set, not all. In that case the wrapper must report timeout, not success.
+    const bool success = (wait_for_all_bits == pdTRUE)
+                             ? ((rc & bits_to_wait_for) == bits_to_wait_for)
+                             : ((rc & bits_to_wait_for) != 0);
+    if (success) {
       return rc;
     }
     return unexpected<error>(ticks_to_wait == 0 ? error::would_block
