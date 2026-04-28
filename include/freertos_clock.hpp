@@ -39,6 +39,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <FreeRTOS.h>
 #include <task.h>
 #include <chrono>
+#include <cstdint>
 #include <ratio>
 #include <type_traits>
 
@@ -89,12 +90,21 @@ to_duration(TickType_t ticks) noexcept {
 
 /** @brief Saturating millisecond-to-tick conversion.
  *
- *  Mirrors `pdMS_TO_TICKS()` but clamps to `portMAX_DELAY` when the
- *  multiplication `ms * configTICK_RATE_HZ / 1000` would overflow
- *  `TickType_t`. `pdMS_TO_TICKS` itself is a macro that performs the
- *  multiplication in the underlying type without overflow checks; for
- *  durations longer than ~24 days at 1 kHz on a 32-bit `TickType_t` it
- *  silently wraps and produces an unexpectedly short delay.
+ *  Converts a `std::chrono::duration` to FreeRTOS ticks while clamping the
+ *  result to `portMAX_DELAY`. Unlike `pdMS_TO_TICKS()`, which expands to a
+ *  macro that performs `ms * configTICK_RATE_HZ / 1000` in the operand's
+ *  native type and silently wraps on overflow, this helper performs the
+ *  multiplication in 64-bit and only narrows once the value is known to fit.
+ *
+ *  This bypasses `pdMS_TO_TICKS` deliberately: at a 1 kHz tick rate with a
+ *  32-bit `TickType_t`, the macro starts wrapping when the millisecond count
+ *  exceeds ~4.3 million (≈ 71 minutes), but `portMAX_DELAY` only saturates at
+ *  ~4.29 billion ms (≈ 49.7 days). That gap is a silent-corruption window
+ *  where a long timeout becomes an unexpectedly short one. Using 64-bit
+ *  intermediate math closes it.
+ *
+ *  Negative durations and zero return 0; values that would exceed
+ *  `portMAX_DELAY` saturate to `portMAX_DELAY`.
  */
 template <typename Rep, typename Period>
 [[nodiscard]] constexpr TickType_t
@@ -104,13 +114,8 @@ to_ticks_saturating(const std::chrono::duration<Rep, Period> &d) noexcept {
   if (ms <= 0) {
     return 0;
   }
-  using ms_t = decltype(ms);
-  constexpr ms_t max_ms =
-      static_cast<ms_t>(portMAX_DELAY) * 1000 / configTICK_RATE_HZ;
-  if (ms >= max_ms) {
-    return portMAX_DELAY;
-  }
-  return pdMS_TO_TICKS(ms);
+  const auto raw = (static_cast<uint64_t>(ms) * configTICK_RATE_HZ) / 1000U;
+  return raw > portMAX_DELAY ? portMAX_DELAY : static_cast<TickType_t>(raw);
 }
 
 } // namespace freertos

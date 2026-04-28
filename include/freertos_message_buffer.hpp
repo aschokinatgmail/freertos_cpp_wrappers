@@ -490,11 +490,20 @@ public:
    * reset, and the higher_priority_task_woken flag.
    */
   isr_result<bool> reset_isr() {
-    // xMessageBufferResetFromISR takes only the buffer handle in production
-    // FreeRTOS — it does not have a higher_priority_task_woken out-parameter.
-    // The flag is left at pdFALSE in the returned result.
+    // xMessageBufferResetFromISR signature differs across FreeRTOS versions.
+    // V10.6+ takes only the handle; pre-V10.6 takes a higher-priority-task-
+    // woken out parameter. Guard the call so the wrapper compiles and behaves
+    // correctly on both. The simulation layer also uses the new (1-arg) form.
     isr_result<bool> result{false, pdFALSE};
+#if (tskKERNEL_VERSION_MAJOR > 10) ||                                          \
+    (tskKERNEL_VERSION_MAJOR == 10 && tskKERNEL_VERSION_MINOR >= 6) ||         \
+    defined(FREERTOS_CPP_WRAPPERS_SIMULATION)
     result.result = xMessageBufferResetFromISR(m_message_buffer) == pdPASS;
+#else
+    BaseType_t hpw = pdFALSE;
+    result.result = xMessageBufferResetFromISR(m_message_buffer, &hpw) == pdPASS;
+    result.higher_priority_task_woken = hpw;
+#endif
     return result;
   }
   [[nodiscard]] isr_result<expected<void, error>> reset_ex_isr() {

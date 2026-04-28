@@ -45,10 +45,99 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <iterator>
 #include <optional>
 #include <stream_buffer.h>
+#include <string>
 #include <type_traits>
 #include <utility>
+#include <vector>
+#if defined(__cpp_lib_concepts) && __cpp_lib_concepts >= 201907L
+#include <iterator>
+#endif
+#if defined(__cpp_lib_span)
+#include <span>
+#endif
 
 namespace freertos {
+
+namespace detail {
+
+// Trait detecting iterators that are guaranteed to point at contiguous
+// storage. `&*begin + N` is only well-defined when the iterator is truly
+// contiguous; random-access alone is not sufficient (e.g. std::deque is
+// random-access but its elements live in non-contiguous chunks, so taking a
+// pointer and offsetting it is undefined behavior).
+//
+// In C++20, the standard provides std::contiguous_iterator which is the
+// canonical answer; we use it directly when the concepts library is
+// available.
+//
+// In C++17, there is no concept-based way to detect contiguity, so we
+// maintain an explicit allowlist of standard-library iterators that are
+// guaranteed by the standard to be contiguous: raw pointers, and the
+// iterators of std::vector, std::array, std::basic_string (and std::span
+// when available). Anything outside the allowlist falls through to the
+// chunked-copy fallback path used by stream_buffer / message_buffer when a
+// non-contiguous iterator is supplied.
+//
+// The trait lives in `detail` so tests can pin its values down with
+// `static_assert` without poking into private members of the buffer
+// templates that consume it.
+#if defined(__cpp_lib_concepts) && __cpp_lib_concepts >= 201907L
+template <typename Iterator>
+inline constexpr bool is_contiguous_iterator_v =
+    std::contiguous_iterator<Iterator>;
+#else
+template <typename Iterator>
+struct is_known_contiguous : std::false_type {};
+
+// Raw pointers to objects are contiguous by definition.
+template <typename T>
+struct is_known_contiguous<T *> : std::true_type {};
+template <typename T>
+struct is_known_contiguous<const T *> : std::true_type {};
+
+// std::vector iterators are guaranteed contiguous since C++17. (vector<bool>
+// has a proxy iterator that is not contiguous, but it is also not in the set
+// of iterator types this trait will encounter for the buffer wrappers — and
+// even if it were, the explicit specialization below for vector<T, Alloc>
+// does not match the proxy iterator anyway.)
+template <typename T, typename Alloc>
+struct is_known_contiguous<typename std::vector<T, Alloc>::iterator>
+    : std::true_type {};
+template <typename T, typename Alloc>
+struct is_known_contiguous<typename std::vector<T, Alloc>::const_iterator>
+    : std::true_type {};
+
+// std::array: iterators are pointers in libstdc++/libc++ but specified as
+// contiguous by the standard regardless.
+template <typename T, std::size_t N>
+struct is_known_contiguous<typename std::array<T, N>::iterator>
+    : std::true_type {};
+template <typename T, std::size_t N>
+struct is_known_contiguous<typename std::array<T, N>::const_iterator>
+    : std::true_type {};
+
+// std::basic_string: contiguous since C++17.
+template <typename CharT, typename Traits, typename Alloc>
+struct is_known_contiguous<
+    typename std::basic_string<CharT, Traits, Alloc>::iterator>
+    : std::true_type {};
+template <typename CharT, typename Traits, typename Alloc>
+struct is_known_contiguous<
+    typename std::basic_string<CharT, Traits, Alloc>::const_iterator>
+    : std::true_type {};
+
+#if defined(__cpp_lib_span)
+template <typename T, std::size_t Extent>
+struct is_known_contiguous<typename std::span<T, Extent>::iterator>
+    : std::true_type {};
+#endif
+
+template <typename Iterator>
+inline constexpr bool is_contiguous_iterator_v =
+    is_known_contiguous<Iterator>::value;
+#endif
+
+}  // namespace detail
 
 #if configUSE_SB_COMPLETED_CALLBACK
 /**
@@ -296,25 +385,13 @@ public:
                 .count()));
   }
 private:
-  // Trait detecting iterators that are guaranteed to point at contiguous
-  // storage. In C++17 there is no std::contiguous_iterator concept; we
-  // approximate by requiring random-access iteration and treat raw pointers
-  // explicitly. This is the same set of iterators for which `&*begin` plus
-  // an element count is a valid description of the underlying byte range.
-  template <typename Iterator>
-  struct is_contiguous_iterator_impl {
-  private:
-    using category =
-        typename std::iterator_traits<Iterator>::iterator_category;
-
-  public:
-    static constexpr bool value =
-        std::is_pointer<Iterator>::value ||
-        std::is_same<category, std::random_access_iterator_tag>::value;
-  };
+  // Re-export the namespace-scope contiguous-iterator trait so the rest of
+  // this class body can keep using the unqualified name. The actual trait
+  // definition lives in `freertos::detail` (above) so it is testable from
+  // outside without needing access to private members.
   template <typename Iterator>
   static constexpr bool is_contiguous_iterator_v =
-      is_contiguous_iterator_impl<Iterator>::value;
+      detail::is_contiguous_iterator_v<Iterator>;
 
   // Fallback path for non-contiguous iterators: copy element-by-element into
   // a small stack buffer and forward to the byte-pointer overload of send().
@@ -699,11 +776,20 @@ public:
    * reset, and the higher_priority_task_woken flag.
    */
   isr_result<bool> reset_isr() {
-    // xStreamBufferResetFromISR takes only the buffer handle in production
-    // FreeRTOS — it does not have a higher_priority_task_woken out-parameter.
-    // The flag is left at pdFALSE in the returned result.
+    // xStreamBufferResetFromISR signature differs across FreeRTOS versions.
+    // V10.6+ takes only the handle; pre-V10.6 takes a higher-priority-task-
+    // woken out parameter. Guard the call so the wrapper compiles and behaves
+    // correctly on both. The simulation layer also uses the new (1-arg) form.
     isr_result<bool> result{false, pdFALSE};
+#if (tskKERNEL_VERSION_MAJOR > 10) ||                                          \
+    (tskKERNEL_VERSION_MAJOR == 10 && tskKERNEL_VERSION_MINOR >= 6) ||         \
+    defined(FREERTOS_CPP_WRAPPERS_SIMULATION)
     result.result = xStreamBufferResetFromISR(m_stream_buffer) == pdPASS;
+#else
+    BaseType_t hpw = pdFALSE;
+    result.result = xStreamBufferResetFromISR(m_stream_buffer, &hpw) == pdPASS;
+    result.higher_priority_task_woken = hpw;
+#endif
     return result;
   }
   [[nodiscard]] isr_result<expected<void, error>> reset_ex_isr() {

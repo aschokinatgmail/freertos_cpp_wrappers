@@ -977,7 +977,14 @@ void vTaskSetThreadLocalStoragePointer(TaskHandle_t xTask, BaseType_t xIndex,
 void *pvTaskGetThreadLocalStoragePointer(TaskHandle_t xTask, BaseType_t xIndex);
 
 // Stream Buffer additional operations (V10.5.0+)
+// Both signatures are exposed: pre-V10.6 took an additional out parameter for
+// the higher-priority-task-woken flag; V10.6+ dropped it. The version-guarded
+// wrappers in the headers may pick either form depending on
+// tskKERNEL_VERSION_MAJOR/MINOR — the mock provides both so the build works
+// for both branches.
 BaseType_t xStreamBufferResetFromISR(StreamBufferHandle_t xStreamBuffer);
+BaseType_t xStreamBufferResetFromISR(StreamBufferHandle_t xStreamBuffer,
+                                     BaseType_t *pxHigherPriorityTaskWoken);
 void vStreamBufferSetStreamBufferNotificationIndex(StreamBufferHandle_t xStreamBuffer,
                                                     uint8_t uxNotificationIndex);
 BaseType_t xStreamBufferGetStaticBuffers(StreamBufferHandle_t xStreamBuffer,
@@ -1017,7 +1024,10 @@ StreamBufferHandle_t xStreamBufferGenericCreateStaticWithCallback(
     void *pvReceiveCompletedCallbackContext);
 
 // Message Buffer additional operations (V10.5.0+)
+// Both signatures exposed for the same reason as xStreamBufferResetFromISR.
 BaseType_t xMessageBufferResetFromISR(MessageBufferHandle_t xMessageBuffer);
+BaseType_t xMessageBufferResetFromISR(MessageBufferHandle_t xMessageBuffer,
+                                      BaseType_t *pxHigherPriorityTaskWoken);
 BaseType_t xMessageBufferGetStaticBuffers(MessageBufferHandle_t xMessageBuffer,
                                             uint8_t **ppucMessageBufferStorageArea,
                                             StaticMessageBuffer_t **ppxStaticMessageBuffer);

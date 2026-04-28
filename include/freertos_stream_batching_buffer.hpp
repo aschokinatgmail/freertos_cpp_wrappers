@@ -405,10 +405,18 @@ public:
     return unexpected<error>(error::invalid_handle);
   }
   isr_result<bool> reset_isr() {
-    // xStreamBufferResetFromISR takes only the buffer handle in production
-    // FreeRTOS — see comment in stream_buffer.hpp::reset_isr().
+    // xStreamBufferResetFromISR signature differs across FreeRTOS versions.
+    // See comment in stream_buffer.hpp::reset_isr().
     isr_result<bool> result{false, pdFALSE};
+#if (tskKERNEL_VERSION_MAJOR > 10) ||                                          \
+    (tskKERNEL_VERSION_MAJOR == 10 && tskKERNEL_VERSION_MINOR >= 6) ||         \
+    defined(FREERTOS_CPP_WRAPPERS_SIMULATION)
     result.result = xStreamBufferResetFromISR(m_stream_buffer) == pdPASS;
+#else
+    BaseType_t hpw = pdFALSE;
+    result.result = xStreamBufferResetFromISR(m_stream_buffer, &hpw) == pdPASS;
+    result.higher_priority_task_woken = hpw;
+#endif
     return result;
   }
   [[nodiscard]] isr_result<expected<void, error>> reset_ex_isr() {

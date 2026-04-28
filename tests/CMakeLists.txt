@@ -465,6 +465,11 @@ add_executable(
     test_freertos_condition_variable.cpp
 )
 
+add_executable(
+    test_freertos_stream_buffer_contiguous
+    test_freertos_stream_buffer_contiguous.cpp
+)
+
 target_link_libraries(
     test_freertos_task
     freertos_cpp_wrappers
@@ -1148,6 +1153,14 @@ target_link_libraries(
     pthread
 )
 
+target_link_libraries(
+    test_freertos_stream_buffer_contiguous
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
 # Apply compile options if using PkgConfig
 if(GTEST_COMPILE_OPTIONS)
     target_compile_options(test_freertos_task PRIVATE ${GTEST_COMPILE_OPTIONS})
@@ -1236,6 +1249,7 @@ target_compile_options(test_freertos_isr_result PRIVATE ${GTEST_COMPILE_OPTIONS}
      target_compile_options(test_freertos_atomic PRIVATE ${GTEST_COMPILE_OPTIONS})
      target_compile_options(test_freertos_lock PRIVATE ${GTEST_COMPILE_OPTIONS})
      target_compile_options(test_freertos_condition_variable PRIVATE ${GTEST_COMPILE_OPTIONS})
+     target_compile_options(test_freertos_stream_buffer_contiguous PRIVATE ${GTEST_COMPILE_OPTIONS})
 endif()
 
 # Add tests - run complete test executables to ensure proper failure detection
@@ -1328,3 +1342,4 @@ add_test(NAME test_freertos_shared_mutex COMMAND test_freertos_shared_mutex)
 add_test(NAME test_freertos_atomic COMMAND test_freertos_atomic)
 add_test(NAME test_freertos_lock COMMAND test_freertos_lock)
 add_test(NAME test_freertos_condition_variable COMMAND test_freertos_condition_variable)
+add_test(NAME test_freertos_stream_buffer_contiguous COMMAND test_freertos_stream_buffer_contiguous)
