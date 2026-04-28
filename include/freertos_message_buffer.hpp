@@ -389,12 +389,24 @@ public:
   [[nodiscard]] expected<size_t, error> send_ex(const void *data,
                                                 size_t data_size,
                                                 TickType_t ticks_to_wait) {
+    // A message buffer reserves a 4-byte length prefix per message, so the
+    // largest message that can ever fit is MessageBufferSize - sizeof(size_t).
+    // Reject oversized requests up front rather than letting them fail with
+    // an ambiguous would_block/timeout.
+    if (data_size + sizeof(size_t) > MessageBufferSize) {
+      return unexpected<error>(error::message_too_large);
+    }
     auto rc = send(data, data_size, ticks_to_wait);
     if (rc > 0) {
       return rc;
     }
-    return unexpected<error>(ticks_to_wait == 0 ? error::would_block
-                                               : error::timeout);
+    if (ticks_to_wait == 0) {
+      if (xMessageBufferIsFull(m_message_buffer) == pdTRUE) {
+        return unexpected<error>(error::buffer_full);
+      }
+      return unexpected<error>(error::would_block);
+    }
+    return unexpected<error>(error::timeout);
   }
   template <typename Rep, typename Period>
   [[nodiscard]] expected<size_t, error>
@@ -408,9 +420,17 @@ public:
   }
   [[nodiscard]] isr_result<expected<size_t, error>>
   send_ex_isr(const void *data, size_t data_size) {
+    // Reject messages that exceed the buffer's total capacity (including the
+    // 4-byte length prefix) before invoking FreeRTOS.
+    if (data_size + sizeof(size_t) > MessageBufferSize) {
+      return isr_result<expected<size_t, error>>{
+          unexpected<error>(error::message_too_large), pdFALSE};
+    }
     auto result = send_isr(data, data_size);
     isr_result<expected<size_t, error>> ret{
-        unexpected<error>(error::would_block),
+        unexpected<error>(xMessageBufferIsFull(m_message_buffer) == pdTRUE
+                              ? error::buffer_full
+                              : error::would_block),
         result.higher_priority_task_woken};
     if (result.result > 0) {
       ret.result = result.result;
@@ -424,8 +444,13 @@ public:
     if (rc > 0) {
       return rc;
     }
-    return unexpected<error>(ticks_to_wait == 0 ? error::would_block
-                                               : error::timeout);
+    if (ticks_to_wait == 0) {
+      if (xMessageBufferIsEmpty(m_message_buffer) == pdTRUE) {
+        return unexpected<error>(error::buffer_empty);
+      }
+      return unexpected<error>(error::would_block);
+    }
+    return unexpected<error>(error::timeout);
   }
   template <typename Rep, typename Period>
   [[nodiscard]] expected<size_t, error>
@@ -441,7 +466,9 @@ public:
   receive_ex_isr(void *data, size_t buffer_size) {
     auto result = receive_isr(data, buffer_size);
     isr_result<expected<size_t, error>> ret{
-        unexpected<error>(error::would_block),
+        unexpected<error>(xMessageBufferIsEmpty(m_message_buffer) == pdTRUE
+                              ? error::buffer_empty
+                              : error::would_block),
         result.higher_priority_task_woken};
     if (result.result > 0) {
       ret.result = result.result;

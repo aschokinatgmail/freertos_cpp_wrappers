@@ -888,7 +888,9 @@ TEST_F(FreeRTOSEventGroupTest, EventGroupSetBitsExIsr_Fail) {
   freertos::da::event_group event_group;
   auto result = event_group.set_bits_ex_isr(0x0A);
   EXPECT_FALSE(result.result.has_value());
-  EXPECT_EQ(result.result.error(), freertos::error::invalid_handle);
+  // pdFAIL/errQUEUE_EMPTY from xEventGroupSetBitsFromISR signals the
+  // timer-service daemon's command queue is full.
+  EXPECT_EQ(result.result.error(), freertos::error::timer_queue_full);
   EXPECT_EQ(result.higher_priority_task_woken, pdFALSE);
 }
 

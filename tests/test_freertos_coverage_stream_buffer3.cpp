@@ -259,10 +259,12 @@ TEST_F(SAStreamBuffer256Test, SendExIsr_Success) {
 }
 
 TEST_F(SAStreamBuffer256Test, SendExIsr_FailureWouldBlock) {
+  // ISR send returned 0 but buffer is not full — surface would_block.
   EXPECT_CALL(*mock, xStreamBufferCreateStatic(256, 1, NotNull(), NotNull()))
       .WillOnce(Return(sb_handle));
   EXPECT_CALL(*mock, xStreamBufferSendFromISR(sb_handle, NotNull(), 4, NotNull()))
       .WillOnce(Return(0));
+  EXPECT_CALL(*mock, xStreamBufferIsFull(sb_handle)).WillOnce(Return(pdFALSE));
   EXPECT_CALL(*mock, vStreamBufferDelete(sb_handle));
 
   freertos::sa::stream_buffer<256> buf;
@@ -270,6 +272,22 @@ TEST_F(SAStreamBuffer256Test, SendExIsr_FailureWouldBlock) {
   auto r = buf.send_ex_isr(data, 4);
   EXPECT_FALSE(r.result.has_value());
   EXPECT_EQ(r.result.error(), freertos::error::would_block);
+}
+
+TEST_F(SAStreamBuffer256Test, SendExIsr_FailureBufferFull) {
+  // ISR send returned 0 because the buffer is full — surface buffer_full.
+  EXPECT_CALL(*mock, xStreamBufferCreateStatic(256, 1, NotNull(), NotNull()))
+      .WillOnce(Return(sb_handle));
+  EXPECT_CALL(*mock, xStreamBufferSendFromISR(sb_handle, NotNull(), 4, NotNull()))
+      .WillOnce(Return(0));
+  EXPECT_CALL(*mock, xStreamBufferIsFull(sb_handle)).WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, vStreamBufferDelete(sb_handle));
+
+  freertos::sa::stream_buffer<256> buf;
+  uint8_t data[4] = {1, 2, 3, 4};
+  auto r = buf.send_ex_isr(data, 4);
+  EXPECT_FALSE(r.result.has_value());
+  EXPECT_EQ(r.result.error(), freertos::error::buffer_full);
 }
 
 // =============================================================================
@@ -294,11 +312,13 @@ TEST_F(SAStreamBuffer256Test, ReceiveExIsr_Success) {
 }
 
 TEST_F(SAStreamBuffer256Test, ReceiveExIsr_FailureWouldBlock) {
+  // ISR receive returned 0 but buffer is not empty — surface would_block.
   EXPECT_CALL(*mock, xStreamBufferCreateStatic(256, 1, NotNull(), NotNull()))
       .WillOnce(Return(sb_handle));
   EXPECT_CALL(*mock,
               xStreamBufferReceiveFromISR(sb_handle, NotNull(), 4, NotNull()))
       .WillOnce(Return(0));
+  EXPECT_CALL(*mock, xStreamBufferIsEmpty(sb_handle)).WillOnce(Return(pdFALSE));
   EXPECT_CALL(*mock, vStreamBufferDelete(sb_handle));
 
   freertos::sa::stream_buffer<256> buf;
@@ -306,6 +326,23 @@ TEST_F(SAStreamBuffer256Test, ReceiveExIsr_FailureWouldBlock) {
   auto r = buf.receive_ex_isr(data, 4);
   EXPECT_FALSE(r.result.has_value());
   EXPECT_EQ(r.result.error(), freertos::error::would_block);
+}
+
+TEST_F(SAStreamBuffer256Test, ReceiveExIsr_FailureBufferEmpty) {
+  // ISR receive returned 0 because the buffer is empty — surface buffer_empty.
+  EXPECT_CALL(*mock, xStreamBufferCreateStatic(256, 1, NotNull(), NotNull()))
+      .WillOnce(Return(sb_handle));
+  EXPECT_CALL(*mock,
+              xStreamBufferReceiveFromISR(sb_handle, NotNull(), 4, NotNull()))
+      .WillOnce(Return(0));
+  EXPECT_CALL(*mock, xStreamBufferIsEmpty(sb_handle)).WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, vStreamBufferDelete(sb_handle));
+
+  freertos::sa::stream_buffer<256> buf;
+  uint8_t data[4];
+  auto r = buf.receive_ex_isr(data, 4);
+  EXPECT_FALSE(r.result.has_value());
+  EXPECT_EQ(r.result.error(), freertos::error::buffer_empty);
 }
 
 // =============================================================================

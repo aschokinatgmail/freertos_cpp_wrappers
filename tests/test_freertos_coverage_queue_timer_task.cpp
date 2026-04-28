@@ -809,7 +809,8 @@ TEST_F(CoverageQueueTimerTaskTest, StaTimerStartExIsrFailure) {
   EXPECT_CALL(*mock, xTimerStartFromISR(mock_timer, _)).WillOnce(Return(pdFAIL));
   auto result = t.start_ex_isr();
   EXPECT_FALSE(result.result.has_value());
-  EXPECT_EQ(result.result.error(), error::invalid_handle);
+  // pdFAIL from FromISR variants signals timer-service queue full.
+  EXPECT_EQ(result.result.error(), error::timer_queue_full);
 }
 
 TEST_F(CoverageQueueTimerTaskTest, StaTimerStopExIsrFailure) {
@@ -820,7 +821,7 @@ TEST_F(CoverageQueueTimerTaskTest, StaTimerStopExIsrFailure) {
   EXPECT_CALL(*mock, xTimerStopFromISR(mock_timer, _)).WillOnce(Return(pdFAIL));
   auto result = t.stop_ex_isr();
   EXPECT_FALSE(result.result.has_value());
-  EXPECT_EQ(result.result.error(), error::invalid_handle);
+  EXPECT_EQ(result.result.error(), error::timer_queue_full);
 }
 
 TEST_F(CoverageQueueTimerTaskTest, StaTimerResetExIsrFailure) {
@@ -831,7 +832,7 @@ TEST_F(CoverageQueueTimerTaskTest, StaTimerResetExIsrFailure) {
   EXPECT_CALL(*mock, xTimerResetFromISR(mock_timer, _)).WillOnce(Return(pdFAIL));
   auto result = t.reset_ex_isr();
   EXPECT_FALSE(result.result.has_value());
-  EXPECT_EQ(result.result.error(), error::invalid_handle);
+  EXPECT_EQ(result.result.error(), error::timer_queue_full);
 }
 
 TEST_F(CoverageQueueTimerTaskTest, StaTimerPeriodExIsrFailure) {
@@ -842,7 +843,7 @@ TEST_F(CoverageQueueTimerTaskTest, StaTimerPeriodExIsrFailure) {
   EXPECT_CALL(*mock, xTimerChangePeriodFromISR(mock_timer, 200, _)).WillOnce(Return(pdFAIL));
   auto result = t.period_ex_isr(200);
   EXPECT_FALSE(result.result.has_value());
-  EXPECT_EQ(result.result.error(), error::invalid_handle);
+  EXPECT_EQ(result.result.error(), error::timer_queue_full);
 }
 
 TEST_F(CoverageQueueTimerTaskTest, StaTimerPeriodExIsrChrono) {

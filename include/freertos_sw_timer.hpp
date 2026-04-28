@@ -639,9 +639,13 @@ public:
             .count()));
   }
   [[nodiscard]] isr_result<expected<void, error>> start_ex_isr(void) {
+    if (!m_timer) {
+      return isr_result<expected<void, error>>{
+          unexpected<error>(error::invalid_handle), pdFALSE};
+    }
     auto result = start_isr();
     isr_result<expected<void, error>> ret{
-        unexpected<error>(error::invalid_handle),
+        unexpected<error>(error::timer_queue_full),
         result.higher_priority_task_woken};
     if (result.result == pdPASS) {
       ret.result = {};
@@ -667,9 +671,13 @@ public:
             .count()));
   }
   [[nodiscard]] isr_result<expected<void, error>> stop_ex_isr(void) {
+    if (!m_timer) {
+      return isr_result<expected<void, error>>{
+          unexpected<error>(error::invalid_handle), pdFALSE};
+    }
     auto result = stop_isr();
     isr_result<expected<void, error>> ret{
-        unexpected<error>(error::invalid_handle),
+        unexpected<error>(error::timer_queue_full),
         result.higher_priority_task_woken};
     if (result.result == pdPASS) {
       ret.result = {};
@@ -695,9 +703,13 @@ public:
             .count()));
   }
   [[nodiscard]] isr_result<expected<void, error>> reset_ex_isr(void) {
+    if (!m_timer) {
+      return isr_result<expected<void, error>>{
+          unexpected<error>(error::invalid_handle), pdFALSE};
+    }
     auto result = reset_isr();
     isr_result<expected<void, error>> ret{
-        unexpected<error>(error::invalid_handle),
+        unexpected<error>(error::timer_queue_full),
         result.higher_priority_task_woken};
     if (result.result == pdPASS) {
       ret.result = {};
@@ -731,9 +743,13 @@ public:
   }
   [[nodiscard]] isr_result<expected<void, error>>
   period_ex_isr(const TickType_t new_period_ticks) {
+    if (!m_timer) {
+      return isr_result<expected<void, error>>{
+          unexpected<error>(error::invalid_handle), pdFALSE};
+    }
     auto result = period_isr(new_period_ticks);
     isr_result<expected<void, error>> ret{
-        unexpected<error>(error::invalid_handle),
+        unexpected<error>(error::timer_queue_full),
         result.higher_priority_task_woken};
     if (result.result == pdPASS) {
       ret.result = {};

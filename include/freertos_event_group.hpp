@@ -324,9 +324,13 @@ public:
    */
   [[nodiscard]] isr_result<expected<EventBits_t, error>>
   set_bits_ex_isr(const EventBits_t bits_to_set) {
+    if (!m_event_group) {
+      return isr_result<expected<EventBits_t, error>>{
+          unexpected<error>(error::invalid_handle), pdFALSE};
+    }
     auto result = set_bits_isr(bits_to_set);
     isr_result<expected<EventBits_t, error>> ret{
-        unexpected<error>(error::invalid_handle),
+        unexpected<error>(error::timer_queue_full),
         result.higher_priority_task_woken};
     if (result.result == pdPASS) {
       ret.result = bits_to_set;

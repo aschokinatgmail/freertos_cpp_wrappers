@@ -317,7 +317,9 @@ TEST_F(ExVariantsEventGroupTest, SetBitsExIsrFailure) {
   freertos::event_group<freertos::dynamic_event_group_allocator> eg;
   auto r = eg.set_bits_ex_isr(0x01);
   EXPECT_FALSE(r.result.has_value());
-  EXPECT_EQ(r.result.error(), freertos::error::invalid_handle);
+  // pdFAIL from xEventGroupSetBitsFromISR signals the timer-service
+  // daemon's command queue is full, not an invalid handle.
+  EXPECT_EQ(r.result.error(), freertos::error::timer_queue_full);
 }
 
 TEST_F(ExVariantsEventGroupTest, WaitBitsExWouldBlock) {
@@ -518,13 +520,27 @@ protected:
 };
 
 TEST_F(ExVariantsStreamBufferTest, SendExWouldBlock) {
+  // Non-blocking send returned 0 bytes but the buffer is not full.
   EXPECT_CALL(*mock, xStreamBufferCreate(_, _)).WillOnce(Return(h));
   EXPECT_CALL(*mock, xStreamBufferSend(h, _, 4, 0)).WillOnce(Return(0));
+  EXPECT_CALL(*mock, xStreamBufferIsFull(h)).WillOnce(Return(pdFALSE));
   EXPECT_CALL(*mock, vStreamBufferDelete(h));
   freertos::stream_buffer<256, freertos::dynamic_stream_buffer_allocator<256>> sb;
   auto r = sb.send_ex("test", 4, 0);
   EXPECT_FALSE(r.has_value());
   EXPECT_EQ(r.error(), freertos::error::would_block);
+}
+
+TEST_F(ExVariantsStreamBufferTest, SendExBufferFull) {
+  // Non-blocking send returned 0 bytes because the buffer is full.
+  EXPECT_CALL(*mock, xStreamBufferCreate(_, _)).WillOnce(Return(h));
+  EXPECT_CALL(*mock, xStreamBufferSend(h, _, 4, 0)).WillOnce(Return(0));
+  EXPECT_CALL(*mock, xStreamBufferIsFull(h)).WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, vStreamBufferDelete(h));
+  freertos::stream_buffer<256, freertos::dynamic_stream_buffer_allocator<256>> sb;
+  auto r = sb.send_ex("test", 4, 0);
+  EXPECT_FALSE(r.has_value());
+  EXPECT_EQ(r.error(), freertos::error::buffer_full);
 }
 
 TEST_F(ExVariantsStreamBufferTest, SendExChrono) {
@@ -540,6 +556,7 @@ TEST_F(ExVariantsStreamBufferTest, SendExChrono) {
 TEST_F(ExVariantsStreamBufferTest, SendExIteratorWouldBlock) {
   EXPECT_CALL(*mock, xStreamBufferCreate(_, _)).WillOnce(Return(h));
   EXPECT_CALL(*mock, xStreamBufferSend(h, _, 4, 0)).WillOnce(Return(0));
+  EXPECT_CALL(*mock, xStreamBufferIsFull(h)).WillOnce(Return(pdFALSE));
   EXPECT_CALL(*mock, vStreamBufferDelete(h));
   freertos::stream_buffer<256, freertos::dynamic_stream_buffer_allocator<256>> sb;
   const char data[] = "test";
@@ -560,14 +577,29 @@ TEST_F(ExVariantsStreamBufferTest, SendExIteratorChrono) {
 }
 
 TEST_F(ExVariantsStreamBufferTest, ReceiveExWouldBlock) {
+  // Non-blocking receive returned 0 bytes but the buffer is not empty.
   EXPECT_CALL(*mock, xStreamBufferCreate(_, _)).WillOnce(Return(h));
   EXPECT_CALL(*mock, xStreamBufferReceive(h, _, 4, 0)).WillOnce(Return(0));
+  EXPECT_CALL(*mock, xStreamBufferIsEmpty(h)).WillOnce(Return(pdFALSE));
   EXPECT_CALL(*mock, vStreamBufferDelete(h));
   freertos::stream_buffer<256, freertos::dynamic_stream_buffer_allocator<256>> sb;
   char buf[4];
   auto r = sb.receive_ex(buf, 4, 0);
   EXPECT_FALSE(r.has_value());
   EXPECT_EQ(r.error(), freertos::error::would_block);
+}
+
+TEST_F(ExVariantsStreamBufferTest, ReceiveExBufferEmpty) {
+  // Non-blocking receive returned 0 bytes because the buffer is empty.
+  EXPECT_CALL(*mock, xStreamBufferCreate(_, _)).WillOnce(Return(h));
+  EXPECT_CALL(*mock, xStreamBufferReceive(h, _, 4, 0)).WillOnce(Return(0));
+  EXPECT_CALL(*mock, xStreamBufferIsEmpty(h)).WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, vStreamBufferDelete(h));
+  freertos::stream_buffer<256, freertos::dynamic_stream_buffer_allocator<256>> sb;
+  char buf[4];
+  auto r = sb.receive_ex(buf, 4, 0);
+  EXPECT_FALSE(r.has_value());
+  EXPECT_EQ(r.error(), freertos::error::buffer_empty);
 }
 
 TEST_F(ExVariantsStreamBufferTest, ReceiveExChrono) {
@@ -584,6 +616,7 @@ TEST_F(ExVariantsStreamBufferTest, ReceiveExChrono) {
 TEST_F(ExVariantsStreamBufferTest, SendExIsrWouldBlock) {
   EXPECT_CALL(*mock, xStreamBufferCreate(_, _)).WillOnce(Return(h));
   EXPECT_CALL(*mock, xStreamBufferSendFromISR(h, _, 4, _)).WillOnce(Return(0));
+  EXPECT_CALL(*mock, xStreamBufferIsFull(h)).WillOnce(Return(pdFALSE));
   EXPECT_CALL(*mock, vStreamBufferDelete(h));
   freertos::stream_buffer<256, freertos::dynamic_stream_buffer_allocator<256>> sb;
   auto r = sb.send_ex_isr("test", 4);
@@ -591,9 +624,21 @@ TEST_F(ExVariantsStreamBufferTest, SendExIsrWouldBlock) {
   EXPECT_EQ(r.result.error(), freertos::error::would_block);
 }
 
+TEST_F(ExVariantsStreamBufferTest, SendExIsrBufferFull) {
+  EXPECT_CALL(*mock, xStreamBufferCreate(_, _)).WillOnce(Return(h));
+  EXPECT_CALL(*mock, xStreamBufferSendFromISR(h, _, 4, _)).WillOnce(Return(0));
+  EXPECT_CALL(*mock, xStreamBufferIsFull(h)).WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, vStreamBufferDelete(h));
+  freertos::stream_buffer<256, freertos::dynamic_stream_buffer_allocator<256>> sb;
+  auto r = sb.send_ex_isr("test", 4);
+  EXPECT_FALSE(r.result.has_value());
+  EXPECT_EQ(r.result.error(), freertos::error::buffer_full);
+}
+
 TEST_F(ExVariantsStreamBufferTest, SendExIsrIteratorWouldBlock) {
   EXPECT_CALL(*mock, xStreamBufferCreate(_, _)).WillOnce(Return(h));
   EXPECT_CALL(*mock, xStreamBufferSendFromISR(h, _, 4, _)).WillOnce(Return(0));
+  EXPECT_CALL(*mock, xStreamBufferIsFull(h)).WillOnce(Return(pdFALSE));
   EXPECT_CALL(*mock, vStreamBufferDelete(h));
   freertos::stream_buffer<256, freertos::dynamic_stream_buffer_allocator<256>> sb;
   const char data[] = "test";
@@ -605,12 +650,25 @@ TEST_F(ExVariantsStreamBufferTest, SendExIsrIteratorWouldBlock) {
 TEST_F(ExVariantsStreamBufferTest, ReceiveExIsrWouldBlock) {
   EXPECT_CALL(*mock, xStreamBufferCreate(_, _)).WillOnce(Return(h));
   EXPECT_CALL(*mock, xStreamBufferReceiveFromISR(h, _, 4, _)).WillOnce(Return(0));
+  EXPECT_CALL(*mock, xStreamBufferIsEmpty(h)).WillOnce(Return(pdFALSE));
   EXPECT_CALL(*mock, vStreamBufferDelete(h));
   freertos::stream_buffer<256, freertos::dynamic_stream_buffer_allocator<256>> sb;
   char buf[4];
   auto r = sb.receive_ex_isr(buf, 4);
   EXPECT_FALSE(r.result.has_value());
   EXPECT_EQ(r.result.error(), freertos::error::would_block);
+}
+
+TEST_F(ExVariantsStreamBufferTest, ReceiveExIsrBufferEmpty) {
+  EXPECT_CALL(*mock, xStreamBufferCreate(_, _)).WillOnce(Return(h));
+  EXPECT_CALL(*mock, xStreamBufferReceiveFromISR(h, _, 4, _)).WillOnce(Return(0));
+  EXPECT_CALL(*mock, xStreamBufferIsEmpty(h)).WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, vStreamBufferDelete(h));
+  freertos::stream_buffer<256, freertos::dynamic_stream_buffer_allocator<256>> sb;
+  char buf[4];
+  auto r = sb.receive_ex_isr(buf, 4);
+  EXPECT_FALSE(r.result.has_value());
+  EXPECT_EQ(r.result.error(), freertos::error::buffer_empty);
 }
 
 TEST_F(ExVariantsStreamBufferTest, ResetExFailure) {
@@ -651,11 +709,36 @@ protected:
 TEST_F(ExVariantsMessageBufferTest, SendExWouldBlock) {
   EXPECT_CALL(*mock, xMessageBufferCreate(_)).WillOnce(Return(h));
   EXPECT_CALL(*mock, xMessageBufferSend(h, _, 4, 0)).WillOnce(Return(0));
+  EXPECT_CALL(*mock, xMessageBufferIsFull(h)).WillOnce(Return(pdFALSE));
   EXPECT_CALL(*mock, vMessageBufferDelete(h));
   freertos::message_buffer<256, freertos::dynamic_message_buffer_allocator<256>> mb;
   auto r = mb.send_ex("test", 4, 0);
   EXPECT_FALSE(r.has_value());
   EXPECT_EQ(r.error(), freertos::error::would_block);
+}
+
+TEST_F(ExVariantsMessageBufferTest, SendExBufferFull) {
+  EXPECT_CALL(*mock, xMessageBufferCreate(_)).WillOnce(Return(h));
+  EXPECT_CALL(*mock, xMessageBufferSend(h, _, 4, 0)).WillOnce(Return(0));
+  EXPECT_CALL(*mock, xMessageBufferIsFull(h)).WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, vMessageBufferDelete(h));
+  freertos::message_buffer<256, freertos::dynamic_message_buffer_allocator<256>> mb;
+  auto r = mb.send_ex("test", 4, 0);
+  EXPECT_FALSE(r.has_value());
+  EXPECT_EQ(r.error(), freertos::error::buffer_full);
+}
+
+TEST_F(ExVariantsMessageBufferTest, SendExMessageTooLarge) {
+  // data_size + sizeof(size_t) > MessageBufferSize triggers message_too_large
+  // up front, before invoking xMessageBufferSend.
+  EXPECT_CALL(*mock, xMessageBufferCreate(_)).WillOnce(Return(h));
+  EXPECT_CALL(*mock, vMessageBufferDelete(h));
+  freertos::message_buffer<32, freertos::dynamic_message_buffer_allocator<32>> mb;
+  // 32 - 4 = 28 max payload; pass 64 bytes to exceed capacity.
+  char big[64] = {};
+  auto r = mb.send_ex(big, sizeof(big), 0);
+  EXPECT_FALSE(r.has_value());
+  EXPECT_EQ(r.error(), freertos::error::message_too_large);
 }
 
 TEST_F(ExVariantsMessageBufferTest, SendExChrono) {
@@ -671,12 +754,25 @@ TEST_F(ExVariantsMessageBufferTest, SendExChrono) {
 TEST_F(ExVariantsMessageBufferTest, ReceiveExWouldBlock) {
   EXPECT_CALL(*mock, xMessageBufferCreate(_)).WillOnce(Return(h));
   EXPECT_CALL(*mock, xMessageBufferReceive(h, _, 4, 0)).WillOnce(Return(0));
+  EXPECT_CALL(*mock, xMessageBufferIsEmpty(h)).WillOnce(Return(pdFALSE));
   EXPECT_CALL(*mock, vMessageBufferDelete(h));
   freertos::message_buffer<256, freertos::dynamic_message_buffer_allocator<256>> mb;
   char buf[4];
   auto r = mb.receive_ex(buf, 4, 0);
   EXPECT_FALSE(r.has_value());
   EXPECT_EQ(r.error(), freertos::error::would_block);
+}
+
+TEST_F(ExVariantsMessageBufferTest, ReceiveExBufferEmpty) {
+  EXPECT_CALL(*mock, xMessageBufferCreate(_)).WillOnce(Return(h));
+  EXPECT_CALL(*mock, xMessageBufferReceive(h, _, 4, 0)).WillOnce(Return(0));
+  EXPECT_CALL(*mock, xMessageBufferIsEmpty(h)).WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, vMessageBufferDelete(h));
+  freertos::message_buffer<256, freertos::dynamic_message_buffer_allocator<256>> mb;
+  char buf[4];
+  auto r = mb.receive_ex(buf, 4, 0);
+  EXPECT_FALSE(r.has_value());
+  EXPECT_EQ(r.error(), freertos::error::buffer_empty);
 }
 
 TEST_F(ExVariantsMessageBufferTest, ReceiveExChrono) {
@@ -693,6 +789,7 @@ TEST_F(ExVariantsMessageBufferTest, ReceiveExChrono) {
 TEST_F(ExVariantsMessageBufferTest, SendExIsrWouldBlock) {
   EXPECT_CALL(*mock, xMessageBufferCreate(_)).WillOnce(Return(h));
   EXPECT_CALL(*mock, xMessageBufferSendFromISR(h, _, 4, _)).WillOnce(Return(0));
+  EXPECT_CALL(*mock, xMessageBufferIsFull(h)).WillOnce(Return(pdFALSE));
   EXPECT_CALL(*mock, vMessageBufferDelete(h));
   freertos::message_buffer<256, freertos::dynamic_message_buffer_allocator<256>> mb;
   auto r = mb.send_ex_isr("test", 4);
@@ -700,15 +797,49 @@ TEST_F(ExVariantsMessageBufferTest, SendExIsrWouldBlock) {
   EXPECT_EQ(r.result.error(), freertos::error::would_block);
 }
 
+TEST_F(ExVariantsMessageBufferTest, SendExIsrBufferFull) {
+  EXPECT_CALL(*mock, xMessageBufferCreate(_)).WillOnce(Return(h));
+  EXPECT_CALL(*mock, xMessageBufferSendFromISR(h, _, 4, _)).WillOnce(Return(0));
+  EXPECT_CALL(*mock, xMessageBufferIsFull(h)).WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, vMessageBufferDelete(h));
+  freertos::message_buffer<256, freertos::dynamic_message_buffer_allocator<256>> mb;
+  auto r = mb.send_ex_isr("test", 4);
+  EXPECT_FALSE(r.result.has_value());
+  EXPECT_EQ(r.result.error(), freertos::error::buffer_full);
+}
+
+TEST_F(ExVariantsMessageBufferTest, SendExIsrMessageTooLarge) {
+  EXPECT_CALL(*mock, xMessageBufferCreate(_)).WillOnce(Return(h));
+  EXPECT_CALL(*mock, vMessageBufferDelete(h));
+  freertos::message_buffer<32, freertos::dynamic_message_buffer_allocator<32>> mb;
+  char big[64] = {};
+  auto r = mb.send_ex_isr(big, sizeof(big));
+  EXPECT_FALSE(r.result.has_value());
+  EXPECT_EQ(r.result.error(), freertos::error::message_too_large);
+}
+
 TEST_F(ExVariantsMessageBufferTest, ReceiveExIsrWouldBlock) {
   EXPECT_CALL(*mock, xMessageBufferCreate(_)).WillOnce(Return(h));
   EXPECT_CALL(*mock, xMessageBufferReceiveFromISR(h, _, 4, _)).WillOnce(Return(0));
+  EXPECT_CALL(*mock, xMessageBufferIsEmpty(h)).WillOnce(Return(pdFALSE));
   EXPECT_CALL(*mock, vMessageBufferDelete(h));
   freertos::message_buffer<256, freertos::dynamic_message_buffer_allocator<256>> mb;
   char buf[4];
   auto r = mb.receive_ex_isr(buf, 4);
   EXPECT_FALSE(r.result.has_value());
   EXPECT_EQ(r.result.error(), freertos::error::would_block);
+}
+
+TEST_F(ExVariantsMessageBufferTest, ReceiveExIsrBufferEmpty) {
+  EXPECT_CALL(*mock, xMessageBufferCreate(_)).WillOnce(Return(h));
+  EXPECT_CALL(*mock, xMessageBufferReceiveFromISR(h, _, 4, _)).WillOnce(Return(0));
+  EXPECT_CALL(*mock, xMessageBufferIsEmpty(h)).WillOnce(Return(pdTRUE));
+  EXPECT_CALL(*mock, vMessageBufferDelete(h));
+  freertos::message_buffer<256, freertos::dynamic_message_buffer_allocator<256>> mb;
+  char buf[4];
+  auto r = mb.receive_ex_isr(buf, 4);
+  EXPECT_FALSE(r.result.has_value());
+  EXPECT_EQ(r.result.error(), freertos::error::buffer_empty);
 }
 
 TEST_F(ExVariantsMessageBufferTest, ResetExFailure) {
@@ -763,7 +894,9 @@ TEST_F(ExVariantsTimerTest, StartExIsrFailure) {
   freertos::timer<freertos::dynamic_sw_timer_allocator> t("t", 100, pdTRUE, [](){});
   auto r = t.start_ex_isr();
   EXPECT_FALSE(r.result.has_value());
-  EXPECT_EQ(r.result.error(), freertos::error::invalid_handle);
+  // pdFAIL from xTimerStartFromISR means the timer command queue is full,
+  // not that the handle is invalid (which would be caught by the pre-check).
+  EXPECT_EQ(r.result.error(), freertos::error::timer_queue_full);
 }
 
 TEST_F(ExVariantsTimerTest, StopExFailure) {
@@ -783,7 +916,7 @@ TEST_F(ExVariantsTimerTest, StopExIsrFailure) {
   freertos::timer<freertos::dynamic_sw_timer_allocator> t("t", 100, pdTRUE, [](){});
   auto r = t.stop_ex_isr();
   EXPECT_FALSE(r.result.has_value());
-  EXPECT_EQ(r.result.error(), freertos::error::invalid_handle);
+  EXPECT_EQ(r.result.error(), freertos::error::timer_queue_full);
 }
 
 TEST_F(ExVariantsTimerTest, ResetExFailure) {
@@ -803,7 +936,7 @@ TEST_F(ExVariantsTimerTest, ResetExIsrFailure) {
   freertos::timer<freertos::dynamic_sw_timer_allocator> t("t", 100, pdTRUE, [](){});
   auto r = t.reset_ex_isr();
   EXPECT_FALSE(r.result.has_value());
-  EXPECT_EQ(r.result.error(), freertos::error::invalid_handle);
+  EXPECT_EQ(r.result.error(), freertos::error::timer_queue_full);
 }
 
 TEST_F(ExVariantsTimerTest, PeriodExFailure) {
@@ -823,7 +956,7 @@ TEST_F(ExVariantsTimerTest, PeriodExIsrFailure) {
   freertos::timer<freertos::dynamic_sw_timer_allocator> t("t", 100, pdTRUE, [](){});
   auto r = t.period_ex_isr(200);
   EXPECT_FALSE(r.result.has_value());
-  EXPECT_EQ(r.result.error(), freertos::error::invalid_handle);
+  EXPECT_EQ(r.result.error(), freertos::error::timer_queue_full);
 }
 
 TEST_F(ExVariantsTimerTest, PeriodExChrono) {
@@ -843,5 +976,5 @@ TEST_F(ExVariantsTimerTest, PeriodExIsrChrono) {
   freertos::timer<freertos::dynamic_sw_timer_allocator> t("t", 100, pdTRUE, [](){});
   auto r = t.period_ex_isr(std::chrono::milliseconds(200));
   EXPECT_FALSE(r.result.has_value());
-  EXPECT_EQ(r.result.error(), freertos::error::invalid_handle);
+  EXPECT_EQ(r.result.error(), freertos::error::timer_queue_full);
 }

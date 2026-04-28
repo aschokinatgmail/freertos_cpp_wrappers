@@ -313,8 +313,13 @@ public:
     if (rc > 0) {
       return rc;
     }
-    return unexpected<error>(timeout == 0 ? error::would_block
-                                          : error::timeout);
+    if (timeout == 0) {
+      if (xStreamBufferIsFull(m_stream_buffer) == pdTRUE) {
+        return unexpected<error>(error::buffer_full);
+      }
+      return unexpected<error>(error::would_block);
+    }
+    return unexpected<error>(error::timeout);
   }
   template <typename Rep, typename Period>
   [[nodiscard]] expected<size_t, error>
@@ -341,7 +346,9 @@ public:
   send_ex_isr(const void *data, size_t data_size) {
     auto result = send_isr(data, data_size);
     isr_result<expected<size_t, error>> ret{
-        unexpected<error>(error::would_block),
+        unexpected<error>(xStreamBufferIsFull(m_stream_buffer) == pdTRUE
+                              ? error::buffer_full
+                              : error::would_block),
         result.higher_priority_task_woken};
     if (result.result > 0) {
       ret.result = result.result;
@@ -359,8 +366,13 @@ public:
     if (rc > 0) {
       return rc;
     }
-    return unexpected<error>(timeout == 0 ? error::would_block
-                                          : error::timeout);
+    if (timeout == 0) {
+      if (xStreamBufferIsEmpty(m_stream_buffer) == pdTRUE) {
+        return unexpected<error>(error::buffer_empty);
+      }
+      return unexpected<error>(error::would_block);
+    }
+    return unexpected<error>(error::timeout);
   }
   template <typename Rep, typename Period>
   [[nodiscard]] expected<size_t, error>
@@ -376,7 +388,9 @@ public:
   receive_ex_isr(void *data, size_t data_size) {
     auto result = receive_isr(data, data_size);
     isr_result<expected<size_t, error>> ret{
-        unexpected<error>(error::would_block),
+        unexpected<error>(xStreamBufferIsEmpty(m_stream_buffer) == pdTRUE
+                              ? error::buffer_empty
+                              : error::would_block),
         result.higher_priority_task_woken};
     if (result.result > 0) {
       ret.result = result.result;
