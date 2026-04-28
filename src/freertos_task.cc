@@ -4,8 +4,8 @@
 @file freertos_task.cc
 @author Andrey V. Shchekin <aschokin@gmail.com>
 @brief FreeRTOS task routines wrapper
-@version 0.1
-@date 2024-04-07
+@version 3.2.0
+@date 2026-04-28
 
 The MIT License (MIT)
 
@@ -41,13 +41,13 @@ void delay_until(TickType_t &previousWakeTime, TickType_t period) {
 void delay_until(const std::chrono::system_clock::time_point &wakeTime) {
   auto now = std::chrono::system_clock::now();
   if (wakeTime > now) {
-    delay(wakeTime - now);
+    delay(std::chrono::duration_cast<std::chrono::milliseconds>(wakeTime - now));
   }
 }
 void delay_until(const std::chrono::steady_clock::time_point &wakeTime) {
   auto now = std::chrono::steady_clock::now();
   if (wakeTime > now) {
-    delay(wakeTime - now);
+    delay(std::chrono::duration_cast<std::chrono::milliseconds>(wakeTime - now));
   }
 }
 #if INCLUDE_xTaskGetCurrentTaskHandle

@@ -68,6 +68,12 @@ enum class error : uint8_t {
   invalid_handle,
   out_of_memory,
   invalid_parameter,
+  // Timer-specific failures
+  timer_queue_full, ///< Timer command queue full (xTimer*() returned pdFAIL)
+  // Stream/message buffer-specific failures
+  buffer_full,        ///< Stream/message buffer is full (no space for write)
+  buffer_empty,       ///< Stream/message buffer is empty (no data to read)
+  message_too_large,  ///< Message size exceeds the message buffer capacity
 };
 
 /** @brief Wrapper for an unexpected error value, used to construct error states in expected.

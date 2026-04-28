@@ -1711,7 +1711,7 @@ TEST_F(TimerFaultTest, StartExFailure) {
   freertos::da::timer t("t", 100, pdTRUE, []() {});
   auto result = t.start_ex();
   EXPECT_FALSE(result.has_value());
-  EXPECT_EQ(result.error(), freertos::error::invalid_handle);
+  EXPECT_EQ(result.error(), freertos::error::timer_queue_full);
 }
 
 TEST_F(TimerFaultTest, StopExFailure) {
@@ -1721,7 +1721,7 @@ TEST_F(TimerFaultTest, StopExFailure) {
   freertos::da::timer t("t", 100, pdTRUE, []() {});
   auto result = t.stop_ex();
   EXPECT_FALSE(result.has_value());
-  EXPECT_EQ(result.error(), freertos::error::invalid_handle);
+  EXPECT_EQ(result.error(), freertos::error::timer_queue_full);
 }
 
 TEST_F(TimerFaultTest, ResetExFailure) {
@@ -1731,7 +1731,7 @@ TEST_F(TimerFaultTest, ResetExFailure) {
   freertos::da::timer t("t", 100, pdTRUE, []() {});
   auto result = t.reset_ex();
   EXPECT_FALSE(result.has_value());
-  EXPECT_EQ(result.error(), freertos::error::invalid_handle);
+  EXPECT_EQ(result.error(), freertos::error::timer_queue_full);
 }
 
 TEST_F(TimerFaultTest, PeriodExFailure) {
@@ -1742,7 +1742,7 @@ TEST_F(TimerFaultTest, PeriodExFailure) {
   freertos::da::timer t("t", 100, pdTRUE, []() {});
   auto result = t.period_ex(200);
   EXPECT_FALSE(result.has_value());
-  EXPECT_EQ(result.error(), freertos::error::invalid_handle);
+  EXPECT_EQ(result.error(), freertos::error::timer_queue_full);
 }
 
 // --- TIMER: null handle _ex failure paths ---

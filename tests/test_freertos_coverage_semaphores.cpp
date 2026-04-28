@@ -280,14 +280,6 @@ TEST_F(CoverageSemaphoreTest, CountingOperatorPlusPlus) {
   ++sem;
 }
 
-TEST_F(CoverageSemaphoreTest, CountingOperatorPlusPlusInt) {
-  EXPECT_CALL(*mock, xSemaphoreCreateCounting(5, 5)).WillOnce(Return(mock_sem));
-  EXPECT_CALL(*mock, xSemaphoreGive(mock_sem)).WillOnce(Return(pdTRUE));
-  EXPECT_CALL(*mock, vSemaphoreDelete(mock_sem));
-  CountingSem sem(5);
-  sem++;
-}
-
 TEST_F(CoverageSemaphoreTest, CountingOperatorMinusMinus) {
   EXPECT_CALL(*mock, xSemaphoreCreateCounting(5, 5)).WillOnce(Return(mock_sem));
   EXPECT_CALL(*mock, xSemaphoreTake(mock_sem, portMAX_DELAY))
@@ -295,15 +287,6 @@ TEST_F(CoverageSemaphoreTest, CountingOperatorMinusMinus) {
   EXPECT_CALL(*mock, vSemaphoreDelete(mock_sem));
   CountingSem sem(5);
   --sem;
-}
-
-TEST_F(CoverageSemaphoreTest, CountingOperatorMinusMinusInt) {
-  EXPECT_CALL(*mock, xSemaphoreCreateCounting(5, 5)).WillOnce(Return(mock_sem));
-  EXPECT_CALL(*mock, xSemaphoreTake(mock_sem, portMAX_DELAY))
-      .WillOnce(Return(pdTRUE));
-  EXPECT_CALL(*mock, vSemaphoreDelete(mock_sem));
-  CountingSem sem(5);
-  sem--;
 }
 
 TEST_F(CoverageSemaphoreTest, CountingOperatorPlusEqual) {

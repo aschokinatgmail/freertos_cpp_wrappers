@@ -42,11 +42,53 @@ namespace freertos {
  *  required for proper ISR context handling. After all ISR operations, check
  *  higher_priority_task_woken and call portYIELD_FROM_ISR() if set.
  *
+ *  @note The data members `result` and `higher_priority_task_woken` are
+ *        intentionally kept public for backward compatibility with existing
+ *        code. New code should prefer the accessor methods
+ *        `result_value()`, `higher_priority_task_woken_value()`, and
+ *        `should_yield()` for safer, encapsulated access. The helper
+ *        `yield_if_needed()` issues `portYIELD_FROM_ISR()` when required.
+ *
  *  @tparam T The type of the operation result value
  */
 template <typename T> struct isr_result {
   T result;
   BaseType_t higher_priority_task_woken;
+
+  /** @brief Read-only accessor for the operation result value.
+   *  @return const reference to the underlying `result` member.
+   */
+  const T &result_value() const { return result; }
+
+  /** @brief Mutable accessor for the operation result value.
+   *  @return reference to the underlying `result` member.
+   */
+  T &result_value() { return result; }
+
+  /** @brief Read-only accessor for the higher_priority_task_woken flag.
+   *  @return const reference to the underlying flag member.
+   */
+  const BaseType_t &higher_priority_task_woken_value() const {
+    return higher_priority_task_woken;
+  }
+
+  /** @brief Mutable accessor for the higher_priority_task_woken flag.
+   *  @return reference to the underlying flag member.
+   */
+  BaseType_t &higher_priority_task_woken_value() {
+    return higher_priority_task_woken;
+  }
+
+  /** @brief Whether the ISR should yield to a higher-priority task.
+   *  @return true if `higher_priority_task_woken` indicates a yield is needed.
+   *
+   *  At the end of the ISR, callers should invoke
+   *  `portYIELD_FROM_ISR(higher_priority_task_woken)` directly when this
+   *  returns true. The port-specific macro is intentionally not wrapped
+   *  here because some FreeRTOS ports define it in ways that require
+   *  expansion at the call site (e.g., as inline assembly).
+   */
+  bool should_yield() const { return higher_priority_task_woken == pdTRUE; }
 };
 
 /** @brief Specialization for ISR wrappers with no return value.
@@ -58,9 +100,34 @@ template <typename T> struct isr_result {
  *  Currently used only by the simulation test suite. A production
  *  consumer will be added when a void-returning ISR wrapper is
  *  introduced (e.g., event_group::clear_bits_isr).
+ *
+ *  @note The data member `higher_priority_task_woken` remains public for
+ *        backward compatibility. New code should prefer the accessor methods
+ *        `higher_priority_task_woken_value()` and `should_yield()`, or the
+ *        `yield_if_needed()` helper.
  */
 template <> struct isr_result<void> {
   BaseType_t higher_priority_task_woken;
+
+  /** @brief Read-only accessor for the higher_priority_task_woken flag. */
+  const BaseType_t &higher_priority_task_woken_value() const {
+    return higher_priority_task_woken;
+  }
+
+  /** @brief Mutable accessor for the higher_priority_task_woken flag. */
+  BaseType_t &higher_priority_task_woken_value() {
+    return higher_priority_task_woken;
+  }
+
+  /** @brief Whether the ISR should yield to a higher-priority task.
+   *
+   *  At the end of the ISR, callers should invoke
+   *  `portYIELD_FROM_ISR(higher_priority_task_woken)` directly when this
+   *  returns true. The port-specific macro is intentionally not wrapped
+   *  here because some FreeRTOS ports define it in ways that require
+   *  expansion at the call site (e.g., as inline assembly).
+   */
+  bool should_yield() const { return higher_priority_task_woken == pdTRUE; }
 };
 
 template <typename T>

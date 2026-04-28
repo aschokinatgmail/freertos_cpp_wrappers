@@ -36,6 +36,36 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #if FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL == 1
 
+// =============================================================================
+//   Implementation 1: shared bucket semaphore (legacy / minimal-overhead path)
+// =============================================================================
+//
+// LIMITATION: Hash collisions on the bucket index cause threads waiting on
+// distinct addresses to share a single counting semaphore. A `notify_one(A)`
+// gives one token to the bucket, which may be consumed by a thread waiting
+// on a colliding address `B` instead of the intended waiter on `A`. The
+// `B` waiter then re-checks `B`'s value, finds it unchanged, and re-enters
+// `__platform_wait_on_address` (correct) — but the token meant for `A` has
+// been consumed and `A`'s waiter is left blocked until the next notify on a
+// colliding address arrives.
+//
+// In practice, livelock probability scales with hash density:
+// - With `atomic_wait_table_size = 16` (default) and N distinct atomics
+//   actively waited on, expected collisions ≈ N²/(2·16). Above ~6 distinct
+//   addresses, missed wakeups become realistic.
+// - When atomic wait is used by only a handful of `std::atomic` objects in
+//   the whole application, the risk is acceptable.
+//
+// Use Implementation 2 (`FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL=2`) when:
+// - The application has many distinct atomic-waited variables
+// - Notification correctness is required under all scheduling conditions
+// - The slightly higher per-wait overhead (linked-list bookkeeping) is
+//   acceptable
+//
+// Implementation 2 keeps a per-address linked list of waiter nodes inside
+// each bucket and uses `vTaskNotifyGive` for wakeup, so notifications are
+// directed at the exact task waiting on the matching address.
+
 freertos_wait_entry freertos_wait_table[atomic_wait_table_size] = {};
 
 static SemaphoreHandle_t atomic_wait_ensure_semaphore(freertos_wait_entry &entry) {
@@ -146,11 +176,22 @@ extern "C" bool __platform_wait_on_address(void const *addr,
     }
 
     if (match) {
+        // Double-checked locking for one-time mutex creation. The outer
+        // check is an optimization for the steady-state path (mutex
+        // already created); the seq_cst fence above this block guarantees
+        // visibility of any prior store. The critical-section-protected
+        // inner check prevents two concurrent first-time waiters from
+        // both creating a mutex (which would leak one and break mutual
+        // exclusion in the bucket).
         if (bucket.mutex == nullptr) {
             taskENTER_CRITICAL();
             if (bucket.mutex == nullptr) {
-                bucket.mutex = xSemaphoreCreateMutex();
-                configASSERT(bucket.mutex != nullptr);
+                SemaphoreHandle_t new_mutex = xSemaphoreCreateMutex();
+                configASSERT(new_mutex != nullptr);
+                // Publish via the same critical section so concurrent
+                // outer-check readers either see nullptr (and re-enter
+                // critical) or the published value — never a torn write.
+                bucket.mutex = new_mutex;
             }
             taskEXIT_CRITICAL();
         }

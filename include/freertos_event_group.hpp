@@ -196,9 +196,12 @@ public:
   }
 
   isr_result<BaseType_t> clear_bits_isr(const EventBits_t bits_to_clear) {
+    // Note: xEventGroupClearBitsFromISR takes only 2 args in production
+    // FreeRTOS — it queues a request to the timer-service daemon and does
+    // not directly wake a task, so there is no higher_priority_task_woken
+    // out-parameter. The flag is left at pdFALSE in the returned result.
     isr_result<BaseType_t> result{pdFALSE, pdFALSE};
-    result.result = xEventGroupClearBitsFromISR(
-        m_event_group, bits_to_clear, &result.higher_priority_task_woken);
+    result.result = xEventGroupClearBitsFromISR(m_event_group, bits_to_clear);
     return result;
   }
   /**
@@ -282,10 +285,28 @@ public:
                 .count()));
   }
 
+  /**
+   * @brief Set event bits and return the resulting bit pattern.
+   *
+   * @note This wrapper always succeeds — `xEventGroupSetBits()` cannot fail.
+   *       The `expected<>` return is provided for API symmetry with
+   *       fallible operations like `wait_bits_ex()`. The unexpected branch
+   *       is never produced.
+   */
   [[nodiscard]] expected<EventBits_t, error>
   set_bits_ex(const EventBits_t bits_to_set) {
     return set_bits(bits_to_set);
   }
+  /**
+   * @brief Set event bits from ISR context.
+   *
+   * @note The returned EventBits_t value reflects the @p bits_to_set request,
+   *       not the actual event group state. `xEventGroupSetBitsFromISR()`
+   *       queues a request to the timer-service daemon task and returns
+   *       only pdPASS/pdFAIL — it cannot synchronously report the resulting
+   *       bit pattern. To inspect actual bits, query from a task context
+   *       after the daemon has processed the request.
+   */
   [[nodiscard]] isr_result<expected<EventBits_t, error>>
   set_bits_ex_isr(const EventBits_t bits_to_set) {
     auto result = set_bits_isr(bits_to_set);
@@ -297,6 +318,14 @@ public:
     }
     return ret;
   }
+  /**
+   * @brief Clear event bits and return the resulting bit pattern.
+   *
+   * @note This wrapper always succeeds — `xEventGroupClearBits()` cannot fail
+   *       from a task context. The `expected<>` return is provided for API
+   *       symmetry with fallible operations like `wait_bits_ex()`. The
+   *       unexpected branch is never produced.
+   */
   [[nodiscard]] expected<EventBits_t, error>
   clear_bits_ex(const EventBits_t bits_to_clear) {
     return clear_bits(bits_to_clear);

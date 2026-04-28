@@ -1550,7 +1550,7 @@ TEST_F(TimerCoverageTest, TimerStartExFailure) {
   freertos::da::timer t("Test", 100, pdTRUE, []() {});
   auto result = t.start_ex(100);
   EXPECT_FALSE(result.has_value());
-  EXPECT_EQ(result.error(), freertos::error::invalid_handle);
+  EXPECT_EQ(result.error(), freertos::error::timer_queue_full);
 }
 
 TEST_F(TimerCoverageTest, TimerStopExFailure) {
@@ -1563,7 +1563,7 @@ TEST_F(TimerCoverageTest, TimerStopExFailure) {
   t.start();
   auto result = t.stop_ex(100);
   EXPECT_FALSE(result.has_value());
-  EXPECT_EQ(result.error(), freertos::error::invalid_handle);
+  EXPECT_EQ(result.error(), freertos::error::timer_queue_full);
 }
 
 TEST_F(TimerCoverageTest, TimerResetExFailure) {
@@ -1574,7 +1574,7 @@ TEST_F(TimerCoverageTest, TimerResetExFailure) {
   freertos::da::timer t("Test", 100, pdTRUE, []() {});
   auto result = t.reset_ex(100);
   EXPECT_FALSE(result.has_value());
-  EXPECT_EQ(result.error(), freertos::error::invalid_handle);
+  EXPECT_EQ(result.error(), freertos::error::timer_queue_full);
 }
 
 TEST_F(TimerCoverageTest, TimerPeriodExFailure) {
@@ -1586,7 +1586,7 @@ TEST_F(TimerCoverageTest, TimerPeriodExFailure) {
   freertos::da::timer t("Test", 100, pdTRUE, []() {});
   auto result = t.period_ex(200, 100);
   EXPECT_FALSE(result.has_value());
-  EXPECT_EQ(result.error(), freertos::error::invalid_handle);
+  EXPECT_EQ(result.error(), freertos::error::timer_queue_full);
 }
 
 TEST_F(TimerCoverageTest, TimerDestructorNullHandle) {

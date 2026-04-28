@@ -533,7 +533,7 @@ TEST_F(SaTimerTest, StartExChronoFailure) {
   freertos::sa::timer t("t", 100, pdTRUE, [](){});
   auto r = t.start_ex(std::chrono::milliseconds(100));
   EXPECT_FALSE(r.has_value());
-  EXPECT_EQ(r.error(), freertos::error::invalid_handle);
+  EXPECT_EQ(r.error(), freertos::error::timer_queue_full);
 }
 
 TEST_F(SaTimerTest, StopExChronoFailure) {
@@ -543,7 +543,7 @@ TEST_F(SaTimerTest, StopExChronoFailure) {
   freertos::sa::timer t("t", 100, pdTRUE, [](){});
   auto r = t.stop_ex(std::chrono::milliseconds(100));
   EXPECT_FALSE(r.has_value());
-  EXPECT_EQ(r.error(), freertos::error::invalid_handle);
+  EXPECT_EQ(r.error(), freertos::error::timer_queue_full);
 }
 
 TEST_F(SaTimerTest, ResetExChronoFailure) {
@@ -553,7 +553,7 @@ TEST_F(SaTimerTest, ResetExChronoFailure) {
   freertos::sa::timer t("t", 100, pdTRUE, [](){});
   auto r = t.reset_ex(std::chrono::milliseconds(100));
   EXPECT_FALSE(r.has_value());
-  EXPECT_EQ(r.error(), freertos::error::invalid_handle);
+  EXPECT_EQ(r.error(), freertos::error::timer_queue_full);
 }
 
 TEST_F(SaTimerTest, PeriodExChronoFailure) {
@@ -563,7 +563,7 @@ TEST_F(SaTimerTest, PeriodExChronoFailure) {
   freertos::sa::timer t("t", 100, pdTRUE, [](){});
   auto r = t.period_ex(std::chrono::milliseconds(200), std::chrono::milliseconds(100));
   EXPECT_FALSE(r.has_value());
-  EXPECT_EQ(r.error(), freertos::error::invalid_handle);
+  EXPECT_EQ(r.error(), freertos::error::timer_queue_full);
 }
 
 class SaQueueTest : public ::testing::Test {

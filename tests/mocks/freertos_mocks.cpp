@@ -879,9 +879,8 @@ EventBits_t xEventGroupClearBits(EventGroupHandle_t xEventGroup,
 }
 
 EventBits_t xEventGroupClearBitsFromISR(EventGroupHandle_t xEventGroup,
-                                        const EventBits_t uxBitsToClear,
-                                        BaseType_t *pxHigherPriorityTaskWoken) {
-    return g_freertos_mock->xEventGroupClearBitsFromISR(xEventGroup, uxBitsToClear, pxHigherPriorityTaskWoken);
+                                        const EventBits_t uxBitsToClear) {
+    return g_freertos_mock->xEventGroupClearBitsFromISR(xEventGroup, uxBitsToClear);
 }
 
 EventBits_t xEventGroupWaitBits(EventGroupHandle_t xEventGroup,
@@ -1463,11 +1462,9 @@ void *pvPortCalloc(size_t xNum, size_t xSize) {
   return nullptr;
 }
 
-BaseType_t xStreamBufferResetFromISR(StreamBufferHandle_t xStreamBuffer,
-                                      BaseType_t *pxHigherPriorityTaskWoken) {
+BaseType_t xStreamBufferResetFromISR(StreamBufferHandle_t xStreamBuffer) {
   if (g_freertos_mock) {
-    return g_freertos_mock->xStreamBufferResetFromISR(xStreamBuffer,
-                                                       pxHigherPriorityTaskWoken);
+    return g_freertos_mock->xStreamBufferResetFromISR(xStreamBuffer);
   }
   return pdPASS;
 }
@@ -1559,11 +1556,9 @@ StreamBufferHandle_t xStreamBufferGenericCreateStaticWithCallback(
   return nullptr;
 }
 
-BaseType_t xMessageBufferResetFromISR(MessageBufferHandle_t xMessageBuffer,
-                                       BaseType_t *pxHigherPriorityTaskWoken) {
+BaseType_t xMessageBufferResetFromISR(MessageBufferHandle_t xMessageBuffer) {
   if (g_freertos_mock) {
-    return g_freertos_mock->xMessageBufferResetFromISR(xMessageBuffer,
-                                                        pxHigherPriorityTaskWoken);
+    return g_freertos_mock->xMessageBufferResetFromISR(xMessageBuffer);
   }
   return pdPASS;
 }

@@ -41,6 +41,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <FreeRTOS.h>
 #include <array>
 #include <chrono>
+#include <cstdint>
+#include <iterator>
 #include <optional>
 #include <stream_buffer.h>
 #include <type_traits>
@@ -293,6 +295,67 @@ public:
             std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
                 .count()));
   }
+private:
+  // Trait detecting iterators that are guaranteed to point at contiguous
+  // storage. In C++17 there is no std::contiguous_iterator concept; we
+  // approximate by requiring random-access iteration and treat raw pointers
+  // explicitly. This is the same set of iterators for which `&*begin` plus
+  // an element count is a valid description of the underlying byte range.
+  template <typename Iterator>
+  struct is_contiguous_iterator_impl {
+  private:
+    using category =
+        typename std::iterator_traits<Iterator>::iterator_category;
+
+  public:
+    static constexpr bool value =
+        std::is_pointer<Iterator>::value ||
+        std::is_same<category, std::random_access_iterator_tag>::value;
+  };
+  template <typename Iterator>
+  static constexpr bool is_contiguous_iterator_v =
+      is_contiguous_iterator_impl<Iterator>::value;
+
+  // Fallback path for non-contiguous iterators: copy element-by-element into
+  // a small stack buffer and forward to the byte-pointer overload of send().
+  template <typename Iterator, typename TimeoutT>
+  size_t send_iter_fallback(Iterator begin, Iterator end, TimeoutT timeout) {
+    using value_type =
+        typename std::iterator_traits<Iterator>::value_type;
+    static_assert(std::is_trivially_copyable<value_type>::value,
+                  "stream_buffer::send requires trivially copyable elements");
+    constexpr size_t kChunkBytes = 64;
+    constexpr size_t kElemSize = sizeof(value_type);
+    static_assert(kElemSize > 0, "element size must be non-zero");
+    constexpr size_t kChunkElems =
+        (kChunkBytes / kElemSize) > 0 ? (kChunkBytes / kElemSize) : 1;
+    uint8_t buffer[kChunkElems * kElemSize];
+    size_t total_bytes_sent = 0;
+    while (begin != end) {
+      size_t count = 0;
+      while (count < kChunkElems && begin != end) {
+        value_type tmp = *begin;
+        // memcpy to avoid aliasing/alignment surprises with the byte buffer.
+        for (size_t i = 0; i < kElemSize; ++i) {
+          buffer[count * kElemSize + i] =
+              reinterpret_cast<const uint8_t *>(&tmp)[i];
+        }
+        ++count;
+        ++begin;
+      }
+      size_t bytes = count * kElemSize;
+      size_t sent = send(static_cast<const void *>(buffer), bytes, timeout);
+      total_bytes_sent += sent;
+      if (sent < bytes) {
+        // Underlying stream buffer could not accept the full chunk; stop to
+        // avoid silently dropping data that would otherwise be queued.
+        break;
+      }
+    }
+    return total_bytes_sent;
+  }
+
+public:
   /**
    * @brief Send data to the stream buffer.
    * @ref https://www.freertos.org/xStreamBufferSend.html
@@ -307,7 +370,16 @@ public:
   template <typename Iterator>
   size_t send(Iterator begin, Iterator end,
               TickType_t timeout = portMAX_DELAY) {
-    return send(&*begin, std::distance(begin, end), timeout);
+    if constexpr (is_contiguous_iterator_v<Iterator>) {
+      using value_type =
+          typename std::iterator_traits<Iterator>::value_type;
+      return send(&*begin,
+                  static_cast<size_t>(std::distance(begin, end)) *
+                      sizeof(value_type),
+                  timeout);
+    } else {
+      return send_iter_fallback(begin, end, timeout);
+    }
   }
   /**
    * @brief Send data to the stream buffer.
@@ -323,7 +395,16 @@ public:
   template <typename Iterator, typename Rep, typename Period>
   size_t send(Iterator begin, Iterator end,
               const std::chrono::duration<Rep, Period> &timeout) {
-    return send(&*begin, std::distance(begin, end), timeout);
+    if constexpr (is_contiguous_iterator_v<Iterator>) {
+      using value_type =
+          typename std::iterator_traits<Iterator>::value_type;
+      return send(&*begin,
+                  static_cast<size_t>(std::distance(begin, end)) *
+                      sizeof(value_type),
+                  timeout);
+    } else {
+      return send_iter_fallback(begin, end, timeout);
+    }
   }
   /**
    * @brief Send data to the stream buffer from an ISR.
@@ -352,7 +433,17 @@ public:
    */
   template <typename Iterator>
   isr_result<size_t> send_isr(Iterator begin, Iterator end) {
-    return send_isr(&*begin, std::distance(begin, end));
+    static_assert(
+        is_contiguous_iterator_v<Iterator>,
+        "stream_buffer::send_isr requires a contiguous iterator (raw pointer "
+        "or random-access iterator over contiguous storage). Non-contiguous "
+        "iterators are not supported in ISR context because a fallback copy "
+        "buffer would not be ISR-safe for arbitrary input ranges.");
+    using value_type =
+        typename std::iterator_traits<Iterator>::value_type;
+    return send_isr(&*begin,
+                    static_cast<size_t>(std::distance(begin, end)) *
+                        sizeof(value_type));
   }
   /**
    * @brief Receive data from the stream buffer.
@@ -426,7 +517,7 @@ public:
    *
    * @return BaseType_t pdPass if the stream buffer was reset, pdFAIL otherwise.
    */
-  BaseType_t reset(void) { return xStreamBufferReset(m_stream_buffer); }
+  [[nodiscard]] BaseType_t reset(void) { return xStreamBufferReset(m_stream_buffer); }
   /**
    * @brief Set the trigger level of the stream buffer.
    * @ref https://www.freertos.org/xStreamBufferSetTriggerLevel.html
@@ -435,7 +526,7 @@ public:
    * buffer before a task that is blocked on a read operation will be unblocked.
    * @return BaseType_t pdPass if the trigger level was set, pdFAIL otherwise.
    */
-  BaseType_t set_trigger_level(size_t trigger_level_bytes) {
+  [[nodiscard]] BaseType_t set_trigger_level(size_t trigger_level_bytes) {
     return xStreamBufferSetTriggerLevel(m_stream_buffer, trigger_level_bytes);
   }
   /**
@@ -482,13 +573,31 @@ public:
   template <typename Iterator>
   [[nodiscard]] expected<size_t, error>
   send_ex(Iterator begin, Iterator end, TickType_t timeout = portMAX_DELAY) {
-    return send_ex(&*begin, std::distance(begin, end), timeout);
+    if constexpr (is_contiguous_iterator_v<Iterator>) {
+      using value_type =
+          typename std::iterator_traits<Iterator>::value_type;
+      return send_ex(&*begin,
+                     static_cast<size_t>(std::distance(begin, end)) *
+                         sizeof(value_type),
+                     timeout);
+    } else {
+      auto rc = send(begin, end, timeout);
+      if (rc > 0) {
+        return rc;
+      }
+      return unexpected<error>(timeout == 0 ? error::would_block
+                                            : error::timeout);
+    }
   }
   template <typename Iterator, typename Rep, typename Period>
   [[nodiscard]] expected<size_t, error>
   send_ex(Iterator begin, Iterator end,
           const std::chrono::duration<Rep, Period> &timeout) {
-    return send_ex(&*begin, std::distance(begin, end), timeout);
+    return send_ex(
+        begin, end,
+        pdMS_TO_TICKS(
+            std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
+                .count()));
   }
   [[nodiscard]] isr_result<expected<size_t, error>>
   send_ex_isr(const void *data, size_t data_size) {
@@ -504,7 +613,16 @@ public:
   template <typename Iterator>
   [[nodiscard]] isr_result<expected<size_t, error>> send_ex_isr(Iterator begin,
                                                                 Iterator end) {
-    return send_ex_isr(&*begin, std::distance(begin, end));
+    static_assert(
+        is_contiguous_iterator_v<Iterator>,
+        "stream_buffer::send_ex_isr requires a contiguous iterator (raw "
+        "pointer or random-access iterator over contiguous storage). "
+        "Non-contiguous iterators are not supported in ISR context.");
+    using value_type =
+        typename std::iterator_traits<Iterator>::value_type;
+    return send_ex_isr(&*begin,
+                       static_cast<size_t>(std::distance(begin, end)) *
+                           sizeof(value_type));
   }
   [[nodiscard]] expected<size_t, error>
   receive_ex(void *data, size_t data_size, TickType_t timeout = portMAX_DELAY) {
@@ -551,10 +669,11 @@ public:
    * reset, and the higher_priority_task_woken flag.
    */
   isr_result<bool> reset_isr() {
+    // xStreamBufferResetFromISR takes only the buffer handle in production
+    // FreeRTOS — it does not have a higher_priority_task_woken out-parameter.
+    // The flag is left at pdFALSE in the returned result.
     isr_result<bool> result{false, pdFALSE};
-    result.result =
-        xStreamBufferResetFromISR(m_stream_buffer,
-                                  &result.higher_priority_task_woken) == pdPASS;
+    result.result = xStreamBufferResetFromISR(m_stream_buffer) == pdPASS;
     return result;
   }
   [[nodiscard]] isr_result<expected<void, error>> reset_ex_isr() {

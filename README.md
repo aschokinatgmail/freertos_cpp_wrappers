@@ -18,7 +18,7 @@ This project follows [Semantic Versioning](https://semver.org/). The version is 
 | `FREERTOS_CPP_WRAPPERS_VERSION_MAJOR` | Major version (breaking changes) |
 | `FREERTOS_CPP_WRAPPERS_VERSION_MINOR` | Minor version (new features) |
 | `FREERTOS_CPP_WRAPPERS_VERSION_PATCH` | Patch version (bug fixes) |
-| `FREERTOS_CPP_WRAPPERS_VERSION` | Full version string (e.g. `"3.0.0"`) |
+| `FREERTOS_CPP_WRAPPERS_VERSION` | Full version string (e.g. `"3.2.0"`) |
 
 Include `<freertos.hpp>` to access version macros at compile time.
 

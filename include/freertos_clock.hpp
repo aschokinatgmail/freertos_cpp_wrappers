@@ -87,4 +87,30 @@ to_duration(TickType_t ticks) noexcept {
   return std::chrono::duration_cast<Duration>(tick_timer::duration{ticks});
 }
 
+/** @brief Saturating millisecond-to-tick conversion.
+ *
+ *  Mirrors `pdMS_TO_TICKS()` but clamps to `portMAX_DELAY` when the
+ *  multiplication `ms * configTICK_RATE_HZ / 1000` would overflow
+ *  `TickType_t`. `pdMS_TO_TICKS` itself is a macro that performs the
+ *  multiplication in the underlying type without overflow checks; for
+ *  durations longer than ~24 days at 1 kHz on a 32-bit `TickType_t` it
+ *  silently wraps and produces an unexpectedly short delay.
+ */
+template <typename Rep, typename Period>
+[[nodiscard]] constexpr TickType_t
+to_ticks_saturating(const std::chrono::duration<Rep, Period> &d) noexcept {
+  const auto ms =
+      std::chrono::duration_cast<std::chrono::milliseconds>(d).count();
+  if (ms <= 0) {
+    return 0;
+  }
+  using ms_t = decltype(ms);
+  constexpr ms_t max_ms =
+      static_cast<ms_t>(portMAX_DELAY) * 1000 / configTICK_RATE_HZ;
+  if (ms >= max_ms) {
+    return portMAX_DELAY;
+  }
+  return pdMS_TO_TICKS(ms);
+}
+
 } // namespace freertos

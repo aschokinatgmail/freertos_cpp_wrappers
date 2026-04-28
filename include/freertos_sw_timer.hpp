@@ -121,6 +121,11 @@ using timer_callback_t = std::function<void()>;
 template <typename SwTimerAllocator> class timer {
   SwTimerAllocator m_allocator;
   timer_callback_t m_callback;
+  // Tracks the user's last requested state (start/stop), not the actual
+  // FreeRTOS-active state. The timer daemon processes start/stop commands
+  // asynchronously, so `m_started` may briefly disagree with
+  // `xTimerIsTimerActive()`. Used for move/destruct bookkeeping; for the
+  // authoritative active state, call `running()`.
   std::atomic<bool> m_started{false};
   TimerHandle_t m_timer;
 
@@ -306,7 +311,7 @@ public:
    * @param ticks_to_wait timeout in ticks to wait for the timer to start
    * @return BaseType_t pdPASS if the timer was started successfully else pdFAIL
    */
-  BaseType_t start(const TickType_t ticks_to_wait = portMAX_DELAY) {
+  [[nodiscard]] BaseType_t start(const TickType_t ticks_to_wait = portMAX_DELAY) {
     if (!m_timer) {
       return pdFAIL;
     }
@@ -326,7 +331,7 @@ public:
    * @return BaseType_t pdPASS if the timer was started successfully else pdFAIL
    */
   template <typename Rep, typename Period>
-  BaseType_t start(const std::chrono::duration<Rep, Period> &timeout) {
+  [[nodiscard]] BaseType_t start(const std::chrono::duration<Rep, Period> &timeout) {
     return start(pdMS_TO_TICKS(
         std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
             .count()));
@@ -357,7 +362,7 @@ public:
    * @param ticks_to_wait timeout in ticks to wait for the timer to stop
    * @return BaseType_t pdPASS if the timer was stopped successfully else pdFAIL
    */
-  BaseType_t stop(const TickType_t ticks_to_wait = portMAX_DELAY) {
+  [[nodiscard]] BaseType_t stop(const TickType_t ticks_to_wait = portMAX_DELAY) {
     if (!m_timer) {
       return pdFAIL;
     }
@@ -377,7 +382,7 @@ public:
    * @return BaseType_t pdPASS if the timer was stopped successfully else pdFAIL
    */
   template <typename Rep, typename Period>
-  BaseType_t stop(const std::chrono::duration<Rep, Period> &timeout) {
+  [[nodiscard]] BaseType_t stop(const std::chrono::duration<Rep, Period> &timeout) {
     return stop(pdMS_TO_TICKS(
         std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
             .count()));
@@ -408,7 +413,7 @@ public:
    * @param ticks_to_wait timeout in ticks to wait for the timer to reset
    * @return BaseType_t pdPASS if the timer was reset successfully else pdFAIL
    */
-  BaseType_t reset(const TickType_t ticks_to_wait = portMAX_DELAY) {
+  [[nodiscard]] BaseType_t reset(const TickType_t ticks_to_wait = portMAX_DELAY) {
     if (!m_timer) {
       return pdFAIL;
     }
@@ -424,7 +429,7 @@ public:
    * @return BaseType_t pdPASS if the timer was reset successfully else pdFAIL
    */
   template <typename Rep, typename Period>
-  BaseType_t reset(const std::chrono::duration<Rep, Period> &timeout) {
+  [[nodiscard]] BaseType_t reset(const std::chrono::duration<Rep, Period> &timeout) {
     return reset(pdMS_TO_TICKS(
         std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
             .count()));
@@ -455,7 +460,7 @@ public:
    * @return BaseType_t pdPASS if the timer period was changed successfully else
    * pdFAIL
    */
-  BaseType_t period(const TickType_t new_period_ticks,
+  [[nodiscard]] BaseType_t period(const TickType_t new_period_ticks,
                     const TickType_t ticks_to_wait = portMAX_DELAY) {
     if (!m_timer) {
       return pdFAIL;
@@ -477,7 +482,7 @@ public:
    */
   template <typename RepPeriod, typename PeriodPeriod, typename RepTimeout,
             typename PeriodTimeout>
-  BaseType_t
+  [[nodiscard]] BaseType_t
   period(const std::chrono::duration<RepPeriod, PeriodPeriod> &new_period,
          const std::chrono::duration<RepTimeout, PeriodTimeout> &timeout) {
     return period(
@@ -617,11 +622,14 @@ public:
 
   [[nodiscard]] expected<void, error>
   start_ex(const TickType_t ticks_to_wait = portMAX_DELAY) {
+    if (!m_timer) {
+      return unexpected<error>(error::invalid_handle);
+    }
     auto rc = start(ticks_to_wait);
     if (rc == pdPASS) {
       return {};
     }
-    return unexpected<error>(error::invalid_handle);
+    return unexpected<error>(error::timer_queue_full);
   }
   template <typename Rep, typename Period>
   [[nodiscard]] expected<void, error>
@@ -642,11 +650,14 @@ public:
   }
   [[nodiscard]] expected<void, error>
   stop_ex(const TickType_t ticks_to_wait = portMAX_DELAY) {
+    if (!m_timer) {
+      return unexpected<error>(error::invalid_handle);
+    }
     auto rc = stop(ticks_to_wait);
     if (rc == pdPASS) {
       return {};
     }
-    return unexpected<error>(error::invalid_handle);
+    return unexpected<error>(error::timer_queue_full);
   }
   template <typename Rep, typename Period>
   [[nodiscard]] expected<void, error>
@@ -667,11 +678,14 @@ public:
   }
   [[nodiscard]] expected<void, error>
   reset_ex(const TickType_t ticks_to_wait = portMAX_DELAY) {
+    if (!m_timer) {
+      return unexpected<error>(error::invalid_handle);
+    }
     auto rc = reset(ticks_to_wait);
     if (rc == pdPASS) {
       return {};
     }
-    return unexpected<error>(error::invalid_handle);
+    return unexpected<error>(error::timer_queue_full);
   }
   template <typename Rep, typename Period>
   [[nodiscard]] expected<void, error>
@@ -693,11 +707,14 @@ public:
   [[nodiscard]] expected<void, error>
   period_ex(const TickType_t new_period_ticks,
             const TickType_t ticks_to_wait = portMAX_DELAY) {
+    if (!m_timer) {
+      return unexpected<error>(error::invalid_handle);
+    }
     auto rc = period(new_period_ticks, ticks_to_wait);
     if (rc == pdPASS) {
       return {};
     }
-    return unexpected<error>(error::invalid_handle);
+    return unexpected<error>(error::timer_queue_full);
   }
   template <typename RepPeriod, typename PeriodPeriod, typename RepTimeout,
             typename PeriodTimeout>

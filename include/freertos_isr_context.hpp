@@ -49,7 +49,14 @@ enum class execution_context : uint8_t {
 };
 
 [[nodiscard]] inline bool in_isr() noexcept {
+#ifdef FREERTOS_CPP_WRAPPERS_SIMULATION
+    // The POSIX/simulation port does not provide xPortIsInsideInterrupt().
+    // Tasks under the simulation are real POSIX threads and never run in
+    // hardware ISR context, so always return false.
+    return false;
+#else
     return xPortIsInsideInterrupt() != 0;
+#endif
 }
 
 [[nodiscard]] inline execution_context current_execution_context() noexcept {

@@ -743,7 +743,7 @@ TEST_F(ExVariantsTimerTest, StartExFailure) {
   freertos::timer<freertos::dynamic_sw_timer_allocator> t("t", 100, pdTRUE, [](){});
   auto r = t.start_ex();
   EXPECT_FALSE(r.has_value());
-  EXPECT_EQ(r.error(), freertos::error::invalid_handle);
+  EXPECT_EQ(r.error(), freertos::error::timer_queue_full);
 }
 
 TEST_F(ExVariantsTimerTest, StartExChrono) {
@@ -753,7 +753,7 @@ TEST_F(ExVariantsTimerTest, StartExChrono) {
   freertos::timer<freertos::dynamic_sw_timer_allocator> t("t", 100, pdTRUE, [](){});
   auto r = t.start_ex(std::chrono::milliseconds(100));
   EXPECT_FALSE(r.has_value());
-  EXPECT_EQ(r.error(), freertos::error::invalid_handle);
+  EXPECT_EQ(r.error(), freertos::error::timer_queue_full);
 }
 
 TEST_F(ExVariantsTimerTest, StartExIsrFailure) {
@@ -773,7 +773,7 @@ TEST_F(ExVariantsTimerTest, StopExFailure) {
   freertos::timer<freertos::dynamic_sw_timer_allocator> t("t", 100, pdTRUE, [](){});
   auto r = t.stop_ex();
   EXPECT_FALSE(r.has_value());
-  EXPECT_EQ(r.error(), freertos::error::invalid_handle);
+  EXPECT_EQ(r.error(), freertos::error::timer_queue_full);
 }
 
 TEST_F(ExVariantsTimerTest, StopExIsrFailure) {
@@ -793,7 +793,7 @@ TEST_F(ExVariantsTimerTest, ResetExFailure) {
   freertos::timer<freertos::dynamic_sw_timer_allocator> t("t", 100, pdTRUE, [](){});
   auto r = t.reset_ex();
   EXPECT_FALSE(r.has_value());
-  EXPECT_EQ(r.error(), freertos::error::invalid_handle);
+  EXPECT_EQ(r.error(), freertos::error::timer_queue_full);
 }
 
 TEST_F(ExVariantsTimerTest, ResetExIsrFailure) {
@@ -813,7 +813,7 @@ TEST_F(ExVariantsTimerTest, PeriodExFailure) {
   freertos::timer<freertos::dynamic_sw_timer_allocator> t("t", 100, pdTRUE, [](){});
   auto r = t.period_ex(200);
   EXPECT_FALSE(r.has_value());
-  EXPECT_EQ(r.error(), freertos::error::invalid_handle);
+  EXPECT_EQ(r.error(), freertos::error::timer_queue_full);
 }
 
 TEST_F(ExVariantsTimerTest, PeriodExIsrFailure) {
@@ -833,7 +833,7 @@ TEST_F(ExVariantsTimerTest, PeriodExChrono) {
   freertos::timer<freertos::dynamic_sw_timer_allocator> t("t", 100, pdTRUE, [](){});
   auto r = t.period_ex(std::chrono::milliseconds(200), std::chrono::milliseconds(100));
   EXPECT_FALSE(r.has_value());
-  EXPECT_EQ(r.error(), freertos::error::invalid_handle);
+  EXPECT_EQ(r.error(), freertos::error::timer_queue_full);
 }
 
 TEST_F(ExVariantsTimerTest, PeriodExIsrChrono) {

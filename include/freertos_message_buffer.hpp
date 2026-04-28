@@ -370,7 +370,7 @@ public:
    *
    * @return BaseType_t pdPass if the message buffer was reset, pdFAIL otherwise
    */
-  BaseType_t reset(void) { return xMessageBufferReset(m_message_buffer); }
+  [[nodiscard]] BaseType_t reset(void) { return xMessageBufferReset(m_message_buffer); }
   /**
    * @brief Method checking if the message buffer is empty.
    * @ref https://www.freertos.org/xMessageBufferIsEmpty.html
@@ -463,10 +463,11 @@ public:
    * reset, and the higher_priority_task_woken flag.
    */
   isr_result<bool> reset_isr() {
+    // xMessageBufferResetFromISR takes only the buffer handle in production
+    // FreeRTOS — it does not have a higher_priority_task_woken out-parameter.
+    // The flag is left at pdFALSE in the returned result.
     isr_result<bool> result{false, pdFALSE};
-    result.result =
-        xMessageBufferResetFromISR(m_message_buffer,
-                                    &result.higher_priority_task_woken) == pdPASS;
+    result.result = xMessageBufferResetFromISR(m_message_buffer) == pdPASS;
     return result;
   }
   [[nodiscard]] isr_result<expected<void, error>> reset_ex_isr() {

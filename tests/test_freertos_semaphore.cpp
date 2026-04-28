@@ -299,21 +299,18 @@ TEST_F(FreeRTOSSemaphoreTest, CountingSemaphoreOperators) {
   EXPECT_CALL(*mock, xSemaphoreCreateCounting(5, 5))
       .WillOnce(Return(mock_semaphore_handle));
   EXPECT_CALL(*mock, xSemaphoreGive(mock_semaphore_handle))
-      .Times(4); // Once for ++, once for operator++(), twice for +=2
+      .Times(3); // Once for ++, twice for +=2 (post-increment removed)
   EXPECT_CALL(*mock, xSemaphoreTake(mock_semaphore_handle, portMAX_DELAY))
-      .Times(2); // Once for --, once for operator--()
+      .Times(1); // Once for -- (post-decrement removed)
   EXPECT_CALL(*mock, vSemaphoreDelete(mock_semaphore_handle));
 
   freertos::counting_semaphore<freertos::dynamic_semaphore_allocator> semaphore(
       5);
 
-  // Test increment operators
+  // Test prefix increment / decrement operators (post-increment/decrement
+  // are intentionally not provided — see freertos_semaphore.hpp).
   ++semaphore;
-  semaphore++;
-
-  // Test decrement operators
   --semaphore;
-  semaphore--;
 
   // Test compound assignment
   semaphore += 2;
@@ -1805,17 +1802,14 @@ TEST_F(FreeRTOSSemaphoreTest, CountingSemaphoreMultipleOperators) {
   freertos::counting_semaphore<freertos::dynamic_semaphore_allocator> semaphore(
       10);
 
-  // Test pre-increment
+  // Test pre-increment (twice — post-increment is not provided)
   ++semaphore;
-  // Test post-increment
-  semaphore++;
+  ++semaphore;
   // Test compound assignment
   semaphore += 5;
-  // Test pre-decrement
+  // Test pre-decrement (three times — post-decrement is not provided)
   --semaphore;
-  // Test post-decrement
-  semaphore--;
-  // Test another decrement
+  --semaphore;
   --semaphore;
 
   // Check final count

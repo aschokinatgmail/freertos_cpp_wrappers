@@ -795,8 +795,7 @@ TEST_F(FreeRTOSStreamBatchingBufferTest, ResetExFailure) {
 TEST_F(FreeRTOSStreamBatchingBufferTest, ResetISR) {
   EXPECT_CALL(*mock, xStreamBufferGenericCreate(128, 1, sbTYPE_STREAM_BATCHING_BUFFER))
       .WillOnce(Return(mock_stream_buffer_handle));
-  EXPECT_CALL(*mock, xStreamBufferResetFromISR(mock_stream_buffer_handle,
-                                                  NotNull()))
+  EXPECT_CALL(*mock, xStreamBufferResetFromISR(mock_stream_buffer_handle))
       .WillOnce(Return(pdPASS));
   EXPECT_CALL(*mock, vStreamBufferDelete(mock_stream_buffer_handle)).Times(1);
 
@@ -809,8 +808,7 @@ TEST_F(FreeRTOSStreamBatchingBufferTest, ResetISR) {
 TEST_F(FreeRTOSStreamBatchingBufferTest, ResetExISR) {
   EXPECT_CALL(*mock, xStreamBufferGenericCreate(128, 1, sbTYPE_STREAM_BATCHING_BUFFER))
       .WillOnce(Return(mock_stream_buffer_handle));
-  EXPECT_CALL(*mock, xStreamBufferResetFromISR(mock_stream_buffer_handle,
-                                                  NotNull()))
+  EXPECT_CALL(*mock, xStreamBufferResetFromISR(mock_stream_buffer_handle))
       .WillOnce(Return(pdPASS));
   EXPECT_CALL(*mock, vStreamBufferDelete(mock_stream_buffer_handle)).Times(1);
 

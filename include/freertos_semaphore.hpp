@@ -242,7 +242,7 @@ public:
    * otherwise pdFALSE.
    *
    */
-  BaseType_t give() FREERTOS_RELEASE() { return xSemaphoreGive(m_semaphore); }
+  [[nodiscard]] BaseType_t give() FREERTOS_RELEASE() { return xSemaphoreGive(m_semaphore); }
   /**
    * @brief Give the binary semaphore from an ISR.
    * @ref https://www.freertos.org/a00124.html
@@ -265,7 +265,7 @@ public:
    * otherwise pdFALSE.
    *
    */
-  BaseType_t take(const TickType_t ticks_to_wait = portMAX_DELAY)
+  [[nodiscard]] BaseType_t take(const TickType_t ticks_to_wait = portMAX_DELAY)
       FREERTOS_ACQUIRE() {
     return xSemaphoreTake(m_semaphore, ticks_to_wait);
   }
@@ -291,7 +291,7 @@ public:
    *
    */
   template <typename Rep, typename Period>
-  BaseType_t take(const std::chrono::duration<Rep, Period> &timeout) {
+  [[nodiscard]] BaseType_t take(const std::chrono::duration<Rep, Period> &timeout) {
     return take(pdMS_TO_TICKS(
         std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
             .count()));
@@ -431,7 +431,7 @@ public:
    * otherwise pdFALSE.
    *
    */
-  BaseType_t give() FREERTOS_RELEASE() { return xSemaphoreGive(m_semaphore); }
+  [[nodiscard]] BaseType_t give() FREERTOS_RELEASE() { return xSemaphoreGive(m_semaphore); }
   /**
    * @brief Give the counting semaphore from an ISR.
    * @ref https://www.freertos.org/a00124.html
@@ -454,7 +454,7 @@ public:
    * otherwise pdFALSE.
    *
    */
-  BaseType_t take(const TickType_t ticks_to_wait = portMAX_DELAY)
+  [[nodiscard]] BaseType_t take(const TickType_t ticks_to_wait = portMAX_DELAY)
       FREERTOS_ACQUIRE() {
     return xSemaphoreTake(m_semaphore, ticks_to_wait);
   }
@@ -480,7 +480,7 @@ public:
    *
    */
   template <typename Rep, typename Period>
-  BaseType_t take(const std::chrono::duration<Rep, Period> &timeout) {
+  [[nodiscard]] BaseType_t take(const std::chrono::duration<Rep, Period> &timeout) {
     return take(pdMS_TO_TICKS(
         std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
             .count()));
@@ -562,30 +562,10 @@ public:
     take();
     return *this;
   }
-  /**
-   * @brief Give the counting semaphore.
-   * Note: Post-increment returns reference instead of copy for RAII safety
-   *
-   * @return counting_semaphore& reference to the counting semaphore.
-   */
-  // NOLINTNEXTLINE(cert-dcl21-cpp): RAII class, copy is deleted -
-  // post-increment returns reference instead of copy
-  counting_semaphore &operator++(int) {
-    give();
-    return *this;
-  }
-  /**
-   * @brief Take the counting semaphore.
-   * Note: Post-decrement returns reference instead of copy for RAII safety
-   *
-   * @return counting_semaphore& reference to the counting semaphore.
-   */
-  // NOLINTNEXTLINE(cert-dcl21-cpp): RAII class, copy is deleted -
-  // post-decrement returns reference instead of copy
-  counting_semaphore &operator--(int) {
-    take();
-    return *this;
-  }
+  // Post-increment and post-decrement intentionally omitted: a conforming
+  // operator++(int)/operator--(int) must return the pre-operation value as
+  // a copy, but counting_semaphore is non-copyable. Use `give()` / `take()`
+  // (or the prefix operators) explicitly instead of `sem++` / `sem--`.
   /**
    * @brief Get the count of the counting semaphore.
    *
@@ -682,7 +662,7 @@ public:
    *
    * @return BaseType_t pdTRUE if the mutex was successfully unlocked,
    */
-  BaseType_t unlock() FREERTOS_RELEASE() {
+  [[nodiscard]] BaseType_t unlock() FREERTOS_RELEASE() {
     auto rc = xSemaphoreGive(m_semaphore);
     if (rc) {
       m_locked = false;
@@ -711,7 +691,7 @@ public:
    * @param ticks_to_wait timeout in ticks to wait for the mutex.
    * @return BaseType_t pdTRUE if the mutex was successfully locked,
    */
-  BaseType_t lock(const TickType_t ticks_to_wait = portMAX_DELAY)
+  [[nodiscard]] BaseType_t lock(const TickType_t ticks_to_wait = portMAX_DELAY)
       FREERTOS_ACQUIRE() {
     auto rc = xSemaphoreTake(m_semaphore, ticks_to_wait);
     if (rc) {
@@ -741,7 +721,7 @@ public:
    * @return BaseType_t pdTRUE if the mutex was successfully locked,
    */
   template <typename Rep, typename Period>
-  BaseType_t lock(const std::chrono::duration<Rep, Period> &timeout) {
+  [[nodiscard]] BaseType_t lock(const std::chrono::duration<Rep, Period> &timeout) {
     return lock(pdMS_TO_TICKS(
         std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
             .count()));
@@ -752,7 +732,7 @@ public:
    *
    * @return BaseType_t pdTRUE if the mutex was successfully locked,
    */
-  BaseType_t try_lock() FREERTOS_TRY_ACQUIRE(true) {
+  [[nodiscard]] BaseType_t try_lock() FREERTOS_TRY_ACQUIRE(true) {
     auto rc = xSemaphoreTake(m_semaphore, 0);
     if (rc) {
       m_locked = true;
@@ -927,7 +907,7 @@ public:
    * @return BaseType_t pdTRUE if the recursive mutex was successfully unlocked,
    * otherwise pdFALSE.
    */
-  BaseType_t unlock() FREERTOS_RELEASE() {
+  [[nodiscard]] BaseType_t unlock() FREERTOS_RELEASE() {
     auto rc = xSemaphoreGiveRecursive(m_semaphore);
     if (rc && m_recursions_count > 0) {
       m_recursions_count--;
@@ -942,7 +922,7 @@ public:
    * @param ticks_to_wait timeout in ticks to wait for the recursive mutex.
    * @return BaseType_t pdTRUE if the recursive mutex was successfully locked,
    */
-  BaseType_t lock(const TickType_t ticks_to_wait = portMAX_DELAY)
+  [[nodiscard]] BaseType_t lock(const TickType_t ticks_to_wait = portMAX_DELAY)
       FREERTOS_ACQUIRE() {
     auto rc = xSemaphoreTakeRecursive(m_semaphore, ticks_to_wait);
     if (rc) {
@@ -958,7 +938,7 @@ public:
    * @return BaseType_t pdTRUE if the recursive mutex was successfully locked,
    */
   template <typename Rep, typename Period>
-  BaseType_t lock(const std::chrono::duration<Rep, Period> &timeout)
+  [[nodiscard]] BaseType_t lock(const std::chrono::duration<Rep, Period> &timeout)
       FREERTOS_ACQUIRE() {
     return lock(pdMS_TO_TICKS(
         std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
@@ -970,7 +950,7 @@ public:
    *
    * @return BaseType_t pdTRUE if the recursive mutex was successfully locked,
    */
-  BaseType_t try_lock() FREERTOS_TRY_ACQUIRE(true) {
+  [[nodiscard]] BaseType_t try_lock() FREERTOS_TRY_ACQUIRE(true) {
     auto rc = xSemaphoreTakeRecursive(m_semaphore, 0);
     if (rc) {
       m_recursions_count++;
@@ -1084,7 +1064,12 @@ public:
    * @brief Destruct the lock guard object and unlock the mutex.
    *
    */
-  ~lock_guard(void) FREERTOS_RELEASE() { m_mutex.unlock(); }
+  ~lock_guard(void) FREERTOS_RELEASE() {
+    // Return value intentionally discarded — pdFAIL during destruction
+    // is unexpected (we held the lock per RAII contract) but ignoring
+    // it preserves noexcept destructor semantics.
+    (void)m_mutex.unlock();
+  }
 
   // Delete copy and move operations for RAII safety
   lock_guard(const lock_guard &) = delete;
@@ -1126,7 +1111,9 @@ public:
    */
   ~try_lock_guard(void) FREERTOS_RELEASE() {
     if (m_lock_acquired) {
-      m_mutex.unlock();
+      // Return value intentionally discarded — pdFAIL during destruction
+      // means the mutex wasn't actually held, which is acceptable here.
+      (void)m_mutex.unlock();
     }
   }
 
@@ -1244,7 +1231,9 @@ public:
    */
   ~timeout_lock_guard(void) FREERTOS_RELEASE() {
     if (m_lock_acquired) {
-      m_mutex.unlock();
+      // Return value intentionally discarded — pdFAIL during destruction
+      // means the mutex wasn't actually held, which is acceptable here.
+      (void)m_mutex.unlock();
     }
   }
 

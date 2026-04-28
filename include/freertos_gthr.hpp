@@ -45,8 +45,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #if __STDC_HOSTED__
 #include <cstring>
+#include <ctime> // for std::timespec
 #else
 #include <string.h>
+#include <time.h> // for struct timespec
 #endif
 
 #define __GTHREADS 1
@@ -126,8 +128,6 @@ typedef volatile uint8_t __gthread_once_t;
 typedef uint32_t __gthread_key_t;
 
 typedef TaskHandle_t __gthread_t;
-
-struct timespec;
 
 inline int __gthread_active_p() {
   return xTaskGetSchedulerState() == taskSCHEDULER_RUNNING ? 1 : 0;

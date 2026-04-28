@@ -46,9 +46,11 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #if __STDC_HOSTED__
 #include <chrono>
 #include <cstring>
+#include <ctime> // for std::timespec
 #else
 #include <stdint.h>
 #include <string.h>
+#include <time.h> // for struct timespec
 #endif
 
 #define _LIBCPP_HAS_THREADS 1

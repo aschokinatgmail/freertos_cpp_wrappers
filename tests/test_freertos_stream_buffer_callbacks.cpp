@@ -52,7 +52,7 @@ TEST_F(StreamBufferCallbackTest, StreamBufferResetIsr) {
   EXPECT_CALL(*mock, xStreamBufferCreate(128, 1))
       .WillOnce(Return(mock_stream_buffer_handle));
   EXPECT_CALL(*mock,
-              xStreamBufferResetFromISR(mock_stream_buffer_handle, NotNull()))
+              xStreamBufferResetFromISR(mock_stream_buffer_handle))
       .WillOnce(Return(pdPASS));
   EXPECT_CALL(*mock, vStreamBufferDelete(mock_stream_buffer_handle));
 
@@ -66,7 +66,7 @@ TEST_F(StreamBufferCallbackTest, StreamBufferResetIsrFailure) {
   EXPECT_CALL(*mock, xStreamBufferCreate(128, 1))
       .WillOnce(Return(mock_stream_buffer_handle));
   EXPECT_CALL(*mock,
-              xStreamBufferResetFromISR(mock_stream_buffer_handle, NotNull()))
+              xStreamBufferResetFromISR(mock_stream_buffer_handle))
       .WillOnce(Return(pdFAIL));
   EXPECT_CALL(*mock, vStreamBufferDelete(mock_stream_buffer_handle));
 
@@ -75,25 +75,28 @@ TEST_F(StreamBufferCallbackTest, StreamBufferResetIsrFailure) {
   EXPECT_FALSE(result.result);
 }
 
-TEST_F(StreamBufferCallbackTest, StreamBufferResetIsrWithHigherPriorityWoken) {
+// Note: xStreamBufferResetFromISR in production FreeRTOS does NOT have a
+// higher_priority_task_woken out-parameter — the woken flag is always pdFALSE
+// in the returned isr_result. Test renamed and updated accordingly.
+TEST_F(StreamBufferCallbackTest, StreamBufferResetIsrSuccess) {
   EXPECT_CALL(*mock, xStreamBufferCreate(128, 1))
       .WillOnce(Return(mock_stream_buffer_handle));
   EXPECT_CALL(*mock,
-              xStreamBufferResetFromISR(mock_stream_buffer_handle, NotNull()))
-      .WillOnce(DoAll(SetArgPointee<1>(pdTRUE), Return(pdPASS)));
+              xStreamBufferResetFromISR(mock_stream_buffer_handle))
+      .WillOnce(Return(pdPASS));
   EXPECT_CALL(*mock, vStreamBufferDelete(mock_stream_buffer_handle));
 
   freertos::da::stream_buffer<128> buffer;
   auto result = buffer.reset_isr();
   EXPECT_TRUE(result.result);
-  EXPECT_EQ(result.higher_priority_task_woken, pdTRUE);
+  EXPECT_EQ(result.higher_priority_task_woken, pdFALSE);
 }
 
 TEST_F(StreamBufferCallbackTest, StreamBufferResetExIsr) {
   EXPECT_CALL(*mock, xStreamBufferCreate(128, 1))
       .WillOnce(Return(mock_stream_buffer_handle));
   EXPECT_CALL(*mock,
-              xStreamBufferResetFromISR(mock_stream_buffer_handle, NotNull()))
+              xStreamBufferResetFromISR(mock_stream_buffer_handle))
       .WillOnce(Return(pdPASS));
   EXPECT_CALL(*mock, vStreamBufferDelete(mock_stream_buffer_handle));
 
@@ -107,7 +110,7 @@ TEST_F(StreamBufferCallbackTest, StreamBufferResetExIsrFailure) {
   EXPECT_CALL(*mock, xStreamBufferCreate(128, 1))
       .WillOnce(Return(mock_stream_buffer_handle));
   EXPECT_CALL(*mock,
-              xStreamBufferResetFromISR(mock_stream_buffer_handle, NotNull()))
+              xStreamBufferResetFromISR(mock_stream_buffer_handle))
       .WillOnce(Return(pdFAIL));
   EXPECT_CALL(*mock, vStreamBufferDelete(mock_stream_buffer_handle));
 
@@ -191,7 +194,7 @@ TEST_F(StreamBufferCallbackTest, MessageBufferResetIsr) {
   EXPECT_CALL(*mock, xMessageBufferCreate(128))
       .WillOnce(Return(mock_message_buffer_handle));
   EXPECT_CALL(*mock,
-              xMessageBufferResetFromISR(mock_message_buffer_handle, NotNull()))
+              xMessageBufferResetFromISR(mock_message_buffer_handle))
       .WillOnce(Return(pdPASS));
   EXPECT_CALL(*mock, vMessageBufferDelete(mock_message_buffer_handle));
 
@@ -205,7 +208,7 @@ TEST_F(StreamBufferCallbackTest, MessageBufferResetIsrFailure) {
   EXPECT_CALL(*mock, xMessageBufferCreate(128))
       .WillOnce(Return(mock_message_buffer_handle));
   EXPECT_CALL(*mock,
-              xMessageBufferResetFromISR(mock_message_buffer_handle, NotNull()))
+              xMessageBufferResetFromISR(mock_message_buffer_handle))
       .WillOnce(Return(pdFAIL));
   EXPECT_CALL(*mock, vMessageBufferDelete(mock_message_buffer_handle));
 
@@ -218,7 +221,7 @@ TEST_F(StreamBufferCallbackTest, MessageBufferResetExIsr) {
   EXPECT_CALL(*mock, xMessageBufferCreate(128))
       .WillOnce(Return(mock_message_buffer_handle));
   EXPECT_CALL(*mock,
-              xMessageBufferResetFromISR(mock_message_buffer_handle, NotNull()))
+              xMessageBufferResetFromISR(mock_message_buffer_handle))
       .WillOnce(Return(pdPASS));
   EXPECT_CALL(*mock, vMessageBufferDelete(mock_message_buffer_handle));
 
@@ -232,7 +235,7 @@ TEST_F(StreamBufferCallbackTest, MessageBufferResetExIsrFailure) {
   EXPECT_CALL(*mock, xMessageBufferCreate(128))
       .WillOnce(Return(mock_message_buffer_handle));
   EXPECT_CALL(*mock,
-              xMessageBufferResetFromISR(mock_message_buffer_handle, NotNull()))
+              xMessageBufferResetFromISR(mock_message_buffer_handle))
       .WillOnce(Return(pdFAIL));
   EXPECT_CALL(*mock, vMessageBufferDelete(mock_message_buffer_handle));
 

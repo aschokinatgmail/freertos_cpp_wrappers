@@ -741,7 +741,7 @@ TEST_F(CoverageQueueTimerTaskTest, StaTimerStartExFailure) {
   EXPECT_CALL(*mock, xTimerStart(mock_timer, _)).WillOnce(Return(pdFAIL));
   auto result = t.start_ex(0);
   EXPECT_FALSE(result.has_value());
-  EXPECT_EQ(result.error(), error::invalid_handle);
+  EXPECT_EQ(result.error(), error::timer_queue_full);
 }
 
 TEST_F(CoverageQueueTimerTaskTest, StaTimerStartExChrono) {
@@ -762,7 +762,7 @@ TEST_F(CoverageQueueTimerTaskTest, StaTimerStopExFailure) {
   EXPECT_CALL(*mock, xTimerStop(mock_timer, _)).WillOnce(Return(pdFAIL));
   auto result = t.stop_ex(0);
   EXPECT_FALSE(result.has_value());
-  EXPECT_EQ(result.error(), error::invalid_handle);
+  EXPECT_EQ(result.error(), error::timer_queue_full);
 }
 
 TEST_F(CoverageQueueTimerTaskTest, StaTimerResetExFailure) {
@@ -773,7 +773,7 @@ TEST_F(CoverageQueueTimerTaskTest, StaTimerResetExFailure) {
   EXPECT_CALL(*mock, xTimerReset(mock_timer, _)).WillOnce(Return(pdFAIL));
   auto result = t.reset_ex(0);
   EXPECT_FALSE(result.has_value());
-  EXPECT_EQ(result.error(), error::invalid_handle);
+  EXPECT_EQ(result.error(), error::timer_queue_full);
 }
 
 TEST_F(CoverageQueueTimerTaskTest, StaTimerPeriodExFailure) {
@@ -784,7 +784,7 @@ TEST_F(CoverageQueueTimerTaskTest, StaTimerPeriodExFailure) {
   EXPECT_CALL(*mock, xTimerChangePeriod(mock_timer, 200, _)).WillOnce(Return(pdFAIL));
   auto result = t.period_ex(200);
   EXPECT_FALSE(result.has_value());
-  EXPECT_EQ(result.error(), error::invalid_handle);
+  EXPECT_EQ(result.error(), error::timer_queue_full);
 }
 
 TEST_F(CoverageQueueTimerTaskTest, StaTimerPeriodExChrono) {

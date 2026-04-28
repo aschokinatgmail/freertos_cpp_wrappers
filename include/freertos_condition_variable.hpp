@@ -43,6 +43,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <FreeRTOS.h>
 #include <atomic>
 #include <chrono>
+#include <condition_variable> // for std::cv_status
 #include <ctime>
 #include <semphr.h>
 #include <task.h>
@@ -142,10 +143,26 @@ public:
       lock.lock();
       return;
     }
-    // Overflow protection: assert if max waiters exceeded
+    // Overflow protection: assert in debug builds; in release builds, fall
+    // back to a yield-loop until a slot becomes available. This avoids
+    // overflowing the underlying counting semaphore (whose max count is
+    // MAX_WAITERS) which would otherwise silently drop notifications and
+    // deadlock waiters past the limit.
     configASSERT(m_waiter_count.load(std::memory_order_acquire) <
                  FREERTOS_CPP_WRAPPERS_CONDITION_VARIABLE_MAX_WAITERS);
-    m_waiter_count.fetch_add(1, std::memory_order_acq_rel);
+    UBaseType_t expected = m_waiter_count.load(std::memory_order_acquire);
+    for (;;) {
+      if (expected >= FREERTOS_CPP_WRAPPERS_CONDITION_VARIABLE_MAX_WAITERS) {
+        taskYIELD();
+        expected = m_waiter_count.load(std::memory_order_acquire);
+        continue;
+      }
+      if (m_waiter_count.compare_exchange_weak(expected, expected + 1,
+                                               std::memory_order_acq_rel,
+                                               std::memory_order_acquire)) {
+        break;
+      }
+    }
     lock.unlock();
     xSemaphoreTake(m_semaphore, portMAX_DELAY);
     m_waiter_count.fetch_sub(1, std::memory_order_acq_rel);
@@ -168,10 +185,24 @@ public:
       lock.lock();
       return std::cv_status::timeout;
     }
-    // Overflow protection
+    // Overflow protection: assert in debug builds; in release builds, fall
+    // back to a yield-loop until a slot becomes available. See wait() for
+    // rationale.
     configASSERT(m_waiter_count.load(std::memory_order_acquire) <
                  FREERTOS_CPP_WRAPPERS_CONDITION_VARIABLE_MAX_WAITERS);
-    m_waiter_count.fetch_add(1, std::memory_order_acq_rel);
+    UBaseType_t expected = m_waiter_count.load(std::memory_order_acquire);
+    for (;;) {
+      if (expected >= FREERTOS_CPP_WRAPPERS_CONDITION_VARIABLE_MAX_WAITERS) {
+        taskYIELD();
+        expected = m_waiter_count.load(std::memory_order_acquire);
+        continue;
+      }
+      if (m_waiter_count.compare_exchange_weak(expected, expected + 1,
+                                               std::memory_order_acq_rel,
+                                               std::memory_order_acquire)) {
+        break;
+      }
+    }
     lock.unlock();
     auto ms = static_cast<TickType_t>(
         std::chrono::duration_cast<std::chrono::milliseconds>(rel_time).count());

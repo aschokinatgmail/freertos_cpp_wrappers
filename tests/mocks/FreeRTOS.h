@@ -471,7 +471,7 @@ public:
               (EventGroupHandle_t xEventGroup,
                const EventBits_t uxBitsToClear));
   MOCK_METHOD(EventBits_t, xEventGroupClearBitsFromISR,
-              (EventGroupHandle_t, const EventBits_t, BaseType_t *));
+              (EventGroupHandle_t, const EventBits_t));
   MOCK_METHOD(EventBits_t, xEventGroupWaitBits,
               (EventGroupHandle_t xEventGroup,
                const EventBits_t uxBitsToWaitFor, const BaseType_t xClearOnExit,
@@ -593,8 +593,7 @@ public:
   MOCK_METHOD(BaseType_t, xStreamBufferSetTriggerLevel,
                (StreamBufferHandle_t xStreamBuffer, size_t xTriggerLevel));
   MOCK_METHOD(BaseType_t, xStreamBufferResetFromISR,
-               (StreamBufferHandle_t xStreamBuffer,
-                BaseType_t *pxHigherPriorityTaskWoken));
+               (StreamBufferHandle_t xStreamBuffer));
   MOCK_METHOD(void, vStreamBufferSetStreamBufferNotificationIndex,
                (StreamBufferHandle_t xStreamBuffer, uint8_t uxNotificationIndex));
   MOCK_METHOD(BaseType_t, xStreamBufferGetStaticBuffers,
@@ -647,8 +646,7 @@ public:
 
   // Message Buffer additional operations (V10.5.0+)
   MOCK_METHOD(BaseType_t, xMessageBufferResetFromISR,
-               (MessageBufferHandle_t xMessageBuffer,
-                BaseType_t *pxHigherPriorityTaskWoken));
+               (MessageBufferHandle_t xMessageBuffer));
   MOCK_METHOD(BaseType_t, xMessageBufferGetStaticBuffers,
                (MessageBufferHandle_t xMessageBuffer, uint8_t **ppucMessageBufferStorageArea,
                 StaticMessageBuffer_t **ppxStaticMessageBuffer));
@@ -979,8 +977,7 @@ void vTaskSetThreadLocalStoragePointer(TaskHandle_t xTask, BaseType_t xIndex,
 void *pvTaskGetThreadLocalStoragePointer(TaskHandle_t xTask, BaseType_t xIndex);
 
 // Stream Buffer additional operations (V10.5.0+)
-BaseType_t xStreamBufferResetFromISR(StreamBufferHandle_t xStreamBuffer,
-                                      BaseType_t *pxHigherPriorityTaskWoken);
+BaseType_t xStreamBufferResetFromISR(StreamBufferHandle_t xStreamBuffer);
 void vStreamBufferSetStreamBufferNotificationIndex(StreamBufferHandle_t xStreamBuffer,
                                                     uint8_t uxNotificationIndex);
 BaseType_t xStreamBufferGetStaticBuffers(StreamBufferHandle_t xStreamBuffer,
@@ -1020,8 +1017,7 @@ StreamBufferHandle_t xStreamBufferGenericCreateStaticWithCallback(
     void *pvReceiveCompletedCallbackContext);
 
 // Message Buffer additional operations (V10.5.0+)
-BaseType_t xMessageBufferResetFromISR(MessageBufferHandle_t xMessageBuffer,
-                                       BaseType_t *pxHigherPriorityTaskWoken);
+BaseType_t xMessageBufferResetFromISR(MessageBufferHandle_t xMessageBuffer);
 BaseType_t xMessageBufferGetStaticBuffers(MessageBufferHandle_t xMessageBuffer,
                                             uint8_t **ppucMessageBufferStorageArea,
                                             StaticMessageBuffer_t **ppxStaticMessageBuffer);

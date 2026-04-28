@@ -105,6 +105,7 @@ private:
                                               std::memory_order_acq_rel,
                                               std::memory_order_acquire)) {
             ensure_semaphore();
+#if __cpp_exceptions
             try {
                 func(arg);
             } catch (...) {
@@ -113,6 +114,13 @@ private:
                     xSemaphoreGive(m_semaphore);
                 throw;
             }
+#else
+            // Exceptions disabled (e.g. -fno-exceptions or simulation build):
+            // a throwing func() would terminate the program anyway, so we
+            // simply call it without a try/catch wrapper. State recovery on
+            // exception is not possible without exceptions.
+            func(arg);
+#endif
             m_state.store(2, std::memory_order_release);
             for (uint8_t i = 0; i < FREERTOS_CPP_WRAPPERS_ONCE_FLAG_MAX_WAITERS; ++i)
                 xSemaphoreGive(m_semaphore);
@@ -194,6 +202,7 @@ private:
                                               std::memory_order_acq_rel,
                                               std::memory_order_acquire)) {
             ensure_semaphore();
+#if __cpp_exceptions
             try {
                 func(arg);
             } catch (...) {
@@ -202,6 +211,13 @@ private:
                     xSemaphoreGive(m_semaphore);
                 throw;
             }
+#else
+            // Exceptions disabled (e.g. -fno-exceptions or simulation build):
+            // a throwing func() would terminate the program anyway, so we
+            // simply call it without a try/catch wrapper. State recovery on
+            // exception is not possible without exceptions.
+            func(arg);
+#endif
             m_state.store(2, std::memory_order_release);
             for (uint8_t i = 0; i < FREERTOS_CPP_WRAPPERS_ONCE_FLAG_MAX_WAITERS; ++i)
                 xSemaphoreGive(m_semaphore);

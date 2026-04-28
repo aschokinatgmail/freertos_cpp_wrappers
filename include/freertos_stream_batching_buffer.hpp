@@ -178,8 +178,18 @@ public:
   void swap(dynamic_stream_batching_buffer_allocator &other) noexcept { (void)other; }
 
   StreamBufferHandle_t create(size_t trigger_level_bytes = 1) {
+#if (tskKERNEL_VERSION_MAJOR > 10) || \
+    (tskKERNEL_VERSION_MAJOR == 10 && tskKERNEL_VERSION_MINOR >= 6) || \
+    defined(FREERTOS_CPP_WRAPPERS_SIMULATION)
+    // FreeRTOS V10.6+ adds two callback parameters; pass nullptrs to keep
+    // the default no-callback behavior.
+    return xStreamBufferGenericCreate(StreamBufferSize, trigger_level_bytes,
+                                      sbTYPE_STREAM_BATCHING_BUFFER,
+                                      nullptr, nullptr);
+#else
     return xStreamBufferGenericCreate(StreamBufferSize, trigger_level_bytes,
                                       sbTYPE_STREAM_BATCHING_BUFFER);
+#endif
   }
 };
 #endif
@@ -381,10 +391,10 @@ public:
     return unexpected<error>(error::invalid_handle);
   }
   isr_result<bool> reset_isr() {
+    // xStreamBufferResetFromISR takes only the buffer handle in production
+    // FreeRTOS — see comment in stream_buffer.hpp::reset_isr().
     isr_result<bool> result{false, pdFALSE};
-    result.result =
-        xStreamBufferResetFromISR(m_stream_buffer,
-                                  &result.higher_priority_task_woken) == pdPASS;
+    result.result = xStreamBufferResetFromISR(m_stream_buffer) == pdPASS;
     return result;
   }
   [[nodiscard]] isr_result<expected<void, error>> reset_ex_isr() {

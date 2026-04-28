@@ -264,7 +264,7 @@ public:
    * @return BaseType_t pdPASS if the item was successfully posted, otherwise
    * errQUEUE_FULL.
    */
-  BaseType_t send(const T &item, TickType_t ticks_to_wait) {
+  [[nodiscard]] BaseType_t send(const T &item, TickType_t ticks_to_wait) {
     return xQueueSend(m_queue, &item, ticks_to_wait);
   }
   /**
@@ -277,7 +277,7 @@ public:
    * errQUEUE_FULL.
    */
   template <typename Rep, typename Period>
-  BaseType_t send(const T &item,
+  [[nodiscard]] BaseType_t send(const T &item,
                   const std::chrono::duration<Rep, Period> &timeout) {
     return send(
         item, pdMS_TO_TICKS(
@@ -309,7 +309,7 @@ public:
    * @return BaseType_t pdPASS if the item
    * was successfully posted, otherwise errQUEUE_FULL.
    */
-  BaseType_t send_back(const T &item, TickType_t ticks_to_wait) {
+  [[nodiscard]] BaseType_t send_back(const T &item, TickType_t ticks_to_wait) {
     return xQueueSendToBack(m_queue, &item, ticks_to_wait);
   }
   /**
@@ -322,7 +322,7 @@ public:
    * errQUEUE_FULL.
    */
   template <typename Rep, typename Period>
-  BaseType_t send_back(const T &item,
+  [[nodiscard]] BaseType_t send_back(const T &item,
                        const std::chrono::duration<Rep, Period> &timeout) {
     return send_back(
         item, pdMS_TO_TICKS(
@@ -354,7 +354,7 @@ public:
    * @return BaseType_t pdPASS if the item
    * was successfully posted, otherwise errQUEUE_FULL.
    */
-  BaseType_t send_front(const T &item, TickType_t ticks_to_wait) {
+  [[nodiscard]] BaseType_t send_front(const T &item, TickType_t ticks_to_wait) {
     return xQueueSendToFront(m_queue, &item, ticks_to_wait);
   }
   /**
@@ -367,7 +367,7 @@ public:
    * errQUEUE_FULL.
    */
   template <typename Rep, typename Period>
-  BaseType_t send_front(const T &item,
+  [[nodiscard]] BaseType_t send_front(const T &item,
                         const std::chrono::duration<Rep, Period> &timeout) {
     return send_front(
         item, pdMS_TO_TICKS(
@@ -399,7 +399,7 @@ public:
    * @return BaseType_t pdPASS if the item was successfully received, otherwise
    * pdFALSE.
    */
-  BaseType_t receive(T &item, TickType_t ticks_to_wait) {
+  [[nodiscard]] BaseType_t receive(T &item, TickType_t ticks_to_wait) {
     return xQueueReceive(m_queue, &item, ticks_to_wait);
   }
   /**
@@ -427,7 +427,7 @@ public:
    * was successfully received, otherwise pdFALSE.
    */
   template <typename Rep, typename Period>
-  BaseType_t receive(T &item,
+  [[nodiscard]] BaseType_t receive(T &item,
                      const std::chrono::duration<Rep, Period> &timeout) {
     return receive(
         item, pdMS_TO_TICKS(
@@ -512,7 +512,7 @@ public:
    *
    * @return BaseType_t pdPASS if the queue was reset, pdFAIL otherwise.
    */
-  BaseType_t reset(void) { return xQueueReset(m_queue); }
+  [[nodiscard]] BaseType_t reset(void) { return xQueueReset(m_queue); }
   /**
    * @brief A version of send_back method that overwrites the items in the queue
    * if it is full.
@@ -549,7 +549,7 @@ public:
    * @return BaseType_t pdPASS if the item was successfully peeked, otherwise
    * pdFALSE.
    */
-  BaseType_t peek(T &item, TickType_t ticks_to_wait) {
+  [[nodiscard]] BaseType_t peek(T &item, TickType_t ticks_to_wait) {
     return xQueuePeek(m_queue, &item, ticks_to_wait);
   }
   /**
@@ -562,7 +562,7 @@ public:
    * pdFALSE.
    */
   template <typename Rep, typename Period>
-  BaseType_t peek(T &item, const std::chrono::duration<Rep, Period> &timeout) {
+  [[nodiscard]] BaseType_t peek(T &item, const std::chrono::duration<Rep, Period> &timeout) {
     return peek(
         item, pdMS_TO_TICKS(
                   std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
@@ -648,14 +648,14 @@ public:
    *
    * @return BaseType_t pdTRUE if the queue is full, pdFALSE otherwise.
    */
-  BaseType_t full_isr(void) const { return xQueueIsQueueFullFromISR(m_queue); }
+  [[nodiscard]] BaseType_t full_isr(void) const { return xQueueIsQueueFullFromISR(m_queue); }
   /**
    * @brief Method checking if the queue is empty from an ISR.
    * @ref https://www.freertos.org/a00018.html#xQueueIsQueueEmptyFromISR
    *
    * @return BaseType_t pdTRUE if the queue is empty, pdFALSE otherwise.
    */
-  BaseType_t empty_isr(void) const {
+  [[nodiscard]] BaseType_t empty_isr(void) const {
     return xQueueIsQueueEmptyFromISR(m_queue);
   }
 

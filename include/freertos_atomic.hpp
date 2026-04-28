@@ -344,6 +344,13 @@ public:
                                        &expected, sizeof(T));
         }
 #else
+        // Best-effort polling fallback when atomic wait/notify is disabled.
+        // `vTaskDelay(1)` is used (not `taskYIELD()`) so the waiting task is
+        // actually descheduled for one tick — this avoids the priority
+        // inversion / starvation that a pure-yield spin loop would cause
+        // when the updater task has equal or lower priority.
+        // Define FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY to enable
+        // a true blocking primitive (semaphore- or notification-based).
         while (this->load(order) == old) {
             vTaskDelay(1);
         }

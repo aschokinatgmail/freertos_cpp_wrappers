@@ -410,7 +410,7 @@ public:
    *
    * @return BaseType_t pdTRUE if the delay was aborted, pdFALSE otherwise
    */
-  BaseType_t abort_delay(void) {
+  [[nodiscard]] BaseType_t abort_delay(void) {
     return m_hTask ? xTaskAbortDelay(m_hTask) : pdFALSE;
   }
 #endif
@@ -609,7 +609,7 @@ public:
    * @return BaseType_t pdTRUE if the notification was given, pdFALSE otherwise
    */
   template <typename Rep, typename Period>
-  BaseType_t notify_wait(uint32_t bits_to_clear_on_entry,
+  [[nodiscard]] BaseType_t notify_wait(uint32_t bits_to_clear_on_entry,
                          uint32_t bits_to_clear_on_exit,
                          uint32_t &notification_value,
                          std::chrono::duration<Rep, Period> duration) {
@@ -763,7 +763,11 @@ template <typename TaskAllocator> class periodic_task {
       if (0 != m_period.count()) {
 #if configUSE_TASK_NOTIFICATIONS
         uint32_t notification_value = 0;
-        m_task.notify_wait(0, 0, notification_value, m_period);
+        // Return value intentionally discarded — periodic_task uses
+        // notify_wait purely as a wake-up signal; whether it returned
+        // pdPASS (notification received) or pdFAIL (timed out) both
+        // mean "wake up and run the periodic routine".
+        (void)m_task.notify_wait(0, 0, notification_value, m_period);
 #else
         delay(m_period);
 #endif
@@ -932,14 +936,17 @@ public:
    */
   ~periodic_task(void) {
 #if INCLUDE_xTaskAbortDelay
-    m_task.abort_delay();
+    // Return value intentionally discarded — pdFAIL just means the
+    // task wasn't blocked on a delay, which is fine during destruction.
+    (void)m_task.abort_delay();
 #endif
   }
 
   periodic_task &operator=(const periodic_task &) = delete;
   periodic_task &operator=(periodic_task &&other) noexcept {
 #if INCLUDE_xTaskAbortDelay
-    m_task.abort_delay();
+    // Return value intentionally discarded — see destructor comment.
+    (void)m_task.abort_delay();
 #endif
     swap(other);
     return *this;
@@ -1011,7 +1018,7 @@ public:
    *
    * @return BaseType_t pdTRUE if the delay was aborted, pdFALSE otherwise
    */
-  BaseType_t abort_delay(void) { return m_task.abort_delay(); }
+  [[nodiscard]] BaseType_t abort_delay(void) { return m_task.abort_delay(); }
 #endif
 #if INCLUDE_uxTaskPriorityGet && configUSE_MUTEXES
   [[nodiscard]] UBaseType_t priority(void) const { return m_task.priority(); }
