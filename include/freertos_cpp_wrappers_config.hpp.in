@@ -42,6 +42,11 @@ provided via preprocessor fallbacks.
 #define FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL @FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL@
 #endif
 
+/* FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_TABLE_SIZE — number of buckets in
+ * the atomic-wait hash table. MUST be a power of two (1, 2, 4, 8, 16,
+ * 32, ...). A static_assert in freertos_atomic_wait.hpp enforces this at
+ * compile time; non-power-of-two values produce a clear build error.
+ * Default: 16. */
 #ifndef FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_TABLE_SIZE
 #define FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_TABLE_SIZE @FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_TABLE_SIZE@
 #endif

@@ -50,18 +50,51 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL 1
 #endif
 
+/** @def FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_TABLE_SIZE
+ *  @brief Number of buckets in the atomic-wait hash table.
+ *
+ *  Default: 16. The value MUST be a power of two — the address-to-bucket
+ *  hash uses a `& (TABLE_SIZE - 1)` mask, which only produces a uniform
+ *  distribution when `TABLE_SIZE` is a power of two. Non-power-of-two
+ *  values silently miscount buckets (some buckets receive no traffic at
+ *  all, others receive more than their share), defeating hash-distribution
+ *  goals. A static_assert below enforces this requirement at compile time
+ *  and the build will fail with a clear message if the value is wrong. */
 #ifndef FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_TABLE_SIZE
 #define FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_TABLE_SIZE 16
 #endif
 
 using __cxx_atomic_contention_t = unsigned int;
 
+/** @brief Compile-time number of buckets in the atomic-wait hash table.
+ *
+ *  Mirrors @ref FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_TABLE_SIZE. Must be a
+ *  power of two; see the static_assert below. */
 inline constexpr size_t atomic_wait_table_size =
     FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_TABLE_SIZE;
 
+// Power-of-two requirement enforced at compile time. The hash function
+// folds the address with `& (atomic_wait_table_size - 1)`, which is only
+// equivalent to `% atomic_wait_table_size` when the size is a power of
+// two. A non-power-of-two value would still produce in-bounds indices
+// (the mask never exceeds the array length) but it would skip some
+// buckets entirely and overload others, breaking distribution.
 static_assert((atomic_wait_table_size & (atomic_wait_table_size - 1)) == 0,
               "FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_TABLE_SIZE must be a power of two");
+static_assert(atomic_wait_table_size > 0,
+              "FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_TABLE_SIZE must be non-zero");
 
+/** @brief Hash a waited-on address into a bucket index in the wait table.
+ *
+ *  Uses the classic xor-fold of high and low halves followed by a bitmask
+ *  fold. The bitmask fold (`& (atomic_wait_table_size - 1)`) is correct
+ *  only when @ref atomic_wait_table_size is a power of two — this is
+ *  enforced by a static_assert at the point where the constant is
+ *  defined, so misconfiguration produces a clear compile-time error
+ *  rather than silent miscounting at runtime.
+ *
+ *  @param addr Address being waited on (must be a valid pointer).
+ *  @return Bucket index in `[0, atomic_wait_table_size)`. */
 [[nodiscard]] inline size_t atomic_wait_hash(void const *addr) {
     auto const key = reinterpret_cast<uintptr_t>(addr);
     auto const hash = key ^ (key >> 16);
