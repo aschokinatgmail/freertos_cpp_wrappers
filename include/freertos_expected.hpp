@@ -47,8 +47,33 @@ template <typename E> using unexpected = std::unexpected<E>;
 #else
 
 #include <FreeRTOS.h>
+#include <exception>
 #include <type_traits>
 #include <utility>
+
+/** @brief Hard-stop guard used by expected accessors when the wrong state is
+ * accessed.
+ *
+ * In debug builds, configASSERT() halts execution. In release builds,
+ * configASSERT() is typically a no-op, which would cause expected::value() /
+ * error() to read through a punned reference to uninitialized storage --
+ * undefined behavior. This macro ensures the program traps loudly instead of
+ * returning garbage. We deliberately invoke configASSERT() first so that any
+ * configured assertion handler still observes the violation.
+ */
+#if defined(__GNUC__) || defined(__clang__)
+#define FREERTOS_EXPECTED_TRAP() __builtin_trap()
+#else
+#define FREERTOS_EXPECTED_TRAP() std::terminate()
+#endif
+
+#define FREERTOS_EXPECTED_REQUIRE(cond)                                        \
+  do {                                                                         \
+    if (!(cond)) {                                                             \
+      configASSERT((cond));                                                    \
+      FREERTOS_EXPECTED_TRAP();                                                \
+    }                                                                          \
+  } while (0)
 
 namespace freertos {
 
@@ -210,62 +235,62 @@ public:
   [[nodiscard]] constexpr explicit operator bool() const noexcept { return m_has_value; }
 
   [[nodiscard]] constexpr T &value() & {
-    configASSERT(m_has_value);
+    FREERTOS_EXPECTED_REQUIRE(m_has_value);
     return *reinterpret_cast<T *>(&m_storage);
   }
 
   [[nodiscard]] constexpr const T &value() const & {
-    configASSERT(m_has_value);
+    FREERTOS_EXPECTED_REQUIRE(m_has_value);
     return *reinterpret_cast<const T *>(&m_storage);
   }
 
   [[nodiscard]] constexpr T &&value() && {
-    configASSERT(m_has_value);
+    FREERTOS_EXPECTED_REQUIRE(m_has_value);
     return std::move(*reinterpret_cast<T *>(&m_storage));
   }
 
   [[nodiscard]] constexpr const T &&value() const && {
-    configASSERT(m_has_value);
+    FREERTOS_EXPECTED_REQUIRE(m_has_value);
     return std::move(*reinterpret_cast<const T *>(&m_storage));
   }
 
   [[nodiscard]] constexpr E &error() & {
-    configASSERT(!m_has_value);
+    FREERTOS_EXPECTED_REQUIRE(!m_has_value);
     return *reinterpret_cast<E *>(&m_error_storage);
   }
 
   [[nodiscard]] constexpr const E &error() const & {
-    configASSERT(!m_has_value);
+    FREERTOS_EXPECTED_REQUIRE(!m_has_value);
     return *reinterpret_cast<const E *>(&m_error_storage);
   }
 
   [[nodiscard]] constexpr E &&error() && {
-    configASSERT(!m_has_value);
+    FREERTOS_EXPECTED_REQUIRE(!m_has_value);
     return std::move(*reinterpret_cast<E *>(&m_error_storage));
   }
 
   [[nodiscard]] constexpr const E &&error() const && {
-    configASSERT(!m_has_value);
+    FREERTOS_EXPECTED_REQUIRE(!m_has_value);
     return std::move(*reinterpret_cast<const E *>(&m_error_storage));
   }
 
   [[nodiscard]] constexpr T &operator*() & {
-    configASSERT(m_has_value);
+    FREERTOS_EXPECTED_REQUIRE(m_has_value);
     return *reinterpret_cast<T *>(&m_storage);
   }
 
   [[nodiscard]] constexpr const T &operator*() const & {
-    configASSERT(m_has_value);
+    FREERTOS_EXPECTED_REQUIRE(m_has_value);
     return *reinterpret_cast<const T *>(&m_storage);
   }
 
   [[nodiscard]] constexpr T *operator->() {
-    configASSERT(m_has_value);
+    FREERTOS_EXPECTED_REQUIRE(m_has_value);
     return reinterpret_cast<T *>(&m_storage);
   }
 
   [[nodiscard]] constexpr const T *operator->() const {
-    configASSERT(m_has_value);
+    FREERTOS_EXPECTED_REQUIRE(m_has_value);
     return reinterpret_cast<const T *>(&m_storage);
   }
 
@@ -480,22 +505,22 @@ public:
   [[nodiscard]] constexpr explicit operator bool() const noexcept { return m_has_value; }
 
   [[nodiscard]] constexpr E &error() & {
-    configASSERT(!m_has_value);
+    FREERTOS_EXPECTED_REQUIRE(!m_has_value);
     return *reinterpret_cast<E *>(&m_error_storage);
   }
 
   [[nodiscard]] constexpr const E &error() const & {
-    configASSERT(!m_has_value);
+    FREERTOS_EXPECTED_REQUIRE(!m_has_value);
     return *reinterpret_cast<const E *>(&m_error_storage);
   }
 
   [[nodiscard]] constexpr E &&error() && {
-    configASSERT(!m_has_value);
+    FREERTOS_EXPECTED_REQUIRE(!m_has_value);
     return std::move(*reinterpret_cast<E *>(&m_error_storage));
   }
 
   [[nodiscard]] constexpr const E &&error() const && {
-    configASSERT(!m_has_value);
+    FREERTOS_EXPECTED_REQUIRE(!m_has_value);
     return std::move(*reinterpret_cast<const E *>(&m_error_storage));
   }
 

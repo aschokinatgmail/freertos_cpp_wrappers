@@ -232,4 +232,110 @@ TEST(ExpectedVoidTest, OrElseWithError) {
   EXPECT_TRUE(result.has_value());
 }
 
+// =============================================================================
+// Wrong-state accessor hardening (issue #337 / v3.2.1 hotfix C2)
+//
+// In release builds configASSERT() is a no-op, so calling value() on an error
+// state, or error() on a value state, would otherwise return a punned reference
+// into uninitialized storage (UB). The accessors now invoke __builtin_trap()
+// (or std::terminate()) on the wrong-state path. These EXPECT_DEATH checks
+// pin that contract: misuse must crash loudly, never silently return garbage.
+// =============================================================================
+
+TEST(ExpectedDeathTest, ValueOnErrorStateTraps) {
+  ::testing::FLAGS_gtest_death_test_style = "threadsafe";
+  EXPECT_DEATH(
+      {
+        expected<int, error> e(unexpect, error::timeout);
+        (void)e.value();
+      },
+      "");
+}
+
+TEST(ExpectedDeathTest, ConstValueOnErrorStateTraps) {
+  ::testing::FLAGS_gtest_death_test_style = "threadsafe";
+  EXPECT_DEATH(
+      {
+        const expected<int, error> e(unexpect, error::timeout);
+        (void)e.value();
+      },
+      "");
+}
+
+TEST(ExpectedDeathTest, RvalueValueOnErrorStateTraps) {
+  ::testing::FLAGS_gtest_death_test_style = "threadsafe";
+  EXPECT_DEATH(
+      {
+        (void)expected<int, error>(unexpect, error::timeout).value();
+      },
+      "");
+}
+
+TEST(ExpectedDeathTest, ErrorOnValueStateTraps) {
+  ::testing::FLAGS_gtest_death_test_style = "threadsafe";
+  EXPECT_DEATH(
+      {
+        expected<int, error> e(42);
+        (void)e.error();
+      },
+      "");
+}
+
+TEST(ExpectedDeathTest, ConstErrorOnValueStateTraps) {
+  ::testing::FLAGS_gtest_death_test_style = "threadsafe";
+  EXPECT_DEATH(
+      {
+        const expected<int, error> e(42);
+        (void)e.error();
+      },
+      "");
+}
+
+TEST(ExpectedDeathTest, DereferenceOnErrorStateTraps) {
+  ::testing::FLAGS_gtest_death_test_style = "threadsafe";
+  EXPECT_DEATH(
+      {
+        expected<int, error> e(unexpect, error::timeout);
+        (void)*e;
+      },
+      "");
+}
+
+TEST(ExpectedDeathTest, ArrowOnErrorStateTraps) {
+  ::testing::FLAGS_gtest_death_test_style = "threadsafe";
+  EXPECT_DEATH(
+      {
+        expected<std::string, error> e(unexpect, error::timeout);
+        (void)e->size();
+      },
+      "");
+}
+
+TEST(ExpectedDeathTest, VoidErrorOnValueStateTraps) {
+  ::testing::FLAGS_gtest_death_test_style = "threadsafe";
+  EXPECT_DEATH(
+      {
+        expected<void, error> e;
+        (void)e.error();
+      },
+      "");
+}
+
+// Sanity: the happy paths must keep working unchanged.
+TEST(ExpectedDeathTest, HappyPathValueStillWorks) {
+  expected<int, error> e(123);
+  EXPECT_EQ(e.value(), 123);
+  EXPECT_EQ(*e, 123);
+}
+
+TEST(ExpectedDeathTest, HappyPathErrorStillWorks) {
+  expected<int, error> e(unexpect, error::queue_full);
+  EXPECT_EQ(e.error(), error::queue_full);
+}
+
+TEST(ExpectedDeathTest, VoidHappyPathErrorStillWorks) {
+  expected<void, error> e(unexpect, error::buffer_empty);
+  EXPECT_EQ(e.error(), error::buffer_empty);
+}
+
 } // namespace

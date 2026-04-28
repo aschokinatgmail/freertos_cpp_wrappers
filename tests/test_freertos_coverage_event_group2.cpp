@@ -234,3 +234,15 @@ TEST_F(EventGroupCoverageTest, SelfMoveAssignment) {
   EXPECT_EQ(eg.handle(), mock_handle);
   EXPECT_CALL(*mock, vEventGroupDelete(mock_handle));
 }
+
+// Issue #316 (v3.2.1 hotfix): xEventGroupClearBitsFromISR was the only
+// EventGroup mock function missing a g_freertos_mock null guard. Calling it
+// while no mock is installed must now return a safe default (pdFALSE) instead
+// of dereferencing a null pointer. This test deliberately runs without the
+// fixture so g_freertos_mock starts unset.
+TEST(EventGroupMockNullGuardTest, ClearBitsFromISRReturnsDefaultWithoutMock) {
+  FreeRTOSMockInstance::resetInstance();
+  auto handle = reinterpret_cast<EventGroupHandle_t>(0xDEADBEEF);
+  EventBits_t result = xEventGroupClearBitsFromISR(handle, 0x0F);
+  EXPECT_EQ(result, static_cast<EventBits_t>(pdFALSE));
+}

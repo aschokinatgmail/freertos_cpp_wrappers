@@ -880,7 +880,11 @@ EventBits_t xEventGroupClearBits(EventGroupHandle_t xEventGroup,
 
 EventBits_t xEventGroupClearBitsFromISR(EventGroupHandle_t xEventGroup,
                                         const EventBits_t uxBitsToClear) {
-    return g_freertos_mock->xEventGroupClearBitsFromISR(xEventGroup, uxBitsToClear);
+  if (g_freertos_mock) {
+    return g_freertos_mock->xEventGroupClearBitsFromISR(xEventGroup,
+                                                        uxBitsToClear);
+  }
+  return pdFALSE;
 }
 
 EventBits_t xEventGroupWaitBits(EventGroupHandle_t xEventGroup,
