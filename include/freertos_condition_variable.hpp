@@ -61,7 +61,6 @@ class condition_variable_any {
 
 #if configSUPPORT_STATIC_ALLOCATION
   StaticSemaphore_t m_semaphore_storage{};
-  uint8_t m_semaphore_created{0};
 #endif
 
   std::atomic<UBaseType_t> m_waiter_count{0};
@@ -72,12 +71,10 @@ public:
     m_semaphore =
         xSemaphoreCreateCountingStatic(FREERTOS_CPP_WRAPPERS_CONDITION_VARIABLE_MAX_WAITERS, 0,
                                        &m_semaphore_storage);
-    configASSERT(m_semaphore != nullptr);
-    m_semaphore_created = 1;
 #else
     m_semaphore = xSemaphoreCreateCounting(FREERTOS_CPP_WRAPPERS_CONDITION_VARIABLE_MAX_WAITERS, 0);
-    configASSERT(m_semaphore != nullptr);
 #endif
+    configASSERT(m_semaphore != nullptr);
   }
 
   condition_variable_any(const condition_variable_any &) = delete;

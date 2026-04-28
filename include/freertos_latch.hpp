@@ -45,10 +45,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 namespace freertos {
 
-#ifndef FREERTOS_CPP_WRAPPERS_LATCH_MAX_WAITERS
-#define FREERTOS_CPP_WRAPPERS_LATCH_MAX_WAITERS 8
-#endif
-
 class latch {
   static_assert(std::atomic<ptrdiff_t>::is_always_lock_free,
                 "latch requires lock-free atomic for ISR safety");
