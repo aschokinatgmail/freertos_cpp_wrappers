@@ -45,16 +45,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <iterator>
 #include <optional>
 #include <stream_buffer.h>
-#include <string>
 #include <type_traits>
 #include <utility>
-#include <vector>
-#if defined(__cpp_lib_concepts) && __cpp_lib_concepts >= 201907L
-#include <iterator>
-#endif
-#if defined(__cpp_lib_span)
-#include <span>
-#endif
 
 namespace freertos {
 
@@ -66,75 +58,36 @@ namespace detail {
 // random-access but its elements live in non-contiguous chunks, so taking a
 // pointer and offsetting it is undefined behavior).
 //
-// In C++20, the standard provides std::contiguous_iterator which is the
-// canonical answer; we use it directly when the concepts library is
-// available.
+// **C++20**: std::contiguous_iterator is the canonical concept and is used
+// directly when the concepts library is available. This correctly accepts
+// pointers, vector/array/string iterators, span::iterator, etc., and rejects
+// deque, list, map, set, etc.
 //
-// In C++17, there is no concept-based way to detect contiguity, so we
-// maintain an explicit allowlist of standard-library iterators that are
-// guaranteed by the standard to be contiguous: raw pointers, and the
-// iterators of std::vector, std::array, std::basic_string (and std::span
-// when available). Anything outside the allowlist falls through to the
-// chunked-copy fallback path used by stream_buffer / message_buffer when a
-// non-contiguous iterator is supplied.
+// **C++17**: there is no concept-based way to detect contiguity from just
+// the iterator type. To avoid pulling heavy standard-library headers
+// (<vector>, <string>, etc.) into a public header — the library is intended
+// for embedded targets where dynamic memory is constrained — the C++17
+// fallback recognizes ONLY raw pointers as contiguous. Users with
+// `std::vector<uint8_t>` or `std::array<uint8_t, N>` should pass
+// `(container.data(), container.size())` to the byte-pointer overload of
+// `send()` / `receive()` rather than the iterator overload.
 //
-// The trait lives in `detail` so tests can pin its values down with
-// `static_assert` without poking into private members of the buffer
-// templates that consume it.
+// Iterator pairs that don't satisfy `is_contiguous_iterator_v` fall through
+// to `send_iter_fallback`, which uses a small chunked stack buffer — slower
+// than the contiguous fast-path but correct for any contiguous OR
+// non-contiguous range.
+//
+// The trait lives in `detail` so tests and follow-up wrappers can pin its
+// values down with `static_assert` without poking into private members of
+// the buffer templates that consume it.
 #if defined(__cpp_lib_concepts) && __cpp_lib_concepts >= 201907L
 template <typename Iterator>
 inline constexpr bool is_contiguous_iterator_v =
     std::contiguous_iterator<Iterator>;
 #else
 template <typename Iterator>
-struct is_known_contiguous : std::false_type {};
-
-// Raw pointers to objects are contiguous by definition.
-template <typename T>
-struct is_known_contiguous<T *> : std::true_type {};
-template <typename T>
-struct is_known_contiguous<const T *> : std::true_type {};
-
-// std::vector iterators are guaranteed contiguous since C++17. (vector<bool>
-// has a proxy iterator that is not contiguous, but it is also not in the set
-// of iterator types this trait will encounter for the buffer wrappers — and
-// even if it were, the explicit specialization below for vector<T, Alloc>
-// does not match the proxy iterator anyway.)
-template <typename T, typename Alloc>
-struct is_known_contiguous<typename std::vector<T, Alloc>::iterator>
-    : std::true_type {};
-template <typename T, typename Alloc>
-struct is_known_contiguous<typename std::vector<T, Alloc>::const_iterator>
-    : std::true_type {};
-
-// std::array: iterators are pointers in libstdc++/libc++ but specified as
-// contiguous by the standard regardless.
-template <typename T, std::size_t N>
-struct is_known_contiguous<typename std::array<T, N>::iterator>
-    : std::true_type {};
-template <typename T, std::size_t N>
-struct is_known_contiguous<typename std::array<T, N>::const_iterator>
-    : std::true_type {};
-
-// std::basic_string: contiguous since C++17.
-template <typename CharT, typename Traits, typename Alloc>
-struct is_known_contiguous<
-    typename std::basic_string<CharT, Traits, Alloc>::iterator>
-    : std::true_type {};
-template <typename CharT, typename Traits, typename Alloc>
-struct is_known_contiguous<
-    typename std::basic_string<CharT, Traits, Alloc>::const_iterator>
-    : std::true_type {};
-
-#if defined(__cpp_lib_span)
-template <typename T, std::size_t Extent>
-struct is_known_contiguous<typename std::span<T, Extent>::iterator>
-    : std::true_type {};
-#endif
-
-template <typename Iterator>
 inline constexpr bool is_contiguous_iterator_v =
-    is_known_contiguous<Iterator>::value;
+    std::is_pointer<Iterator>::value;
 #endif
 
 }  // namespace detail
