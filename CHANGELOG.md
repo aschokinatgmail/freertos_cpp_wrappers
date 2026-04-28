@@ -7,12 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.2.1] - Unreleased
 
+### Fixed
+- Buffer reset_isr signatures now compile against pre-V10.6 FreeRTOS via `tskKERNEL_VERSION` guard (#302) — applies to `stream_buffer`, `stream_batching_buffer`, `message_buffer`
+- `to_ticks_saturating()` rewritten in 64-bit math; closes the silent-corruption window between ms ≈ 4.3M and ms ≈ 4.29B at 1 kHz tick rate (#303, supersedes #287)
+- `is_contiguous_iterator_v` no longer false-positives on `std::deque::iterator` (#306, supersedes #288). C++20 path uses `std::contiguous_iterator`; C++17 path narrowed to raw pointers only to honor the heap-purity directive — container iterators correctly fall through to the chunked stack-buffer fallback.
+- `expected::value()` / `error()` / `operator->` accessors no longer rely solely on `configASSERT` for safety; new `FREERTOS_EXPECTED_REQUIRE` macro pairs `configASSERT` with `__builtin_trap` so wrong-state access fails loudly even when `configASSERT` is a release-build no-op (#337)
+- `xEventGroupClearBitsFromISR` mock now null-guards `g_freertos_mock` consistent with every other mock (#316)
+- `sw_timer` ISR `_ex` variants distinguish `error::invalid_handle` (null handle) from `error::timer_queue_full` (queue full); applies to `start_ex_isr`, `stop_ex_isr`, `reset_ex_isr`, `period_ex_isr` (#304)
+- `event_group::set_bits_ex_isr` returns `error::timer_queue_full` for queue-full failures instead of `error::invalid_handle` (#305)
+- `buffer_full` / `buffer_empty` / `message_too_large` error codes now wired into `stream_buffer` / `message_buffer` / `stream_batching_buffer` `_ex` paths; `would_block` reserved for genuinely-non-blocking polling that can't yet make progress (#307)
+- `mutex::swap()` and `recursive_mutex::swap()` now refuse to operate while RAII guards reference the mutex; `m_guard_refcount` atomic + friend-managed inc/dec on lock_guard / try_lock_guard / timeout_lock_guard prevents the unsafe pattern where a guard's destructor would unlock a swapped-in semaphore (#338)
+
 ### Documentation
 - Removed stale `yield_if_needed()` references from `freertos_isr_result.hpp` doxygen (#301)
 - `freertos_atomic_wait.cc` version stamp synchronized to current release (#308)
 - `event_group::set_bits_isr` doxygen `@return` corrected to `isr_result<BaseType_t>` (#310)
 - `event_group::clear_bits_isr` now has full doxygen header explaining the 2-arg API and pdFALSE flag (#311)
 - `delay_until` chrono overloads document sub-millisecond truncation and recommend `tick_timer` for tick-aligned planning (#314)
+
+### Cleanup
+- Removed dead `m_semaphore_created` field from `condition_variable_any` (#309)
+- Rewrote double-checked-locking pattern in `freertos_atomic_wait.cc` so the outer/inner null checks use distinct operators (`!= nullptr` vs `== nullptr`); silences cppcheck `identicalInnerCondition` without suppression (#341)
+- Removed unused `FREERTOS_CPP_WRAPPERS_LATCH_MAX_WAITERS` macro (#245)
+
+### Deferred to v3.3.0
+- Library-wide null-check policy for moved-from objects and unlock-failure surfacing (#275, #312, #313, #339) — partial work in `hotfix/v3.2.1-pr-g` branch covering 3 of 8 wrappers
+- `std::string` / `std::function` / heap-dependent stdlib purge from public headers (#342, #300, #331, #345) — partial work in `worktree-agent-a3191237587d84b66`
 
 ## [3.2.0] - 2026-04-27
 
