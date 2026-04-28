@@ -40,6 +40,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "freertos_isr_result.hpp"
 #include "freertos_thread_safety.hpp"
 #include <FreeRTOS.h>
+#include <atomic>
 #include <chrono>
 #include <ctime>
 #include <semphr.h>
@@ -48,6 +49,14 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <utility>
 
 namespace freertos {
+
+// Forward declarations for RAII guard friendship — required so that mutex /
+// recursive_mutex can grant access to their private refcount tracking
+// (m_guard_refcount) only to the RAII guard wrappers below. Increments and
+// decrements happen exclusively via these friends.
+template <typename Mutex> class lock_guard;
+template <typename Mutex> class try_lock_guard;
+template <typename Mutex> class timeout_lock_guard;
 
 #if configSUPPORT_STATIC_ALLOCATION
 /**
@@ -597,6 +606,18 @@ class FREERTOS_CAPABILITY("mutex") mutex {
   SemaphoreAllocator m_allocator{};
   SemaphoreHandle_t m_semaphore{nullptr};
   uint8_t m_locked : 1;
+  // Live-RAII-guard back-reference count. Incremented when an RAII guard
+  // (lock_guard / try_lock_guard / timeout_lock_guard) successfully acquires
+  // the lock; decremented on guard destruction. Used by swap / move-assign /
+  // move-ctor to refuse the operation while guards are alive — preventing the
+  // unsafe pattern where a guard's destructor would unlock the *swapped-in*
+  // semaphore. Atomic because guards may live on different tasks. (Issue #338)
+  std::atomic<UBaseType_t> m_guard_refcount{0};
+
+  // RAII guards manage m_guard_refcount through these friends.
+  template <typename M> friend class lock_guard;
+  template <typename M> friend class try_lock_guard;
+  template <typename M> friend class timeout_lock_guard;
 
 public:
   /**
@@ -619,6 +640,9 @@ public:
         m_locked(src.m_locked) {
     configASSERT(!SemaphoreAllocator::is_static);
     configASSERT(!src.m_locked);
+    // Refuse move-construction while RAII guards reference src — their
+    // destructors would otherwise unlock a moved-from / null handle (#338).
+    configASSERT(src.m_guard_refcount.load(std::memory_order_acquire) == 0);
     src.m_semaphore = nullptr;
     src.m_locked = false;
   }
@@ -638,6 +662,9 @@ public:
     configASSERT(!SemaphoreAllocator::is_static);
     configASSERT(!m_locked);
     configASSERT(!src.m_locked);
+    // Refuse move-assignment while either side has live RAII guards (#338).
+    configASSERT(m_guard_refcount.load(std::memory_order_acquire) == 0);
+    configASSERT(src.m_guard_refcount.load(std::memory_order_acquire) == 0);
     if (this != &src) {
       swap(src);
     }
@@ -646,6 +673,14 @@ public:
 
   void swap(mutex &other) noexcept {
     configASSERT(!SemaphoreAllocator::is_static);
+    // Refuse swap while either side has live RAII guards. Swapping under a
+    // live guard would re-target the guard's destructor unlock onto the
+    // *other* mutex's semaphore — releasing a lock the guard never took.
+    // Detected at runtime via configASSERT (#338). m_guard_refcount itself is
+    // not swapped: refcount tracks "guards holding a *reference* to *this*
+    // object", which is unaffected by swapping the underlying handle.
+    configASSERT(m_guard_refcount.load(std::memory_order_acquire) == 0);
+    configASSERT(other.m_guard_refcount.load(std::memory_order_acquire) == 0);
     using std::swap;
     m_allocator.swap(other.m_allocator);
     swap(m_semaphore, other.m_semaphore);
@@ -805,6 +840,19 @@ public:
    */
   bool locked(void) const { return m_locked; }
 
+  /**
+   * @brief Number of live RAII guards (lock_guard / try_lock_guard /
+   *        timeout_lock_guard) currently referencing this mutex.
+   *
+   * Primarily a diagnostic for the swap / move-assign safety policy added
+   * for issue #338: those operations require this count to be zero.
+   *
+   * @return UBaseType_t live RAII guard count.
+   */
+  UBaseType_t guard_refcount(void) const {
+    return m_guard_refcount.load(std::memory_order_acquire);
+  }
+
   template <typename Fn>
   auto claim(Fn &&fn) -> decltype(fn()) {
     lock();
@@ -840,6 +888,14 @@ class FREERTOS_SCOPED_CAPABILITY recursive_mutex {
   SemaphoreAllocator m_allocator{};
   SemaphoreHandle_t m_semaphore{nullptr};
   uint8_t m_recursions_count{0};
+  // Live-RAII-guard back-reference count — see mutex::m_guard_refcount.
+  // Same swap / move-assign / move-ctor safety policy applies (issue #338).
+  std::atomic<UBaseType_t> m_guard_refcount{0};
+
+  // RAII guards manage m_guard_refcount through these friends.
+  template <typename M> friend class lock_guard;
+  template <typename M> friend class try_lock_guard;
+  template <typename M> friend class timeout_lock_guard;
 
 public:
   /**
@@ -863,6 +919,8 @@ public:
         m_recursions_count(src.m_recursions_count) {
     configASSERT(!SemaphoreAllocator::is_static);
     configASSERT(src.m_recursions_count == 0);
+    // Refuse move-construction while RAII guards reference src (#338).
+    configASSERT(src.m_guard_refcount.load(std::memory_order_acquire) == 0);
     src.m_semaphore = nullptr;
     src.m_recursions_count = 0;
   }
@@ -882,6 +940,9 @@ public:
     configASSERT(!SemaphoreAllocator::is_static);
     configASSERT(m_recursions_count == 0);
     configASSERT(src.m_recursions_count == 0);
+    // Refuse move-assignment while either side has live RAII guards (#338).
+    configASSERT(m_guard_refcount.load(std::memory_order_acquire) == 0);
+    configASSERT(src.m_guard_refcount.load(std::memory_order_acquire) == 0);
     if (this != &src) {
       swap(src);
     }
@@ -890,6 +951,10 @@ public:
 
   void swap(recursive_mutex &other) noexcept {
     configASSERT(!SemaphoreAllocator::is_static);
+    // Refuse swap while either side has live RAII guards — see mutex::swap
+    // for the rationale (#338). m_guard_refcount itself is not swapped.
+    configASSERT(m_guard_refcount.load(std::memory_order_acquire) == 0);
+    configASSERT(other.m_guard_refcount.load(std::memory_order_acquire) == 0);
     using std::swap;
     m_allocator.swap(other.m_allocator);
     swap(m_semaphore, other.m_semaphore);
@@ -1015,6 +1080,17 @@ public:
    * @return uint8_t number of recursions of the recursive mutex.
    */
   uint8_t recursions_count(void) const { return m_recursions_count; }
+  /**
+   * @brief Number of live RAII guards (lock_guard / try_lock_guard /
+   *        timeout_lock_guard) currently referencing this mutex.
+   *
+   * Diagnostic for the swap / move-assign safety policy (issue #338).
+   *
+   * @return UBaseType_t live RAII guard count.
+   */
+  UBaseType_t guard_refcount(void) const {
+    return m_guard_refcount.load(std::memory_order_acquire);
+  }
 
   template <typename Fn>
   auto claim(Fn &&fn) -> decltype(fn()) {
@@ -1040,6 +1116,36 @@ public:
   }
 };
 
+namespace detail {
+// Detection trait for the m_guard_refcount member added in #338. Used by
+// the RAII guards to conditionally maintain the count only on Mutex types
+// that actually own one (freertos::mutex / freertos::recursive_mutex).
+// Duck-typed Mutex stand-ins in tests (mock classes) intentionally lack
+// the member — the trait yields false for them and the increment/decrement
+// is elided at compile time via if constexpr.
+template <typename, typename = void>
+struct has_guard_refcount : std::false_type {};
+template <typename T>
+struct has_guard_refcount<T,
+                          std::void_t<decltype(std::declval<T &>().m_guard_refcount)>>
+    : std::true_type {};
+
+template <typename Mutex> inline void guard_acquire(Mutex &m) noexcept {
+  if constexpr (has_guard_refcount<Mutex>::value) {
+    m.m_guard_refcount.fetch_add(1, std::memory_order_acq_rel);
+  } else {
+    (void)m;
+  }
+}
+template <typename Mutex> inline void guard_release(Mutex &m) noexcept {
+  if constexpr (has_guard_refcount<Mutex>::value) {
+    m.m_guard_refcount.fetch_sub(1, std::memory_order_acq_rel);
+  } else {
+    (void)m;
+  }
+}
+} // namespace detail
+
 /**
  * @brief Lock guard for the mutex. The mutex is locked in the constructor and
  * unlocked in the destructor (RAII).
@@ -1058,6 +1164,13 @@ public:
    */
   explicit lock_guard(Mutex &mutex) FREERTOS_ACQUIRE("mutex") : m_mutex{mutex} {
     m_mutex.lock();
+    // Increment the guard refcount only after successful lock. Per #338,
+    // the refcount tracks guards that *will* call unlock() in their dtor.
+    // Note: lock() returns void in the standard lock_guard contract used
+    // by some Mutex stand-ins, and BaseType_t pdTRUE/pdFALSE on freertos
+    // mutexes — but lock_guard semantics already assume the lock succeeds
+    // (it blocks indefinitely by default).
+    detail::guard_acquire(m_mutex);
   }
 
   /**
@@ -1065,6 +1178,9 @@ public:
    *
    */
   ~lock_guard(void) FREERTOS_RELEASE() {
+    // Decrement before unlock so swap/move waiting on refcount==0 sees a
+    // consistent post-state immediately after the unlock returns. (#338)
+    detail::guard_release(m_mutex);
     // Return value intentionally discarded — pdFAIL during destruction
     // is unexpected (we held the lock per RAII contract) but ignoring
     // it preserves noexcept destructor semantics.
@@ -1104,6 +1220,11 @@ public:
    */
   explicit try_lock_guard(Mutex &mutex) FREERTOS_TRY_ACQUIRE(true)
       : m_mutex{mutex}, m_lock_acquired{static_cast<bool>(m_mutex.try_lock())} {
+    // Only count guards that actually own the lock — see #338. Failed
+    // try_lock means dtor will not call unlock, so no guard tracking needed.
+    if (m_lock_acquired) {
+      detail::guard_acquire(m_mutex);
+    }
   }
   /**
    * @brief Destruct the try lock guard object and unlock the mutex.
@@ -1111,6 +1232,8 @@ public:
    */
   ~try_lock_guard(void) FREERTOS_RELEASE() {
     if (m_lock_acquired) {
+      // Decrement before unlock — see lock_guard dtor (#338).
+      detail::guard_release(m_mutex);
       // Return value intentionally discarded — pdFAIL during destruction
       // means the mutex wasn't actually held, which is acceptable here.
       (void)m_mutex.unlock();
@@ -1136,6 +1259,16 @@ public:
  * unlocked in the destructor (RAII).
  *
  * @tparam Mutex type of the mutex to guard.
+ *
+ * @note Issue #338: this guard is intentionally NOT a friend of the
+ *       mutex / recursive_mutex refcount machinery. FreeRTOS mutexes are
+ *       invalid in ISR context (lock_isr / unlock_isr trigger
+ *       configASSERT(false), see PR-G #312), so lock_guard_isr<mutex> is
+ *       a dead code path with respect to mutex swap-safety. ISR-callable
+ *       semaphore types (binary_semaphore, counting_semaphore) do not
+ *       carry the refcount and are not subject to the swap-under-guard
+ *       hazard described in #338 — those types do not provide RAII-guard
+ *       wrappers that hold a reference across a potential swap.
  */
 template <typename Mutex> class FREERTOS_SCOPED_CAPABILITY lock_guard_isr {
   Mutex &m_mutex; // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members):
@@ -1210,7 +1343,12 @@ public:
   timeout_lock_guard(Mutex &mutex, TickType_t ticks_to_wait)
       FREERTOS_TRY_ACQUIRE(true)
       : m_mutex{mutex},
-        m_lock_acquired{static_cast<bool>(m_mutex.lock(ticks_to_wait))} {}
+        m_lock_acquired{static_cast<bool>(m_mutex.lock(ticks_to_wait))} {
+    // Only track if the lock was actually acquired — see #338.
+    if (m_lock_acquired) {
+      detail::guard_acquire(m_mutex);
+    }
+  }
   /**
    * @brief Construct a new timeout lock guard object
    *
@@ -1224,13 +1362,20 @@ public:
       : m_mutex{mutex},
         m_lock_acquired{static_cast<bool>(m_mutex.lock(pdMS_TO_TICKS(
             std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
-                .count())))} {}
+                .count())))} {
+    // Only track if the lock was actually acquired — see #338.
+    if (m_lock_acquired) {
+      detail::guard_acquire(m_mutex);
+    }
+  }
   /**
    * @brief Destruct the timeout lock guard object and unlock the mutex.
    *
    */
   ~timeout_lock_guard(void) FREERTOS_RELEASE() {
     if (m_lock_acquired) {
+      // Decrement before unlock — see lock_guard dtor (#338).
+      detail::guard_release(m_mutex);
       // Return value intentionally discarded — pdFAIL during destruction
       // means the mutex wasn't actually held, which is acceptable here.
       (void)m_mutex.unlock();

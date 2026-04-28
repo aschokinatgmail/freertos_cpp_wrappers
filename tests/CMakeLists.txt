@@ -223,6 +223,11 @@ add_executable(
 )
 
 add_executable(
+    test_freertos_mutex_swap_safety
+    test_freertos_mutex_swap_safety.cpp
+)
+
+add_executable(
     test_freertos_coverage_ex_variants
     test_freertos_coverage_ex_variants.cpp
 )
@@ -771,6 +776,14 @@ target_link_libraries(
 )
 
 target_link_libraries(
+    test_freertos_mutex_swap_safety
+    freertos_cpp_wrappers
+    freertos_mocks
+    ${GTEST_LIBRARIES}
+    pthread
+)
+
+target_link_libraries(
     test_freertos_coverage_ex_variants
     freertos_cpp_wrappers
     freertos_mocks
@@ -1174,6 +1187,7 @@ target_compile_options(test_freertos_coverage_sa_ns PRIVATE ${GTEST_COMPILE_OPTI
 target_compile_options(test_freertos_coverage_faults PRIVATE ${GTEST_COMPILE_OPTIONS})
 target_compile_options(test_freertos_isr_result PRIVATE ${GTEST_COMPILE_OPTIONS})
     target_compile_options(test_freertos_concurrency PRIVATE ${GTEST_COMPILE_OPTIONS})
+    target_compile_options(test_freertos_mutex_swap_safety PRIVATE ${GTEST_COMPILE_OPTIONS})
     target_compile_options(test_freertos_coverage_ex_variants PRIVATE ${GTEST_COMPILE_OPTIONS})
     target_compile_options(test_freertos_coverage_isr PRIVATE ${GTEST_COMPILE_OPTIONS})
     target_compile_options(test_freertos_coverage_task_timer_isr PRIVATE ${GTEST_COMPILE_OPTIONS})
@@ -1263,6 +1277,7 @@ add_test(NAME test_freertos_coverage_sa_ns COMMAND test_freertos_coverage_sa_ns)
 add_test(NAME test_freertos_coverage_faults COMMAND test_freertos_coverage_faults)
 add_test(NAME test_freertos_isr_result COMMAND test_freertos_isr_result)
 add_test(NAME test_freertos_concurrency COMMAND test_freertos_concurrency)
+add_test(NAME test_freertos_mutex_swap_safety COMMAND test_freertos_mutex_swap_safety)
 add_test(NAME test_freertos_coverage_ex_variants COMMAND test_freertos_coverage_ex_variants)
 add_test(NAME test_freertos_coverage_isr COMMAND test_freertos_coverage_isr)
 add_test(NAME test_freertos_coverage_task_timer_isr COMMAND test_freertos_coverage_task_timer_isr)
