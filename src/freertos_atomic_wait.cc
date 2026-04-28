@@ -132,6 +132,19 @@ extern "C" bool __platform_wait_on_address(void const *addr,
     return true;
 }
 
+/** @brief Wake one or more tasks waiting on @p addr (IMPL=1, shared
+ *  bucket semaphore).
+ *
+ *  @param addr   Address being signalled.
+ *  @param count  `1` for `notify_one`, `-1` for `notify_all`, or any
+ *                positive integer for "wake up to N".
+ *
+ *  @par Stack usage
+ *  Constant — no per-call stack buffers are allocated. The function
+ *  issues `xSemaphoreGive` calls in place against the bucket's shared
+ *  counting semaphore. Compare with IMPL=2 which uses a bounded
+ *  per-call batch buffer (see `__platform_wake_by_address` in the
+ *  IMPL=2 block). */
 extern "C" void __platform_wake_by_address(void const *addr, int count) {
     auto idx = atomic_wait_hash(addr);
     auto &entry = freertos_wait_table[idx];
@@ -237,7 +250,54 @@ extern "C" bool __platform_wait_on_address(void const *addr,
     return true;
 }
 
+/** @brief Wake one or more tasks waiting on @p addr.
+ *
+ *  @param addr   Address being signalled.
+ *  @param count  Number of waiters to wake. `1` wakes a single matching
+ *                waiter; positive values wake up to @p count waiters; a
+ *                negative value (e.g. `-1`) wakes ALL waiters on @p addr
+ *                in this bucket.
+ *
+ *  @par Stack usage
+ *  This function uses a fixed-size stack buffer of
+ *  `kAtomicWaitWakeBatchSize` entries (default: 16) to defer task
+ *  notifications outside the bucket-mutex critical section. The peak
+ *  stack footprint of the batch buffer is
+ *      `sizeof(TaskHandle_t) * kAtomicWaitWakeBatchSize`
+ *  which on a 32-bit target is 64 bytes, and on a 64-bit target is 128
+ *  bytes. The buffer size is independent of
+ *  @ref atomic_wait_table_size or the number of waiters in the bucket;
+ *  larger waiter sets are processed in successive batches, each
+ *  re-acquiring the bucket mutex from scratch (the lock is never held
+ *  across an iteration). If you need to tune the bound for a
+ *  particularly stack-constrained target, change
+ *  `kAtomicWaitWakeBatchSize` below and the documentation above.
+ *
+ *  @par Batch correctness
+ *  Each batch takes the bucket mutex fresh. While holding the mutex we
+ *  collect up to `kAtomicWaitWakeBatchSize` matching waiters into the
+ *  stack buffer and immediately mark each collected node by clearing
+ *  its `address` field; this prevents a subsequent batch (or a
+ *  concurrent waker that grabs the mutex between batches) from
+ *  re-notifying the same waiter while it is still in the list waiting
+ *  for the notify-take to return. The address field is only read by
+ *  wakers under the mutex; the waiter does not re-read it after
+ *  publishing the node, so the clear is race-free. The mutex is
+ *  released before the actual `xTaskNotifyGive` calls so that newly
+ *  arriving waiters are not blocked by long batch processing. After a
+ *  notify pass we re-acquire the mutex and re-scan the list; a waiter
+ *  that arrived between batches but has not been notified is still
+ *  pending and will be picked up by the next pass, satisfying the
+ *  "wake all" contract for negative @p count. */
 extern "C" void __platform_wake_by_address(void const *addr, int count) {
+    if (addr == nullptr) {
+        // No real waiter publishes `address == nullptr`; we also use
+        // nullptr as a "consumed by this wake" sentinel below, so a
+        // null `addr` would conflate consumed and live waiters. The
+        // libc++/libstdc++ atomic-wait shims never call us with
+        // nullptr; reject defensively to keep the sentinel clean.
+        return;
+    }
     auto idx = atomic_wait_hash(addr);
     auto &bucket = freertos_wait_buckets[idx];
     auto waiters = bucket.waiter_count.load(std::memory_order_seq_cst);
@@ -249,21 +309,58 @@ extern "C" void __platform_wake_by_address(void const *addr, int count) {
         return;
     }
 
-    xSemaphoreTake(bucket.mutex, portMAX_DELAY);
-    auto to_wake = count < 0 ? waiters : static_cast<__cxx_atomic_contention_t>(count);
-    TaskHandle_t tasks_to_notify[atomic_wait_table_size];
-    __cxx_atomic_contention_t collected = 0;
-    auto *node = bucket.waiters;
-    while (node != nullptr && collected < to_wake &&
-           collected < static_cast<__cxx_atomic_contention_t>(atomic_wait_table_size)) {
-        if (node->address == addr) {
-            tasks_to_notify[collected++] = node->task;
+    // Stack-batch size — bounded independent of atomic_wait_table_size
+    // so the per-call stack footprint stays predictable on
+    // stack-constrained MCUs. See doxygen above for the formula.
+    static constexpr size_t kAtomicWaitWakeBatchSize = 16;
+
+    auto remaining = count < 0
+                         ? static_cast<__cxx_atomic_contention_t>(-1)
+                         : static_cast<__cxx_atomic_contention_t>(count);
+
+    while (remaining > 0) {
+        TaskHandle_t tasks_to_notify[kAtomicWaitWakeBatchSize];
+        size_t collected = 0;
+        // Per-batch cap: smaller of the global batch size and the
+        // remaining request (for bounded `count >= 0` only).
+        size_t batch_cap = kAtomicWaitWakeBatchSize;
+        if (count >= 0 && static_cast<size_t>(remaining) < batch_cap) {
+            batch_cap = static_cast<size_t>(remaining);
         }
-        node = node->next;
-    }
-    xSemaphoreGive(bucket.mutex);
-    for (__cxx_atomic_contention_t i = 0; i < collected; ++i) {
-        xTaskNotifyGive(tasks_to_notify[i]);
+
+        xSemaphoreTake(bucket.mutex, portMAX_DELAY);
+        auto *node = bucket.waiters;
+        while (node != nullptr && collected < batch_cap) {
+            // `address` is cleared by a previous batch when that
+            // node has already been collected for notification but
+            // its waiter has not yet removed the node from the list.
+            if (node->address == addr) {
+                tasks_to_notify[collected++] = node->task;
+                // Mark this node consumed for the duration of any
+                // remaining wake activity. Safe under the mutex —
+                // wakers only read `address` while holding the
+                // mutex, and the owning waiter does not re-read it.
+                node->address = nullptr;
+            }
+            node = node->next;
+        }
+        xSemaphoreGive(bucket.mutex);
+
+        if (collected == 0) {
+            // No more matching waiters in the bucket; we are done.
+            break;
+        }
+
+        for (size_t i = 0; i < collected; ++i) {
+            xTaskNotifyGive(tasks_to_notify[i]);
+        }
+
+        if (count >= 0) {
+            remaining -= static_cast<__cxx_atomic_contention_t>(collected);
+        }
+        // For count < 0 (unbounded "wake all") `remaining` stays at
+        // (unsigned)-1 and the outer loop condition only exits via
+        // the `collected == 0` break above.
     }
 }
 
