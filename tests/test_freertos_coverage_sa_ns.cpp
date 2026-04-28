@@ -201,7 +201,7 @@ TEST_F(SaMessageBufferTest, SendExWouldBlock) {
   freertos::sa::message_buffer<256> mb;
   auto result = mb.send_ex("test", 4, 0);
   EXPECT_FALSE(result.has_value());
-  EXPECT_EQ(result.error(), freertos::error::would_block);
+  EXPECT_EQ(result.error(), freertos::error::buffer_full);
 }
 
 TEST_F(SaMessageBufferTest, ReceiveExFailure) {
@@ -222,7 +222,7 @@ TEST_F(SaMessageBufferTest, ReceiveExWouldBlock) {
   char buf[4];
   auto result = mb.receive_ex(buf, 4, 0);
   EXPECT_FALSE(result.has_value());
-  EXPECT_EQ(result.error(), freertos::error::would_block);
+  EXPECT_EQ(result.error(), freertos::error::buffer_empty);
 }
 
 TEST_F(SaMessageBufferTest, SendExIsrFailure) {
@@ -313,7 +313,7 @@ TEST_F(SaStreamBufferTest, SendExWouldBlock) {
   freertos::sa::stream_buffer<256> sb;
   auto result = sb.send_ex("test", 4, 0);
   EXPECT_FALSE(result.has_value());
-  EXPECT_EQ(result.error(), freertos::error::would_block);
+  EXPECT_EQ(result.error(), freertos::error::buffer_full);
 }
 
 TEST_F(SaStreamBufferTest, ReceiveExFailure) {
@@ -334,7 +334,7 @@ TEST_F(SaStreamBufferTest, ReceiveExWouldBlock) {
   char buf[4];
   auto result = sb.receive_ex(buf, 4, 0);
   EXPECT_FALSE(result.has_value());
-  EXPECT_EQ(result.error(), freertos::error::would_block);
+  EXPECT_EQ(result.error(), freertos::error::buffer_empty);
 }
 
 TEST_F(SaStreamBufferTest, SendExIsrFailure) {

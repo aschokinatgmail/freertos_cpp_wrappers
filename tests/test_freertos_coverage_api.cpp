@@ -206,7 +206,7 @@ TEST_F(StreamBufferCoverageTest, StreamBufferSendExIsrFailure) {
   uint8_t data[] = {1, 2, 3, 4};
   auto result = sb.send_ex_isr(data, 4);
   EXPECT_FALSE(result.result.has_value());
-  EXPECT_EQ(result.result.error(), freertos::error::would_block);
+  EXPECT_EQ(result.result.error(), freertos::error::buffer_full);
 }
 
 TEST_F(StreamBufferCoverageTest, StreamBufferReceiveExTimeout) {
@@ -258,7 +258,7 @@ TEST_F(StreamBufferCoverageTest, StreamBufferReceiveExIsrFailure) {
   freertos::da::stream_buffer<64> sb;
   auto result = sb.receive_ex_isr(buf, 4);
   EXPECT_FALSE(result.result.has_value());
-  EXPECT_EQ(result.result.error(), freertos::error::would_block);
+  EXPECT_EQ(result.result.error(), freertos::error::buffer_empty);
 }
 
 TEST_F(StreamBufferCoverageTest, StreamBufferResetExFailure) {
@@ -348,7 +348,7 @@ TEST_F(MessageBufferCoverageTest, MessageBufferSendExIsrFailure) {
   uint8_t data[] = {1, 2, 3, 4};
   auto result = mb.send_ex_isr(data, 4);
   EXPECT_FALSE(result.result.has_value());
-  EXPECT_EQ(result.result.error(), freertos::error::would_block);
+  EXPECT_EQ(result.result.error(), freertos::error::buffer_full);
 }
 
 TEST_F(MessageBufferCoverageTest, MessageBufferReceiveExWouldBlock) {
@@ -361,7 +361,7 @@ TEST_F(MessageBufferCoverageTest, MessageBufferReceiveExWouldBlock) {
   freertos::da::message_buffer<128> mb;
   auto result = mb.receive_ex(buf, 4, 0);
   EXPECT_FALSE(result.has_value());
-  EXPECT_EQ(result.error(), freertos::error::would_block);
+  EXPECT_EQ(result.error(), freertos::error::buffer_empty);
 }
 
 TEST_F(MessageBufferCoverageTest, MessageBufferReceiveExTimeout) {
@@ -413,7 +413,7 @@ TEST_F(MessageBufferCoverageTest, MessageBufferReceiveExIsrFailure) {
   freertos::da::message_buffer<128> mb;
   auto result = mb.receive_ex_isr(buf, 4);
   EXPECT_FALSE(result.result.has_value());
-  EXPECT_EQ(result.result.error(), freertos::error::would_block);
+  EXPECT_EQ(result.result.error(), freertos::error::buffer_empty);
 }
 
 TEST_F(MessageBufferCoverageTest, MessageBufferResetExFailure) {
@@ -1686,7 +1686,7 @@ TEST_F(StreamBufferCoverageTest, StreamBufferSendExWouldBlock) {
   uint8_t data[] = {1, 2, 3, 4};
   auto result = sb.send_ex(data, 4, 0);
   EXPECT_FALSE(result.has_value());
-  EXPECT_EQ(result.error(), freertos::error::would_block);
+  EXPECT_EQ(result.error(), freertos::error::buffer_full);
 }
 
 TEST_F(StreamBufferCoverageTest, StreamBufferReceiveExWouldBlock) {
@@ -1699,7 +1699,7 @@ TEST_F(StreamBufferCoverageTest, StreamBufferReceiveExWouldBlock) {
   freertos::da::stream_buffer<64> sb;
   auto result = sb.receive_ex(buf, 4, 0);
   EXPECT_FALSE(result.has_value());
-  EXPECT_EQ(result.error(), freertos::error::would_block);
+  EXPECT_EQ(result.error(), freertos::error::buffer_empty);
 }
 
 TEST_F(StreamBufferCoverageTest, StreamBufferSendExIteratorChrono) {
@@ -2220,7 +2220,7 @@ TEST_F(StreamBufferCoverageTest, StreamBufferSendExIsrIteratorFailure) {
   freertos::da::stream_buffer<64> sb;
   auto result = sb.send_ex_isr(data, data + 4);
   EXPECT_FALSE(result.result.has_value());
-  EXPECT_EQ(result.result.error(), freertos::error::would_block);
+  EXPECT_EQ(result.result.error(), freertos::error::buffer_full);
 }
 
 TEST_F(QueueCoverageTest, QueueSendExSuccess) {

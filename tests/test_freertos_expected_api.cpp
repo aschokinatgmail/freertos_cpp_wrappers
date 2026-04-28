@@ -498,7 +498,7 @@ TEST_F(ExpectedApiTest, StreamBufferSendExWouldBlock) {
   uint8_t data[] = {1, 2, 3, 4};
   auto result = sb.send_ex(data, 4, 0);
   EXPECT_FALSE(result.has_value());
-  EXPECT_EQ(result.error(), freertos::error::would_block);
+  EXPECT_EQ(result.error(), freertos::error::buffer_full);
 }
 
 TEST_F(ExpectedApiTest, StreamBufferReceiveExSuccess) {
@@ -549,7 +549,7 @@ TEST_F(ExpectedApiTest, MessageBufferSendExWouldBlock) {
   uint8_t data[] = {1, 2, 3, 4};
   auto result = mb.send_ex(data, 4, 0);
   EXPECT_FALSE(result.has_value());
-  EXPECT_EQ(result.error(), freertos::error::would_block);
+  EXPECT_EQ(result.error(), freertos::error::buffer_full);
 }
 
 TEST_F(ExpectedApiTest, MessageBufferResetExSuccess) {

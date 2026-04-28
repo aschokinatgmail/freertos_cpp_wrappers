@@ -401,10 +401,7 @@ public:
       return rc;
     }
     if (ticks_to_wait == 0) {
-      if (xMessageBufferIsFull(m_message_buffer) == pdTRUE) {
-        return unexpected<error>(error::buffer_full);
-      }
-      return unexpected<error>(error::would_block);
+      return unexpected<error>(error::buffer_full);
     }
     return unexpected<error>(error::timeout);
   }
@@ -428,9 +425,7 @@ public:
     }
     auto result = send_isr(data, data_size);
     isr_result<expected<size_t, error>> ret{
-        unexpected<error>(xMessageBufferIsFull(m_message_buffer) == pdTRUE
-                              ? error::buffer_full
-                              : error::would_block),
+        unexpected<error>(error::buffer_full),
         result.higher_priority_task_woken};
     if (result.result > 0) {
       ret.result = result.result;
@@ -445,10 +440,7 @@ public:
       return rc;
     }
     if (ticks_to_wait == 0) {
-      if (xMessageBufferIsEmpty(m_message_buffer) == pdTRUE) {
-        return unexpected<error>(error::buffer_empty);
-      }
-      return unexpected<error>(error::would_block);
+      return unexpected<error>(error::buffer_empty);
     }
     return unexpected<error>(error::timeout);
   }
@@ -466,9 +458,7 @@ public:
   receive_ex_isr(void *data, size_t buffer_size) {
     auto result = receive_isr(data, buffer_size);
     isr_result<expected<size_t, error>> ret{
-        unexpected<error>(xMessageBufferIsEmpty(m_message_buffer) == pdTRUE
-                              ? error::buffer_empty
-                              : error::would_block),
+        unexpected<error>(error::buffer_empty),
         result.higher_priority_task_woken};
     if (result.result > 0) {
       ret.result = result.result;

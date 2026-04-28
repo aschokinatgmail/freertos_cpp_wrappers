@@ -222,7 +222,10 @@ TEST_F(StreamMessageCoverageTest, StreamBuffer_SendIsrIterators_WokenSet) {
 
   freertos::da::stream_buffer<128> buf;
   std::string data = "hello";
-  auto r = buf.send_isr(data.begin(), data.end());
+  // ISR send requires a contiguous iterator; under the heap-pure C++17 trait
+  // only raw pointers qualify. Use data() / data() + size() instead of
+  // begin() / end() (#306).
+  auto r = buf.send_isr(data.data(), data.data() + data.size());
   EXPECT_EQ(r.result, 5u);
   EXPECT_EQ(r.higher_priority_task_woken, pdTRUE);
 }
@@ -335,7 +338,7 @@ TEST_F(StreamMessageCoverageTest, StreamBuffer_SendEx_WouldBlock) {
   uint8_t data[4] = {1, 2, 3, 4};
   auto r = buf.send_ex(data, 4, TickType_t(0));
   EXPECT_FALSE(r.has_value());
-  EXPECT_EQ(r.error(), freertos::error::would_block);
+  EXPECT_EQ(r.error(), freertos::error::buffer_full);
 }
 
 TEST_F(StreamMessageCoverageTest, StreamBuffer_SendEx_Timeout) {
@@ -393,7 +396,7 @@ TEST_F(StreamMessageCoverageTest, StreamBuffer_SendEx_IteratorsTimeut) {
   std::vector<uint8_t> data = {1, 2, 3};
   auto r = buf.send_ex(data.begin(), data.end(), TickType_t(0));
   EXPECT_FALSE(r.has_value());
-  EXPECT_EQ(r.error(), freertos::error::would_block);
+  EXPECT_EQ(r.error(), freertos::error::buffer_full);
 }
 
 TEST_F(StreamMessageCoverageTest, StreamBuffer_SendEx_IteratorsChronoTimeut) {
@@ -441,7 +444,7 @@ TEST_F(StreamMessageCoverageTest, StreamBuffer_SendExIsr_FailureWouldBlock) {
   uint8_t data[4] = {1, 2, 3, 4};
   auto r = buf.send_ex_isr(data, 4);
   EXPECT_FALSE(r.result.has_value());
-  EXPECT_EQ(r.result.error(), freertos::error::would_block);
+  EXPECT_EQ(r.result.error(), freertos::error::buffer_full);
 }
 
 TEST_F(StreamMessageCoverageTest, StreamBuffer_SendExIsr_IteratorsSuccess) {
@@ -454,7 +457,8 @@ TEST_F(StreamMessageCoverageTest, StreamBuffer_SendExIsr_IteratorsSuccess) {
 
   freertos::da::stream_buffer<64> buf;
   std::vector<uint8_t> data = {1, 2, 3};
-  auto r = buf.send_ex_isr(data.begin(), data.end());
+  // See note above: ISR send requires raw pointers under heap-pure C++17.
+  auto r = buf.send_ex_isr(data.data(), data.data() + data.size());
   EXPECT_TRUE(r.result.has_value());
   EXPECT_EQ(r.result.value(), 3u);
 }
@@ -487,7 +491,7 @@ TEST_F(StreamMessageCoverageTest, StreamBuffer_ReceiveEx_WouldBlock) {
   uint8_t data[4];
   auto r = buf.receive_ex(data, 4, TickType_t(0));
   EXPECT_FALSE(r.has_value());
-  EXPECT_EQ(r.error(), freertos::error::would_block);
+  EXPECT_EQ(r.error(), freertos::error::buffer_empty);
 }
 
 TEST_F(StreamMessageCoverageTest, StreamBuffer_ReceiveEx_Timeout) {
@@ -565,7 +569,7 @@ TEST_F(StreamMessageCoverageTest, StreamBuffer_ReceiveExIsr_FailureWouldBlock) {
   uint8_t data[4];
   auto r = buf.receive_ex_isr(data, 4);
   EXPECT_FALSE(r.result.has_value());
-  EXPECT_EQ(r.result.error(), freertos::error::would_block);
+  EXPECT_EQ(r.result.error(), freertos::error::buffer_empty);
 }
 
 // --- reset_ex (lines 440-446) ---
@@ -841,7 +845,7 @@ TEST_F(StreamMessageCoverageTest, MessageBuffer_SendEx_WouldBlock) {
   uint8_t data[4] = {1, 2, 3, 4};
   auto r = buf.send_ex(data, 4, TickType_t(0));
   EXPECT_FALSE(r.has_value());
-  EXPECT_EQ(r.error(), freertos::error::would_block);
+  EXPECT_EQ(r.error(), freertos::error::buffer_full);
 }
 
 TEST_F(StreamMessageCoverageTest, MessageBuffer_SendEx_Timeout) {
@@ -921,7 +925,7 @@ TEST_F(StreamMessageCoverageTest, MessageBuffer_SendExIsr_FailureWouldBlock) {
   uint8_t data[4] = {1, 2, 3, 4};
   auto r = buf.send_ex_isr(data, 4);
   EXPECT_FALSE(r.result.has_value());
-  EXPECT_EQ(r.result.error(), freertos::error::would_block);
+  EXPECT_EQ(r.result.error(), freertos::error::buffer_full);
 }
 
 // --- receive_ex failure paths (lines 321-329) ---
@@ -951,7 +955,7 @@ TEST_F(StreamMessageCoverageTest, MessageBuffer_ReceiveEx_WouldBlock) {
   uint8_t data[4];
   auto r = buf.receive_ex(data, 4, TickType_t(0));
   EXPECT_FALSE(r.has_value());
-  EXPECT_EQ(r.error(), freertos::error::would_block);
+  EXPECT_EQ(r.error(), freertos::error::buffer_empty);
 }
 
 TEST_F(StreamMessageCoverageTest, MessageBuffer_ReceiveEx_Timeout) {
@@ -1031,7 +1035,7 @@ TEST_F(StreamMessageCoverageTest, MessageBuffer_ReceiveExIsr_FailureWouldBlock) 
   uint8_t data[4];
   auto r = buf.receive_ex_isr(data, 4);
   EXPECT_FALSE(r.result.has_value());
-  EXPECT_EQ(r.result.error(), freertos::error::would_block);
+  EXPECT_EQ(r.result.error(), freertos::error::buffer_empty);
 }
 
 // --- reset_ex (lines 352-358) ---

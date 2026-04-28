@@ -29,7 +29,7 @@ typedef struct StaticEventGroup {
 
 // FreeRTOS kernel version (mock as V10.5.0 for feature testing)
 #define tskKERNEL_VERSION_MAJOR 10
-#define tskKERNEL_VERSION_MINOR 5
+#define tskKERNEL_VERSION_MINOR 6
 
 #define configTICK_RATE_HZ 1000
 #define portMAX_DELAY 0xFFFFFFFF
@@ -600,10 +600,14 @@ public:
                (StreamBufferHandle_t xStreamBuffer, uint8_t **ppucStreamBufferStorageArea,
                 StaticStreamBuffer_t **ppxStaticStreamBuffer));
 
-  // Stream Buffer generic creation (V11.1.0+)
+  // Stream Buffer generic creation (V10.6+ signature: adds two callback
+  // function pointer parameters; pre-V10.6 took only 3 args). Mock targets
+  // V10.6 (see tskKERNEL_VERSION_*).
   MOCK_METHOD(StreamBufferHandle_t, xStreamBufferGenericCreate,
               (size_t xBufferSizeBytes, size_t xTriggerLevelBytes,
-               BaseType_t xIsMessageBuffer));
+               BaseType_t xIsMessageBuffer,
+               StreamBufferCallbackFunction_t pxSendCompletedCallback,
+               StreamBufferCallbackFunction_t pxReceiveCompletedCallback));
   MOCK_METHOD(StreamBufferHandle_t, xStreamBufferGenericCreateStatic,
               (size_t xBufferSizeBytes, size_t xTriggerLevelBytes,
                BaseType_t xIsMessageBuffer,
@@ -936,10 +940,12 @@ BaseType_t xMessageBufferReset(MessageBufferHandle_t xMessageBuffer);
 BaseType_t xMessageBufferIsEmpty(MessageBufferHandle_t xMessageBuffer);
 BaseType_t xMessageBufferIsFull(MessageBufferHandle_t xMessageBuffer);
 
-// Stream buffer generic creation functions (V11.1.0+)
-StreamBufferHandle_t xStreamBufferGenericCreate(size_t xBufferSizeBytes,
-                                                 size_t xTriggerLevelBytes,
-                                                 BaseType_t xIsMessageBuffer);
+// Stream buffer generic creation (V10.6+ signature)
+StreamBufferHandle_t xStreamBufferGenericCreate(
+    size_t xBufferSizeBytes, size_t xTriggerLevelBytes,
+    BaseType_t xIsMessageBuffer,
+    StreamBufferCallbackFunction_t pxSendCompletedCallback,
+    StreamBufferCallbackFunction_t pxReceiveCompletedCallback);
 StreamBufferHandle_t
 xStreamBufferGenericCreateStatic(size_t xBufferSizeBytes, size_t xTriggerLevelBytes,
                                  BaseType_t xIsMessageBuffer,
@@ -977,14 +983,12 @@ void vTaskSetThreadLocalStoragePointer(TaskHandle_t xTask, BaseType_t xIndex,
 void *pvTaskGetThreadLocalStoragePointer(TaskHandle_t xTask, BaseType_t xIndex);
 
 // Stream Buffer additional operations (V10.5.0+)
-// Both signatures are exposed: pre-V10.6 took an additional out parameter for
-// the higher-priority-task-woken flag; V10.6+ dropped it. The version-guarded
-// wrappers in the headers may pick either form depending on
-// tskKERNEL_VERSION_MAJOR/MINOR — the mock provides both so the build works
-// for both branches.
+// V10.6+ form: dropped the higher-priority-task-woken out parameter. The mock
+// targets V10.6 (see tskKERNEL_VERSION_MAJOR/MINOR above), so the wrapper's
+// version guard takes the 1-arg branch. C linkage forbids overloading by
+// signature, so the mock cannot expose both forms simultaneously; pre-V10.6
+// FreeRTOS targets must build against a real (non-mock) FreeRTOS.
 BaseType_t xStreamBufferResetFromISR(StreamBufferHandle_t xStreamBuffer);
-BaseType_t xStreamBufferResetFromISR(StreamBufferHandle_t xStreamBuffer,
-                                     BaseType_t *pxHigherPriorityTaskWoken);
 void vStreamBufferSetStreamBufferNotificationIndex(StreamBufferHandle_t xStreamBuffer,
                                                     uint8_t uxNotificationIndex);
 BaseType_t xStreamBufferGetStaticBuffers(StreamBufferHandle_t xStreamBuffer,
@@ -1023,11 +1027,10 @@ StreamBufferHandle_t xStreamBufferGenericCreateStaticWithCallback(
     StreamBufferCallbackFunction_t pxReceiveCompletedCallback,
     void *pvReceiveCompletedCallbackContext);
 
-// Message Buffer additional operations (V10.5.0+)
-// Both signatures exposed for the same reason as xStreamBufferResetFromISR.
+// Message Buffer additional operations (V10.6+).
+// Mock targets V10.6, so only the 1-arg signature is exposed (see comment on
+// xStreamBufferResetFromISR above).
 BaseType_t xMessageBufferResetFromISR(MessageBufferHandle_t xMessageBuffer);
-BaseType_t xMessageBufferResetFromISR(MessageBufferHandle_t xMessageBuffer,
-                                      BaseType_t *pxHigherPriorityTaskWoken);
 BaseType_t xMessageBufferGetStaticBuffers(MessageBufferHandle_t xMessageBuffer,
                                             uint8_t **ppucMessageBufferStorageArea,
                                             StaticMessageBuffer_t **ppxStaticMessageBuffer);

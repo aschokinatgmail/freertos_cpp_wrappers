@@ -1135,7 +1135,7 @@ TEST_F(StreamBufferBranchTest, SendExWouldBlockDirect) {
   uint8_t data[] = {1, 2, 3, 4};
   auto result = sb.send_ex(data, 4, TickType_t(0));
   EXPECT_FALSE(result.has_value());
-  EXPECT_EQ(result.error(), freertos::error::would_block);
+  EXPECT_EQ(result.error(), freertos::error::buffer_full);
 }
 
 TEST_F(StreamBufferBranchTest, ReceiveExWouldBlockDirect) {
@@ -1147,7 +1147,7 @@ TEST_F(StreamBufferBranchTest, ReceiveExWouldBlockDirect) {
   uint8_t buf[4];
   auto result = sb.receive_ex(buf, 4, TickType_t(0));
   EXPECT_FALSE(result.has_value());
-  EXPECT_EQ(result.error(), freertos::error::would_block);
+  EXPECT_EQ(result.error(), freertos::error::buffer_empty);
 }
 
 TEST_F(StreamBufferBranchTest, ResetExFailure) {
@@ -1221,7 +1221,7 @@ TEST_F(MessageBufferBranchTest, SendExWouldBlockDirectTicks) {
   uint8_t data[] = {1, 2, 3};
   auto result = mb.send_ex(data, 3, TickType_t(0));
   EXPECT_FALSE(result.has_value());
-  EXPECT_EQ(result.error(), freertos::error::would_block);
+  EXPECT_EQ(result.error(), freertos::error::buffer_full);
 }
 
 TEST_F(MessageBufferBranchTest, ReceiveExWouldBlockDirectTicks) {
@@ -1233,7 +1233,7 @@ TEST_F(MessageBufferBranchTest, ReceiveExWouldBlockDirectTicks) {
   uint8_t buf[64];
   auto result = mb.receive_ex(buf, 64, TickType_t(0));
   EXPECT_FALSE(result.has_value());
-  EXPECT_EQ(result.error(), freertos::error::would_block);
+  EXPECT_EQ(result.error(), freertos::error::buffer_empty);
 }
 
 TEST_F(MessageBufferBranchTest, ResetExFailureDirect) {

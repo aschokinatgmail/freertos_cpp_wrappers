@@ -105,24 +105,35 @@ TEST(ToTicksSaturatingTest, NegativeDurationReturnsZero) {
 }
 
 TEST(ToTicksSaturatingTest, AtPdMSToTicksOverflowBoundaryDoesNotWrap) {
-  // The pdMS_TO_TICKS macro used to wrap when (ms * configTICK_RATE_HZ) overflowed
-  // its native arithmetic type. At configTICK_RATE_HZ == 1000, that boundary is
-  // around (UINT32_MAX / 1000) ms ≈ 4'294'967 ms. Just above this point the
-  // 32-bit product wraps to a small value; the 64-bit helper must not.
-  constexpr int64_t boundary_ms = 4'294'968; // one ms past the wrap point
+  // pdMS_TO_TICKS performs `ms * configTICK_RATE_HZ` in TickType_t (uint32_t)
+  // before dividing by 1000. At 1 kHz the intermediate `ms * 1000` overflows
+  // uint32_t once ms > UINT32_MAX/1000 ≈ 4'294'967. At 4'294'968 ms the OLD
+  // macro wraps to ~704; the 64-bit helper must instead produce the correct
+  // tick count, which at 1 kHz equals the millisecond count itself
+  // (1 tick per ms).
+  constexpr int64_t boundary_ms = 4'294'968;
   const auto result =
       to_ticks_saturating(std::chrono::milliseconds{boundary_ms});
-  // Expected raw: 4'294'968'000, which exceeds portMAX_DELAY (0xFFFFFFFF =
-  // 4'294'967'295), so we must saturate.
-  EXPECT_EQ(result, static_cast<TickType_t>(portMAX_DELAY));
+  EXPECT_EQ(result, static_cast<TickType_t>(boundary_ms));
 }
 
 TEST(ToTicksSaturatingTest, JustBelowBoundaryComputesNormally) {
-  // 4'294'967 ms * 1000 = 4'294'967'000 ticks, which fits in TickType_t.
+  // 4'294'967 ms at 1 kHz is exactly 4'294'967 ticks (still fits TickType_t),
+  // and `4'294'967 * 1000` does *not* overflow uint32_t (= 4'294'967'000 <
+  // UINT32_MAX). Both old and new code agree at this boundary.
   constexpr int64_t below_ms = 4'294'967;
   const auto result =
       to_ticks_saturating(std::chrono::milliseconds{below_ms});
-  EXPECT_EQ(result, static_cast<TickType_t>(4'294'967'000ULL));
+  EXPECT_EQ(result, static_cast<TickType_t>(below_ms));
+}
+
+TEST(ToTicksSaturatingTest, AbovePortMaxDelaySaturates) {
+  // True saturation boundary: at 1 kHz, 1 ms = 1 tick, so the helper must
+  // saturate when ms exceeds portMAX_DELAY (= UINT32_MAX). Use UINT32_MAX+1
+  // ms to land just past the saturation point.
+  const std::chrono::milliseconds beyond{int64_t{0x100000000LL}};
+  EXPECT_EQ(to_ticks_saturating(beyond),
+            static_cast<TickType_t>(portMAX_DELAY));
 }
 
 TEST(ToTicksSaturatingTest, MuchLargerThanOverflowSaturates) {
@@ -134,9 +145,13 @@ TEST(ToTicksSaturatingTest, MuchLargerThanOverflowSaturates) {
 }
 
 TEST(ToTicksSaturatingTest, MaxDurationSaturates) {
-  // std::chrono::seconds::max() converted to ms is enormous and must saturate
-  // without invoking UB.
-  const auto huge = std::chrono::seconds::max();
+  // Use std::chrono::milliseconds::max() directly; converting
+  // std::chrono::seconds::max() to milliseconds itself overflows int64_t
+  // (the duration_cast multiplies by 1000) and produces a *negative* count,
+  // which the helper would correctly clamp to 0 — but that's testing the
+  // overflow handling of duration_cast, not the saturating logic. Use a
+  // value that's huge but doesn't overflow the cast.
+  const auto huge = std::chrono::milliseconds::max();
   EXPECT_EQ(to_ticks_saturating(huge),
             static_cast<TickType_t>(portMAX_DELAY));
 }

@@ -339,7 +339,10 @@ TEST_F(FreeRTOSStreamBufferTest, StreamBufferSendISRIterators) {
   freertos::da::stream_buffer<512> buffer;
   std::string data = "Hello World!";
 
-  auto result = buffer.send_isr(data.begin(), data.end());
+  // ISR send requires a contiguous iterator. Under the heap-pure C++17
+  // trait, only raw pointers qualify; std::string::iterator falls through.
+  // Use data() to get a raw pointer view into the contiguous storage.
+  auto result = buffer.send_isr(data.data(), data.data() + data.size());
   EXPECT_EQ(result.result, 12);
 }
 
@@ -890,7 +893,8 @@ TEST_F(FreeRTOSStreamBufferTest,
 
   freertos::da::stream_buffer<512> buffer;
   std::string data = "Hello";
-  auto result = buffer.send_isr(data.begin(), data.end());
+  // See note at the earlier send_isr iterator test about raw pointer access.
+  auto result = buffer.send_isr(data.data(), data.data() + data.size());
   EXPECT_EQ(result.result, 5);
 }
 
@@ -965,7 +969,8 @@ TEST_F(FreeRTOSStreamBufferTest,
 
   freertos::da::stream_buffer<64> buffer;
   std::vector<uint8_t> data = {1, 2, 3};
-  auto result = buffer.send_isr(data.begin(), data.end());
+  // See note at the earlier send_isr iterator test about raw pointer access.
+  auto result = buffer.send_isr(data.data(), data.data() + data.size());
   EXPECT_EQ(result.result, 3);
 }
 

@@ -853,20 +853,39 @@ public:
     return m_guard_refcount.load(std::memory_order_acquire);
   }
 
+  /**
+   * @brief Internal: increment the live-guard refcount.
+   *
+   * Called by the RAII guard wrappers immediately after a successful lock
+   * acquisition. Public to enable SFINAE detection in this header without
+   * friend gymnastics. Not intended for direct user code. (#338)
+   */
+  void register_guard() noexcept {
+    m_guard_refcount.fetch_add(1, std::memory_order_acq_rel);
+  }
+  /**
+   * @brief Internal: decrement the live-guard refcount.
+   *
+   * Called by the RAII guard wrappers in their destructor. (#338)
+   */
+  void unregister_guard() noexcept {
+    m_guard_refcount.fetch_sub(1, std::memory_order_acq_rel);
+  }
+
   template <typename Fn>
   auto claim(Fn &&fn) -> decltype(fn()) {
-    lock();
+    (void)lock();
     try {
       if constexpr (std::is_void_v<decltype(fn())>) {
         fn();
-        unlock();
+        (void)unlock();
       } else {
         auto result = fn();
-        unlock();
+        (void)unlock();
         return result;
       }
     } catch (...) {
-      unlock();
+      (void)unlock();
       throw;
     }
   }
@@ -1092,20 +1111,39 @@ public:
     return m_guard_refcount.load(std::memory_order_acquire);
   }
 
+  /**
+   * @brief Internal: increment the live-guard refcount.
+   *
+   * Called by the RAII guard wrappers immediately after a successful lock
+   * acquisition. Public to enable SFINAE detection in this header without
+   * friend gymnastics. Not intended for direct user code. (#338)
+   */
+  void register_guard() noexcept {
+    m_guard_refcount.fetch_add(1, std::memory_order_acq_rel);
+  }
+  /**
+   * @brief Internal: decrement the live-guard refcount.
+   *
+   * Called by the RAII guard wrappers in their destructor. (#338)
+   */
+  void unregister_guard() noexcept {
+    m_guard_refcount.fetch_sub(1, std::memory_order_acq_rel);
+  }
+
   template <typename Fn>
   auto claim(Fn &&fn) -> decltype(fn()) {
-    lock();
+    (void)lock();
     try {
       if constexpr (std::is_void_v<decltype(fn())>) {
         fn();
-        unlock();
+        (void)unlock();
       } else {
         auto result = fn();
-        unlock();
+        (void)unlock();
         return result;
       }
     } catch (...) {
-      unlock();
+      (void)unlock();
       throw;
     }
   }
@@ -1117,29 +1155,32 @@ public:
 };
 
 namespace detail {
-// Detection trait for the m_guard_refcount member added in #338. Used by
-// the RAII guards to conditionally maintain the count only on Mutex types
-// that actually own one (freertos::mutex / freertos::recursive_mutex).
-// Duck-typed Mutex stand-ins in tests (mock classes) intentionally lack
-// the member — the trait yields false for them and the increment/decrement
-// is elided at compile time via if constexpr.
+// Detection trait for the live-guard refcount tracking added in #338. The
+// detection probes the public register_guard()/unregister_guard() methods
+// rather than the private m_guard_refcount member directly: SFINAE access
+// checks can elide private members on some compilers, while public methods
+// reliably participate in template substitution. Duck-typed Mutex stand-ins
+// in tests (mock classes) intentionally lack these methods — the trait
+// yields false for them and the increment/decrement is elided at compile
+// time via if constexpr.
 template <typename, typename = void>
 struct has_guard_refcount : std::false_type {};
 template <typename T>
-struct has_guard_refcount<T,
-                          std::void_t<decltype(std::declval<T &>().m_guard_refcount)>>
+struct has_guard_refcount<
+    T, std::void_t<decltype(std::declval<T &>().register_guard()),
+                   decltype(std::declval<T &>().unregister_guard())>>
     : std::true_type {};
 
 template <typename Mutex> inline void guard_acquire(Mutex &m) noexcept {
   if constexpr (has_guard_refcount<Mutex>::value) {
-    m.m_guard_refcount.fetch_add(1, std::memory_order_acq_rel);
+    m.register_guard();
   } else {
     (void)m;
   }
 }
 template <typename Mutex> inline void guard_release(Mutex &m) noexcept {
   if constexpr (has_guard_refcount<Mutex>::value) {
-    m.m_guard_refcount.fetch_sub(1, std::memory_order_acq_rel);
+    m.unregister_guard();
   } else {
     (void)m;
   }

@@ -1306,13 +1306,15 @@ StreamBufferHandle_t xStreamBufferCreate(size_t xBufferSizeBytes,
   return nullptr;
 }
 
-StreamBufferHandle_t
-xStreamBufferGenericCreate(size_t xBufferSizeBytes, size_t xTriggerLevelBytes,
-                           BaseType_t xIsMessageBuffer) {
+StreamBufferHandle_t xStreamBufferGenericCreate(
+    size_t xBufferSizeBytes, size_t xTriggerLevelBytes,
+    BaseType_t xIsMessageBuffer,
+    StreamBufferCallbackFunction_t pxSendCompletedCallback,
+    StreamBufferCallbackFunction_t pxReceiveCompletedCallback) {
   if (g_freertos_mock) {
-    return g_freertos_mock->xStreamBufferGenericCreate(xBufferSizeBytes,
-                                                       xTriggerLevelBytes,
-                                                       xIsMessageBuffer);
+    return g_freertos_mock->xStreamBufferGenericCreate(
+        xBufferSizeBytes, xTriggerLevelBytes, xIsMessageBuffer,
+        pxSendCompletedCallback, pxReceiveCompletedCallback);
   }
   return nullptr;
 }
@@ -1473,19 +1475,6 @@ BaseType_t xStreamBufferResetFromISR(StreamBufferHandle_t xStreamBuffer) {
   return pdPASS;
 }
 
-// Pre-V10.6 overload — forwards to the 1-arg mock and clears the
-// higher-priority-task-woken out parameter.
-BaseType_t xStreamBufferResetFromISR(StreamBufferHandle_t xStreamBuffer,
-                                     BaseType_t *pxHigherPriorityTaskWoken) {
-  if (pxHigherPriorityTaskWoken) {
-    *pxHigherPriorityTaskWoken = pdFALSE;
-  }
-  if (g_freertos_mock) {
-    return g_freertos_mock->xStreamBufferResetFromISR(xStreamBuffer);
-  }
-  return pdPASS;
-}
-
 void vStreamBufferSetStreamBufferNotificationIndex(
     StreamBufferHandle_t xStreamBuffer, uint8_t uxNotificationIndex) {
   if (g_freertos_mock) {
@@ -1574,19 +1563,6 @@ StreamBufferHandle_t xStreamBufferGenericCreateStaticWithCallback(
 }
 
 BaseType_t xMessageBufferResetFromISR(MessageBufferHandle_t xMessageBuffer) {
-  if (g_freertos_mock) {
-    return g_freertos_mock->xMessageBufferResetFromISR(xMessageBuffer);
-  }
-  return pdPASS;
-}
-
-// Pre-V10.6 overload — forwards to the 1-arg mock and clears the
-// higher-priority-task-woken out parameter.
-BaseType_t xMessageBufferResetFromISR(MessageBufferHandle_t xMessageBuffer,
-                                      BaseType_t *pxHigherPriorityTaskWoken) {
-  if (pxHigherPriorityTaskWoken) {
-    *pxHigherPriorityTaskWoken = pdFALSE;
-  }
   if (g_freertos_mock) {
     return g_freertos_mock->xMessageBufferResetFromISR(xMessageBuffer);
   }

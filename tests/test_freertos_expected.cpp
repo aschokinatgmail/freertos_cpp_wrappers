@@ -242,83 +242,62 @@ TEST(ExpectedVoidTest, OrElseWithError) {
 // pin that contract: misuse must crash loudly, never silently return garbage.
 // =============================================================================
 
+// EXPECT_DEATH expands its first argument as a single preprocessor token.
+// Bare template instantiations like `expected<int, error>` contain commas
+// that the preprocessor sees as macro-argument separators. The variable is
+// constructed *outside* the death-test block so the block contains no
+// commas at all, then the offending operation runs inside.
+namespace {
+using expected_int = expected<int, error>;
+using expected_string = expected<std::string, error>;
+using expected_void = expected<void, error>;
+}  // namespace
+
 TEST(ExpectedDeathTest, ValueOnErrorStateTraps) {
   ::testing::FLAGS_gtest_death_test_style = "threadsafe";
-  EXPECT_DEATH(
-      {
-        expected<int, error> e(unexpect, error::timeout);
-        (void)e.value();
-      },
-      "");
+  expected_int e(unexpect, error::timeout);
+  EXPECT_DEATH({ (void)e.value(); }, "");
 }
 
 TEST(ExpectedDeathTest, ConstValueOnErrorStateTraps) {
   ::testing::FLAGS_gtest_death_test_style = "threadsafe";
-  EXPECT_DEATH(
-      {
-        const expected<int, error> e(unexpect, error::timeout);
-        (void)e.value();
-      },
-      "");
+  const expected_int e(unexpect, error::timeout);
+  EXPECT_DEATH({ (void)e.value(); }, "");
 }
 
 TEST(ExpectedDeathTest, RvalueValueOnErrorStateTraps) {
   ::testing::FLAGS_gtest_death_test_style = "threadsafe";
-  EXPECT_DEATH(
-      {
-        (void)expected<int, error>(unexpect, error::timeout).value();
-      },
-      "");
+  EXPECT_DEATH({ (void)expected_int(unexpect, error::timeout).value(); }, "");
 }
 
 TEST(ExpectedDeathTest, ErrorOnValueStateTraps) {
   ::testing::FLAGS_gtest_death_test_style = "threadsafe";
-  EXPECT_DEATH(
-      {
-        expected<int, error> e(42);
-        (void)e.error();
-      },
-      "");
+  expected_int e(42);
+  EXPECT_DEATH({ (void)e.error(); }, "");
 }
 
 TEST(ExpectedDeathTest, ConstErrorOnValueStateTraps) {
   ::testing::FLAGS_gtest_death_test_style = "threadsafe";
-  EXPECT_DEATH(
-      {
-        const expected<int, error> e(42);
-        (void)e.error();
-      },
-      "");
+  const expected_int e(42);
+  EXPECT_DEATH({ (void)e.error(); }, "");
 }
 
 TEST(ExpectedDeathTest, DereferenceOnErrorStateTraps) {
   ::testing::FLAGS_gtest_death_test_style = "threadsafe";
-  EXPECT_DEATH(
-      {
-        expected<int, error> e(unexpect, error::timeout);
-        (void)*e;
-      },
-      "");
+  expected_int e(unexpect, error::timeout);
+  EXPECT_DEATH({ (void)*e; }, "");
 }
 
 TEST(ExpectedDeathTest, ArrowOnErrorStateTraps) {
   ::testing::FLAGS_gtest_death_test_style = "threadsafe";
-  EXPECT_DEATH(
-      {
-        expected<std::string, error> e(unexpect, error::timeout);
-        (void)e->size();
-      },
-      "");
+  expected_string e(unexpect, error::timeout);
+  EXPECT_DEATH({ (void)e->size(); }, "");
 }
 
 TEST(ExpectedDeathTest, VoidErrorOnValueStateTraps) {
   ::testing::FLAGS_gtest_death_test_style = "threadsafe";
-  EXPECT_DEATH(
-      {
-        expected<void, error> e;
-        (void)e.error();
-      },
-      "");
+  expected_void e;
+  EXPECT_DEATH({ (void)e.error(); }, "");
 }
 
 // Sanity: the happy paths must keep working unchanged.

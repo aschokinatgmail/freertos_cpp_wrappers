@@ -262,7 +262,7 @@ TEST_F(SAStreamBufferTest, SendEx_WouldBlock) {
   uint8_t data[4] = {1, 2, 3, 4};
   auto r = buf.send_ex(data, 4, TickType_t(0));
   EXPECT_FALSE(r.has_value());
-  EXPECT_EQ(r.error(), freertos::error::would_block);
+  EXPECT_EQ(r.error(), freertos::error::buffer_full);
 }
 
 TEST_F(SAStreamBufferTest, SendEx_Timeout) {
@@ -294,7 +294,7 @@ TEST_F(SAStreamBufferTest, ReceiveEx_WouldBlock) {
   uint8_t data[4];
   auto r = buf.receive_ex(data, 4, TickType_t(0));
   EXPECT_FALSE(r.has_value());
-  EXPECT_EQ(r.error(), freertos::error::would_block);
+  EXPECT_EQ(r.error(), freertos::error::buffer_empty);
 }
 
 TEST_F(SAStreamBufferTest, ReceiveEx_Timeout) {
@@ -342,7 +342,7 @@ TEST_F(SAStreamBufferTest, SendExIsr_FailureWouldBlock) {
   uint8_t data[4] = {1, 2, 3, 4};
   auto r = buf.send_ex_isr(data, 4);
   EXPECT_FALSE(r.result.has_value());
-  EXPECT_EQ(r.result.error(), freertos::error::would_block);
+  EXPECT_EQ(r.result.error(), freertos::error::buffer_full);
 }
 
 // =============================================================================
@@ -378,7 +378,7 @@ TEST_F(SAStreamBufferTest, ReceiveExIsr_FailureWouldBlock) {
   uint8_t data[4];
   auto r = buf.receive_ex_isr(data, 4);
   EXPECT_FALSE(r.result.has_value());
-  EXPECT_EQ(r.result.error(), freertos::error::would_block);
+  EXPECT_EQ(r.result.error(), freertos::error::buffer_empty);
 }
 
 // =============================================================================
@@ -621,7 +621,7 @@ TEST_F(SAMessageBufferTest, SendEx_WouldBlock) {
   uint8_t data[4] = {1, 2, 3, 4};
   auto r = buf.send_ex(data, 4, TickType_t(0));
   EXPECT_FALSE(r.has_value());
-  EXPECT_EQ(r.error(), freertos::error::would_block);
+  EXPECT_EQ(r.error(), freertos::error::buffer_full);
 }
 
 TEST_F(SAMessageBufferTest, SendEx_Timeout) {
@@ -653,7 +653,7 @@ TEST_F(SAMessageBufferTest, ReceiveEx_WouldBlock) {
   uint8_t data[4];
   auto r = buf.receive_ex(data, 4, TickType_t(0));
   EXPECT_FALSE(r.has_value());
-  EXPECT_EQ(r.error(), freertos::error::would_block);
+  EXPECT_EQ(r.error(), freertos::error::buffer_empty);
 }
 
 TEST_F(SAMessageBufferTest, ReceiveEx_Timeout) {
@@ -703,7 +703,7 @@ TEST_F(SAMessageBufferTest, SendExIsr_FailureWouldBlock) {
   uint8_t data[4] = {1, 2, 3, 4};
   auto r = buf.send_ex_isr(data, 4);
   EXPECT_FALSE(r.result.has_value());
-  EXPECT_EQ(r.result.error(), freertos::error::would_block);
+  EXPECT_EQ(r.result.error(), freertos::error::buffer_full);
 }
 
 // =============================================================================
@@ -739,7 +739,7 @@ TEST_F(SAMessageBufferTest, ReceiveExIsr_FailureWouldBlock) {
   uint8_t data[4];
   auto r = buf.receive_ex_isr(data, 4);
   EXPECT_FALSE(r.result.has_value());
-  EXPECT_EQ(r.result.error(), freertos::error::would_block);
+  EXPECT_EQ(r.result.error(), freertos::error::buffer_empty);
 }
 
 // =============================================================================

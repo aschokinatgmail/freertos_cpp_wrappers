@@ -1665,7 +1665,7 @@ TEST_F(StreamBufferFaultTest, SendExWouldBlock) {
   freertos::da::stream_buffer<64> sb(1);
   auto result = sb.send_ex("test", 4, 0);
   EXPECT_FALSE(result.has_value());
-  EXPECT_EQ(result.error(), freertos::error::would_block);
+  EXPECT_EQ(result.error(), freertos::error::buffer_full);
 }
 
 TEST_F(StreamBufferFaultTest, ReceiveExWouldBlock) {
@@ -1676,7 +1676,7 @@ TEST_F(StreamBufferFaultTest, ReceiveExWouldBlock) {
   char buf[4];
   auto result = sb.receive_ex(buf, 4, 0);
   EXPECT_FALSE(result.has_value());
-  EXPECT_EQ(result.error(), freertos::error::would_block);
+  EXPECT_EQ(result.error(), freertos::error::buffer_empty);
 }
 
 // --- MESSAGE BUFFER: would_block paths ---
@@ -1688,7 +1688,7 @@ TEST_F(MessageBufferFaultTest, SendExWouldBlock) {
   freertos::da::message_buffer<256> mb;
   auto result = mb.send_ex("test", 4, 0);
   EXPECT_FALSE(result.has_value());
-  EXPECT_EQ(result.error(), freertos::error::would_block);
+  EXPECT_EQ(result.error(), freertos::error::buffer_full);
 }
 
 TEST_F(MessageBufferFaultTest, ReceiveExWouldBlock) {
@@ -1699,7 +1699,7 @@ TEST_F(MessageBufferFaultTest, ReceiveExWouldBlock) {
   char buf[4];
   auto result = mb.receive_ex(buf, 4, 0);
   EXPECT_FALSE(result.has_value());
-  EXPECT_EQ(result.error(), freertos::error::would_block);
+  EXPECT_EQ(result.error(), freertos::error::buffer_empty);
 }
 
 // --- TIMER: _ex failure paths ---
