@@ -115,7 +115,7 @@ public:
  * @brief Callback type for the task routine function
  *
  */
-using task_routine_t = std::function<void(void)>;
+using task_routine_t = std::function<void()>;
 
 /**
  * @brief A modern C++ wrapper for FreeRTOS tasks with RAII semantics.
@@ -299,7 +299,7 @@ public:
    * created.
    *
    */
-  ~task(void) {
+  ~task() {
 #if INCLUDE_vTaskDelete
     if (m_hTask) {
       vTaskDelete(m_hTask);
@@ -343,24 +343,24 @@ public:
    *
    * @return TaskHandle_t task handle
    */
-  [[nodiscard]] TaskHandle_t handle(void) const { return m_hTask; }
+  [[nodiscard]] TaskHandle_t handle() const { return m_hTask; }
 #if INCLUDE_vTaskSuspend
   /**
    * @brief Suspend the task.
    *
    */
-  void suspend(void) { vTaskSuspend(m_hTask); }
+  void suspend() { vTaskSuspend(m_hTask); }
   /**
    * @brief Resume the task.
    *
    */
-  void resume(void) { vTaskResume(m_hTask); }
+  void resume() { vTaskResume(m_hTask); }
   /**
    * @brief Resume the task from an ISR.
    *
    * @return BaseType_t pdTRUE if the task was resumed, pdFALSE otherwise
    */
-  isr_result<BaseType_t> resume_isr(void) {
+  isr_result<BaseType_t> resume_isr() {
     BaseType_t xSwitchRequired = xTaskResumeFromISR(m_hTask);
     return {pdTRUE, xSwitchRequired};
   }
@@ -370,7 +370,7 @@ public:
    *
    * @return bool true if the task is running, false otherwise
    */
-  [[nodiscard]] bool is_running(void) const {
+  [[nodiscard]] bool is_running() const {
     switch (state()) {
     case eRunning:
     case eReady:
@@ -380,8 +380,8 @@ public:
       return false;
     }
   }
-  [[nodiscard]] bool is_suspended(void) const { return state() == eSuspended; }
-  [[nodiscard]] bool is_alive(void) const {
+  [[nodiscard]] bool is_suspended() const { return state() == eSuspended; }
+  [[nodiscard]] bool is_alive() const {
     eTaskState s = state();
     return s != eDeleted && s != eInvalid;
   }
@@ -389,13 +389,13 @@ public:
    * @brief Terminates the task.
    *
    */
-  void terminate(void) {
+  void terminate() {
     vTaskDelete(m_hTask);
     m_hTask = nullptr;
   }
-  [[nodiscard]] bool joinable(void) const noexcept { return m_hTask != nullptr; }
+  [[nodiscard]] bool joinable() const noexcept { return m_hTask != nullptr; }
 #if configUSE_TASK_NOTIFICATIONS
-  void join(void) {
+  void join() {
     configASSERT(m_hTask != nullptr);
     configASSERT(m_joinHandle == nullptr);
     m_joinHandle = xTaskGetCurrentTaskHandle();
@@ -411,16 +411,16 @@ public:
    *
    * @return BaseType_t pdTRUE if the delay was aborted, pdFALSE otherwise
    */
-  [[nodiscard]] BaseType_t abort_delay(void) {
+  [[nodiscard]] BaseType_t abort_delay() {
     return m_hTask ? xTaskAbortDelay(m_hTask) : pdFALSE;
   }
 #endif
 #if INCLUDE_uxTaskPriorityGet && configUSE_MUTEXES
-  [[nodiscard]] UBaseType_t priority(void) const { return uxTaskPriorityGet(m_hTask); }
-  [[nodiscard]] UBaseType_t priority_isr(void) const {
+  [[nodiscard]] UBaseType_t priority() const { return uxTaskPriorityGet(m_hTask); }
+  [[nodiscard]] UBaseType_t priority_isr() const {
     return uxTaskPriorityGetFromISR(m_hTask);
   }
-  [[nodiscard]] UBaseType_t base_priority(void) const {
+  [[nodiscard]] UBaseType_t base_priority() const {
     return uxTaskBasePriorityGet(m_hTask);
   }
 #endif
@@ -467,7 +467,7 @@ public:
    *
    * @return TaskHookFunction_t task tag
    */
-  [[nodiscard]] TaskHookFunction_t tag(void) const {
+  [[nodiscard]] TaskHookFunction_t tag() const {
     return ulTaskGetApplicationTaskTag(m_hTask);
   }
   /**
@@ -475,7 +475,7 @@ public:
    *
    * @return TaskHookFunction_t task tag
    */
-  [[nodiscard]] TaskHookFunction_t tag_isr(void) const {
+  [[nodiscard]] TaskHookFunction_t tag_isr() const {
     return ulTaskGetApplicationTaskTagFromISR(m_hTask);
   }
 #endif
@@ -485,7 +485,7 @@ public:
    *
    * @return size_t high water mark
    */
-  [[nodiscard]] size_t stack_high_water_mark(void) const {
+  [[nodiscard]] size_t stack_high_water_mark() const {
     return uxTaskGetStackHighWaterMark(m_hTask);
   }
 #endif
@@ -495,7 +495,7 @@ public:
    *
    * @return size_t high water mark
    */
-  [[nodiscard]] size_t stack_high_water_mark2(void) const {
+  [[nodiscard]] size_t stack_high_water_mark2() const {
     return uxTaskGetStackHighWaterMark2(m_hTask);
   }
 #endif
@@ -505,14 +505,14 @@ public:
    *
    * @return eTaskState task state
    */
-  [[nodiscard]] eTaskState state(void) const { return eTaskGetState(m_hTask); }
+  [[nodiscard]] eTaskState state() const { return eTaskGetState(m_hTask); }
 #endif
   /**
    * @brief Get the name of the task.
    *
    * @return const char* task name
    */
-  [[nodiscard]] const char *name(void) const { return pcTaskGetName(m_hTask); }
+  [[nodiscard]] const char *name() const { return pcTaskGetName(m_hTask); }
 // Task notification API
 #if configUSE_TASK_NOTIFICATIONS
   /**
@@ -520,7 +520,7 @@ public:
    *
    * @return BaseType_t pdTRUE if the notification was given, pdFALSE otherwise
    */
-  [[nodiscard]] BaseType_t notify_give(void) { return xTaskNotifyGive(m_hTask); }
+  [[nodiscard]] BaseType_t notify_give() { return xTaskNotifyGive(m_hTask); }
   /**
    * @brief Take a notification from the task.
    *
@@ -626,7 +626,7 @@ public:
    * @return BaseType_t pdTRUE if the notification state was cleared, pdFALSE
    * otherwise
    */
-  [[nodiscard]] BaseType_t notify_state_clear(void) { return xTaskNotifyStateClear(m_hTask); }
+  [[nodiscard]] BaseType_t notify_state_clear() { return xTaskNotifyStateClear(m_hTask); }
   /**
    * @brief Clear the notification value.
    *
@@ -735,10 +735,10 @@ public:
   void clear_affinity(freertos::core_affinity_mask mask) {
     vTaskCoreAffinityClear(m_hTask, mask.value());
   }
-  [[nodiscard]] freertos::core_affinity_mask affinity(void) const {
+  [[nodiscard]] freertos::core_affinity_mask affinity() const {
     return freertos::core_affinity_mask(ulTaskCoreAffinityGet(m_hTask));
   }
-  [[nodiscard]] freertos::core_affinity_mask affinity_isr(void) const {
+  [[nodiscard]] freertos::core_affinity_mask affinity_isr() const {
     return freertos::core_affinity_mask(ulTaskCoreAffinityGetFromISR(m_hTask));
   }
 #endif
@@ -935,7 +935,7 @@ public:
    * was created.
    *
    */
-  ~periodic_task(void) {
+  ~periodic_task() {
 #if INCLUDE_xTaskAbortDelay
     // Return value intentionally discarded — pdFAIL just means the
     // task wasn't blocked on a delay, which is fine during destruction.
@@ -969,31 +969,31 @@ public:
    *
    * @return TaskHandle_t task handle
    */
-  [[nodiscard]] TaskHandle_t handle(void) const { return m_task.handle(); }
+  [[nodiscard]] TaskHandle_t handle() const { return m_task.handle(); }
 #if INCLUDE_vTaskSuspend
   /**
    * @brief Suspend the task.
    *
    */
-  void suspend(void) { m_task.suspend(); }
+  void suspend() { m_task.suspend(); }
   /**
    * @brief Resume the task.
    *
    */
-  void resume(void) { m_task.resume(); }
+  void resume() { m_task.resume(); }
   /**
    * @brief Resume the task from an ISR.
    *
    * @return BaseType_t pdTRUE if the task was resumed, pdFALSE otherwise
    */
-  isr_result<BaseType_t> resume_isr(void) { return m_task.resume_isr(); }
+  isr_result<BaseType_t> resume_isr() { return m_task.resume_isr(); }
 #endif
   /**
    * @brief Check if the task is running.
    *
    * @return bool true if the task is running, false otherwise
    */
-  [[nodiscard]] bool is_running(void) const {
+  [[nodiscard]] bool is_running() const {
     switch (m_task.state()) {
     case eRunning:
     case eReady:
@@ -1003,8 +1003,8 @@ public:
       return false;
     }
   }
-  [[nodiscard]] bool is_suspended(void) const { return m_task.state() == eSuspended; }
-  [[nodiscard]] bool is_alive(void) const {
+  [[nodiscard]] bool is_suspended() const { return m_task.state() == eSuspended; }
+  [[nodiscard]] bool is_alive() const {
     eTaskState s = m_task.state();
     return s != eDeleted && s != eInvalid;
   }
@@ -1012,19 +1012,19 @@ public:
    * @brief Terminate the task.
    *
    */
-  void terminate(void) { m_task.terminate(); }
+  void terminate() { m_task.terminate(); }
 #if INCLUDE_xTaskAbortDelay
   /**
    * @brief Abort the delay of the task.
    *
    * @return BaseType_t pdTRUE if the delay was aborted, pdFALSE otherwise
    */
-  [[nodiscard]] BaseType_t abort_delay(void) { return m_task.abort_delay(); }
+  [[nodiscard]] BaseType_t abort_delay() { return m_task.abort_delay(); }
 #endif
 #if INCLUDE_uxTaskPriorityGet && configUSE_MUTEXES
-  [[nodiscard]] UBaseType_t priority(void) const { return m_task.priority(); }
-  [[nodiscard]] UBaseType_t priority_isr(void) const { return m_task.priority_isr(); }
-  [[nodiscard]] UBaseType_t base_priority(void) const { return m_task.base_priority(); }
+  [[nodiscard]] UBaseType_t priority() const { return m_task.priority(); }
+  [[nodiscard]] UBaseType_t priority_isr() const { return m_task.priority_isr(); }
+  [[nodiscard]] UBaseType_t base_priority() const { return m_task.base_priority(); }
 #endif
 #if INCLUDE_vTaskPrioritySet
   /**
@@ -1067,13 +1067,13 @@ public:
    *
    * @return TaskHookFunction_t  task tag
    */
-  [[nodiscard]] TaskHookFunction_t tag(void) const { return m_task.tag(); }
+  [[nodiscard]] TaskHookFunction_t tag() const { return m_task.tag(); }
   /**
    * @brief Get the tag of the task from an ISR.
    *
    * @return TaskHookFunction_t  task tag
    */
-  [[nodiscard]] TaskHookFunction_t tag_isr(void) const { return m_task.tag_isr(); }
+  [[nodiscard]] TaskHookFunction_t tag_isr() const { return m_task.tag_isr(); }
 #endif
 #if INCLUDE_uxTaskGetStackHighWaterMark
   /**
@@ -1081,7 +1081,7 @@ public:
    *
    * @return size_t  high water mark
    */
-  [[nodiscard]] size_t stack_high_water_mark(void) const {
+  [[nodiscard]] size_t stack_high_water_mark() const {
     return m_task.stack_high_water_mark();
   }
 #endif
@@ -1091,7 +1091,7 @@ public:
    *
    * @return size_t  high water mark
    */
-  [[nodiscard]] size_t stack_high_water_mark2(void) const {
+  [[nodiscard]] size_t stack_high_water_mark2() const {
     return m_task.stack_high_water_mark2();
   }
 #endif
@@ -1101,14 +1101,14 @@ public:
    *
    * @return eTaskState  task state
    */
-  [[nodiscard]] eTaskState state(void) const { return m_task.state(); }
+  [[nodiscard]] eTaskState state() const { return m_task.state(); }
 #endif
   /**
    * @brief Get the name of the task.
    *
    * @return const char*  task name
    */
-  [[nodiscard]] const char *name(void) const { return m_task.name(); }
+  [[nodiscard]] const char *name() const { return m_task.name(); }
 // Task notification API
 #if configUSE_TASK_NOTIFICATIONS
   /**
@@ -1116,7 +1116,7 @@ public:
    *
    * @return BaseType_t  pdTRUE if the notification was given, pdFALSE otherwise
    */
-  [[nodiscard]] BaseType_t notify_give(void) { return m_task.notify_give(); }
+  [[nodiscard]] BaseType_t notify_give() { return m_task.notify_give(); }
   /**
    * @brief Take a notification from the task.
    *
@@ -1216,7 +1216,7 @@ public:
    * @return BaseType_t  pdTRUE if the notification state was cleared, pdFALSE
    * otherwise
    */
-  [[nodiscard]] BaseType_t notify_state_clear(void) { return m_task.notify_state_clear(); }
+  [[nodiscard]] BaseType_t notify_state_clear() { return m_task.notify_state_clear(); }
   /**
    * @brief Clear the notification value.
    *
@@ -1302,10 +1302,10 @@ public:
   void clear_affinity(freertos::core_affinity_mask mask) {
     m_task.clear_affinity(mask);
   }
-  [[nodiscard]] freertos::core_affinity_mask affinity(void) const {
+  [[nodiscard]] freertos::core_affinity_mask affinity() const {
     return m_task.affinity();
   }
-  [[nodiscard]] freertos::core_affinity_mask affinity_isr(void) const {
+  [[nodiscard]] freertos::core_affinity_mask affinity_isr() const {
     return m_task.affinity_isr();
   }
 #endif
@@ -1407,7 +1407,7 @@ public:
    * @brief Construct a new task system status object
    *
    */
-  task_system_status(void) {
+  task_system_status() {
     m_task_count = uxTaskGetSystemState(
         m_status_array.data(), status_array_capacity, &m_total_run_time);
   }
@@ -1417,8 +1417,8 @@ public:
    *
    * @return UBaseType_t number of tasks
    */
-  UBaseType_t count(void) const { return m_task_count; }
-  std::chrono::milliseconds total_run_time(void) const {
+  UBaseType_t count() const { return m_task_count; }
+  std::chrono::milliseconds total_run_time() const {
     return std::chrono::milliseconds{m_total_run_time};
   }
   /**
@@ -1426,13 +1426,13 @@ public:
    *
    * @return const TaskStatus_t* begin iterator
    */
-  const TaskStatus_t *begin(void) const { return m_status_array.data(); }
+  const TaskStatus_t *begin() const { return m_status_array.data(); }
   /**
    * @brief Return the end iterator of the task status array.
    *
    * @return const TaskStatus_t* end iterator
    */
-  const TaskStatus_t *end(void) const {
+  const TaskStatus_t *end() const {
     return m_status_array.data() + m_task_count;
   }
 };
@@ -1443,7 +1443,7 @@ public:
  *
  * @return TaskHandle_t task handle
  */
-TaskHandle_t current_task_handle(void);
+TaskHandle_t current_task_handle();
 #endif
 #if INCLUDE_xTaskGetIdleTaskHandle
 /**
@@ -1451,7 +1451,7 @@ TaskHandle_t current_task_handle(void);
  *
  * @return TaskHandle_t task handle
  */
-TaskHandle_t idle_task_handle(void);
+TaskHandle_t idle_task_handle();
 #endif
 
 /**
@@ -1459,26 +1459,26 @@ TaskHandle_t idle_task_handle(void);
  *
  * @return TickType_t number of ticks
  */
-TickType_t tick_count(void);
+TickType_t tick_count();
 /**
  * @brief Get number of ticks since the scheduler started from an ISR.
  *
  * @return TickType_t number of ticks
  */
-TickType_t tick_count_isr(void);
+TickType_t tick_count_isr();
 
 /**
  * @brief Get the time since the scheduler started.
  *
  * @return std::chrono::milliseconds time since the scheduler started
  */
-std::chrono::milliseconds time_since_scheduler_started(void);
+std::chrono::milliseconds time_since_scheduler_started();
 /**
  * @brief Get the time since the scheduler started from an ISR.
  *
  * @return std::chrono::milliseconds time since the scheduler started
  */
-std::chrono::milliseconds time_since_scheduler_started_isr(void);
+std::chrono::milliseconds time_since_scheduler_started_isr();
 
 #if INCLUDE_xTaskGetSchedulerState || configUSE_TIMERS
 /**
@@ -1486,14 +1486,14 @@ std::chrono::milliseconds time_since_scheduler_started_isr(void);
  *
  * @return UBaseType_t scheduler state
  */
-BaseType_t get_scheduler_state(void);
+BaseType_t get_scheduler_state();
 #endif
 /**
  * @brief Get the number of tasks in the system.
  *
  * @return UBaseType_t number of tasks
  */
-UBaseType_t task_count(void);
+UBaseType_t task_count();
 
 // RTOS Kernel Control:
 
@@ -1501,16 +1501,16 @@ UBaseType_t task_count(void);
  * @brief Start the scheduler.
  *
  */
-void yield(void);
+void yield();
 
-bool is_isr(void);
+bool is_isr();
 
 #if configUSE_TICKLESS_IDLE
 void catch_up_ticks(TickType_t ticks);
 #endif
 
 #if configUSE_TIMERS
-TaskHandle_t timer_daemon_task_handle(void);
+TaskHandle_t timer_daemon_task_handle();
 #endif
 
 /**
@@ -1524,12 +1524,12 @@ public:
    * @brief Construct a new critical section object
    *
    */
-  critical_section(void) { taskENTER_CRITICAL(); }
+  critical_section() { taskENTER_CRITICAL(); }
   /**
    * @brief Destroy the critical section object
    *
    */
-  ~critical_section(void) { taskEXIT_CRITICAL(); }
+  ~critical_section() { taskEXIT_CRITICAL(); }
 
   // Delete copy and move operations for RAII safety
   critical_section(const critical_section &) = delete;
@@ -1551,12 +1551,12 @@ public:
    * @brief Construct a new critical section isr object
    *
    */
-  critical_section_isr(void) = default;
+  critical_section_isr() = default;
   /**
    * @brief Destroy the critical section isr object
    *
    */
-  ~critical_section_isr(void) {
+  ~critical_section_isr() {
     taskEXIT_CRITICAL_FROM_ISR(m_saved_interrupt_status);
   }
 
@@ -1578,12 +1578,12 @@ public:
    * @brief Construct a new interrupt barrier object
    *
    */
-  interrupt_barrier(void) { taskDISABLE_INTERRUPTS(); }
+  interrupt_barrier() { taskDISABLE_INTERRUPTS(); }
   /**
    * @brief Destroy the interrupt barrier object
    *
    */
-  ~interrupt_barrier(void) { taskENABLE_INTERRUPTS(); }
+  ~interrupt_barrier() { taskENABLE_INTERRUPTS(); }
 
   // Delete copy and move operations for RAII safety
   interrupt_barrier(const interrupt_barrier &) = delete;
@@ -1603,12 +1603,12 @@ public:
    * @brief Construct a new scheduler barrier object
    *
    */
-  scheduler_barrier(void) { vTaskSuspendAll(); }
+  scheduler_barrier() { vTaskSuspendAll(); }
   /**
    * @brief Destroy the scheduler barrier object
    *
    */
-  ~scheduler_barrier(void) { (void)xTaskResumeAll(); }
+  ~scheduler_barrier() { (void)xTaskResumeAll(); }
 
   // Delete copy and move operations for RAII safety
   scheduler_barrier(const scheduler_barrier &) = delete;

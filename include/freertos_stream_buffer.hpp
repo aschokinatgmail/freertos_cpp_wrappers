@@ -280,7 +280,7 @@ public:
    * instance if it was created.
    *
    */
-  ~stream_buffer(void) {
+  ~stream_buffer() {
     if (m_stream_buffer) {
       vStreamBufferDelete(m_stream_buffer);
     }
@@ -531,7 +531,7 @@ public:
    *
    * @return size_t Number of bytes available in the stream buffer.
    */
-  [[nodiscard]] size_t available(void) const {
+  [[nodiscard]] size_t available() const {
     return xStreamBufferBytesAvailable(m_stream_buffer);
   }
   /**
@@ -540,14 +540,14 @@ public:
    *
    * @return size_t Number of bytes free in the stream buffer.
    */
-  [[nodiscard]] size_t free(void) const { return xStreamBufferSpacesAvailable(m_stream_buffer); }
+  [[nodiscard]] size_t free() const { return xStreamBufferSpacesAvailable(m_stream_buffer); }
   /**
    * @brief Reset the stream buffer to the cleared state.
    * @ref https://www.freertos.org/xStreamBufferReset.html
    *
    * @return BaseType_t pdPass if the stream buffer was reset, pdFAIL otherwise.
    */
-  [[nodiscard]] BaseType_t reset(void) { return xStreamBufferReset(m_stream_buffer); }
+  [[nodiscard]] BaseType_t reset() { return xStreamBufferReset(m_stream_buffer); }
   /**
    * @brief Set the trigger level of the stream buffer.
    * @ref https://www.freertos.org/xStreamBufferSetTriggerLevel.html
@@ -564,21 +564,21 @@ public:
    *
    * @return StreamBufferHandle_t Handle of the stream buffer.
    */
-  [[nodiscard]] StreamBufferHandle_t handle(void) const { return m_stream_buffer; }
+  [[nodiscard]] StreamBufferHandle_t handle() const { return m_stream_buffer; }
   /**
    * @brief Check if the stream buffer is empty.
    * @ref https://www.freertos.org/xStreamBufferIsEmpty.html
    *
    * @return BaseType_t pdTRUE if the stream buffer is empty, pdFALSE otherwise.
    */
-  [[nodiscard]] BaseType_t empty(void) const { return xStreamBufferIsEmpty(m_stream_buffer); }
+  [[nodiscard]] BaseType_t empty() const { return xStreamBufferIsEmpty(m_stream_buffer); }
   /**
    * @brief Check if the stream buffer is full.
    * @ref https://www.freertos.org/xStreamBufferIsFull.html
    *
    * @return BaseType_t pdTRUE if the stream buffer is full, pdFALSE otherwise.
    */
-  [[nodiscard]] BaseType_t full(void) const { return xStreamBufferIsFull(m_stream_buffer); }
+  [[nodiscard]] BaseType_t full() const { return xStreamBufferIsFull(m_stream_buffer); }
 
   [[nodiscard]] expected<size_t, error>
   send_ex(const void *data, size_t data_size,

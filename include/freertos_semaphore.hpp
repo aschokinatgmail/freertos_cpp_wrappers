@@ -225,7 +225,7 @@ public:
    * delete the binary semaphore instance if it was created.
    *
    */
-  ~binary_semaphore(void) {
+  ~binary_semaphore() {
     if (m_semaphore) {
       vSemaphoreDelete(m_semaphore);
     }
@@ -267,7 +267,7 @@ public:
    * @return isr_result<BaseType_t> containing the result and whether a
    * higher priority task was woken.
    */
-  isr_result<BaseType_t> give_isr(void) {
+  isr_result<BaseType_t> give_isr() {
     isr_result<BaseType_t> result{pdFALSE, pdFALSE};
     result.result =
         xSemaphoreGiveFromISR(m_semaphore, &result.higher_priority_task_woken);
@@ -293,7 +293,7 @@ public:
    * @return isr_result<BaseType_t> containing the result and whether a
    * higher priority task was woken.
    */
-  isr_result<BaseType_t> take_isr(void) {
+  isr_result<BaseType_t> take_isr() {
     isr_result<BaseType_t> result{pdFALSE, pdFALSE};
     result.result =
         xSemaphoreTakeFromISR(m_semaphore, &result.higher_priority_task_woken);
@@ -431,7 +431,7 @@ public:
    * delete the counting semaphore instance if it was created.
    *
    */
-  ~counting_semaphore(void) {
+  ~counting_semaphore() {
     if (m_semaphore) {
       vSemaphoreDelete(m_semaphore);
     }
@@ -473,7 +473,7 @@ public:
    * @return isr_result<BaseType_t> containing the result and whether a
    * higher priority task was woken.
    */
-  isr_result<BaseType_t> give_isr(void) {
+  isr_result<BaseType_t> give_isr() {
     isr_result<BaseType_t> result{pdFALSE, pdFALSE};
     result.result =
         xSemaphoreGiveFromISR(m_semaphore, &result.higher_priority_task_woken);
@@ -499,7 +499,7 @@ public:
    * @return isr_result<BaseType_t> containing the result and whether a
    * higher priority task was woken.
    */
-  isr_result<BaseType_t> take_isr(void) {
+  isr_result<BaseType_t> take_isr() {
     isr_result<BaseType_t> result{pdFALSE, pdFALSE};
     result.result =
         xSemaphoreTakeFromISR(m_semaphore, &result.higher_priority_task_woken);
@@ -676,7 +676,7 @@ public:
    * created.
    *
    */
-  ~mutex(void) {
+  ~mutex() {
     if (m_semaphore) {
       vSemaphoreDelete(m_semaphore);
     }
@@ -740,7 +740,7 @@ public:
    * @return isr_result<BaseType_t> containing the result and whether a
    * higher priority task was woken.
    */
-  isr_result<BaseType_t> unlock_isr(void) {
+  isr_result<BaseType_t> unlock_isr() {
     configASSERT(false);
     return {pdFALSE, pdFALSE};
   }
@@ -770,7 +770,7 @@ public:
    * @return isr_result<BaseType_t> containing the result and whether a
    * higher priority task was woken.
    */
-  isr_result<BaseType_t> lock_isr(void) {
+  isr_result<BaseType_t> lock_isr() {
     configASSERT(false);
     return {pdFALSE, pdFALSE};
   }
@@ -863,7 +863,7 @@ public:
    *
    * @return bool true if the mutex is locked, otherwise false.
    */
-  bool locked(void) const { return m_locked; }
+  bool locked() const { return m_locked; }
 
   /**
    * @brief Number of live RAII guards (lock_guard / try_lock_guard /
@@ -874,7 +874,7 @@ public:
    *
    * @return UBaseType_t live RAII guard count.
    */
-  UBaseType_t guard_refcount(void) const {
+  UBaseType_t guard_refcount() const {
     return m_guard_refcount.load(std::memory_order_acquire);
   }
 
@@ -973,7 +973,7 @@ public:
    * instance if it was created.
    *
    */
-  ~recursive_mutex(void) {
+  ~recursive_mutex() {
     if (m_semaphore) {
       vSemaphoreDelete(m_semaphore);
     }
@@ -1117,13 +1117,13 @@ public:
    *
    * @return bool true if the recursive mutex is locked, otherwise false.
    */
-  bool locked(void) const { return m_recursions_count > 0; }
+  bool locked() const { return m_recursions_count > 0; }
   /**
    * @brief Get the number of recursions of the recursive mutex.
    *
    * @return uint8_t number of recursions of the recursive mutex.
    */
-  uint8_t recursions_count(void) const { return m_recursions_count; }
+  uint8_t recursions_count() const { return m_recursions_count; }
   /**
    * @brief Number of live RAII guards (lock_guard / try_lock_guard /
    *        timeout_lock_guard) currently referencing this mutex.
@@ -1132,7 +1132,7 @@ public:
    *
    * @return UBaseType_t live RAII guard count.
    */
-  UBaseType_t guard_refcount(void) const {
+  UBaseType_t guard_refcount() const {
     return m_guard_refcount.load(std::memory_order_acquire);
   }
 
@@ -1243,7 +1243,7 @@ public:
    * @brief Destruct the lock guard object and unlock the mutex.
    *
    */
-  ~lock_guard(void) FREERTOS_RELEASE() {
+  ~lock_guard() FREERTOS_RELEASE() {
     detail::guard_release(m_mutex);
     m_mutex.unlock();
   }
@@ -1259,7 +1259,7 @@ public:
    *
    * @return  true if the mutex is locked, otherwise false.
    */
-  bool locked(void) const { return m_mutex.locked(); }
+  bool locked() const { return m_mutex.locked(); }
 };
 
 /**
@@ -1291,7 +1291,7 @@ public:
    * @brief Destruct the try lock guard object and unlock the mutex.
    *
    */
-  ~try_lock_guard(void) FREERTOS_RELEASE() {
+  ~try_lock_guard() FREERTOS_RELEASE() {
     if (m_lock_acquired) {
       detail::guard_release(m_mutex);
       m_mutex.unlock();
@@ -1309,7 +1309,7 @@ public:
    *
    * @return  true if the mutex is locked, otherwise false.
    */
-  bool locked(void) const { return m_lock_acquired && m_mutex.locked(); }
+  bool locked() const { return m_lock_acquired && m_mutex.locked(); }
 };
 
 /**
@@ -1350,7 +1350,7 @@ public:
    * @brief Destruct the lock guard object and unlock the mutex.
    *
    */
-  ~lock_guard_isr(void) FREERTOS_RELEASE() {
+  ~lock_guard_isr() FREERTOS_RELEASE() {
     if (m_lock_acquired) {
       auto result = m_mutex.unlock_isr();
       configASSERT(result.result == pdTRUE);
@@ -1370,7 +1370,7 @@ public:
    * @return BaseType_t pdTRUE if the high priority task was woken, otherwise
    * pdFALSE.
    */
-  BaseType_t high_priority_task_woken(void) const {
+  BaseType_t high_priority_task_woken() const {
     return m_high_priority_task_woken;
   }
   /**
@@ -1378,7 +1378,7 @@ public:
    *
    * @return  true if the mutex is locked, otherwise false.
    */
-  bool locked(void) const { return m_lock_acquired && m_mutex.locked(); }
+  bool locked() const { return m_lock_acquired && m_mutex.locked(); }
 };
 
 /**
@@ -1431,7 +1431,7 @@ public:
    * @brief Destruct the timeout lock guard object and unlock the mutex.
    *
    */
-  ~timeout_lock_guard(void) FREERTOS_RELEASE() {
+  ~timeout_lock_guard() FREERTOS_RELEASE() {
     if (m_lock_acquired) {
       detail::guard_release(m_mutex);
       m_mutex.unlock();
@@ -1449,7 +1449,7 @@ public:
    *
    * @return  true if the mutex is locked, otherwise false.
    */
-  bool locked(void) const { return m_lock_acquired && m_mutex.locked(); }
+  bool locked() const { return m_lock_acquired && m_mutex.locked(); }
 };
 
 #if configSUPPORT_STATIC_ALLOCATION

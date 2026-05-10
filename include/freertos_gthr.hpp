@@ -255,9 +255,9 @@ __gthread_recursive_mutex_destroy(__gthread_recursive_mutex_t *mutex) {
   return 0;
 }
 
-inline void __gthread_once_callback(void) {}
+inline void __gthread_once_callback() {}
 
-inline int __gthread_once(__gthread_once_t *once, void (*func)(void)) {
+inline int __gthread_once(__gthread_once_t *once, void (*func)()) {
   if (__atomic_load_n(once, __ATOMIC_ACQUIRE) == 2) {
     return 0;
   }

@@ -231,7 +231,7 @@ public:
    * kernel object instance if it was created.
    *
    */
-  ~message_buffer(void) {
+  ~message_buffer() {
     if (m_message_buffer) {
       vMessageBufferDelete(m_message_buffer);
     }
@@ -361,7 +361,7 @@ public:
    *
    * @return size_t the number of bytes available in the buffer
    */
-  [[nodiscard]] size_t available(void) const {
+  [[nodiscard]] size_t available() const {
     return xMessageBufferSpaceAvailable(m_message_buffer);
   }
   /**
@@ -370,21 +370,21 @@ public:
    *
    * @return BaseType_t pdPass if the message buffer was reset, pdFAIL otherwise
    */
-  [[nodiscard]] BaseType_t reset(void) { return xMessageBufferReset(m_message_buffer); }
+  [[nodiscard]] BaseType_t reset() { return xMessageBufferReset(m_message_buffer); }
   /**
    * @brief Method checking if the message buffer is empty.
    * @ref https://www.freertos.org/xMessageBufferIsEmpty.html
    *
    * @return BaseType_t pdTRUE if the message buffer is empty, pdFALSE otherwise
    */
-  [[nodiscard]] BaseType_t empty(void) const { return xMessageBufferIsEmpty(m_message_buffer); }
+  [[nodiscard]] BaseType_t empty() const { return xMessageBufferIsEmpty(m_message_buffer); }
   /**
    * @brief Method checking if the message buffer is full.
    * @ref https://www.freertos.org/xMessageBufferIsFull.html
    *
    * @return BaseType_t pdTRUE if the message buffer is full, pdFALSE otherwise
    */
-  [[nodiscard]] BaseType_t full(void) const { return xMessageBufferIsFull(m_message_buffer); }
+  [[nodiscard]] BaseType_t full() const { return xMessageBufferIsFull(m_message_buffer); }
 
   [[nodiscard]] expected<size_t, error> send_ex(const void *data,
                                                 size_t data_size,

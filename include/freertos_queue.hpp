@@ -235,7 +235,7 @@ public:
     configASSERT(!QueueAllocator::is_static);
     src.m_queue = nullptr;
   }
-  ~queue(void) {
+  ~queue() {
     if (m_queue) {
       auto n = pcQueueGetName(m_queue);
       if (n) {
@@ -481,7 +481,7 @@ public:
    * from the queue (or std::nullopt if empty), and the higher priority task
    * woken flag.
    */
-  isr_result<std::optional<T>> receive_isr(void) {
+  isr_result<std::optional<T>> receive_isr() {
     isr_result<std::optional<T>> result{{}, pdFALSE};
     T item;
     BaseType_t higher_priority_task_woken = pdFALSE;
@@ -498,14 +498,14 @@ public:
    *
    * @return UBaseType_t The number of items stored in the queue.
    */
-  [[nodiscard]] UBaseType_t messages_waiting(void) const { return uxQueueMessagesWaiting(m_queue); }
+  [[nodiscard]] UBaseType_t messages_waiting() const { return uxQueueMessagesWaiting(m_queue); }
   /**
    * @brief Return the number of items stored in the queue from an ISR.
    * @ref https://www.freertos.org/a00018.html#uxQueueMessagesWaitingFromISR
    *
    * @return UBaseType_t The number of items stored in the queue.
    */
-  UBaseType_t messages_waiting_isr(void) const {
+  UBaseType_t messages_waiting_isr() const {
     return uxQueueMessagesWaitingFromISR(m_queue);
   }
   /**
@@ -514,14 +514,14 @@ public:
    *
    * @return UBaseType_t The number of spaces available in the queue.
    */
-  [[nodiscard]] UBaseType_t spaces_available(void) const { return uxQueueSpacesAvailable(m_queue); }
+  [[nodiscard]] UBaseType_t spaces_available() const { return uxQueueSpacesAvailable(m_queue); }
   /**
    * @brief Resets the queue to the empty state.
    * @ref https://www.freertos.org/a00018.html#xQueueReset
    *
    * @return BaseType_t pdPASS if the queue was reset, pdFAIL otherwise.
    */
-  [[nodiscard]] BaseType_t reset(void) { return xQueueReset(m_queue); }
+  [[nodiscard]] BaseType_t reset() { return xQueueReset(m_queue); }
   /**
    * @brief A version of send_back method that overwrites the items in the queue
    * if it is full.
@@ -633,7 +633,7 @@ public:
    * the queue (or std::nullopt if empty), and the higher priority task woken
    * flag.
    */
-  isr_result<std::optional<T>> peek_isr(void) {
+  isr_result<std::optional<T>> peek_isr() {
     isr_result<std::optional<T>> result{{}, pdFALSE};
     T item;
     BaseType_t higher_priority_task_woken = pdFALSE;
@@ -650,21 +650,21 @@ public:
    *
    * @return const char* The name of the queue.
    */
-  const char *name(void) const { return pcQueueGetName(m_queue); }
+  const char *name() const { return pcQueueGetName(m_queue); }
   /**
    * @brief Method checking if the queue is full from an ISR.
    * @ref https://www.freertos.org/a00018.html#xQueueIsQueueFullFromISR
    *
    * @return BaseType_t pdTRUE if the queue is full, pdFALSE otherwise.
    */
-  [[nodiscard]] BaseType_t full_isr(void) const { return xQueueIsQueueFullFromISR(m_queue); }
+  [[nodiscard]] BaseType_t full_isr() const { return xQueueIsQueueFullFromISR(m_queue); }
   /**
    * @brief Method checking if the queue is empty from an ISR.
    * @ref https://www.freertos.org/a00018.html#xQueueIsQueueEmptyFromISR
    *
    * @return BaseType_t pdTRUE if the queue is empty, pdFALSE otherwise.
    */
-  [[nodiscard]] BaseType_t empty_isr(void) const {
+  [[nodiscard]] BaseType_t empty_isr() const {
     return xQueueIsQueueEmptyFromISR(m_queue);
   }
 

@@ -224,7 +224,7 @@ public:
    * object instance if it was created.
    *
    */
-  ~timer(void) {
+  ~timer() {
     if (m_timer) {
       xTimerDelete(m_timer, portMAX_DELAY);
       m_timer = nullptr;
@@ -343,7 +343,7 @@ public:
    * @return isr_result<BaseType_t> result containing pdPASS if the timer was
    * started successfully else pdFAIL, and the higher_priority_task_woken flag.
    */
-  isr_result<BaseType_t> start_isr(void) {
+  isr_result<BaseType_t> start_isr() {
     isr_result<BaseType_t> result{pdFAIL, pdFALSE};
     if (!m_timer) {
       return result;
@@ -394,7 +394,7 @@ public:
    * @return isr_result<BaseType_t> result containing pdPASS if the timer was
    * stopped successfully else pdFAIL, and the higher_priority_task_woken flag.
    */
-  isr_result<BaseType_t> stop_isr(void) {
+  isr_result<BaseType_t> stop_isr() {
     isr_result<BaseType_t> result{pdFAIL, pdFALSE};
     if (!m_timer) {
       return result;
@@ -441,7 +441,7 @@ public:
    * @return isr_result<BaseType_t> result containing pdPASS if the timer was
    * reset successfully else pdFAIL, and the higher_priority_task_woken flag.
    */
-  isr_result<BaseType_t> reset_isr(void) {
+  isr_result<BaseType_t> reset_isr() {
     isr_result<BaseType_t> result{pdFAIL, pdFALSE};
     if (!m_timer) {
       return result;
@@ -540,7 +540,7 @@ public:
    * was woken
    * @return TickType_t timer period in ticks
    */
-  [[nodiscard]] TickType_t period_ticks(void) const {
+  [[nodiscard]] TickType_t period_ticks() const {
     if (!m_timer) {
       return 0;
     }
@@ -551,7 +551,7 @@ public:
    *
    * @return std::chrono::milliseconds period of the timer in milliseconds
    */
-  [[nodiscard]] std::chrono::milliseconds period(void) const {
+  [[nodiscard]] std::chrono::milliseconds period() const {
     return std::chrono::milliseconds{period_ticks()};
   }
   /**
@@ -574,13 +574,13 @@ public:
    * @return UBaseType_t pdTRUE if auto-reload mode is enabled, pdFALSE
    * otherwise
    */
-  [[nodiscard]] UBaseType_t reload_mode(void) const { return uxTimerGetReloadMode(m_timer); }
+  [[nodiscard]] UBaseType_t reload_mode() const { return uxTimerGetReloadMode(m_timer); }
   /**
    * @brief Method to get number of remaining ticks before the timer expires.
    *
    * @return TickType_t number of remaining ticks before the timer expires.
    */
-  [[nodiscard]] TickType_t remaining_ticks(void) const {
+  [[nodiscard]] TickType_t remaining_ticks() const {
     if (m_timer) {
       return xTimerGetExpiryTime(m_timer) - xTaskGetTickCount();
     } else {
@@ -593,7 +593,7 @@ public:
    * @return std::chrono::milliseconds remaining time before the timer expires
    * in milliseconds.
    */
-  [[nodiscard]] std::chrono::milliseconds remaining_time(void) const {
+  [[nodiscard]] std::chrono::milliseconds remaining_time() const {
     return std::chrono::milliseconds{remaining_ticks()};
   }
   /**
@@ -602,7 +602,7 @@ public:
    *
    * @return BaseType_t pdTRUE if the timer is running, pdFALSE otherwise
    */
-  [[nodiscard]] BaseType_t running(void) const {
+  [[nodiscard]] BaseType_t running() const {
     if (!m_timer) {
       return pdFALSE;
     }
@@ -613,7 +613,7 @@ public:
    *
    * @return const char* name of the timer
    */
-  [[nodiscard]] const char *name(void) const {
+  [[nodiscard]] const char *name() const {
     if (!m_timer) {
       return nullptr;
     }
@@ -638,7 +638,7 @@ public:
         std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
             .count()));
   }
-  [[nodiscard]] isr_result<expected<void, error>> start_ex_isr(void) {
+  [[nodiscard]] isr_result<expected<void, error>> start_ex_isr() {
     if (!m_timer) {
       return isr_result<expected<void, error>>{
           unexpected<error>(error::invalid_handle), pdFALSE};
@@ -670,7 +670,7 @@ public:
         std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
             .count()));
   }
-  [[nodiscard]] isr_result<expected<void, error>> stop_ex_isr(void) {
+  [[nodiscard]] isr_result<expected<void, error>> stop_ex_isr() {
     if (!m_timer) {
       return isr_result<expected<void, error>>{
           unexpected<error>(error::invalid_handle), pdFALSE};
@@ -702,7 +702,7 @@ public:
         std::chrono::duration_cast<std::chrono::milliseconds>(timeout)
             .count()));
   }
-  [[nodiscard]] isr_result<expected<void, error>> reset_ex_isr(void) {
+  [[nodiscard]] isr_result<expected<void, error>> reset_ex_isr() {
     if (!m_timer) {
       return isr_result<expected<void, error>>{
           unexpected<error>(error::invalid_handle), pdFALSE};

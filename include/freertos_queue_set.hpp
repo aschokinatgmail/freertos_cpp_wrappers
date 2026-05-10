@@ -94,7 +94,7 @@ public:
     src.m_queue_set = nullptr;
   }
 
-  ~queue_set(void) {
+  ~queue_set() {
     if (m_queue_set) {
       vQueueDelete(m_queue_set);
     }
@@ -135,7 +135,7 @@ public:
             .count()));
   }
 
-  isr_result<QueueSetMemberHandle_t> select_isr(void) {
+  isr_result<QueueSetMemberHandle_t> select_isr() {
     isr_result<QueueSetMemberHandle_t> result{nullptr, pdFALSE};
     result.result = xQueueSelectFromSetFromISR(
         m_queue_set, &result.higher_priority_task_woken);
@@ -179,7 +179,7 @@ public:
   }
 
   [[nodiscard]] isr_result<expected<QueueSetMemberHandle_t, error>>
-  select_ex_isr(void) {
+  select_ex_isr() {
     auto result = select_isr();
     isr_result<expected<QueueSetMemberHandle_t, error>> ret{
         unexpected<error>(error::would_block),

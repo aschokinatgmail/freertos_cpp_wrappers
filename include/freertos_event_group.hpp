@@ -106,7 +106,7 @@ public:
    * @brief Construct a new event group object
    *
    */
-  event_group(void) : m_event_group(m_allocator.create()) {
+  event_group() : m_event_group(m_allocator.create()) {
     configASSERT(m_event_group);
   }
   template <typename... AllocatorArgs,
@@ -128,7 +128,7 @@ public:
    * if it was created.
    *
    */
-  ~event_group(void) {
+  ~event_group() {
     if (m_event_group) {
       vEventGroupDelete(m_event_group);
     }
@@ -158,7 +158,7 @@ public:
    *
    * @return EventGroupHandle_t event group handle
    */
-  [[nodiscard]] EventGroupHandle_t handle(void) const { return m_event_group; }
+  [[nodiscard]] EventGroupHandle_t handle() const { return m_event_group; }
 
   /**
    * @brief Method to set bits in the event group.
@@ -264,14 +264,14 @@ public:
    *
    * @return EventBits_t Current value of the event group bits
    */
-  [[nodiscard]] EventBits_t get_bits(void) const { return xEventGroupGetBits(m_event_group); }
+  [[nodiscard]] EventBits_t get_bits() const { return xEventGroupGetBits(m_event_group); }
   /**
    * @brief Method to get the bits of the event group from an ISR.
    * @ref https://www.freertos.org/xEventGroupGetBitsFromISR.html
    *
    * @return EventBits_t Current value of the event group bits
    */
-  [[nodiscard]] EventBits_t get_bits_isr(void) const {
+  [[nodiscard]] EventBits_t get_bits_isr() const {
     return xEventGroupGetBitsFromISR(m_event_group);
   }
   /**
