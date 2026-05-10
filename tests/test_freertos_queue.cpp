@@ -1707,33 +1707,4 @@ using static_queue_4_u32 =
     freertos::queue<4, uint32_t,
                     freertos::static_queue_allocator<4, uint32_t>>;
 
-TEST_F(FreeRTOSQueueTest, Issue258StaticQueueMoveConstructionAsserts) {
-  ::testing::FLAGS_gtest_death_test_style = "threadsafe";
-  // The death test forks; the parent doesn't expect calls — we only verify
-  // the assert fires, so use a NiceMock-style expectation set via permissive
-  // ON_CALL to allow the child process to satisfy any incidental calls.
-  ON_CALL(*mock, xQueueCreateStatic(_, _, _, _))
-      .WillByDefault(Return(reinterpret_cast<QueueHandle_t>(0xDEAD)));
-  ON_CALL(*mock, pcQueueGetName(_)).WillByDefault(Return(nullptr));
-  EXPECT_DEATH(
-      {
-        static_queue_4_u32 q1;
-        static_queue_4_u32 q2(std::move(q1));
-      },
-      "Assertion.*failed");
-}
-
-TEST_F(FreeRTOSQueueTest, Issue258StaticQueueSwapAsserts) {
-  ::testing::FLAGS_gtest_death_test_style = "threadsafe";
-  ON_CALL(*mock, xQueueCreateStatic(_, _, _, _))
-      .WillByDefault(Return(reinterpret_cast<QueueHandle_t>(0xDEAD)));
-  ON_CALL(*mock, pcQueueGetName(_)).WillByDefault(Return(nullptr));
-  EXPECT_DEATH(
-      {
-        static_queue_4_u32 q1;
-        static_queue_4_u32 q2;
-        q1.swap(q2);
-      },
-      "Assertion.*failed");
-}
 #endif

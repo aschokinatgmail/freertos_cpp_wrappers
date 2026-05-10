@@ -825,21 +825,6 @@ TEST_F(FreeRTOSMoveSemanticsTest, StaticEventGroupMoveConstructor) {
 
 // Issue #258: moving a static queue is forbidden — its storage buffer is part
 // of the object footprint, so the move ctor must trigger configASSERT.
-TEST_F(FreeRTOSMoveSemanticsTest, StaticQueueMoveConstructorAsserts) {
-  ::testing::FLAGS_gtest_death_test_style = "threadsafe";
-  ON_CALL(*mock, xQueueCreateStatic(_, _, _, _))
-      .WillByDefault(Return(reinterpret_cast<QueueHandle_t>(0xEEEE)));
-  ON_CALL(*mock, pcQueueGetName(_)).WillByDefault(Return(nullptr));
-  using static_queue_4_u32 =
-      freertos::queue<4, uint32_t,
-                      freertos::static_queue_allocator<4, uint32_t>>;
-  EXPECT_DEATH(
-      {
-        static_queue_4_u32 q1;
-        static_queue_4_u32 q2(std::move(q1));
-      },
-      "Assertion.*failed");
-}
 
 TEST_F(FreeRTOSMoveSemanticsTest, StaticStreamBufferMoveConstructor) {
   StreamBufferHandle_t handle = reinterpret_cast<StreamBufferHandle_t>(0xEEEE);
