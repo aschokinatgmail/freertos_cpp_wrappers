@@ -241,10 +241,12 @@ public:
    * @param task_routine task routine function
    * @param start_suspended start the task in the suspended state
    */
+#ifdef FREERTOS_CPP_WRAPPERS_ENABLE_STD_STRING
   task(const std::string &name, UBaseType_t priority,
        task_routine_t &&task_routine, bool start_suspended = true)
       : task{name.c_str(), priority, std::move(task_routine), start_suspended} {
   }
+#endif
 #else
   /**
    * @brief Construct a new task object
@@ -270,10 +272,12 @@ public:
    * @param priority  priority of the task
    * @param task_routine  task routine function
    */
+#ifdef FREERTOS_CPP_WRAPPERS_ENABLE_STD_STRING
   task(const std::string &name, UBaseType_t priority,
        task_routine_t &&task_routine)
       : task{name.c_str(), priority,
              std::forward<std::function<void()>>(task_routine)} {}
+#endif
 #endif
   task(const task &) = delete;
   task(task &&other) noexcept
@@ -828,6 +832,7 @@ public:
    * @param period  period of the periodic task
    * @param start_suspended  start the task in the suspended state
    */
+#ifdef FREERTOS_CPP_WRAPPERS_ENABLE_STD_STRING
   template <typename Rep, typename Period>
   periodic_task(const std::string &name, UBaseType_t priority,
                 task_routine_t &&on_start, task_routine_t &&on_stop,
@@ -856,6 +861,7 @@ public:
                       period,
                       start_suspended,
                       std::forward<AllocatorArgs>(args)...} {}
+#endif
   /**
    * @brief Construct a new periodic task object
    *
@@ -900,6 +906,7 @@ public:
    * @param periodic_routine  periodic task routine function
    * @param start_suspended  start the task in the suspended state
    */
+#ifdef FREERTOS_CPP_WRAPPERS_ENABLE_STD_STRING
   periodic_task(const std::string &name, UBaseType_t priority,
                 task_routine_t &&on_start, task_routine_t &&on_stop,
                 task_routine_t &&periodic_routine, bool start_suspended = true)
@@ -922,6 +929,7 @@ public:
                       std::move(periodic_routine),
                       start_suspended,
                       std::forward<AllocatorArgs>(args)...} {}
+#endif
   periodic_task(const periodic_task &) = delete;
   periodic_task(periodic_task &&other) noexcept
       : m_period(other.m_period), m_on_start(std::move(other.m_on_start)),

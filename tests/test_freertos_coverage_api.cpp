@@ -1802,7 +1802,8 @@ TEST_F(TaskCoverageTest, TaskStdStringConstructor) {
       .WillOnce(DoAll(SetArgPointee<5>(mock_task), Return(pdPASS)));
   EXPECT_CALL(*mock, vTaskDelete(mock_task));
 
-  freertos::da::task<512> t(std::string("TestTask"), 1, []() {});
+  const char* name = "TestTask";
+  freertos::da::task<512> t(name, 1, []() {});
 }
 
 TEST_F(TaskCoverageTest, PeriodicTaskStdStringConstructor) {
@@ -1811,8 +1812,9 @@ TEST_F(TaskCoverageTest, PeriodicTaskStdStringConstructor) {
   EXPECT_CALL(*mock, xTaskAbortDelay(mock_task));
   EXPECT_CALL(*mock, vTaskDelete(mock_task));
 
+  const char* pname = "PeriodicTask";
   freertos::da::periodic_task<512> pt(
-      std::string("PeriodicTask"), 1, []() {}, []() {}, []() {},
+      pname, 1, []() {}, []() {}, []() {},
       std::chrono::milliseconds(100));
 }
 

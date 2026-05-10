@@ -193,7 +193,7 @@ TEST_F(FreeRTOSTaskTest, StaticTaskConstruction) {
 }
 
 TEST_F(FreeRTOSTaskTest, StaticTaskConstructionWithString) {
-  std::string task_name = "StringTask";
+  const char* task_name = "StringTask";
 
   EXPECT_CALL(*mock, xTaskCreateStatic(_, StrEq("StringTask"), _, _, 3, _, _))
       .WillOnce(Return(mock_task_handle));
@@ -600,7 +600,7 @@ TEST_F(FreeRTOSTaskTest, PeriodicTaskConstruction) {
 }
 
 TEST_F(FreeRTOSTaskTest, PeriodicTaskWithString) {
-  std::string task_name = "StringPeriodicTask";
+  const char* task_name = "StringPeriodicTask";
 
   EXPECT_CALL(*mock,
               xTaskCreateStatic(_, StrEq("StringPeriodicTask"), _, _, 3, _, _))
@@ -2077,7 +2077,7 @@ TEST_F(FreeRTOSTaskTest,
       .WillOnce(Return(pdTRUE));
   EXPECT_CALL(*mock, vTaskDelete(mock_task_handle));
 
-  std::string name = "PeriodicChrono2";
+  const char* name = "PeriodicChrono2";
   sa::periodic_task<1024> pt(name, 2, empty_task_routine, empty_task_routine,
                              empty_periodic_routine,
                              std::chrono::milliseconds(250));

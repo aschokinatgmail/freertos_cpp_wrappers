@@ -108,8 +108,8 @@ enum class error : uint8_t {
  */
 template <typename E> class unexpected {
 public:
-  constexpr unexpected(const E &err) : m_error(err) {}
-  constexpr unexpected(E &&err) : m_error(std::move(err)) {}
+  explicit constexpr unexpected(const E &err) : m_error(err) {}
+  explicit constexpr unexpected(E &&err) : m_error(std::move(err)) {}
 
   constexpr const E &value() const & noexcept { return m_error; }
   constexpr E &value() & noexcept { return m_error; }

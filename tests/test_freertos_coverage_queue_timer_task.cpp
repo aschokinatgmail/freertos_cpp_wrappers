@@ -4,6 +4,8 @@
 #include <memory>
 #include <string>
 
+#define FREERTOS_CPP_WRAPPERS_ENABLE_STD_STRING
+
 #include "mocks/freertos_mocks.hpp"
 #include "freertos_isr_result.hpp"
 #include "freertos_queue.hpp"
