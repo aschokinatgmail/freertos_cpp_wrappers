@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+    branches: [main, 'release/**', 'integration/**']
+  pull_request:
+    branches: [main, 'release/**']
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Build & Test
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and run unit tests
+        run: |
+          docker compose build test
+          docker compose run --rm test
+
+  coverage:
+    name: Coverage
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build with coverage and generate report
+        run: |
+          docker compose build coverage
+          docker compose run --rm coverage
+
+  cross-compile:
+    name: Cross-Compile
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cross-compile for ARM targets
+        run: |
+          docker compose build xcompile
+          docker compose run --rm xcompile
+
+  static-analysis:
+    name: Static Analysis
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run clang-tidy and format check
+        run: |
+          docker compose build shell
+          docker compose run --rm shell bash -c '
+            cmake -B build-sa -DCMAKE_BUILD_TYPE=Debug -DENABLE_CLANG_TIDY=ON -DENABLE_MISRA_ANALYSIS=ON &&
+            cmake --build build-sa -j$(nproc) 2>&1 | tee build-sa/clang_tidy.log
+          '
