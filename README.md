@@ -323,7 +323,7 @@ This library requires C++17. Key C++17 features used:
 
 ### Migrating from v1.x to v2.x/v3.x
 
-See the detailed migration guide: [docs/migration-v1-to-v2.md](docs/migration-v1-to-v2.md)
+See the detailed migration guide: [docs/migration-guide.md](docs/migration-guide.md)
 
 Key changes in v3.0.0:
 - **C++17 is now required** (previously C++14)
@@ -470,7 +470,7 @@ docker compose up test
 docker compose up coverage
 
 # Generate full validation & verification report
-docker compose up validation
+docker compose run coverage
 
 # Generate documentation
 docker compose up docs
