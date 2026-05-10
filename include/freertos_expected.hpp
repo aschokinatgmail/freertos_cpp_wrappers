@@ -217,18 +217,75 @@ public:
     return *this;
   }
 
-  constexpr expected &operator=(expected &&other) noexcept {
-    if (this != &other) {
-      this->~expected();
-      m_has_value = other.m_has_value;
-      if (m_has_value) {
-        new (&m_storage) T(std::move(*reinterpret_cast<T *>(&other.m_storage)));
-      } else {
-        new (&m_error_storage)
-            E(std::move(*reinterpret_cast<E *>(&other.m_error_storage)));
-      }
+  /**
+   * @brief Swaps this expected with another.
+   *
+   * Strong exception guarantee: if T or E constructors throw during the
+   * one-has-value-one-has-error case, the operation is rolled back. In the
+   * common cases (both-value or both-error) this is `noexcept` when T and E
+   * are nothrow swappable.
+   *
+   * @param other The other expected to swap with
+   */
+  void swap(expected &other) noexcept(std::is_nothrow_move_constructible_v<T>
+                                           &&std::is_nothrow_swappable_v<T>
+                                               &&std::is_nothrow_move_constructible_v<E>
+                                                   &&std::is_nothrow_swappable_v<E>) {
+    if (m_has_value && other.m_has_value) {
+      // Both have values: swap the values
+      using std::swap;
+      swap(*reinterpret_cast<T *>(&m_storage),
+           *reinterpret_cast<T *>(&other.m_storage));
+    } else if (!m_has_value && !other.m_has_value) {
+      // Both have errors: swap the errors
+      using std::swap;
+      swap(*reinterpret_cast<E *>(&m_error_storage),
+           *reinterpret_cast<E *>(&other.m_error_storage));
+    } else if (m_has_value) {
+      // this has value, other has error
+      // Move our value out, move their error in
+      E temp_err(std::move(*reinterpret_cast<E *>(&other.m_error_storage)));
+      reinterpret_cast<E *>(&other.m_error_storage)->~E();
+      new (&other.m_storage)
+          T(std::move(*reinterpret_cast<T *>(&m_storage)));
+      reinterpret_cast<T *>(&m_storage)->~T();
+      new (&m_error_storage) E(std::move(temp_err));
+      m_has_value = false;
+      other.m_has_value = true;
+    } else {
+      // this has error, other has value
+      other.swap(*this);
     }
-    return *this;
+  }
+
+  /**
+   * @brief Constructs a new value in-place, destroying any previous content.
+   *
+   * @tparam Args Constructor argument types for T
+   * @param args Arguments forwarded to T's constructor
+   * @return T& Reference to the newly constructed value
+   */
+  template <typename... Args>
+  T &emplace(Args &&...args) noexcept(std::is_nothrow_constructible_v<T, Args...>) {
+    this->~expected();
+    new (&m_storage) T(std::forward<Args>(args)...);
+    m_has_value = true;
+    return *reinterpret_cast<T *>(&m_storage);
+  }
+
+  /**
+   * @brief Constructs a new error in-place, destroying any previous content.
+   *
+   * @tparam Args Constructor argument types for E
+   * @param args Arguments forwarded to E's constructor
+   * @return E& Reference to the newly constructed error
+   */
+  template <typename... Args>
+  E &emplace_error(Args &&...args) noexcept(std::is_nothrow_constructible_v<E, Args...>) {
+    this->~expected();
+    new (&m_error_storage) E(std::forward<Args>(args)...);
+    m_has_value = false;
+    return *reinterpret_cast<E *>(&m_error_storage);
   }
 
   [[nodiscard]] constexpr bool has_value() const noexcept { return m_has_value; }
@@ -499,6 +556,46 @@ public:
       }
     }
     return *this;
+  }
+
+  void swap(expected &other) noexcept(std::is_nothrow_move_constructible_v<E>
+                                           &&std::is_nothrow_swappable_v<E>) {
+    if (m_has_value && other.m_has_value) {
+      // Both void-success: nothing to swap
+      return;
+    } else if (!m_has_value && !other.m_has_value) {
+      // Both have errors: swap the errors
+      using std::swap;
+      swap(*reinterpret_cast<E *>(&m_error_storage),
+           *reinterpret_cast<E *>(&other.m_error_storage));
+    } else if (m_has_value) {
+      // this has value, other has error
+      new (&m_error_storage)
+          E(std::move(*reinterpret_cast<E *>(&other.m_error_storage)));
+      reinterpret_cast<E *>(&other.m_error_storage)->~E();
+      m_has_value = false;
+      other.m_has_value = true;
+    } else {
+      // this has error, other has value
+      other.swap(*this);
+    }
+  }
+
+  void emplace() noexcept {
+    if (!m_has_value) {
+      reinterpret_cast<E *>(&m_error_storage)->~E();
+    }
+    m_has_value = true;
+  }
+
+  template <typename... Args>
+  E &emplace_error(Args &&...args) noexcept(std::is_nothrow_constructible_v<E, Args...>) {
+    if (!m_has_value) {
+      reinterpret_cast<E *>(&m_error_storage)->~E();
+    }
+    new (&m_error_storage) E(std::forward<Args>(args)...);
+    m_has_value = false;
+    return *reinterpret_cast<E *>(&m_error_storage);
   }
 
   [[nodiscard]] constexpr bool has_value() const noexcept { return m_has_value; }

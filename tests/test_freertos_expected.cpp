@@ -317,4 +317,137 @@ TEST(ExpectedDeathTest, VoidHappyPathErrorStillWorks) {
   EXPECT_EQ(e.error(), error::buffer_empty);
 }
 
+// ── swap() tests ───────────────────────────────────────────────────────
+
+TEST(ExpectedSwapTest, BothHaveValues) {
+  expected<int, error> e1(10);
+  expected<int, error> e2(20);
+  e1.swap(e2);
+  EXPECT_EQ(e1.value(), 20);
+  EXPECT_EQ(e2.value(), 10);
+}
+
+TEST(ExpectedSwapTest, BothHaveErrors) {
+  expected<int, error> e1(unexpect, error::timeout);
+  expected<int, error> e2(unexpect, error::queue_full);
+  e1.swap(e2);
+  EXPECT_EQ(e1.error(), error::queue_full);
+  EXPECT_EQ(e2.error(), error::timeout);
+}
+
+TEST(ExpectedSwapTest, ValueWithError) {
+  expected<int, error> e1(42);
+  expected<int, error> e2(unexpect, error::timeout);
+  e1.swap(e2);
+  EXPECT_FALSE(e1.has_value());
+  EXPECT_EQ(e1.error(), error::timeout);
+  EXPECT_TRUE(e2.has_value());
+  EXPECT_EQ(e2.value(), 42);
+}
+
+TEST(ExpectedSwapTest, ErrorWithValue) {
+  expected<int, error> e1(unexpect, error::timeout);
+  expected<int, error> e2(99);
+  e1.swap(e2);
+  EXPECT_TRUE(e1.has_value());
+  EXPECT_EQ(e1.value(), 99);
+  EXPECT_FALSE(e2.has_value());
+  EXPECT_EQ(e2.error(), error::timeout);
+}
+
+TEST(ExpectedSwapTest, VoidBothSuccess) {
+  expected<void, error> e1;
+  expected<void, error> e2;
+  e1.swap(e2);
+  EXPECT_TRUE(e1.has_value());
+  EXPECT_TRUE(e2.has_value());
+}
+
+TEST(ExpectedSwapTest, VoidBothErrors) {
+  expected<void, error> e1(unexpect, error::timeout);
+  expected<void, error> e2(unexpect, error::queue_full);
+  e1.swap(e2);
+  EXPECT_EQ(e1.error(), error::queue_full);
+  EXPECT_EQ(e2.error(), error::timeout);
+}
+
+TEST(ExpectedSwapTest, VoidSuccessWithError) {
+  expected<void, error> e1;
+  expected<void, error> e2(unexpect, error::invalid_handle);
+  e1.swap(e2);
+  EXPECT_FALSE(e1.has_value());
+  EXPECT_EQ(e1.error(), error::invalid_handle);
+  EXPECT_TRUE(e2.has_value());
+}
+
+TEST(ExpectedSwapTest, VoidErrorWithSuccess) {
+  expected<void, error> e1(unexpect, error::out_of_memory);
+  expected<void, error> e2;
+  e1.swap(e2);
+  EXPECT_TRUE(e1.has_value());
+  EXPECT_FALSE(e2.has_value());
+  EXPECT_EQ(e2.error(), error::out_of_memory);
+}
+
+// ── emplace() tests ─────────────────────────────────────────────────────
+
+TEST(ExpectedEmplaceTest, EmplaceIntoValue) {
+  expected<int, error> e(10);
+  int &ref = e.emplace(42);
+  EXPECT_EQ(&ref, &e.value());
+  EXPECT_EQ(e.value(), 42);
+}
+
+TEST(ExpectedEmplaceTest, EmplaceIntoError) {
+  expected<int, error> e(unexpect, error::timeout);
+  int &ref = e.emplace(99);
+  EXPECT_EQ(&ref, &e.value());
+  EXPECT_EQ(e.value(), 99);
+  EXPECT_TRUE(e.has_value());
+}
+
+TEST(ExpectedEmplaceTest, EmplaceVoidIntoValue) {
+  expected<void, error> e;
+  e.emplace();
+  EXPECT_TRUE(e.has_value());
+}
+
+TEST(ExpectedEmplaceTest, EmplaceVoidIntoError) {
+  expected<void, error> e(unexpect, error::timeout);
+  e.emplace();
+  EXPECT_TRUE(e.has_value());
+}
+
+// ── emplace_error() tests ───────────────────────────────────────────────
+
+TEST(ExpectedEmplaceErrorTest, EmplaceErrorIntoValue) {
+  expected<int, error> e(10);
+  error &ref = e.emplace_error(error::timeout);
+  EXPECT_EQ(&ref, &e.error());
+  EXPECT_FALSE(e.has_value());
+  EXPECT_EQ(e.error(), error::timeout);
+}
+
+TEST(ExpectedEmplaceErrorTest, EmplaceErrorIntoError) {
+  expected<int, error> e(unexpect, error::timeout);
+  error &ref = e.emplace_error(error::queue_full);
+  EXPECT_EQ(&ref, &e.error());
+  EXPECT_EQ(e.error(), error::queue_full);
+}
+
+TEST(ExpectedEmplaceErrorTest, VoidEmplaceErrorIntoValue) {
+  expected<void, error> e;
+  error &ref = e.emplace_error(error::invalid_handle);
+  EXPECT_EQ(&ref, &e.error());
+  EXPECT_FALSE(e.has_value());
+  EXPECT_EQ(e.error(), error::invalid_handle);
+}
+
+TEST(ExpectedEmplaceErrorTest, VoidEmplaceErrorIntoError) {
+  expected<void, error> e(unexpect, error::timeout);
+  error &ref = e.emplace_error(error::out_of_memory);
+  EXPECT_EQ(&ref, &e.error());
+  EXPECT_EQ(e.error(), error::out_of_memory);
+}
+
 } // namespace
