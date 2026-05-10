@@ -83,9 +83,13 @@ public:
   SemaphoreHandle_t create_mutex() {
     return xSemaphoreCreateMutexStatic(&m_mutex_placeholder);
   }
-  SemaphoreHandle_t create_counting(UBaseType_t max_count) {
-    return xSemaphoreCreateCountingStatic(max_count, max_count,
+  SemaphoreHandle_t create_counting(UBaseType_t max_count,
+                                    UBaseType_t initial_count) {
+    return xSemaphoreCreateCountingStatic(max_count, initial_count,
                                           &m_reader_slots_placeholder);
+  }
+  SemaphoreHandle_t create_counting(UBaseType_t max_count) {
+    return create_counting(max_count, max_count);
   }
 };
 #endif
@@ -97,8 +101,12 @@ public:
   void swap(dynamic_shared_mutex_allocator &other) noexcept { (void)other; }
 
   SemaphoreHandle_t create_mutex() { return xSemaphoreCreateMutex(); }
+  SemaphoreHandle_t create_counting(UBaseType_t max_count,
+                                    UBaseType_t initial_count) {
+    return xSemaphoreCreateCounting(max_count, initial_count);
+  }
   SemaphoreHandle_t create_counting(UBaseType_t max_count) {
-    return xSemaphoreCreateCounting(max_count, max_count);
+    return create_counting(max_count, max_count);
   }
 };
 #endif

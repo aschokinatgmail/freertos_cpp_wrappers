@@ -551,14 +551,18 @@ public:
     return xSemaphoreCreateMutexStatic(
         static_cast<StaticSemaphore_t *>(m_mutex_memory)); // NOLINT(clang-tidy:cppcoreguidelines-pro-type-static-cast-downcast)
   }
-  SemaphoreHandle_t create_counting(UBaseType_t max_count) {
+  SemaphoreHandle_t create_counting(UBaseType_t max_count,
+                                    UBaseType_t initial_count) {
     m_reader_slots_memory = m_region->allocate(sizeof(StaticSemaphore_t));
     if (!m_reader_slots_memory) {
       return nullptr;
     }
     return xSemaphoreCreateCountingStatic(
-        max_count, max_count,
+        max_count, initial_count,
         static_cast<StaticSemaphore_t *>(m_reader_slots_memory)); // NOLINT(clang-tidy:cppcoreguidelines-pro-type-static-cast-downcast)
+  }
+  SemaphoreHandle_t create_counting(UBaseType_t max_count) {
+    return create_counting(max_count, max_count);
   }
 };
 

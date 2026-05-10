@@ -1573,8 +1573,12 @@ class SemArgAllocator {
 public:
   explicit SemArgAllocator(SemAllocatorArg arg) : m_arg(arg) {}
   SemaphoreHandle_t create_binary() { return xSemaphoreCreateBinary(); }
+  SemaphoreHandle_t create_counting(UBaseType_t max_count,
+                                    UBaseType_t initial_count) {
+    return xSemaphoreCreateCounting(max_count, initial_count);
+  }
   SemaphoreHandle_t create_counting(UBaseType_t max_count) {
-    return xSemaphoreCreateCounting(max_count, max_count);
+    return create_counting(max_count, max_count);
   }
   SemaphoreHandle_t create_mutex() { return xSemaphoreCreateMutex(); }
   SemaphoreHandle_t create_recursive_mutex() {
