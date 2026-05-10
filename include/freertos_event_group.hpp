@@ -129,7 +129,7 @@ public:
    *
    */
   ~event_group() {
-    if (m_event_group) {
+    if (m_event_group != nullptr) {
       vEventGroupDelete(m_event_group);
     }
   }
@@ -324,7 +324,7 @@ public:
    */
   [[nodiscard]] isr_result<expected<EventBits_t, error>>
   set_bits_ex_isr(const EventBits_t bits_to_set) {
-    if (!m_event_group) {
+    if (m_event_group == nullptr) {
       return isr_result<expected<EventBits_t, error>>{
           unexpected<error>(error::invalid_handle), pdFALSE};
     }

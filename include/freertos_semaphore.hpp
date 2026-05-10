@@ -226,7 +226,7 @@ public:
    *
    */
   ~binary_semaphore() {
-    if (m_semaphore) {
+    if (m_semaphore != nullptr) {
       vSemaphoreDelete(m_semaphore);
     }
   }
@@ -432,7 +432,7 @@ public:
    *
    */
   ~counting_semaphore() {
-    if (m_semaphore) {
+    if (m_semaphore != nullptr) {
       vSemaphoreDelete(m_semaphore);
     }
   }
@@ -677,7 +677,7 @@ public:
    *
    */
   ~mutex() {
-    if (m_semaphore) {
+    if (m_semaphore != nullptr) {
       vSemaphoreDelete(m_semaphore);
     }
   }
@@ -974,7 +974,7 @@ public:
    *
    */
   ~recursive_mutex() {
-    if (m_semaphore) {
+    if (m_semaphore != nullptr) {
       vSemaphoreDelete(m_semaphore);
     }
   }

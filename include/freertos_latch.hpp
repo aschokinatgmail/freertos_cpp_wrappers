@@ -64,7 +64,7 @@ public:
   latch &operator=(const latch &) = delete;
 
   ~latch() noexcept {
-    if (m_semaphore) {
+    if (m_semaphore != nullptr) {
       vSemaphoreDelete(m_semaphore);
     }
   }
@@ -85,7 +85,7 @@ public:
                                               std::memory_order_acq_rel,
                                               std::memory_order_acquire));
     if (next == 0 && prev > 0) {
-      if (m_semaphore) {
+      if (m_semaphore != nullptr) {
         xSemaphoreGive(m_semaphore);
       }
     }
@@ -99,7 +99,7 @@ public:
     if (m_counter.load(std::memory_order_acquire) == 0) {
       return;
     }
-    if (!m_semaphore) {
+    if (m_semaphore == nullptr) {
       return;
     }
     xSemaphoreTake(m_semaphore, portMAX_DELAY);
@@ -128,7 +128,7 @@ public:
                                               std::memory_order_acquire));
     isr_result<void> result{pdFALSE};
     if (next == 0 && prev > 0) {
-      if (m_semaphore) {
+      if (m_semaphore != nullptr) {
         xSemaphoreGiveFromISR(m_semaphore, &result.higher_priority_task_woken);
       }
     }
@@ -151,7 +151,7 @@ public:
                                               std::memory_order_acq_rel,
                                               std::memory_order_acquire));
     if (next == 0 && prev > 0) {
-      if (!m_semaphore) {
+      if (m_semaphore == nullptr) {
         return unexpected<error>(error::invalid_handle);
       }
       if (xSemaphoreGive(m_semaphore) != pdTRUE) {
@@ -178,7 +178,7 @@ public:
                                               std::memory_order_acq_rel,
                                               std::memory_order_acquire));
     if (next == 0 && prev > 0) {
-      if (!m_semaphore) {
+      if (m_semaphore == nullptr) {
         return {unexpected<error>(error::invalid_handle), pdFALSE};
       }
       BaseType_t woken = pdFALSE;
@@ -221,7 +221,7 @@ public:
   latch_static &operator=(const latch_static &) = delete;
 
   ~latch_static() noexcept {
-    if (m_semaphore) {
+    if (m_semaphore != nullptr) {
       vSemaphoreDelete(m_semaphore);
     }
   }

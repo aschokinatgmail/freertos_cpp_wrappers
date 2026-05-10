@@ -155,7 +155,7 @@ public:
           m_mover(other.m_mover), m_destroyer(other.m_destroyer) {
         if (m_copier) {
             m_copier(m_storage.data(), other.m_storage.data());
-        } else if (!m_invoker) {
+        } else if (m_invoker == nullptr) {
         } else {
             configASSERT(false); // cannot copy fixed_function wrapping non-copyable callable
             m_invoker = nullptr;
@@ -194,7 +194,7 @@ public:
             m_destroyer = other.m_destroyer;
             if (m_copier) {
                 m_copier(m_storage.data(), other.m_storage.data());
-            } else if (m_invoker) {
+            } else if (m_invoker != nullptr) {
                 configASSERT(false); // cannot copy fixed_function wrapping non-copyable callable
                 m_invoker = nullptr;
                 m_copier = nullptr;

@@ -82,14 +82,14 @@ public:
 
   ~condition_variable_any() noexcept {
     configASSERT(m_waiter_count.load(std::memory_order_acquire) == 0);
-    if (m_semaphore) {
+    if (m_semaphore != nullptr) {
       vSemaphoreDelete(m_semaphore);
     }
   }
 
   void notify_one() noexcept {
     configASSERT(m_semaphore != nullptr);
-    if (!m_semaphore) {
+    if (m_semaphore == nullptr) {
       return;
     }
     (void)xSemaphoreGive(m_semaphore);
@@ -97,7 +97,7 @@ public:
 
   void notify_all() noexcept {
     configASSERT(m_semaphore != nullptr);
-    if (!m_semaphore) {
+    if (m_semaphore == nullptr) {
       return;
     }
     UBaseType_t count = m_waiter_count.load(std::memory_order_acquire);
@@ -112,7 +112,7 @@ public:
   }
 
   isr_result<void> notify_one_isr() noexcept {
-    if (!m_semaphore) {
+    if (m_semaphore == nullptr) {
       return {pdFALSE};
     }
     isr_result<void> result{pdFALSE};
@@ -121,7 +121,7 @@ public:
   }
 
   isr_result<void> notify_all_isr() noexcept {
-    if (!m_semaphore) {
+    if (m_semaphore == nullptr) {
       return {pdFALSE};
     }
     isr_result<void> result{pdFALSE};
@@ -136,7 +136,7 @@ public:
   }
 
   template <typename Lock> void wait(Lock &lock) {
-    if (!m_semaphore) {
+    if (m_semaphore == nullptr) {
       lock.unlock();
       lock.lock();
       return;
@@ -178,7 +178,7 @@ public:
   template <typename Lock, typename Rep, typename Period>
   std::cv_status wait_for(Lock &lock,
                            const std::chrono::duration<Rep, Period> &rel_time) {
-    if (!m_semaphore) {
+    if (m_semaphore == nullptr) {
       lock.unlock();
       lock.lock();
       return std::cv_status::timeout;
@@ -257,7 +257,7 @@ public:
   }
 
   [[nodiscard]] expected<void, error> notify_one_ex() noexcept {
-    if (!m_semaphore) {
+    if (m_semaphore == nullptr) {
       return unexpected<error>(error::invalid_handle);
     }
     auto rc = xSemaphoreGive(m_semaphore);
@@ -268,7 +268,7 @@ public:
   }
 
   [[nodiscard]] expected<void, error> notify_all_ex() noexcept {
-    if (!m_semaphore) {
+    if (m_semaphore == nullptr) {
       return unexpected<error>(error::invalid_handle);
     }
     notify_all();

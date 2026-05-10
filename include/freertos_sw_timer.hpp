@@ -215,7 +215,7 @@ public:
     configASSERT(!src.m_started.load(std::memory_order_acquire)); // UB if started
     src.m_timer = nullptr;
     src.m_started.store(false, std::memory_order_release);
-    if (m_timer) {
+    if (m_timer != nullptr) {
       vTimerSetTimerID(m_timer, this);
     }
   }
@@ -225,7 +225,7 @@ public:
    *
    */
   ~timer() {
-    if (m_timer) {
+    if (m_timer != nullptr) {
       xTimerDelete(m_timer, portMAX_DELAY);
       m_timer = nullptr;
     }
@@ -274,7 +274,7 @@ public:
         }
       } else {
         // Source has null timer: just delete destination's timer.
-        if (m_timer) {
+        if (m_timer != nullptr) {
           xTimerDelete(m_timer, portMAX_DELAY);
           m_timer = nullptr;
         }
@@ -294,7 +294,7 @@ public:
                     std::memory_order_release);
     other.m_started.store(started_tmp, std::memory_order_release);
     swap(m_timer, other.m_timer);
-    if (m_timer) {
+    if (m_timer != nullptr) {
       vTimerSetTimerID(m_timer, this);
     }
     if (other.m_timer) {
@@ -312,7 +312,7 @@ public:
    * @return BaseType_t pdPASS if the timer was started successfully else pdFAIL
    */
   [[nodiscard]] BaseType_t start(const TickType_t ticks_to_wait = portMAX_DELAY) {
-    if (!m_timer) {
+    if (m_timer == nullptr) {
       return pdFAIL;
     }
     auto rc = xTimerStart(m_timer, ticks_to_wait);
@@ -345,7 +345,7 @@ public:
    */
   isr_result<BaseType_t> start_isr() {
     isr_result<BaseType_t> result{pdFAIL, pdFALSE};
-    if (!m_timer) {
+    if (m_timer == nullptr) {
       return result;
     }
     result.result =
@@ -363,7 +363,7 @@ public:
    * @return BaseType_t pdPASS if the timer was stopped successfully else pdFAIL
    */
   [[nodiscard]] BaseType_t stop(const TickType_t ticks_to_wait = portMAX_DELAY) {
-    if (!m_timer) {
+    if (m_timer == nullptr) {
       return pdFAIL;
     }
     auto rc = xTimerStop(m_timer, ticks_to_wait);
@@ -396,7 +396,7 @@ public:
    */
   isr_result<BaseType_t> stop_isr() {
     isr_result<BaseType_t> result{pdFAIL, pdFALSE};
-    if (!m_timer) {
+    if (m_timer == nullptr) {
       return result;
     }
     result.result =
@@ -414,7 +414,7 @@ public:
    * @return BaseType_t pdPASS if the timer was reset successfully else pdFAIL
    */
   [[nodiscard]] BaseType_t reset(const TickType_t ticks_to_wait = portMAX_DELAY) {
-    if (!m_timer) {
+    if (m_timer == nullptr) {
       return pdFAIL;
     }
     return xTimerReset(m_timer, ticks_to_wait);
@@ -443,7 +443,7 @@ public:
    */
   isr_result<BaseType_t> reset_isr() {
     isr_result<BaseType_t> result{pdFAIL, pdFALSE};
-    if (!m_timer) {
+    if (m_timer == nullptr) {
       return result;
     }
     result.result =
@@ -462,7 +462,7 @@ public:
    */
   [[nodiscard]] BaseType_t period(const TickType_t new_period_ticks,
                     const TickType_t ticks_to_wait = portMAX_DELAY) {
-    if (!m_timer) {
+    if (m_timer == nullptr) {
       return pdFAIL;
     }
     return xTimerChangePeriod(m_timer, new_period_ticks, ticks_to_wait);
@@ -504,7 +504,7 @@ public:
    */
   isr_result<BaseType_t> period_isr(const TickType_t new_period_ticks) {
     isr_result<BaseType_t> result{pdFAIL, pdFALSE};
-    if (!m_timer) {
+    if (m_timer == nullptr) {
       return result;
     }
     result.result = xTimerChangePeriodFromISR(
@@ -541,7 +541,7 @@ public:
    * @return TickType_t timer period in ticks
    */
   [[nodiscard]] TickType_t period_ticks() const {
-    if (!m_timer) {
+    if (m_timer == nullptr) {
       return 0;
     }
     return xTimerGetPeriod(m_timer);
@@ -562,7 +562,7 @@ public:
    * @return timer& reference to the timer object
    */
   timer &reload_mode(UBaseType_t auto_reload) {
-    if (m_timer) {
+    if (m_timer != nullptr) {
       vTimerSetReloadMode(m_timer, auto_reload);
     }
     return *this;
@@ -581,7 +581,7 @@ public:
    * @return TickType_t number of remaining ticks before the timer expires.
    */
   [[nodiscard]] TickType_t remaining_ticks() const {
-    if (m_timer) {
+    if (m_timer != nullptr) {
       return xTimerGetExpiryTime(m_timer) - xTaskGetTickCount();
     } else {
       return 0;
@@ -603,7 +603,7 @@ public:
    * @return BaseType_t pdTRUE if the timer is running, pdFALSE otherwise
    */
   [[nodiscard]] BaseType_t running() const {
-    if (!m_timer) {
+    if (m_timer == nullptr) {
       return pdFALSE;
     }
     return xTimerIsTimerActive(m_timer);
@@ -614,7 +614,7 @@ public:
    * @return const char* name of the timer
    */
   [[nodiscard]] const char *name() const {
-    if (!m_timer) {
+    if (m_timer == nullptr) {
       return nullptr;
     }
     return pcTimerGetName(m_timer);
@@ -622,7 +622,7 @@ public:
 
   [[nodiscard]] expected<void, error>
   start_ex(const TickType_t ticks_to_wait = portMAX_DELAY) {
-    if (!m_timer) {
+    if (m_timer == nullptr) {
       return unexpected<error>(error::invalid_handle);
     }
     auto rc = start(ticks_to_wait);
@@ -639,7 +639,7 @@ public:
             .count()));
   }
   [[nodiscard]] isr_result<expected<void, error>> start_ex_isr() {
-    if (!m_timer) {
+    if (m_timer == nullptr) {
       return isr_result<expected<void, error>>{
           unexpected<error>(error::invalid_handle), pdFALSE};
     }
@@ -654,7 +654,7 @@ public:
   }
   [[nodiscard]] expected<void, error>
   stop_ex(const TickType_t ticks_to_wait = portMAX_DELAY) {
-    if (!m_timer) {
+    if (m_timer == nullptr) {
       return unexpected<error>(error::invalid_handle);
     }
     auto rc = stop(ticks_to_wait);
@@ -671,7 +671,7 @@ public:
             .count()));
   }
   [[nodiscard]] isr_result<expected<void, error>> stop_ex_isr() {
-    if (!m_timer) {
+    if (m_timer == nullptr) {
       return isr_result<expected<void, error>>{
           unexpected<error>(error::invalid_handle), pdFALSE};
     }
@@ -686,7 +686,7 @@ public:
   }
   [[nodiscard]] expected<void, error>
   reset_ex(const TickType_t ticks_to_wait = portMAX_DELAY) {
-    if (!m_timer) {
+    if (m_timer == nullptr) {
       return unexpected<error>(error::invalid_handle);
     }
     auto rc = reset(ticks_to_wait);
@@ -703,7 +703,7 @@ public:
             .count()));
   }
   [[nodiscard]] isr_result<expected<void, error>> reset_ex_isr() {
-    if (!m_timer) {
+    if (m_timer == nullptr) {
       return isr_result<expected<void, error>>{
           unexpected<error>(error::invalid_handle), pdFALSE};
     }
@@ -719,7 +719,7 @@ public:
   [[nodiscard]] expected<void, error>
   period_ex(const TickType_t new_period_ticks,
             const TickType_t ticks_to_wait = portMAX_DELAY) {
-    if (!m_timer) {
+    if (m_timer == nullptr) {
       return unexpected<error>(error::invalid_handle);
     }
     auto rc = period(new_period_ticks, ticks_to_wait);
@@ -743,7 +743,7 @@ public:
   }
   [[nodiscard]] isr_result<expected<void, error>>
   period_ex_isr(const TickType_t new_period_ticks) {
-    if (!m_timer) {
+    if (m_timer == nullptr) {
       return isr_result<expected<void, error>>{
           unexpected<error>(error::invalid_handle), pdFALSE};
     }

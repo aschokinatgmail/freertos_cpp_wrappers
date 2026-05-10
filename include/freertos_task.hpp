@@ -301,7 +301,7 @@ public:
    */
   ~task() {
 #if INCLUDE_vTaskDelete
-    if (m_hTask) {
+    if (m_hTask != nullptr) {
       vTaskDelete(m_hTask);
     }
 #endif
@@ -311,7 +311,7 @@ public:
   task &operator=(task &&other) noexcept {
     configASSERT(!TaskAllocator::is_static);
 #if INCLUDE_vTaskDelete
-    if (m_hTask) {
+    if (m_hTask != nullptr) {
       vTaskDelete(m_hTask);
     }
 #endif

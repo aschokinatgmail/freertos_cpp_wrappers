@@ -67,7 +67,7 @@ public:
     atomic_flag &operator=(atomic_flag &&) = delete;
 
     ~atomic_flag() noexcept {
-        if (m_semaphore) {
+        if (m_semaphore != nullptr) {
             vSemaphoreDelete(m_semaphore);
         }
     }
@@ -89,7 +89,7 @@ public:
             return {};
         }
         ensure_semaphore();
-        if (!m_semaphore) {
+        if (m_semaphore == nullptr) {
             configASSERT(m_semaphore);
             return unexpected<error>(error::out_of_memory);
         }
@@ -101,7 +101,7 @@ public:
 
     void notify_one() noexcept {
         ensure_semaphore();
-        if (!m_semaphore) {
+        if (m_semaphore == nullptr) {
             return;
         }
         xSemaphoreGive(m_semaphore);
@@ -109,7 +109,7 @@ public:
 
     void notify_all() noexcept {
         ensure_semaphore();
-        if (!m_semaphore) {
+        if (m_semaphore == nullptr) {
             return;
         }
         UBaseType_t count = uxSemaphoreGetCount(m_semaphore);
@@ -126,7 +126,7 @@ public:
     }
 
     isr_result<void> notify_one_isr() noexcept {
-        if (!m_semaphore) {
+        if (m_semaphore == nullptr) {
             return {pdFALSE};
         }
         isr_result<void> result{pdFALSE};
@@ -135,7 +135,7 @@ public:
     }
 
     isr_result<void> notify_all_isr() noexcept {
-        if (!m_semaphore) {
+        if (m_semaphore == nullptr) {
             return {pdFALSE};
         }
         isr_result<void> result{pdFALSE};
@@ -160,7 +160,7 @@ public:
 
     [[nodiscard]] expected<void, error> notify_one_ex() noexcept {
         ensure_semaphore();
-        if (!m_semaphore) {
+        if (m_semaphore == nullptr) {
             return unexpected<error>(error::invalid_handle);
         }
         auto rc = xSemaphoreGive(m_semaphore);
@@ -172,7 +172,7 @@ public:
 
     [[nodiscard]] expected<void, error> notify_all_ex() noexcept {
         ensure_semaphore();
-        if (!m_semaphore) {
+        if (m_semaphore == nullptr) {
             return unexpected<error>(error::invalid_handle);
         }
         UBaseType_t count = uxSemaphoreGetCount(m_semaphore);
@@ -210,7 +210,7 @@ private:
                 m_semaphore = xSemaphoreCreateCounting(
                     FREERTOS_CPP_WRAPPERS_ATOMIC_FLAG_MAX_WAITERS, 0);
 #endif
-                if (m_semaphore) {
+                if (m_semaphore != nullptr) {
                     m_semaphore_created.store(1, std::memory_order_release);
                 }
             }
@@ -231,7 +231,7 @@ public:
     atomic_flag_static &operator=(atomic_flag_static &&) = delete;
 
     ~atomic_flag_static() noexcept {
-        if (m_semaphore) {
+        if (m_semaphore != nullptr) {
             vSemaphoreDelete(m_semaphore);
         }
     }
@@ -281,7 +281,7 @@ public:
     }
 
     isr_result<void> notify_one_isr() noexcept {
-        if (!m_semaphore) {
+        if (m_semaphore == nullptr) {
             return {pdFALSE};
         }
         isr_result<void> result{pdFALSE};
@@ -290,7 +290,7 @@ public:
     }
 
     isr_result<void> notify_all_isr() noexcept {
-        if (!m_semaphore) {
+        if (m_semaphore == nullptr) {
             return {pdFALSE};
         }
         isr_result<void> result{pdFALSE};
