@@ -194,8 +194,7 @@ typedef void (*TaskHookFunction_t)(void);
 #define taskENABLE_INTERRUPTS() // Host testing: Interrupt enable not applicable
 #define taskYIELD()             // Host testing: Task yield stubbed
 
-// Assert macro (no-op for host testing with comment)
-#define configASSERT(x) // Host testing: Assert not applicable, condition: x
+#define configASSERT(x) (void)(0)
 
 // Scheduler control macros
 #define vTaskSuspendAll()       // Host testing: Scheduler suspend stubbed

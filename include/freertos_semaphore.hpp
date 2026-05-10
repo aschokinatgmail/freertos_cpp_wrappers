@@ -1244,13 +1244,8 @@ public:
    *
    */
   ~lock_guard(void) FREERTOS_RELEASE() {
-    // Decrement before unlock so swap/move waiting on refcount==0 sees a
-    // consistent post-state immediately after the unlock returns. (#338)
     detail::guard_release(m_mutex);
-    // Return value intentionally discarded — pdFAIL during destruction
-    // is unexpected (we held the lock per RAII contract) but ignoring
-    // it preserves noexcept destructor semantics.
-    (void)m_mutex.unlock();
+    m_mutex.unlock();
   }
 
   // Delete copy and move operations for RAII safety
@@ -1298,11 +1293,8 @@ public:
    */
   ~try_lock_guard(void) FREERTOS_RELEASE() {
     if (m_lock_acquired) {
-      // Decrement before unlock — see lock_guard dtor (#338).
       detail::guard_release(m_mutex);
-      // Return value intentionally discarded — pdFAIL during destruction
-      // means the mutex wasn't actually held, which is acceptable here.
-      (void)m_mutex.unlock();
+      m_mutex.unlock();
     }
   }
 
@@ -1361,6 +1353,7 @@ public:
   ~lock_guard_isr(void) FREERTOS_RELEASE() {
     if (m_lock_acquired) {
       auto result = m_mutex.unlock_isr();
+      configASSERT(result.result == pdTRUE);
       m_high_priority_task_woken = result.higher_priority_task_woken;
     }
   }
@@ -1440,11 +1433,8 @@ public:
    */
   ~timeout_lock_guard(void) FREERTOS_RELEASE() {
     if (m_lock_acquired) {
-      // Decrement before unlock — see lock_guard dtor (#338).
       detail::guard_release(m_mutex);
-      // Return value intentionally discarded — pdFAIL during destruction
-      // means the mutex wasn't actually held, which is acceptable here.
-      (void)m_mutex.unlock();
+      m_mutex.unlock();
     }
   }
 

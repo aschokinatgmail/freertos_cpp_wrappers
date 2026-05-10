@@ -397,6 +397,7 @@ public:
 #if configUSE_TASK_NOTIFICATIONS
   void join(void) {
     configASSERT(m_hTask != nullptr);
+    configASSERT(m_joinHandle == nullptr);
     m_joinHandle = xTaskGetCurrentTaskHandle();
     ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
     vTaskDelete(m_hTask);

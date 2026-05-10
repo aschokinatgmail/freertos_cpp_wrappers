@@ -1,4 +1,5 @@
 #include "freertos_task.hpp"
+#include <limits>
 
 /**********************************************************************************
 @file freertos_task.cc
@@ -59,10 +60,20 @@ TaskHandle_t idle_task_handle(void) { return xTaskGetIdleTaskHandle(); }
 TickType_t tick_count(void) { return xTaskGetTickCount(); }
 TickType_t tick_count_isr(void) { return xTaskGetTickCountFromISR(); }
 std::chrono::milliseconds time_since_scheduler_started(void) {
-  return std::chrono::milliseconds{tick_count() * portTICK_PERIOD_MS};
+  auto ms = static_cast<uint64_t>(tick_count()) *
+            static_cast<uint64_t>(portTICK_PERIOD_MS);
+  if (ms > static_cast<uint64_t>(std::numeric_limits<TickType_t>::max())) {
+    return std::chrono::milliseconds{std::numeric_limits<TickType_t>::max()};
+  }
+  return std::chrono::milliseconds{static_cast<TickType_t>(ms)};
 }
 std::chrono::milliseconds time_since_scheduler_started_isr(void) {
-  return std::chrono::milliseconds{tick_count_isr() * portTICK_PERIOD_MS};
+  auto ms = static_cast<uint64_t>(tick_count_isr()) *
+            static_cast<uint64_t>(portTICK_PERIOD_MS);
+  if (ms > static_cast<uint64_t>(std::numeric_limits<TickType_t>::max())) {
+    return std::chrono::milliseconds{std::numeric_limits<TickType_t>::max()};
+  }
+  return std::chrono::milliseconds{static_cast<TickType_t>(ms)};
 }
 #if INCLUDE_xTaskGetSchedulerState || configUSE_TIMERS
 BaseType_t get_scheduler_state(void) { return xTaskGetSchedulerState(); }

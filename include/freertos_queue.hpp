@@ -198,6 +198,10 @@ public:
  * ```
  */
 template <size_t QueueLength, typename T, typename QueueAllocator> class queue {
+  static_assert(std::is_trivially_copyable_v<T>,
+                "Queue element type T must be trivially copyable — FreeRTOS "
+                "queues move items by memcpy, not by copy constructor");
+
   QueueAllocator m_allocator{};
   QueueHandle_t m_queue{nullptr};
 

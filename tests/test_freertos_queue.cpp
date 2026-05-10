@@ -94,21 +94,21 @@ TEST_F(FreeRTOSQueueTest, StaticQueueAllocatorCreate) {
 }
 
 TEST_F(FreeRTOSQueueTest, StaticQueueAllocatorDifferentTypes) {
-  // Test allocator with different data types
-  freertos::static_queue_allocator<3, std::string> string_allocator;
+  struct test_msg_t { uint32_t id; char data[16]; };
+  freertos::static_queue_allocator<3, test_msg_t> msg_allocator;
   freertos::static_queue_allocator<8, double> double_allocator;
 
   EXPECT_CALL(*mock,
-              xQueueCreateStatic(3, sizeof(std::string), NotNull(), NotNull()))
+              xQueueCreateStatic(3, sizeof(test_msg_t), NotNull(), NotNull()))
       .WillOnce(Return(mock_queue_handle));
   EXPECT_CALL(*mock,
               xQueueCreateStatic(8, sizeof(double), NotNull(), NotNull()))
       .WillOnce(Return(mock_queue_handle_2));
 
-  auto string_handle = string_allocator.create();
+  auto msg_handle = msg_allocator.create();
   auto double_handle = double_allocator.create();
 
-  EXPECT_EQ(string_handle, mock_queue_handle);
+  EXPECT_EQ(msg_handle, mock_queue_handle);
   EXPECT_EQ(double_handle, mock_queue_handle_2);
 }
 

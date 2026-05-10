@@ -256,7 +256,7 @@ TEST_F(Cpp17FeaturesTest, TemplateDeductionGuides) {
 
   // Test template parameter order for queues - they are created at construction
   sa::queue<10, int> int_queue;
-  sa::queue<5, std::string> string_queue;
+  sa::queue<5, uint32_t> uint_queue;
 
   // Queues should be created automatically during construction
   // No need to call create() explicitly
