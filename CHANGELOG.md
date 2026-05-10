@@ -7,8 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.2.1] - Unreleased
 
-Hotfix release window. Detailed changelog entries are tracked in the
-v3.2.1 release branch and will be consolidated here on tagging.
+### Fixed
+- Buffer reset_isr signatures now compile against pre-V10.6 FreeRTOS via `tskKERNEL_VERSION` guard (#302)
+- `to_ticks_saturating()` rewritten in 64-bit math; closes silent-corruption window (#303)
+- `is_contiguous_iterator_v` no longer false-positives on `std::deque::iterator` (#306)
+- `expected::value()` / `error()` / `operator->` accessors hardened with `FREERTOS_EXPECTED_REQUIRE` macro (#337)
+- `xEventGroupClearBitsFromISR` mock null-guards `g_freertos_mock` (#316)
+- `sw_timer` ISR `_ex` variants distinguish `error::invalid_handle` from `error::timer_queue_full` (#304)
+- `event_group::set_bits_ex_isr` returns correct error code for queue-full failures (#305)
+- `buffer_full` / `buffer_empty` / `message_too_large` error codes wired into `_ex` paths (#307)
+- `mutex::swap()` refuses to operate while RAII guards reference the mutex (#338)
+- `condition_variable_any` destructor asserts no pending waiters (#250)
+- External allocators assert against double-create (#253)
+- `atomic_flag notify_all` guards against count underflow (#255)
+- Counting semaphore allocators forward `initial_count` parameter (#229)
+- Static queue move/swap guarded by `configASSERT` (#258)
+- `event_group::wait_bits_ex` requires all bits when `wait_for_all_bits=true` (#265)
+- `atomic_wait` table size enforced as power-of-two (#240)
+- Wake-batch stack usage bounded and documented for IMPL=2 (#249)
+- Version strings reconciled to 3.2.1 across project (#318)
+- `.clang-format` updated for clang-format 16+ compatibility (#329)
+
+### Documentation
+- Removed stale `yield_if_needed()` references from `freertos_isr_result.hpp` doxygen (#301)
+- `freertos_atomic_wait.cc` version stamp synchronized (#308)
+- `event_group` ISR doxygen corrections (#310, #311)
+- `delay_until` chrono overloads document sub-millisecond truncation (#314)
 
 ## [3.1.0] - Unreleased
 
