@@ -17,6 +17,7 @@
 #include "FreeRTOS.h"
 #include "freertos_isr_result.hpp"
 #include "freertos_semaphore.hpp"
+#include <memory>
 
 using ::testing::_;
 using ::testing::DoAll;
@@ -31,20 +32,20 @@ static bool g_is_isr_context = false;
 class ConcurrencyTest : public ::testing::Test {
 protected:
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
     g_is_isr_context = false;
 
     mock_mutex_handle = reinterpret_cast<SemaphoreHandle_t>(0xDEADBEEF);
   }
 
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
     g_is_isr_context = false;
   }
 
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   SemaphoreHandle_t mock_mutex_handle;
 };
 

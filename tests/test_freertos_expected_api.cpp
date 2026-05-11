@@ -11,6 +11,7 @@
 #include "freertos_semaphore.hpp"
 #include "freertos_stream_buffer.hpp"
 #include "freertos_sw_timer.hpp"
+#include <memory>
 
 using ::testing::_;
 using ::testing::DoAll;
@@ -21,8 +22,8 @@ using ::testing::StrictMock;
 class ExpectedApiTest : public ::testing::Test {
 protected:
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
     mock_sem = reinterpret_cast<SemaphoreHandle_t>(0x11111111);
     mock_mutex_handle = reinterpret_cast<SemaphoreHandle_t>(0x22222222);
     mock_queue = reinterpret_cast<QueueHandle_t>(0x33333333);
@@ -32,10 +33,10 @@ protected:
     mock_mb = reinterpret_cast<MessageBufferHandle_t>(0x77777777);
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   SemaphoreHandle_t mock_sem;
   SemaphoreHandle_t mock_mutex_handle;
   QueueHandle_t mock_queue;

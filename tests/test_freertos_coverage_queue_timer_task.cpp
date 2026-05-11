@@ -41,8 +41,8 @@ using StaPeriodicTask = freertos::sa::periodic_task<1024>;
 class CoverageQueueTimerTaskTest : public ::testing::Test {
 protected:
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
     mock_queue = reinterpret_cast<QueueHandle_t>(0x1234);
     mock_queue2 = reinterpret_cast<QueueHandle_t>(0x5678);
     mock_timer = reinterpret_cast<TimerHandle_t>(0x2000);
@@ -51,11 +51,11 @@ protected:
   }
 
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   QueueHandle_t mock_queue;
   QueueHandle_t mock_queue2;
   TimerHandle_t mock_timer;

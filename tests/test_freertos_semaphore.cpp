@@ -40,6 +40,7 @@
 #include "FreeRTOS.h"
 #include "freertos_isr_result.hpp"
 #include "freertos_semaphore.hpp"
+#include <memory>
 
 using ::testing::_;
 using ::testing::NiceMock;
@@ -52,8 +53,8 @@ class FreeRTOSSemaphoreTest : public ::testing::Test {
 protected:
   void SetUp() override {
     // Create a strict mock for precise API verification
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
 
     // Create mock handles for testing
     mock_semaphore_handle = reinterpret_cast<SemaphoreHandle_t>(0x12345678);
@@ -63,11 +64,11 @@ protected:
   }
 
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   SemaphoreHandle_t mock_semaphore_handle;
   SemaphoreHandle_t mock_mutex_handle;
   SemaphoreHandle_t mock_recursive_mutex_handle;

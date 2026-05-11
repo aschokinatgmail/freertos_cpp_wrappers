@@ -9,6 +9,7 @@
 #include "freertos_message_buffer.hpp"
 #include "freertos_event_group.hpp"
 #include "freertos_sw_timer.hpp"
+#include <memory>
 
 using ::testing::_;
 using ::testing::Return;
@@ -17,14 +18,14 @@ using ::testing::NotNull;
 
 class ExVariantsSemTest : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   SemaphoreHandle_t h = reinterpret_cast<SemaphoreHandle_t>(0x1001);
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };
@@ -288,14 +289,14 @@ TEST_F(ExVariantsSemTest, RecursiveMutexTryLockExFailure) {
 // Event Group _ex variants
 class ExVariantsEventGroupTest : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   EventGroupHandle_t h = reinterpret_cast<EventGroupHandle_t>(0x2001);
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };
@@ -369,14 +370,14 @@ TEST_F(ExVariantsEventGroupTest, SyncExChrono) {
 // Queue _ex variants
 class ExVariantsQueueTest : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   QueueHandle_t h = reinterpret_cast<QueueHandle_t>(0x3001);
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };
@@ -507,14 +508,14 @@ TEST_F(ExVariantsQueueTest, OverwriteExFailure) {
 // Stream Buffer _ex variants
 class ExVariantsStreamBufferTest : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   StreamBufferHandle_t h = reinterpret_cast<StreamBufferHandle_t>(0x4001);
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };
@@ -684,14 +685,14 @@ TEST_F(ExVariantsStreamBufferTest, SetTriggerLevelExFailure) {
 // Message Buffer _ex variants
 class ExVariantsMessageBufferTest : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   MessageBufferHandle_t h = reinterpret_cast<MessageBufferHandle_t>(0x5001);
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };
@@ -837,14 +838,14 @@ TEST_F(ExVariantsMessageBufferTest, ResetExFailure) {
 // Timer _ex variants
 class ExVariantsTimerTest : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   TimerHandle_t h = reinterpret_cast<TimerHandle_t>(0x6001);
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };

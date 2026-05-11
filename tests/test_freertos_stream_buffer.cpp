@@ -46,6 +46,7 @@
 #include "../include/freertos_isr_result.hpp"
 #include "FreeRTOS.h"
 #include "freertos_stream_buffer.hpp"
+#include <memory>
 
 using ::testing::_;
 using ::testing::InSequence;
@@ -58,8 +59,8 @@ class FreeRTOSStreamBufferTest : public ::testing::Test {
 protected:
   void SetUp() override {
     // Create a strict mock for precise API verification
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
 
     // Create mock handles for testing
     mock_stream_buffer_handle =
@@ -69,11 +70,11 @@ protected:
   }
 
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   StreamBufferHandle_t mock_stream_buffer_handle;
   StreamBufferHandle_t mock_stream_buffer_handle_2;
 };

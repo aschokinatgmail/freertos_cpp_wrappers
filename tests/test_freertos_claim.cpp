@@ -3,6 +3,7 @@
 
 #include "FreeRTOS.h"
 #include "freertos_semaphore.hpp"
+#include <memory>
 
 using ::testing::_;
 using ::testing::Return;
@@ -11,19 +12,19 @@ using ::testing::StrictMock;
 class ClaimTest : public ::testing::Test {
 protected:
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
     mock_mutex_handle = reinterpret_cast<SemaphoreHandle_t>(0x87654321);
     mock_recursive_mutex_handle =
         reinterpret_cast<SemaphoreHandle_t>(0x11223344);
   }
 
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   SemaphoreHandle_t mock_mutex_handle;
   SemaphoreHandle_t mock_recursive_mutex_handle;
 };

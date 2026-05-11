@@ -4,6 +4,7 @@
 #include "FreeRTOS.h"
 #include "semphr.h"
 #include "task.h"
+#include <memory>
 
 #ifndef FREERTOS_CPP_WRAPPERS_HAS_STATIC_ALLOCATION
 #define FREERTOS_CPP_WRAPPERS_HAS_STATIC_ALLOCATION 1
@@ -247,15 +248,15 @@ static void test_libcpp_tls_set(test_libcpp_tls_key key, void *ptr) {
 
 class ExtThreadingMutexTest : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   SemaphoreHandle_t h = reinterpret_cast<SemaphoreHandle_t>(0x5001);
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };
@@ -320,15 +321,15 @@ TEST_F(ExtThreadingMutexTest, DestroyUninitialized) {
 
 class ExtThreadingRecMutexTest : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   SemaphoreHandle_t h = reinterpret_cast<SemaphoreHandle_t>(0x5101);
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };
@@ -385,15 +386,15 @@ TEST_F(ExtThreadingRecMutexTest, DestroyWithHandle) {
 
 class ExtThreadingCondvarTest : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   SemaphoreHandle_t sig_h = reinterpret_cast<SemaphoreHandle_t>(0x6001);
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };
@@ -434,14 +435,14 @@ TEST_F(ExtThreadingCondvarTest, DestroyNullSignal) {
 
 class ExtThreadingOnceTest : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };
@@ -459,14 +460,14 @@ TEST_F(ExtThreadingOnceTest, SkipsWhenAlreadyTwo) {
 
 class ExtThreadingThreadTest : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };
@@ -542,14 +543,14 @@ TEST_F(ExtThreadingThreadTest, GetId) {
 
 class ExtThreadingTlsTest : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };

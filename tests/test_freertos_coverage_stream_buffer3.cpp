@@ -34,18 +34,18 @@ protected:
 
 class ExtAllocStreamBuffer64Test : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock_ptr;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock_ptr;
 
   static void *test_allocate(size_t size) { return malloc(size); }
   static void test_deallocate(void *ptr) { free(ptr); }
 
   void SetUp() override {
-    mock_ptr = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock_ptr;
+    mock_ptr = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock_ptr.get();
   }
 
   void TearDown() override {
-    delete mock_ptr;
+    mock_ptr.reset();
     g_freertos_mock = nullptr;
   }
 };

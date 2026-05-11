@@ -21,6 +21,7 @@
 #define FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY 1
 #define FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL 3
 #include "freertos_atomic_wait.hpp"
+#include <memory>
 
 extern "C" bool __platform_wait_on_address(void const *addr,
                                            __cxx_atomic_contention_t const *expected,
@@ -46,17 +47,17 @@ using ::testing::StrictMock;
 class AtomicFlagTest : public ::testing::Test {
 protected:
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
     mock_semaphore_handle = reinterpret_cast<SemaphoreHandle_t>(0xAAAA0001);
   }
 
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   SemaphoreHandle_t mock_semaphore_handle;
 };
 
@@ -231,16 +232,16 @@ TEST_F(AtomicFlagTest, SemaphoreCreatedOnlyOnce) {
 class AtomicTest : public ::testing::Test {
 protected:
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
 
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
 };
 
 TEST_F(AtomicTest, DefaultConstructionZero) {
@@ -368,16 +369,16 @@ TEST_F(AtomicTest, IsStandardLayout) {
 class AtomicBoolSpecificTest : public ::testing::Test {
 protected:
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
 
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
 };
 
 TEST_F(AtomicBoolSpecificTest, StoreAndLoad) {
@@ -402,16 +403,16 @@ TEST_F(AtomicBoolSpecificTest, WaitReturnsImmediatelyWhenDifferent) {
 class AtomicPtrdiffTest : public ::testing::Test {
 protected:
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
 
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
 };
 
 TEST_F(AtomicPtrdiffTest, StoreAndLoad) {
@@ -425,17 +426,17 @@ TEST_F(AtomicPtrdiffTest, StoreAndLoad) {
 class StaticAtomicFlagTest : public ::testing::Test {
 protected:
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
     mock_semaphore_handle = reinterpret_cast<SemaphoreHandle_t>(0xAAAA0002);
   }
 
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   SemaphoreHandle_t mock_semaphore_handle;
 };
 
@@ -516,17 +517,17 @@ TEST_F(StaticAtomicFlagTest, SemaphoreCreatedOnlyOnce) {
 class DaAtomicFlagTest : public ::testing::Test {
 protected:
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
     mock_semaphore_handle = reinterpret_cast<SemaphoreHandle_t>(0xAAAA0003);
   }
 
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   SemaphoreHandle_t mock_semaphore_handle;
 };
 

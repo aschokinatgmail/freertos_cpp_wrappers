@@ -22,6 +22,7 @@
 
 #include "FreeRTOS.h"
 #include "freertos_semaphore.hpp"
+#include <memory>
 
 using ::testing::_;
 using ::testing::NiceMock;
@@ -34,16 +35,16 @@ using RecursiveMutex = freertos::da::recursive_mutex;
 class MutexSwapSafetyTest : public ::testing::Test {
 protected:
   void SetUp() override {
-    mock = new NiceMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<NiceMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
     h1 = reinterpret_cast<SemaphoreHandle_t>(0xA001);
     h2 = reinterpret_cast<SemaphoreHandle_t>(0xA002);
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
-  NiceMock<FreeRTOSMock> *mock;
+  std::unique_ptr<NiceMock<FreeRTOSMock>> mock;
   SemaphoreHandle_t h1;
   SemaphoreHandle_t h2;
 };

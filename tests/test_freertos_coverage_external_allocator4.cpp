@@ -3,6 +3,7 @@
 
 #include "FreeRTOS.h"
 #include "freertos_external_allocator.hpp"
+#include <memory>
 
 using ::testing::_;
 using ::testing::Return;
@@ -38,14 +39,14 @@ public:
 
 class ExternalAllocator4Test : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };

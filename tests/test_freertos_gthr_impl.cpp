@@ -4,6 +4,7 @@
 #include "FreeRTOS.h"
 #include "semphr.h"
 #include "task.h"
+#include <memory>
 
 #ifndef FREERTOS_CPP_WRAPPERS_HAS_STATIC_ALLOCATION
 #define FREERTOS_CPP_WRAPPERS_HAS_STATIC_ALLOCATION 1
@@ -194,16 +195,16 @@ static int test_gthread_active_p() {
 
 class GthrImplTest : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   SemaphoreHandle_t h = reinterpret_cast<SemaphoreHandle_t>(0x2001);
   SemaphoreHandle_t h2 = reinterpret_cast<SemaphoreHandle_t>(0x2002);
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };
@@ -282,15 +283,15 @@ TEST_F(GthrImplTest, MutexDestroyNullHandle) {
 
 class GthrRecursiveMutexTest : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   SemaphoreHandle_t h = reinterpret_cast<SemaphoreHandle_t>(0x2101);
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };
@@ -350,14 +351,14 @@ TEST_F(GthrRecursiveMutexTest, DestroyUninitialized) {
 
 class GthrOnceTest : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };
@@ -384,14 +385,14 @@ TEST_F(GthrOnceTest, SkipsWhenAlreadyTwo) {
 
 class GthrKeyTest : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };
@@ -409,14 +410,14 @@ TEST_F(GthrKeyTest, DeleteKeyAlwaysSucceeds) {
 
 class GthrActivePTest : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };
@@ -434,15 +435,15 @@ TEST_F(GthrActivePTest, ReturnsZeroWhenNotRunning) {
 
 class GthrCondImpl1Test : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   SemaphoreHandle_t sig_h = reinterpret_cast<SemaphoreHandle_t>(0x3001);
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };

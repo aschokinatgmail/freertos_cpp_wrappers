@@ -10,6 +10,7 @@
 #include "freertos_external_allocator.hpp"
 #include "freertos_expected.hpp"
 #include "freertos_isr_result.hpp"
+#include <memory>
 
 using ::testing::_;
 using ::testing::DoAll;
@@ -28,15 +29,15 @@ using ::testing::Expectation;
 
 class TaskCoverage2Test : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   TaskHandle_t fake_task = reinterpret_cast<TaskHandle_t>(0x3000);
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };
@@ -216,16 +217,16 @@ TEST_F(TaskCoverage2Test, StaticAllocator512IsNotAliveInvalid) {
 
 class PeriodicTaskCoverage2Test : public ::testing::Test {
 protected:
-  NiceMock<FreeRTOSMock> *mock;
+  std::unique_ptr<NiceMock<FreeRTOSMock>> mock;
   TaskHandle_t fake_task = reinterpret_cast<TaskHandle_t>(0x3000);
   int eTaskGetState_call_count = 0;
 
   void SetUp() override {
-    mock = new NiceMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<NiceMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };
@@ -414,15 +415,15 @@ StaticTimer_t TestExternalRegion::s_timer_buf{};
 
 class TimerCoverage2Test : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   TimerHandle_t fake_timer = reinterpret_cast<TimerHandle_t>(0x1000);
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };
@@ -526,15 +527,15 @@ private:
 
 class QueueCoverage2Test : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   QueueHandle_t fake_q = reinterpret_cast<QueueHandle_t>(0x4000);
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };
@@ -635,15 +636,15 @@ private:
 
 class EventGroupCoverage2Test : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   EventGroupHandle_t fake_eg = reinterpret_cast<EventGroupHandle_t>(0x2000);
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };

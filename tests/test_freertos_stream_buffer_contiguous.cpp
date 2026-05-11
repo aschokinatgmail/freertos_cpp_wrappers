@@ -34,6 +34,7 @@
 
 #include "FreeRTOS.h"
 #include "freertos_stream_buffer.hpp"
+#include <memory>
 
 using ::testing::_;
 using ::testing::AtLeast;
@@ -115,17 +116,17 @@ static_assert(
 class StreamBufferDequeFallbackTest : public ::testing::Test {
  protected:
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
     handle = reinterpret_cast<StreamBufferHandle_t>(0xC0FFEE);
   }
 
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 
-  StrictMock<FreeRTOSMock>* mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   StreamBufferHandle_t handle;
 };
 

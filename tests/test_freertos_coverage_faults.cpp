@@ -19,6 +19,7 @@
 #include "freertos_stream_buffer.hpp"
 #include "freertos_message_buffer.hpp"
 #include "freertos_external_allocator.hpp"
+#include <memory>
 
 using ::testing::_;
 using ::testing::Return;
@@ -42,15 +43,15 @@ void dummy_timer_callback(TimerHandle_t) {}
 
 class QueueNameTest : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   QueueHandle_t fake_q = reinterpret_cast<QueueHandle_t>(0x7001);
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };
@@ -90,15 +91,15 @@ TEST_F(QueueNameTest, MoveConstructNullHandleDestructor) {
 
 class QueueFaultTest : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   QueueHandle_t fake_q = reinterpret_cast<QueueHandle_t>(0x7002);
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };
@@ -242,15 +243,15 @@ TEST_F(QueueFaultTest, OverwriteExFailure) {
 
 class EventGroupFaultTest : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   EventGroupHandle_t fake_eg = reinterpret_cast<EventGroupHandle_t>(0x2001);
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };
@@ -293,15 +294,15 @@ TEST_F(EventGroupFaultTest, SetBitsExIsrSuccess) {
 
 class SemaphoreFaultTest : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   SemaphoreHandle_t fake_sem = reinterpret_cast<SemaphoreHandle_t>(0x5001);
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };
@@ -498,15 +499,15 @@ TEST_F(SemaphoreFaultTest, RecursiveMutexTryLockExSuccess) {
 
 class StreamBufferFaultTest : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   StreamBufferHandle_t fake_sb = reinterpret_cast<StreamBufferHandle_t>(0x4001);
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };
@@ -579,15 +580,15 @@ TEST_F(StreamBufferFaultTest, SetTriggerLevelExSuccess) {
 
 class MessageBufferFaultTest : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   MessageBufferHandle_t fake_mb = reinterpret_cast<MessageBufferHandle_t>(0x3001);
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };
@@ -651,15 +652,15 @@ TEST_F(MessageBufferFaultTest, ResetExSuccess) {
 
 class TimerFaultTest : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   TimerHandle_t fake_timer = reinterpret_cast<TimerHandle_t>(0x1000);
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };
@@ -825,15 +826,15 @@ TEST_F(TimerFaultTest, NullHandleReloadModeNoop) {
 
 class QueueSetFaultTest : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   QueueSetHandle_t fake_qs = reinterpret_cast<QueueSetHandle_t>(0x8001);
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };
@@ -877,15 +878,15 @@ TEST_F(QueueSetFaultTest, SelectExIsrSuccess) {
 
 class TaskFaultTest : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   TaskHandle_t fake_task = reinterpret_cast<TaskHandle_t>(0x3000);
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };
@@ -1049,122 +1050,122 @@ TEST(ExternalAllocatorTest, SemaphoreCreateRecursiveMutexFailure) {
 }
 
 TEST(ExternalAllocatorTest, EventGroupAllocateFailure) {
-  NiceMock<FreeRTOSMock> *nice_mock = new NiceMock<FreeRTOSMock>();
-  g_freertos_mock = nice_mock;
+  auto nice_mock = std::make_unique<NiceMock<FreeRTOSMock>>();
+  g_freertos_mock = nice_mock.get();
   MockRegion region;
   region.fail_after = 0;
   freertos::external_event_group_allocator<MockRegion> alloc(region);
   auto result = alloc.create();
   EXPECT_EQ(result, nullptr);
-  delete nice_mock;
+  nice_mock.reset();
   g_freertos_mock = nullptr;
 }
 
 TEST(ExternalAllocatorTest, StreamBufferStructAllocateFailure) {
-  NiceMock<FreeRTOSMock> *nice_mock = new NiceMock<FreeRTOSMock>();
-  g_freertos_mock = nice_mock;
+  auto nice_mock = std::make_unique<NiceMock<FreeRTOSMock>>();
+  g_freertos_mock = nice_mock.get();
   MockRegion region;
   region.fail_after = 0;
   freertos::external_stream_buffer_allocator<MockRegion, 64> alloc(region);
   auto result = alloc.create(1);
   EXPECT_EQ(result, nullptr);
-  delete nice_mock;
+  nice_mock.reset();
   g_freertos_mock = nullptr;
 }
 
 TEST(ExternalAllocatorTest, StreamBufferStorageAllocateFailure) {
-  NiceMock<FreeRTOSMock> *nice_mock = new NiceMock<FreeRTOSMock>();
-  g_freertos_mock = nice_mock;
+  auto nice_mock = std::make_unique<NiceMock<FreeRTOSMock>>();
+  g_freertos_mock = nice_mock.get();
   MockRegion region;
   region.fail_after = 1;
   freertos::external_stream_buffer_allocator<MockRegion, 64> alloc(region);
   auto result = alloc.create(1);
   EXPECT_EQ(result, nullptr);
-  delete nice_mock;
+  nice_mock.reset();
   g_freertos_mock = nullptr;
 }
 
 TEST(ExternalAllocatorTest, MessageBufferStructAllocateFailure) {
-  NiceMock<FreeRTOSMock> *nice_mock = new NiceMock<FreeRTOSMock>();
-  g_freertos_mock = nice_mock;
+  auto nice_mock = std::make_unique<NiceMock<FreeRTOSMock>>();
+  g_freertos_mock = nice_mock.get();
   MockRegion region;
   region.fail_after = 0;
   freertos::external_message_buffer_allocator<MockRegion, 256> alloc(region);
   auto result = alloc.create();
   EXPECT_EQ(result, nullptr);
-  delete nice_mock;
+  nice_mock.reset();
   g_freertos_mock = nullptr;
 }
 
 TEST(ExternalAllocatorTest, MessageBufferStorageAllocateFailure) {
-  NiceMock<FreeRTOSMock> *nice_mock = new NiceMock<FreeRTOSMock>();
-  g_freertos_mock = nice_mock;
+  auto nice_mock = std::make_unique<NiceMock<FreeRTOSMock>>();
+  g_freertos_mock = nice_mock.get();
   MockRegion region;
   region.fail_after = 1;
   freertos::external_message_buffer_allocator<MockRegion, 256> alloc(region);
   auto result = alloc.create();
   EXPECT_EQ(result, nullptr);
-  delete nice_mock;
+  nice_mock.reset();
   g_freertos_mock = nullptr;
 }
 
 TEST(ExternalAllocatorTest, SwTimerAllocateFailure) {
-  NiceMock<FreeRTOSMock> *nice_mock = new NiceMock<FreeRTOSMock>();
-  g_freertos_mock = nice_mock;
+  auto nice_mock = std::make_unique<NiceMock<FreeRTOSMock>>();
+  g_freertos_mock = nice_mock.get();
   MockRegion region;
   region.fail_after = 0;
   freertos::external_sw_timer_allocator<MockRegion> alloc(region);
   auto result = alloc.create("t", 100, pdTRUE, nullptr, dummy_timer_callback);
   EXPECT_EQ(result, nullptr);
-  delete nice_mock;
+  nice_mock.reset();
   g_freertos_mock = nullptr;
 }
 
 TEST(ExternalAllocatorTest, TaskStructAllocateFailure) {
-  NiceMock<FreeRTOSMock> *nice_mock = new NiceMock<FreeRTOSMock>();
-  g_freertos_mock = nice_mock;
+  auto nice_mock = std::make_unique<NiceMock<FreeRTOSMock>>();
+  g_freertos_mock = nice_mock.get();
   MockRegion region;
   region.fail_after = 0;
   freertos::external_task_allocator<MockRegion, 512> alloc(region);
   auto result = alloc.create(nullptr, "t", 1, nullptr);
   EXPECT_EQ(result, nullptr);
-  delete nice_mock;
+  nice_mock.reset();
   g_freertos_mock = nullptr;
 }
 
 TEST(ExternalAllocatorTest, TaskStackAllocateFailure) {
-  NiceMock<FreeRTOSMock> *nice_mock = new NiceMock<FreeRTOSMock>();
-  g_freertos_mock = nice_mock;
+  auto nice_mock = std::make_unique<NiceMock<FreeRTOSMock>>();
+  g_freertos_mock = nice_mock.get();
   MockRegion region;
   region.fail_after = 1;
   freertos::external_task_allocator<MockRegion, 512> alloc(region);
   auto result = alloc.create(nullptr, "t", 1, nullptr);
   EXPECT_EQ(result, nullptr);
-  delete nice_mock;
+  nice_mock.reset();
   g_freertos_mock = nullptr;
 }
 
 TEST(ExternalAllocatorTest, QueueStructAllocateFailure) {
-  NiceMock<FreeRTOSMock> *nice_mock = new NiceMock<FreeRTOSMock>();
-  g_freertos_mock = nice_mock;
+  auto nice_mock = std::make_unique<NiceMock<FreeRTOSMock>>();
+  g_freertos_mock = nice_mock.get();
   MockRegion region;
   region.fail_after = 0;
   freertos::external_queue_allocator<MockRegion, 10, int> alloc(region);
   auto result = alloc.create();
   EXPECT_EQ(result, nullptr);
-  delete nice_mock;
+  nice_mock.reset();
   g_freertos_mock = nullptr;
 }
 
 TEST(ExternalAllocatorTest, QueueStorageAllocateFailure) {
-  NiceMock<FreeRTOSMock> *nice_mock = new NiceMock<FreeRTOSMock>();
-  g_freertos_mock = nice_mock;
+  auto nice_mock = std::make_unique<NiceMock<FreeRTOSMock>>();
+  g_freertos_mock = nice_mock.get();
   MockRegion region;
   region.fail_after = 1;
   freertos::external_queue_allocator<MockRegion, 10, int> alloc(region);
   auto result = alloc.create();
   EXPECT_EQ(result, nullptr);
-  delete nice_mock;
+  nice_mock.reset();
   g_freertos_mock = nullptr;
 }
 // ================================================================
@@ -1398,15 +1399,15 @@ TEST_F(EventGroupFaultTest, SyncExWouldBlock) {
 
 class EventGroupMoveTest : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   EventGroupHandle_t fake_eg = reinterpret_cast<EventGroupHandle_t>(0x2002);
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };
@@ -1528,15 +1529,15 @@ TEST_F(SemaphoreFaultTest, MutexTryLockUntilFailure) {
 
 class SemaphoreMoveFromNullTest : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   SemaphoreHandle_t fake_sem = reinterpret_cast<SemaphoreHandle_t>(0x5002);
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };
@@ -1591,15 +1592,15 @@ private:
 
 class SemArgCtorTest : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   SemaphoreHandle_t fake_sem = reinterpret_cast<SemaphoreHandle_t>(0x5A01);
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };
@@ -1771,15 +1772,15 @@ TEST_F(TimerFaultTest, NullHandleStopExReturnsError) {
 
 class TimerMoveTest : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   TimerHandle_t fake_timer = reinterpret_cast<TimerHandle_t>(0x1001);
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };
@@ -1879,15 +1880,15 @@ TEST_F(TimerMoveTest, MoveAssignmentNotStarted) {
 
 class TaskMoveFromNullTest : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   TaskHandle_t fake_task = reinterpret_cast<TaskHandle_t>(0x3001);
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };
@@ -1905,14 +1906,14 @@ TEST_F(TaskMoveFromNullTest, TaskMoveThenDestroy) {
 
 class QueueSetNullHandleTest : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };
@@ -1931,15 +1932,15 @@ TEST_F(QueueSetNullHandleTest, NullHandleDestructor) {
 
 class QueueChronoTest : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   QueueHandle_t fake_q = reinterpret_cast<QueueHandle_t>(0x7003);
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };
@@ -2287,15 +2288,15 @@ TEST_F(QueueChronoTest, PeekIsrOptThrows) {
 
 class SemChronoTest : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   SemaphoreHandle_t fake_sem = reinterpret_cast<SemaphoreHandle_t>(0x5003);
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };
@@ -2573,15 +2574,15 @@ TEST_F(SemChronoTest, TimeoutLockGuardNotLocked) {
 
 class TimerChronoTest : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   TimerHandle_t fake_timer = reinterpret_cast<TimerHandle_t>(0x1000);
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };
@@ -2666,15 +2667,15 @@ TEST_F(TimerChronoTest, PeriodExChrono) {
 
 class EventGroupChronoTest : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   EventGroupHandle_t fake_eg = reinterpret_cast<EventGroupHandle_t>(0x2003);
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };
@@ -2783,15 +2784,15 @@ TEST_F(EventGroupChronoTest, SetBitsExIsrThrows) {
 
 class StreamBufferChronoTest : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   StreamBufferHandle_t fake_sb = reinterpret_cast<StreamBufferHandle_t>(0x4003);
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };
@@ -2940,15 +2941,15 @@ TEST_F(StreamBufferChronoTest, ReceiveExIsrThrows) {
 
 class MessageBufferChronoTest : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   MessageBufferHandle_t fake_mb = reinterpret_cast<MessageBufferHandle_t>(0x3003);
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };
@@ -3095,15 +3096,15 @@ TEST_F(MessageBufferChronoTest, ReceiveExIsrThrows) {
 
 class QueueSetChronoTest : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   QueueSetHandle_t fake_qs = reinterpret_cast<QueueSetHandle_t>(0x8003);
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };
@@ -3169,14 +3170,14 @@ TEST_F(QueueSetChronoTest, SelectExIsrThrows) {
 
 class TaskFreeFuncChronoTest : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };
@@ -3439,68 +3440,68 @@ TEST(ExternalAllocatorTest, SemaphoreMoveFromNullDestructor) {
 }
 
 TEST(ExternalAllocatorTest, QueueMoveFromNullDestructor) {
-  NiceMock<FreeRTOSMock> *nice_mock = new NiceMock<FreeRTOSMock>();
-  g_freertos_mock = nice_mock;
+  auto nice_mock = std::make_unique<NiceMock<FreeRTOSMock>>();
+  g_freertos_mock = nice_mock.get();
   MockRegion region;
   freertos::external_queue_allocator<MockRegion, 10, int> alloc(region);
   auto q = alloc.create();
   auto alloc2 = std::move(alloc);
-  delete nice_mock;
+  nice_mock.reset();
   g_freertos_mock = nullptr;
 }
 
 TEST(ExternalAllocatorTest, EventGroupMoveFromNullDestructor) {
-  NiceMock<FreeRTOSMock> *nice_mock = new NiceMock<FreeRTOSMock>();
-  g_freertos_mock = nice_mock;
+  auto nice_mock = std::make_unique<NiceMock<FreeRTOSMock>>();
+  g_freertos_mock = nice_mock.get();
   MockRegion region;
   freertos::external_event_group_allocator<MockRegion> alloc(region);
   auto eg = alloc.create();
   auto alloc2 = std::move(alloc);
-  delete nice_mock;
+  nice_mock.reset();
   g_freertos_mock = nullptr;
 }
 
 TEST(ExternalAllocatorTest, StreamBufferMoveFromNullDestructor) {
-  NiceMock<FreeRTOSMock> *nice_mock = new NiceMock<FreeRTOSMock>();
-  g_freertos_mock = nice_mock;
+  auto nice_mock = std::make_unique<NiceMock<FreeRTOSMock>>();
+  g_freertos_mock = nice_mock.get();
   MockRegion region;
   freertos::external_stream_buffer_allocator<MockRegion, 64> alloc(region);
   auto sb = alloc.create(1);
   auto alloc2 = std::move(alloc);
-  delete nice_mock;
+  nice_mock.reset();
   g_freertos_mock = nullptr;
 }
 
 TEST(ExternalAllocatorTest, MessageBufferMoveFromNullDestructor) {
-  NiceMock<FreeRTOSMock> *nice_mock = new NiceMock<FreeRTOSMock>();
-  g_freertos_mock = nice_mock;
+  auto nice_mock = std::make_unique<NiceMock<FreeRTOSMock>>();
+  g_freertos_mock = nice_mock.get();
   MockRegion region;
   freertos::external_message_buffer_allocator<MockRegion, 256> alloc(region);
   auto mb = alloc.create();
   auto alloc2 = std::move(alloc);
-  delete nice_mock;
+  nice_mock.reset();
   g_freertos_mock = nullptr;
 }
 
 TEST(ExternalAllocatorTest, SwTimerMoveFromNullDestructor) {
-  NiceMock<FreeRTOSMock> *nice_mock = new NiceMock<FreeRTOSMock>();
-  g_freertos_mock = nice_mock;
+  auto nice_mock = std::make_unique<NiceMock<FreeRTOSMock>>();
+  g_freertos_mock = nice_mock.get();
   MockRegion region;
   freertos::external_sw_timer_allocator<MockRegion> alloc(region);
   auto timer = alloc.create("t", 100, pdTRUE, nullptr, dummy_timer_callback);
   auto alloc2 = std::move(alloc);
-  delete nice_mock;
+  nice_mock.reset();
   g_freertos_mock = nullptr;
 }
 
 TEST(ExternalAllocatorTest, TaskMoveFromNullDestructor) {
-  NiceMock<FreeRTOSMock> *nice_mock = new NiceMock<FreeRTOSMock>();
-  g_freertos_mock = nice_mock;
+  auto nice_mock = std::make_unique<NiceMock<FreeRTOSMock>>();
+  g_freertos_mock = nice_mock.get();
   MockRegion region;
   freertos::external_task_allocator<MockRegion, 512> alloc(region);
   auto task = alloc.create(nullptr, "t", 1, nullptr);
   auto alloc2 = std::move(alloc);
-  delete nice_mock;
+  nice_mock.reset();
   g_freertos_mock = nullptr;
 }
 
@@ -3699,15 +3700,15 @@ TEST_F(TaskFaultTest, DynamicPeriodicTaskOperatorChronoLong) {
 
 class SemaphoreCoverageTest : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   SemaphoreHandle_t fake_sem = reinterpret_cast<SemaphoreHandle_t>(0x4000);
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };

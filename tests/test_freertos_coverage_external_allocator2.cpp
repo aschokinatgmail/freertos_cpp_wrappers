@@ -4,6 +4,7 @@
 
 #include "FreeRTOS.h"
 #include "freertos.hpp"
+#include <memory>
 
 using ::testing::_;
 using ::testing::Return;
@@ -26,18 +27,18 @@ static void *test_allocate_partial(size_t size) {
 
 class ExternalAllocatorCoverageTest : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   TestMemoryRegion region{test_allocate, test_deallocate};
   TestMemoryRegion fail_region{test_allocate_fail, test_deallocate};
   TestMemoryRegion partial_region{test_allocate_partial, test_deallocate};
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
     g_alloc_count = 0;
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };

@@ -16,6 +16,7 @@
 #include "freertos_event_group.hpp"
 #include "freertos_stream_buffer.hpp"
 #include "freertos_message_buffer.hpp"
+#include <memory>
 
 using ::testing::_;
 using ::testing::Return;
@@ -31,15 +32,15 @@ void dummy_timer_callback(TimerHandle_t) {}
 
 class TaskNotifyTest : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   TaskHandle_t fake_task = reinterpret_cast<TaskHandle_t>(0x3000);
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };
@@ -173,15 +174,15 @@ TEST_F(TaskNotifyTest, DynamicTaskAllocatorCreateFailure) {
 
 class TimerComplexTest : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   TimerHandle_t fake_timer = reinterpret_cast<TimerHandle_t>(0x1000);
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };
@@ -227,7 +228,7 @@ TEST_F(TimerComplexTest, SelfAssignment) {
 
 class MoveAssignmentTest : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   SemaphoreHandle_t sem1 = reinterpret_cast<SemaphoreHandle_t>(0x4001);
   SemaphoreHandle_t sem2 = reinterpret_cast<SemaphoreHandle_t>(0x4002);
   QueueHandle_t q1 = reinterpret_cast<QueueHandle_t>(0x5001);
@@ -240,11 +241,11 @@ protected:
   MessageBufferHandle_t mb2 = reinterpret_cast<MessageBufferHandle_t>(0x8002);
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };
@@ -365,14 +366,14 @@ TEST_F(MoveAssignmentTest, QueueOverwrite) {
 
 class NullHandleTest : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };
@@ -403,15 +404,15 @@ TEST_F(NullHandleTest, MessageBufferEmptyAndFull) {
 
 class QueueIsrTest : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   QueueHandle_t fake_queue = reinterpret_cast<QueueHandle_t>(0x5000);
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };
@@ -470,15 +471,15 @@ TEST_F(QueueIsrTest, ReceiveIsrTypedVariant) {
 
 class EventGroupChronoTest : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   EventGroupHandle_t fake_eg = reinterpret_cast<EventGroupHandle_t>(0x6000);
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };
@@ -555,15 +556,15 @@ TEST_F(EventGroupChronoTest, SyncExPartialBits) {
 
 class SemaphoreChronoTest : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   SemaphoreHandle_t fake_sem = reinterpret_cast<SemaphoreHandle_t>(0x4000);
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };
@@ -667,15 +668,15 @@ TEST_F(SemaphoreChronoTest, CountingSemaphoreTakeExIsrFailure) {
 
 class QueueExtraTest : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   QueueHandle_t fake_queue = reinterpret_cast<QueueHandle_t>(0x5000);
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };
@@ -718,15 +719,15 @@ TEST_F(QueueExtraTest, QueueSendBackChrono) {
 
 class StreamBufferExtraTest : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   StreamBufferHandle_t fake_sb = reinterpret_cast<StreamBufferHandle_t>(0x7000);
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };
@@ -758,15 +759,15 @@ TEST_F(StreamBufferExtraTest, ReceiveExIsrFailure) {
 
 class MessageBufferExtraTest : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   MessageBufferHandle_t fake_mb = reinterpret_cast<MessageBufferHandle_t>(0x8000);
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };
@@ -866,15 +867,15 @@ TEST_F(MessageBufferExtraTest, ResetExFailure) {
 
 class EventGroupIsrTest : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   EventGroupHandle_t fake_eg = reinterpret_cast<EventGroupHandle_t>(0x6000);
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };

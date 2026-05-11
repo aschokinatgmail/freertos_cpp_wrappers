@@ -3,6 +3,7 @@
 
 #include "FreeRTOS.h"
 #include "freertos_once_flag.hpp"
+#include <memory>
 
 using ::testing::_;
 using ::testing::Return;
@@ -11,17 +12,17 @@ using ::testing::StrictMock;
 class OnceFlagTest : public ::testing::Test {
 protected:
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
     counter = 0;
   }
 
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   int counter;
 
   static void set_initialized(freertos::once_flag &flag) {

@@ -3,6 +3,7 @@
 
 #include "FreeRTOS.h"
 #include "freertos.hpp"
+#include <memory>
 
 using ::testing::_;
 using ::testing::Return;
@@ -19,18 +20,18 @@ static void *test_allocate_fail(size_t) { return nullptr; }
 class ExternalAllocatorTest : public ::testing::Test {
 protected:
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
     region.allocate = test_allocate;
     region.deallocate = test_deallocate;
   }
 
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   TestMemoryRegion region;
 };
 

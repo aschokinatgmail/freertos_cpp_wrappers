@@ -36,6 +36,7 @@
 #include "freertos_stream_buffer.hpp"
 #include "freertos_sw_timer.hpp"
 #include "freertos_task.hpp"
+#include <memory>
 
 using ::testing::_;
 using ::testing::DoAll;
@@ -216,16 +217,16 @@ static_assert(std::is_move_assignable_v<
 class FreeRTOSMoveSemanticsTest : public ::testing::Test {
 protected:
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
 
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
 };
 
 // Helper: empty task functions

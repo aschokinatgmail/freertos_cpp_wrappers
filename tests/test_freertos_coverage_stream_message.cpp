@@ -9,6 +9,7 @@
 #include "../include/freertos_isr_result.hpp"
 #include "freertos_stream_buffer.hpp"
 #include "freertos_message_buffer.hpp"
+#include <memory>
 
 using ::testing::_;
 using ::testing::DoAll;
@@ -21,8 +22,8 @@ using ::testing::WithArg;
 class StreamMessageCoverageTest : public ::testing::Test {
 protected:
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
     sb_handle = reinterpret_cast<StreamBufferHandle_t>(0x1000);
     sb_handle2 = reinterpret_cast<StreamBufferHandle_t>(0x2000);
     mb_handle = reinterpret_cast<MessageBufferHandle_t>(0x3000);
@@ -30,11 +31,11 @@ protected:
   }
 
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   StreamBufferHandle_t sb_handle;
   StreamBufferHandle_t sb_handle2;
   MessageBufferHandle_t mb_handle;

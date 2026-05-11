@@ -40,6 +40,7 @@
 #include "FreeRTOS.h"
 #include "freertos_isr_result.hpp"
 #include "freertos_queue.hpp"
+#include <memory>
 
 using ::testing::_;
 using ::testing::DoAll;
@@ -54,8 +55,8 @@ class FreeRTOSQueueTest : public ::testing::Test {
 protected:
   void SetUp() override {
     // Create a strict mock for precise API verification
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
 
     // Create mock handles for testing
     mock_queue_handle = reinterpret_cast<QueueHandle_t>(0x12345678);
@@ -63,11 +64,11 @@ protected:
   }
 
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   QueueHandle_t mock_queue_handle;
   QueueHandle_t mock_queue_handle_2;
 };

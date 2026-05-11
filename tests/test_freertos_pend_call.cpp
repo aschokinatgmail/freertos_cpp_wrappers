@@ -6,6 +6,7 @@
 #include "FreeRTOS.h"
 #include "freertos_expected.hpp"
 #include "freertos_pend_call.hpp"
+#include <memory>
 
 using ::testing::_;
 using ::testing::DoAll;
@@ -16,16 +17,16 @@ using ::testing::StrictMock;
 class PendCallTest : public ::testing::Test {
 protected:
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
 
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
 };
 
 static void test_callback(void *arg1, uint32_t arg2) {
@@ -152,16 +153,16 @@ TEST_F(PendCallTest, PendCallLambdaOOMReturnsFalse) {
 class PendCallExTest : public ::testing::Test {
 protected:
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
 
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
 };
 
 TEST_F(PendCallExTest, PendCallExRawFunctionQueueFullReturnsTimeout) {

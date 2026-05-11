@@ -35,11 +35,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <chrono>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <memory>
 
-// Include mock headers first to override FreeRTOS definitions
-#include "mocks/freertos_mocks.hpp"
-
-// Include the module under test
 #include "freertos_event_group.hpp"
 
 #include "../include/freertos_isr_result.hpp"
@@ -56,16 +53,17 @@ using ::testing::StrictMock;
 class FreeRTOSEventGroupTest : public ::testing::Test {
 protected:
   void SetUp() override {
-    mock = FreeRTOSMockInstance::getInstance();
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
     mock_event_group_handle = reinterpret_cast<EventGroupHandle_t>(0x12345678);
   }
 
   void TearDown() override {
-    // Reset the mock instance
-    FreeRTOSMockInstance::resetInstance();
+    g_freertos_mock = nullptr;
+    mock.reset();
   }
 
-  std::shared_ptr<::testing::StrictMock<::FreeRTOSMock>> mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   EventGroupHandle_t mock_event_group_handle;
 };
 

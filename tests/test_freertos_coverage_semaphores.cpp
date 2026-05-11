@@ -4,6 +4,7 @@
 
 #include "FreeRTOS.h"
 #include "freertos_semaphore.hpp"
+#include <memory>
 
 using ::testing::_;
 using ::testing::DoAll;
@@ -18,19 +19,19 @@ using freertos::unexpected;
 class CoverageSemaphoreTest : public ::testing::Test {
 protected:
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
     mock_sem = reinterpret_cast<SemaphoreHandle_t>(0x1000);
     mock_mutex = reinterpret_cast<SemaphoreHandle_t>(0x2000);
     mock_recursive_mutex = reinterpret_cast<SemaphoreHandle_t>(0x3000);
   }
 
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   SemaphoreHandle_t mock_sem;
   SemaphoreHandle_t mock_mutex;
   SemaphoreHandle_t mock_recursive_mutex;

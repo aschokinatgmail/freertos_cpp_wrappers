@@ -10,6 +10,7 @@
 #include <stdexcept>
 #include <chrono>
 #include <mutex>
+#include <memory>
 
 using ::testing::_;
 using ::testing::Return;
@@ -75,18 +76,18 @@ public:
 class SharedDataExceptionTest : public ::testing::Test {
 protected:
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
     ResetThrowingFlags();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
     ThrowingCopy::copy_throws = false;
     ThrowingCopy::assign_throws = false;
     ThrowingCopy::move_assign_throws = false;
   }
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   SemaphoreHandle_t mock_handle =
       reinterpret_cast<SemaphoreHandle_t>(0xABCDEFFF);
 };
@@ -186,14 +187,14 @@ TEST_F(SharedDataExceptionTest, SetExMoveThrowsOnMoveAssignment) {
 class MutexClaimExceptionTest : public ::testing::Test {
 protected:
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   SemaphoreHandle_t mock_handle =
       reinterpret_cast<SemaphoreHandle_t>(0x87654321);
 };
@@ -331,14 +332,14 @@ TEST(ConditionVariablePastDeadline, WaitUntilPredicatePastDeadlineFalse) {
 class LatchBranchTest : public ::testing::Test {
 protected:
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   SemaphoreHandle_t mock_handle =
       reinterpret_cast<SemaphoreHandle_t>(0x11111111);
 };

@@ -14,6 +14,7 @@
 #include "freertos_stream_buffer.hpp"
 #include "freertos_sw_timer.hpp"
 #include "freertos_task.hpp"
+#include <memory>
 
 using ::testing::_;
 using ::testing::DoAll;
@@ -132,15 +133,15 @@ TEST_F(ExpectedCoverageTest, ExpectedSelfAssignment) {
 class StreamBufferCoverageTest : public ::testing::Test {
 protected:
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
     mock_sb = reinterpret_cast<StreamBufferHandle_t>(0x66666666);
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   StreamBufferHandle_t mock_sb;
 };
 
@@ -287,15 +288,15 @@ TEST_F(StreamBufferCoverageTest, StreamBufferSetTriggerLevelExFailure) {
 class MessageBufferCoverageTest : public ::testing::Test {
 protected:
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
     mock_mb = reinterpret_cast<MessageBufferHandle_t>(0x77777777);
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   MessageBufferHandle_t mock_mb;
 };
 
@@ -430,15 +431,15 @@ TEST_F(MessageBufferCoverageTest, MessageBufferResetExFailure) {
 class EventGroupCoverageTest : public ::testing::Test {
 protected:
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
     mock_eg = reinterpret_cast<EventGroupHandle_t>(0x55555555);
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   EventGroupHandle_t mock_eg;
 };
 
@@ -506,15 +507,15 @@ TEST_F(EventGroupCoverageTest, EventGroupSyncExChrono) {
 class QueueCoverageTest : public ::testing::Test {
 protected:
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
     mock_queue = reinterpret_cast<QueueHandle_t>(0x33333333);
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   QueueHandle_t mock_queue;
 };
 
@@ -736,15 +737,15 @@ TEST_F(QueueCoverageTest, QueuePeekExChrono) {
 class TimerCoverageTest : public ::testing::Test {
 protected:
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
     mock_timer = reinterpret_cast<TimerHandle_t>(0x44444444);
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   TimerHandle_t mock_timer;
 };
 
@@ -841,17 +842,17 @@ TEST_F(TimerCoverageTest, TimerPeriodExIsr) {
 class QueueSetCoverageTest : public ::testing::Test {
 protected:
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
     mock_queue_set_handle = reinterpret_cast<QueueSetHandle_t>(0x12345678);
     mock_member_handle =
         reinterpret_cast<QueueSetMemberHandle_t>(0xAAAABBBB);
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   QueueSetHandle_t mock_queue_set_handle;
   QueueSetMemberHandle_t mock_member_handle;
 };
@@ -911,16 +912,16 @@ TEST_F(QueueSetCoverageTest, QueueSetSelectExIsr) {
 class ExternalAllocatorCoverageTest : public ::testing::Test {
 protected:
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
     region.allocate = test_allocate;
     region.deallocate = test_deallocate;
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   freertos::external_memory_region region;
 
   static void *test_allocate(size_t size) { return malloc(size); }
@@ -1785,15 +1786,15 @@ TEST_F(EventGroupCoverageTest, EventGroupNullHandleDestructorSkip) {
 class TaskCoverageTest : public ::testing::Test {
 protected:
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
     mock_task = reinterpret_cast<TaskHandle_t>(0x22222222);
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   TaskHandle_t mock_task;
 };
 

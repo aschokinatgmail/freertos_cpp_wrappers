@@ -17,6 +17,7 @@
 
 #include "FreeRTOS.h"
 #include "freertos_latch.hpp"
+#include <memory>
 
 using ::testing::_;
 using ::testing::DoAll;
@@ -28,17 +29,17 @@ using ::testing::StrictMock;
 class LatchTest : public ::testing::Test {
 protected:
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
     mock_semaphore_handle = reinterpret_cast<SemaphoreHandle_t>(0x11111111);
   }
 
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   SemaphoreHandle_t mock_semaphore_handle;
 };
 
@@ -404,17 +405,17 @@ TEST_F(LatchTest, DynamicLatch_CountDownExIsrZeroUpdate) {
 class StaticLatchTest : public ::testing::Test {
 protected:
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
     mock_semaphore_handle = reinterpret_cast<SemaphoreHandle_t>(0x22222222);
   }
 
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   SemaphoreHandle_t mock_semaphore_handle;
 };
 
@@ -636,17 +637,17 @@ TEST_F(StaticLatchTest, CountDownExIsrZeroUpdate) {
 class DaLatchTest : public ::testing::Test {
 protected:
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
     mock_semaphore_handle = reinterpret_cast<SemaphoreHandle_t>(0x33333333);
   }
 
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   SemaphoreHandle_t mock_semaphore_handle;
 };
 

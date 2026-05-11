@@ -16,6 +16,7 @@
 #include "freertos_stream_buffer.hpp"
 #include "freertos_message_buffer.hpp"
 #include "freertos_task.hpp"
+#include <memory>
 
 using ::testing::_;
 using ::testing::Return;
@@ -34,15 +35,15 @@ void empty_task_routine() {}
 
 class QueueBranch4Test : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   QueueHandle_t fake_q = reinterpret_cast<QueueHandle_t>(0xA001);
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };
@@ -332,15 +333,15 @@ TEST_F(QueueBranch4Test, SaQueue16CharMovedFromDestructor) {
 
 class StreamBufferBranch4Test : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   StreamBufferHandle_t fake_sb = reinterpret_cast<StreamBufferHandle_t>(0xB001);
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };
@@ -470,15 +471,15 @@ TEST_F(StreamBufferBranch4Test, SaStreamBuffer100MovedFromDestruction) {
 
 class MessageBufferBranch4Test : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   MessageBufferHandle_t fake_mb = reinterpret_cast<MessageBufferHandle_t>(0xC001);
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };
@@ -540,15 +541,15 @@ TEST_F(MessageBufferBranch4Test, SaMessageBuffer64MovedFromDestruction) {
 
 class TaskBranch4Test : public ::testing::Test {
 protected:
-  StrictMock<FreeRTOSMock> *mock;
+  std::unique_ptr<StrictMock<FreeRTOSMock>> mock;
   TaskHandle_t fake_task = reinterpret_cast<TaskHandle_t>(0xD001);
 
   void SetUp() override {
-    mock = new StrictMock<FreeRTOSMock>();
-    g_freertos_mock = mock;
+    mock = std::make_unique<StrictMock<FreeRTOSMock>>();
+    g_freertos_mock = mock.get();
   }
   void TearDown() override {
-    delete mock;
+    mock.reset();
     g_freertos_mock = nullptr;
   }
 };
