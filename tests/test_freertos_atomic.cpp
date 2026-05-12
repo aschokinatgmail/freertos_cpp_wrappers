@@ -324,6 +324,7 @@ TEST_F(AtomicTest, NotifyAllNoop) { freertos::atomic<int> a(0); a.notify_all(); 
 
 TEST_F(AtomicTest, NotifyOneIsrNoop) {
   freertos::atomic<int> a(0);
+  EXPECT_CALL(*mock, xSemaphoreGiveFromISR(_, _)).WillOnce(Return(pdFALSE));
   auto result = a.notify_one_isr();
   EXPECT_EQ(result.higher_priority_task_woken, pdFALSE);
 }
