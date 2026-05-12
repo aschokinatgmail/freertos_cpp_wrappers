@@ -46,11 +46,13 @@ jobs:
           set -ex
           docker compose build test
           docker compose run --rm test bash -c '
+            echo "=== Verifying environment ===" &&
+            pwd && ls -la cmake/ &&
             echo "=== Verifying ARM toolchain ===" &&
             which arm-none-eabi-gcc && arm-none-eabi-gcc --version | head -1 &&
             rm -rf build-xcompile &&
             cmake -B build-xcompile \
-              -DCMAKE_TOOLCHAIN_FILE=cmake/arm-none-eabi-toolchain.cmake \
+              -DCMAKE_TOOLCHAIN_FILE=/project/cmake/arm-none-eabi-toolchain.cmake \
               -DCMAKE_BUILD_TYPE=Debug \
               -DENABLE_CROSS_COMPILE=ON &&
             cmake --build build-xcompile -j$(nproc) &&
