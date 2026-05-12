@@ -281,30 +281,34 @@ public:
 #endif
 #endif
   task(const task &) = delete;
+ private:
+  // Asserts the allocator is not static and returns the value.
+  // Used in move ctor init-list to ensure the assert fires
+  // BEFORE any member moves (Bug #270).
+  template <typename T>
+  static T &&assert_dynamic(T &&v) {
+    configASSERT(!TaskAllocator::is_static);
+    return static_cast<T &&>(v);
+  }
+ public:
   task(task &&other) noexcept
-      : m_allocator{}, m_taskRoutine{}, m_hTask{nullptr}
+      : m_allocator(assert_dynamic(std::move(other.m_allocator))),
+        m_taskRoutine(std::move(other.m_taskRoutine)), m_hTask(other.m_hTask)
 #if INCLUDE_vTaskSuspend
         ,
-        m_start_suspended{0}
+        m_start_suspended(other.m_start_suspended)
 #endif
 #if configUSE_TASK_NOTIFICATIONS
         ,
-        m_joinHandle{nullptr}
+        m_joinHandle(other.m_joinHandle)
 #endif
   {
-    configASSERT(!TaskAllocator::is_static);
-    using std::swap;
-    m_allocator.swap(other.m_allocator);
-    swap(m_taskRoutine, other.m_taskRoutine);
-    swap(m_hTask, other.m_hTask);
+    other.m_hTask = nullptr;
 #if INCLUDE_vTaskSuspend
-    const auto start_suspended_tmp =
-        static_cast<uint8_t>(other.m_start_suspended);
-    m_start_suspended = start_suspended_tmp ? 1 : 0;
     other.m_start_suspended = 0;
 #endif
 #if configUSE_TASK_NOTIFICATIONS
-    swap(m_joinHandle, other.m_joinHandle);
+    other.m_joinHandle = nullptr;
 #endif
   }
   /**
