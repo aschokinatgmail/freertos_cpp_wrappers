@@ -463,7 +463,7 @@ public:
   MOCK_METHOD(void, vEventGroupDelete, (EventGroupHandle_t xEventGroup));
   MOCK_METHOD(EventBits_t, xEventGroupSetBits,
               (EventGroupHandle_t xEventGroup, const EventBits_t uxBitsToSet));
-  MOCK_METHOD(EventBits_t, xEventGroupSetBitsFromISR,
+  MOCK_METHOD(BaseType_t, xEventGroupSetBitsFromISR,
               (EventGroupHandle_t xEventGroup, const EventBits_t uxBitsToSet,
                BaseType_t *pxHigherPriorityTaskWoken));
   MOCK_METHOD(EventBits_t, xEventGroupClearBits,
