@@ -35,34 +35,30 @@ jobs:
           docker compose build coverage
           docker compose run --rm coverage
 
-  # TODO(#346): Re-enable cross-compile job. Works locally in Docker but
-  # fails on GitHub Actions runners with CMAKE_CXX_COMPILER not set.
-  # Likely a Docker layer caching / apt transient issue specific to the runner.
   cross-compile:
-    if: false
     name: Cross-Compile
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-      - name: Cross-compile for ARM targets
+        with:
+          submodules: recursive
+      - name: Install ARM toolchain
         run: |
           set -ex
-          docker compose build test
-          docker compose run --rm test bash -c '
-            echo "=== Verifying environment ===" &&
-            pwd && ls -la cmake/ &&
-            echo "=== Verifying ARM toolchain ===" &&
-            which arm-none-eabi-gcc && arm-none-eabi-gcc --version | head -1 &&
-            rm -rf build-xcompile &&
-            cmake -B build-xcompile \
-              -DCMAKE_TOOLCHAIN_FILE=/project/cmake/arm-none-eabi-toolchain.cmake \
-              -DCMAKE_BUILD_TYPE=Debug \
-              -DENABLE_CROSS_COMPILE=ON &&
-            cmake --build build-xcompile -j$(nproc) &&
-            cmake --build build-xcompile --target xcompile_all &&
-            echo "=== Cross-compile verification passed ==="
-          '
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends gcc-arm-none-eabi libnewlib-arm-none-eabi
+      - name: Cross-compile for ARM Cortex-M
+        run: |
+          set -ex
+          rm -rf build-xcompile
+          cmake -B build-xcompile \
+            -DCMAKE_TOOLCHAIN_FILE=cmake/arm-none-eabi-toolchain.cmake \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DENABLE_CROSS_COMPILE=ON
+          cmake --build build-xcompile -j$(nproc)
+          cmake --build build-xcompile --target xcompile_all
+          echo "=== Cross-compile verification passed ==="
 
   static-analysis:
     name: Static Analysis
