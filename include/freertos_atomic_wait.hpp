@@ -168,13 +168,21 @@ inline BaseType_t atomic_notify_one_isr(void const *addr) {
     auto idx = atomic_wait_hash(addr);
     auto &bucket = freertos_wait_buckets[idx];
     BaseType_t higher_priority_task_woken = pdFALSE;
-    auto *node = bucket.waiters;
-    while (node != nullptr) {
-        if (node->address == addr) {
-            vTaskNotifyGiveFromISR(node->task, &higher_priority_task_woken);
-            break;
+    /* Acquire the bucket mutex before traversing the waiter linked list
+     * to prevent a concurrent task from modifying the list while we walk
+     * it from ISR context. */
+    if (xSemaphoreTakeFromISR(bucket.mutex, &higher_priority_task_woken) ==
+        pdTRUE) {
+        auto *node = bucket.waiters;
+        while (node != nullptr) {
+            if (node->address == addr) {
+                vTaskNotifyGiveFromISR(node->task,
+                                       &higher_priority_task_woken);
+                break;
+            }
+            node = node->next;
         }
-        node = node->next;
+        xSemaphoreGiveFromISR(bucket.mutex, &higher_priority_task_woken);
     }
     return higher_priority_task_woken;
 }
@@ -183,12 +191,20 @@ inline BaseType_t atomic_notify_all_isr(void const *addr) {
     auto idx = atomic_wait_hash(addr);
     auto &bucket = freertos_wait_buckets[idx];
     BaseType_t higher_priority_task_woken = pdFALSE;
-    auto *node = bucket.waiters;
-    while (node != nullptr) {
-        if (node->address == addr) {
-            vTaskNotifyGiveFromISR(node->task, &higher_priority_task_woken);
+    /* Acquire the bucket mutex before traversing the waiter linked list
+     * to prevent a concurrent task from modifying the list while we walk
+     * it from ISR context. */
+    if (xSemaphoreTakeFromISR(bucket.mutex, &higher_priority_task_woken) ==
+        pdTRUE) {
+        auto *node = bucket.waiters;
+        while (node != nullptr) {
+            if (node->address == addr) {
+                vTaskNotifyGiveFromISR(node->task,
+                                       &higher_priority_task_woken);
+            }
+            node = node->next;
         }
-        node = node->next;
+        xSemaphoreGiveFromISR(bucket.mutex, &higher_priority_task_woken);
     }
     return higher_priority_task_woken;
 }

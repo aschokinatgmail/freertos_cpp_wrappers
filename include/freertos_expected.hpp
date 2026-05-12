@@ -544,7 +544,8 @@ public:
     return *this;
   }
 
-  constexpr expected &operator=(expected &&other) noexcept {
+  constexpr expected &operator=(expected &&other) noexcept(
+      std::is_nothrow_move_constructible_v<E>) {
     if (this != &other) {
       if (!m_has_value) {
         reinterpret_cast<E *>(&m_error_storage)->~E();

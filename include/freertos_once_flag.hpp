@@ -65,10 +65,14 @@ public:
 private:
     mutable SemaphoreHandle_t m_semaphore{nullptr};
     mutable std::atomic<uint8_t> m_state{0};
+    // Lazy-init state for m_semaphore: 0 = not started, 1 = creation in
+    // progress (some thread is constructing the semaphore), 2 = created and
+    // m_semaphore is published. Always present so ensure_semaphore() never
+    // needs a critical section regardless of static/dynamic allocation.
+    mutable std::atomic<uint8_t> m_sem_init{0};
 
 #if configSUPPORT_STATIC_ALLOCATION
     mutable StaticSemaphore_t m_semaphore_storage{};
-    mutable std::atomic<uint8_t> m_semaphore_created{0};
 #endif
 
     template <typename Callable, typename... Args>
@@ -76,23 +80,35 @@ private:
 
     friend class ::OnceFlagTest;
 
+    // Lazy, race-safe semaphore creation that does NOT call any FreeRTOS API
+    // from inside a critical section (Bug #262). FreeRTOS forbids invoking
+    // potentially-blocking APIs (xSemaphoreCreate*) while the scheduler is
+    // suspended via taskENTER_CRITICAL. Instead we elect a single creator via
+    // an atomic CAS on m_sem_init and have the losers spin (taskYIELD) until
+    // creation is published.
     void ensure_semaphore() const {
-        if (m_semaphore == nullptr) {
-            taskENTER_CRITICAL();
-            if (m_semaphore == nullptr) {
+        if (m_sem_init.load(std::memory_order_acquire) == 2) {
+            return;
+        }
+        uint8_t expected = 0;
+        if (m_sem_init.compare_exchange_strong(
+                expected, 1, std::memory_order_acq_rel,
+                std::memory_order_acquire)) {
+            // Winner: create the semaphore OUTSIDE any critical section.
 #if configSUPPORT_STATIC_ALLOCATION
-                if (m_semaphore_created.load(std::memory_order_acquire) == 0) {
-                    m_semaphore = xSemaphoreCreateCountingStatic(
-                        FREERTOS_CPP_WRAPPERS_ONCE_FLAG_MAX_WAITERS, 0,
-                        &m_semaphore_storage);
-                    m_semaphore_created.store(1, std::memory_order_release);
-                }
+            m_semaphore = xSemaphoreCreateCountingStatic(
+                FREERTOS_CPP_WRAPPERS_ONCE_FLAG_MAX_WAITERS, 0,
+                &m_semaphore_storage);
 #else
-                m_semaphore = xSemaphoreCreateCounting(
-                    FREERTOS_CPP_WRAPPERS_ONCE_FLAG_MAX_WAITERS, 0);
+            m_semaphore = xSemaphoreCreateCounting(
+                FREERTOS_CPP_WRAPPERS_ONCE_FLAG_MAX_WAITERS, 0);
 #endif
+            m_sem_init.store(2, std::memory_order_release);
+        } else {
+            // Loser: wait for the winner to publish the semaphore.
+            while (m_sem_init.load(std::memory_order_acquire) != 2) {
+                taskYIELD();
             }
-            taskEXIT_CRITICAL();
         }
     }
 
@@ -106,14 +122,23 @@ private:
                                               std::memory_order_acquire)) {
             ensure_semaphore();
 #if __cpp_exceptions
+            // Bug #263: ensure waiters are always released and the state is
+            // reset to 0 if func() throws, so subsequent call_once attempts
+            // can retry instead of dead-locking on a never-given semaphore.
+            // Order matters: reset m_state to 0 BEFORE giving so that woken
+            // waiters observe state != 1 and exit their wait loop.
+            bool succeeded = false;
             try {
                 func(arg);
+                succeeded = true;
             } catch (...) {
                 m_state.store(0, std::memory_order_release);
-                for (uint8_t i = 0; i < FREERTOS_CPP_WRAPPERS_ONCE_FLAG_MAX_WAITERS; ++i)
+                for (uint8_t i = 0;
+                     i < FREERTOS_CPP_WRAPPERS_ONCE_FLAG_MAX_WAITERS; ++i)
                     xSemaphoreGive(m_semaphore);
                 throw;
             }
+            (void)succeeded;
 #else
             // Exceptions disabled (e.g. -fno-exceptions or simulation build):
             // a throwing func() would terminate the program anyway, so we
@@ -172,24 +197,32 @@ private:
     mutable SemaphoreHandle_t m_semaphore{nullptr};
     mutable std::atomic<uint8_t> m_state{0};
     mutable StaticSemaphore_t m_semaphore_storage{};
-    mutable std::atomic<uint8_t> m_semaphore_created{0};
+    // See once_flag::m_sem_init for state semantics (0/1/2).
+    mutable std::atomic<uint8_t> m_sem_init{0};
 
     template <typename Callable, typename... Args>
     friend void call_once(once_flag_static &, Callable &&, Args &&...);
 
     friend class ::OnceFlagTest;
 
+    // Bug #262: must not create the semaphore inside a critical section.
+    // Use CAS-based election + spin-wait instead.
     void ensure_semaphore() const {
-        if (m_semaphore_created.load(std::memory_order_acquire) == 0) {
-            taskENTER_CRITICAL();
-            if (m_semaphore_created.load(std::memory_order_acquire) == 0) {
-                m_semaphore =
-                    xSemaphoreCreateCountingStatic(
-                        FREERTOS_CPP_WRAPPERS_ONCE_FLAG_MAX_WAITERS, 0,
-                        &m_semaphore_storage);
-                m_semaphore_created.store(1, std::memory_order_release);
+        if (m_sem_init.load(std::memory_order_acquire) == 2) {
+            return;
+        }
+        uint8_t expected = 0;
+        if (m_sem_init.compare_exchange_strong(
+                expected, 1, std::memory_order_acq_rel,
+                std::memory_order_acquire)) {
+            m_semaphore = xSemaphoreCreateCountingStatic(
+                FREERTOS_CPP_WRAPPERS_ONCE_FLAG_MAX_WAITERS, 0,
+                &m_semaphore_storage);
+            m_sem_init.store(2, std::memory_order_release);
+        } else {
+            while (m_sem_init.load(std::memory_order_acquire) != 2) {
+                taskYIELD();
             }
-            taskEXIT_CRITICAL();
         }
     }
 
@@ -203,19 +236,19 @@ private:
                                               std::memory_order_acquire)) {
             ensure_semaphore();
 #if __cpp_exceptions
+            // Bug #263: on exception, reset state to 0 and release waiters so
+            // they exit their wait loop and a subsequent call_once can retry.
             try {
                 func(arg);
             } catch (...) {
                 m_state.store(0, std::memory_order_release);
-                for (uint8_t i = 0; i < FREERTOS_CPP_WRAPPERS_ONCE_FLAG_MAX_WAITERS; ++i)
+                for (uint8_t i = 0;
+                     i < FREERTOS_CPP_WRAPPERS_ONCE_FLAG_MAX_WAITERS; ++i)
                     xSemaphoreGive(m_semaphore);
                 throw;
             }
 #else
-            // Exceptions disabled (e.g. -fno-exceptions or simulation build):
-            // a throwing func() would terminate the program anyway, so we
-            // simply call it without a try/catch wrapper. State recovery on
-            // exception is not possible without exceptions.
+            // Exceptions disabled: state recovery on exception is not possible.
             func(arg);
 #endif
             m_state.store(2, std::memory_order_release);

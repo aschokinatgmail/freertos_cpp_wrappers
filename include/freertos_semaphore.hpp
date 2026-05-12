@@ -630,7 +630,7 @@ template <typename SemaphoreAllocator>
 class FREERTOS_CAPABILITY("mutex") mutex {
   SemaphoreAllocator m_allocator{};
   SemaphoreHandle_t m_semaphore{nullptr};
-  uint8_t m_locked : 1;
+  std::atomic<uint8_t> m_locked{0};
   // Live-RAII-guard back-reference count. Incremented when an RAII guard
   // (lock_guard / try_lock_guard / timeout_lock_guard) successfully acquires
   // the lock; decremented on guard destruction. Used by swap / move-assign /
@@ -649,27 +649,27 @@ public:
    * @brief Construct a new mutex object
    *
    */
-  mutex() : m_semaphore{m_allocator.create_mutex()}, m_locked{false} {
+  mutex() : m_semaphore{m_allocator.create_mutex()}, m_locked{0} {
     configASSERT(m_semaphore);
   }
   template <typename... AllocatorArgs,
             typename std::enable_if_t<(sizeof...(AllocatorArgs) > 0), int> = 0>
   explicit mutex(AllocatorArgs &&...args)
       : m_allocator{std::forward<AllocatorArgs>(args)...},
-        m_semaphore{m_allocator.create_mutex()}, m_locked{false} {
+        m_semaphore{m_allocator.create_mutex()}, m_locked{0} {
     configASSERT(m_semaphore);
   }
   mutex(const mutex &) = delete;
   mutex(mutex &&src) noexcept
       : m_allocator(std::move(src.m_allocator)), m_semaphore(src.m_semaphore),
-        m_locked(src.m_locked) {
+        m_locked(src.m_locked.load()) {
     configASSERT(!SemaphoreAllocator::is_static);
-    configASSERT(!src.m_locked);
+    configASSERT(src.m_locked.load() == 0);
     // Refuse move-construction while RAII guards reference src — their
     // destructors would otherwise unlock a moved-from / null handle (#338).
     configASSERT(src.m_guard_refcount.load(std::memory_order_acquire) == 0);
     src.m_semaphore = nullptr;
-    src.m_locked = false;
+    src.m_locked.store(0);
   }
   /**
    * @brief Destruct the mutex object and delete the mutex instance if it was
@@ -685,8 +685,8 @@ public:
   mutex &operator=(const mutex &) = delete;
   mutex &operator=(mutex &&src) noexcept {
     configASSERT(!SemaphoreAllocator::is_static);
-    configASSERT(!m_locked);
-    configASSERT(!src.m_locked);
+    configASSERT(m_locked.load() == 0);
+    configASSERT(src.m_locked.load() == 0);
     // Refuse move-assignment while either side has live RAII guards (#338).
     configASSERT(m_guard_refcount.load(std::memory_order_acquire) == 0);
     configASSERT(src.m_guard_refcount.load(std::memory_order_acquire) == 0);
@@ -709,9 +709,9 @@ public:
     using std::swap;
     m_allocator.swap(other.m_allocator);
     swap(m_semaphore, other.m_semaphore);
-    const auto locked_tmp = static_cast<uint8_t>(m_locked);
-    m_locked = other.m_locked ? 1 : 0;
-    other.m_locked = locked_tmp ? 1 : 0;
+    const auto locked_tmp = m_locked.load();
+    m_locked.store(other.m_locked.load());
+    other.m_locked.store(locked_tmp);
   }
 
   friend void swap(mutex &a, mutex &b) noexcept { a.swap(b); }
@@ -725,7 +725,7 @@ public:
   [[nodiscard]] BaseType_t unlock() FREERTOS_RELEASE() {
     auto rc = xSemaphoreGive(m_semaphore);
     if (rc) {
-      m_locked = false;
+      m_locked.store(0);
     }
     return rc;
   }
@@ -755,7 +755,7 @@ public:
       FREERTOS_ACQUIRE() {
     auto rc = xSemaphoreTake(m_semaphore, ticks_to_wait);
     if (rc) {
-      m_locked = true;
+      m_locked.store(1);
     }
     return rc;
   }
@@ -795,7 +795,7 @@ public:
   [[nodiscard]] BaseType_t try_lock() FREERTOS_TRY_ACQUIRE(true) {
     auto rc = xSemaphoreTake(m_semaphore, 0);
     if (rc) {
-      m_locked = true;
+      m_locked.store(1);
     }
     return rc;
   }
@@ -863,7 +863,7 @@ public:
    *
    * @return bool true if the mutex is locked, otherwise false.
    */
-  bool locked() const { return m_locked; }
+  bool locked() const { return m_locked.load() != 0; }
 
   /**
    * @brief Number of live RAII guards (lock_guard / try_lock_guard /
@@ -931,7 +931,7 @@ template <typename SemaphoreAllocator>
 class FREERTOS_SCOPED_CAPABILITY recursive_mutex {
   SemaphoreAllocator m_allocator{};
   SemaphoreHandle_t m_semaphore{nullptr};
-  uint8_t m_recursions_count{0};
+  std::atomic<uint8_t> m_recursions_count{0};
   // Live-RAII-guard back-reference count — see mutex::m_guard_refcount.
   // Same swap / move-assign / move-ctor safety policy applies (issue #338).
   std::atomic<UBaseType_t> m_guard_refcount{0};
@@ -960,7 +960,7 @@ public:
   recursive_mutex(recursive_mutex &&src) noexcept
       : m_allocator(std::move(src.m_allocator)),
         m_semaphore(src.m_semaphore),
-        m_recursions_count(src.m_recursions_count) {
+        m_recursions_count(src.m_recursions_count.load()) {
     configASSERT(!SemaphoreAllocator::is_static);
     configASSERT(src.m_recursions_count == 0);
     // Refuse move-construction while RAII guards reference src (#338).
@@ -1002,7 +1002,9 @@ public:
     using std::swap;
     m_allocator.swap(other.m_allocator);
     swap(m_semaphore, other.m_semaphore);
-    swap(m_recursions_count, other.m_recursions_count);
+    const auto rc_tmp = m_recursions_count.load();
+    m_recursions_count.store(other.m_recursions_count.load());
+    other.m_recursions_count.store(rc_tmp);
   }
 
   friend void swap(recursive_mutex &a, recursive_mutex &b) noexcept {
@@ -1123,7 +1125,7 @@ public:
    *
    * @return uint8_t number of recursions of the recursive mutex.
    */
-  uint8_t recursions_count() const { return m_recursions_count; }
+  uint8_t recursions_count() const { return m_recursions_count.load(); }
   /**
    * @brief Number of live RAII guards (lock_guard / try_lock_guard /
    *        timeout_lock_guard) currently referencing this mutex.

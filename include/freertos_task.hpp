@@ -44,6 +44,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <cassert>
 #include <chrono>
 #include <functional>
+#include <memory>
 #include <semphr.h>
 #include <string>
 #include <task.h>
@@ -281,31 +282,44 @@ public:
 #endif
   task(const task &) = delete;
   task(task &&other) noexcept
-      : m_allocator(std::move(other.m_allocator)),
-        m_taskRoutine(std::move(other.m_taskRoutine)), m_hTask(other.m_hTask)
+      : m_allocator{}, m_taskRoutine{}, m_hTask{nullptr}
 #if INCLUDE_vTaskSuspend
         ,
-        m_start_suspended(other.m_start_suspended)
+        m_start_suspended{0}
 #endif
 #if configUSE_TASK_NOTIFICATIONS
         ,
-        m_joinHandle(other.m_joinHandle)
+        m_joinHandle{nullptr}
 #endif
   {
     configASSERT(!TaskAllocator::is_static);
-    other.m_hTask = nullptr;
+    using std::swap;
+    m_allocator.swap(other.m_allocator);
+    swap(m_taskRoutine, other.m_taskRoutine);
+    swap(m_hTask, other.m_hTask);
+#if INCLUDE_vTaskSuspend
+    const auto start_suspended_tmp =
+        static_cast<uint8_t>(other.m_start_suspended);
+    m_start_suspended = start_suspended_tmp ? 1 : 0;
+    other.m_start_suspended = 0;
+#endif
 #if configUSE_TASK_NOTIFICATIONS
-    other.m_joinHandle = nullptr;
+    swap(m_joinHandle, other.m_joinHandle);
 #endif
   }
   /**
    * @brief Destruct the task object and delete the task instance if it was
    * created.
    *
+   * @note The task must not be the currently running task when the destructor
+   * is called. Use join() or ensure the task routine has returned before the
+   * task object goes out of scope. For dynamically allocated tasks, the idle
+   * task is responsible for freeing the TCB and stack memory after vTaskDelete.
    */
   ~task() {
 #if INCLUDE_vTaskDelete
     if (m_hTask != nullptr) {
+      configASSERT(m_hTask != xTaskGetCurrentTaskHandle());
       vTaskDelete(m_hTask);
     }
 #endif
@@ -353,18 +367,25 @@ public:
    * @brief Suspend the task.
    *
    */
-  void suspend() { vTaskSuspend(m_hTask); }
+  void suspend() {
+    configASSERT(m_hTask != nullptr);
+    vTaskSuspend(m_hTask);
+  }
   /**
    * @brief Resume the task.
    *
    */
-  void resume() { vTaskResume(m_hTask); }
+  void resume() {
+    configASSERT(m_hTask != nullptr);
+    vTaskResume(m_hTask);
+  }
   /**
    * @brief Resume the task from an ISR.
    *
    * @return BaseType_t pdTRUE if the task was resumed, pdFALSE otherwise
    */
   isr_result<BaseType_t> resume_isr() {
+    configASSERT(m_hTask != nullptr);
     BaseType_t xSwitchRequired = xTaskResumeFromISR(m_hTask);
     return {pdTRUE, xSwitchRequired};
   }
@@ -394,6 +415,7 @@ public:
    *
    */
   void terminate() {
+    configASSERT(m_hTask != nullptr);
     vTaskDelete(m_hTask);
     m_hTask = nullptr;
   }
@@ -420,11 +442,16 @@ public:
   }
 #endif
 #if INCLUDE_uxTaskPriorityGet && configUSE_MUTEXES
-  [[nodiscard]] UBaseType_t priority() const { return uxTaskPriorityGet(m_hTask); }
+  [[nodiscard]] UBaseType_t priority() const {
+    configASSERT(m_hTask != nullptr);
+    return uxTaskPriorityGet(m_hTask);
+  }
   [[nodiscard]] UBaseType_t priority_isr() const {
+    configASSERT(m_hTask != nullptr);
     return uxTaskPriorityGetFromISR(m_hTask);
   }
   [[nodiscard]] UBaseType_t base_priority() const {
+    configASSERT(m_hTask != nullptr);
     return uxTaskBasePriorityGet(m_hTask);
   }
 #endif
@@ -436,6 +463,7 @@ public:
    * @return task& reference to the task object
    */
   task &priority(UBaseType_t priority) {
+    configASSERT(m_hTask != nullptr);
     vTaskPrioritySet(m_hTask, priority);
     return *this;
   }
@@ -450,6 +478,7 @@ public:
    */
   [[nodiscard]] TaskStatus_t status(BaseType_t get_free_stack_space = pdFALSE,
                       eTaskState e_state = eInvalid) const {
+    configASSERT(m_hTask != nullptr);
     TaskStatus_t status;
     vTaskGetInfo(m_hTask, &status, get_free_stack_space, e_state);
     return status;
@@ -463,6 +492,7 @@ public:
    * @return task& reference to the task object
    */
   task &tag(TaskHookFunction_t tag) {
+    configASSERT(m_hTask != nullptr);
     vTaskSetApplicationTaskTag(m_hTask, tag);
     return *this;
   }
@@ -472,6 +502,7 @@ public:
    * @return TaskHookFunction_t task tag
    */
   [[nodiscard]] TaskHookFunction_t tag() const {
+    configASSERT(m_hTask != nullptr);
     return ulTaskGetApplicationTaskTag(m_hTask);
   }
   /**
@@ -480,6 +511,7 @@ public:
    * @return TaskHookFunction_t task tag
    */
   [[nodiscard]] TaskHookFunction_t tag_isr() const {
+    configASSERT(m_hTask != nullptr);
     return ulTaskGetApplicationTaskTagFromISR(m_hTask);
   }
 #endif
@@ -490,6 +522,7 @@ public:
    * @return size_t high water mark
    */
   [[nodiscard]] size_t stack_high_water_mark() const {
+    configASSERT(m_hTask != nullptr);
     return uxTaskGetStackHighWaterMark(m_hTask);
   }
 #endif
@@ -500,6 +533,7 @@ public:
    * @return size_t high water mark
    */
   [[nodiscard]] size_t stack_high_water_mark2() const {
+    configASSERT(m_hTask != nullptr);
     return uxTaskGetStackHighWaterMark2(m_hTask);
   }
 #endif
@@ -509,14 +543,20 @@ public:
    *
    * @return eTaskState task state
    */
-  [[nodiscard]] eTaskState state() const { return eTaskGetState(m_hTask); }
+  [[nodiscard]] eTaskState state() const {
+    configASSERT(m_hTask != nullptr);
+    return eTaskGetState(m_hTask);
+  }
 #endif
   /**
    * @brief Get the name of the task.
    *
    * @return const char* task name
    */
-  [[nodiscard]] const char *name() const { return pcTaskGetName(m_hTask); }
+  [[nodiscard]] const char *name() const {
+    configASSERT(m_hTask != nullptr);
+    return pcTaskGetName(m_hTask);
+  }
 // Task notification API
 #if configUSE_TASK_NOTIFICATIONS
   /**
@@ -524,7 +564,10 @@ public:
    *
    * @return BaseType_t pdTRUE if the notification was given, pdFALSE otherwise
    */
-  [[nodiscard]] BaseType_t notify_give() { return xTaskNotifyGive(m_hTask); }
+  [[nodiscard]] BaseType_t notify_give() {
+    configASSERT(m_hTask != nullptr);
+    return xTaskNotifyGive(m_hTask);
+  }
   /**
    * @brief Take a notification from the task.
    *
@@ -560,6 +603,7 @@ public:
    * @return BaseType_t pdTRUE if the notification was given, pdFALSE otherwise
    */
   [[nodiscard]] BaseType_t notify(const uint32_t val, eNotifyAction action) {
+    configASSERT(m_hTask != nullptr);
     return xTaskNotify(m_hTask, val, action);
   }
   /**
@@ -572,9 +616,11 @@ public:
    */
   [[nodiscard]] BaseType_t notify_and_query(const uint32_t val, eNotifyAction action,
                               uint32_t &prev_value) {
+    configASSERT(m_hTask != nullptr);
     return xTaskNotifyAndQuery(m_hTask, val, action, &prev_value);
   }
   isr_result<BaseType_t> notify_isr(const uint32_t val, eNotifyAction action) {
+    configASSERT(m_hTask != nullptr);
     isr_result<BaseType_t> result{pdFALSE, pdFALSE};
     result.result = xTaskNotifyFromISR(m_hTask, val, action,
                                        &result.higher_priority_task_woken);
@@ -583,6 +629,7 @@ public:
   isr_result<BaseType_t> notify_and_query_isr(const uint32_t val,
                                               eNotifyAction action,
                                               uint32_t &prev_value) {
+    configASSERT(m_hTask != nullptr);
     isr_result<BaseType_t> result{pdFALSE, pdFALSE};
     result.result = xTaskNotifyAndQueryFromISR(
         m_hTask, val, action, &prev_value, &result.higher_priority_task_woken);
@@ -630,7 +677,10 @@ public:
    * @return BaseType_t pdTRUE if the notification state was cleared, pdFALSE
    * otherwise
    */
-  [[nodiscard]] BaseType_t notify_state_clear() { return xTaskNotifyStateClear(m_hTask); }
+  [[nodiscard]] BaseType_t notify_state_clear() {
+    configASSERT(m_hTask != nullptr);
+    return xTaskNotifyStateClear(m_hTask);
+  }
   /**
    * @brief Clear the notification value.
    *
@@ -638,10 +688,12 @@ public:
    * @return uint32_t bits cleared
    */
   [[nodiscard]] uint32_t notify_value_clear(uint32_t bits_to_clear) {
+    configASSERT(m_hTask != nullptr);
     return ulTaskNotifyValueClear(m_hTask, bits_to_clear);
   }
 #if configTASK_NOTIFICATION_ARRAY_ENTRIES > 1
   [[nodiscard]] BaseType_t notify_give(UBaseType_t index) {
+    configASSERT(m_hTask != nullptr);
     return xTaskNotifyGiveIndexed(m_hTask, index);
   }
   [[nodiscard]] uint32_t notify_take(UBaseType_t index, BaseType_t clear_count_on_exit,
@@ -659,14 +711,17 @@ public:
   }
   [[nodiscard]] BaseType_t notify(UBaseType_t index, const uint32_t val,
                     eNotifyAction action) {
+    configASSERT(m_hTask != nullptr);
     return xTaskNotifyIndexed(m_hTask, index, val, action);
   }
   [[nodiscard]] BaseType_t notify_and_query(UBaseType_t index, const uint32_t val,
                               eNotifyAction action, uint32_t &prev_value) {
+    configASSERT(m_hTask != nullptr);
     return xTaskNotifyAndQueryIndexed(m_hTask, index, val, action, &prev_value);
   }
   isr_result<BaseType_t> notify_isr(UBaseType_t index, const uint32_t val,
                                     eNotifyAction action) {
+    configASSERT(m_hTask != nullptr);
     isr_result<BaseType_t> result{pdFALSE, pdFALSE};
     result.result = xTaskNotifyIndexedFromISR(
         m_hTask, index, val, action, &result.higher_priority_task_woken);
@@ -676,6 +731,7 @@ public:
                                               const uint32_t val,
                                               eNotifyAction action,
                                               uint32_t &prev_value) {
+    configASSERT(m_hTask != nullptr);
     isr_result<BaseType_t> result{pdFALSE, pdFALSE};
     result.result = xTaskNotifyAndQueryIndexedFromISR(
         m_hTask, index, val, action, &prev_value,
@@ -702,9 +758,11 @@ public:
                 .count()));
   }
   [[nodiscard]] BaseType_t notify_state_clear(UBaseType_t index) {
+    configASSERT(m_hTask != nullptr);
     return xTaskNotifyStateClearIndexed(m_hTask, index);
   }
   [[nodiscard]] uint32_t notify_value_clear(UBaseType_t index, uint32_t bits_to_clear) {
+    configASSERT(m_hTask != nullptr);
     return ulTaskNotifyValueClearIndexed(m_hTask, index, bits_to_clear);
   }
 #endif
@@ -734,15 +792,19 @@ public:
 #endif
 #if configNUMBER_OF_CORES > 1 && (configUSE_CORE_AFFINITY == 1)
   void set_affinity(freertos::core_affinity_mask mask) {
+    configASSERT(m_hTask != nullptr);
     vTaskCoreAffinitySet(m_hTask, mask.value());
   }
   void clear_affinity(freertos::core_affinity_mask mask) {
+    configASSERT(m_hTask != nullptr);
     vTaskCoreAffinityClear(m_hTask, mask.value());
   }
   [[nodiscard]] freertos::core_affinity_mask affinity() const {
+    configASSERT(m_hTask != nullptr);
     return freertos::core_affinity_mask(ulTaskCoreAffinityGet(m_hTask));
   }
   [[nodiscard]] freertos::core_affinity_mask affinity_isr() const {
+    configASSERT(m_hTask != nullptr);
     return freertos::core_affinity_mask(ulTaskCoreAffinityGetFromISR(m_hTask));
   }
 #endif
@@ -758,6 +820,7 @@ template <typename TaskAllocator> class periodic_task {
   task_routine_t m_on_start;
   task_routine_t m_on_stop;
   task_routine_t m_periodic_routine;
+  std::shared_ptr<periodic_task *> m_self_ptr;
   task<TaskAllocator> m_task;
 
   // LCOV_EXCL_START - Internal periodic task run method called by FreeRTOS
@@ -806,7 +869,9 @@ public:
       : m_period{std::chrono::duration_cast<std::chrono::milliseconds>(period)},
         m_on_start{std::move(on_start)}, m_on_stop{std::move(on_stop)},
         m_periodic_routine{std::move(periodic_routine)},
-        m_task{name, priority, [this]() { run(); }, start_suspended} {}
+        m_self_ptr{std::make_shared<periodic_task *>(this)},
+        m_task{name, priority,
+               [s = m_self_ptr]() { (*s)->run(); }, start_suspended} {}
   template <typename Rep, typename Period, typename... AllocatorArgs,
             typename std::enable_if_t<(sizeof...(AllocatorArgs) > 0), int> = 0>
   periodic_task(const char *name, UBaseType_t priority,
@@ -817,7 +882,9 @@ public:
       : m_period{std::chrono::duration_cast<std::chrono::milliseconds>(period)},
         m_on_start{std::move(on_start)}, m_on_stop{std::move(on_stop)},
         m_periodic_routine{std::move(periodic_routine)},
-        m_task{name, priority, [this]() { run(); }, start_suspended,
+        m_self_ptr{std::make_shared<periodic_task *>(this)},
+        m_task{name, priority,
+               [s = m_self_ptr]() { (*s)->run(); }, start_suspended,
                std::forward<AllocatorArgs>(args)...} {}
   /**
    * @brief Construct a new periodic task object
@@ -935,8 +1002,9 @@ public:
       : m_period(other.m_period), m_on_start(std::move(other.m_on_start)),
         m_on_stop(std::move(other.m_on_stop)),
         m_periodic_routine(std::move(other.m_periodic_routine)),
+        m_self_ptr(std::move(other.m_self_ptr)),
         m_task(std::move(other.m_task)) {
-    // m_task move constructor will handle ownership transfer
+    *m_self_ptr = this;
   }
   /**
    * @brief Destruct the periodic task object and delete the task instance if it
@@ -967,7 +1035,10 @@ public:
     swap(m_on_start, other.m_on_start);
     swap(m_on_stop, other.m_on_stop);
     swap(m_periodic_routine, other.m_periodic_routine);
+    swap(m_self_ptr, other.m_self_ptr);
     m_task.swap(other.m_task);
+    *m_self_ptr = this;
+    *other.m_self_ptr = &other;
   }
 
   friend void swap(periodic_task &a, periodic_task &b) noexcept { a.swap(b); }
