@@ -16,8 +16,7 @@ services:
         cmake -B build-test \
           -DCMAKE_BUILD_TYPE=Debug \
           -DENABLE_CLANG_TIDY=OFF \
-          -DENABLE_MISRA_ANALYSIS=OFF \
-          -DFREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY=ON && \
+          -DENABLE_MISRA_ANALYSIS=OFF && \
         cmake --build build-test -j$$(nproc) && \
         ctest --test-dir build-test \
           --output-on-failure
@@ -64,8 +63,7 @@ services:
           -DCMAKE_BUILD_TYPE=Debug \
           -DENABLE_CLANG_TIDY=OFF \
           -DENABLE_MISRA_ANALYSIS=OFF \
-          -DENABLE_COVERAGE=ON \
-          -DFREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY=ON && \
+          -DENABLE_COVERAGE=ON && \
         cmake --build build-cov -j2 && \
         ctest --test-dir build-cov \
           --output-on-failure && \

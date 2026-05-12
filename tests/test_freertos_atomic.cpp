@@ -17,8 +17,16 @@
 
 #include "FreeRTOS.h"
 
+#define FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY 1
+
 #include "freertos_atomic.hpp"
 #include <memory>
+
+// Provide the storage for the atomic wait table (IMPL=1 default).
+// src/freertos_atomic_wait.cc is not compiled in the test build
+// (ENABLE_ATOMIC_WAIT_NOTIFY is OFF by default in CMakeLists.txt),
+// so we supply a zero-initialised mock table here.
+freertos_wait_entry freertos_wait_table[atomic_wait_table_size] = {};
 
 extern "C" bool __platform_wait_on_address(void const *addr,
                                            __cxx_atomic_contention_t const *expected,
