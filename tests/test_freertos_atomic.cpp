@@ -19,7 +19,7 @@
 #include "freertos_atomic.hpp"
 
 #define FREERTOS_CPP_WRAPPERS_ENABLE_ATOMIC_WAIT_NOTIFY 1
-#define FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL 3
+#define FREERTOS_CPP_WRAPPERS_ATOMIC_WAIT_IMPL 2
 #include "freertos_atomic_wait.hpp"
 #include <memory>
 
