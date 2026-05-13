@@ -51,11 +51,11 @@ jobs:
       - name: Cross-compile for ARM Cortex-M
         run: |
           set -ex
-          which make && make --version
-          which arm-none-eabi-gcc && arm-none-eabi-gcc --version
+          pwd && ls -la cmake/arm-none-eabi-toolchain.cmake
           rm -rf build-xcompile
           cmake -B build-xcompile \
-            -DCMAKE_TOOLCHAIN_FILE=$GITHUB_WORKSPACE/cmake/arm-none-eabi-toolchain.cmake \
+            -DCMAKE_TOOLCHAIN_FILE="${GITHUB_WORKSPACE}/cmake/arm-none-eabi-toolchain.cmake" \
+            -DCMAKE_MAKE_PROGRAM="$(which make)" \
             -DCMAKE_BUILD_TYPE=Debug \
             -DENABLE_CROSS_COMPILE=ON
           cmake --build build-xcompile -j$(nproc)
