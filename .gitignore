@@ -27,6 +27,8 @@ cmake_install.cmake
 Makefile
 *.cmake
 !cmake/*.cmake.in
+!cmake/arm-cortex-m3-toolchain.cmake
+!cmake/arm-none-eabi-toolchain.cmake
 
 # Compiled object files
 *.o
